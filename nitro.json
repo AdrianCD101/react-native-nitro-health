@@ -1,0 +1,30 @@
+{
+  "$schema": "https://nitro.margelo.com/nitro.schema.json",
+  "cxxNamespace": [
+    "nitrohealth"
+  ],
+  "ios": {
+    "iosModuleName": "NitroHealth"
+  },
+  "android": {
+    "androidNamespace": [
+      "nitrohealth"
+    ],
+    "androidCxxLibName": "NitroHealth"
+  },
+  "autolinking": {
+    "NitroHealth": {
+      "ios": {
+        "language": "swift",
+        "implementationClassName": "HybridNitroHealth"
+      },
+      "android": {
+        "language": "kotlin",
+        "implementationClassName": "HybridNitroHealth"
+      }
+    }
+  },
+  "ignorePaths": [
+    "**/node_modules"
+  ]
+}
