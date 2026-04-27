@@ -8,6 +8,10 @@
   "react-native": "src/index",
   "source": "src/index",
   "scripts": {
+    "lint": "oxlint .",
+    "lint:fix": "oxlint --fix .",
+    "format": "oxfmt .",
+    "format:check": "oxfmt --check .",
     "typecheck": "tsc --noEmit",
     "clean": "git clean -dfX",
     "release": "semantic-release",
@@ -52,17 +56,18 @@
     "registry": "https://registry.npmjs.org/"
   },
   "devDependencies": {
-    "@jamesacarr/eslint-formatter-github-actions": "^0.2.0",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
     "@types/jest": "^29.5.12",
     "@types/react": "19.2.0",
+    "conventional-changelog-conventionalcommits": "^9.1.0",
     "nitrogen": "0.35.5",
+    "oxfmt": "^0.47.0",
+    "oxlint": "^1.62.0",
     "react": "19.2.3",
     "react-native": "0.85.2",
     "react-native-builder-bob": "^0.40.18",
     "react-native-nitro-modules": "0.35.5",
-    "conventional-changelog-conventionalcommits": "^9.1.0",
     "semantic-release": "^25.0.3",
     "typescript": "^5.8.3"
   },
@@ -70,40 +75,6 @@
     "react": "*",
     "react-native": "*",
     "react-native-nitro-modules": "*"
-  },
-  "eslintConfig": {
-    "root": true,
-    "extends": [
-      "@react-native",
-      "prettier"
-    ],
-    "plugins": [
-      "prettier"
-    ],
-    "rules": {
-      "prettier/prettier": [
-        "warn",
-        {
-          "quoteProps": "consistent",
-          "singleQuote": true,
-          "tabWidth": 2,
-          "trailingComma": "es5",
-          "useTabs": false
-        }
-      ]
-    }
-  },
-  "eslintIgnore": [
-    "node_modules/",
-    "lib/"
-  ],
-  "prettier": {
-    "quoteProps": "consistent",
-    "singleQuote": true,
-    "tabWidth": 2,
-    "trailingComma": "es5",
-    "useTabs": false,
-    "semi": false
   },
   "react-native-builder-bob": {
     "source": "src",

@@ -5,7 +5,7 @@
   "scripts": {
     "android": "react-native run-android",
     "ios": "react-native run-ios --simulator='iPhone 16'",
-    "lint": "eslint .",
+    "lint": "oxlint .",
     "start": "react-native start --reset-cache",
     "test": "jest",
     "pod": "bundle install && bundle exec pod install --project-directory=ios"
@@ -25,7 +25,6 @@
     "@react-native-community/cli-platform-android": "20.1.0",
     "@react-native-community/cli-platform-ios": "20.1.0",
     "@react-native/babel-preset": "0.85.2",
-    "@react-native/eslint-config": "0.85.2",
     "@react-native/jest-preset": "0.85.2",
     "@react-native/metro-config": "0.85.2",
     "@react-native/typescript-config": "0.85.2",

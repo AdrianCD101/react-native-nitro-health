@@ -1,0 +1,24 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["eslint", "typescript", "unicorn", "oxc", "react", "jest"],
+  "env": {
+    "es2024": true,
+    "node": true,
+    "jest": true
+  },
+  "settings": {
+    "react": {
+      "version": "19.2.3"
+    }
+  },
+  "globals": {
+    "__DEV__": "writable"
+  },
+  "ignorePatterns": [
+    "node_modules/**",
+    "lib/**",
+    "example/ios/Pods/**",
+    "example/android/build/**",
+    "nitrogen/generated/**"
+  ]
+}
