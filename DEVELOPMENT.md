@@ -55,23 +55,23 @@ Do not run `bun install` every time. Run it for a new clone or when dependencies
 
 ## If/Then
 
-| Change                              | Run                                              |
-| ----------------------------------- | ------------------------------------------------ |
-| New clone                           | `bun install`                                    |
-| Dependencies changed                | `bun install`                                    |
-| Nitro spec changed                  | `bun run codegen`                                |
-| Package TypeScript changed          | `bun run build`                                  |
-| Swift/Kotlin implementation changed | `cd example && bun run ios` or `bun run android` |
-| iOS native deps/pods changed        | `cd example && bun run pod`                      |
-| Example app JS changed              | `cd example && bun run start`                    |
-| Run iOS app                         | `cd example && bun run ios`                      |
+| Change                              | Run                                                        |
+| ----------------------------------- | ---------------------------------------------------------- |
+| New clone                           | `bun install`                                              |
+| Dependencies changed                | `bun install`                                              |
+| Nitro spec changed                  | `bun run codegen`                                          |
+| Package TypeScript changed          | `bun run build`                                            |
+| Swift/Kotlin implementation changed | `cd example && bun run ios` or `bun run android`           |
+| iOS native deps/pods changed        | `cd example && bun run pod`                                |
+| Example app JS changed              | `cd example && bun run start`                              |
+| Run iOS app                         | `cd example && bun run ios`                                |
 | Run iOS physical device             | open `example/ios/NitroHealthExample.xcworkspace` in Xcode |
-| Run Android app                     | `cd example && bun run android`                  |
-| Run fast tests                      | `bun run test`                                   |
-| Check lint                          | `bun run lint`                                   |
-| Fix lint                            | `bun run lint:fix`                               |
-| Check formatting                    | `bun run format:check`                           |
-| Apply formatting                    | `bun run format`                                 |
+| Run Android app                     | `cd example && bun run android`                            |
+| Run fast tests                      | `bun run test`                                             |
+| Check lint                          | `bun run lint`                                             |
+| Fix lint                            | `bun run lint:fix`                                         |
+| Check formatting                    | `bun run format:check`                                     |
+| Apply formatting                    | `bun run format`                                           |
 
 ## Common Flows
 
