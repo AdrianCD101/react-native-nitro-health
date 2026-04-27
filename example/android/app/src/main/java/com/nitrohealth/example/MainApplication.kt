@@ -1,4 +1,4 @@
-package com.nitrohealthexample
+package com.nitrohealth.example
 
 import android.app.Application
 import com.facebook.react.PackageList
