@@ -2,25 +2,18 @@
   "name": "react-native-nitro-health",
   "version": "0.1.0",
   "description": "react-native-nitro-health is a react native package built with Nitro",
-  "main": "./lib/commonjs/index.js",
-  "module": "./lib/module/index.js",
-  "types": "./lib/typescript/src/index.d.ts",
-  "react-native": "src/index",
-  "source": "src/index",
-  "scripts": {
-    "lint": "oxlint .",
-    "lint:fix": "oxlint --fix .",
-    "format": "oxfmt .",
-    "format:check": "oxfmt --check .",
-    "typecheck": "tsc --noEmit",
-    "clean": "git clean -dfX",
-    "release": "semantic-release",
-    "build": "bun run typecheck && bob build",
-    "codegen": "nitrogen --logLevel=\"debug\" && bun run build && node post-script.js"
-  },
   "keywords": [
     "react-native",
     "react-native-nitro-health"
+  ],
+  "homepage": "https://github.com/adrianwhite/react-native-nitro-health#readme",
+  "bugs": "https://github.com/adrianwhite/react-native-nitro-health/issues",
+  "license": "MIT",
+  "author": "Adrian White",
+  "repository": "https://github.com/adrianwhite/react-native-nitro-health.git",
+  "source": "src/index",
+  "workspaces": [
+    "example"
   ],
   "files": [
     "src",
@@ -43,17 +36,24 @@
     "*.podspec",
     "README.md"
   ],
-  "workspaces": [
-    "example"
-  ],
-  "repository": "https://github.com/adrianwhite/react-native-nitro-health.git",
-  "author": "Adrian White",
-  "license": "MIT",
-  "bugs": "https://github.com/adrianwhite/react-native-nitro-health/issues",
-  "homepage": "https://github.com/adrianwhite/react-native-nitro-health#readme",
+  "main": "./lib/commonjs/index.js",
+  "module": "./lib/module/index.js",
+  "types": "./lib/typescript/src/index.d.ts",
+  "react-native": "src/index",
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
+  },
+  "scripts": {
+    "lint": "oxlint .",
+    "lint:fix": "oxlint --fix .",
+    "format": "oxfmt .",
+    "format:check": "oxfmt --check .",
+    "typecheck": "tsc --noEmit",
+    "clean": "git clean -dfX",
+    "release": "semantic-release",
+    "build": "bun run typecheck && bob build",
+    "codegen": "nitrogen --logLevel=\"debug\" && bun run build && node post-script.js"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.3",

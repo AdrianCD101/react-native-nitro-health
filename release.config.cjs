@@ -7,9 +7,7 @@ const rules = [
   { type: 'chore', release: 'patch', title: '🛠️ Other changes' },
 ]
 
-const sortMap = Object.fromEntries(
-  rules.map((rule, index) => [rule.title, index])
-)
+const sortMap = Object.fromEntries(rules.map((rule, index) => [rule.title, index]))
 
 /**
  * @type {import('semantic-release').GlobalConfig}
