@@ -13,8 +13,7 @@ public protocol HybridNitroHealthSpec_protocol: HybridObject {
   
 
   // Methods
-  func sum(num1: Double, num2: Double) throws -> Double
-  func subtract(num1: Double, num2: Double) throws -> Double
+  func isAvailable() throws -> Bool
 }
 
 public extension HybridNitroHealthSpec_protocol {

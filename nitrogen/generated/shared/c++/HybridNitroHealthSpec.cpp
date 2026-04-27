@@ -14,8 +14,7 @@ namespace margelo::nitro::nitrohealth {
     HybridObject::loadHybridMethods();
     // load custom methods/properties
     registerHybrids(this, [](Prototype& prototype) {
-      prototype.registerHybridMethod("sum", &HybridNitroHealthSpec::sum);
-      prototype.registerHybridMethod("subtract", &HybridNitroHealthSpec::subtract);
+      prototype.registerHybridMethod("isAvailable", &HybridNitroHealthSpec::isAvailable);
     });
   }
 

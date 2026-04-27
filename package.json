@@ -49,6 +49,7 @@
     "lint:fix": "oxlint --fix .",
     "format": "oxfmt .",
     "format:check": "oxfmt --check .",
+    "test": "bun run --cwd example test",
     "typecheck": "tsc --noEmit",
     "clean": "git clean -dfX",
     "release": "semantic-release",

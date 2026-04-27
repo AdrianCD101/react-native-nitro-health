@@ -30,11 +30,7 @@ abstract class HybridNitroHealthSpec: HybridObject() {
   // Methods
   @DoNotStrip
   @Keep
-  abstract fun sum(num1: Double, num2: Double): Double
-  
-  @DoNotStrip
-  @Keep
-  abstract fun subtract(num1: Double, num2: Double): Double
+  abstract fun isAvailable(): Boolean
 
   // Default implementation of `HybridObject.toString()`
   override fun toString(): String {

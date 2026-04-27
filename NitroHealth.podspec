@@ -21,6 +21,7 @@ Pod::Spec.new do |s|
     # Implementation (C++ objects)
     "cpp/**/*.{hpp,cpp}",
   ]
+  s.ios.frameworks = 'HealthKit'
 
   load 'nitrogen/generated/ios/NitroHealth+autolinking.rb'
   add_nitrogen_files(s)

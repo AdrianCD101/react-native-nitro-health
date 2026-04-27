@@ -6,9 +6,10 @@
 //
 
 import Foundation
+import HealthKit
 
 class HybridNitroHealth: HybridNitroHealthSpec {
-    func sum(num1: Double, num2: Double) throws -> Double {
-        return num1 + num2
+    func isAvailable() throws -> Bool {
+        return HKHealthStore.isHealthDataAvailable()
     }
 }

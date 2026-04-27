@@ -44,15 +44,10 @@ namespace margelo::nitro::nitrohealth {
   
 
   // Methods
-  double JHybridNitroHealthSpec::sum(double num1, double num2) {
-    static const auto method = _javaPart->javaClassStatic()->getMethod<double(double /* num1 */, double /* num2 */)>("sum");
-    auto __result = method(_javaPart, num1, num2);
-    return __result;
-  }
-  double JHybridNitroHealthSpec::subtract(double num1, double num2) {
-    static const auto method = _javaPart->javaClassStatic()->getMethod<double(double /* num1 */, double /* num2 */)>("subtract");
-    auto __result = method(_javaPart, num1, num2);
-    return __result;
+  bool JHybridNitroHealthSpec::isAvailable() {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jboolean()>("isAvailable");
+    auto __result = method(_javaPart);
+    return static_cast<bool>(__result);
   }
 
 } // namespace margelo::nitro::nitrohealth

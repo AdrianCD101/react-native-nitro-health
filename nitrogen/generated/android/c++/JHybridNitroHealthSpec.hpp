@@ -54,8 +54,7 @@ namespace margelo::nitro::nitrohealth {
 
   public:
     // Methods
-    double sum(double num1, double num2) override;
-    double subtract(double num1, double num2) override;
+    bool isAvailable() override;
 
   private:
     jni::global_ref<JHybridNitroHealthSpec::JavaPart> _javaPart;

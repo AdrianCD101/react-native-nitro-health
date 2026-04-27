@@ -39,13 +39,13 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
   using std__weak_ptr_HybridNitroHealthSpec_ = std::weak_ptr<HybridNitroHealthSpec>;
   inline std__weak_ptr_HybridNitroHealthSpec_ weakify_std__shared_ptr_HybridNitroHealthSpec_(const std::shared_ptr<HybridNitroHealthSpec>& strong) noexcept { return strong; }
   
-  // pragma MARK: Result<double>
-  using Result_double_ = Result<double>;
-  inline Result_double_ create_Result_double_(double value) noexcept {
-    return Result<double>::withValue(std::move(value));
+  // pragma MARK: Result<bool>
+  using Result_bool_ = Result<bool>;
+  inline Result_bool_ create_Result_bool_(bool value) noexcept {
+    return Result<bool>::withValue(std::move(value));
   }
-  inline Result_double_ create_Result_double_(const std::exception_ptr& error) noexcept {
-    return Result<double>::withError(error);
+  inline Result_bool_ create_Result_bool_(const std::exception_ptr& error) noexcept {
+    return Result<bool>::withError(error);
   }
 
 } // namespace margelo::nitro::nitrohealth::bridge::swift

@@ -2102,7 +2102,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   FBLazyVector: 26fd21c75314e101f280d401e97f27d54f3f7064
   hermes-engine: 8fbead96586f7bc663e9c24a9c6eeada9d8a3662
-  NitroHealth: 0f3bac1a67b30ed1d85dcc25d29379597fc752bf
+  NitroHealth: 7298561a35eddbf5a6a4bcf8c1a707dc8445e13e
   NitroModules: 8146b7b58cd5a478a21485fc2a0d542076f9f1ba
   RCTDeprecation: c7a2768f905d76ca6d2cfefb26e4349eacbdfca3
   RCTRequired: 5e502c3553cfbed090a991c444448da452fb752e

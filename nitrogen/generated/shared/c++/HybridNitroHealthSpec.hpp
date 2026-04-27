@@ -48,8 +48,7 @@ namespace margelo::nitro::nitrohealth {
 
     public:
       // Methods
-      virtual double sum(double num1, double num2) = 0;
-      virtual double subtract(double num1, double num2) = 0;
+      virtual bool isAvailable() = 0;
 
     protected:
       // Hybrid Setup

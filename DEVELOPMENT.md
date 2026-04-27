@@ -37,9 +37,9 @@ flowchart TD
   F4 --> Q
   G --> Q
 
-  Q --> Q1[bun run lint]
-  Q1 --> Q2[bun run format:check]
-  Q2 --> Q3[bun run typecheck]
+  Q --> Q1[bun run test]
+  Q1 --> Q2[bun run lint]
+  Q2 --> Q3[bun run format:check]
 ```
 
 ## One-Time Setup
@@ -65,14 +65,25 @@ Do not run `bun install` every time. Run it for a new clone or when dependencies
 | iOS native deps/pods changed        | `cd example && bun run pod`                      |
 | Example app JS changed              | `cd example && bun run start`                    |
 | Run iOS app                         | `cd example && bun run ios`                      |
+| Run iOS physical device             | open `example/ios/NitroHealthExample.xcworkspace` in Xcode |
 | Run Android app                     | `cd example && bun run android`                  |
+| Run fast tests                      | `bun run test`                                   |
 | Check lint                          | `bun run lint`                                   |
 | Fix lint                            | `bun run lint:fix`                               |
 | Check formatting                    | `bun run format:check`                           |
 | Apply formatting                    | `bun run format`                                 |
-| Type-check                          | `bun run typecheck`                              |
 
 ## Common Flows
+
+### TDD Loop
+
+Use Jest for fast JS/API behavior tests. Use native app builds for platform smoke tests.
+
+```sh
+bun run test
+```
+
+When the test is red, implement the smallest change. When it is green, run the relevant build or native smoke step from the sections below.
 
 ### Changed Nitro Spec
 
@@ -80,6 +91,7 @@ Example: added or renamed a method in `src/specs/*.nitro.ts`.
 
 ```sh
 bun run codegen
+bun run test
 cd example
 bun run pod # iOS only
 bun run ios # or bun run android
@@ -96,7 +108,7 @@ cd example
 bun run ios # or bun run android
 ```
 
-No `codegen` needed.
+No `codegen` needed. Run `bun run test` from the repo root if JS behavior or example UI changed too.
 
 ### Changed Package TypeScript Only
 
@@ -104,6 +116,7 @@ Example: changed `src/index.ts`.
 
 ```sh
 bun run build
+bun run test
 ```
 
 If you want to test it in the app:
@@ -122,18 +135,42 @@ cd example
 bun run start
 ```
 
+Run the fast tests if behavior changed:
+
+```sh
+bun run test
+```
+
 Fast Refresh should pick it up if the app is already installed. If not:
 
 ```sh
 bun run ios # or bun run android
 ```
 
+## iOS Physical Device Signing
+
+Simulator builds are the default OSS workflow and need no signing setup.
+
+For a physical iPhone:
+
+```sh
+open example/ios/NitroHealthExample.xcworkspace
+```
+
+In Xcode, select the `NitroHealthExample` target → **Signing & Capabilities** → swap **Team** to your own Apple team. If the bundle ID conflicts with another app on your Apple ID, change it (e.g. `com.yourname.nitrohealth`).
+
+Do not commit your local signing changes in `project.pbxproj`. Revert before staging:
+
+```sh
+git restore example/ios/NitroHealthExample.xcodeproj/project.pbxproj
+```
+
 ## Before Commit
 
 ```sh
+bun run test
 bun run lint
 bun run format:check
-bun run typecheck
 ```
 
 Use `bun run lint:fix` for safe lint fixes. Use `bun run format` only when you are ready to accept formatting changes.

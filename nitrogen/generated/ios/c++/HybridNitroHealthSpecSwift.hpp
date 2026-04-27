@@ -66,16 +66,8 @@ namespace margelo::nitro::nitrohealth {
 
   public:
     // Methods
-    inline double sum(double num1, double num2) override {
-      auto __result = _swiftPart.sum(std::forward<decltype(num1)>(num1), std::forward<decltype(num2)>(num2));
-      if (__result.hasError()) [[unlikely]] {
-        std::rethrow_exception(__result.error());
-      }
-      auto __value = std::move(__result.value());
-      return __value;
-    }
-    inline double subtract(double num1, double num2) override {
-      auto __result = _swiftPart.subtract(std::forward<decltype(num1)>(num1), std::forward<decltype(num2)>(num2));
+    inline bool isAvailable() override {
+      auto __result = _swiftPart.isAvailable();
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }

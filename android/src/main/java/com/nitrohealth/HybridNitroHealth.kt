@@ -1,9 +1,13 @@
 package com.nitrohealth
 
+import androidx.health.connect.client.HealthConnectClient
+import com.margelo.nitro.NitroModules
 import com.margelo.nitro.nitrohealth.HybridNitroHealthSpec
 
 class HybridNitroHealth: HybridNitroHealthSpec() {    
-    override fun sum(num1: Double, num2: Double): Double {
-        return num1 + num2
+    override fun isAvailable(): Boolean {
+        val context = NitroModules.applicationContext ?: return false
+
+        return HealthConnectClient.getSdkStatus(context) == HealthConnectClient.SDK_AVAILABLE
     }
 }

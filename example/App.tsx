@@ -5,7 +5,7 @@ import { NitroHealth } from 'react-native-nitro-health'
 function App(): React.JSX.Element {
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>{NitroHealth.sum(1, 2)}</Text>
+      <Text style={styles.text}>{NitroHealth.isAvailable() ? 'Available' : 'Unavailable'}</Text>
     </View>
   )
 }

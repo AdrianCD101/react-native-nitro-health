@@ -125,26 +125,14 @@ open class HybridNitroHealthSpec_cxx {
 
   // Methods
   @inline(__always)
-  public final func sum(num1: Double, num2: Double) -> bridge.Result_double_ {
+  public final func isAvailable() -> bridge.Result_bool_ {
     do {
-      let __result = try self.__implementation.sum(num1: num1, num2: num2)
+      let __result = try self.__implementation.isAvailable()
       let __resultCpp = __result
-      return bridge.create_Result_double_(__resultCpp)
+      return bridge.create_Result_bool_(__resultCpp)
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_double_(__exceptionPtr)
-    }
-  }
-  
-  @inline(__always)
-  public final func subtract(num1: Double, num2: Double) -> bridge.Result_double_ {
-    do {
-      let __result = try self.__implementation.subtract(num1: num1, num2: num2)
-      let __resultCpp = __result
-      return bridge.create_Result_double_(__resultCpp)
-    } catch (let __error) {
-      let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_double_(__exceptionPtr)
+      return bridge.create_Result_bool_(__exceptionPtr)
     }
   }
 }
