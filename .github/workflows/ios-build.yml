@@ -50,7 +50,11 @@ jobs:
     name: Build iOS Example App
     runs-on: macOS-15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22.13.0'
       - uses: oven-sh/setup-bun@v2
       - name: Setup Xcode
         uses: maxim-lobanov/setup-xcode@v1
@@ -65,13 +69,13 @@ jobs:
         with:
           ruby-version: '3.2'
           bundler-cache: true
-          working-directory: example/ios
+          working-directory: example
 
       - name: Install xcpretty
         run: gem install xcpretty
 
       - name: Cache CocoaPods
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.cocoapods/repos
@@ -81,8 +85,8 @@ jobs:
             ${{ runner.os }}-pods-
 
       - name: Install Pods
-        working-directory: example/ios
-        run: pod install
+        working-directory: example
+        run: bundle exec pod install --project-directory=ios
 
       - name: Build App
         working-directory: example/ios
@@ -94,6 +98,6 @@ jobs:
             -scheme NitroHealthExample \
             -sdk iphonesimulator \
             -configuration Debug \
-            -destination 'platform=iOS Simulator,name=iPhone 16' \
+            -destination 'generic/platform=iOS Simulator' \
             build \
             CODE_SIGNING_ALLOWED=NO | xcpretty
