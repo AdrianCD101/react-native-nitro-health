@@ -50,6 +50,10 @@ example/vendor/
 
 # node.js
 #
+.env
+.env.local
+example/.env
+example/.env.local
 node_modules/
 npm-debug.log
 yarn-debug.log

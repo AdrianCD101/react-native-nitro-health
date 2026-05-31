@@ -92,6 +92,18 @@ RN_HARNESS_IOS_SIMULATOR='iPhone 17 Pro' RN_HARNESS_IOS_RUNTIME='26.0' bun run h
 RN_HARNESS_ANDROID_AVD='Pixel_7_API_35' RN_HARNESS_ANDROID_API_LEVEL='35' RN_HARNESS_ANDROID_PROFILE='pixel_7' bun run harness:android
 ```
 
+You can also put the same values in `example/.env` or `.env` for local Harness runs:
+
+```sh
+RN_HARNESS_ANDROID_AVD=Pixel_7_API_35
+RN_HARNESS_ANDROID_API_LEVEL=35
+RN_HARNESS_ANDROID_PROFILE=pixel_7
+RN_HARNESS_IOS_SIMULATOR=iPhone 17 Pro
+RN_HARNESS_IOS_RUNTIME=26.0
+```
+
+Shell and CI environment variables take precedence over `.env` values.
+
 Harness does not build the app. Build and install the debug app first with `bun run ios` or `bun run android`, then run the Harness command. After native changes, rebuild/reinstall before running Harness again.
 
 The GitHub Actions Harness workflow runs Android runtime validation on pull requests and `main` pushes that touch native/spec/example paths. iOS remains manual-only to avoid burning macOS minutes while simulator reliability is still being proven. Run it from **Actions → Run Harness → Run workflow** when you want to manually validate Android, iOS, or both.
