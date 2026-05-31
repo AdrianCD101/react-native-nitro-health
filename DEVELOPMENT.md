@@ -104,7 +104,9 @@ RN_HARNESS_IOS_RUNTIME=26.0
 
 Shell and CI environment variables take precedence over `.env` values.
 
-Harness does not build the app. Build and install the debug app first with `bun run ios` or `bun run android`, then run the Harness command. After native changes, rebuild/reinstall before running Harness again.
+Harness does not build the app. Build the Android debug APK first with `cd android && ./gradlew assembleDebug`, or build and install it with `bun run android`, then run `bun run harness:android`. The Android Harness script passes `HARNESS_APP_PATH=android/app/build/outputs/apk/debug/app-debug.apk` so Harness can install the built APK onto a fresh emulator. After native changes, rebuild before running Harness again.
+
+For iOS, build and install the debug app first with `bun run ios`, then run `bun run harness:ios`.
 
 The GitHub Actions Harness workflow runs Android runtime validation on pull requests and `main` pushes that touch native/spec/example paths. iOS remains manual-only to avoid burning macOS minutes while simulator reliability is still being proven. Run it from **Actions → Run Harness → Run workflow** when you want to manually validate Android, iOS, or both.
 
