@@ -7,9 +7,31 @@
 
 #include "JHybridNitroHealthSpec.hpp"
 
+// Forward declaration of `HealthAvailabilityStatus` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class HealthAvailabilityStatus; }
+// Forward declaration of `AuthorizationRequestStatus` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class AuthorizationRequestStatus; }
+// Forward declaration of `NativeHealthAuthorizationResult` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthAuthorizationResult; }
+// Forward declaration of `HealthAuthorizationStatus` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class HealthAuthorizationStatus; }
+// Forward declaration of `NativeHealthPermission` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthPermission; }
 
-
-
+#include "HealthAvailabilityStatus.hpp"
+#include "JHealthAvailabilityStatus.hpp"
+#include <NitroModules/Promise.hpp>
+#include <NitroModules/JPromise.hpp>
+#include "AuthorizationRequestStatus.hpp"
+#include "JAuthorizationRequestStatus.hpp"
+#include "NativeHealthAuthorizationResult.hpp"
+#include "JNativeHealthAuthorizationResult.hpp"
+#include "HealthAuthorizationStatus.hpp"
+#include "JHealthAuthorizationStatus.hpp"
+#include "NativeHealthPermission.hpp"
+#include <vector>
+#include "JNativeHealthPermission.hpp"
+#include <string>
 
 namespace margelo::nitro::nitrohealth {
 
@@ -48,6 +70,82 @@ namespace margelo::nitro::nitrohealth {
     static const auto method = _javaPart->javaClassStatic()->getMethod<jboolean()>("isAvailable");
     auto __result = method(_javaPart);
     return static_cast<bool>(__result);
+  }
+  HealthAvailabilityStatus JHybridNitroHealthSpec::getAvailabilityStatus() {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JHealthAvailabilityStatus>()>("getAvailabilityStatus");
+    auto __result = method(_javaPart);
+    return __result->toCpp();
+  }
+  bool JHybridNitroHealthSpec::openHealthConnectInstall() {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jboolean()>("openHealthConnectInstall");
+    auto __result = method(_javaPart);
+    return static_cast<bool>(__result);
+  }
+  std::shared_ptr<Promise<bool>> JHybridNitroHealthSpec::openHealthSettings() {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>()>("openHealthSettings");
+    auto __result = method(_javaPart);
+    return [&]() {
+      auto __promise = Promise<bool>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {
+        auto __result = jni::static_ref_cast<jni::JBoolean>(__boxedResult);
+        __promise->resolve(static_cast<bool>(__result->value()));
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
+  }
+  std::shared_ptr<Promise<AuthorizationRequestStatus>> JHybridNitroHealthSpec::getRequestStatusForAuthorization(const std::vector<NativeHealthPermission>& permissions) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<jni::JArrayClass<JNativeHealthPermission>> /* permissions */)>("getRequestStatusForAuthorization");
+    auto __result = method(_javaPart, [&](auto&& __input) {
+      size_t __size = __input.size();
+      jni::local_ref<jni::JArrayClass<JNativeHealthPermission>> __array = jni::JArrayClass<JNativeHealthPermission>::newArray(__size);
+      for (size_t __i = 0; __i < __size; __i++) {
+        const auto& __element = __input[__i];
+        auto __elementJni = JNativeHealthPermission::fromCpp(__element);
+        __array->setElement(__i, *__elementJni);
+      }
+      return __array;
+    }(permissions));
+    return [&]() {
+      auto __promise = Promise<AuthorizationRequestStatus>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {
+        auto __result = jni::static_ref_cast<JAuthorizationRequestStatus>(__boxedResult);
+        __promise->resolve(__result->toCpp());
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
+  }
+  std::shared_ptr<Promise<NativeHealthAuthorizationResult>> JHybridNitroHealthSpec::requestAuthorization(const std::vector<NativeHealthPermission>& permissions) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<jni::JArrayClass<JNativeHealthPermission>> /* permissions */)>("requestAuthorization");
+    auto __result = method(_javaPart, [&](auto&& __input) {
+      size_t __size = __input.size();
+      jni::local_ref<jni::JArrayClass<JNativeHealthPermission>> __array = jni::JArrayClass<JNativeHealthPermission>::newArray(__size);
+      for (size_t __i = 0; __i < __size; __i++) {
+        const auto& __element = __input[__i];
+        auto __elementJni = JNativeHealthPermission::fromCpp(__element);
+        __array->setElement(__i, *__elementJni);
+      }
+      return __array;
+    }(permissions));
+    return [&]() {
+      auto __promise = Promise<NativeHealthAuthorizationResult>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {
+        auto __result = jni::static_ref_cast<JNativeHealthAuthorizationResult>(__boxedResult);
+        __promise->resolve(__result->toCpp());
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
   }
 
 } // namespace margelo::nitro::nitrohealth

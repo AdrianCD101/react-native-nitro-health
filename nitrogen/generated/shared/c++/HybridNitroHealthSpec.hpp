@@ -13,9 +13,21 @@
 #error NitroModules cannot be found! Are you sure you installed NitroModules properly?
 #endif
 
+// Forward declaration of `HealthAvailabilityStatus` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class HealthAvailabilityStatus; }
+// Forward declaration of `AuthorizationRequestStatus` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class AuthorizationRequestStatus; }
+// Forward declaration of `NativeHealthPermission` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthPermission; }
+// Forward declaration of `NativeHealthAuthorizationResult` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthAuthorizationResult; }
 
-
-
+#include "HealthAvailabilityStatus.hpp"
+#include <NitroModules/Promise.hpp>
+#include "AuthorizationRequestStatus.hpp"
+#include "NativeHealthPermission.hpp"
+#include <vector>
+#include "NativeHealthAuthorizationResult.hpp"
 
 namespace margelo::nitro::nitrohealth {
 
@@ -49,6 +61,11 @@ namespace margelo::nitro::nitrohealth {
     public:
       // Methods
       virtual bool isAvailable() = 0;
+      virtual HealthAvailabilityStatus getAvailabilityStatus() = 0;
+      virtual bool openHealthConnectInstall() = 0;
+      virtual std::shared_ptr<Promise<bool>> openHealthSettings() = 0;
+      virtual std::shared_ptr<Promise<AuthorizationRequestStatus>> getRequestStatusForAuthorization(const std::vector<NativeHealthPermission>& permissions) = 0;
+      virtual std::shared_ptr<Promise<NativeHealthAuthorizationResult>> requestAuthorization(const std::vector<NativeHealthPermission>& permissions) = 0;
 
     protected:
       // Hybrid Setup

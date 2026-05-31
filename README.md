@@ -20,6 +20,65 @@ react-native-nitro-health is a react native package built with Nitro
 bun add react-native-nitro-health react-native-nitro-modules
 ```
 
+## Availability
+
+```ts
+import { NitroHealth } from 'react-native-nitro-health'
+
+const status = NitroHealth.getAvailabilityStatus()
+const available = NitroHealth.isAvailable()
+
+if (status === 'providerUpdateRequired') {
+  NitroHealth.openHealthConnectInstall()
+}
+```
+
+`getAvailabilityStatus()` returns:
+
+| Status | Meaning |
+| --- | --- |
+| `available` | HealthKit or Health Connect is available on this device. |
+| `unavailable` | Health APIs are not available on this device. |
+| `providerUpdateRequired` | Android only. Health Connect needs to be installed or updated. |
+
+`isAvailable()` is a convenience method equivalent to `getAvailabilityStatus() === 'available'`.
+
+`openHealthConnectInstall()` opens the Android Health Connect Play Store onboarding flow when `getAvailabilityStatus()` returns `providerUpdateRequired`. It returns `false` when the flow is not available, including on iOS.
+
+On iOS, apps still need the HealthKit capability and the relevant HealthKit usage descriptions before read/write APIs can request authorization.
+
+## Permissions
+
+The first supported unified permission data types are `steps` and `heartRate`.
+
+```ts
+import { NitroHealth, type HealthPermission } from 'react-native-nitro-health'
+
+const permissions: HealthPermission[] = [
+  { accessType: 'read', dataType: 'steps' },
+  { accessType: 'read', dataType: 'heartRate' },
+]
+
+const status = await NitroHealth.getRequestStatusForAuthorization(permissions)
+
+if (status === 'shouldRequest') {
+  const result = await NitroHealth.requestAuthorization(permissions)
+
+  if (result.status === 'denied' || result.status === 'partial') {
+    // Show your app-specific rationale or settings instructions.
+    await NitroHealth.openHealthSettings()
+  }
+}
+```
+
+`getRequestStatusForAuthorization()` returns `unknown`, `shouldRequest`, or `unnecessary`.
+
+`requestAuthorization()` returns a structured result with `status`, `requestStatus`, `grantedPermissions`, `deniedPermissions`, and `unverifiablePermissions`. Android Health Connect can report granted and denied permissions after the prompt. iOS HealthKit cannot verify read permissions after prompting, so read permissions are returned in `unverifiablePermissions` and the aggregate status can be `completed`.
+
+`openHealthSettings()` opens Android Health Connect settings on Android and the app settings screen on iOS. It returns `false` when settings cannot be opened.
+
+Android consumer apps must declare the matching Health Connect permissions in their own `AndroidManifest.xml`, for example `android.permission.health.READ_HEART_RATE` before requesting `heartRate` read access.
+
 ## Credits
 
 Bootstrapped with [create-nitro-module](https://github.com/patrickkabwe/create-nitro-module).

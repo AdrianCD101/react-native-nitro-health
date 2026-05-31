@@ -135,4 +135,85 @@ open class HybridNitroHealthSpec_cxx {
       return bridge.create_Result_bool_(__exceptionPtr)
     }
   }
+  
+  @inline(__always)
+  public final func getAvailabilityStatus() -> bridge.Result_HealthAvailabilityStatus_ {
+    do {
+      let __result = try self.__implementation.getAvailabilityStatus()
+      let __resultCpp = __result
+      return bridge.create_Result_HealthAvailabilityStatus_(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_HealthAvailabilityStatus_(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func openHealthConnectInstall() -> bridge.Result_bool_ {
+    do {
+      let __result = try self.__implementation.openHealthConnectInstall()
+      let __resultCpp = __result
+      return bridge.create_Result_bool_(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_bool_(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func openHealthSettings() -> bridge.Result_std__shared_ptr_Promise_bool___ {
+    do {
+      let __result = try self.__implementation.openHealthSettings()
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_bool__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_bool__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_bool__(__promise)
+        __result
+          .then({ __result in __promiseHolder.resolve(__result) })
+          .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
+        return __promise
+      }()
+      return bridge.create_Result_std__shared_ptr_Promise_bool___(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_std__shared_ptr_Promise_bool___(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func getRequestStatusForAuthorization(permissions: bridge.std__vector_NativeHealthPermission_) -> bridge.Result_std__shared_ptr_Promise_AuthorizationRequestStatus___ {
+    do {
+      let __result = try self.__implementation.getRequestStatusForAuthorization(permissions: permissions.map({ __item in __item }))
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_AuthorizationRequestStatus__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_AuthorizationRequestStatus__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_AuthorizationRequestStatus__(__promise)
+        __result
+          .then({ __result in __promiseHolder.resolve(__result) })
+          .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
+        return __promise
+      }()
+      return bridge.create_Result_std__shared_ptr_Promise_AuthorizationRequestStatus___(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_std__shared_ptr_Promise_AuthorizationRequestStatus___(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func requestAuthorization(permissions: bridge.std__vector_NativeHealthPermission_) -> bridge.Result_std__shared_ptr_Promise_NativeHealthAuthorizationResult___ {
+    do {
+      let __result = try self.__implementation.requestAuthorization(permissions: permissions.map({ __item in __item }))
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_NativeHealthAuthorizationResult__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_NativeHealthAuthorizationResult__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_NativeHealthAuthorizationResult__(__promise)
+        __result
+          .then({ __result in __promiseHolder.resolve(__result) })
+          .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
+        return __promise
+      }()
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthAuthorizationResult___(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthAuthorizationResult___(__exceptionPtr)
+    }
+  }
 }

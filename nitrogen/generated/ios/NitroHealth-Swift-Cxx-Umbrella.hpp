@@ -8,14 +8,32 @@
 #pragma once
 
 // Forward declarations of C++ defined types
+// Forward declaration of `AuthorizationRequestStatus` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class AuthorizationRequestStatus; }
+// Forward declaration of `HealthAuthorizationStatus` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class HealthAuthorizationStatus; }
+// Forward declaration of `HealthAvailabilityStatus` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class HealthAvailabilityStatus; }
 // Forward declaration of `HybridNitroHealthSpec` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { class HybridNitroHealthSpec; }
+// Forward declaration of `NativeHealthAuthorizationResult` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthAuthorizationResult; }
+// Forward declaration of `NativeHealthPermission` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthPermission; }
 
 // Include C++ defined types
+#include "AuthorizationRequestStatus.hpp"
+#include "HealthAuthorizationStatus.hpp"
+#include "HealthAvailabilityStatus.hpp"
 #include "HybridNitroHealthSpec.hpp"
+#include "NativeHealthAuthorizationResult.hpp"
+#include "NativeHealthPermission.hpp"
+#include <NitroModules/Promise.hpp>
 #include <NitroModules/Result.hpp>
 #include <exception>
 #include <memory>
+#include <string>
+#include <vector>
 
 // C++ helpers for Swift
 #include "NitroHealth-Swift-Cxx-Bridge.hpp"

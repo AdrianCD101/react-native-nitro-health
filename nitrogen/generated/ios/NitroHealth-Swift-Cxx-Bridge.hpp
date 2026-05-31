@@ -8,18 +8,38 @@
 #pragma once
 
 // Forward declarations of C++ defined types
+// Forward declaration of `AuthorizationRequestStatus` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class AuthorizationRequestStatus; }
+// Forward declaration of `HealthAuthorizationStatus` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class HealthAuthorizationStatus; }
+// Forward declaration of `HealthAvailabilityStatus` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class HealthAvailabilityStatus; }
 // Forward declaration of `HybridNitroHealthSpec` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { class HybridNitroHealthSpec; }
+// Forward declaration of `NativeHealthAuthorizationResult` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthAuthorizationResult; }
+// Forward declaration of `NativeHealthPermission` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthPermission; }
 
 // Forward declarations of Swift defined types
 // Forward declaration of `HybridNitroHealthSpec_cxx` to properly resolve imports.
 namespace NitroHealth { class HybridNitroHealthSpec_cxx; }
 
 // Include C++ defined types
+#include "AuthorizationRequestStatus.hpp"
+#include "HealthAuthorizationStatus.hpp"
+#include "HealthAvailabilityStatus.hpp"
 #include "HybridNitroHealthSpec.hpp"
+#include "NativeHealthAuthorizationResult.hpp"
+#include "NativeHealthPermission.hpp"
+#include <NitroModules/Promise.hpp>
+#include <NitroModules/PromiseHolder.hpp>
 #include <NitroModules/Result.hpp>
 #include <exception>
+#include <functional>
 #include <memory>
+#include <string>
+#include <vector>
 
 /**
  * Contains specialized versions of C++ templated types so they can be accessed from Swift,
@@ -27,6 +47,141 @@ namespace NitroHealth { class HybridNitroHealthSpec_cxx; }
  */
 namespace margelo::nitro::nitrohealth::bridge::swift {
 
+  // pragma MARK: std::shared_ptr<Promise<bool>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<bool>>`.
+   */
+  using std__shared_ptr_Promise_bool__ = std::shared_ptr<Promise<bool>>;
+  inline std::shared_ptr<Promise<bool>> create_std__shared_ptr_Promise_bool__() noexcept {
+    return Promise<bool>::create();
+  }
+  inline PromiseHolder<bool> wrap_std__shared_ptr_Promise_bool__(std::shared_ptr<Promise<bool>> promise) noexcept {
+    return PromiseHolder<bool>(std::move(promise));
+  }
+  
+  // pragma MARK: std::function<void(bool /* result */)>
+  /**
+   * Specialized version of `std::function<void(bool)>`.
+   */
+  using Func_void_bool = std::function<void(bool /* result */)>;
+  /**
+   * Wrapper class for a `std::function<void(bool / * result * /)>`, this can be used from Swift.
+   */
+  class Func_void_bool_Wrapper final {
+  public:
+    explicit Func_void_bool_Wrapper(std::function<void(bool /* result */)>&& func): _function(std::make_unique<std::function<void(bool /* result */)>>(std::move(func))) {}
+    inline void call(bool result) const noexcept {
+      _function->operator()(result);
+    }
+  private:
+    std::unique_ptr<std::function<void(bool /* result */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_bool create_Func_void_bool(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_bool_Wrapper wrap_Func_void_bool(Func_void_bool value) noexcept {
+    return Func_void_bool_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::function<void(const std::exception_ptr& /* error */)>
+  /**
+   * Specialized version of `std::function<void(const std::exception_ptr&)>`.
+   */
+  using Func_void_std__exception_ptr = std::function<void(const std::exception_ptr& /* error */)>;
+  /**
+   * Wrapper class for a `std::function<void(const std::exception_ptr& / * error * /)>`, this can be used from Swift.
+   */
+  class Func_void_std__exception_ptr_Wrapper final {
+  public:
+    explicit Func_void_std__exception_ptr_Wrapper(std::function<void(const std::exception_ptr& /* error */)>&& func): _function(std::make_unique<std::function<void(const std::exception_ptr& /* error */)>>(std::move(func))) {}
+    inline void call(std::exception_ptr error) const noexcept {
+      _function->operator()(error);
+    }
+  private:
+    std::unique_ptr<std::function<void(const std::exception_ptr& /* error */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_std__exception_ptr create_Func_void_std__exception_ptr(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_std__exception_ptr_Wrapper wrap_Func_void_std__exception_ptr(Func_void_std__exception_ptr value) noexcept {
+    return Func_void_std__exception_ptr_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::shared_ptr<Promise<AuthorizationRequestStatus>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<AuthorizationRequestStatus>>`.
+   */
+  using std__shared_ptr_Promise_AuthorizationRequestStatus__ = std::shared_ptr<Promise<AuthorizationRequestStatus>>;
+  inline std::shared_ptr<Promise<AuthorizationRequestStatus>> create_std__shared_ptr_Promise_AuthorizationRequestStatus__() noexcept {
+    return Promise<AuthorizationRequestStatus>::create();
+  }
+  inline PromiseHolder<AuthorizationRequestStatus> wrap_std__shared_ptr_Promise_AuthorizationRequestStatus__(std::shared_ptr<Promise<AuthorizationRequestStatus>> promise) noexcept {
+    return PromiseHolder<AuthorizationRequestStatus>(std::move(promise));
+  }
+  
+  // pragma MARK: std::function<void(AuthorizationRequestStatus /* result */)>
+  /**
+   * Specialized version of `std::function<void(AuthorizationRequestStatus)>`.
+   */
+  using Func_void_AuthorizationRequestStatus = std::function<void(AuthorizationRequestStatus /* result */)>;
+  /**
+   * Wrapper class for a `std::function<void(AuthorizationRequestStatus / * result * /)>`, this can be used from Swift.
+   */
+  class Func_void_AuthorizationRequestStatus_Wrapper final {
+  public:
+    explicit Func_void_AuthorizationRequestStatus_Wrapper(std::function<void(AuthorizationRequestStatus /* result */)>&& func): _function(std::make_unique<std::function<void(AuthorizationRequestStatus /* result */)>>(std::move(func))) {}
+    inline void call(int result) const noexcept {
+      _function->operator()(static_cast<AuthorizationRequestStatus>(result));
+    }
+  private:
+    std::unique_ptr<std::function<void(AuthorizationRequestStatus /* result */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_AuthorizationRequestStatus create_Func_void_AuthorizationRequestStatus(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_AuthorizationRequestStatus_Wrapper wrap_Func_void_AuthorizationRequestStatus(Func_void_AuthorizationRequestStatus value) noexcept {
+    return Func_void_AuthorizationRequestStatus_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::vector<NativeHealthPermission>
+  /**
+   * Specialized version of `std::vector<NativeHealthPermission>`.
+   */
+  using std__vector_NativeHealthPermission_ = std::vector<NativeHealthPermission>;
+  inline std::vector<NativeHealthPermission> create_std__vector_NativeHealthPermission_(size_t size) noexcept {
+    std::vector<NativeHealthPermission> vector;
+    vector.reserve(size);
+    return vector;
+  }
+  
+  // pragma MARK: std::shared_ptr<Promise<NativeHealthAuthorizationResult>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<NativeHealthAuthorizationResult>>`.
+   */
+  using std__shared_ptr_Promise_NativeHealthAuthorizationResult__ = std::shared_ptr<Promise<NativeHealthAuthorizationResult>>;
+  inline std::shared_ptr<Promise<NativeHealthAuthorizationResult>> create_std__shared_ptr_Promise_NativeHealthAuthorizationResult__() noexcept {
+    return Promise<NativeHealthAuthorizationResult>::create();
+  }
+  inline PromiseHolder<NativeHealthAuthorizationResult> wrap_std__shared_ptr_Promise_NativeHealthAuthorizationResult__(std::shared_ptr<Promise<NativeHealthAuthorizationResult>> promise) noexcept {
+    return PromiseHolder<NativeHealthAuthorizationResult>(std::move(promise));
+  }
+  
+  // pragma MARK: std::function<void(const NativeHealthAuthorizationResult& /* result */)>
+  /**
+   * Specialized version of `std::function<void(const NativeHealthAuthorizationResult&)>`.
+   */
+  using Func_void_NativeHealthAuthorizationResult = std::function<void(const NativeHealthAuthorizationResult& /* result */)>;
+  /**
+   * Wrapper class for a `std::function<void(const NativeHealthAuthorizationResult& / * result * /)>`, this can be used from Swift.
+   */
+  class Func_void_NativeHealthAuthorizationResult_Wrapper final {
+  public:
+    explicit Func_void_NativeHealthAuthorizationResult_Wrapper(std::function<void(const NativeHealthAuthorizationResult& /* result */)>&& func): _function(std::make_unique<std::function<void(const NativeHealthAuthorizationResult& /* result */)>>(std::move(func))) {}
+    inline void call(NativeHealthAuthorizationResult result) const noexcept {
+      _function->operator()(result);
+    }
+  private:
+    std::unique_ptr<std::function<void(const NativeHealthAuthorizationResult& /* result */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_NativeHealthAuthorizationResult create_Func_void_NativeHealthAuthorizationResult(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_NativeHealthAuthorizationResult_Wrapper wrap_Func_void_NativeHealthAuthorizationResult(Func_void_NativeHealthAuthorizationResult value) noexcept {
+    return Func_void_NativeHealthAuthorizationResult_Wrapper(std::move(value));
+  }
+  
   // pragma MARK: std::shared_ptr<HybridNitroHealthSpec>
   /**
    * Specialized version of `std::shared_ptr<HybridNitroHealthSpec>`.
@@ -46,6 +201,42 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
   }
   inline Result_bool_ create_Result_bool_(const std::exception_ptr& error) noexcept {
     return Result<bool>::withError(error);
+  }
+  
+  // pragma MARK: Result<HealthAvailabilityStatus>
+  using Result_HealthAvailabilityStatus_ = Result<HealthAvailabilityStatus>;
+  inline Result_HealthAvailabilityStatus_ create_Result_HealthAvailabilityStatus_(HealthAvailabilityStatus value) noexcept {
+    return Result<HealthAvailabilityStatus>::withValue(std::move(value));
+  }
+  inline Result_HealthAvailabilityStatus_ create_Result_HealthAvailabilityStatus_(const std::exception_ptr& error) noexcept {
+    return Result<HealthAvailabilityStatus>::withError(error);
+  }
+  
+  // pragma MARK: Result<std::shared_ptr<Promise<bool>>>
+  using Result_std__shared_ptr_Promise_bool___ = Result<std::shared_ptr<Promise<bool>>>;
+  inline Result_std__shared_ptr_Promise_bool___ create_Result_std__shared_ptr_Promise_bool___(const std::shared_ptr<Promise<bool>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<bool>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_bool___ create_Result_std__shared_ptr_Promise_bool___(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<bool>>>::withError(error);
+  }
+  
+  // pragma MARK: Result<std::shared_ptr<Promise<AuthorizationRequestStatus>>>
+  using Result_std__shared_ptr_Promise_AuthorizationRequestStatus___ = Result<std::shared_ptr<Promise<AuthorizationRequestStatus>>>;
+  inline Result_std__shared_ptr_Promise_AuthorizationRequestStatus___ create_Result_std__shared_ptr_Promise_AuthorizationRequestStatus___(const std::shared_ptr<Promise<AuthorizationRequestStatus>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<AuthorizationRequestStatus>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_AuthorizationRequestStatus___ create_Result_std__shared_ptr_Promise_AuthorizationRequestStatus___(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<AuthorizationRequestStatus>>>::withError(error);
+  }
+  
+  // pragma MARK: Result<std::shared_ptr<Promise<NativeHealthAuthorizationResult>>>
+  using Result_std__shared_ptr_Promise_NativeHealthAuthorizationResult___ = Result<std::shared_ptr<Promise<NativeHealthAuthorizationResult>>>;
+  inline Result_std__shared_ptr_Promise_NativeHealthAuthorizationResult___ create_Result_std__shared_ptr_Promise_NativeHealthAuthorizationResult___(const std::shared_ptr<Promise<NativeHealthAuthorizationResult>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<NativeHealthAuthorizationResult>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_NativeHealthAuthorizationResult___ create_Result_std__shared_ptr_Promise_NativeHealthAuthorizationResult___(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<NativeHealthAuthorizationResult>>>::withError(error);
   }
 
 } // namespace margelo::nitro::nitrohealth::bridge::swift

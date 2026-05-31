@@ -14,6 +14,38 @@
 
 namespace margelo::nitro::nitrohealth::bridge::swift {
 
+  // pragma MARK: std::function<void(bool /* result */)>
+  Func_void_bool create_Func_void_bool(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroHealth::Func_void_bool::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](bool result) mutable -> void {
+      swiftClosure.call(result);
+    };
+  }
+  
+  // pragma MARK: std::function<void(const std::exception_ptr& /* error */)>
+  Func_void_std__exception_ptr create_Func_void_std__exception_ptr(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroHealth::Func_void_std__exception_ptr::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const std::exception_ptr& error) mutable -> void {
+      swiftClosure.call(error);
+    };
+  }
+  
+  // pragma MARK: std::function<void(AuthorizationRequestStatus /* result */)>
+  Func_void_AuthorizationRequestStatus create_Func_void_AuthorizationRequestStatus(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroHealth::Func_void_AuthorizationRequestStatus::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](AuthorizationRequestStatus result) mutable -> void {
+      swiftClosure.call(static_cast<int>(result));
+    };
+  }
+  
+  // pragma MARK: std::function<void(const NativeHealthAuthorizationResult& /* result */)>
+  Func_void_NativeHealthAuthorizationResult create_Func_void_NativeHealthAuthorizationResult(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroHealth::Func_void_NativeHealthAuthorizationResult::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const NativeHealthAuthorizationResult& result) mutable -> void {
+      swiftClosure.call(result);
+    };
+  }
+  
   // pragma MARK: std::shared_ptr<HybridNitroHealthSpec>
   std::shared_ptr<HybridNitroHealthSpec> create_std__shared_ptr_HybridNitroHealthSpec_(void* NON_NULL swiftUnsafePointer) noexcept {
     NitroHealth::HybridNitroHealthSpec_cxx swiftPart = NitroHealth::HybridNitroHealthSpec_cxx::fromUnsafe(swiftUnsafePointer);

@@ -55,6 +55,11 @@ namespace margelo::nitro::nitrohealth {
   public:
     // Methods
     bool isAvailable() override;
+    HealthAvailabilityStatus getAvailabilityStatus() override;
+    bool openHealthConnectInstall() override;
+    std::shared_ptr<Promise<bool>> openHealthSettings() override;
+    std::shared_ptr<Promise<AuthorizationRequestStatus>> getRequestStatusForAuthorization(const std::vector<NativeHealthPermission>& permissions) override;
+    std::shared_ptr<Promise<NativeHealthAuthorizationResult>> requestAuthorization(const std::vector<NativeHealthPermission>& permissions) override;
 
   private:
     jni::global_ref<JHybridNitroHealthSpec::JavaPart> _javaPart;

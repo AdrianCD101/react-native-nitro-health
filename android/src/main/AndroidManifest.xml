@@ -2,4 +2,10 @@
     <queries>
         <package android:name="com.google.android.apps.healthdata" />
     </queries>
+
+    <application>
+        <activity
+            android:name=".NitroHealthPermissionActivity"
+            android:exported="false" />
+    </application>
 </manifest>

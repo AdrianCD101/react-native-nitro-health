@@ -10,6 +10,7 @@ package com.margelo.nitro.nitrohealth
 import androidx.annotation.Keep
 import com.facebook.jni.HybridData
 import com.facebook.proguard.annotations.DoNotStrip
+import com.margelo.nitro.core.Promise
 import com.margelo.nitro.core.HybridObject
 
 /**
@@ -31,6 +32,26 @@ abstract class HybridNitroHealthSpec: HybridObject() {
   @DoNotStrip
   @Keep
   abstract fun isAvailable(): Boolean
+  
+  @DoNotStrip
+  @Keep
+  abstract fun getAvailabilityStatus(): HealthAvailabilityStatus
+  
+  @DoNotStrip
+  @Keep
+  abstract fun openHealthConnectInstall(): Boolean
+  
+  @DoNotStrip
+  @Keep
+  abstract fun openHealthSettings(): Promise<Boolean>
+  
+  @DoNotStrip
+  @Keep
+  abstract fun getRequestStatusForAuthorization(permissions: Array<NativeHealthPermission>): Promise<AuthorizationRequestStatus>
+  
+  @DoNotStrip
+  @Keep
+  abstract fun requestAuthorization(permissions: Array<NativeHealthPermission>): Promise<NativeHealthAuthorizationResult>
 
   // Default implementation of `HybridObject.toString()`
   override fun toString(): String {

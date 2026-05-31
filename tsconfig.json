@@ -6,6 +6,7 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "react",
+    "ignoreDeprecations": "6.0",
     "lib": ["esnext"],
     "module": "esnext",
     "moduleResolution": "node",
