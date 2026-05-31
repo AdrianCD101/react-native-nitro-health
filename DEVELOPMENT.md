@@ -75,6 +75,29 @@ Do not run `bun install` every time. Run it for a new clone or when dependencies
 
 ## Common Flows
 
+### Native Module Harness
+
+Use React Native Harness for JS tests that execute inside the real iOS/Android app runtime with access to Nitro native modules.
+
+```sh
+cd example
+bun run harness:ios
+bun run harness:android
+```
+
+Harness uses `example/rn-harness.config.mjs`. Override local device names when needed:
+
+```sh
+RN_HARNESS_IOS_SIMULATOR='iPhone 17 Pro' RN_HARNESS_IOS_RUNTIME='26.0' bun run harness:ios
+RN_HARNESS_ANDROID_AVD='Medium_Phone' bun run harness:android
+```
+
+Harness does not build the app. Build and install the debug app first with `bun run ios` or `bun run android`, then run the Harness command. After native changes, rebuild/reinstall before running Harness again.
+
+Set `permissions: true` in the Harness config only when adding tests that need Harness-managed permission prompt handling.
+
+The permission Harness tests intentionally skip interactive request flows unless the requested permission is already unnecessary/granted. HealthKit and Health Connect use specialized permission sheets, so do not assume Harness can auto-accept them like camera/location prompts.
+
 ### TDD Loop
 
 Use Jest for fast JS/API behavior tests. Use native app builds for platform smoke tests.
@@ -146,6 +169,46 @@ Fast Refresh should pick it up if the app is already installed. If not:
 ```sh
 bun run ios # or bun run android
 ```
+
+## Consumer App Setup
+
+The library deliberately ships **no health permissions**. Consumer apps must declare every data type they read or write. This avoids forcing every downstream app to inherit permissions it doesn't use, which would fail Play Store privacy review.
+
+The `example/` app is a working reference — copy from it.
+
+### iOS
+
+1. Enable HealthKit capability in Xcode: target → **Signing & Capabilities** → **+ Capability** → **HealthKit**. This adds an `.entitlements` file referencing `com.apple.developer.healthkit`.
+2. Add to the app's `Info.plist`:
+   ```xml
+   <key>NSHealthShareUsageDescription</key>
+   <string>Why your app reads health data.</string>
+   <key>NSHealthUpdateUsageDescription</key>
+   <string>Why your app writes health data.</string>
+   ```
+   These strings appear in the system permission prompt. Apple rejects vague text — explain the user-visible feature.
+3. (Optional) For clinical health records, also add the `com.apple.developer.healthkit.access` entitlement with `health-records` and `NSHealthClinicalHealthRecordsShareUsageDescription` in Info.plist.
+
+Reference: `example/ios/NitroHealthExample/NitroHealthExample.entitlements`, `example/ios/NitroHealthExample/Info.plist`.
+
+### Android
+
+1. Declare each Health Connect data type permission in your `AndroidManifest.xml`:
+   ```xml
+   <uses-permission android:name="android.permission.health.READ_STEPS" />
+   <uses-permission android:name="android.permission.health.WRITE_STEPS" />
+   <!-- one pair per data type — see Health Connect docs for the full list -->
+   ```
+   Full list: <https://developer.android.com/health-and-fitness/guides/health-connect/plan/data-types>.
+2. Add a `<queries>` block so the app can see the Health Connect provider package on Android 11+ (the library declares this too, but explicit in the consumer manifest avoids manifest-merger surprises):
+   ```xml
+   <queries>
+     <package android:name="com.google.android.apps.healthdata" />
+   </queries>
+   ```
+3. Create a `PermissionsRationaleActivity` that displays the app's privacy policy. The system launches this when the user taps the privacy policy link in the Health Connect permissions screen. Register it with two intent-filters — one for Android <14 (`androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE`), one for Android 14+ (an `<activity-alias>` named `ViewPermissionUsageActivity` with `android.intent.action.VIEW_PERMISSION_USAGE`). The activity must show the same privacy policy you list in Play Console.
+
+Reference: `example/android/app/src/main/AndroidManifest.xml`, `example/android/app/src/main/java/com/nitrohealth/example/PermissionsRationaleActivity.kt`.
 
 ## iOS Physical Device Signing
 

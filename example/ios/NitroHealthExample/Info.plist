@@ -33,6 +33,10 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
+	<key>NSHealthShareUsageDescription</key>
+	<string>NitroHealth example reads health data to demonstrate library usage.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>NitroHealth example writes health data to demonstrate library usage.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string></string>
 	<key>RCTNewArchEnabled</key>

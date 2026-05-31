@@ -2,6 +2,19 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- Health Connect data type permissions used by this example.
+         Each consumer app declares only the data types it actually reads or writes.
+         See: https://developer.android.com/health-and-fitness/guides/health-connect/plan/data-types -->
+    <uses-permission android:name="android.permission.health.READ_STEPS" />
+    <uses-permission android:name="android.permission.health.WRITE_STEPS" />
+    <uses-permission android:name="android.permission.health.READ_HEART_RATE" />
+    <uses-permission android:name="android.permission.health.WRITE_HEART_RATE" />
+
+    <!-- Required on Android 11+ so the app can see the Health Connect provider package. -->
+    <queries>
+        <package android:name="com.google.android.apps.healthdata" />
+    </queries>
+
     <application
       android:name=".MainApplication"
       android:label="@string/app_name"
@@ -23,5 +36,27 @@
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
       </activity>
+
+      <!-- Privacy policy rationale shown when the user taps the link in the
+           Health Connect permissions screen. Required on Android <14. -->
+      <activity
+        android:name=".PermissionsRationaleActivity"
+        android:exported="true">
+        <intent-filter>
+          <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
+        </intent-filter>
+      </activity>
+
+      <!-- Same rationale, surfaced through the Android 14+ permission usage flow. -->
+      <activity-alias
+        android:name="ViewPermissionUsageActivity"
+        android:exported="true"
+        android:targetActivity=".PermissionsRationaleActivity"
+        android:permission="android.permission.START_VIEW_PERMISSION_USAGE">
+        <intent-filter>
+          <action android:name="android.intent.action.VIEW_PERMISSION_USAGE" />
+          <category android:name="android.intent.category.HEALTH_PERMISSIONS" />
+        </intent-filter>
+      </activity-alias>
     </application>
 </manifest>
