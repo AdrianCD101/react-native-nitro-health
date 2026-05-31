@@ -17,6 +17,7 @@
   ],
   "files": [
     "src",
+    "jest",
     "react-native.config.js",
     "lib",
     "nitrogen",

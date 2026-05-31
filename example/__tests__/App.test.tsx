@@ -1,13 +1,9 @@
 import React from 'react'
-import { fireEvent, render, screen } from '@testing-library/react-native'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react-native'
 
-const mockNitroHealth = {
-  getAvailabilityStatus: jest.fn(),
-  getRequestStatusForAuthorization: jest.fn(),
-  openHealthConnectInstall: jest.fn(),
-  openHealthSettings: jest.fn(),
-  requestAuthorization: jest.fn(),
-}
+jest.mock('react-native-nitro-health', () => require('../../jest/mock'))
+
+const { NitroHealth: mockNitroHealth, resetNitroHealthMock } = require('../../jest/mock')
 
 const grantedStepsResult = {
   status: 'granted',
@@ -36,17 +32,11 @@ const deniedHeartRateResult = {
   unverifiablePermissions: [],
 }
 
-jest.mock('react-native-nitro-modules', () => ({
-  NitroModules: {
-    createHybridObject: jest.fn(() => mockNitroHealth),
-  },
-}))
-
 const App = require('../App').default
 
 describe('App', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    resetNitroHealthMock()
   })
 
   it('shows Available when health APIs are available', () => {
@@ -88,7 +78,7 @@ describe('App', () => {
 
     render(<App />)
 
-    fireEvent.press(screen.getByText('Check steps permission'))
+    fireEvent.press(screen.getByText('Check Steps permission'))
 
     expect(await screen.findByText('Steps request status: shouldRequest')).toBeTruthy()
     expect(mockNitroHealth.getRequestStatusForAuthorization).toHaveBeenCalledWith([
@@ -116,7 +106,7 @@ describe('App', () => {
 
     render(<App />)
 
-    fireEvent.press(screen.getByText('Request steps permission'))
+    fireEvent.press(screen.getByText('Request Steps permission'))
 
     expect(await screen.findByText('Steps authorization result: granted')).toBeTruthy()
     expect(screen.getByText('Steps request status: unnecessary')).toBeTruthy()
@@ -154,6 +144,8 @@ describe('App', () => {
 
     fireEvent.press(screen.getByText('Open health settings'))
 
-    expect(mockNitroHealth.openHealthSettings).toHaveBeenCalledTimes(1)
+    await waitFor(() => {
+      expect(mockNitroHealth.openHealthSettings).toHaveBeenCalledTimes(1)
+    })
   })
 })

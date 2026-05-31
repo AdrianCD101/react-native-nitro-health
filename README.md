@@ -4,7 +4,7 @@ react-native-nitro-health is a react native package built with Nitro
 
 [![Version](https://img.shields.io/npm/v/react-native-nitro-health.svg)](https://www.npmjs.com/package/react-native-nitro-health)
 [![Downloads](https://img.shields.io/npm/dm/react-native-nitro-health.svg)](https://www.npmjs.com/package/react-native-nitro-health)
-[![License](https://img.shields.io/npm/l/react-native-nitro-health.svg)](https://github.com/patrickkabwe/react-native-nitro-health/LICENSE)
+[![License](https://img.shields.io/npm/l/react-native-nitro-health.svg)](https://github.com/AdrianCD101/react-native-nitro-health/blob/main/LICENSE)
 
 ## Requirements
 
@@ -78,6 +78,36 @@ if (status === 'shouldRequest') {
 `openHealthSettings()` opens Android Health Connect settings on Android and the app settings screen on iOS. It returns `false` when settings cannot be opened.
 
 Android consumer apps must declare the matching Health Connect permissions in their own `AndroidManifest.xml`, for example `android.permission.health.READ_HEART_RATE` before requesting `heartRate` read access.
+
+## Jest
+
+The package ships a Jest mock so app tests do not need to mock Nitro internals.
+
+Add it to your Jest setup file:
+
+```js
+jest.mock('react-native-nitro-health', () => require('react-native-nitro-health/jest/mock'))
+```
+
+Or load the provided setup file from your Jest config:
+
+```js
+module.exports = {
+  setupFilesAfterEnv: ['react-native-nitro-health/jest/setup'],
+}
+```
+
+Then override behavior in tests as needed:
+
+```ts
+import { NitroHealth, resetNitroHealthMock } from 'react-native-nitro-health/jest/mock'
+
+beforeEach(() => {
+  resetNitroHealthMock()
+})
+
+NitroHealth.getAvailabilityStatus.mockReturnValue('unavailable')
+```
 
 ## Credits
 
