@@ -89,10 +89,12 @@ Harness uses `example/rn-harness.config.mjs`. Override local device names when n
 
 ```sh
 RN_HARNESS_IOS_SIMULATOR='iPhone 17 Pro' RN_HARNESS_IOS_RUNTIME='26.0' bun run harness:ios
-RN_HARNESS_ANDROID_AVD='Medium_Phone' bun run harness:android
+RN_HARNESS_ANDROID_AVD='Pixel_8_API_35' RN_HARNESS_ANDROID_API_LEVEL='35' RN_HARNESS_ANDROID_PROFILE='pixel_8' bun run harness:android
 ```
 
 Harness does not build the app. Build and install the debug app first with `bun run ios` or `bun run android`, then run the Harness command. After native changes, rebuild/reinstall before running Harness again.
+
+The GitHub Actions Harness workflow is manual-only to avoid burning CI minutes on every push or PR. Run it from **Actions → Run Harness → Run workflow** when you want native runtime validation, and leave it out of branch protection until it has proven reliable.
 
 Set `permissions: true` in the Harness config only when adding tests that need Harness-managed permission prompt handling.
 
