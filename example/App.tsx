@@ -36,12 +36,9 @@ function App(): React.JSX.Element {
     Partial<Record<HealthDataType, HealthAuthorizationResult>>
   >({})
   const [checkingPermission, setCheckingPermission] = useState<HealthDataType>()
-  const [requestingPermission, setRequestingPermission] =
-    useState<HealthDataType>()
+  const [requestingPermission, setRequestingPermission] = useState<HealthDataType>()
   const [openingSettings, setOpeningSettings] = useState<HealthDataType>()
-  const [errorMessages, setErrorMessages] = useState<
-    Partial<Record<HealthDataType, string>>
-  >({})
+  const [errorMessages, setErrorMessages] = useState<Partial<Record<HealthDataType, string>>>({})
 
   async function checkPermission(dataType: HealthDataType): Promise<void> {
     const permission: HealthPermission[] = [{ accessType: 'read', dataType }]
@@ -49,9 +46,7 @@ function App(): React.JSX.Element {
     setErrorMessages((current) => ({ ...current, [dataType]: undefined }))
 
     try {
-      const status = await NitroHealth.getRequestStatusForAuthorization(
-        permission,
-      )
+      const status = await NitroHealth.getRequestStatusForAuthorization(permission)
       setAuthorizationStatuses((current) => ({ ...current, [dataType]: status }))
     } catch (error) {
       setErrorMessages((current) => ({
@@ -111,9 +106,7 @@ function App(): React.JSX.Element {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Health APIs</Text>
-      <Text
-        style={[styles.status, isAvailable ? styles.available : styles.unavailable]}
-      >
+      <Text style={[styles.status, isAvailable ? styles.available : styles.unavailable]}>
         {getAvailabilityLabel(availabilityStatus)}
       </Text>
       <Text style={styles.detail}>Status: {availabilityStatus}</Text>
@@ -128,8 +121,7 @@ function App(): React.JSX.Element {
           <View key={dataType} style={styles.permissionCard}>
             <Text style={styles.cardTitle}>{label} permission</Text>
             <Text style={styles.detail}>
-              {label} request status:{' '}
-              {authorizationStatuses[dataType] ?? 'not checked'}
+              {label} request status: {authorizationStatuses[dataType] ?? 'not checked'}
             </Text>
             {result ? (
               <Text style={styles.detail}>

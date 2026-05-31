@@ -1,13 +1,9 @@
 import React from 'react'
-import { fireEvent, render, screen } from '@testing-library/react-native'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react-native'
 
-const mockNitroHealth = {
-  getAvailabilityStatus: jest.fn(),
-  getRequestStatusForAuthorization: jest.fn(),
-  openHealthConnectInstall: jest.fn(),
-  openHealthSettings: jest.fn(),
-  requestAuthorization: jest.fn(),
-}
+jest.mock('react-native-nitro-health', () => require('../../jest/mock'))
+
+const { NitroHealth: mockNitroHealth, resetNitroHealthMock } = require('../../jest/mock')
 
 const grantedStepsResult = {
   status: 'granted',
@@ -36,17 +32,11 @@ const deniedHeartRateResult = {
   unverifiablePermissions: [],
 }
 
-jest.mock('react-native-nitro-modules', () => ({
-  NitroModules: {
-    createHybridObject: jest.fn(() => mockNitroHealth),
-  },
-}))
-
 const App = require('../App').default
 
 describe('App', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    resetNitroHealthMock()
   })
 
   it('shows Available when health APIs are available', () => {
@@ -84,17 +74,13 @@ describe('App', () => {
 
   it('checks steps permission status from the app UI', async () => {
     mockNitroHealth.getAvailabilityStatus.mockReturnValue('available')
-    mockNitroHealth.getRequestStatusForAuthorization.mockResolvedValue(
-      'shouldRequest',
-    )
+    mockNitroHealth.getRequestStatusForAuthorization.mockResolvedValue('shouldRequest')
 
     render(<App />)
 
-    fireEvent.press(screen.getByText('Check steps permission'))
+    fireEvent.press(screen.getByText('Check Steps permission'))
 
-    expect(
-      await screen.findByText('Steps request status: shouldRequest'),
-    ).toBeTruthy()
+    expect(await screen.findByText('Steps request status: shouldRequest')).toBeTruthy()
     expect(mockNitroHealth.getRequestStatusForAuthorization).toHaveBeenCalledWith([
       { accessType: 'read', dataType: 'steps' },
     ])
@@ -102,17 +88,13 @@ describe('App', () => {
 
   it('checks Heart Rate permission status from the app UI', async () => {
     mockNitroHealth.getAvailabilityStatus.mockReturnValue('available')
-    mockNitroHealth.getRequestStatusForAuthorization.mockResolvedValue(
-      'shouldRequest',
-    )
+    mockNitroHealth.getRequestStatusForAuthorization.mockResolvedValue('shouldRequest')
 
     render(<App />)
 
     fireEvent.press(screen.getByText('Check Heart Rate permission'))
 
-    expect(
-      await screen.findByText('Heart Rate request status: shouldRequest'),
-    ).toBeTruthy()
+    expect(await screen.findByText('Heart Rate request status: shouldRequest')).toBeTruthy()
     expect(mockNitroHealth.getRequestStatusForAuthorization).toHaveBeenCalledWith([
       { accessType: 'read', dataType: 'heartRate' },
     ])
@@ -124,15 +106,11 @@ describe('App', () => {
 
     render(<App />)
 
-    fireEvent.press(screen.getByText('Request steps permission'))
+    fireEvent.press(screen.getByText('Request Steps permission'))
 
-    expect(
-      await screen.findByText('Steps authorization result: granted'),
-    ).toBeTruthy()
+    expect(await screen.findByText('Steps authorization result: granted')).toBeTruthy()
     expect(screen.getByText('Steps request status: unnecessary')).toBeTruthy()
-    expect(
-      screen.getByText('Steps granted: 1 | denied: 0 | unverifiable: 0'),
-    ).toBeTruthy()
+    expect(screen.getByText('Steps granted: 1 | denied: 0 | unverifiable: 0')).toBeTruthy()
     expect(mockNitroHealth.requestAuthorization).toHaveBeenCalledWith([
       { accessType: 'read', dataType: 'steps' },
     ])
@@ -146,13 +124,9 @@ describe('App', () => {
 
     fireEvent.press(screen.getByText('Request Heart Rate permission'))
 
-    expect(
-      await screen.findByText('Heart Rate authorization result: completed'),
-    ).toBeTruthy()
+    expect(await screen.findByText('Heart Rate authorization result: completed')).toBeTruthy()
     expect(screen.getByText('Heart Rate request status: unnecessary')).toBeTruthy()
-    expect(
-      screen.getByText('Heart Rate granted: 0 | denied: 0 | unverifiable: 1'),
-    ).toBeTruthy()
+    expect(screen.getByText('Heart Rate granted: 0 | denied: 0 | unverifiable: 1')).toBeTruthy()
     expect(mockNitroHealth.requestAuthorization).toHaveBeenCalledWith([
       { accessType: 'read', dataType: 'heartRate' },
     ])
@@ -166,12 +140,12 @@ describe('App', () => {
     render(<App />)
 
     fireEvent.press(screen.getByText('Request Heart Rate permission'))
-    expect(
-      await screen.findByText('Heart Rate authorization result: denied'),
-    ).toBeTruthy()
+    expect(await screen.findByText('Heart Rate authorization result: denied')).toBeTruthy()
 
     fireEvent.press(screen.getByText('Open health settings'))
 
-    expect(mockNitroHealth.openHealthSettings).toHaveBeenCalledTimes(1)
+    await waitFor(() => {
+      expect(mockNitroHealth.openHealthSettings).toHaveBeenCalledTimes(1)
+    })
   })
 })

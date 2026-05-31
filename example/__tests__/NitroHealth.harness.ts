@@ -3,29 +3,11 @@ import { Platform } from 'react-native'
 import { NitroHealth } from 'react-native-nitro-health'
 import type { HealthPermission } from 'react-native-nitro-health'
 
-const availabilityStatuses = [
-  'available',
-  'unavailable',
-  'providerUpdateRequired',
-]
-const authorizationRequestStatuses = [
-  'unknown',
-  'shouldRequest',
-  'unnecessary',
-]
-const authorizationResultStatuses = [
-  'granted',
-  'partial',
-  'denied',
-  'completed',
-  'unavailable',
-]
-const stepsReadPermission: HealthPermission[] = [
-  { accessType: 'read', dataType: 'steps' },
-]
-const heartRateReadPermission: HealthPermission[] = [
-  { accessType: 'read', dataType: 'heartRate' },
-]
+const availabilityStatuses = ['available', 'unavailable', 'providerUpdateRequired']
+const authorizationRequestStatuses = ['unknown', 'shouldRequest', 'unnecessary']
+const authorizationResultStatuses = ['granted', 'partial', 'denied', 'completed', 'unavailable']
+const stepsReadPermission: HealthPermission[] = [{ accessType: 'read', dataType: 'steps' }]
+const heartRateReadPermission: HealthPermission[] = [{ accessType: 'read', dataType: 'heartRate' }]
 
 describe('NitroHealth native module', () => {
   it('returns a platform availability status from native code', () => {
@@ -52,25 +34,19 @@ describe('NitroHealth native module', () => {
   })
 
   it('gets request status for steps read permission from native code', async () => {
-    const status = await NitroHealth.getRequestStatusForAuthorization(
-      stepsReadPermission,
-    )
+    const status = await NitroHealth.getRequestStatusForAuthorization(stepsReadPermission)
 
     expect(authorizationRequestStatuses).toContain(status)
   })
 
   it('gets request status for Heart Rate read permission from native code', async () => {
-    const status = await NitroHealth.getRequestStatusForAuthorization(
-      heartRateReadPermission,
-    )
+    const status = await NitroHealth.getRequestStatusForAuthorization(heartRateReadPermission)
 
     expect(authorizationRequestStatuses).toContain(status)
   })
 
   it('returns a resolved result for already-authorized steps permissions without opening a prompt', async () => {
-    const status = await NitroHealth.getRequestStatusForAuthorization(
-      stepsReadPermission,
-    )
+    const status = await NitroHealth.getRequestStatusForAuthorization(stepsReadPermission)
 
     if (status !== 'unnecessary') {
       return
@@ -83,9 +59,7 @@ describe('NitroHealth native module', () => {
   })
 
   it('returns a resolved result for already-authorized Heart Rate permissions without opening a prompt', async () => {
-    const status = await NitroHealth.getRequestStatusForAuthorization(
-      heartRateReadPermission,
-    )
+    const status = await NitroHealth.getRequestStatusForAuthorization(heartRateReadPermission)
 
     if (status !== 'unnecessary') {
       return

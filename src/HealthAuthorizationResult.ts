@@ -2,11 +2,10 @@ import type { NativeHealthAuthorizationResult } from './NativeHealthAuthorizatio
 import type { HealthPermission } from './HealthPermission'
 
 /** Public authorization result returned by {@linkcode NitroHealth.requestAuthorization}. */
-export interface HealthAuthorizationResult
-  extends Omit<
-    NativeHealthAuthorizationResult,
-    'grantedPermissions' | 'deniedPermissions' | 'unverifiablePermissions'
-  > {
+export interface HealthAuthorizationResult extends Omit<
+  NativeHealthAuthorizationResult,
+  'grantedPermissions' | 'deniedPermissions' | 'unverifiablePermissions'
+> {
   grantedPermissions: HealthPermission[]
   deniedPermissions: HealthPermission[]
   unverifiablePermissions: HealthPermission[]
