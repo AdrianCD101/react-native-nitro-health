@@ -33,12 +33,12 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.bun/install/cache
-          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
           restore-keys: |
             ${{ runner.os }}-bun-
 
       - name: Install npm dependencies (bun)
-        run: bun install
+        run: bun install --frozen-lockfile
 
       - name: Build lib
         run: bun run build
@@ -52,4 +52,4 @@ jobs:
           GIT_AUTHOR_EMAIL: '${{ github.actor }}@users.noreply.github.com'
           GIT_COMMITTER_NAME: ${{ github.actor }}
           GIT_COMMITTER_EMAIL: '${{ github.actor }}@users.noreply.github.com'
-        run: bun release
+        run: bun run release

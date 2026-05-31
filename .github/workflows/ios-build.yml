@@ -58,7 +58,7 @@ jobs:
           xcode-version: 16.4
 
       - name: Install dependencies (bun)
-        run: bun install
+        run: bun install --frozen-lockfile
 
       - name: Setup Ruby (bundle)
         uses: ruby/setup-ruby@v1
