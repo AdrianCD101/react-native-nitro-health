@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "android": "react-native run-android",
-    "harness:android": "HARNESS_APP_PATH=android/app/build/outputs/apk/debug/app-debug.apk react-native-harness --config jest.harness.config.mjs --harnessRunner android",
+    "harness:android": "react-native-harness --config jest.harness.config.mjs --harnessRunner android",
     "harness:ios": "react-native-harness --config jest.harness.config.mjs --harnessRunner ios",
     "ios": "react-native run-ios --simulator='iPhone 17 Pro'",
     "lint": "oxlint .",
