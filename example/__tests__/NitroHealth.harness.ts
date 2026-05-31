@@ -45,6 +45,18 @@ describe('NitroHealth native module', () => {
     expect(authorizationRequestStatuses).toContain(status)
   })
 
+  it('rejects an empty request status check before crossing the native boundary', async () => {
+    await expect(NitroHealth.getRequestStatusForAuthorization([])).rejects.toThrow(
+      'At least one health permission is required'
+    )
+  })
+
+  it('rejects an empty authorization request before crossing the native boundary', async () => {
+    await expect(NitroHealth.requestAuthorization([])).rejects.toThrow(
+      'At least one health permission is required'
+    )
+  })
+
   it('returns a resolved result for already-authorized steps permissions without opening a prompt', async () => {
     const status = await NitroHealth.getRequestStatusForAuthorization(stepsReadPermission)
 
