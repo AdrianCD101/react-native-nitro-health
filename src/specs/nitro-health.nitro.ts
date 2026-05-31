@@ -10,9 +10,9 @@ export interface NitroHealth extends HybridObject<{ ios: 'swift'; android: 'kotl
   openHealthConnectInstall(): boolean
   openHealthSettings(): Promise<boolean>
   getRequestStatusForAuthorization(
-    permissions: NativeHealthPermission[],
+    permissions: NativeHealthPermission[]
   ): Promise<AuthorizationRequestStatus>
   requestAuthorization(
-    permissions: NativeHealthPermission[],
+    permissions: NativeHealthPermission[]
   ): Promise<NativeHealthAuthorizationResult>
 }

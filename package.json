@@ -6,11 +6,11 @@
     "react-native",
     "react-native-nitro-health"
   ],
-  "homepage": "https://github.com/adrianwhite/react-native-nitro-health#readme",
-  "bugs": "https://github.com/adrianwhite/react-native-nitro-health/issues",
+  "homepage": "https://github.com/AdrianCD101/react-native-nitro-health#readme",
+  "bugs": "https://github.com/AdrianCD101/react-native-nitro-health/issues",
   "license": "MIT",
   "author": "Adrian White",
-  "repository": "https://github.com/adrianwhite/react-native-nitro-health.git",
+  "repository": "https://github.com/AdrianCD101/react-native-nitro-health.git",
   "source": "src/index",
   "workspaces": [
     "example"

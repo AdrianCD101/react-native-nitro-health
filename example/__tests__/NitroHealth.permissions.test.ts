@@ -21,17 +21,13 @@ describe('NitroHealth permission contract', () => {
 
   it('gets request status through the Nitro hybrid object', async () => {
     const permissions = [{ accessType: 'read', dataType: 'steps' }]
-    mockNitroHealth.getRequestStatusForAuthorization.mockResolvedValue(
-      'shouldRequest',
+    mockNitroHealth.getRequestStatusForAuthorization.mockResolvedValue('shouldRequest')
+
+    await expect(NitroHealth.getRequestStatusForAuthorization(permissions)).resolves.toBe(
+      'shouldRequest'
     )
 
-    await expect(
-      NitroHealth.getRequestStatusForAuthorization(permissions),
-    ).resolves.toBe('shouldRequest')
-
-    expect(
-      mockNitroHealth.getRequestStatusForAuthorization,
-    ).toHaveBeenCalledWith(permissions)
+    expect(mockNitroHealth.getRequestStatusForAuthorization).toHaveBeenCalledWith(permissions)
   })
 
   it('requests authorization through the Nitro hybrid object', async () => {
@@ -46,26 +42,22 @@ describe('NitroHealth permission contract', () => {
     }
     mockNitroHealth.requestAuthorization.mockResolvedValue(result)
 
-    await expect(NitroHealth.requestAuthorization(permissions)).resolves.toEqual(
-      result,
-    )
+    await expect(NitroHealth.requestAuthorization(permissions)).resolves.toEqual(result)
 
     expect(mockNitroHealth.requestAuthorization).toHaveBeenCalledWith(permissions)
   })
 
   it('rejects an empty request status check before crossing the native boundary', async () => {
-    await expect(
-      NitroHealth.getRequestStatusForAuthorization([]),
-    ).rejects.toThrow('At least one health permission is required')
+    await expect(NitroHealth.getRequestStatusForAuthorization([])).rejects.toThrow(
+      'At least one health permission is required'
+    )
 
-    expect(
-      mockNitroHealth.getRequestStatusForAuthorization,
-    ).not.toHaveBeenCalled()
+    expect(mockNitroHealth.getRequestStatusForAuthorization).not.toHaveBeenCalled()
   })
 
   it('rejects an empty authorization request before crossing the native boundary', async () => {
     await expect(NitroHealth.requestAuthorization([])).rejects.toThrow(
-      'At least one health permission is required',
+      'At least one health permission is required'
     )
 
     expect(mockNitroHealth.requestAuthorization).not.toHaveBeenCalled()

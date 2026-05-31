@@ -1,11 +1,5 @@
-import {
-  androidEmulator,
-  androidPlatform,
-} from '@react-native-harness/platform-android'
-import {
-  applePlatform,
-  appleSimulator,
-} from '@react-native-harness/platform-apple'
+import { androidEmulator, androidPlatform } from '@react-native-harness/platform-android'
+import { applePlatform, appleSimulator } from '@react-native-harness/platform-apple'
 
 const androidAvd = process.env.RN_HARNESS_ANDROID_AVD ?? 'Medium_Phone'
 const iosSimulator = process.env.RN_HARNESS_IOS_SIMULATOR ?? 'iPhone 17 Pro'

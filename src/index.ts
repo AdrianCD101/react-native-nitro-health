@@ -14,8 +14,7 @@ export type { NativeHealthAuthorizationResult } from './NativeHealthAuthorizatio
 export type { NativeHealthPermission } from './NativeHealthPermission'
 export type { NitroHealth as NitroHealthSpec } from './specs/nitro-health.nitro'
 
-const NitroHealthNative =
-  NitroModules.createHybridObject<NitroHealthSpec>('NitroHealth')
+const NitroHealthNative = NitroModules.createHybridObject<NitroHealthSpec>('NitroHealth')
 
 function assertPermissions(permissions: HealthPermission[]): void {
   if (permissions.length === 0) {
@@ -28,11 +27,9 @@ export type NitroHealth = Omit<
   'getRequestStatusForAuthorization' | 'requestAuthorization'
 > & {
   getRequestStatusForAuthorization(
-    permissions: HealthPermission[],
+    permissions: HealthPermission[]
   ): ReturnType<NitroHealthSpec['getRequestStatusForAuthorization']>
-  requestAuthorization(
-    permissions: HealthPermission[],
-  ): Promise<HealthAuthorizationResult>
+  requestAuthorization(permissions: HealthPermission[]): Promise<HealthAuthorizationResult>
 }
 
 export const NitroHealth: NitroHealth = {
@@ -66,8 +63,6 @@ export const NitroHealth: NitroHealth = {
   },
   async requestAuthorization(permissions) {
     assertPermissions(permissions)
-    return NitroHealthNative.requestAuthorization(
-      permissions,
-    ) as Promise<HealthAuthorizationResult>
+    return NitroHealthNative.requestAuthorization(permissions) as Promise<HealthAuthorizationResult>
   },
 }

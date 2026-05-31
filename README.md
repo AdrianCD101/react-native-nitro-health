@@ -35,10 +35,10 @@ if (status === 'providerUpdateRequired') {
 
 `getAvailabilityStatus()` returns:
 
-| Status | Meaning |
-| --- | --- |
-| `available` | HealthKit or Health Connect is available on this device. |
-| `unavailable` | Health APIs are not available on this device. |
+| Status                   | Meaning                                                        |
+| ------------------------ | -------------------------------------------------------------- |
+| `available`              | HealthKit or Health Connect is available on this device.       |
+| `unavailable`            | Health APIs are not available on this device.                  |
 | `providerUpdateRequired` | Android only. Health Connect needs to be installed or updated. |
 
 `isAvailable()` is a convenience method equivalent to `getAvailabilityStatus() === 'available'`.
