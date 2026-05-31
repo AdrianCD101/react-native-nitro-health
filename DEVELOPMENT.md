@@ -94,7 +94,7 @@ RN_HARNESS_ANDROID_AVD='Pixel_8_API_35' RN_HARNESS_ANDROID_API_LEVEL='35' RN_HAR
 
 Harness does not build the app. Build and install the debug app first with `bun run ios` or `bun run android`, then run the Harness command. After native changes, rebuild/reinstall before running Harness again.
 
-The GitHub Actions Harness workflow is manual-only to avoid burning CI minutes on every push or PR. Run it from **Actions → Run Harness → Run workflow** when you want native runtime validation, and leave it out of branch protection until it has proven reliable.
+The GitHub Actions Harness workflow runs Android runtime validation on pull requests and `main` pushes that touch native/spec/example paths. iOS remains manual-only to avoid burning macOS minutes while simulator reliability is still being proven. Run it from **Actions → Run Harness → Run workflow** when you want to manually validate Android, iOS, or both.
 
 Set `permissions: true` in the Harness config only when adding tests that need Harness-managed permission prompt handling.
 

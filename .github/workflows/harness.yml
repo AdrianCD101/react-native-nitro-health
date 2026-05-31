@@ -1,6 +1,42 @@
 name: Run Harness
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/harness.yml'
+      - 'android/**'
+      - 'example/__tests__/**'
+      - 'example/android/**'
+      - 'example/App.tsx'
+      - 'example/index.js'
+      - 'example/jest.harness.config.mjs'
+      - 'example/package.json'
+      - 'example/rn-harness.config.mjs'
+      - 'nitrogen/generated/android/**'
+      - 'nitrogen/generated/shared/**'
+      - 'src/**'
+      - 'bun.lock'
+      - 'nitro.json'
+      - 'package.json'
+  pull_request:
+    paths:
+      - '.github/workflows/harness.yml'
+      - 'android/**'
+      - 'example/__tests__/**'
+      - 'example/android/**'
+      - 'example/App.tsx'
+      - 'example/index.js'
+      - 'example/jest.harness.config.mjs'
+      - 'example/package.json'
+      - 'example/rn-harness.config.mjs'
+      - 'nitrogen/generated/android/**'
+      - 'nitrogen/generated/shared/**'
+      - 'src/**'
+      - 'bun.lock'
+      - 'nitro.json'
+      - 'package.json'
   workflow_dispatch:
     inputs:
       platform:
@@ -17,14 +53,14 @@ permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}-${{ inputs.platform }}
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}-${{ github.event.inputs.platform || 'android' }}
   cancel-in-progress: true
 
 jobs:
   harness-android:
     name: Harness Android
     runs-on: ubuntu-latest
-    if: ${{ inputs.platform == 'android' || inputs.platform == 'all' }}
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.platform == 'android' || inputs.platform == 'all' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -67,10 +103,26 @@ jobs:
             adb shell settings put global transition_animation_scale 0
             adb shell settings put global animator_duration_scale 0
 
+      - name: Collect Android Harness diagnostics
+        if: ${{ failure() }}
+        run: |
+          adb devices -l > "$RUNNER_TEMP/harness-android-devices.txt" || true
+          adb logcat -d > "$RUNNER_TEMP/harness-android-logcat.txt" || true
+
+      - name: Upload Android Harness diagnostics
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: harness-android-diagnostics
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/harness-android-devices.txt
+            ${{ runner.temp }}/harness-android-logcat.txt
+
   harness-ios:
     name: Harness iOS
     runs-on: macOS-15
-    if: ${{ inputs.platform == 'ios' || inputs.platform == 'all' }}
+    if: ${{ github.event_name == 'workflow_dispatch' && (inputs.platform == 'ios' || inputs.platform == 'all') }}
     env:
       RN_HARNESS_IOS_SIMULATOR: iPhone 16 Pro
       RN_HARNESS_IOS_RUNTIME: '18.5'
@@ -143,3 +195,19 @@ jobs:
           projectRoot: example
           packageManager: bun
           harnessArgs: --config jest.harness.config.mjs
+
+      - name: Collect iOS Harness diagnostics
+        if: ${{ failure() }}
+        run: |
+          xcrun simctl list devices > "$RUNNER_TEMP/harness-ios-devices.txt" || true
+          xcrun simctl spawn booted log show --last 10m > "$RUNNER_TEMP/harness-ios-simulator.log" || true
+
+      - name: Upload iOS Harness diagnostics
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: harness-ios-diagnostics
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/harness-ios-devices.txt
+            ${{ runner.temp }}/harness-ios-simulator.log
