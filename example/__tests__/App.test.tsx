@@ -14,6 +14,15 @@ const grantedStepsResult = {
   unverifiablePermissions: [],
 }
 
+const grantedHeartRateResult = {
+  status: 'granted',
+  availabilityStatus: 'available',
+  requestStatus: 'unnecessary',
+  grantedPermissions: [{ accessType: 'read', dataType: 'heartRate' }],
+  deniedPermissions: [],
+  unverifiablePermissions: [],
+}
+
 const completedHeartRateResult = {
   status: 'completed',
   availabilityStatus: 'available',
@@ -163,6 +172,52 @@ describe('App', () => {
     fireEvent.press(screen.getByText('Read Steps'))
     await waitFor(() => {
       expect(mockNitroHealth.readSteps).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  it('reads heart rate from the app UI after heart rate permission is granted', async () => {
+    mockNitroHealth.getAvailabilityStatus.mockReturnValue('available')
+    mockNitroHealth.requestAuthorization.mockResolvedValue(grantedHeartRateResult)
+    mockNitroHealth.readHeartRate.mockResolvedValue([
+      { date: new Date('2026-01-01T00:00:00.000Z'), bpm: 72, source: 'com.example.health' },
+      { date: new Date('2026-01-01T00:01:00.000Z'), bpm: 76, source: 'com.example.health' },
+    ])
+
+    render(<App />)
+
+    fireEvent.press(screen.getByText('Request Heart Rate permission'))
+    expect(await screen.findByText('Heart Rate authorization result: granted')).toBeTruthy()
+
+    fireEvent.press(screen.getByText('Read Heart Rate'))
+
+    expect(await screen.findByText('Heart rate samples: 2')).toBeTruthy()
+    expect(screen.getByText('Average bpm: 74')).toBeTruthy()
+    expect(screen.getByText('Source: com.example.health')).toBeTruthy()
+    expect(mockNitroHealth.readHeartRate).toHaveBeenCalledWith({
+      startDate: expect.any(Date),
+      endDate: expect.any(Date),
+      limit: 100,
+      ascending: false,
+    })
+  })
+
+  it('disables Read Heart Rate until heart rate permission is granted', async () => {
+    mockNitroHealth.getAvailabilityStatus.mockReturnValue('available')
+    mockNitroHealth.requestAuthorization.mockResolvedValue(grantedHeartRateResult)
+
+    render(<App />)
+
+    expect(screen.getByText('Grant Heart Rate permission to read')).toBeTruthy()
+    fireEvent.press(screen.getByText('Read Heart Rate'))
+    expect(mockNitroHealth.readHeartRate).not.toHaveBeenCalled()
+
+    fireEvent.press(screen.getByText('Request Heart Rate permission'))
+    expect(await screen.findByText('Heart Rate authorization result: granted')).toBeTruthy()
+    expect(screen.queryByText('Grant Heart Rate permission to read')).toBeNull()
+
+    fireEvent.press(screen.getByText('Read Heart Rate'))
+    await waitFor(() => {
+      expect(mockNitroHealth.readHeartRate).toHaveBeenCalledTimes(1)
     })
   })
 

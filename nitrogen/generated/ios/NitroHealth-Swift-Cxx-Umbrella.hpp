@@ -22,6 +22,8 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthAuthorizationResult; 
 namespace margelo::nitro::nitrohealth { struct NativeHealthDateRangeQuery; }
 // Forward declaration of `NativeHealthPermission` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthPermission; }
+// Forward declaration of `NativeHeartRateSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHeartRateSample; }
 // Forward declaration of `NativeStepSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeStepSample; }
 
@@ -33,11 +35,13 @@ namespace margelo::nitro::nitrohealth { struct NativeStepSample; }
 #include "NativeHealthAuthorizationResult.hpp"
 #include "NativeHealthDateRangeQuery.hpp"
 #include "NativeHealthPermission.hpp"
+#include "NativeHeartRateSample.hpp"
 #include "NativeStepSample.hpp"
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/Result.hpp>
 #include <exception>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 

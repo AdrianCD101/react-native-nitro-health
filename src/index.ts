@@ -3,7 +3,9 @@ import type { NitroHealth as NitroHealthSpec } from './specs/nitro-health.nitro'
 import type { HealthAuthorizationResult } from './HealthAuthorizationResult'
 import type { HealthDateRangeQuery } from './HealthDateRangeQuery'
 import type { HealthPermission } from './HealthPermission'
+import type { HeartRateSample } from './HeartRateSample'
 import type { NativeHealthDateRangeQuery } from './NativeHealthDateRangeQuery'
+import type { NativeHeartRateSample } from './NativeHeartRateSample'
 import type { NativeStepSample } from './NativeStepSample'
 import type { StepSample } from './StepSample'
 
@@ -15,9 +17,11 @@ export type { HealthDataType } from './HealthDataType'
 export type { HealthDateRangeQuery } from './HealthDateRangeQuery'
 export type { HealthPermission } from './HealthPermission'
 export type { HealthPermissionAccessType } from './HealthPermissionAccessType'
+export type { HeartRateSample } from './HeartRateSample'
 export type { NativeHealthAuthorizationResult } from './NativeHealthAuthorizationResult'
 export type { NativeHealthDateRangeQuery } from './NativeHealthDateRangeQuery'
 export type { NativeHealthPermission } from './NativeHealthPermission'
+export type { NativeHeartRateSample } from './NativeHeartRateSample'
 export type { NativeStepSample } from './NativeStepSample'
 export type { NitroHealth as NitroHealthSpec } from './specs/nitro-health.nitro'
 export type { StepSample } from './StepSample'
@@ -73,14 +77,23 @@ function makeStepSample(sample: NativeStepSample): StepSample {
   }
 }
 
+function makeHeartRateSample(sample: NativeHeartRateSample): HeartRateSample {
+  return {
+    date: new Date(sample.timeMs),
+    bpm: sample.bpm,
+    source: sample.source,
+  }
+}
+
 export type NitroHealth = Omit<
   NitroHealthSpec,
-  'getRequestStatusForAuthorization' | 'readSteps' | 'requestAuthorization'
+  'getRequestStatusForAuthorization' | 'readSteps' | 'readHeartRate' | 'requestAuthorization'
 > & {
   getRequestStatusForAuthorization(
     permissions: HealthPermission[]
   ): ReturnType<NitroHealthSpec['getRequestStatusForAuthorization']>
   readSteps(query: HealthDateRangeQuery): Promise<StepSample[]>
+  readHeartRate(query: HealthDateRangeQuery): Promise<HeartRateSample[]>
   requestAuthorization(permissions: HealthPermission[]): Promise<HealthAuthorizationResult>
 }
 
@@ -113,6 +126,11 @@ export const NitroHealth: NitroHealth = {
     const samples = await NitroHealthNative.readSteps(makeNativeDateRangeQuery(query))
 
     return samples.map(makeStepSample)
+  },
+  async readHeartRate(query) {
+    const samples = await NitroHealthNative.readHeartRate(makeNativeDateRangeQuery(query))
+
+    return samples.map(makeHeartRateSample)
   },
   async getRequestStatusForAuthorization(permissions) {
     assertPermissions(permissions)
