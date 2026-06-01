@@ -61,6 +61,8 @@ jobs:
     name: Harness Android
     runs-on: ubuntu-latest
     if: ${{ github.event_name != 'workflow_dispatch' || inputs.platform == 'android' || inputs.platform == 'all' }}
+    env:
+      RN_HARNESS_ANDROID_DISK_SIZE: 1G
     steps:
       - name: Checkout
         uses: actions/checkout@v6

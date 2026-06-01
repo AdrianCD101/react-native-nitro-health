@@ -18,6 +18,7 @@ export type NitroHealthMock = Omit<
   | 'openHealthConnectInstall'
   | 'openHealthSettings'
   | 'readSteps'
+  | 'readHeartRate'
   | 'getRequestStatusForAuthorization'
   | 'requestAuthorization'
 > & {
@@ -29,6 +30,7 @@ export type NitroHealthMock = Omit<
   openHealthConnectInstall: MockFunction<NitroHealth['openHealthConnectInstall']>
   openHealthSettings: MockFunction<NitroHealth['openHealthSettings']>
   readSteps: MockFunction<NitroHealth['readSteps']>
+  readHeartRate: MockFunction<NitroHealth['readHeartRate']>
   getRequestStatusForAuthorization: MockFunction<NitroHealth['getRequestStatusForAuthorization']>
   requestAuthorization: MockFunction<NitroHealth['requestAuthorization']>
 }

@@ -17,6 +17,7 @@ function createNitroHealthMock(overrides = {}) {
     openHealthConnectInstall: createMockFunction(() => false),
     openHealthSettings: createMockFunction(() => Promise.resolve(true)),
     readSteps: createMockFunction(() => Promise.resolve([])),
+    readHeartRate: createMockFunction(() => Promise.resolve([])),
     getRequestStatusForAuthorization: createMockFunction(() => Promise.resolve('unknown')),
     requestAuthorization: createMockFunction(() =>
       Promise.resolve({

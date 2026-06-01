@@ -94,6 +94,21 @@ const steps = await NitroHealth.readSteps({
 
 `readSteps()` returns step count samples with `startDate`, `endDate`, and `count`. It returns an empty array when the platform query succeeds but no matching samples are available. Apps must request and receive steps read permission before relying on returned data.
 
+## Read Heart Rate
+
+```ts
+import { NitroHealth } from 'react-native-nitro-health'
+
+const heartRate = await NitroHealth.readHeartRate({
+  startDate: new Date('2026-01-01T00:00:00.000Z'),
+  endDate: new Date('2026-01-02T00:00:00.000Z'),
+  limit: 100,
+  ascending: true,
+})
+```
+
+`readHeartRate()` returns individual readings with `date`, `bpm`, and an optional `source` (the originating app or device). On iOS each reading is one `HKQuantitySample`; on Android a `HeartRateRecord` holds many readings, so records are flattened to individual points and `limit` caps the flattened, time-ordered result (records are fetched up to `limit`). It returns an empty array when the query succeeds but no samples are available. Apps must request and receive heart rate read permission before relying on returned data.
+
 ## Jest
 
 The package ships a Jest mock so app tests do not need to mock Nitro internals.
