@@ -84,6 +84,47 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         }
     }
 
+    // Daily totals use HealthKit statistics so overlapping sources are aggregated by the OS.
+    func readDailyStepTotals(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeStepSample]> {
+        if !HKHealthStore.isHealthDataAvailable() {
+            throw permissionError("Health data is not available")
+        }
+
+        let quantityType = try makeHealthKitQuantityType(dataType: "steps")
+        let startDate = Date(timeIntervalSince1970: query.startTimeMs / 1000)
+        let endDate = Date(timeIntervalSince1970: query.endTimeMs / 1000)
+        let predicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate, options: [])
+        let anchorDate = Calendar.current.startOfDay(for: startDate)
+        var intervalComponents = DateComponents()
+        intervalComponents.day = 1
+
+        return Promise<[NativeStepSample]>.async {
+            let statistics = try await self.queryHealthKitStatisticsCollection(
+                quantityType: quantityType,
+                predicate: predicate,
+                options: .cumulativeSum,
+                anchorDate: anchorDate,
+                intervalComponents: intervalComponents,
+                startDate: startDate,
+                endDate: endDate
+            )
+            let samples = statistics.compactMap { statistic -> NativeStepSample? in
+                guard let sum = statistic.sumQuantity() else {
+                    return nil
+                }
+
+                return NativeStepSample(
+                    startTimeMs: statistic.startDate.timeIntervalSince1970 * 1000,
+                    endTimeMs: statistic.endDate.timeIntervalSince1970 * 1000,
+                    count: sum.doubleValue(for: HKUnit.count())
+                )
+            }
+            let ordered = query.ascending ? samples : Array(samples.reversed())
+
+            return Array(ordered.prefix(Int(query.limit)))
+        }
+    }
+
     // Note: like readSteps, HealthKit resolves with an empty array when read access is denied
     // (read-permission denial is not detectable). Heart rate is read in beats per minute.
     func readHeartRate(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeHeartRateSample]> {
@@ -119,6 +160,33 @@ class HybridNitroHealth: HybridNitroHealthSpec {
                     source: quantitySample.sourceRevision.source.name
                 )
             }
+        }
+    }
+
+    // Note: like readHeartRate, HealthKit resolves with empty statistics when read access is denied.
+    func readHeartRateStatistics(query: NativeHealthTimeRangeQuery) throws -> Promise<NativeHeartRateStatistics> {
+        if !HKHealthStore.isHealthDataAvailable() {
+            throw permissionError("Health data is not available")
+        }
+
+        let quantityType = try makeHealthKitQuantityType(dataType: "heartRate")
+        let bpmUnit = HKUnit.count().unitDivided(by: HKUnit.minute())
+        let startDate = Date(timeIntervalSince1970: query.startTimeMs / 1000)
+        let endDate = Date(timeIntervalSince1970: query.endTimeMs / 1000)
+        let predicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate, options: [])
+
+        return Promise<NativeHeartRateStatistics>.async {
+            let statistics = try await self.queryHealthKitStatistics(
+                quantityType: quantityType,
+                predicate: predicate,
+                options: [.discreteAverage, .discreteMin, .discreteMax]
+            )
+
+            return NativeHeartRateStatistics(
+                average: statistics?.averageQuantity()?.doubleValue(for: bpmUnit),
+                min: statistics?.minimumQuantity()?.doubleValue(for: bpmUnit),
+                max: statistics?.maximumQuantity()?.doubleValue(for: bpmUnit)
+            )
         }
     }
 
@@ -234,6 +302,74 @@ class HybridNitroHealth: HybridNitroHealthSpec {
                 }
 
                 continuation.resume(returning: samples ?? [])
+            }
+
+            healthStore.execute(query)
+        }
+    }
+
+    private func queryHealthKitStatisticsCollection(
+        quantityType: HKQuantityType,
+        predicate: NSPredicate?,
+        options: HKStatisticsOptions,
+        anchorDate: Date,
+        intervalComponents: DateComponents,
+        startDate: Date,
+        endDate: Date
+    ) async throws -> [HKStatistics] {
+        return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<[HKStatistics], Error>) in
+            let query = HKStatisticsCollectionQuery(
+                quantityType: quantityType,
+                quantitySamplePredicate: predicate,
+                options: options,
+                anchorDate: anchorDate,
+                intervalComponents: intervalComponents
+            )
+
+            query.initialResultsHandler = { _, collection, error in
+                if let error = error {
+                    if let hkError = error as? HKError, hkError.code == .errorNoData {
+                        continuation.resume(returning: [])
+                        return
+                    }
+
+                    continuation.resume(throwing: error)
+                    return
+                }
+
+                var statistics = [HKStatistics]()
+                collection?.enumerateStatistics(from: startDate, to: endDate) { statistic, _ in
+                    statistics.append(statistic)
+                }
+                continuation.resume(returning: statistics)
+            }
+
+            healthStore.execute(query)
+        }
+    }
+
+    private func queryHealthKitStatistics(
+        quantityType: HKQuantityType,
+        predicate: NSPredicate?,
+        options: HKStatisticsOptions
+    ) async throws -> HKStatistics? {
+        return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<HKStatistics?, Error>) in
+            let query = HKStatisticsQuery(
+                quantityType: quantityType,
+                quantitySamplePredicate: predicate,
+                options: options
+            ) { _, statistics, error in
+                if let error = error {
+                    if let hkError = error as? HKError, hkError.code == .errorNoData {
+                        continuation.resume(returning: nil)
+                        return
+                    }
+
+                    continuation.resume(throwing: error)
+                    return
+                }
+
+                continuation.resume(returning: statistics)
             }
 
             healthStore.execute(query)

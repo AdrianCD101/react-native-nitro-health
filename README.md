@@ -94,6 +94,30 @@ const steps = await NitroHealth.readSteps({
 
 `readSteps()` returns step count samples with `startDate`, `endDate`, and `count`. It returns an empty array when the platform query succeeds but no matching samples are available. Apps must request and receive steps read permission before relying on returned data.
 
+## Aggregation
+
+Use native aggregation when you need totals or statistics. HealthKit and Health Connect can aggregate across device and app sources without double-counting overlapping data, while summing raw samples in JavaScript can over-count data from a phone, watch, and other apps.
+
+```ts
+import { NitroHealth } from 'react-native-nitro-health'
+
+const dailySteps = await NitroHealth.readDailyStepTotals({
+  startDate: new Date('2026-01-01T00:00:00.000Z'),
+  endDate: new Date('2026-01-08T00:00:00.000Z'),
+  limit: 7,
+  ascending: true,
+})
+
+const heartRate = await NitroHealth.readHeartRateStatistics({
+  startDate: new Date('2026-01-01T00:00:00.000Z'),
+  endDate: new Date('2026-01-02T00:00:00.000Z'),
+})
+```
+
+`readDailyStepTotals()` returns one step-count bucket per local calendar day with `startDate`, `endDate`, and `count`. Empty days are omitted, so apps that need a continuous chart should zero-fill missing days. First and last buckets may be partial when the query starts or ends mid-day. `ascending` orders the buckets and `limit` caps the returned bucket count.
+
+`readHeartRateStatistics()` returns `{ average, min, max }` in beats per minute. Each field is `undefined` when no matching heart-rate data exists.
+
 ## Read Heart Rate
 
 ```ts

@@ -3,8 +3,10 @@ import type { AuthorizationRequestStatus } from '../AuthorizationRequestStatus'
 import type { HealthAvailabilityStatus } from '../HealthAvailabilityStatus'
 import type { NativeHealthAuthorizationResult } from '../NativeHealthAuthorizationResult'
 import type { NativeHealthDateRangeQuery } from '../NativeHealthDateRangeQuery'
+import type { NativeHealthTimeRangeQuery } from '../NativeHealthTimeRangeQuery'
 import type { NativeHealthPermission } from '../NativeHealthPermission'
 import type { NativeHeartRateSample } from '../NativeHeartRateSample'
+import type { NativeHeartRateStatistics } from '../NativeHeartRateStatistics'
 import type { NativeStepSample } from '../NativeStepSample'
 
 export interface NitroHealth extends HybridObject<{ ios: 'swift'; android: 'kotlin' }> {
@@ -13,7 +15,9 @@ export interface NitroHealth extends HybridObject<{ ios: 'swift'; android: 'kotl
   openHealthConnectInstall(): boolean
   openHealthSettings(): Promise<boolean>
   readSteps(query: NativeHealthDateRangeQuery): Promise<NativeStepSample[]>
+  readDailyStepTotals(query: NativeHealthDateRangeQuery): Promise<NativeStepSample[]>
   readHeartRate(query: NativeHealthDateRangeQuery): Promise<NativeHeartRateSample[]>
+  readHeartRateStatistics(query: NativeHealthTimeRangeQuery): Promise<NativeHeartRateStatistics>
   getRequestStatusForAuthorization(
     permissions: NativeHealthPermission[]
   ): Promise<AuthorizationRequestStatus>
