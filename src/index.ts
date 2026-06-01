@@ -87,10 +87,7 @@ function makeHeartRateSample(sample: NativeHeartRateSample): HeartRateSample {
 
 export type NitroHealth = Omit<
   NitroHealthSpec,
-  | 'getRequestStatusForAuthorization'
-  | 'readSteps'
-  | 'readHeartRate'
-  | 'requestAuthorization'
+  'getRequestStatusForAuthorization' | 'readSteps' | 'readHeartRate' | 'requestAuthorization'
 > & {
   getRequestStatusForAuthorization(
     permissions: HealthPermission[]
