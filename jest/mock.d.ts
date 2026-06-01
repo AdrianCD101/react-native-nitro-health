@@ -17,6 +17,7 @@ export type NitroHealthMock = Omit<
   | 'getAvailabilityStatus'
   | 'openHealthConnectInstall'
   | 'openHealthSettings'
+  | 'readSteps'
   | 'getRequestStatusForAuthorization'
   | 'requestAuthorization'
 > & {
@@ -27,6 +28,7 @@ export type NitroHealthMock = Omit<
   getAvailabilityStatus: MockFunction<NitroHealth['getAvailabilityStatus']>
   openHealthConnectInstall: MockFunction<NitroHealth['openHealthConnectInstall']>
   openHealthSettings: MockFunction<NitroHealth['openHealthSettings']>
+  readSteps: MockFunction<NitroHealth['readSteps']>
   getRequestStatusForAuthorization: MockFunction<NitroHealth['getRequestStatusForAuthorization']>
   requestAuthorization: MockFunction<NitroHealth['requestAuthorization']>
 }

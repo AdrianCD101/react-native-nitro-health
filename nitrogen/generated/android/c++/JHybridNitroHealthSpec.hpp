@@ -58,6 +58,7 @@ namespace margelo::nitro::nitrohealth {
     HealthAvailabilityStatus getAvailabilityStatus() override;
     bool openHealthConnectInstall() override;
     std::shared_ptr<Promise<bool>> openHealthSettings() override;
+    std::shared_ptr<Promise<std::vector<NativeStepSample>>> readSteps(const NativeHealthDateRangeQuery& query) override;
     std::shared_ptr<Promise<AuthorizationRequestStatus>> getRequestStatusForAuthorization(const std::vector<NativeHealthPermission>& permissions) override;
     std::shared_ptr<Promise<NativeHealthAuthorizationResult>> requestAuthorization(const std::vector<NativeHealthPermission>& permissions) override;
 

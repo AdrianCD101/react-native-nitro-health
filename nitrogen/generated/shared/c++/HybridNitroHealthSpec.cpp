@@ -18,6 +18,7 @@ namespace margelo::nitro::nitrohealth {
       prototype.registerHybridMethod("getAvailabilityStatus", &HybridNitroHealthSpec::getAvailabilityStatus);
       prototype.registerHybridMethod("openHealthConnectInstall", &HybridNitroHealthSpec::openHealthConnectInstall);
       prototype.registerHybridMethod("openHealthSettings", &HybridNitroHealthSpec::openHealthSettings);
+      prototype.registerHybridMethod("readSteps", &HybridNitroHealthSpec::readSteps);
       prototype.registerHybridMethod("getRequestStatusForAuthorization", &HybridNitroHealthSpec::getRequestStatusForAuthorization);
       prototype.registerHybridMethod("requestAuthorization", &HybridNitroHealthSpec::requestAuthorization);
     });

@@ -15,6 +15,10 @@
 
 // Forward declaration of `HealthAvailabilityStatus` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class HealthAvailabilityStatus; }
+// Forward declaration of `NativeStepSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeStepSample; }
+// Forward declaration of `NativeHealthDateRangeQuery` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthDateRangeQuery; }
 // Forward declaration of `AuthorizationRequestStatus` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class AuthorizationRequestStatus; }
 // Forward declaration of `NativeHealthPermission` to properly resolve imports.
@@ -24,9 +28,11 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthAuthorizationResult; 
 
 #include "HealthAvailabilityStatus.hpp"
 #include <NitroModules/Promise.hpp>
+#include "NativeStepSample.hpp"
+#include <vector>
+#include "NativeHealthDateRangeQuery.hpp"
 #include "AuthorizationRequestStatus.hpp"
 #include "NativeHealthPermission.hpp"
-#include <vector>
 #include "NativeHealthAuthorizationResult.hpp"
 
 namespace margelo::nitro::nitrohealth {
@@ -64,6 +70,7 @@ namespace margelo::nitro::nitrohealth {
       virtual HealthAvailabilityStatus getAvailabilityStatus() = 0;
       virtual bool openHealthConnectInstall() = 0;
       virtual std::shared_ptr<Promise<bool>> openHealthSettings() = 0;
+      virtual std::shared_ptr<Promise<std::vector<NativeStepSample>>> readSteps(const NativeHealthDateRangeQuery& query) = 0;
       virtual std::shared_ptr<Promise<AuthorizationRequestStatus>> getRequestStatusForAuthorization(const std::vector<NativeHealthPermission>& permissions) = 0;
       virtual std::shared_ptr<Promise<NativeHealthAuthorizationResult>> requestAuthorization(const std::vector<NativeHealthPermission>& permissions) = 0;
 

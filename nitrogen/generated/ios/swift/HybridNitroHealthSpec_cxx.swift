@@ -180,6 +180,31 @@ open class HybridNitroHealthSpec_cxx {
   }
   
   @inline(__always)
+  public final func readSteps(query: NativeHealthDateRangeQuery) -> bridge.Result_std__shared_ptr_Promise_std__vector_NativeStepSample____ {
+    do {
+      let __result = try self.__implementation.readSteps(query: query)
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_std__vector_NativeStepSample___ in
+        let __promise = bridge.create_std__shared_ptr_Promise_std__vector_NativeStepSample___()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_std__vector_NativeStepSample___(__promise)
+        __result
+          .then({ __result in __promiseHolder.resolve({ () -> bridge.std__vector_NativeStepSample_ in
+              var __vector = bridge.create_std__vector_NativeStepSample_(__result.count)
+              for __item in __result {
+                __vector.push_back(__item)
+              }
+              return __vector
+            }()) })
+          .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
+        return __promise
+      }()
+      return bridge.create_Result_std__shared_ptr_Promise_std__vector_NativeStepSample____(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_std__shared_ptr_Promise_std__vector_NativeStepSample____(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
   public final func getRequestStatusForAuthorization(permissions: bridge.std__vector_NativeHealthPermission_) -> bridge.Result_std__shared_ptr_Promise_AuthorizationRequestStatus___ {
     do {
       let __result = try self.__implementation.getRequestStatusForAuthorization(permissions: permissions.map({ __item in __item }))

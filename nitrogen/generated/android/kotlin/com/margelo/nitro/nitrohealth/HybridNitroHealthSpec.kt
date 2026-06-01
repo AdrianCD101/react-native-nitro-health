@@ -47,6 +47,10 @@ abstract class HybridNitroHealthSpec: HybridObject() {
   
   @DoNotStrip
   @Keep
+  abstract fun readSteps(query: NativeHealthDateRangeQuery): Promise<Array<NativeStepSample>>
+  
+  @DoNotStrip
+  @Keep
   abstract fun getRequestStatusForAuthorization(permissions: Array<NativeHealthPermission>): Promise<AuthorizationRequestStatus>
   
   @DoNotStrip

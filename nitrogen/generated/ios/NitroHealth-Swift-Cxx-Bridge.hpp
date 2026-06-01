@@ -20,6 +20,8 @@ namespace margelo::nitro::nitrohealth { class HybridNitroHealthSpec; }
 namespace margelo::nitro::nitrohealth { struct NativeHealthAuthorizationResult; }
 // Forward declaration of `NativeHealthPermission` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthPermission; }
+// Forward declaration of `NativeStepSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeStepSample; }
 
 // Forward declarations of Swift defined types
 // Forward declaration of `HybridNitroHealthSpec_cxx` to properly resolve imports.
@@ -32,6 +34,7 @@ namespace NitroHealth { class HybridNitroHealthSpec_cxx; }
 #include "HybridNitroHealthSpec.hpp"
 #include "NativeHealthAuthorizationResult.hpp"
 #include "NativeHealthPermission.hpp"
+#include "NativeStepSample.hpp"
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/PromiseHolder.hpp>
 #include <NitroModules/Result.hpp>
@@ -101,6 +104,51 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
   Func_void_std__exception_ptr create_Func_void_std__exception_ptr(void* NON_NULL swiftClosureWrapper) noexcept;
   inline Func_void_std__exception_ptr_Wrapper wrap_Func_void_std__exception_ptr(Func_void_std__exception_ptr value) noexcept {
     return Func_void_std__exception_ptr_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::vector<NativeStepSample>
+  /**
+   * Specialized version of `std::vector<NativeStepSample>`.
+   */
+  using std__vector_NativeStepSample_ = std::vector<NativeStepSample>;
+  inline std::vector<NativeStepSample> create_std__vector_NativeStepSample_(size_t size) noexcept {
+    std::vector<NativeStepSample> vector;
+    vector.reserve(size);
+    return vector;
+  }
+  
+  // pragma MARK: std::shared_ptr<Promise<std::vector<NativeStepSample>>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<std::vector<NativeStepSample>>>`.
+   */
+  using std__shared_ptr_Promise_std__vector_NativeStepSample___ = std::shared_ptr<Promise<std::vector<NativeStepSample>>>;
+  inline std::shared_ptr<Promise<std::vector<NativeStepSample>>> create_std__shared_ptr_Promise_std__vector_NativeStepSample___() noexcept {
+    return Promise<std::vector<NativeStepSample>>::create();
+  }
+  inline PromiseHolder<std::vector<NativeStepSample>> wrap_std__shared_ptr_Promise_std__vector_NativeStepSample___(std::shared_ptr<Promise<std::vector<NativeStepSample>>> promise) noexcept {
+    return PromiseHolder<std::vector<NativeStepSample>>(std::move(promise));
+  }
+  
+  // pragma MARK: std::function<void(const std::vector<NativeStepSample>& /* result */)>
+  /**
+   * Specialized version of `std::function<void(const std::vector<NativeStepSample>&)>`.
+   */
+  using Func_void_std__vector_NativeStepSample_ = std::function<void(const std::vector<NativeStepSample>& /* result */)>;
+  /**
+   * Wrapper class for a `std::function<void(const std::vector<NativeStepSample>& / * result * /)>`, this can be used from Swift.
+   */
+  class Func_void_std__vector_NativeStepSample__Wrapper final {
+  public:
+    explicit Func_void_std__vector_NativeStepSample__Wrapper(std::function<void(const std::vector<NativeStepSample>& /* result */)>&& func): _function(std::make_unique<std::function<void(const std::vector<NativeStepSample>& /* result */)>>(std::move(func))) {}
+    inline void call(std::vector<NativeStepSample> result) const noexcept {
+      _function->operator()(result);
+    }
+  private:
+    std::unique_ptr<std::function<void(const std::vector<NativeStepSample>& /* result */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_std__vector_NativeStepSample_ create_Func_void_std__vector_NativeStepSample_(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_std__vector_NativeStepSample__Wrapper wrap_Func_void_std__vector_NativeStepSample_(Func_void_std__vector_NativeStepSample_ value) noexcept {
+    return Func_void_std__vector_NativeStepSample__Wrapper(std::move(value));
   }
   
   // pragma MARK: std::shared_ptr<Promise<AuthorizationRequestStatus>>
@@ -219,6 +267,15 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
   }
   inline Result_std__shared_ptr_Promise_bool___ create_Result_std__shared_ptr_Promise_bool___(const std::exception_ptr& error) noexcept {
     return Result<std::shared_ptr<Promise<bool>>>::withError(error);
+  }
+  
+  // pragma MARK: Result<std::shared_ptr<Promise<std::vector<NativeStepSample>>>>
+  using Result_std__shared_ptr_Promise_std__vector_NativeStepSample____ = Result<std::shared_ptr<Promise<std::vector<NativeStepSample>>>>;
+  inline Result_std__shared_ptr_Promise_std__vector_NativeStepSample____ create_Result_std__shared_ptr_Promise_std__vector_NativeStepSample____(const std::shared_ptr<Promise<std::vector<NativeStepSample>>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<std::vector<NativeStepSample>>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_std__vector_NativeStepSample____ create_Result_std__shared_ptr_Promise_std__vector_NativeStepSample____(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<std::vector<NativeStepSample>>>>::withError(error);
   }
   
   // pragma MARK: Result<std::shared_ptr<Promise<AuthorizationRequestStatus>>>

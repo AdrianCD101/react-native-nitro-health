@@ -9,6 +9,7 @@ describe('NitroHealth Jest mock', () => {
     expect(NitroHealth.isAvailable()).toBe(true)
     expect(NitroHealth.getAvailabilityStatus()).toBe('available')
     await expect(NitroHealth.openHealthSettings()).resolves.toBe(true)
+    await expect(NitroHealth.readSteps({})).resolves.toEqual([])
     await expect(NitroHealth.getRequestStatusForAuthorization([])).resolves.toBe('unknown')
   })
 

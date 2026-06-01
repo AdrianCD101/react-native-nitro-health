@@ -8,6 +8,10 @@ const authorizationRequestStatuses = ['unknown', 'shouldRequest', 'unnecessary']
 const authorizationResultStatuses = ['granted', 'partial', 'denied', 'completed', 'unavailable']
 const stepsReadPermission: HealthPermission[] = [{ accessType: 'read', dataType: 'steps' }]
 const heartRateReadPermission: HealthPermission[] = [{ accessType: 'read', dataType: 'heartRate' }]
+const emptyRange = {
+  startDate: new Date('2000-01-01T00:00:00.000Z'),
+  endDate: new Date('2000-01-02T00:00:00.000Z'),
+}
 
 describe('NitroHealth native module', () => {
   it('returns a platform availability status from native code', () => {
@@ -43,6 +47,58 @@ describe('NitroHealth native module', () => {
     const status = await NitroHealth.getRequestStatusForAuthorization(heartRateReadPermission)
 
     expect(authorizationRequestStatuses).toContain(status)
+  })
+
+  it('rejects an empty request status check before crossing the native boundary', async () => {
+    await expect(NitroHealth.getRequestStatusForAuthorization([])).rejects.toThrow(
+      'At least one health permission is required'
+    )
+  })
+
+  it('rejects an empty authorization request before crossing the native boundary', async () => {
+    await expect(NitroHealth.requestAuthorization([])).rejects.toThrow(
+      'At least one health permission is required'
+    )
+  })
+
+  it('reads steps from native code without crashing', async () => {
+    try {
+      const steps = await NitroHealth.readSteps(emptyRange)
+
+      expect(Array.isArray(steps)).toBe(true)
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error)
+    }
+  })
+
+  it('rejects reading steps on Android when permission is not granted', async () => {
+    if (Platform.OS !== 'android') {
+      return
+    }
+
+    const status = await NitroHealth.getRequestStatusForAuthorization(stepsReadPermission)
+
+    if (status === 'unnecessary') {
+      return
+    }
+
+    await expect(NitroHealth.readSteps(emptyRange)).rejects.toThrow(/permission/i)
+  })
+
+  it('returns empty steps on iOS when permission is not granted (HealthKit silent-empty)', async () => {
+    if (Platform.OS !== 'ios') {
+      return
+    }
+
+    const status = await NitroHealth.getRequestStatusForAuthorization(stepsReadPermission)
+
+    if (status === 'unnecessary') {
+      return
+    }
+
+    const steps = await NitroHealth.readSteps(emptyRange)
+
+    expect(Array.isArray(steps)).toBe(true)
   })
 
   it('returns a resolved result for already-authorized steps permissions without opening a prompt', async () => {

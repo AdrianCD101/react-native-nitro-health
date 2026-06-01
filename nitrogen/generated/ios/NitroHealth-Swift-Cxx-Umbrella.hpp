@@ -18,8 +18,12 @@ namespace margelo::nitro::nitrohealth { enum class HealthAvailabilityStatus; }
 namespace margelo::nitro::nitrohealth { class HybridNitroHealthSpec; }
 // Forward declaration of `NativeHealthAuthorizationResult` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthAuthorizationResult; }
+// Forward declaration of `NativeHealthDateRangeQuery` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthDateRangeQuery; }
 // Forward declaration of `NativeHealthPermission` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthPermission; }
+// Forward declaration of `NativeStepSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeStepSample; }
 
 // Include C++ defined types
 #include "AuthorizationRequestStatus.hpp"
@@ -27,7 +31,9 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthPermission; }
 #include "HealthAvailabilityStatus.hpp"
 #include "HybridNitroHealthSpec.hpp"
 #include "NativeHealthAuthorizationResult.hpp"
+#include "NativeHealthDateRangeQuery.hpp"
 #include "NativeHealthPermission.hpp"
+#include "NativeStepSample.hpp"
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/Result.hpp>
 #include <exception>
