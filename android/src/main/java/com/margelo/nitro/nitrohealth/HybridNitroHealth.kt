@@ -1,4 +1,4 @@
-package com.nitrohealth
+package com.margelo.nitro.nitrohealth
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
@@ -12,15 +12,7 @@ import androidx.health.connect.client.request.ReadRecordsRequest
 import androidx.health.connect.client.time.TimeRangeFilter
 import com.margelo.nitro.NitroModules
 import com.margelo.nitro.core.Promise
-import com.margelo.nitro.nitrohealth.AuthorizationRequestStatus
-import com.margelo.nitro.nitrohealth.HealthAuthorizationStatus
-import com.margelo.nitro.nitrohealth.HealthAvailabilityStatus
-import com.margelo.nitro.nitrohealth.HybridNitroHealthSpec
-import com.margelo.nitro.nitrohealth.NativeHealthAuthorizationResult
-import com.margelo.nitro.nitrohealth.NativeHealthDateRangeQuery
-import com.margelo.nitro.nitrohealth.NativeHealthPermission
-import com.margelo.nitro.nitrohealth.NativeHeartRateSample
-import com.margelo.nitro.nitrohealth.NativeStepSample
+import com.nitrohealth.NitroHealthPermissionActivity
 import java.time.Instant
 import kotlin.reflect.KClass
 
