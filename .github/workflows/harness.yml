@@ -104,7 +104,7 @@ jobs:
           df -h
 
       - name: Run Harness Android
-        uses: callstackincubator/react-native-harness@v1.3.0
+        uses: callstackincubator/react-native-harness@v1.2.0
         with:
           app: app-debug.apk
           runner: android
@@ -202,7 +202,7 @@ jobs:
             CODE_SIGNING_ALLOWED=NO | xcpretty
 
       - name: Run Harness iOS
-        uses: callstackincubator/react-native-harness@v1.3.0
+        uses: callstackincubator/react-native-harness@v1.2.0
         with:
           app: ios/build/Build/Products/Debug-iphonesimulator/NitroHealthExample.app
           runner: ios
