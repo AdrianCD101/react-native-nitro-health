@@ -84,6 +84,44 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         }
     }
 
+    // Note: like readSteps, HealthKit resolves with an empty array when read access is denied
+    // (read-permission denial is not detectable). Heart rate is read in beats per minute.
+    func readHeartRate(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeHeartRateSample]> {
+        if !HKHealthStore.isHealthDataAvailable() {
+            throw permissionError("Health data is not available")
+        }
+
+        let quantityType = try makeHealthKitQuantityType(dataType: "heartRate")
+        let bpmUnit = HKUnit.count().unitDivided(by: HKUnit.minute())
+        let startDate = Date(timeIntervalSince1970: query.startTimeMs / 1000)
+        let endDate = Date(timeIntervalSince1970: query.endTimeMs / 1000)
+        let predicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate, options: [])
+        let sortDescriptors = [
+            NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: query.ascending),
+        ]
+
+        return Promise<[NativeHeartRateSample]>.async {
+            let samples = try await self.queryHealthKitSamples(
+                sampleType: quantityType,
+                limit: Int(query.limit),
+                predicate: predicate,
+                sortDescriptors: sortDescriptors
+            )
+
+            return samples.compactMap { sample in
+                guard let quantitySample = sample as? HKQuantitySample else {
+                    return nil
+                }
+
+                return NativeHeartRateSample(
+                    timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
+                    bpm: quantitySample.quantity.doubleValue(for: bpmUnit),
+                    source: quantitySample.sourceRevision.source.name
+                )
+            }
+        }
+    }
+
     func getRequestStatusForAuthorization(permissions: [NativeHealthPermission]) throws -> Promise<AuthorizationRequestStatus> {
         if !HKHealthStore.isHealthDataAvailable() {
             return Promise<AuthorizationRequestStatus>.resolved(withResult: AuthorizationRequestStatus.unknown)

@@ -3,6 +3,7 @@ const mockNitroHealth = {
   getRequestStatusForAuthorization: jest.fn(),
   isAvailable: jest.fn(),
   openHealthConnectInstall: jest.fn(),
+  readHeartRate: jest.fn(),
   readSteps: jest.fn(),
   requestAuthorization: jest.fn(),
 }
@@ -96,6 +97,45 @@ describe('NitroHealth permission contract', () => {
     await expect(NitroHealth.readSteps({ startDate, endDate })).resolves.toEqual([])
 
     expect(mockNitroHealth.readSteps).toHaveBeenCalledWith({
+      startTimeMs: startDate.getTime(),
+      endTimeMs: endDate.getTime(),
+      limit: 1000,
+      ascending: true,
+    })
+  })
+
+  it('reads heart rate through the Nitro hybrid object', async () => {
+    const startDate = new Date('2026-01-01T00:00:00.000Z')
+    const endDate = new Date('2026-01-02T00:00:00.000Z')
+    const nativeResult = [
+      {
+        timeMs: startDate.getTime(),
+        bpm: 72,
+        source: 'com.example.health',
+      },
+    ]
+    mockNitroHealth.readHeartRate.mockResolvedValue(nativeResult)
+
+    await expect(
+      NitroHealth.readHeartRate({ startDate, endDate, limit: 25, ascending: false })
+    ).resolves.toEqual([{ date: startDate, bpm: 72, source: 'com.example.health' }])
+
+    expect(mockNitroHealth.readHeartRate).toHaveBeenCalledWith({
+      startTimeMs: startDate.getTime(),
+      endTimeMs: endDate.getTime(),
+      limit: 25,
+      ascending: false,
+    })
+  })
+
+  it('applies read heart rate defaults before crossing the native boundary', async () => {
+    const startDate = new Date('2026-01-01T00:00:00.000Z')
+    const endDate = new Date('2026-01-02T00:00:00.000Z')
+    mockNitroHealth.readHeartRate.mockResolvedValue([])
+
+    await expect(NitroHealth.readHeartRate({ startDate, endDate })).resolves.toEqual([])
+
+    expect(mockNitroHealth.readHeartRate).toHaveBeenCalledWith({
       startTimeMs: startDate.getTime(),
       endTimeMs: endDate.getTime(),
       limit: 1000,

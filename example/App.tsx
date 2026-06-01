@@ -7,6 +7,7 @@ import type {
   HealthDataType,
   HealthAvailabilityStatus,
   HealthPermission,
+  HeartRateSample,
   StepSample,
 } from 'react-native-nitro-health'
 
@@ -41,6 +42,8 @@ function App(): React.JSX.Element {
   const [openingSettings, setOpeningSettings] = useState<HealthDataType>()
   const [readingSteps, setReadingSteps] = useState(false)
   const [stepSamples, setStepSamples] = useState<StepSample[]>()
+  const [readingHeartRate, setReadingHeartRate] = useState(false)
+  const [heartRateSamples, setHeartRateSamples] = useState<HeartRateSample[]>()
   const [errorMessages, setErrorMessages] = useState<Partial<Record<HealthDataType, string>>>({})
 
   async function checkPermission(dataType: HealthDataType): Promise<void> {
@@ -131,7 +134,39 @@ function App(): React.JSX.Element {
     }
   }
 
+  async function readHeartRate(): Promise<void> {
+    const endDate = new Date()
+    const startDate = new Date(endDate.getTime() - 24 * 60 * 60 * 1000)
+
+    setReadingHeartRate(true)
+    setErrorMessages((current) => ({ ...current, heartRate: undefined }))
+
+    try {
+      const samples = await NitroHealth.readHeartRate({
+        startDate,
+        endDate,
+        limit: 100,
+        ascending: false,
+      })
+      setHeartRateSamples(samples)
+    } catch (error) {
+      setErrorMessages((current) => ({
+        ...current,
+        heartRate: error instanceof Error ? error.message : String(error),
+      }))
+    } finally {
+      setReadingHeartRate(false)
+    }
+  }
+
   const stepsTotal = stepSamples?.reduce((total, sample) => total + sample.count, 0)
+  const heartRateAverage =
+    heartRateSamples && heartRateSamples.length > 0
+      ? Math.round(
+          heartRateSamples.reduce((total, sample) => total + sample.bpm, 0) /
+            heartRateSamples.length
+        )
+      : undefined
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -148,6 +183,7 @@ function App(): React.JSX.Element {
         const requestStatus = authorizationStatuses[dataType]
         const canOpenSettings = result ? result.status !== 'granted' : false
         const canReadSteps = dataType === 'steps'
+        const canReadHeartRate = dataType === 'heartRate'
         const hasPermission =
           result?.status === 'granted' ||
           result?.status === 'completed' ||
@@ -179,6 +215,15 @@ function App(): React.JSX.Element {
               <View style={styles.readResult}>
                 <Text style={styles.detail}>Steps samples: {stepSamples.length}</Text>
                 <Text style={styles.detail}>Steps total: {stepsTotal}</Text>
+              </View>
+            ) : null}
+            {canReadHeartRate && heartRateSamples ? (
+              <View style={styles.readResult}>
+                <Text style={styles.detail}>Heart rate samples: {heartRateSamples.length}</Text>
+                <Text style={styles.detail}>Average bpm: {heartRateAverage ?? 'n/a'}</Text>
+                {heartRateSamples[0]?.source ? (
+                  <Text style={styles.detail}>Source: {heartRateSamples[0].source}</Text>
+                ) : null}
               </View>
             ) : null}
             <View style={styles.buttonRow}>
@@ -249,6 +294,29 @@ function App(): React.JSX.Element {
                 >
                   <Text style={styles.buttonText}>
                     {readingSteps ? 'Reading...' : 'Read Steps'}
+                  </Text>
+                </Pressable>
+              ) : null}
+              {canReadHeartRate && !hasPermission ? (
+                <Text style={styles.detail}>Grant Heart Rate permission to read</Text>
+              ) : null}
+              {canReadHeartRate ? (
+                <Pressable
+                  disabled={!isAvailable || readingHeartRate || !hasPermission}
+                  onPress={() => {
+                    readHeartRate()
+                  }}
+                  style={({ pressed }) => [
+                    styles.button,
+                    styles.readButton,
+                    pressed ? styles.buttonPressed : null,
+                    !isAvailable || readingHeartRate || !hasPermission
+                      ? styles.buttonDisabled
+                      : null,
+                  ]}
+                >
+                  <Text style={styles.buttonText}>
+                    {readingHeartRate ? 'Reading...' : 'Read Heart Rate'}
                   </Text>
                 </Pressable>
               ) : null}

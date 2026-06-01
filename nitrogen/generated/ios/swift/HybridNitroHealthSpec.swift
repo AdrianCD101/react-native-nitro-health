@@ -18,6 +18,7 @@ public protocol HybridNitroHealthSpec_protocol: HybridObject {
   func openHealthConnectInstall() throws -> Bool
   func openHealthSettings() throws -> Promise<Bool>
   func readSteps(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeStepSample]>
+  func readHeartRate(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeHeartRateSample]>
   func getRequestStatusForAuthorization(permissions: [NativeHealthPermission]) throws -> Promise<AuthorizationRequestStatus>
   func requestAuthorization(permissions: [NativeHealthPermission]) throws -> Promise<NativeHealthAuthorizationResult>
 }

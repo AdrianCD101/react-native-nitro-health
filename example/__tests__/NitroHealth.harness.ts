@@ -101,6 +101,50 @@ describe('NitroHealth native module', () => {
     expect(Array.isArray(steps)).toBe(true)
   })
 
+  it('reads heart rate from native code without crashing', async () => {
+    try {
+      const samples = await NitroHealth.readHeartRate(emptyRange)
+
+      expect(Array.isArray(samples)).toBe(true)
+      for (const sample of samples) {
+        expect(typeof sample.bpm).toBe('number')
+        expect(['string', 'undefined']).toContain(typeof sample.source)
+      }
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error)
+    }
+  })
+
+  it('rejects reading heart rate on Android when permission is not granted', async () => {
+    if (Platform.OS !== 'android') {
+      return
+    }
+
+    const status = await NitroHealth.getRequestStatusForAuthorization(heartRateReadPermission)
+
+    if (status === 'unnecessary') {
+      return
+    }
+
+    await expect(NitroHealth.readHeartRate(emptyRange)).rejects.toThrow(/permission/i)
+  })
+
+  it('returns empty heart rate on iOS when permission is not granted (HealthKit silent-empty)', async () => {
+    if (Platform.OS !== 'ios') {
+      return
+    }
+
+    const status = await NitroHealth.getRequestStatusForAuthorization(heartRateReadPermission)
+
+    if (status === 'unnecessary') {
+      return
+    }
+
+    const samples = await NitroHealth.readHeartRate(emptyRange)
+
+    expect(Array.isArray(samples)).toBe(true)
+  })
+
   it('returns a resolved result for already-authorized steps permissions without opening a prompt', async () => {
     const status = await NitroHealth.getRequestStatusForAuthorization(stepsReadPermission)
 
