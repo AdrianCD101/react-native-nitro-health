@@ -4,11 +4,11 @@ import { NitroHealth } from 'react-native-nitro-health'
 import type {
   HealthAuthorizationResult,
   AuthorizationRequestStatus,
+  DailyStepTotal,
   HealthDataType,
   HealthAvailabilityStatus,
   HealthPermission,
-  HeartRateSample,
-  StepSample,
+  HeartRateStatistics,
 } from 'react-native-nitro-health'
 
 const readPermissions: Array<{ dataType: HealthDataType; label: string }> = [
@@ -40,10 +40,10 @@ function App(): React.JSX.Element {
   const [checkingPermission, setCheckingPermission] = useState<HealthDataType>()
   const [requestingPermission, setRequestingPermission] = useState<HealthDataType>()
   const [openingSettings, setOpeningSettings] = useState<HealthDataType>()
-  const [readingSteps, setReadingSteps] = useState(false)
-  const [stepSamples, setStepSamples] = useState<StepSample[]>()
-  const [readingHeartRate, setReadingHeartRate] = useState(false)
-  const [heartRateSamples, setHeartRateSamples] = useState<HeartRateSample[]>()
+  const [readingDailyStepTotals, setReadingDailyStepTotals] = useState(false)
+  const [dailyStepTotals, setDailyStepTotals] = useState<DailyStepTotal[]>()
+  const [readingHeartRateStatistics, setReadingHeartRateStatistics] = useState(false)
+  const [heartRateStatistics, setHeartRateStatistics] = useState<HeartRateStatistics>()
   const [errorMessages, setErrorMessages] = useState<Partial<Record<HealthDataType, string>>>({})
 
   async function checkPermission(dataType: HealthDataType): Promise<void> {
@@ -109,64 +109,53 @@ function App(): React.JSX.Element {
     }
   }
 
-  async function readSteps(): Promise<void> {
+  async function readDailyStepTotals(): Promise<void> {
     const endDate = new Date()
     const startDate = new Date(endDate.getTime() - 7 * 24 * 60 * 60 * 1000)
 
-    setReadingSteps(true)
+    setReadingDailyStepTotals(true)
     setErrorMessages((current) => ({ ...current, steps: undefined }))
 
     try {
-      const samples = await NitroHealth.readSteps({
+      const totals = await NitroHealth.readDailyStepTotals({
         startDate,
         endDate,
-        limit: 100,
+        limit: 7,
         ascending: false,
       })
-      setStepSamples(samples)
+      setDailyStepTotals(totals)
     } catch (error) {
       setErrorMessages((current) => ({
         ...current,
         steps: error instanceof Error ? error.message : String(error),
       }))
     } finally {
-      setReadingSteps(false)
+      setReadingDailyStepTotals(false)
     }
   }
 
-  async function readHeartRate(): Promise<void> {
+  async function readHeartRateStatistics(): Promise<void> {
     const endDate = new Date()
     const startDate = new Date(endDate.getTime() - 24 * 60 * 60 * 1000)
 
-    setReadingHeartRate(true)
+    setReadingHeartRateStatistics(true)
     setErrorMessages((current) => ({ ...current, heartRate: undefined }))
 
     try {
-      const samples = await NitroHealth.readHeartRate({
+      const statistics = await NitroHealth.readHeartRateStatistics({
         startDate,
         endDate,
-        limit: 100,
-        ascending: false,
       })
-      setHeartRateSamples(samples)
+      setHeartRateStatistics(statistics)
     } catch (error) {
       setErrorMessages((current) => ({
         ...current,
         heartRate: error instanceof Error ? error.message : String(error),
       }))
     } finally {
-      setReadingHeartRate(false)
+      setReadingHeartRateStatistics(false)
     }
   }
-
-  const stepsTotal = stepSamples?.reduce((total, sample) => total + sample.count, 0)
-  const heartRateAverage =
-    heartRateSamples && heartRateSamples.length > 0
-      ? Math.round(
-          heartRateSamples.reduce((total, sample) => total + sample.bpm, 0) /
-            heartRateSamples.length
-        )
-      : undefined
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -211,19 +200,23 @@ function App(): React.JSX.Element {
             {errorMessages[dataType] ? (
               <Text style={styles.error}>{errorMessages[dataType]}</Text>
             ) : null}
-            {canReadSteps && stepSamples ? (
+            {canReadSteps && dailyStepTotals ? (
               <View style={styles.readResult}>
-                <Text style={styles.detail}>Steps samples: {stepSamples.length}</Text>
-                <Text style={styles.detail}>Steps total: {stepsTotal}</Text>
+                <Text style={styles.detail}>Daily step buckets: {dailyStepTotals.length}</Text>
+                {dailyStepTotals.map((bucket) => (
+                  <Text key={bucket.startDate.toISOString()} style={styles.detail}>
+                    {bucket.startDate.toLocaleDateString()}: {bucket.count} steps
+                  </Text>
+                ))}
               </View>
             ) : null}
-            {canReadHeartRate && heartRateSamples ? (
+            {canReadHeartRate && heartRateStatistics ? (
               <View style={styles.readResult}>
-                <Text style={styles.detail}>Heart rate samples: {heartRateSamples.length}</Text>
-                <Text style={styles.detail}>Average bpm: {heartRateAverage ?? 'n/a'}</Text>
-                {heartRateSamples[0]?.source ? (
-                  <Text style={styles.detail}>Source: {heartRateSamples[0].source}</Text>
-                ) : null}
+                <Text style={styles.detail}>
+                  Average bpm: {heartRateStatistics.average ?? 'n/a'}
+                </Text>
+                <Text style={styles.detail}>Min bpm: {heartRateStatistics.min ?? 'n/a'}</Text>
+                <Text style={styles.detail}>Max bpm: {heartRateStatistics.max ?? 'n/a'}</Text>
               </View>
             ) : null}
             <View style={styles.buttonRow}>
@@ -281,19 +274,21 @@ function App(): React.JSX.Element {
               ) : null}
               {canReadSteps ? (
                 <Pressable
-                  disabled={!isAvailable || readingSteps || !hasPermission}
+                  disabled={!isAvailable || readingDailyStepTotals || !hasPermission}
                   onPress={() => {
-                    readSteps()
+                    readDailyStepTotals()
                   }}
                   style={({ pressed }) => [
                     styles.button,
                     styles.readButton,
                     pressed ? styles.buttonPressed : null,
-                    !isAvailable || readingSteps || !hasPermission ? styles.buttonDisabled : null,
+                    !isAvailable || readingDailyStepTotals || !hasPermission
+                      ? styles.buttonDisabled
+                      : null,
                   ]}
                 >
                   <Text style={styles.buttonText}>
-                    {readingSteps ? 'Reading...' : 'Read Steps'}
+                    {readingDailyStepTotals ? 'Reading...' : 'Read daily step totals'}
                   </Text>
                 </Pressable>
               ) : null}
@@ -302,21 +297,21 @@ function App(): React.JSX.Element {
               ) : null}
               {canReadHeartRate ? (
                 <Pressable
-                  disabled={!isAvailable || readingHeartRate || !hasPermission}
+                  disabled={!isAvailable || readingHeartRateStatistics || !hasPermission}
                   onPress={() => {
-                    readHeartRate()
+                    readHeartRateStatistics()
                   }}
                   style={({ pressed }) => [
                     styles.button,
                     styles.readButton,
                     pressed ? styles.buttonPressed : null,
-                    !isAvailable || readingHeartRate || !hasPermission
+                    !isAvailable || readingHeartRateStatistics || !hasPermission
                       ? styles.buttonDisabled
                       : null,
                   ]}
                 >
                   <Text style={styles.buttonText}>
-                    {readingHeartRate ? 'Reading...' : 'Read Heart Rate'}
+                    {readingHeartRateStatistics ? 'Reading...' : 'Read Heart Rate stats'}
                   </Text>
                 </Pressable>
               ) : null}

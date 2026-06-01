@@ -125,13 +125,13 @@ describe('App', () => {
     ])
   })
 
-  it('reads steps from the app UI after steps permission is granted', async () => {
+  it('reads daily step totals from the app UI after steps permission is granted', async () => {
     mockNitroHealth.getAvailabilityStatus.mockReturnValue('available')
     mockNitroHealth.requestAuthorization.mockResolvedValue(grantedStepsResult)
-    mockNitroHealth.readSteps.mockResolvedValue([
+    mockNitroHealth.readDailyStepTotals.mockResolvedValue([
       {
         startDate: new Date('2026-01-01T00:00:00.000Z'),
-        endDate: new Date('2026-01-01T01:00:00.000Z'),
+        endDate: new Date('2026-01-02T00:00:00.000Z'),
         count: 123,
       },
     ])
@@ -141,19 +141,19 @@ describe('App', () => {
     fireEvent.press(screen.getByText('Request Steps permission'))
     expect(await screen.findByText('Steps authorization result: granted')).toBeTruthy()
 
-    fireEvent.press(screen.getByText('Read Steps'))
+    fireEvent.press(screen.getByText('Read daily step totals'))
 
-    expect(await screen.findByText('Steps samples: 1')).toBeTruthy()
-    expect(screen.getByText('Steps total: 123')).toBeTruthy()
-    expect(mockNitroHealth.readSteps).toHaveBeenCalledWith({
+    expect(await screen.findByText('Daily step buckets: 1')).toBeTruthy()
+    expect(screen.getByText(/123 steps/)).toBeTruthy()
+    expect(mockNitroHealth.readDailyStepTotals).toHaveBeenCalledWith({
       startDate: expect.any(Date),
       endDate: expect.any(Date),
-      limit: 100,
+      limit: 7,
       ascending: false,
     })
   })
 
-  it('disables Read Steps until steps permission is granted', async () => {
+  it('disables daily step totals until steps permission is granted', async () => {
     mockNitroHealth.getAvailabilityStatus.mockReturnValue('available')
     mockNitroHealth.requestAuthorization.mockResolvedValue(grantedStepsResult)
 
@@ -161,63 +161,75 @@ describe('App', () => {
 
     // Before any grant the button is gated: a hint is shown and pressing does nothing.
     expect(screen.getByText('Grant Steps permission to read')).toBeTruthy()
-    fireEvent.press(screen.getByText('Read Steps'))
-    expect(mockNitroHealth.readSteps).not.toHaveBeenCalled()
+    fireEvent.press(screen.getByText('Read daily step totals'))
+    expect(mockNitroHealth.readDailyStepTotals).not.toHaveBeenCalled()
 
     // Granting permission opens the gate.
     fireEvent.press(screen.getByText('Request Steps permission'))
     expect(await screen.findByText('Steps authorization result: granted')).toBeTruthy()
     expect(screen.queryByText('Grant Steps permission to read')).toBeNull()
 
-    fireEvent.press(screen.getByText('Read Steps'))
+    fireEvent.press(screen.getByText('Read daily step totals'))
     await waitFor(() => {
-      expect(mockNitroHealth.readSteps).toHaveBeenCalledTimes(1)
+      expect(mockNitroHealth.readDailyStepTotals).toHaveBeenCalledTimes(1)
     })
   })
 
-  it('reads heart rate from the app UI after heart rate permission is granted', async () => {
+  it('reads heart rate statistics from the app UI after heart rate permission is granted', async () => {
     mockNitroHealth.getAvailabilityStatus.mockReturnValue('available')
     mockNitroHealth.requestAuthorization.mockResolvedValue(grantedHeartRateResult)
-    mockNitroHealth.readHeartRate.mockResolvedValue([
-      { date: new Date('2026-01-01T00:00:00.000Z'), bpm: 72, source: 'com.example.health' },
-      { date: new Date('2026-01-01T00:01:00.000Z'), bpm: 76, source: 'com.example.health' },
-    ])
+    mockNitroHealth.readHeartRateStatistics.mockResolvedValue({ average: 74, min: 72, max: 76 })
 
     render(<App />)
 
     fireEvent.press(screen.getByText('Request Heart Rate permission'))
     expect(await screen.findByText('Heart Rate authorization result: granted')).toBeTruthy()
 
-    fireEvent.press(screen.getByText('Read Heart Rate'))
+    fireEvent.press(screen.getByText('Read Heart Rate stats'))
 
-    expect(await screen.findByText('Heart rate samples: 2')).toBeTruthy()
-    expect(screen.getByText('Average bpm: 74')).toBeTruthy()
-    expect(screen.getByText('Source: com.example.health')).toBeTruthy()
-    expect(mockNitroHealth.readHeartRate).toHaveBeenCalledWith({
+    expect(await screen.findByText('Average bpm: 74')).toBeTruthy()
+    expect(screen.getByText('Min bpm: 72')).toBeTruthy()
+    expect(screen.getByText('Max bpm: 76')).toBeTruthy()
+    expect(mockNitroHealth.readHeartRateStatistics).toHaveBeenCalledWith({
       startDate: expect.any(Date),
       endDate: expect.any(Date),
-      limit: 100,
-      ascending: false,
     })
   })
 
-  it('disables Read Heart Rate until heart rate permission is granted', async () => {
+  it('renders missing heart rate statistics as n/a', async () => {
+    mockNitroHealth.getAvailabilityStatus.mockReturnValue('available')
+    mockNitroHealth.requestAuthorization.mockResolvedValue(grantedHeartRateResult)
+    mockNitroHealth.readHeartRateStatistics.mockResolvedValue({})
+
+    render(<App />)
+
+    fireEvent.press(screen.getByText('Request Heart Rate permission'))
+    expect(await screen.findByText('Heart Rate authorization result: granted')).toBeTruthy()
+
+    fireEvent.press(screen.getByText('Read Heart Rate stats'))
+
+    expect(await screen.findByText('Average bpm: n/a')).toBeTruthy()
+    expect(screen.getByText('Min bpm: n/a')).toBeTruthy()
+    expect(screen.getByText('Max bpm: n/a')).toBeTruthy()
+  })
+
+  it('disables Heart Rate stats until heart rate permission is granted', async () => {
     mockNitroHealth.getAvailabilityStatus.mockReturnValue('available')
     mockNitroHealth.requestAuthorization.mockResolvedValue(grantedHeartRateResult)
 
     render(<App />)
 
     expect(screen.getByText('Grant Heart Rate permission to read')).toBeTruthy()
-    fireEvent.press(screen.getByText('Read Heart Rate'))
-    expect(mockNitroHealth.readHeartRate).not.toHaveBeenCalled()
+    fireEvent.press(screen.getByText('Read Heart Rate stats'))
+    expect(mockNitroHealth.readHeartRateStatistics).not.toHaveBeenCalled()
 
     fireEvent.press(screen.getByText('Request Heart Rate permission'))
     expect(await screen.findByText('Heart Rate authorization result: granted')).toBeTruthy()
     expect(screen.queryByText('Grant Heart Rate permission to read')).toBeNull()
 
-    fireEvent.press(screen.getByText('Read Heart Rate'))
+    fireEvent.press(screen.getByText('Read Heart Rate stats'))
     await waitFor(() => {
-      expect(mockNitroHealth.readHeartRate).toHaveBeenCalledTimes(1)
+      expect(mockNitroHealth.readHeartRateStatistics).toHaveBeenCalledTimes(1)
     })
   })
 

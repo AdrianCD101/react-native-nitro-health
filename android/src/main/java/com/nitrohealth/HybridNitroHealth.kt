@@ -1,4 +1,4 @@
-package com.margelo.nitro.nitrohealth
+package com.nitrohealth
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
@@ -8,12 +8,26 @@ import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.Record
 import androidx.health.connect.client.records.StepsRecord
+import androidx.health.connect.client.request.AggregateGroupByPeriodRequest
+import androidx.health.connect.client.request.AggregateRequest
 import androidx.health.connect.client.request.ReadRecordsRequest
 import androidx.health.connect.client.time.TimeRangeFilter
 import com.margelo.nitro.NitroModules
 import com.margelo.nitro.core.Promise
-import com.nitrohealth.NitroHealthPermissionActivity
+import com.margelo.nitro.nitrohealth.AuthorizationRequestStatus
+import com.margelo.nitro.nitrohealth.HealthAuthorizationStatus
+import com.margelo.nitro.nitrohealth.HealthAvailabilityStatus
+import com.margelo.nitro.nitrohealth.HybridNitroHealthSpec
+import com.margelo.nitro.nitrohealth.NativeHealthAuthorizationResult
+import com.margelo.nitro.nitrohealth.NativeHealthDateRangeQuery
+import com.margelo.nitro.nitrohealth.NativeHealthPermission
+import com.margelo.nitro.nitrohealth.NativeHealthTimeRangeQuery
+import com.margelo.nitro.nitrohealth.NativeHeartRateSample
+import com.margelo.nitro.nitrohealth.NativeHeartRateStatistics
+import com.margelo.nitro.nitrohealth.NativeStepSample
 import java.time.Instant
+import java.time.Period
+import java.time.ZoneId
 import kotlin.reflect.KClass
 
 class HybridNitroHealth: HybridNitroHealthSpec() {
@@ -109,6 +123,45 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         }
     }
 
+    override fun readDailyStepTotals(query: NativeHealthDateRangeQuery): Promise<Array<NativeStepSample>> {
+        return Promise.async {
+            val context = NitroModules.applicationContext
+                ?: throw IllegalStateException("Android application context is unavailable")
+
+            if (getAvailabilityStatus() != HealthAvailabilityStatus.AVAILABLE) {
+                throw IllegalStateException("Health Connect is not available")
+            }
+
+            val client = HealthConnectClient.getOrCreate(context)
+            requireReadPermission(client, StepsRecord::class, "steps")
+
+            val zoneId = ZoneId.systemDefault()
+            val request = AggregateGroupByPeriodRequest(
+                metrics = setOf(StepsRecord.COUNT_TOTAL),
+                timeRangeFilter = TimeRangeFilter.between(
+                    Instant.ofEpochMilli(query.startTimeMs.toLong()).atZone(zoneId).toLocalDateTime(),
+                    Instant.ofEpochMilli(query.endTimeMs.toLong()).atZone(zoneId).toLocalDateTime()
+                ),
+                timeRangeSlicer = Period.ofDays(1)
+            )
+            val response = client.aggregateGroupByPeriod(request)
+            val samples = response.map { group ->
+                NativeStepSample(
+                    startTimeMs = group.startTime.atZone(zoneId).toInstant().toEpochMilli().toDouble(),
+                    endTimeMs = group.endTime.atZone(zoneId).toInstant().toEpochMilli().toDouble(),
+                    count = group.result[StepsRecord.COUNT_TOTAL]?.toDouble() ?: 0.0
+                )
+            }
+            val ordered = if (query.ascending) {
+                samples.sortedBy { it.startTimeMs }
+            } else {
+                samples.sortedByDescending { it.startTimeMs }
+            }
+
+            ordered.take(query.limit.toInt()).toTypedArray()
+        }
+    }
+
     override fun readHeartRate(query: NativeHealthDateRangeQuery): Promise<Array<NativeHeartRateSample>> {
         return Promise.async {
             val context = NitroModules.applicationContext
@@ -152,6 +205,39 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             }
 
             ordered.take(query.limit.toInt()).toTypedArray()
+        }
+    }
+
+    override fun readHeartRateStatistics(query: NativeHealthTimeRangeQuery): Promise<NativeHeartRateStatistics> {
+        return Promise.async {
+            val context = NitroModules.applicationContext
+                ?: throw IllegalStateException("Android application context is unavailable")
+
+            if (getAvailabilityStatus() != HealthAvailabilityStatus.AVAILABLE) {
+                throw IllegalStateException("Health Connect is not available")
+            }
+
+            val client = HealthConnectClient.getOrCreate(context)
+            requireReadPermission(client, HeartRateRecord::class, "heart rate")
+
+            val request = AggregateRequest(
+                metrics = setOf(
+                    HeartRateRecord.BPM_AVG,
+                    HeartRateRecord.BPM_MIN,
+                    HeartRateRecord.BPM_MAX
+                ),
+                timeRangeFilter = TimeRangeFilter.between(
+                    Instant.ofEpochMilli(query.startTimeMs.toLong()),
+                    Instant.ofEpochMilli(query.endTimeMs.toLong())
+                )
+            )
+            val result = client.aggregate(request)
+
+            NativeHeartRateStatistics(
+                average = result[HeartRateRecord.BPM_AVG]?.toDouble(),
+                min = result[HeartRateRecord.BPM_MIN]?.toDouble(),
+                max = result[HeartRateRecord.BPM_MAX]?.toDouble()
+            )
         }
     }
 

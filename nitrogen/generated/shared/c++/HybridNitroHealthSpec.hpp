@@ -21,6 +21,10 @@ namespace margelo::nitro::nitrohealth { struct NativeStepSample; }
 namespace margelo::nitro::nitrohealth { struct NativeHealthDateRangeQuery; }
 // Forward declaration of `NativeHeartRateSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHeartRateSample; }
+// Forward declaration of `NativeHeartRateStatistics` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHeartRateStatistics; }
+// Forward declaration of `NativeHealthTimeRangeQuery` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthTimeRangeQuery; }
 // Forward declaration of `AuthorizationRequestStatus` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class AuthorizationRequestStatus; }
 // Forward declaration of `NativeHealthPermission` to properly resolve imports.
@@ -34,6 +38,8 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthAuthorizationResult; 
 #include <vector>
 #include "NativeHealthDateRangeQuery.hpp"
 #include "NativeHeartRateSample.hpp"
+#include "NativeHeartRateStatistics.hpp"
+#include "NativeHealthTimeRangeQuery.hpp"
 #include "AuthorizationRequestStatus.hpp"
 #include "NativeHealthPermission.hpp"
 #include "NativeHealthAuthorizationResult.hpp"
@@ -74,7 +80,9 @@ namespace margelo::nitro::nitrohealth {
       virtual bool openHealthConnectInstall() = 0;
       virtual std::shared_ptr<Promise<bool>> openHealthSettings() = 0;
       virtual std::shared_ptr<Promise<std::vector<NativeStepSample>>> readSteps(const NativeHealthDateRangeQuery& query) = 0;
+      virtual std::shared_ptr<Promise<std::vector<NativeStepSample>>> readDailyStepTotals(const NativeHealthDateRangeQuery& query) = 0;
       virtual std::shared_ptr<Promise<std::vector<NativeHeartRateSample>>> readHeartRate(const NativeHealthDateRangeQuery& query) = 0;
+      virtual std::shared_ptr<Promise<NativeHeartRateStatistics>> readHeartRateStatistics(const NativeHealthTimeRangeQuery& query) = 0;
       virtual std::shared_ptr<Promise<AuthorizationRequestStatus>> getRequestStatusForAuthorization(const std::vector<NativeHealthPermission>& permissions) = 0;
       virtual std::shared_ptr<Promise<NativeHealthAuthorizationResult>> requestAuthorization(const std::vector<NativeHealthPermission>& permissions) = 0;
 

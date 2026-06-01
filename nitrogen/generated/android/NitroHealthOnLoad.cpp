@@ -27,7 +27,7 @@ int initialize(JavaVM* vm) {
 }
 
 struct JHybridNitroHealthSpecImpl: public jni::JavaClass<JHybridNitroHealthSpecImpl, JHybridNitroHealthSpec::JavaPart> {
-  static constexpr auto kJavaDescriptor = "Lcom/margelo/nitro/nitrohealth/HybridNitroHealth;";
+  static constexpr auto kJavaDescriptor = "Lcom/nitrohealth/HybridNitroHealth;";
   static std::shared_ptr<JHybridNitroHealthSpec> create() {
     static const auto constructorFn = javaClassStatic()->getConstructor<JHybridNitroHealthSpecImpl::javaobject()>();
     jni::local_ref<JHybridNitroHealthSpec::JavaPart> javaPart = javaClassStatic()->newObject(constructorFn);

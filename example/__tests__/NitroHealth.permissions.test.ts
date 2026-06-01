@@ -3,7 +3,9 @@ const mockNitroHealth = {
   getRequestStatusForAuthorization: jest.fn(),
   isAvailable: jest.fn(),
   openHealthConnectInstall: jest.fn(),
+  readDailyStepTotals: jest.fn(),
   readHeartRate: jest.fn(),
+  readHeartRateStatistics: jest.fn(),
   readSteps: jest.fn(),
   requestAuthorization: jest.fn(),
 }
@@ -104,6 +106,36 @@ describe('NitroHealth permission contract', () => {
     })
   })
 
+  it('reads daily step totals through the Nitro hybrid object', async () => {
+    const startDate = new Date('2026-01-01T00:00:00.000Z')
+    const endDate = new Date('2026-01-08T00:00:00.000Z')
+    const nativeResult = [
+      {
+        startTimeMs: startDate.getTime(),
+        endTimeMs: new Date('2026-01-02T00:00:00.000Z').getTime(),
+        count: 456,
+      },
+    ]
+    mockNitroHealth.readDailyStepTotals.mockResolvedValue(nativeResult)
+
+    await expect(
+      NitroHealth.readDailyStepTotals({ startDate, endDate, limit: 7, ascending: false })
+    ).resolves.toEqual([
+      {
+        startDate,
+        endDate: new Date('2026-01-02T00:00:00.000Z'),
+        count: 456,
+      },
+    ])
+
+    expect(mockNitroHealth.readDailyStepTotals).toHaveBeenCalledWith({
+      startTimeMs: startDate.getTime(),
+      endTimeMs: endDate.getTime(),
+      limit: 7,
+      ascending: false,
+    })
+  })
+
   it('reads heart rate through the Nitro hybrid object', async () => {
     const startDate = new Date('2026-01-01T00:00:00.000Z')
     const endDate = new Date('2026-01-02T00:00:00.000Z')
@@ -140,6 +172,27 @@ describe('NitroHealth permission contract', () => {
       endTimeMs: endDate.getTime(),
       limit: 1000,
       ascending: true,
+    })
+  })
+
+  it('reads heart rate statistics through the Nitro hybrid object', async () => {
+    const startDate = new Date('2026-01-01T00:00:00.000Z')
+    const endDate = new Date('2026-01-02T00:00:00.000Z')
+    mockNitroHealth.readHeartRateStatistics.mockResolvedValue({
+      average: 72,
+      min: undefined,
+      max: 92,
+    })
+
+    await expect(NitroHealth.readHeartRateStatistics({ startDate, endDate })).resolves.toEqual({
+      average: 72,
+      min: undefined,
+      max: 92,
+    })
+
+    expect(mockNitroHealth.readHeartRateStatistics).toHaveBeenCalledWith({
+      startTimeMs: startDate.getTime(),
+      endTimeMs: endDate.getTime(),
     })
   })
 
