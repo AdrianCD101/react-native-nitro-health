@@ -116,6 +116,56 @@ describe('App', () => {
     ])
   })
 
+  it('reads steps from the app UI after steps permission is granted', async () => {
+    mockNitroHealth.getAvailabilityStatus.mockReturnValue('available')
+    mockNitroHealth.requestAuthorization.mockResolvedValue(grantedStepsResult)
+    mockNitroHealth.readSteps.mockResolvedValue([
+      {
+        startDate: new Date('2026-01-01T00:00:00.000Z'),
+        endDate: new Date('2026-01-01T01:00:00.000Z'),
+        count: 123,
+      },
+    ])
+
+    render(<App />)
+
+    fireEvent.press(screen.getByText('Request Steps permission'))
+    expect(await screen.findByText('Steps authorization result: granted')).toBeTruthy()
+
+    fireEvent.press(screen.getByText('Read Steps'))
+
+    expect(await screen.findByText('Steps samples: 1')).toBeTruthy()
+    expect(screen.getByText('Steps total: 123')).toBeTruthy()
+    expect(mockNitroHealth.readSteps).toHaveBeenCalledWith({
+      startDate: expect.any(Date),
+      endDate: expect.any(Date),
+      limit: 100,
+      ascending: false,
+    })
+  })
+
+  it('disables Read Steps until steps permission is granted', async () => {
+    mockNitroHealth.getAvailabilityStatus.mockReturnValue('available')
+    mockNitroHealth.requestAuthorization.mockResolvedValue(grantedStepsResult)
+
+    render(<App />)
+
+    // Before any grant the button is gated: a hint is shown and pressing does nothing.
+    expect(screen.getByText('Grant Steps permission to read')).toBeTruthy()
+    fireEvent.press(screen.getByText('Read Steps'))
+    expect(mockNitroHealth.readSteps).not.toHaveBeenCalled()
+
+    // Granting permission opens the gate.
+    fireEvent.press(screen.getByText('Request Steps permission'))
+    expect(await screen.findByText('Steps authorization result: granted')).toBeTruthy()
+    expect(screen.queryByText('Grant Steps permission to read')).toBeNull()
+
+    fireEvent.press(screen.getByText('Read Steps'))
+    await waitFor(() => {
+      expect(mockNitroHealth.readSteps).toHaveBeenCalledTimes(1)
+    })
+  })
+
   it('requests Heart Rate permission from the app UI', async () => {
     mockNitroHealth.getAvailabilityStatus.mockReturnValue('available')
     mockNitroHealth.requestAuthorization.mockResolvedValue(completedHeartRateResult)

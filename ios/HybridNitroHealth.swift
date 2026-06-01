@@ -46,6 +46,44 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         }
     }
 
+    // Note: HealthKit cannot report read-permission denial (a privacy limitation), so a query
+    // without read access resolves to an empty array rather than throwing. Callers should gate on
+    // getRequestStatusForAuthorization / requestAuthorization before reading.
+    func readSteps(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeStepSample]> {
+        if !HKHealthStore.isHealthDataAvailable() {
+            throw permissionError("Health data is not available")
+        }
+
+        let quantityType = try makeHealthKitQuantityType(dataType: "steps")
+        let startDate = Date(timeIntervalSince1970: query.startTimeMs / 1000)
+        let endDate = Date(timeIntervalSince1970: query.endTimeMs / 1000)
+        let predicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate, options: [])
+        let sortDescriptors = [
+            NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: query.ascending),
+        ]
+
+        return Promise<[NativeStepSample]>.async {
+            let samples = try await self.queryHealthKitSamples(
+                sampleType: quantityType,
+                limit: Int(query.limit),
+                predicate: predicate,
+                sortDescriptors: sortDescriptors
+            )
+
+            return samples.compactMap { sample in
+                guard let quantitySample = sample as? HKQuantitySample else {
+                    return nil
+                }
+
+                return NativeStepSample(
+                    startTimeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
+                    endTimeMs: quantitySample.endDate.timeIntervalSince1970 * 1000,
+                    count: quantitySample.quantity.doubleValue(for: HKUnit.count())
+                )
+            }
+        }
+    }
+
     func getRequestStatusForAuthorization(permissions: [NativeHealthPermission]) throws -> Promise<AuthorizationRequestStatus> {
         if !HKHealthStore.isHealthDataAvailable() {
             return Promise<AuthorizationRequestStatus>.resolved(withResult: AuthorizationRequestStatus.unknown)
@@ -136,6 +174,31 @@ class HybridNitroHealth: HybridNitroHealthSpec {
                     continuation.resume(returning: AuthorizationRequestStatus.unknown)
                 }
             }
+        }
+    }
+
+    private func queryHealthKitSamples(
+        sampleType: HKSampleType,
+        limit: Int,
+        predicate: NSPredicate?,
+        sortDescriptors: [NSSortDescriptor]
+    ) async throws -> [HKSample] {
+        return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<[HKSample], Error>) in
+            let query = HKSampleQuery(
+                sampleType: sampleType,
+                predicate: predicate,
+                limit: limit,
+                sortDescriptors: sortDescriptors
+            ) { _, samples, error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                    return
+                }
+
+                continuation.resume(returning: samples ?? [])
+            }
+
+            healthStore.execute(query)
         }
     }
 

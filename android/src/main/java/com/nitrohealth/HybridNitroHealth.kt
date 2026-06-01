@@ -8,6 +8,8 @@ import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.Record
 import androidx.health.connect.client.records.StepsRecord
+import androidx.health.connect.client.request.ReadRecordsRequest
+import androidx.health.connect.client.time.TimeRangeFilter
 import com.margelo.nitro.NitroModules
 import com.margelo.nitro.core.Promise
 import com.margelo.nitro.nitrohealth.AuthorizationRequestStatus
@@ -15,7 +17,10 @@ import com.margelo.nitro.nitrohealth.HealthAuthorizationStatus
 import com.margelo.nitro.nitrohealth.HealthAvailabilityStatus
 import com.margelo.nitro.nitrohealth.HybridNitroHealthSpec
 import com.margelo.nitro.nitrohealth.NativeHealthAuthorizationResult
+import com.margelo.nitro.nitrohealth.NativeHealthDateRangeQuery
 import com.margelo.nitro.nitrohealth.NativeHealthPermission
+import com.margelo.nitro.nitrohealth.NativeStepSample
+import java.time.Instant
 import kotlin.reflect.KClass
 
 class HybridNitroHealth: HybridNitroHealthSpec() {
@@ -76,6 +81,43 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                 false
             }
         )
+    }
+
+    override fun readSteps(query: NativeHealthDateRangeQuery): Promise<Array<NativeStepSample>> {
+        return Promise.async {
+            val context = NitroModules.applicationContext
+                ?: throw IllegalStateException("Android application context is unavailable")
+
+            if (getAvailabilityStatus() != HealthAvailabilityStatus.AVAILABLE) {
+                throw IllegalStateException("Health Connect is not available")
+            }
+
+            val client = HealthConnectClient.getOrCreate(context)
+
+            val stepsReadPermission = HealthPermission.getReadPermission(StepsRecord::class)
+            if (!client.permissionController.getGrantedPermissions().contains(stepsReadPermission)) {
+                throw SecurityException("Missing permission to read steps")
+            }
+
+            val request = ReadRecordsRequest(
+                recordType = StepsRecord::class,
+                timeRangeFilter = TimeRangeFilter.between(
+                    Instant.ofEpochMilli(query.startTimeMs.toLong()),
+                    Instant.ofEpochMilli(query.endTimeMs.toLong())
+                ),
+                ascendingOrder = query.ascending,
+                pageSize = query.limit.toInt()
+            )
+            val response = client.readRecords(request)
+
+            response.records.map { record ->
+                NativeStepSample(
+                    startTimeMs = record.startTime.toEpochMilli().toDouble(),
+                    endTimeMs = record.endTime.toEpochMilli().toDouble(),
+                    count = record.count.toDouble()
+                )
+            }.toTypedArray()
+        }
     }
 
     override fun getRequestStatusForAuthorization(

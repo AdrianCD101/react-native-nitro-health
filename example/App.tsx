@@ -7,6 +7,7 @@ import type {
   HealthDataType,
   HealthAvailabilityStatus,
   HealthPermission,
+  StepSample,
 } from 'react-native-nitro-health'
 
 const readPermissions: Array<{ dataType: HealthDataType; label: string }> = [
@@ -38,6 +39,8 @@ function App(): React.JSX.Element {
   const [checkingPermission, setCheckingPermission] = useState<HealthDataType>()
   const [requestingPermission, setRequestingPermission] = useState<HealthDataType>()
   const [openingSettings, setOpeningSettings] = useState<HealthDataType>()
+  const [readingSteps, setReadingSteps] = useState(false)
+  const [stepSamples, setStepSamples] = useState<StepSample[]>()
   const [errorMessages, setErrorMessages] = useState<Partial<Record<HealthDataType, string>>>({})
 
   async function checkPermission(dataType: HealthDataType): Promise<void> {
@@ -103,6 +106,33 @@ function App(): React.JSX.Element {
     }
   }
 
+  async function readSteps(): Promise<void> {
+    const endDate = new Date()
+    const startDate = new Date(endDate.getTime() - 7 * 24 * 60 * 60 * 1000)
+
+    setReadingSteps(true)
+    setErrorMessages((current) => ({ ...current, steps: undefined }))
+
+    try {
+      const samples = await NitroHealth.readSteps({
+        startDate,
+        endDate,
+        limit: 100,
+        ascending: false,
+      })
+      setStepSamples(samples)
+    } catch (error) {
+      setErrorMessages((current) => ({
+        ...current,
+        steps: error instanceof Error ? error.message : String(error),
+      }))
+    } finally {
+      setReadingSteps(false)
+    }
+  }
+
+  const stepsTotal = stepSamples?.reduce((total, sample) => total + sample.count, 0)
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Health APIs</Text>
@@ -115,7 +145,14 @@ function App(): React.JSX.Element {
         const isRequesting = requestingPermission === dataType
         const isOpeningSettings = openingSettings === dataType
         const result = authorizationResults[dataType]
+        const requestStatus = authorizationStatuses[dataType]
         const canOpenSettings = result ? result.status !== 'granted' : false
+        const canReadSteps = dataType === 'steps'
+        const hasPermission =
+          result?.status === 'granted' ||
+          result?.status === 'completed' ||
+          (result?.grantedPermissions.length ?? 0) > 0 ||
+          requestStatus === 'unnecessary'
 
         return (
           <View key={dataType} style={styles.permissionCard}>
@@ -137,6 +174,12 @@ function App(): React.JSX.Element {
             ) : null}
             {errorMessages[dataType] ? (
               <Text style={styles.error}>{errorMessages[dataType]}</Text>
+            ) : null}
+            {canReadSteps && stepSamples ? (
+              <View style={styles.readResult}>
+                <Text style={styles.detail}>Steps samples: {stepSamples.length}</Text>
+                <Text style={styles.detail}>Steps total: {stepsTotal}</Text>
+              </View>
             ) : null}
             <View style={styles.buttonRow}>
               <Pressable
@@ -185,6 +228,27 @@ function App(): React.JSX.Element {
                 >
                   <Text style={styles.buttonText}>
                     {isOpeningSettings ? 'Opening...' : 'Open health settings'}
+                  </Text>
+                </Pressable>
+              ) : null}
+              {canReadSteps && !hasPermission ? (
+                <Text style={styles.detail}>Grant Steps permission to read</Text>
+              ) : null}
+              {canReadSteps ? (
+                <Pressable
+                  disabled={!isAvailable || readingSteps || !hasPermission}
+                  onPress={() => {
+                    readSteps()
+                  }}
+                  style={({ pressed }) => [
+                    styles.button,
+                    styles.readButton,
+                    pressed ? styles.buttonPressed : null,
+                    !isAvailable || readingSteps || !hasPermission ? styles.buttonDisabled : null,
+                  ]}
+                >
+                  <Text style={styles.buttonText}>
+                    {readingSteps ? 'Reading...' : 'Read Steps'}
                   </Text>
                 </Pressable>
               ) : null}
@@ -263,6 +327,9 @@ const styles = StyleSheet.create({
     marginTop: 16,
     gap: 12,
   },
+  readResult: {
+    marginTop: 4,
+  },
   button: {
     minHeight: 44,
     paddingVertical: 12,
@@ -277,6 +344,9 @@ const styles = StyleSheet.create({
   },
   settingsButton: {
     backgroundColor: '#64748b',
+  },
+  readButton: {
+    backgroundColor: '#15803d',
   },
   installButton: {
     marginTop: 24,

@@ -14,6 +14,10 @@ namespace NitroHealth { class HybridNitroHealthSpec_cxx; }
 
 // Forward declaration of `HealthAvailabilityStatus` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class HealthAvailabilityStatus; }
+// Forward declaration of `NativeStepSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeStepSample; }
+// Forward declaration of `NativeHealthDateRangeQuery` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthDateRangeQuery; }
 // Forward declaration of `AuthorizationRequestStatus` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class AuthorizationRequestStatus; }
 // Forward declaration of `NativeHealthPermission` to properly resolve imports.
@@ -25,9 +29,11 @@ namespace margelo::nitro::nitrohealth { enum class HealthAuthorizationStatus; }
 
 #include "HealthAvailabilityStatus.hpp"
 #include <NitroModules/Promise.hpp>
+#include "NativeStepSample.hpp"
+#include <vector>
+#include "NativeHealthDateRangeQuery.hpp"
 #include "AuthorizationRequestStatus.hpp"
 #include "NativeHealthPermission.hpp"
-#include <vector>
 #include <string>
 #include "NativeHealthAuthorizationResult.hpp"
 #include "HealthAuthorizationStatus.hpp"
@@ -108,6 +114,14 @@ namespace margelo::nitro::nitrohealth {
     }
     inline std::shared_ptr<Promise<bool>> openHealthSettings() override {
       auto __result = _swiftPart.openHealthSettings();
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline std::shared_ptr<Promise<std::vector<NativeStepSample>>> readSteps(const NativeHealthDateRangeQuery& query) override {
+      auto __result = _swiftPart.readSteps(std::forward<decltype(query)>(query));
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }
