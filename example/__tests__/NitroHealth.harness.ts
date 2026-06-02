@@ -210,6 +210,26 @@ describe('NitroHealth native module', () => {
     }
   })
 
+  it('rejects invalid activity quantity ranges before crossing the native boundary', async () => {
+    const invalidRange = {
+      startDate: new Date('2026-01-02T00:00:00.000Z'),
+      endDate: new Date('2026-01-01T00:00:00.000Z'),
+    }
+
+    await expect(NitroHealth.readDistance(invalidRange)).rejects.toThrow(
+      'startDate must be before endDate'
+    )
+    await expect(NitroHealth.readDailyDistanceTotals(invalidRange)).rejects.toThrow(
+      'startDate must be before endDate'
+    )
+    await expect(NitroHealth.readActiveEnergyBurned(invalidRange)).rejects.toThrow(
+      'startDate must be before endDate'
+    )
+    await expect(NitroHealth.readDailyActiveEnergyBurnedTotals(invalidRange)).rejects.toThrow(
+      'startDate must be before endDate'
+    )
+  })
+
   it('rejects reading daily distance totals on Android when permission is not granted', async () => {
     if (Platform.OS !== 'android') {
       return

@@ -156,11 +156,13 @@ const heartRate = await NitroHealth.readHeartRateStatistics({
 })
 ```
 
-`readDailyStepTotals()` returns one step-count bucket per local calendar day with `startDate`, `endDate`, and `count`. Empty days are omitted, so apps that need a continuous chart should zero-fill missing days. First and last buckets may be partial when the query starts or ends mid-day. `ascending` orders the buckets and `limit` caps the returned bucket count.
+Daily total methods return one bucket per day. On iOS, buckets align to local calendar days, so the first and last buckets may be partial when the query starts or ends mid-day. On Android, Health Connect anchors buckets to the query's start time, so a query starting at 15:30 returns 15:30-to-15:30 windows — pass a local-midnight `startDate` when you need calendar-day buckets on both platforms. Empty days are omitted, so apps that need a continuous chart should zero-fill missing days. `ascending` orders the buckets and `limit` caps the returned bucket count.
 
-`readDailyDistanceTotals()` returns one distance bucket per local calendar day with `startDate`, `endDate`, and `distanceMeters`.
+`readDailyStepTotals()` returns buckets with `startDate`, `endDate`, and `count`.
 
-`readDailyActiveEnergyBurnedTotals()` returns one active-energy bucket per local calendar day with `startDate`, `endDate`, and `kilocalories`.
+`readDailyDistanceTotals()` returns buckets with `startDate`, `endDate`, and `distanceMeters`.
+
+`readDailyActiveEnergyBurnedTotals()` returns buckets with `startDate`, `endDate`, and `kilocalories`.
 
 `readHeartRateStatistics()` returns `{ average, min, max }` in beats per minute. Each field is `undefined` when no matching heart-rate data exists.
 

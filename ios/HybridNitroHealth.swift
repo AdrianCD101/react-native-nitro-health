@@ -112,16 +112,25 @@ class HybridNitroHealth: HybridNitroHealthSpec {
                 guard let sum = statistic.sumQuantity() else {
                     return nil
                 }
+                let range = clampDailyBucketRange(
+                    bucketStartTimeMs: statistic.startDate.timeIntervalSince1970 * 1000,
+                    bucketEndTimeMs: statistic.endDate.timeIntervalSince1970 * 1000,
+                    queryStartTimeMs: query.startTimeMs,
+                    queryEndTimeMs: query.endTimeMs
+                )
 
                 return NativeStepSample(
-                    startTimeMs: statistic.startDate.timeIntervalSince1970 * 1000,
-                    endTimeMs: statistic.endDate.timeIntervalSince1970 * 1000,
+                    startTimeMs: range.startTimeMs,
+                    endTimeMs: range.endTimeMs,
                     count: sum.doubleValue(for: HKUnit.count())
                 )
             }
-            let ordered = query.ascending ? samples : Array(samples.reversed())
 
-            return Array(ordered.prefix(Int(query.limit)))
+            return orderAndLimitDailySamples(
+                samples,
+                ascending: query.ascending,
+                limit: Int(query.limit)
+            ) { $0.startTimeMs }
         }
     }
 
@@ -189,16 +198,25 @@ class HybridNitroHealth: HybridNitroHealthSpec {
                 guard let sum = statistic.sumQuantity() else {
                     return nil
                 }
+                let range = clampDailyBucketRange(
+                    bucketStartTimeMs: statistic.startDate.timeIntervalSince1970 * 1000,
+                    bucketEndTimeMs: statistic.endDate.timeIntervalSince1970 * 1000,
+                    queryStartTimeMs: query.startTimeMs,
+                    queryEndTimeMs: query.endTimeMs
+                )
 
                 return NativeDistanceSample(
-                    startTimeMs: statistic.startDate.timeIntervalSince1970 * 1000,
-                    endTimeMs: statistic.endDate.timeIntervalSince1970 * 1000,
+                    startTimeMs: range.startTimeMs,
+                    endTimeMs: range.endTimeMs,
                     distanceMeters: sum.doubleValue(for: HKUnit.meter())
                 )
             }
-            let ordered = query.ascending ? samples : Array(samples.reversed())
 
-            return Array(ordered.prefix(Int(query.limit)))
+            return orderAndLimitDailySamples(
+                samples,
+                ascending: query.ascending,
+                limit: Int(query.limit)
+            ) { $0.startTimeMs }
         }
     }
 
@@ -266,16 +284,25 @@ class HybridNitroHealth: HybridNitroHealthSpec {
                 guard let sum = statistic.sumQuantity() else {
                     return nil
                 }
+                let range = clampDailyBucketRange(
+                    bucketStartTimeMs: statistic.startDate.timeIntervalSince1970 * 1000,
+                    bucketEndTimeMs: statistic.endDate.timeIntervalSince1970 * 1000,
+                    queryStartTimeMs: query.startTimeMs,
+                    queryEndTimeMs: query.endTimeMs
+                )
 
                 return NativeActiveEnergyBurnedSample(
-                    startTimeMs: statistic.startDate.timeIntervalSince1970 * 1000,
-                    endTimeMs: statistic.endDate.timeIntervalSince1970 * 1000,
+                    startTimeMs: range.startTimeMs,
+                    endTimeMs: range.endTimeMs,
                     kilocalories: sum.doubleValue(for: HKUnit.kilocalorie())
                 )
             }
-            let ordered = query.ascending ? samples : Array(samples.reversed())
 
-            return Array(ordered.prefix(Int(query.limit)))
+            return orderAndLimitDailySamples(
+                samples,
+                ascending: query.ascending,
+                limit: Int(query.limit)
+            ) { $0.startTimeMs }
         }
     }
 

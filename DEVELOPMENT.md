@@ -100,6 +100,32 @@ Set `permissions: true` in the Harness config only when adding tests that need H
 
 The permission Harness tests intentionally skip interactive request flows unless the requested permission is already unnecessary/granted. HealthKit and Health Connect use specialized permission sheets, so do not assume Harness can auto-accept them like camera/location prompts.
 
+### Android Native Unit Tests
+
+Use JVM unit tests for pure Kotlin logic that does not need Android framework state, Health Connect, or user permissions.
+
+Run from the repository root:
+
+```sh
+bun run test:android:native
+```
+
+You can also open `example/android` in Android Studio, then run `DailyBucketUtilsTest` or `HealthConnectPermissionUtilsTest` from the editor gutter or test class context menu.
+
+The first native unit tests cover daily bucket shaping helpers: clamping bucket ranges to the requested query, ordering buckets, and applying `limit`. Keep Health Connect client calls, permission prompts, and device/provider behavior in Harness or manual device tests instead.
+
+### iOS Native Unit Tests
+
+Use SwiftPM/XCTest for pure Swift logic that does not need HealthKit runtime state, permissions, CocoaPods, or Nitro-generated values.
+
+Run from the repository root:
+
+```sh
+bun run test:ios:native
+```
+
+This delegates to `swift test` through the test-only root `Package.swift`. The package includes only pure helper files such as `ios/DailyBucketUtils.swift`; the production iOS pod still builds through `NitroHealth.podspec`. Keep `HKHealthStore`, query execution, and permission prompts in Harness or manual device tests instead.
+
 ### TDD Loop
 
 Use Jest for fast JS/API behavior tests. Use native app builds for platform smoke tests.

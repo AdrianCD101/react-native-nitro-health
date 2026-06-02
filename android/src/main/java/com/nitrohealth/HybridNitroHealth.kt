@@ -149,20 +149,24 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                 timeRangeSlicer = Period.ofDays(1)
             )
             val response = client.aggregateGroupByPeriod(request)
-            val samples = response.map { group ->
+            val samples = response.mapNotNull { group ->
+                val count = group.result[StepsRecord.COUNT_TOTAL]
+                    ?: return@mapNotNull null
+                val range = clampDailyBucketRange(
+                    bucketStartTimeMs = group.startTime.atZone(zoneId).toInstant().toEpochMilli().toDouble(),
+                    bucketEndTimeMs = group.endTime.atZone(zoneId).toInstant().toEpochMilli().toDouble(),
+                    queryStartTimeMs = query.startTimeMs,
+                    queryEndTimeMs = query.endTimeMs
+                )
+
                 NativeStepSample(
-                    startTimeMs = group.startTime.atZone(zoneId).toInstant().toEpochMilli().toDouble(),
-                    endTimeMs = group.endTime.atZone(zoneId).toInstant().toEpochMilli().toDouble(),
-                    count = group.result[StepsRecord.COUNT_TOTAL]?.toDouble() ?: 0.0
+                    startTimeMs = range.startTimeMs,
+                    endTimeMs = range.endTimeMs,
+                    count = count.toDouble()
                 )
             }
-            val ordered = if (query.ascending) {
-                samples.sortedBy { it.startTimeMs }
-            } else {
-                samples.sortedByDescending { it.startTimeMs }
-            }
-
-            ordered.take(query.limit.toInt()).toTypedArray()
+            orderAndLimitDailySamples(samples, query.ascending, query.limit.toInt()) { it.startTimeMs }
+                .toTypedArray()
         }
     }
 
@@ -221,20 +225,24 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                 timeRangeSlicer = Period.ofDays(1)
             )
             val response = client.aggregateGroupByPeriod(request)
-            val samples = response.map { group ->
+            val samples = response.mapNotNull { group ->
+                val distance = group.result[DistanceRecord.DISTANCE_TOTAL]
+                    ?: return@mapNotNull null
+                val range = clampDailyBucketRange(
+                    bucketStartTimeMs = group.startTime.atZone(zoneId).toInstant().toEpochMilli().toDouble(),
+                    bucketEndTimeMs = group.endTime.atZone(zoneId).toInstant().toEpochMilli().toDouble(),
+                    queryStartTimeMs = query.startTimeMs,
+                    queryEndTimeMs = query.endTimeMs
+                )
+
                 NativeDistanceSample(
-                    startTimeMs = group.startTime.atZone(zoneId).toInstant().toEpochMilli().toDouble(),
-                    endTimeMs = group.endTime.atZone(zoneId).toInstant().toEpochMilli().toDouble(),
-                    distanceMeters = group.result[DistanceRecord.DISTANCE_TOTAL]?.inMeters ?: 0.0
+                    startTimeMs = range.startTimeMs,
+                    endTimeMs = range.endTimeMs,
+                    distanceMeters = distance.inMeters
                 )
             }
-            val ordered = if (query.ascending) {
-                samples.sortedBy { it.startTimeMs }
-            } else {
-                samples.sortedByDescending { it.startTimeMs }
-            }
-
-            ordered.take(query.limit.toInt()).toTypedArray()
+            orderAndLimitDailySamples(samples, query.ascending, query.limit.toInt()) { it.startTimeMs }
+                .toTypedArray()
         }
     }
 
@@ -295,20 +303,24 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                 timeRangeSlicer = Period.ofDays(1)
             )
             val response = client.aggregateGroupByPeriod(request)
-            val samples = response.map { group ->
+            val samples = response.mapNotNull { group ->
+                val activeCalories = group.result[ActiveCaloriesBurnedRecord.ACTIVE_CALORIES_TOTAL]
+                    ?: return@mapNotNull null
+                val range = clampDailyBucketRange(
+                    bucketStartTimeMs = group.startTime.atZone(zoneId).toInstant().toEpochMilli().toDouble(),
+                    bucketEndTimeMs = group.endTime.atZone(zoneId).toInstant().toEpochMilli().toDouble(),
+                    queryStartTimeMs = query.startTimeMs,
+                    queryEndTimeMs = query.endTimeMs
+                )
+
                 NativeActiveEnergyBurnedSample(
-                    startTimeMs = group.startTime.atZone(zoneId).toInstant().toEpochMilli().toDouble(),
-                    endTimeMs = group.endTime.atZone(zoneId).toInstant().toEpochMilli().toDouble(),
-                    kilocalories = group.result[ActiveCaloriesBurnedRecord.ACTIVE_CALORIES_TOTAL]?.inKilocalories ?: 0.0
+                    startTimeMs = range.startTimeMs,
+                    endTimeMs = range.endTimeMs,
+                    kilocalories = activeCalories.inKilocalories
                 )
             }
-            val ordered = if (query.ascending) {
-                samples.sortedBy { it.startTimeMs }
-            } else {
-                samples.sortedByDescending { it.startTimeMs }
-            }
-
-            ordered.take(query.limit.toInt()).toTypedArray()
+            orderAndLimitDailySamples(samples, query.ascending, query.limit.toInt()) { it.startTimeMs }
+                .toTypedArray()
         }
     }
 
@@ -404,7 +416,9 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         return Promise.async {
             val client = HealthConnectClient.getOrCreate(context)
             val grantedPermissions = client.permissionController.getGrantedPermissions()
-            val requestedPermissions = permissions.map(::toHealthConnectPermission).toSet()
+            val requestedPermissions = permissions.map {
+                toHealthConnectPermission(it.dataType, it.accessType)
+            }.toSet()
 
             if (grantedPermissions.containsAll(requestedPermissions)) {
                 AuthorizationRequestStatus.UNNECESSARY
@@ -441,7 +455,9 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         return Promise.async {
             val client = HealthConnectClient.getOrCreate(context)
             val grantedPermissions = client.permissionController.getGrantedPermissions()
-            val requestedPermissions = permissions.associateWith(::toHealthConnectPermission)
+            val requestedPermissions = permissions.associateWith {
+                toHealthConnectPermission(it.dataType, it.accessType)
+            }
             val requestedPermissionSet = requestedPermissions.values.toSet()
 
             val updatedGrantedPermissions = if (grantedPermissions.containsAll(requestedPermissionSet)) {
@@ -508,24 +524,6 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         val permission = HealthPermission.getReadPermission(recordType)
         if (!client.permissionController.getGrantedPermissions().contains(permission)) {
             throw SecurityException("Missing permission to read $label")
-        }
-    }
-
-    private fun toHealthConnectPermission(permission: NativeHealthPermission): String {
-        val recordType: KClass<out Record> = when (permission.dataType) {
-            "steps" -> StepsRecord::class
-            "heartRate" -> HeartRateRecord::class
-            "distance" -> DistanceRecord::class
-            "activeEnergyBurned" -> ActiveCaloriesBurnedRecord::class
-            else -> throw IllegalArgumentException("Unsupported health data type: ${permission.dataType}")
-        }
-
-        return when (permission.accessType) {
-            "read" -> HealthPermission.getReadPermission(recordType)
-            "write" -> HealthPermission.getWritePermission(recordType)
-            else -> throw IllegalArgumentException(
-                "Unsupported health permission access type: ${permission.accessType}"
-            )
         }
     }
 }

@@ -368,4 +368,82 @@ describe('NitroHealth permission contract', () => {
 
     expect(mockNitroHealth.readSteps).not.toHaveBeenCalled()
   })
+
+  it('rejects invalid activity quantity dates before crossing the native boundary', async () => {
+    const invalidDateRange = {
+      startDate: new Date(Number.NaN),
+      endDate: new Date('2026-01-02T00:00:00.000Z'),
+    }
+
+    await expect(NitroHealth.readDistance(invalidDateRange)).rejects.toThrow(
+      'A valid startDate is required'
+    )
+    await expect(NitroHealth.readDailyDistanceTotals(invalidDateRange)).rejects.toThrow(
+      'A valid startDate is required'
+    )
+    await expect(NitroHealth.readActiveEnergyBurned(invalidDateRange)).rejects.toThrow(
+      'A valid startDate is required'
+    )
+    await expect(NitroHealth.readDailyActiveEnergyBurnedTotals(invalidDateRange)).rejects.toThrow(
+      'A valid startDate is required'
+    )
+
+    expect(mockNitroHealth.readDistance).not.toHaveBeenCalled()
+    expect(mockNitroHealth.readDailyDistanceTotals).not.toHaveBeenCalled()
+    expect(mockNitroHealth.readActiveEnergyBurned).not.toHaveBeenCalled()
+    expect(mockNitroHealth.readDailyActiveEnergyBurnedTotals).not.toHaveBeenCalled()
+  })
+
+  it('rejects invalid activity quantity ranges before crossing the native boundary', async () => {
+    const invalidRange = {
+      startDate: new Date('2026-01-02T00:00:00.000Z'),
+      endDate: new Date('2026-01-01T00:00:00.000Z'),
+    }
+
+    await expect(NitroHealth.readDistance(invalidRange)).rejects.toThrow(
+      'startDate must be before endDate'
+    )
+    await expect(NitroHealth.readDailyDistanceTotals(invalidRange)).rejects.toThrow(
+      'startDate must be before endDate'
+    )
+    await expect(NitroHealth.readActiveEnergyBurned(invalidRange)).rejects.toThrow(
+      'startDate must be before endDate'
+    )
+    await expect(NitroHealth.readDailyActiveEnergyBurnedTotals(invalidRange)).rejects.toThrow(
+      'startDate must be before endDate'
+    )
+
+    expect(mockNitroHealth.readDistance).not.toHaveBeenCalled()
+    expect(mockNitroHealth.readDailyDistanceTotals).not.toHaveBeenCalled()
+    expect(mockNitroHealth.readActiveEnergyBurned).not.toHaveBeenCalled()
+    expect(mockNitroHealth.readDailyActiveEnergyBurnedTotals).not.toHaveBeenCalled()
+  })
+
+  it('rejects non-positive-integer activity quantity limits before crossing the native boundary', async () => {
+    for (const limit of [0, -1, 1.5]) {
+      const invalidLimitRange = {
+        startDate: new Date('2026-01-01T00:00:00.000Z'),
+        endDate: new Date('2026-01-02T00:00:00.000Z'),
+        limit,
+      }
+
+      await expect(NitroHealth.readDistance(invalidLimitRange)).rejects.toThrow(
+        'limit must be a positive integer'
+      )
+      await expect(NitroHealth.readDailyDistanceTotals(invalidLimitRange)).rejects.toThrow(
+        'limit must be a positive integer'
+      )
+      await expect(NitroHealth.readActiveEnergyBurned(invalidLimitRange)).rejects.toThrow(
+        'limit must be a positive integer'
+      )
+      await expect(
+        NitroHealth.readDailyActiveEnergyBurnedTotals(invalidLimitRange)
+      ).rejects.toThrow('limit must be a positive integer')
+    }
+
+    expect(mockNitroHealth.readDistance).not.toHaveBeenCalled()
+    expect(mockNitroHealth.readDailyDistanceTotals).not.toHaveBeenCalled()
+    expect(mockNitroHealth.readActiveEnergyBurned).not.toHaveBeenCalled()
+    expect(mockNitroHealth.readDailyActiveEnergyBurnedTotals).not.toHaveBeenCalled()
+  })
 })
