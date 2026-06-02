@@ -7,6 +7,10 @@ const availabilityStatuses = ['available', 'unavailable', 'providerUpdateRequire
 const authorizationRequestStatuses = ['unknown', 'shouldRequest', 'unnecessary']
 const authorizationResultStatuses = ['granted', 'partial', 'denied', 'completed', 'unavailable']
 const stepsReadPermission: HealthPermission[] = [{ accessType: 'read', dataType: 'steps' }]
+const distanceReadPermission: HealthPermission[] = [{ accessType: 'read', dataType: 'distance' }]
+const activeEnergyReadPermission: HealthPermission[] = [
+  { accessType: 'read', dataType: 'activeEnergyBurned' },
+]
 const heartRateReadPermission: HealthPermission[] = [{ accessType: 'read', dataType: 'heartRate' }]
 const emptyRange = {
   startDate: new Date('2000-01-01T00:00:00.000Z'),
@@ -45,6 +49,18 @@ describe('NitroHealth native module', () => {
 
   it('gets request status for Heart Rate read permission from native code', async () => {
     const status = await NitroHealth.getRequestStatusForAuthorization(heartRateReadPermission)
+
+    expect(authorizationRequestStatuses).toContain(status)
+  })
+
+  it('gets request status for distance read permission from native code', async () => {
+    const status = await NitroHealth.getRequestStatusForAuthorization(distanceReadPermission)
+
+    expect(authorizationRequestStatuses).toContain(status)
+  })
+
+  it('gets request status for active energy read permission from native code', async () => {
+    const status = await NitroHealth.getRequestStatusForAuthorization(activeEnergyReadPermission)
 
     expect(authorizationRequestStatuses).toContain(status)
   })
@@ -139,6 +155,142 @@ describe('NitroHealth native module', () => {
     const totals = await NitroHealth.readDailyStepTotals(emptyRange)
 
     expect(Array.isArray(totals)).toBe(true)
+  })
+
+  it('reads distance from native code without crashing', async () => {
+    try {
+      const samples = await NitroHealth.readDistance(emptyRange)
+
+      expect(Array.isArray(samples)).toBe(true)
+      for (const sample of samples) {
+        expect(typeof sample.distanceMeters).toBe('number')
+      }
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error)
+    }
+  })
+
+  it('rejects reading distance on Android when permission is not granted', async () => {
+    if (Platform.OS !== 'android') {
+      return
+    }
+
+    const status = await NitroHealth.getRequestStatusForAuthorization(distanceReadPermission)
+
+    if (status === 'unnecessary') {
+      return
+    }
+
+    await expect(NitroHealth.readDistance(emptyRange)).rejects.toThrow(/permission/i)
+  })
+
+  it('returns empty distance on iOS when permission is not granted (HealthKit silent-empty)', async () => {
+    if (Platform.OS !== 'ios') {
+      return
+    }
+
+    const status = await NitroHealth.getRequestStatusForAuthorization(distanceReadPermission)
+
+    if (status === 'unnecessary') {
+      return
+    }
+
+    const samples = await NitroHealth.readDistance(emptyRange)
+
+    expect(Array.isArray(samples)).toBe(true)
+  })
+
+  it('reads daily distance totals from native code without crashing', async () => {
+    try {
+      const totals = await NitroHealth.readDailyDistanceTotals(emptyRange)
+
+      expect(Array.isArray(totals)).toBe(true)
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error)
+    }
+  })
+
+  it('rejects reading daily distance totals on Android when permission is not granted', async () => {
+    if (Platform.OS !== 'android') {
+      return
+    }
+
+    const status = await NitroHealth.getRequestStatusForAuthorization(distanceReadPermission)
+
+    if (status === 'unnecessary') {
+      return
+    }
+
+    await expect(NitroHealth.readDailyDistanceTotals(emptyRange)).rejects.toThrow(/permission/i)
+  })
+
+  it('reads active energy burned from native code without crashing', async () => {
+    try {
+      const samples = await NitroHealth.readActiveEnergyBurned(emptyRange)
+
+      expect(Array.isArray(samples)).toBe(true)
+      for (const sample of samples) {
+        expect(typeof sample.kilocalories).toBe('number')
+      }
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error)
+    }
+  })
+
+  it('rejects reading active energy burned on Android when permission is not granted', async () => {
+    if (Platform.OS !== 'android') {
+      return
+    }
+
+    const status = await NitroHealth.getRequestStatusForAuthorization(activeEnergyReadPermission)
+
+    if (status === 'unnecessary') {
+      return
+    }
+
+    await expect(NitroHealth.readActiveEnergyBurned(emptyRange)).rejects.toThrow(/permission/i)
+  })
+
+  it('returns empty active energy burned on iOS when permission is not granted (HealthKit silent-empty)', async () => {
+    if (Platform.OS !== 'ios') {
+      return
+    }
+
+    const status = await NitroHealth.getRequestStatusForAuthorization(activeEnergyReadPermission)
+
+    if (status === 'unnecessary') {
+      return
+    }
+
+    const samples = await NitroHealth.readActiveEnergyBurned(emptyRange)
+
+    expect(Array.isArray(samples)).toBe(true)
+  })
+
+  it('reads daily active energy burned totals from native code without crashing', async () => {
+    try {
+      const totals = await NitroHealth.readDailyActiveEnergyBurnedTotals(emptyRange)
+
+      expect(Array.isArray(totals)).toBe(true)
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error)
+    }
+  })
+
+  it('rejects reading daily active energy burned totals on Android when permission is not granted', async () => {
+    if (Platform.OS !== 'android') {
+      return
+    }
+
+    const status = await NitroHealth.getRequestStatusForAuthorization(activeEnergyReadPermission)
+
+    if (status === 'unnecessary') {
+      return
+    }
+
+    await expect(NitroHealth.readDailyActiveEnergyBurnedTotals(emptyRange)).rejects.toThrow(
+      /permission/i
+    )
   })
 
   it('reads heart rate from native code without crashing', async () => {

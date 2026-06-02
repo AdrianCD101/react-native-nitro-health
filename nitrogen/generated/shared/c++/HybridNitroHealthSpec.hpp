@@ -19,6 +19,10 @@ namespace margelo::nitro::nitrohealth { enum class HealthAvailabilityStatus; }
 namespace margelo::nitro::nitrohealth { struct NativeStepSample; }
 // Forward declaration of `NativeHealthDateRangeQuery` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthDateRangeQuery; }
+// Forward declaration of `NativeDistanceSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeDistanceSample; }
+// Forward declaration of `NativeActiveEnergyBurnedSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeActiveEnergyBurnedSample; }
 // Forward declaration of `NativeHeartRateSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHeartRateSample; }
 // Forward declaration of `NativeHeartRateStatistics` to properly resolve imports.
@@ -37,6 +41,8 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthAuthorizationResult; 
 #include "NativeStepSample.hpp"
 #include <vector>
 #include "NativeHealthDateRangeQuery.hpp"
+#include "NativeDistanceSample.hpp"
+#include "NativeActiveEnergyBurnedSample.hpp"
 #include "NativeHeartRateSample.hpp"
 #include "NativeHeartRateStatistics.hpp"
 #include "NativeHealthTimeRangeQuery.hpp"
@@ -81,6 +87,10 @@ namespace margelo::nitro::nitrohealth {
       virtual std::shared_ptr<Promise<bool>> openHealthSettings() = 0;
       virtual std::shared_ptr<Promise<std::vector<NativeStepSample>>> readSteps(const NativeHealthDateRangeQuery& query) = 0;
       virtual std::shared_ptr<Promise<std::vector<NativeStepSample>>> readDailyStepTotals(const NativeHealthDateRangeQuery& query) = 0;
+      virtual std::shared_ptr<Promise<std::vector<NativeDistanceSample>>> readDistance(const NativeHealthDateRangeQuery& query) = 0;
+      virtual std::shared_ptr<Promise<std::vector<NativeDistanceSample>>> readDailyDistanceTotals(const NativeHealthDateRangeQuery& query) = 0;
+      virtual std::shared_ptr<Promise<std::vector<NativeActiveEnergyBurnedSample>>> readActiveEnergyBurned(const NativeHealthDateRangeQuery& query) = 0;
+      virtual std::shared_ptr<Promise<std::vector<NativeActiveEnergyBurnedSample>>> readDailyActiveEnergyBurnedTotals(const NativeHealthDateRangeQuery& query) = 0;
       virtual std::shared_ptr<Promise<std::vector<NativeHeartRateSample>>> readHeartRate(const NativeHealthDateRangeQuery& query) = 0;
       virtual std::shared_ptr<Promise<NativeHeartRateStatistics>> readHeartRateStatistics(const NativeHealthTimeRangeQuery& query) = 0;
       virtual std::shared_ptr<Promise<AuthorizationRequestStatus>> getRequestStatusForAuthorization(const std::vector<NativeHealthPermission>& permissions) = 0;

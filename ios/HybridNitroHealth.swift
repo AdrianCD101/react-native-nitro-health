@@ -125,6 +125,160 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         }
     }
 
+    // Note: like readSteps, HealthKit resolves with an empty array when read access is denied.
+    func readDistance(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeDistanceSample]> {
+        if !HKHealthStore.isHealthDataAvailable() {
+            throw permissionError("Health data is not available")
+        }
+
+        let quantityType = try makeHealthKitQuantityType(dataType: "distance")
+        let startDate = Date(timeIntervalSince1970: query.startTimeMs / 1000)
+        let endDate = Date(timeIntervalSince1970: query.endTimeMs / 1000)
+        let predicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate, options: [])
+        let sortDescriptors = [
+            NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: query.ascending),
+        ]
+
+        return Promise<[NativeDistanceSample]>.async {
+            let samples = try await self.queryHealthKitSamples(
+                sampleType: quantityType,
+                limit: Int(query.limit),
+                predicate: predicate,
+                sortDescriptors: sortDescriptors
+            )
+
+            return samples.compactMap { sample in
+                guard let quantitySample = sample as? HKQuantitySample else {
+                    return nil
+                }
+
+                return NativeDistanceSample(
+                    startTimeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
+                    endTimeMs: quantitySample.endDate.timeIntervalSince1970 * 1000,
+                    distanceMeters: quantitySample.quantity.doubleValue(for: HKUnit.meter())
+                )
+            }
+        }
+    }
+
+    // Daily totals use HealthKit statistics so overlapping sources are aggregated by the OS.
+    func readDailyDistanceTotals(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeDistanceSample]> {
+        if !HKHealthStore.isHealthDataAvailable() {
+            throw permissionError("Health data is not available")
+        }
+
+        let quantityType = try makeHealthKitQuantityType(dataType: "distance")
+        let startDate = Date(timeIntervalSince1970: query.startTimeMs / 1000)
+        let endDate = Date(timeIntervalSince1970: query.endTimeMs / 1000)
+        let predicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate, options: [])
+        let anchorDate = Calendar.current.startOfDay(for: startDate)
+        var intervalComponents = DateComponents()
+        intervalComponents.day = 1
+
+        return Promise<[NativeDistanceSample]>.async {
+            let statistics = try await self.queryHealthKitStatisticsCollection(
+                quantityType: quantityType,
+                predicate: predicate,
+                options: .cumulativeSum,
+                anchorDate: anchorDate,
+                intervalComponents: intervalComponents,
+                startDate: startDate,
+                endDate: endDate
+            )
+            let samples = statistics.compactMap { statistic -> NativeDistanceSample? in
+                guard let sum = statistic.sumQuantity() else {
+                    return nil
+                }
+
+                return NativeDistanceSample(
+                    startTimeMs: statistic.startDate.timeIntervalSince1970 * 1000,
+                    endTimeMs: statistic.endDate.timeIntervalSince1970 * 1000,
+                    distanceMeters: sum.doubleValue(for: HKUnit.meter())
+                )
+            }
+            let ordered = query.ascending ? samples : Array(samples.reversed())
+
+            return Array(ordered.prefix(Int(query.limit)))
+        }
+    }
+
+    // Note: like readSteps, HealthKit resolves with an empty array when read access is denied.
+    func readActiveEnergyBurned(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeActiveEnergyBurnedSample]> {
+        if !HKHealthStore.isHealthDataAvailable() {
+            throw permissionError("Health data is not available")
+        }
+
+        let quantityType = try makeHealthKitQuantityType(dataType: "activeEnergyBurned")
+        let startDate = Date(timeIntervalSince1970: query.startTimeMs / 1000)
+        let endDate = Date(timeIntervalSince1970: query.endTimeMs / 1000)
+        let predicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate, options: [])
+        let sortDescriptors = [
+            NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: query.ascending),
+        ]
+
+        return Promise<[NativeActiveEnergyBurnedSample]>.async {
+            let samples = try await self.queryHealthKitSamples(
+                sampleType: quantityType,
+                limit: Int(query.limit),
+                predicate: predicate,
+                sortDescriptors: sortDescriptors
+            )
+
+            return samples.compactMap { sample in
+                guard let quantitySample = sample as? HKQuantitySample else {
+                    return nil
+                }
+
+                return NativeActiveEnergyBurnedSample(
+                    startTimeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
+                    endTimeMs: quantitySample.endDate.timeIntervalSince1970 * 1000,
+                    kilocalories: quantitySample.quantity.doubleValue(for: HKUnit.kilocalorie())
+                )
+            }
+        }
+    }
+
+    // Daily totals use HealthKit statistics so overlapping sources are aggregated by the OS.
+    func readDailyActiveEnergyBurnedTotals(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeActiveEnergyBurnedSample]> {
+        if !HKHealthStore.isHealthDataAvailable() {
+            throw permissionError("Health data is not available")
+        }
+
+        let quantityType = try makeHealthKitQuantityType(dataType: "activeEnergyBurned")
+        let startDate = Date(timeIntervalSince1970: query.startTimeMs / 1000)
+        let endDate = Date(timeIntervalSince1970: query.endTimeMs / 1000)
+        let predicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate, options: [])
+        let anchorDate = Calendar.current.startOfDay(for: startDate)
+        var intervalComponents = DateComponents()
+        intervalComponents.day = 1
+
+        return Promise<[NativeActiveEnergyBurnedSample]>.async {
+            let statistics = try await self.queryHealthKitStatisticsCollection(
+                quantityType: quantityType,
+                predicate: predicate,
+                options: .cumulativeSum,
+                anchorDate: anchorDate,
+                intervalComponents: intervalComponents,
+                startDate: startDate,
+                endDate: endDate
+            )
+            let samples = statistics.compactMap { statistic -> NativeActiveEnergyBurnedSample? in
+                guard let sum = statistic.sumQuantity() else {
+                    return nil
+                }
+
+                return NativeActiveEnergyBurnedSample(
+                    startTimeMs: statistic.startDate.timeIntervalSince1970 * 1000,
+                    endTimeMs: statistic.endDate.timeIntervalSince1970 * 1000,
+                    kilocalories: sum.doubleValue(for: HKUnit.kilocalorie())
+                )
+            }
+            let ordered = query.ascending ? samples : Array(samples.reversed())
+
+            return Array(ordered.prefix(Int(query.limit)))
+        }
+    }
+
     // Note: like readSteps, HealthKit resolves with an empty array when read access is denied
     // (read-permission denial is not detectable). Heart rate is read in beats per minute.
     func readHeartRate(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeHeartRateSample]> {
@@ -472,6 +626,10 @@ class HybridNitroHealth: HybridNitroHealthSpec {
             identifier = .stepCount
         case "heartRate":
             identifier = .heartRate
+        case "distance":
+            identifier = .distanceWalkingRunning
+        case "activeEnergyBurned":
+            identifier = .activeEnergyBurned
         default:
             throw permissionError("Unsupported health data type: \(dataType)")
         }

@@ -4,6 +4,8 @@ import { NitroHealth } from 'react-native-nitro-health'
 import type {
   HealthAuthorizationResult,
   AuthorizationRequestStatus,
+  DailyActiveEnergyBurnedTotal,
+  DailyDistanceTotal,
   DailyStepTotal,
   HealthDataType,
   HealthAvailabilityStatus,
@@ -13,6 +15,8 @@ import type {
 
 const readPermissions: Array<{ dataType: HealthDataType; label: string }> = [
   { dataType: 'steps', label: 'Steps' },
+  { dataType: 'distance', label: 'Distance' },
+  { dataType: 'activeEnergyBurned', label: 'Active Energy' },
   { dataType: 'heartRate', label: 'Heart Rate' },
 ]
 
@@ -42,6 +46,11 @@ function App(): React.JSX.Element {
   const [openingSettings, setOpeningSettings] = useState<HealthDataType>()
   const [readingDailyStepTotals, setReadingDailyStepTotals] = useState(false)
   const [dailyStepTotals, setDailyStepTotals] = useState<DailyStepTotal[]>()
+  const [readingDailyDistanceTotals, setReadingDailyDistanceTotals] = useState(false)
+  const [dailyDistanceTotals, setDailyDistanceTotals] = useState<DailyDistanceTotal[]>()
+  const [readingDailyActiveEnergyTotals, setReadingDailyActiveEnergyTotals] = useState(false)
+  const [dailyActiveEnergyTotals, setDailyActiveEnergyTotals] =
+    useState<DailyActiveEnergyBurnedTotal[]>()
   const [readingHeartRateStatistics, setReadingHeartRateStatistics] = useState(false)
   const [heartRateStatistics, setHeartRateStatistics] = useState<HeartRateStatistics>()
   const [errorMessages, setErrorMessages] = useState<Partial<Record<HealthDataType, string>>>({})
@@ -134,6 +143,56 @@ function App(): React.JSX.Element {
     }
   }
 
+  async function readDailyDistanceTotals(): Promise<void> {
+    const endDate = new Date()
+    const startDate = new Date(endDate.getTime() - 7 * 24 * 60 * 60 * 1000)
+
+    setReadingDailyDistanceTotals(true)
+    setErrorMessages((current) => ({ ...current, distance: undefined }))
+
+    try {
+      const totals = await NitroHealth.readDailyDistanceTotals({
+        startDate,
+        endDate,
+        limit: 7,
+        ascending: false,
+      })
+      setDailyDistanceTotals(totals)
+    } catch (error) {
+      setErrorMessages((current) => ({
+        ...current,
+        distance: error instanceof Error ? error.message : String(error),
+      }))
+    } finally {
+      setReadingDailyDistanceTotals(false)
+    }
+  }
+
+  async function readDailyActiveEnergyBurnedTotals(): Promise<void> {
+    const endDate = new Date()
+    const startDate = new Date(endDate.getTime() - 7 * 24 * 60 * 60 * 1000)
+
+    setReadingDailyActiveEnergyTotals(true)
+    setErrorMessages((current) => ({ ...current, activeEnergyBurned: undefined }))
+
+    try {
+      const totals = await NitroHealth.readDailyActiveEnergyBurnedTotals({
+        startDate,
+        endDate,
+        limit: 7,
+        ascending: false,
+      })
+      setDailyActiveEnergyTotals(totals)
+    } catch (error) {
+      setErrorMessages((current) => ({
+        ...current,
+        activeEnergyBurned: error instanceof Error ? error.message : String(error),
+      }))
+    } finally {
+      setReadingDailyActiveEnergyTotals(false)
+    }
+  }
+
   async function readHeartRateStatistics(): Promise<void> {
     const endDate = new Date()
     const startDate = new Date(endDate.getTime() - 24 * 60 * 60 * 1000)
@@ -172,6 +231,8 @@ function App(): React.JSX.Element {
         const requestStatus = authorizationStatuses[dataType]
         const canOpenSettings = result ? result.status !== 'granted' : false
         const canReadSteps = dataType === 'steps'
+        const canReadDistance = dataType === 'distance'
+        const canReadActiveEnergy = dataType === 'activeEnergyBurned'
         const canReadHeartRate = dataType === 'heartRate'
         const hasPermission =
           result?.status === 'granted' ||
@@ -206,6 +267,30 @@ function App(): React.JSX.Element {
                 {dailyStepTotals.map((bucket) => (
                   <Text key={bucket.startDate.toISOString()} style={styles.detail}>
                     {bucket.startDate.toLocaleDateString()}: {bucket.count} steps
+                  </Text>
+                ))}
+              </View>
+            ) : null}
+            {canReadDistance && dailyDistanceTotals ? (
+              <View style={styles.readResult}>
+                <Text style={styles.detail}>
+                  Daily distance buckets: {dailyDistanceTotals.length}
+                </Text>
+                {dailyDistanceTotals.map((bucket) => (
+                  <Text key={bucket.startDate.toISOString()} style={styles.detail}>
+                    {bucket.startDate.toLocaleDateString()}: {Math.round(bucket.distanceMeters)} m
+                  </Text>
+                ))}
+              </View>
+            ) : null}
+            {canReadActiveEnergy && dailyActiveEnergyTotals ? (
+              <View style={styles.readResult}>
+                <Text style={styles.detail}>
+                  Daily active-energy buckets: {dailyActiveEnergyTotals.length}
+                </Text>
+                {dailyActiveEnergyTotals.map((bucket) => (
+                  <Text key={bucket.startDate.toISOString()} style={styles.detail}>
+                    {bucket.startDate.toLocaleDateString()}: {Math.round(bucket.kilocalories)} kcal
                   </Text>
                 ))}
               </View>
@@ -289,6 +374,54 @@ function App(): React.JSX.Element {
                 >
                   <Text style={styles.buttonText}>
                     {readingDailyStepTotals ? 'Reading...' : 'Read daily step totals'}
+                  </Text>
+                </Pressable>
+              ) : null}
+              {canReadDistance && !hasPermission ? (
+                <Text style={styles.detail}>Grant Distance permission to read</Text>
+              ) : null}
+              {canReadDistance ? (
+                <Pressable
+                  disabled={!isAvailable || readingDailyDistanceTotals || !hasPermission}
+                  onPress={() => {
+                    readDailyDistanceTotals()
+                  }}
+                  style={({ pressed }) => [
+                    styles.button,
+                    styles.readButton,
+                    pressed ? styles.buttonPressed : null,
+                    !isAvailable || readingDailyDistanceTotals || !hasPermission
+                      ? styles.buttonDisabled
+                      : null,
+                  ]}
+                >
+                  <Text style={styles.buttonText}>
+                    {readingDailyDistanceTotals ? 'Reading...' : 'Read daily distance totals'}
+                  </Text>
+                </Pressable>
+              ) : null}
+              {canReadActiveEnergy && !hasPermission ? (
+                <Text style={styles.detail}>Grant Active Energy permission to read</Text>
+              ) : null}
+              {canReadActiveEnergy ? (
+                <Pressable
+                  disabled={!isAvailable || readingDailyActiveEnergyTotals || !hasPermission}
+                  onPress={() => {
+                    readDailyActiveEnergyBurnedTotals()
+                  }}
+                  style={({ pressed }) => [
+                    styles.button,
+                    styles.readButton,
+                    pressed ? styles.buttonPressed : null,
+                    !isAvailable || readingDailyActiveEnergyTotals || !hasPermission
+                      ? styles.buttonDisabled
+                      : null,
+                  ]}
+                >
+                  <Text style={styles.buttonText}>
+                    {readingDailyActiveEnergyTotals
+                      ? 'Reading...'
+                      : 'Read daily active energy totals'}
                   </Text>
                 </Pressable>
               ) : null}

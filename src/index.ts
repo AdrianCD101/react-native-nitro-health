@@ -1,12 +1,18 @@
 import { NitroModules } from 'react-native-nitro-modules'
 import type { NitroHealth as NitroHealthSpec } from './specs/nitro-health.nitro'
+import type { ActiveEnergyBurnedSample } from './ActiveEnergyBurnedSample'
+import type { DailyActiveEnergyBurnedTotal } from './DailyActiveEnergyBurnedTotal'
+import type { DailyDistanceTotal } from './DailyDistanceTotal'
 import type { DailyStepTotal } from './DailyStepTotal'
+import type { DistanceSample } from './DistanceSample'
 import type { HealthAuthorizationResult } from './HealthAuthorizationResult'
 import type { HealthDateRangeQuery } from './HealthDateRangeQuery'
 import type { HealthPermission } from './HealthPermission'
 import type { HealthTimeRangeQuery } from './HealthTimeRangeQuery'
 import type { HeartRateSample } from './HeartRateSample'
 import type { HeartRateStatistics } from './HeartRateStatistics'
+import type { NativeActiveEnergyBurnedSample } from './NativeActiveEnergyBurnedSample'
+import type { NativeDistanceSample } from './NativeDistanceSample'
 import type { NativeHealthDateRangeQuery } from './NativeHealthDateRangeQuery'
 import type { NativeHealthTimeRangeQuery } from './NativeHealthTimeRangeQuery'
 import type { NativeHeartRateSample } from './NativeHeartRateSample'
@@ -14,8 +20,12 @@ import type { NativeHeartRateStatistics } from './NativeHeartRateStatistics'
 import type { NativeStepSample } from './NativeStepSample'
 import type { StepSample } from './StepSample'
 
+export type { ActiveEnergyBurnedSample } from './ActiveEnergyBurnedSample'
 export type { AuthorizationRequestStatus } from './AuthorizationRequestStatus'
+export type { DailyActiveEnergyBurnedTotal } from './DailyActiveEnergyBurnedTotal'
+export type { DailyDistanceTotal } from './DailyDistanceTotal'
 export type { DailyStepTotal } from './DailyStepTotal'
+export type { DistanceSample } from './DistanceSample'
 export type { HealthAuthorizationResult } from './HealthAuthorizationResult'
 export type { HealthAuthorizationStatus } from './HealthAuthorizationStatus'
 export type { HealthAvailabilityStatus } from './HealthAvailabilityStatus'
@@ -26,6 +36,8 @@ export type { HealthPermissionAccessType } from './HealthPermissionAccessType'
 export type { HealthTimeRangeQuery } from './HealthTimeRangeQuery'
 export type { HeartRateSample } from './HeartRateSample'
 export type { HeartRateStatistics } from './HeartRateStatistics'
+export type { NativeActiveEnergyBurnedSample } from './NativeActiveEnergyBurnedSample'
+export type { NativeDistanceSample } from './NativeDistanceSample'
 export type { NativeHealthAuthorizationResult } from './NativeHealthAuthorizationResult'
 export type { NativeHealthDateRangeQuery } from './NativeHealthDateRangeQuery'
 export type { NativeHealthTimeRangeQuery } from './NativeHealthTimeRangeQuery'
@@ -101,6 +113,24 @@ function makeStepSample(sample: NativeStepSample): StepSample {
   }
 }
 
+function makeDistanceSample(sample: NativeDistanceSample): DistanceSample {
+  return {
+    startDate: new Date(sample.startTimeMs),
+    endDate: new Date(sample.endTimeMs),
+    distanceMeters: sample.distanceMeters,
+  }
+}
+
+function makeActiveEnergyBurnedSample(
+  sample: NativeActiveEnergyBurnedSample
+): ActiveEnergyBurnedSample {
+  return {
+    startDate: new Date(sample.startTimeMs),
+    endDate: new Date(sample.endTimeMs),
+    kilocalories: sample.kilocalories,
+  }
+}
+
 function makeHeartRateSample(sample: NativeHeartRateSample): HeartRateSample {
   return {
     date: new Date(sample.timeMs),
@@ -122,6 +152,10 @@ export type NitroHealth = Omit<
   | 'getRequestStatusForAuthorization'
   | 'readSteps'
   | 'readDailyStepTotals'
+  | 'readDistance'
+  | 'readDailyDistanceTotals'
+  | 'readActiveEnergyBurned'
+  | 'readDailyActiveEnergyBurnedTotals'
   | 'readHeartRate'
   | 'readHeartRateStatistics'
   | 'requestAuthorization'
@@ -131,6 +165,12 @@ export type NitroHealth = Omit<
   ): ReturnType<NitroHealthSpec['getRequestStatusForAuthorization']>
   readSteps(query: HealthDateRangeQuery): Promise<StepSample[]>
   readDailyStepTotals(query: HealthDateRangeQuery): Promise<DailyStepTotal[]>
+  readDistance(query: HealthDateRangeQuery): Promise<DistanceSample[]>
+  readDailyDistanceTotals(query: HealthDateRangeQuery): Promise<DailyDistanceTotal[]>
+  readActiveEnergyBurned(query: HealthDateRangeQuery): Promise<ActiveEnergyBurnedSample[]>
+  readDailyActiveEnergyBurnedTotals(
+    query: HealthDateRangeQuery
+  ): Promise<DailyActiveEnergyBurnedTotal[]>
   readHeartRate(query: HealthDateRangeQuery): Promise<HeartRateSample[]>
   readHeartRateStatistics(query: HealthTimeRangeQuery): Promise<HeartRateStatistics>
   requestAuthorization(permissions: HealthPermission[]): Promise<HealthAuthorizationResult>
@@ -170,6 +210,28 @@ export const NitroHealth: NitroHealth = {
     const samples = await NitroHealthNative.readDailyStepTotals(makeNativeDateRangeQuery(query))
 
     return samples.map(makeStepSample)
+  },
+  async readDistance(query) {
+    const samples = await NitroHealthNative.readDistance(makeNativeDateRangeQuery(query))
+
+    return samples.map(makeDistanceSample)
+  },
+  async readDailyDistanceTotals(query) {
+    const samples = await NitroHealthNative.readDailyDistanceTotals(makeNativeDateRangeQuery(query))
+
+    return samples.map(makeDistanceSample)
+  },
+  async readActiveEnergyBurned(query) {
+    const samples = await NitroHealthNative.readActiveEnergyBurned(makeNativeDateRangeQuery(query))
+
+    return samples.map(makeActiveEnergyBurnedSample)
+  },
+  async readDailyActiveEnergyBurnedTotals(query) {
+    const samples = await NitroHealthNative.readDailyActiveEnergyBurnedTotals(
+      makeNativeDateRangeQuery(query)
+    )
+
+    return samples.map(makeActiveEnergyBurnedSample)
   },
   async readHeartRate(query) {
     const samples = await NitroHealthNative.readHeartRate(makeNativeDateRangeQuery(query))

@@ -3,7 +3,11 @@ const mockNitroHealth = {
   getRequestStatusForAuthorization: jest.fn(),
   isAvailable: jest.fn(),
   openHealthConnectInstall: jest.fn(),
+  readActiveEnergyBurned: jest.fn(),
+  readDailyActiveEnergyBurnedTotals: jest.fn(),
+  readDailyDistanceTotals: jest.fn(),
   readDailyStepTotals: jest.fn(),
+  readDistance: jest.fn(),
   readHeartRate: jest.fn(),
   readHeartRateStatistics: jest.fn(),
   readSteps: jest.fn(),
@@ -129,6 +133,118 @@ describe('NitroHealth permission contract', () => {
     ])
 
     expect(mockNitroHealth.readDailyStepTotals).toHaveBeenCalledWith({
+      startTimeMs: startDate.getTime(),
+      endTimeMs: endDate.getTime(),
+      limit: 7,
+      ascending: false,
+    })
+  })
+
+  it('reads distance through the Nitro hybrid object', async () => {
+    const startDate = new Date('2026-01-01T00:00:00.000Z')
+    const endDate = new Date('2026-01-02T00:00:00.000Z')
+    const nativeResult = [
+      {
+        startTimeMs: startDate.getTime(),
+        endTimeMs: endDate.getTime(),
+        distanceMeters: 1234,
+      },
+    ]
+    mockNitroHealth.readDistance.mockResolvedValue(nativeResult)
+
+    await expect(
+      NitroHealth.readDistance({ startDate, endDate, limit: 25, ascending: false })
+    ).resolves.toEqual([{ startDate, endDate, distanceMeters: 1234 }])
+
+    expect(mockNitroHealth.readDistance).toHaveBeenCalledWith({
+      startTimeMs: startDate.getTime(),
+      endTimeMs: endDate.getTime(),
+      limit: 25,
+      ascending: false,
+    })
+  })
+
+  it('reads daily distance totals through the Nitro hybrid object', async () => {
+    const startDate = new Date('2026-01-01T00:00:00.000Z')
+    const endDate = new Date('2026-01-08T00:00:00.000Z')
+    const bucketEndDate = new Date('2026-01-02T00:00:00.000Z')
+    mockNitroHealth.readDailyDistanceTotals.mockResolvedValue([
+      {
+        startTimeMs: startDate.getTime(),
+        endTimeMs: bucketEndDate.getTime(),
+        distanceMeters: 2500,
+      },
+    ])
+
+    await expect(
+      NitroHealth.readDailyDistanceTotals({ startDate, endDate, limit: 7, ascending: false })
+    ).resolves.toEqual([
+      {
+        startDate,
+        endDate: bucketEndDate,
+        distanceMeters: 2500,
+      },
+    ])
+
+    expect(mockNitroHealth.readDailyDistanceTotals).toHaveBeenCalledWith({
+      startTimeMs: startDate.getTime(),
+      endTimeMs: endDate.getTime(),
+      limit: 7,
+      ascending: false,
+    })
+  })
+
+  it('reads active energy burned through the Nitro hybrid object', async () => {
+    const startDate = new Date('2026-01-01T00:00:00.000Z')
+    const endDate = new Date('2026-01-02T00:00:00.000Z')
+    mockNitroHealth.readActiveEnergyBurned.mockResolvedValue([
+      {
+        startTimeMs: startDate.getTime(),
+        endTimeMs: endDate.getTime(),
+        kilocalories: 321,
+      },
+    ])
+
+    await expect(
+      NitroHealth.readActiveEnergyBurned({ startDate, endDate, limit: 25, ascending: false })
+    ).resolves.toEqual([{ startDate, endDate, kilocalories: 321 }])
+
+    expect(mockNitroHealth.readActiveEnergyBurned).toHaveBeenCalledWith({
+      startTimeMs: startDate.getTime(),
+      endTimeMs: endDate.getTime(),
+      limit: 25,
+      ascending: false,
+    })
+  })
+
+  it('reads daily active energy burned totals through the Nitro hybrid object', async () => {
+    const startDate = new Date('2026-01-01T00:00:00.000Z')
+    const endDate = new Date('2026-01-08T00:00:00.000Z')
+    const bucketEndDate = new Date('2026-01-02T00:00:00.000Z')
+    mockNitroHealth.readDailyActiveEnergyBurnedTotals.mockResolvedValue([
+      {
+        startTimeMs: startDate.getTime(),
+        endTimeMs: bucketEndDate.getTime(),
+        kilocalories: 456,
+      },
+    ])
+
+    await expect(
+      NitroHealth.readDailyActiveEnergyBurnedTotals({
+        startDate,
+        endDate,
+        limit: 7,
+        ascending: false,
+      })
+    ).resolves.toEqual([
+      {
+        startDate,
+        endDate: bucketEndDate,
+        kilocalories: 456,
+      },
+    ])
+
+    expect(mockNitroHealth.readDailyActiveEnergyBurnedTotals).toHaveBeenCalledWith({
       startTimeMs: startDate.getTime(),
       endTimeMs: endDate.getTime(),
       limit: 7,

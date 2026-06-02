@@ -17,8 +17,12 @@ export type NitroHealthMock = Omit<
   | 'getAvailabilityStatus'
   | 'openHealthConnectInstall'
   | 'openHealthSettings'
+  | 'readActiveEnergyBurned'
+  | 'readDailyActiveEnergyBurnedTotals'
+  | 'readDailyDistanceTotals'
   | 'readSteps'
   | 'readDailyStepTotals'
+  | 'readDistance'
   | 'readHeartRate'
   | 'readHeartRateStatistics'
   | 'getRequestStatusForAuthorization'
@@ -31,8 +35,12 @@ export type NitroHealthMock = Omit<
   getAvailabilityStatus: MockFunction<NitroHealth['getAvailabilityStatus']>
   openHealthConnectInstall: MockFunction<NitroHealth['openHealthConnectInstall']>
   openHealthSettings: MockFunction<NitroHealth['openHealthSettings']>
+  readActiveEnergyBurned: MockFunction<NitroHealth['readActiveEnergyBurned']>
+  readDailyActiveEnergyBurnedTotals: MockFunction<NitroHealth['readDailyActiveEnergyBurnedTotals']>
+  readDailyDistanceTotals: MockFunction<NitroHealth['readDailyDistanceTotals']>
   readSteps: MockFunction<NitroHealth['readSteps']>
   readDailyStepTotals: MockFunction<NitroHealth['readDailyStepTotals']>
+  readDistance: MockFunction<NitroHealth['readDistance']>
   readHeartRate: MockFunction<NitroHealth['readHeartRate']>
   readHeartRateStatistics: MockFunction<NitroHealth['readHeartRateStatistics']>
   getRequestStatusForAuthorization: MockFunction<NitroHealth['getRequestStatusForAuthorization']>

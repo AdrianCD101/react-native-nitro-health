@@ -55,6 +55,22 @@ abstract class HybridNitroHealthSpec: HybridObject() {
   
   @DoNotStrip
   @Keep
+  abstract fun readDistance(query: NativeHealthDateRangeQuery): Promise<Array<NativeDistanceSample>>
+  
+  @DoNotStrip
+  @Keep
+  abstract fun readDailyDistanceTotals(query: NativeHealthDateRangeQuery): Promise<Array<NativeDistanceSample>>
+  
+  @DoNotStrip
+  @Keep
+  abstract fun readActiveEnergyBurned(query: NativeHealthDateRangeQuery): Promise<Array<NativeActiveEnergyBurnedSample>>
+  
+  @DoNotStrip
+  @Keep
+  abstract fun readDailyActiveEnergyBurnedTotals(query: NativeHealthDateRangeQuery): Promise<Array<NativeActiveEnergyBurnedSample>>
+  
+  @DoNotStrip
+  @Keep
   abstract fun readHeartRate(query: NativeHealthDateRangeQuery): Promise<Array<NativeHeartRateSample>>
   
   @DoNotStrip

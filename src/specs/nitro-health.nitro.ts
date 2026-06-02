@@ -1,6 +1,8 @@
 import type { HybridObject } from 'react-native-nitro-modules'
 import type { AuthorizationRequestStatus } from '../AuthorizationRequestStatus'
 import type { HealthAvailabilityStatus } from '../HealthAvailabilityStatus'
+import type { NativeActiveEnergyBurnedSample } from '../NativeActiveEnergyBurnedSample'
+import type { NativeDistanceSample } from '../NativeDistanceSample'
 import type { NativeHealthAuthorizationResult } from '../NativeHealthAuthorizationResult'
 import type { NativeHealthDateRangeQuery } from '../NativeHealthDateRangeQuery'
 import type { NativeHealthTimeRangeQuery } from '../NativeHealthTimeRangeQuery'
@@ -16,6 +18,14 @@ export interface NitroHealth extends HybridObject<{ ios: 'swift'; android: 'kotl
   openHealthSettings(): Promise<boolean>
   readSteps(query: NativeHealthDateRangeQuery): Promise<NativeStepSample[]>
   readDailyStepTotals(query: NativeHealthDateRangeQuery): Promise<NativeStepSample[]>
+  readDistance(query: NativeHealthDateRangeQuery): Promise<NativeDistanceSample[]>
+  readDailyDistanceTotals(query: NativeHealthDateRangeQuery): Promise<NativeDistanceSample[]>
+  readActiveEnergyBurned(
+    query: NativeHealthDateRangeQuery
+  ): Promise<NativeActiveEnergyBurnedSample[]>
+  readDailyActiveEnergyBurnedTotals(
+    query: NativeHealthDateRangeQuery
+  ): Promise<NativeActiveEnergyBurnedSample[]>
   readHeartRate(query: NativeHealthDateRangeQuery): Promise<NativeHeartRateSample[]>
   readHeartRateStatistics(query: NativeHealthTimeRangeQuery): Promise<NativeHeartRateStatistics>
   getRequestStatusForAuthorization(
