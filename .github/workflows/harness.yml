@@ -65,7 +65,7 @@ jobs:
       RN_HARNESS_ANDROID_DISK_SIZE: 1G
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -131,7 +131,7 @@ jobs:
       USE_CCACHE: 1
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
