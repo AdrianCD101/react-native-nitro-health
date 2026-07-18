@@ -12,6 +12,8 @@ const activeEnergyReadPermission: HealthPermission[] = [
   { accessType: 'read', dataType: 'activeEnergyBurned' },
 ]
 const heartRateReadPermission: HealthPermission[] = [{ accessType: 'read', dataType: 'heartRate' }]
+const sleepReadPermission: HealthPermission[] = [{ accessType: 'read', dataType: 'sleep' }]
+const bodyMassReadPermission: HealthPermission[] = [{ accessType: 'read', dataType: 'bodyMass' }]
 const emptyRange = {
   startDate: new Date('2000-01-01T00:00:00.000Z'),
   endDate: new Date('2000-01-02T00:00:00.000Z'),
@@ -65,6 +67,18 @@ describe('NitroHealth native module', () => {
     expect(authorizationRequestStatuses).toContain(status)
   })
 
+  it('gets request status for sleep read permission from native code', async () => {
+    const status = await NitroHealth.getRequestStatusForAuthorization(sleepReadPermission)
+
+    expect(authorizationRequestStatuses).toContain(status)
+  })
+
+  it('gets request status for body mass read permission from native code', async () => {
+    const status = await NitroHealth.getRequestStatusForAuthorization(bodyMassReadPermission)
+
+    expect(authorizationRequestStatuses).toContain(status)
+  })
+
   it('rejects an empty request status check before crossing the native boundary', async () => {
     await expect(NitroHealth.getRequestStatusForAuthorization([])).rejects.toThrow(
       'At least one health permission is required'
@@ -101,7 +115,7 @@ describe('NitroHealth native module', () => {
     await expect(NitroHealth.readSteps(emptyRange)).rejects.toThrow(/permission/i)
   })
 
-  it('returns empty steps on iOS when permission is not granted (HealthKit silent-empty)', async () => {
+  it('rejects reading steps on iOS before authorization is requested (HealthKit notDetermined)', async () => {
     if (Platform.OS !== 'ios') {
       return
     }
@@ -112,9 +126,7 @@ describe('NitroHealth native module', () => {
       return
     }
 
-    const steps = await NitroHealth.readSteps(emptyRange)
-
-    expect(Array.isArray(steps)).toBe(true)
+    await expect(NitroHealth.readSteps(emptyRange)).rejects.toThrow(/not determined/i)
   })
 
   it('reads daily step totals from native code without crashing', async () => {
@@ -141,7 +153,7 @@ describe('NitroHealth native module', () => {
     await expect(NitroHealth.readDailyStepTotals(emptyRange)).rejects.toThrow(/permission/i)
   })
 
-  it('returns empty daily step totals on iOS when permission is not granted (HealthKit silent-empty)', async () => {
+  it('rejects reading daily step totals on iOS before authorization is requested (HealthKit notDetermined)', async () => {
     if (Platform.OS !== 'ios') {
       return
     }
@@ -152,9 +164,7 @@ describe('NitroHealth native module', () => {
       return
     }
 
-    const totals = await NitroHealth.readDailyStepTotals(emptyRange)
-
-    expect(Array.isArray(totals)).toBe(true)
+    await expect(NitroHealth.readDailyStepTotals(emptyRange)).rejects.toThrow(/not determined/i)
   })
 
   it('reads distance from native code without crashing', async () => {
@@ -184,7 +194,7 @@ describe('NitroHealth native module', () => {
     await expect(NitroHealth.readDistance(emptyRange)).rejects.toThrow(/permission/i)
   })
 
-  it('returns empty distance on iOS when permission is not granted (HealthKit silent-empty)', async () => {
+  it('rejects reading distance on iOS before authorization is requested (HealthKit notDetermined)', async () => {
     if (Platform.OS !== 'ios') {
       return
     }
@@ -195,9 +205,7 @@ describe('NitroHealth native module', () => {
       return
     }
 
-    const samples = await NitroHealth.readDistance(emptyRange)
-
-    expect(Array.isArray(samples)).toBe(true)
+    await expect(NitroHealth.readDistance(emptyRange)).rejects.toThrow(/not determined/i)
   })
 
   it('reads daily distance totals from native code without crashing', async () => {
@@ -271,7 +279,7 @@ describe('NitroHealth native module', () => {
     await expect(NitroHealth.readActiveEnergyBurned(emptyRange)).rejects.toThrow(/permission/i)
   })
 
-  it('returns empty active energy burned on iOS when permission is not granted (HealthKit silent-empty)', async () => {
+  it('rejects reading active energy burned on iOS before authorization is requested (HealthKit notDetermined)', async () => {
     if (Platform.OS !== 'ios') {
       return
     }
@@ -282,9 +290,7 @@ describe('NitroHealth native module', () => {
       return
     }
 
-    const samples = await NitroHealth.readActiveEnergyBurned(emptyRange)
-
-    expect(Array.isArray(samples)).toBe(true)
+    await expect(NitroHealth.readActiveEnergyBurned(emptyRange)).rejects.toThrow(/not determined/i)
   })
 
   it('reads daily active energy burned totals from native code without crashing', async () => {
@@ -327,6 +333,48 @@ describe('NitroHealth native module', () => {
     }
   })
 
+  it('reads body mass from native code without crashing', async () => {
+    try {
+      const samples = await NitroHealth.readBodyMass(emptyRange)
+
+      expect(Array.isArray(samples)).toBe(true)
+      for (const sample of samples) {
+        expect(typeof sample.kilograms).toBe('number')
+        expect(['string', 'undefined']).toContain(typeof sample.source)
+      }
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error)
+    }
+  })
+
+  it('rejects reading body mass on Android when permission is not granted', async () => {
+    if (Platform.OS !== 'android') {
+      return
+    }
+
+    const status = await NitroHealth.getRequestStatusForAuthorization(bodyMassReadPermission)
+
+    if (status === 'unnecessary') {
+      return
+    }
+
+    await expect(NitroHealth.readBodyMass(emptyRange)).rejects.toThrow(/permission/i)
+  })
+
+  it('rejects reading body mass on iOS before authorization is requested (HealthKit notDetermined)', async () => {
+    if (Platform.OS !== 'ios') {
+      return
+    }
+
+    const status = await NitroHealth.getRequestStatusForAuthorization(bodyMassReadPermission)
+
+    if (status === 'unnecessary') {
+      return
+    }
+
+    await expect(NitroHealth.readBodyMass(emptyRange)).rejects.toThrow(/not determined/i)
+  })
+
   it('rejects reading heart rate on Android when permission is not granted', async () => {
     if (Platform.OS !== 'android') {
       return
@@ -341,7 +389,7 @@ describe('NitroHealth native module', () => {
     await expect(NitroHealth.readHeartRate(emptyRange)).rejects.toThrow(/permission/i)
   })
 
-  it('returns empty heart rate on iOS when permission is not granted (HealthKit silent-empty)', async () => {
+  it('rejects reading heart rate on iOS before authorization is requested (HealthKit notDetermined)', async () => {
     if (Platform.OS !== 'ios') {
       return
     }
@@ -352,9 +400,7 @@ describe('NitroHealth native module', () => {
       return
     }
 
-    const samples = await NitroHealth.readHeartRate(emptyRange)
-
-    expect(Array.isArray(samples)).toBe(true)
+    await expect(NitroHealth.readHeartRate(emptyRange)).rejects.toThrow(/not determined/i)
   })
 
   it('reads heart rate statistics from native code without crashing', async () => {
@@ -383,7 +429,7 @@ describe('NitroHealth native module', () => {
     await expect(NitroHealth.readHeartRateStatistics(emptyRange)).rejects.toThrow(/permission/i)
   })
 
-  it('returns empty heart rate statistics on iOS when permission is not granted (HealthKit silent-empty)', async () => {
+  it('rejects reading heart rate statistics on iOS before authorization is requested (HealthKit notDetermined)', async () => {
     if (Platform.OS !== 'ios') {
       return
     }
@@ -394,11 +440,53 @@ describe('NitroHealth native module', () => {
       return
     }
 
-    await expect(NitroHealth.readHeartRateStatistics(emptyRange)).resolves.toEqual({
-      average: undefined,
-      min: undefined,
-      max: undefined,
-    })
+    await expect(NitroHealth.readHeartRateStatistics(emptyRange)).rejects.toThrow(
+      /not determined/i
+    )
+  })
+
+  it('reads sleep samples from native code without crashing', async () => {
+    try {
+      const samples = await NitroHealth.readSleepSamples(emptyRange)
+
+      expect(Array.isArray(samples)).toBe(true)
+      for (const sample of samples) {
+        expect(sample.startDate).toBeInstanceOf(Date)
+        expect(sample.endDate).toBeInstanceOf(Date)
+        expect(typeof sample.stage).toBe('string')
+        expect(['string', 'undefined']).toContain(typeof sample.source)
+      }
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error)
+    }
+  })
+
+  it('rejects reading sleep samples on Android when permission is not granted', async () => {
+    if (Platform.OS !== 'android') {
+      return
+    }
+
+    const status = await NitroHealth.getRequestStatusForAuthorization(sleepReadPermission)
+
+    if (status === 'unnecessary') {
+      return
+    }
+
+    await expect(NitroHealth.readSleepSamples(emptyRange)).rejects.toThrow(/permission/i)
+  })
+
+  it('rejects reading sleep samples on iOS before authorization is requested (HealthKit notDetermined)', async () => {
+    if (Platform.OS !== 'ios') {
+      return
+    }
+
+    const status = await NitroHealth.getRequestStatusForAuthorization(sleepReadPermission)
+
+    if (status === 'unnecessary') {
+      return
+    }
+
+    await expect(NitroHealth.readSleepSamples(emptyRange)).rejects.toThrow(/not determined/i)
   })
 
   it('returns a resolved result for already-authorized steps permissions without opening a prompt', async () => {

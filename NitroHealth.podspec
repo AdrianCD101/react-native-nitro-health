@@ -15,12 +15,14 @@ Pod::Spec.new do |s|
 
   s.source_files = [
     # Implementation (Swift)
-    "ios/*.swift",
+    "ios/**/*.swift",
     # Autolinking/Registration (Objective-C++)
     "ios/**/*.{m,mm}",
     # Implementation (C++ objects)
     "cpp/**/*.{hpp,cpp}",
   ]
+  # SwiftPM-only unit tests — must not compile into the pod.
+  s.exclude_files = "ios/Tests/**"
   s.ios.frameworks = 'HealthKit'
 
   load 'nitrogen/generated/ios/NitroHealth+autolinking.rb'

@@ -49,7 +49,7 @@ On iOS, apps still need the HealthKit capability and the relevant HealthKit usag
 
 ## Permissions
 
-The first supported unified permission data types are `steps`, `distance`, `activeEnergyBurned`, and `heartRate`.
+The first supported unified permission data types are `steps`, `distance`, `activeEnergyBurned`, `heartRate`, `sleep`, and `bodyMass`.
 
 ```ts
 import { NitroHealth, type HealthPermission } from 'react-native-nitro-health'
@@ -59,6 +59,8 @@ const permissions: HealthPermission[] = [
   { accessType: 'read', dataType: 'distance' },
   { accessType: 'read', dataType: 'activeEnergyBurned' },
   { accessType: 'read', dataType: 'heartRate' },
+  { accessType: 'read', dataType: 'sleep' },
+  { accessType: 'read', dataType: 'bodyMass' },
 ]
 
 const status = await NitroHealth.getRequestStatusForAuthorization(permissions)
@@ -79,7 +81,9 @@ if (status === 'shouldRequest') {
 
 `openHealthSettings()` opens Android Health Connect settings on Android and the app settings screen on iOS. It returns `false` when settings cannot be opened.
 
-Android consumer apps must declare the matching Health Connect permissions in their own `AndroidManifest.xml`, for example `android.permission.health.READ_DISTANCE`, `android.permission.health.READ_ACTIVE_CALORIES_BURNED`, and `android.permission.health.READ_HEART_RATE` before requesting read access.
+Android consumer apps must declare the matching Health Connect permissions in their own `AndroidManifest.xml`, for example `android.permission.health.READ_DISTANCE`, `android.permission.health.READ_ACTIVE_CALORIES_BURNED`, `android.permission.health.READ_HEART_RATE`, `android.permission.health.READ_SLEEP`, and `android.permission.health.READ_WEIGHT` before requesting read access.
+
+Read methods behave differently per platform when permission is missing. On Android, reads reject with a missing-permission error until the permission is granted. On iOS, reads reject with an "Authorization not determined" error until the app has requested authorization at least once; after the user responds to the prompt, HealthKit never discloses a read denial — denied reads resolve with empty results, indistinguishable from having no data.
 
 ## Read Steps
 
@@ -116,7 +120,7 @@ const activeEnergy = await NitroHealth.readActiveEnergyBurned({
 })
 ```
 
-`readDistance()` returns distance samples with `startDate`, `endDate`, and `distanceMeters`. iOS reads walking/running distance. Android reads Health Connect distance records.
+`readDistance()` returns distance samples with `startDate`, `endDate`, and `distanceMeters`. iOS reads HealthKit walking/running distance only — cycling, wheelchair, and swimming distance live under separate HealthKit identifiers and are not included. Android reads Health Connect distance records, which apps may write for any activity (including cycling), so totals for the same user can differ between platforms when non-pedestrian activity is present.
 
 `readActiveEnergyBurned()` returns active-energy samples with `startDate`, `endDate`, and `kilocalories`.
 
@@ -180,6 +184,38 @@ const heartRate = await NitroHealth.readHeartRate({
 ```
 
 `readHeartRate()` returns individual readings with `date`, `bpm`, and an optional `source` (the originating app or device). On iOS each reading is one `HKQuantitySample`; on Android a `HeartRateRecord` holds many readings, so records are flattened to individual points and `limit` caps the flattened, time-ordered result (records are fetched up to `limit`). It returns an empty array when the query succeeds but no samples are available. Apps must request and receive heart rate read permission before relying on returned data.
+
+## Read Body Mass
+
+```ts
+import { NitroHealth } from 'react-native-nitro-health'
+
+const bodyMass = await NitroHealth.readBodyMass({
+  startDate: new Date('2026-01-01T00:00:00.000Z'),
+  endDate: new Date('2026-02-01T00:00:00.000Z'),
+  limit: 100,
+  ascending: true,
+})
+```
+
+`readBodyMass()` returns body mass samples with `startDate`, `endDate`, `kilograms`, and an optional `source`. It returns an empty array when the platform query succeeds but no matching samples are available. Apps must request and receive body mass read permission before relying on returned data.
+
+## Read Sleep
+
+```ts
+import { NitroHealth } from 'react-native-nitro-health'
+
+const sleep = await NitroHealth.readSleepSamples({
+  startDate: new Date('2026-01-01T00:00:00.000Z'),
+  endDate: new Date('2026-01-08T00:00:00.000Z'),
+  limit: 100,
+  ascending: true,
+})
+```
+
+`readSleepSamples()` returns sleep intervals with `startDate`, `endDate`, `stage`, and an optional `source`. Stages are normalized to `inBed`, `awake`, `awakeInBed`, `asleep`, `asleepCore`, `asleepDeep`, `asleepREM`, `outOfBed`, or `unknown`.
+
+On iOS, HealthKit sleep analysis is category interval data and `inBed` samples can overlap `asleep` stage samples. On Android, Health Connect sleep sessions are flattened to stage intervals; sessions without explicit stages are returned as one `asleep` interval. Apps must request and receive sleep read permission before relying on returned data.
 
 ## Jest
 

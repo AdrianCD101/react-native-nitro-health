@@ -226,9 +226,11 @@ Reference: `example/ios/NitroHealthExample/NitroHealthExample.entitlements`, `ex
    <uses-permission android:name="android.permission.health.READ_STEPS" />
    <uses-permission android:name="android.permission.health.WRITE_STEPS" />
    <uses-permission android:name="android.permission.health.READ_DISTANCE" />
-   <uses-permission android:name="android.permission.health.READ_ACTIVE_CALORIES_BURNED" />
-   <uses-permission android:name="android.permission.health.READ_HEART_RATE" />
-   <!-- declare only the data types your app reads or writes -->
+    <uses-permission android:name="android.permission.health.READ_ACTIVE_CALORIES_BURNED" />
+    <uses-permission android:name="android.permission.health.READ_HEART_RATE" />
+    <uses-permission android:name="android.permission.health.READ_SLEEP" />
+    <uses-permission android:name="android.permission.health.READ_WEIGHT" />
+    <!-- declare only the data types your app reads or writes -->
    ```
    Full list: <https://developer.android.com/health-and-fitness/guides/health-connect/plan/data-types>.
 2. Add a `<queries>` block so the app can see the Health Connect provider package on Android 11+ (the library declares this too, but explicit in the consumer manifest avoids manifest-merger surprises):

@@ -62,6 +62,18 @@ final class DailyBucketUtilsTests: XCTestCase {
         XCTAssertEqual(range.endTimeMs, 10)
     }
 
+    func testClampDailyBucketRangeNeverExceedsQueryEndWhenBucketStartsAfterQuery() {
+        let range = clampDailyBucketRange(
+            bucketStartTimeMs: 40,
+            bucketEndTimeMs: 50,
+            queryStartTimeMs: 10,
+            queryEndTimeMs: 30
+        )
+
+        XCTAssertEqual(range.startTimeMs, 30)
+        XCTAssertEqual(range.endTimeMs, 30)
+    }
+
     func testOrderAndLimitDailySamplesSortsAscendingBeforeApplyingLimit() {
         let samples = [
             DailySample(startTimeMs: 30),

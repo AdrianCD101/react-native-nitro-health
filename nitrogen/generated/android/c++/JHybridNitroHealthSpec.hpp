@@ -64,8 +64,10 @@ namespace margelo::nitro::nitrohealth {
     std::shared_ptr<Promise<std::vector<NativeDistanceSample>>> readDailyDistanceTotals(const NativeHealthDateRangeQuery& query) override;
     std::shared_ptr<Promise<std::vector<NativeActiveEnergyBurnedSample>>> readActiveEnergyBurned(const NativeHealthDateRangeQuery& query) override;
     std::shared_ptr<Promise<std::vector<NativeActiveEnergyBurnedSample>>> readDailyActiveEnergyBurnedTotals(const NativeHealthDateRangeQuery& query) override;
+    std::shared_ptr<Promise<std::vector<NativeBodyMassSample>>> readBodyMass(const NativeHealthDateRangeQuery& query) override;
     std::shared_ptr<Promise<std::vector<NativeHeartRateSample>>> readHeartRate(const NativeHealthDateRangeQuery& query) override;
     std::shared_ptr<Promise<NativeHeartRateStatistics>> readHeartRateStatistics(const NativeHealthTimeRangeQuery& query) override;
+    std::shared_ptr<Promise<std::vector<NativeSleepSample>>> readSleepSamples(const NativeHealthDateRangeQuery& query) override;
     std::shared_ptr<Promise<AuthorizationRequestStatus>> getRequestStatusForAuthorization(const std::vector<NativeHealthPermission>& permissions) override;
     std::shared_ptr<Promise<NativeHealthAuthorizationResult>> requestAuthorization(const std::vector<NativeHealthPermission>& permissions) override;
 

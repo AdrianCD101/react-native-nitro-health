@@ -11,7 +11,7 @@ internal fun clampDailyBucketRange(
     queryStartTimeMs: Double,
     queryEndTimeMs: Double
 ): DailyBucketRange {
-    val startTimeMs = bucketStartTimeMs.coerceAtLeast(queryStartTimeMs)
+    val startTimeMs = bucketStartTimeMs.coerceIn(queryStartTimeMs, queryEndTimeMs)
 
     return DailyBucketRange(
         startTimeMs = startTimeMs,

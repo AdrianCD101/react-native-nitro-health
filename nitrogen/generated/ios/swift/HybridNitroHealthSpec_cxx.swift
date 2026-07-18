@@ -330,6 +330,31 @@ open class HybridNitroHealthSpec_cxx {
   }
   
   @inline(__always)
+  public final func readBodyMass(query: NativeHealthDateRangeQuery) -> bridge.Result_std__shared_ptr_Promise_std__vector_NativeBodyMassSample____ {
+    do {
+      let __result = try self.__implementation.readBodyMass(query: query)
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_std__vector_NativeBodyMassSample___ in
+        let __promise = bridge.create_std__shared_ptr_Promise_std__vector_NativeBodyMassSample___()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_std__vector_NativeBodyMassSample___(__promise)
+        __result
+          .then({ __result in __promiseHolder.resolve({ () -> bridge.std__vector_NativeBodyMassSample_ in
+              var __vector = bridge.create_std__vector_NativeBodyMassSample_(__result.count)
+              for __item in __result {
+                __vector.push_back(__item)
+              }
+              return __vector
+            }()) })
+          .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
+        return __promise
+      }()
+      return bridge.create_Result_std__shared_ptr_Promise_std__vector_NativeBodyMassSample____(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_std__shared_ptr_Promise_std__vector_NativeBodyMassSample____(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
   public final func readHeartRate(query: NativeHealthDateRangeQuery) -> bridge.Result_std__shared_ptr_Promise_std__vector_NativeHeartRateSample____ {
     do {
       let __result = try self.__implementation.readHeartRate(query: query)
@@ -370,6 +395,31 @@ open class HybridNitroHealthSpec_cxx {
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()
       return bridge.create_Result_std__shared_ptr_Promise_NativeHeartRateStatistics___(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func readSleepSamples(query: NativeHealthDateRangeQuery) -> bridge.Result_std__shared_ptr_Promise_std__vector_NativeSleepSample____ {
+    do {
+      let __result = try self.__implementation.readSleepSamples(query: query)
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_std__vector_NativeSleepSample___ in
+        let __promise = bridge.create_std__shared_ptr_Promise_std__vector_NativeSleepSample___()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_std__vector_NativeSleepSample___(__promise)
+        __result
+          .then({ __result in __promiseHolder.resolve({ () -> bridge.std__vector_NativeSleepSample_ in
+              var __vector = bridge.create_std__vector_NativeSleepSample_(__result.count)
+              for __item in __result {
+                __vector.push_back(__item)
+              }
+              return __vector
+            }()) })
+          .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
+        return __promise
+      }()
+      return bridge.create_Result_std__shared_ptr_Promise_std__vector_NativeSleepSample____(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_std__shared_ptr_Promise_std__vector_NativeSleepSample____(__exceptionPtr)
     }
   }
   

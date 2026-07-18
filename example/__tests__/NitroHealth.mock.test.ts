@@ -15,8 +15,10 @@ describe('NitroHealth Jest mock', () => {
     await expect(NitroHealth.readSteps({})).resolves.toEqual([])
     await expect(NitroHealth.readDailyStepTotals({})).resolves.toEqual([])
     await expect(NitroHealth.readDistance({})).resolves.toEqual([])
+    await expect(NitroHealth.readBodyMass({})).resolves.toEqual([])
     await expect(NitroHealth.readHeartRate({})).resolves.toEqual([])
     await expect(NitroHealth.readHeartRateStatistics({})).resolves.toEqual({})
+    await expect(NitroHealth.readSleepSamples({})).resolves.toEqual([])
     await expect(NitroHealth.getRequestStatusForAuthorization([])).resolves.toBe('unknown')
   })
 

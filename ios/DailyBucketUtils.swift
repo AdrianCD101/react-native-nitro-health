@@ -11,7 +11,7 @@ func clampDailyBucketRange(
     queryStartTimeMs: Double,
     queryEndTimeMs: Double
 ) -> DailyBucketRange {
-    let startTimeMs = max(bucketStartTimeMs, queryStartTimeMs)
+    let startTimeMs = min(max(bucketStartTimeMs, queryStartTimeMs), queryEndTimeMs)
 
     return DailyBucketRange(
         startTimeMs: startTimeMs,

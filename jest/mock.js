@@ -22,8 +22,10 @@ function createNitroHealthMock(overrides = {}) {
     readSteps: createMockFunction(() => Promise.resolve([])),
     readDailyStepTotals: createMockFunction(() => Promise.resolve([])),
     readDistance: createMockFunction(() => Promise.resolve([])),
+    readBodyMass: createMockFunction(() => Promise.resolve([])),
     readHeartRate: createMockFunction(() => Promise.resolve([])),
     readHeartRateStatistics: createMockFunction(() => Promise.resolve({})),
+    readSleepSamples: createMockFunction(() => Promise.resolve([])),
     getRequestStatusForAuthorization: createMockFunction(() => Promise.resolve('unknown')),
     requestAuthorization: createMockFunction(() =>
       Promise.resolve({

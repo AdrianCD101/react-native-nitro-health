@@ -8,8 +8,10 @@ const mockNitroHealth = {
   readDailyDistanceTotals: jest.fn(),
   readDailyStepTotals: jest.fn(),
   readDistance: jest.fn(),
+  readBodyMass: jest.fn(),
   readHeartRate: jest.fn(),
   readHeartRateStatistics: jest.fn(),
+  readSleepSamples: jest.fn(),
   readSteps: jest.fn(),
   requestAuthorization: jest.fn(),
 }
@@ -276,6 +278,37 @@ describe('NitroHealth permission contract', () => {
     })
   })
 
+  it('reads body mass through the Nitro hybrid object', async () => {
+    const startDate = new Date('2026-01-01T00:00:00.000Z')
+    const endDate = new Date('2026-01-02T00:00:00.000Z')
+    mockNitroHealth.readBodyMass.mockResolvedValue([
+      {
+        startTimeMs: startDate.getTime(),
+        endTimeMs: endDate.getTime(),
+        kilograms: 72.5,
+        source: 'com.example.health',
+      },
+    ])
+
+    await expect(
+      NitroHealth.readBodyMass({ startDate, endDate, limit: 25, ascending: false })
+    ).resolves.toEqual([
+      {
+        startDate,
+        endDate,
+        kilograms: 72.5,
+        source: 'com.example.health',
+      },
+    ])
+
+    expect(mockNitroHealth.readBodyMass).toHaveBeenCalledWith({
+      startTimeMs: startDate.getTime(),
+      endTimeMs: endDate.getTime(),
+      limit: 25,
+      ascending: false,
+    })
+  })
+
   it('applies read heart rate defaults before crossing the native boundary', async () => {
     const startDate = new Date('2026-01-01T00:00:00.000Z')
     const endDate = new Date('2026-01-02T00:00:00.000Z')
@@ -309,6 +342,37 @@ describe('NitroHealth permission contract', () => {
     expect(mockNitroHealth.readHeartRateStatistics).toHaveBeenCalledWith({
       startTimeMs: startDate.getTime(),
       endTimeMs: endDate.getTime(),
+    })
+  })
+
+  it('reads sleep samples through the Nitro hybrid object', async () => {
+    const startDate = new Date('2026-01-01T00:00:00.000Z')
+    const endDate = new Date('2026-01-02T00:00:00.000Z')
+    mockNitroHealth.readSleepSamples.mockResolvedValue([
+      {
+        startTimeMs: startDate.getTime(),
+        endTimeMs: endDate.getTime(),
+        stage: 'asleepREM',
+        source: 'com.example.health',
+      },
+    ])
+
+    await expect(
+      NitroHealth.readSleepSamples({ startDate, endDate, limit: 25, ascending: false })
+    ).resolves.toEqual([
+      {
+        startDate,
+        endDate,
+        stage: 'asleepREM',
+        source: 'com.example.health',
+      },
+    ])
+
+    expect(mockNitroHealth.readSleepSamples).toHaveBeenCalledWith({
+      startTimeMs: startDate.getTime(),
+      endTimeMs: endDate.getTime(),
+      limit: 25,
+      ascending: false,
     })
   })
 
@@ -384,14 +448,22 @@ describe('NitroHealth permission contract', () => {
     await expect(NitroHealth.readActiveEnergyBurned(invalidDateRange)).rejects.toThrow(
       'A valid startDate is required'
     )
+    await expect(NitroHealth.readBodyMass(invalidDateRange)).rejects.toThrow(
+      'A valid startDate is required'
+    )
     await expect(NitroHealth.readDailyActiveEnergyBurnedTotals(invalidDateRange)).rejects.toThrow(
+      'A valid startDate is required'
+    )
+    await expect(NitroHealth.readSleepSamples(invalidDateRange)).rejects.toThrow(
       'A valid startDate is required'
     )
 
     expect(mockNitroHealth.readDistance).not.toHaveBeenCalled()
     expect(mockNitroHealth.readDailyDistanceTotals).not.toHaveBeenCalled()
     expect(mockNitroHealth.readActiveEnergyBurned).not.toHaveBeenCalled()
+    expect(mockNitroHealth.readBodyMass).not.toHaveBeenCalled()
     expect(mockNitroHealth.readDailyActiveEnergyBurnedTotals).not.toHaveBeenCalled()
+    expect(mockNitroHealth.readSleepSamples).not.toHaveBeenCalled()
   })
 
   it('rejects invalid activity quantity ranges before crossing the native boundary', async () => {
@@ -409,14 +481,22 @@ describe('NitroHealth permission contract', () => {
     await expect(NitroHealth.readActiveEnergyBurned(invalidRange)).rejects.toThrow(
       'startDate must be before endDate'
     )
+    await expect(NitroHealth.readBodyMass(invalidRange)).rejects.toThrow(
+      'startDate must be before endDate'
+    )
     await expect(NitroHealth.readDailyActiveEnergyBurnedTotals(invalidRange)).rejects.toThrow(
+      'startDate must be before endDate'
+    )
+    await expect(NitroHealth.readSleepSamples(invalidRange)).rejects.toThrow(
       'startDate must be before endDate'
     )
 
     expect(mockNitroHealth.readDistance).not.toHaveBeenCalled()
     expect(mockNitroHealth.readDailyDistanceTotals).not.toHaveBeenCalled()
     expect(mockNitroHealth.readActiveEnergyBurned).not.toHaveBeenCalled()
+    expect(mockNitroHealth.readBodyMass).not.toHaveBeenCalled()
     expect(mockNitroHealth.readDailyActiveEnergyBurnedTotals).not.toHaveBeenCalled()
+    expect(mockNitroHealth.readSleepSamples).not.toHaveBeenCalled()
   })
 
   it('rejects non-positive-integer activity quantity limits before crossing the native boundary', async () => {
@@ -436,14 +516,22 @@ describe('NitroHealth permission contract', () => {
       await expect(NitroHealth.readActiveEnergyBurned(invalidLimitRange)).rejects.toThrow(
         'limit must be a positive integer'
       )
+      await expect(NitroHealth.readBodyMass(invalidLimitRange)).rejects.toThrow(
+        'limit must be a positive integer'
+      )
       await expect(
         NitroHealth.readDailyActiveEnergyBurnedTotals(invalidLimitRange)
       ).rejects.toThrow('limit must be a positive integer')
+      await expect(NitroHealth.readSleepSamples(invalidLimitRange)).rejects.toThrow(
+        'limit must be a positive integer'
+      )
     }
 
     expect(mockNitroHealth.readDistance).not.toHaveBeenCalled()
     expect(mockNitroHealth.readDailyDistanceTotals).not.toHaveBeenCalled()
     expect(mockNitroHealth.readActiveEnergyBurned).not.toHaveBeenCalled()
+    expect(mockNitroHealth.readBodyMass).not.toHaveBeenCalled()
     expect(mockNitroHealth.readDailyActiveEnergyBurnedTotals).not.toHaveBeenCalled()
+    expect(mockNitroHealth.readSleepSamples).not.toHaveBeenCalled()
   })
 })

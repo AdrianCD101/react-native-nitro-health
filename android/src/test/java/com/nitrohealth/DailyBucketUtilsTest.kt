@@ -70,6 +70,19 @@ class DailyBucketUtilsTest {
     }
 
     @Test
+    fun clampDailyBucketRangeNeverExceedsQueryEndWhenBucketStartsAfterQuery() {
+        val range = clampDailyBucketRange(
+            bucketStartTimeMs = 40.0,
+            bucketEndTimeMs = 50.0,
+            queryStartTimeMs = 10.0,
+            queryEndTimeMs = 30.0
+        )
+
+        assertEquals(30.0, range.startTimeMs, 0.0)
+        assertEquals(30.0, range.endTimeMs, 0.0)
+    }
+
+    @Test
     fun orderAndLimitDailySamplesSortsAscendingBeforeApplyingLimit() {
         val samples = listOf(
             DailySample(startTimeMs = 30.0),

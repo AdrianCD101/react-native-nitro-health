@@ -54,6 +54,14 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     };
   }
   
+  // pragma MARK: std::function<void(const std::vector<NativeBodyMassSample>& /* result */)>
+  Func_void_std__vector_NativeBodyMassSample_ create_Func_void_std__vector_NativeBodyMassSample_(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroHealth::Func_void_std__vector_NativeBodyMassSample_::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const std::vector<NativeBodyMassSample>& result) mutable -> void {
+      swiftClosure.call(result);
+    };
+  }
+  
   // pragma MARK: std::function<void(const std::vector<NativeHeartRateSample>& /* result */)>
   Func_void_std__vector_NativeHeartRateSample_ create_Func_void_std__vector_NativeHeartRateSample_(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = NitroHealth::Func_void_std__vector_NativeHeartRateSample_::fromUnsafe(swiftClosureWrapper);
@@ -66,6 +74,14 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
   Func_void_NativeHeartRateStatistics create_Func_void_NativeHeartRateStatistics(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = NitroHealth::Func_void_NativeHeartRateStatistics::fromUnsafe(swiftClosureWrapper);
     return [swiftClosure = std::move(swiftClosure)](const NativeHeartRateStatistics& result) mutable -> void {
+      swiftClosure.call(result);
+    };
+  }
+  
+  // pragma MARK: std::function<void(const std::vector<NativeSleepSample>& /* result */)>
+  Func_void_std__vector_NativeSleepSample_ create_Func_void_std__vector_NativeSleepSample_(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroHealth::Func_void_std__vector_NativeSleepSample_::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const std::vector<NativeSleepSample>& result) mutable -> void {
       swiftClosure.call(result);
     };
   }
