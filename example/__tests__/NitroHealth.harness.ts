@@ -440,9 +440,7 @@ describe('NitroHealth native module', () => {
       return
     }
 
-    await expect(NitroHealth.readHeartRateStatistics(emptyRange)).rejects.toThrow(
-      /not determined/i
-    )
+    await expect(NitroHealth.readHeartRateStatistics(emptyRange)).rejects.toThrow(/not determined/i)
   })
 
   it('reads sleep samples from native code without crashing', async () => {
