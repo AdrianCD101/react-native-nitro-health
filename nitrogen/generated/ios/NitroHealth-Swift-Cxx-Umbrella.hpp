@@ -16,6 +16,12 @@ namespace margelo::nitro::nitrohealth { enum class HealthAuthorizationStatus; }
 namespace margelo::nitro::nitrohealth { enum class HealthAvailabilityStatus; }
 // Forward declaration of `HybridNitroHealthSpec` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { class HybridNitroHealthSpec; }
+// Forward declaration of `NativeActiveEnergyBurnedSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeActiveEnergyBurnedSample; }
+// Forward declaration of `NativeBodyMassSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeBodyMassSample; }
+// Forward declaration of `NativeDistanceSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeDistanceSample; }
 // Forward declaration of `NativeHealthAuthorizationResult` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthAuthorizationResult; }
 // Forward declaration of `NativeHealthDateRangeQuery` to properly resolve imports.
@@ -28,6 +34,8 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthTimeRangeQuery; }
 namespace margelo::nitro::nitrohealth { struct NativeHeartRateSample; }
 // Forward declaration of `NativeHeartRateStatistics` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHeartRateStatistics; }
+// Forward declaration of `NativeSleepSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeSleepSample; }
 // Forward declaration of `NativeStepSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeStepSample; }
 
@@ -36,12 +44,16 @@ namespace margelo::nitro::nitrohealth { struct NativeStepSample; }
 #include "HealthAuthorizationStatus.hpp"
 #include "HealthAvailabilityStatus.hpp"
 #include "HybridNitroHealthSpec.hpp"
+#include "NativeActiveEnergyBurnedSample.hpp"
+#include "NativeBodyMassSample.hpp"
+#include "NativeDistanceSample.hpp"
 #include "NativeHealthAuthorizationResult.hpp"
 #include "NativeHealthDateRangeQuery.hpp"
 #include "NativeHealthPermission.hpp"
 #include "NativeHealthTimeRangeQuery.hpp"
 #include "NativeHeartRateSample.hpp"
 #include "NativeHeartRateStatistics.hpp"
+#include "NativeSleepSample.hpp"
 #include "NativeStepSample.hpp"
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/Result.hpp>

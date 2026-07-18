@@ -14,6 +14,24 @@ const grantedStepsResult = {
   unverifiablePermissions: [],
 }
 
+const grantedDistanceResult = {
+  status: 'granted',
+  availabilityStatus: 'available',
+  requestStatus: 'unnecessary',
+  grantedPermissions: [{ accessType: 'read', dataType: 'distance' }],
+  deniedPermissions: [],
+  unverifiablePermissions: [],
+}
+
+const grantedActiveEnergyResult = {
+  status: 'granted',
+  availabilityStatus: 'available',
+  requestStatus: 'unnecessary',
+  grantedPermissions: [{ accessType: 'read', dataType: 'activeEnergyBurned' }],
+  deniedPermissions: [],
+  unverifiablePermissions: [],
+}
+
 const grantedHeartRateResult = {
   status: 'granted',
   availabilityStatus: 'available',
@@ -56,6 +74,8 @@ describe('App', () => {
     expect(screen.getByText('Available')).toBeTruthy()
     expect(screen.getByText('Status: available')).toBeTruthy()
     expect(screen.getByText('Steps request status: not checked')).toBeTruthy()
+    expect(screen.getByText('Distance request status: not checked')).toBeTruthy()
+    expect(screen.getByText('Active Energy request status: not checked')).toBeTruthy()
     expect(screen.getByText('Heart Rate request status: not checked')).toBeTruthy()
   })
 
@@ -109,6 +129,34 @@ describe('App', () => {
     ])
   })
 
+  it('checks Distance permission status from the app UI', async () => {
+    mockNitroHealth.getAvailabilityStatus.mockReturnValue('available')
+    mockNitroHealth.getRequestStatusForAuthorization.mockResolvedValue('shouldRequest')
+
+    render(<App />)
+
+    fireEvent.press(screen.getByText('Check Distance permission'))
+
+    expect(await screen.findByText('Distance request status: shouldRequest')).toBeTruthy()
+    expect(mockNitroHealth.getRequestStatusForAuthorization).toHaveBeenCalledWith([
+      { accessType: 'read', dataType: 'distance' },
+    ])
+  })
+
+  it('checks Active Energy permission status from the app UI', async () => {
+    mockNitroHealth.getAvailabilityStatus.mockReturnValue('available')
+    mockNitroHealth.getRequestStatusForAuthorization.mockResolvedValue('shouldRequest')
+
+    render(<App />)
+
+    fireEvent.press(screen.getByText('Check Active Energy permission'))
+
+    expect(await screen.findByText('Active Energy request status: shouldRequest')).toBeTruthy()
+    expect(mockNitroHealth.getRequestStatusForAuthorization).toHaveBeenCalledWith([
+      { accessType: 'read', dataType: 'activeEnergyBurned' },
+    ])
+  })
+
   it('requests steps permission from the app UI', async () => {
     mockNitroHealth.getAvailabilityStatus.mockReturnValue('available')
     mockNitroHealth.requestAuthorization.mockResolvedValue(grantedStepsResult)
@@ -146,6 +194,62 @@ describe('App', () => {
     expect(await screen.findByText('Daily step buckets: 1')).toBeTruthy()
     expect(screen.getByText(/123 steps/)).toBeTruthy()
     expect(mockNitroHealth.readDailyStepTotals).toHaveBeenCalledWith({
+      startDate: expect.any(Date),
+      endDate: expect.any(Date),
+      limit: 7,
+      ascending: false,
+    })
+  })
+
+  it('reads daily distance totals from the app UI after distance permission is granted', async () => {
+    mockNitroHealth.getAvailabilityStatus.mockReturnValue('available')
+    mockNitroHealth.requestAuthorization.mockResolvedValue(grantedDistanceResult)
+    mockNitroHealth.readDailyDistanceTotals.mockResolvedValue([
+      {
+        startDate: new Date('2026-01-01T00:00:00.000Z'),
+        endDate: new Date('2026-01-02T00:00:00.000Z'),
+        distanceMeters: 1234,
+      },
+    ])
+
+    render(<App />)
+
+    fireEvent.press(screen.getByText('Request Distance permission'))
+    expect(await screen.findByText('Distance authorization result: granted')).toBeTruthy()
+
+    fireEvent.press(screen.getByText('Read daily distance totals'))
+
+    expect(await screen.findByText('Daily distance buckets: 1')).toBeTruthy()
+    expect(screen.getByText(/1234 m/)).toBeTruthy()
+    expect(mockNitroHealth.readDailyDistanceTotals).toHaveBeenCalledWith({
+      startDate: expect.any(Date),
+      endDate: expect.any(Date),
+      limit: 7,
+      ascending: false,
+    })
+  })
+
+  it('reads daily active energy totals from the app UI after active energy permission is granted', async () => {
+    mockNitroHealth.getAvailabilityStatus.mockReturnValue('available')
+    mockNitroHealth.requestAuthorization.mockResolvedValue(grantedActiveEnergyResult)
+    mockNitroHealth.readDailyActiveEnergyBurnedTotals.mockResolvedValue([
+      {
+        startDate: new Date('2026-01-01T00:00:00.000Z'),
+        endDate: new Date('2026-01-02T00:00:00.000Z'),
+        kilocalories: 321,
+      },
+    ])
+
+    render(<App />)
+
+    fireEvent.press(screen.getByText('Request Active Energy permission'))
+    expect(await screen.findByText('Active Energy authorization result: granted')).toBeTruthy()
+
+    fireEvent.press(screen.getByText('Read daily active energy totals'))
+
+    expect(await screen.findByText('Daily active-energy buckets: 1')).toBeTruthy()
+    expect(screen.getByText(/321 kcal/)).toBeTruthy()
+    expect(mockNitroHealth.readDailyActiveEnergyBurnedTotals).toHaveBeenCalledWith({
       startDate: expect.any(Date),
       endDate: expect.any(Date),
       limit: 7,

@@ -16,10 +16,16 @@ function createNitroHealthMock(overrides = {}) {
     getAvailabilityStatus: createMockFunction(() => 'available'),
     openHealthConnectInstall: createMockFunction(() => false),
     openHealthSettings: createMockFunction(() => Promise.resolve(true)),
+    readActiveEnergyBurned: createMockFunction(() => Promise.resolve([])),
+    readDailyActiveEnergyBurnedTotals: createMockFunction(() => Promise.resolve([])),
+    readDailyDistanceTotals: createMockFunction(() => Promise.resolve([])),
     readSteps: createMockFunction(() => Promise.resolve([])),
     readDailyStepTotals: createMockFunction(() => Promise.resolve([])),
+    readDistance: createMockFunction(() => Promise.resolve([])),
+    readBodyMass: createMockFunction(() => Promise.resolve([])),
     readHeartRate: createMockFunction(() => Promise.resolve([])),
     readHeartRateStatistics: createMockFunction(() => Promise.resolve({})),
+    readSleepSamples: createMockFunction(() => Promise.resolve([])),
     getRequestStatusForAuthorization: createMockFunction(() => Promise.resolve('unknown')),
     requestAuthorization: createMockFunction(() =>
       Promise.resolve({

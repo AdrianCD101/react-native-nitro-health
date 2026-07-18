@@ -1,2 +1,8 @@
 /** Health data type supported by {@linkcode NitroHealth.requestAuthorization}. */
-export type HealthDataType = 'steps' | 'heartRate'
+export type HealthDataType =
+  | 'steps'
+  | 'heartRate'
+  | 'distance'
+  | 'activeEnergyBurned'
+  | 'sleep'
+  | 'bodyMass'

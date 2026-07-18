@@ -2,18 +2,27 @@ import React, { useState } from 'react'
 import { Pressable, ScrollView, Text, View, StyleSheet } from 'react-native'
 import { NitroHealth } from 'react-native-nitro-health'
 import type {
-  HealthAuthorizationResult,
   AuthorizationRequestStatus,
+  BodyMassSample,
+  DailyActiveEnergyBurnedTotal,
+  DailyDistanceTotal,
   DailyStepTotal,
+  HealthAuthorizationResult,
   HealthDataType,
   HealthAvailabilityStatus,
   HealthPermission,
   HeartRateStatistics,
+  SleepSample,
 } from 'react-native-nitro-health'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 const readPermissions: Array<{ dataType: HealthDataType; label: string }> = [
   { dataType: 'steps', label: 'Steps' },
+  { dataType: 'distance', label: 'Distance' },
+  { dataType: 'activeEnergyBurned', label: 'Active Energy' },
   { dataType: 'heartRate', label: 'Heart Rate' },
+  { dataType: 'sleep', label: 'Sleep' },
+  { dataType: 'bodyMass', label: 'Body Mass' },
 ]
 
 function getAvailabilityLabel(status: HealthAvailabilityStatus): string {
@@ -42,8 +51,17 @@ function App(): React.JSX.Element {
   const [openingSettings, setOpeningSettings] = useState<HealthDataType>()
   const [readingDailyStepTotals, setReadingDailyStepTotals] = useState(false)
   const [dailyStepTotals, setDailyStepTotals] = useState<DailyStepTotal[]>()
+  const [readingDailyDistanceTotals, setReadingDailyDistanceTotals] = useState(false)
+  const [dailyDistanceTotals, setDailyDistanceTotals] = useState<DailyDistanceTotal[]>()
+  const [readingDailyActiveEnergyTotals, setReadingDailyActiveEnergyTotals] = useState(false)
+  const [dailyActiveEnergyTotals, setDailyActiveEnergyTotals] =
+    useState<DailyActiveEnergyBurnedTotal[]>()
   const [readingHeartRateStatistics, setReadingHeartRateStatistics] = useState(false)
   const [heartRateStatistics, setHeartRateStatistics] = useState<HeartRateStatistics>()
+  const [readingSleepSamples, setReadingSleepSamples] = useState(false)
+  const [sleepSamples, setSleepSamples] = useState<SleepSample[]>()
+  const [readingBodyMass, setReadingBodyMass] = useState(false)
+  const [bodyMassSamples, setBodyMassSamples] = useState<BodyMassSample[]>()
   const [errorMessages, setErrorMessages] = useState<Partial<Record<HealthDataType, string>>>({})
 
   async function checkPermission(dataType: HealthDataType): Promise<void> {
@@ -134,6 +152,56 @@ function App(): React.JSX.Element {
     }
   }
 
+  async function readDailyDistanceTotals(): Promise<void> {
+    const endDate = new Date()
+    const startDate = new Date(endDate.getTime() - 7 * 24 * 60 * 60 * 1000)
+
+    setReadingDailyDistanceTotals(true)
+    setErrorMessages((current) => ({ ...current, distance: undefined }))
+
+    try {
+      const totals = await NitroHealth.readDailyDistanceTotals({
+        startDate,
+        endDate,
+        limit: 7,
+        ascending: false,
+      })
+      setDailyDistanceTotals(totals)
+    } catch (error) {
+      setErrorMessages((current) => ({
+        ...current,
+        distance: error instanceof Error ? error.message : String(error),
+      }))
+    } finally {
+      setReadingDailyDistanceTotals(false)
+    }
+  }
+
+  async function readDailyActiveEnergyBurnedTotals(): Promise<void> {
+    const endDate = new Date()
+    const startDate = new Date(endDate.getTime() - 7 * 24 * 60 * 60 * 1000)
+
+    setReadingDailyActiveEnergyTotals(true)
+    setErrorMessages((current) => ({ ...current, activeEnergyBurned: undefined }))
+
+    try {
+      const totals = await NitroHealth.readDailyActiveEnergyBurnedTotals({
+        startDate,
+        endDate,
+        limit: 7,
+        ascending: false,
+      })
+      setDailyActiveEnergyTotals(totals)
+    } catch (error) {
+      setErrorMessages((current) => ({
+        ...current,
+        activeEnergyBurned: error instanceof Error ? error.message : String(error),
+      }))
+    } finally {
+      setReadingDailyActiveEnergyTotals(false)
+    }
+  }
+
   async function readHeartRateStatistics(): Promise<void> {
     const endDate = new Date()
     const startDate = new Date(endDate.getTime() - 24 * 60 * 60 * 1000)
@@ -157,183 +225,381 @@ function App(): React.JSX.Element {
     }
   }
 
-  return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Health APIs</Text>
-      <Text style={[styles.status, isAvailable ? styles.available : styles.unavailable]}>
-        {getAvailabilityLabel(availabilityStatus)}
-      </Text>
-      <Text style={styles.detail}>Status: {availabilityStatus}</Text>
-      {readPermissions.map(({ dataType, label }) => {
-        const isChecking = checkingPermission === dataType
-        const isRequesting = requestingPermission === dataType
-        const isOpeningSettings = openingSettings === dataType
-        const result = authorizationResults[dataType]
-        const requestStatus = authorizationStatuses[dataType]
-        const canOpenSettings = result ? result.status !== 'granted' : false
-        const canReadSteps = dataType === 'steps'
-        const canReadHeartRate = dataType === 'heartRate'
-        const hasPermission =
-          result?.status === 'granted' ||
-          result?.status === 'completed' ||
-          (result?.grantedPermissions.length ?? 0) > 0 ||
-          requestStatus === 'unnecessary'
+  async function readSleepSamples(): Promise<void> {
+    const endDate = new Date()
+    const startDate = new Date(endDate.getTime() - 7 * 24 * 60 * 60 * 1000)
 
-        return (
-          <View key={dataType} style={styles.permissionCard}>
-            <Text style={styles.cardTitle}>{label} permission</Text>
-            <Text style={styles.detail}>
-              {label} request status: {authorizationStatuses[dataType] ?? 'not checked'}
-            </Text>
-            {result ? (
+    setReadingSleepSamples(true)
+    setErrorMessages((current) => ({ ...current, sleep: undefined }))
+
+    try {
+      const samples = await NitroHealth.readSleepSamples({
+        startDate,
+        endDate,
+        limit: 50,
+        ascending: false,
+      })
+      setSleepSamples(samples)
+    } catch (error) {
+      setErrorMessages((current) => ({
+        ...current,
+        sleep: error instanceof Error ? error.message : String(error),
+      }))
+    } finally {
+      setReadingSleepSamples(false)
+    }
+  }
+
+  async function readBodyMass(): Promise<void> {
+    const endDate = new Date()
+    const startDate = new Date(endDate.getTime() - 7 * 24 * 60 * 60 * 1000)
+
+    setReadingBodyMass(true)
+    setErrorMessages((current) => ({ ...current, bodyMass: undefined }))
+
+    try {
+      const samples = await NitroHealth.readBodyMass({
+        startDate,
+        endDate,
+        limit: 20,
+        ascending: false,
+      })
+      setBodyMassSamples(samples)
+    } catch (error) {
+      setErrorMessages((current) => ({
+        ...current,
+        bodyMass: error instanceof Error ? error.message : String(error),
+      }))
+    } finally {
+      setReadingBodyMass(false)
+    }
+  }
+
+  return (
+    <SafeAreaView>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.title}>Health APIs</Text>
+        <Text style={[styles.status, isAvailable ? styles.available : styles.unavailable]}>
+          {getAvailabilityLabel(availabilityStatus)}
+        </Text>
+        <Text style={styles.detail}>Status: {availabilityStatus}</Text>
+        {readPermissions.map(({ dataType, label }) => {
+          const isChecking = checkingPermission === dataType
+          const isRequesting = requestingPermission === dataType
+          const isOpeningSettings = openingSettings === dataType
+          const result = authorizationResults[dataType]
+          const requestStatus = authorizationStatuses[dataType]
+          const canOpenSettings = result ? result.status !== 'granted' : false
+          const canReadSteps = dataType === 'steps'
+          const canReadDistance = dataType === 'distance'
+          const canReadActiveEnergy = dataType === 'activeEnergyBurned'
+          const canReadHeartRate = dataType === 'heartRate'
+          const canReadSleep = dataType === 'sleep'
+          const canReadBodyMass = dataType === 'bodyMass'
+          const hasPermission =
+            result?.status === 'granted' ||
+            result?.status === 'completed' ||
+            (result?.grantedPermissions.length ?? 0) > 0 ||
+            requestStatus === 'unnecessary'
+
+          return (
+            <View key={dataType} style={styles.permissionCard}>
+              <Text style={styles.cardTitle}>{label} permission</Text>
               <Text style={styles.detail}>
-                {label} authorization result: {result.status}
+                {label} request status: {authorizationStatuses[dataType] ?? 'not checked'}
               </Text>
-            ) : null}
-            {result ? (
-              <Text style={styles.detail}>
-                {label} granted: {result.grantedPermissions.length} | denied:{' '}
-                {result.deniedPermissions.length} | unverifiable:{' '}
-                {result.unverifiablePermissions.length}
-              </Text>
-            ) : null}
-            {errorMessages[dataType] ? (
-              <Text style={styles.error}>{errorMessages[dataType]}</Text>
-            ) : null}
-            {canReadSteps && dailyStepTotals ? (
-              <View style={styles.readResult}>
-                <Text style={styles.detail}>Daily step buckets: {dailyStepTotals.length}</Text>
-                {dailyStepTotals.map((bucket) => (
-                  <Text key={bucket.startDate.toISOString()} style={styles.detail}>
-                    {bucket.startDate.toLocaleDateString()}: {bucket.count} steps
-                  </Text>
-                ))}
-              </View>
-            ) : null}
-            {canReadHeartRate && heartRateStatistics ? (
-              <View style={styles.readResult}>
+              {result ? (
                 <Text style={styles.detail}>
-                  Average bpm: {heartRateStatistics.average ?? 'n/a'}
+                  {label} authorization result: {result.status}
                 </Text>
-                <Text style={styles.detail}>Min bpm: {heartRateStatistics.min ?? 'n/a'}</Text>
-                <Text style={styles.detail}>Max bpm: {heartRateStatistics.max ?? 'n/a'}</Text>
+              ) : null}
+              {result ? (
+                <Text style={styles.detail}>
+                  {label} granted: {result.grantedPermissions.length} | denied:{' '}
+                  {result.deniedPermissions.length} | unverifiable:{' '}
+                  {result.unverifiablePermissions.length}
+                </Text>
+              ) : null}
+              {errorMessages[dataType] ? (
+                <Text style={styles.error}>{errorMessages[dataType]}</Text>
+              ) : null}
+              {canReadSteps && dailyStepTotals ? (
+                <View style={styles.readResult}>
+                  <Text style={styles.detail}>Daily step buckets: {dailyStepTotals.length}</Text>
+                  {dailyStepTotals.map((bucket) => (
+                    <Text key={bucket.startDate.toISOString()} style={styles.detail}>
+                      {bucket.startDate.toLocaleDateString()}: {bucket.count} steps
+                    </Text>
+                  ))}
+                </View>
+              ) : null}
+              {canReadDistance && dailyDistanceTotals ? (
+                <View style={styles.readResult}>
+                  <Text style={styles.detail}>
+                    Daily distance buckets: {dailyDistanceTotals.length}
+                  </Text>
+                  {dailyDistanceTotals.map((bucket) => (
+                    <Text key={bucket.startDate.toISOString()} style={styles.detail}>
+                      {bucket.startDate.toLocaleDateString()}: {Math.round(bucket.distanceMeters)} m
+                    </Text>
+                  ))}
+                </View>
+              ) : null}
+              {canReadActiveEnergy && dailyActiveEnergyTotals ? (
+                <View style={styles.readResult}>
+                  <Text style={styles.detail}>
+                    Daily active-energy buckets: {dailyActiveEnergyTotals.length}
+                  </Text>
+                  {dailyActiveEnergyTotals.map((bucket) => (
+                    <Text key={bucket.startDate.toISOString()} style={styles.detail}>
+                      {bucket.startDate.toLocaleDateString()}: {Math.round(bucket.kilocalories)}{' '}
+                      kcal
+                    </Text>
+                  ))}
+                </View>
+              ) : null}
+              {canReadHeartRate && heartRateStatistics ? (
+                <View style={styles.readResult}>
+                  <Text style={styles.detail}>
+                    Average bpm: {heartRateStatistics.average ?? 'n/a'}
+                  </Text>
+                  <Text style={styles.detail}>Min bpm: {heartRateStatistics.min ?? 'n/a'}</Text>
+                  <Text style={styles.detail}>Max bpm: {heartRateStatistics.max ?? 'n/a'}</Text>
+                </View>
+              ) : null}
+              {canReadSleep && sleepSamples ? (
+                <View style={styles.readResult}>
+                  <Text style={styles.detail}>Sleep samples: {sleepSamples.length}</Text>
+                  {sleepSamples.map((sample) => (
+                    <Text
+                      key={`${sample.startDate.toISOString()}-${sample.stage}`}
+                      style={styles.detail}
+                    >
+                      {sample.startDate.toLocaleString()}: {sample.stage}
+                    </Text>
+                  ))}
+                </View>
+              ) : null}
+              {canReadBodyMass && bodyMassSamples ? (
+                <View style={styles.readResult}>
+                  <Text style={styles.detail}>Body mass samples: {bodyMassSamples.length}</Text>
+                  {bodyMassSamples.map((sample) => (
+                    <Text key={sample.startDate.toISOString()} style={styles.detail}>
+                      {sample.startDate.toLocaleString()}: {sample.kilograms.toFixed(1)} kg
+                    </Text>
+                  ))}
+                </View>
+              ) : null}
+              <View style={styles.buttonRow}>
+                <Pressable
+                  disabled={!isAvailable || isChecking}
+                  onPress={() => {
+                    checkPermission(dataType)
+                  }}
+                  style={({ pressed }) => [
+                    styles.button,
+                    styles.secondaryButton,
+                    pressed ? styles.buttonPressed : null,
+                    !isAvailable || isChecking ? styles.buttonDisabled : null,
+                  ]}
+                >
+                  <Text style={styles.buttonText}>
+                    {isChecking ? 'Checking...' : `Check ${label} permission`}
+                  </Text>
+                </Pressable>
+                <Pressable
+                  disabled={!isAvailable || isRequesting}
+                  onPress={() => {
+                    requestPermission(dataType)
+                  }}
+                  style={({ pressed }) => [
+                    styles.button,
+                    pressed ? styles.buttonPressed : null,
+                    !isAvailable || isRequesting ? styles.buttonDisabled : null,
+                  ]}
+                >
+                  <Text style={styles.buttonText}>
+                    {isRequesting ? 'Requesting...' : `Request ${label} permission`}
+                  </Text>
+                </Pressable>
+                {canOpenSettings ? (
+                  <Pressable
+                    disabled={isOpeningSettings}
+                    onPress={() => {
+                      openSettings(dataType)
+                    }}
+                    style={({ pressed }) => [
+                      styles.button,
+                      styles.settingsButton,
+                      pressed ? styles.buttonPressed : null,
+                      isOpeningSettings ? styles.buttonDisabled : null,
+                    ]}
+                  >
+                    <Text style={styles.buttonText}>
+                      {isOpeningSettings ? 'Opening...' : 'Open health settings'}
+                    </Text>
+                  </Pressable>
+                ) : null}
+                {canReadSteps && !hasPermission ? (
+                  <Text style={styles.detail}>Grant Steps permission to read</Text>
+                ) : null}
+                {canReadSteps ? (
+                  <Pressable
+                    disabled={!isAvailable || readingDailyStepTotals || !hasPermission}
+                    onPress={() => {
+                      readDailyStepTotals()
+                    }}
+                    style={({ pressed }) => [
+                      styles.button,
+                      styles.readButton,
+                      pressed ? styles.buttonPressed : null,
+                      !isAvailable || readingDailyStepTotals || !hasPermission
+                        ? styles.buttonDisabled
+                        : null,
+                    ]}
+                  >
+                    <Text style={styles.buttonText}>
+                      {readingDailyStepTotals ? 'Reading...' : 'Read daily step totals'}
+                    </Text>
+                  </Pressable>
+                ) : null}
+                {canReadDistance && !hasPermission ? (
+                  <Text style={styles.detail}>Grant Distance permission to read</Text>
+                ) : null}
+                {canReadDistance ? (
+                  <Pressable
+                    disabled={!isAvailable || readingDailyDistanceTotals || !hasPermission}
+                    onPress={() => {
+                      readDailyDistanceTotals()
+                    }}
+                    style={({ pressed }) => [
+                      styles.button,
+                      styles.readButton,
+                      pressed ? styles.buttonPressed : null,
+                      !isAvailable || readingDailyDistanceTotals || !hasPermission
+                        ? styles.buttonDisabled
+                        : null,
+                    ]}
+                  >
+                    <Text style={styles.buttonText}>
+                      {readingDailyDistanceTotals ? 'Reading...' : 'Read daily distance totals'}
+                    </Text>
+                  </Pressable>
+                ) : null}
+                {canReadActiveEnergy && !hasPermission ? (
+                  <Text style={styles.detail}>Grant Active Energy permission to read</Text>
+                ) : null}
+                {canReadActiveEnergy ? (
+                  <Pressable
+                    disabled={!isAvailable || readingDailyActiveEnergyTotals || !hasPermission}
+                    onPress={() => {
+                      readDailyActiveEnergyBurnedTotals()
+                    }}
+                    style={({ pressed }) => [
+                      styles.button,
+                      styles.readButton,
+                      pressed ? styles.buttonPressed : null,
+                      !isAvailable || readingDailyActiveEnergyTotals || !hasPermission
+                        ? styles.buttonDisabled
+                        : null,
+                    ]}
+                  >
+                    <Text style={styles.buttonText}>
+                      {readingDailyActiveEnergyTotals
+                        ? 'Reading...'
+                        : 'Read daily active energy totals'}
+                    </Text>
+                  </Pressable>
+                ) : null}
+                {canReadHeartRate && !hasPermission ? (
+                  <Text style={styles.detail}>Grant Heart Rate permission to read</Text>
+                ) : null}
+                {canReadHeartRate ? (
+                  <Pressable
+                    disabled={!isAvailable || readingHeartRateStatistics || !hasPermission}
+                    onPress={() => {
+                      readHeartRateStatistics()
+                    }}
+                    style={({ pressed }) => [
+                      styles.button,
+                      styles.readButton,
+                      pressed ? styles.buttonPressed : null,
+                      !isAvailable || readingHeartRateStatistics || !hasPermission
+                        ? styles.buttonDisabled
+                        : null,
+                    ]}
+                  >
+                    <Text style={styles.buttonText}>
+                      {readingHeartRateStatistics ? 'Reading...' : 'Read Heart Rate stats'}
+                    </Text>
+                  </Pressable>
+                ) : null}
+                {canReadSleep && !hasPermission ? (
+                  <Text style={styles.detail}>Grant Sleep permission to read</Text>
+                ) : null}
+                {canReadSleep ? (
+                  <Pressable
+                    disabled={!isAvailable || readingSleepSamples || !hasPermission}
+                    onPress={() => {
+                      readSleepSamples()
+                    }}
+                    style={({ pressed }) => [
+                      styles.button,
+                      styles.readButton,
+                      pressed ? styles.buttonPressed : null,
+                      !isAvailable || readingSleepSamples || !hasPermission
+                        ? styles.buttonDisabled
+                        : null,
+                    ]}
+                  >
+                    <Text style={styles.buttonText}>
+                      {readingSleepSamples ? 'Reading...' : 'Read sleep samples'}
+                    </Text>
+                  </Pressable>
+                ) : null}
+                {canReadBodyMass && !hasPermission ? (
+                  <Text style={styles.detail}>Grant Body Mass permission to read</Text>
+                ) : null}
+                {canReadBodyMass ? (
+                  <Pressable
+                    disabled={!isAvailable || readingBodyMass || !hasPermission}
+                    onPress={() => {
+                      readBodyMass()
+                    }}
+                    style={({ pressed }) => [
+                      styles.button,
+                      styles.readButton,
+                      pressed ? styles.buttonPressed : null,
+                      !isAvailable || readingBodyMass || !hasPermission
+                        ? styles.buttonDisabled
+                        : null,
+                    ]}
+                  >
+                    <Text style={styles.buttonText}>
+                      {readingBodyMass ? 'Reading...' : 'Read body mass'}
+                    </Text>
+                  </Pressable>
+                ) : null}
               </View>
-            ) : null}
-            <View style={styles.buttonRow}>
-              <Pressable
-                disabled={!isAvailable || isChecking}
-                onPress={() => {
-                  checkPermission(dataType)
-                }}
-                style={({ pressed }) => [
-                  styles.button,
-                  styles.secondaryButton,
-                  pressed ? styles.buttonPressed : null,
-                  !isAvailable || isChecking ? styles.buttonDisabled : null,
-                ]}
-              >
-                <Text style={styles.buttonText}>
-                  {isChecking ? 'Checking...' : `Check ${label} permission`}
-                </Text>
-              </Pressable>
-              <Pressable
-                disabled={!isAvailable || isRequesting}
-                onPress={() => {
-                  requestPermission(dataType)
-                }}
-                style={({ pressed }) => [
-                  styles.button,
-                  pressed ? styles.buttonPressed : null,
-                  !isAvailable || isRequesting ? styles.buttonDisabled : null,
-                ]}
-              >
-                <Text style={styles.buttonText}>
-                  {isRequesting ? 'Requesting...' : `Request ${label} permission`}
-                </Text>
-              </Pressable>
-              {canOpenSettings ? (
-                <Pressable
-                  disabled={isOpeningSettings}
-                  onPress={() => {
-                    openSettings(dataType)
-                  }}
-                  style={({ pressed }) => [
-                    styles.button,
-                    styles.settingsButton,
-                    pressed ? styles.buttonPressed : null,
-                    isOpeningSettings ? styles.buttonDisabled : null,
-                  ]}
-                >
-                  <Text style={styles.buttonText}>
-                    {isOpeningSettings ? 'Opening...' : 'Open health settings'}
-                  </Text>
-                </Pressable>
-              ) : null}
-              {canReadSteps && !hasPermission ? (
-                <Text style={styles.detail}>Grant Steps permission to read</Text>
-              ) : null}
-              {canReadSteps ? (
-                <Pressable
-                  disabled={!isAvailable || readingDailyStepTotals || !hasPermission}
-                  onPress={() => {
-                    readDailyStepTotals()
-                  }}
-                  style={({ pressed }) => [
-                    styles.button,
-                    styles.readButton,
-                    pressed ? styles.buttonPressed : null,
-                    !isAvailable || readingDailyStepTotals || !hasPermission
-                      ? styles.buttonDisabled
-                      : null,
-                  ]}
-                >
-                  <Text style={styles.buttonText}>
-                    {readingDailyStepTotals ? 'Reading...' : 'Read daily step totals'}
-                  </Text>
-                </Pressable>
-              ) : null}
-              {canReadHeartRate && !hasPermission ? (
-                <Text style={styles.detail}>Grant Heart Rate permission to read</Text>
-              ) : null}
-              {canReadHeartRate ? (
-                <Pressable
-                  disabled={!isAvailable || readingHeartRateStatistics || !hasPermission}
-                  onPress={() => {
-                    readHeartRateStatistics()
-                  }}
-                  style={({ pressed }) => [
-                    styles.button,
-                    styles.readButton,
-                    pressed ? styles.buttonPressed : null,
-                    !isAvailable || readingHeartRateStatistics || !hasPermission
-                      ? styles.buttonDisabled
-                      : null,
-                  ]}
-                >
-                  <Text style={styles.buttonText}>
-                    {readingHeartRateStatistics ? 'Reading...' : 'Read Heart Rate stats'}
-                  </Text>
-                </Pressable>
-              ) : null}
             </View>
-          </View>
-        )
-      })}
-      {canOpenInstall ? (
-        <Pressable
-          onPress={() => {
-            NitroHealth.openHealthConnectInstall()
-          }}
-          style={({ pressed }) => [
-            styles.button,
-            styles.installButton,
-            pressed ? styles.buttonPressed : null,
-          ]}
-        >
-          <Text style={styles.buttonText}>Open Health Connect install</Text>
-        </Pressable>
-      ) : null}
-    </ScrollView>
+          )
+        })}
+        {canOpenInstall ? (
+          <Pressable
+            onPress={() => {
+              NitroHealth.openHealthConnectInstall()
+            }}
+            style={({ pressed }) => [
+              styles.button,
+              styles.installButton,
+              pressed ? styles.buttonPressed : null,
+            ]}
+          >
+            <Text style={styles.buttonText}>Open Health Connect install</Text>
+          </Pressable>
+        ) : null}
+      </ScrollView>
+    </SafeAreaView>
   )
 }
 

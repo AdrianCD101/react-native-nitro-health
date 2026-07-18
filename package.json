@@ -35,7 +35,9 @@
     "ios/**/*.swift",
     "app.plugin.js",
     "*.podspec",
-    "README.md"
+    "README.md",
+    "!android/src/test",
+    "!ios/Tests"
   ],
   "main": "./lib/commonjs/index.js",
   "module": "./lib/module/index.js",
@@ -53,6 +55,8 @@
     "harness:android": "bun run --cwd example harness:android",
     "harness:ios": "bun run --cwd example harness:ios",
     "test": "bun run --cwd example test",
+    "test:android:native": "example/android/gradlew -p example/android :react-native-nitro-health:testDebugUnitTest",
+    "test:ios:native": "swift test",
     "typecheck": "tsc --noEmit",
     "clean": "git clean -dfX",
     "release": "semantic-release",

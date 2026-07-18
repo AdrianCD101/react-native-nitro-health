@@ -5,9 +5,13 @@ import android.content.Intent
 import android.net.Uri
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.permission.HealthPermission
+import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
+import androidx.health.connect.client.records.DistanceRecord
 import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.Record
+import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.StepsRecord
+import androidx.health.connect.client.records.WeightRecord
 import androidx.health.connect.client.request.AggregateGroupByPeriodRequest
 import androidx.health.connect.client.request.AggregateRequest
 import androidx.health.connect.client.request.ReadRecordsRequest
@@ -18,12 +22,16 @@ import com.margelo.nitro.nitrohealth.AuthorizationRequestStatus
 import com.margelo.nitro.nitrohealth.HealthAuthorizationStatus
 import com.margelo.nitro.nitrohealth.HealthAvailabilityStatus
 import com.margelo.nitro.nitrohealth.HybridNitroHealthSpec
+import com.margelo.nitro.nitrohealth.NativeActiveEnergyBurnedSample
+import com.margelo.nitro.nitrohealth.NativeBodyMassSample
+import com.margelo.nitro.nitrohealth.NativeDistanceSample
 import com.margelo.nitro.nitrohealth.NativeHealthAuthorizationResult
 import com.margelo.nitro.nitrohealth.NativeHealthDateRangeQuery
 import com.margelo.nitro.nitrohealth.NativeHealthPermission
 import com.margelo.nitro.nitrohealth.NativeHealthTimeRangeQuery
 import com.margelo.nitro.nitrohealth.NativeHeartRateSample
 import com.margelo.nitro.nitrohealth.NativeHeartRateStatistics
+import com.margelo.nitro.nitrohealth.NativeSleepSample
 import com.margelo.nitro.nitrohealth.NativeStepSample
 import java.time.Instant
 import java.time.Period
@@ -145,20 +153,178 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                 timeRangeSlicer = Period.ofDays(1)
             )
             val response = client.aggregateGroupByPeriod(request)
-            val samples = response.map { group ->
+            val samples = response.mapNotNull { group ->
+                val count = group.result[StepsRecord.COUNT_TOTAL]
+                    ?: return@mapNotNull null
+                val range = clampDailyBucketRange(
+                    bucketStartTimeMs = group.startTime.atZone(zoneId).toInstant().toEpochMilli().toDouble(),
+                    bucketEndTimeMs = group.endTime.atZone(zoneId).toInstant().toEpochMilli().toDouble(),
+                    queryStartTimeMs = query.startTimeMs,
+                    queryEndTimeMs = query.endTimeMs
+                )
+
                 NativeStepSample(
-                    startTimeMs = group.startTime.atZone(zoneId).toInstant().toEpochMilli().toDouble(),
-                    endTimeMs = group.endTime.atZone(zoneId).toInstant().toEpochMilli().toDouble(),
-                    count = group.result[StepsRecord.COUNT_TOTAL]?.toDouble() ?: 0.0
+                    startTimeMs = range.startTimeMs,
+                    endTimeMs = range.endTimeMs,
+                    count = count.toDouble()
                 )
             }
-            val ordered = if (query.ascending) {
-                samples.sortedBy { it.startTimeMs }
-            } else {
-                samples.sortedByDescending { it.startTimeMs }
+            orderAndLimitDailySamples(samples, query.ascending, query.limit.toInt()) { it.startTimeMs }
+                .toTypedArray()
+        }
+    }
+
+    override fun readDistance(query: NativeHealthDateRangeQuery): Promise<Array<NativeDistanceSample>> {
+        return Promise.async {
+            val context = NitroModules.applicationContext
+                ?: throw IllegalStateException("Android application context is unavailable")
+
+            if (getAvailabilityStatus() != HealthAvailabilityStatus.AVAILABLE) {
+                throw IllegalStateException("Health Connect is not available")
             }
 
-            ordered.take(query.limit.toInt()).toTypedArray()
+            val client = HealthConnectClient.getOrCreate(context)
+            requireReadPermission(client, DistanceRecord::class, "distance")
+
+            val request = ReadRecordsRequest(
+                recordType = DistanceRecord::class,
+                timeRangeFilter = TimeRangeFilter.between(
+                    Instant.ofEpochMilli(query.startTimeMs.toLong()),
+                    Instant.ofEpochMilli(query.endTimeMs.toLong())
+                ),
+                ascendingOrder = query.ascending,
+                pageSize = query.limit.toInt()
+            )
+            val response = client.readRecords(request)
+
+            response.records.map { record ->
+                NativeDistanceSample(
+                    startTimeMs = record.startTime.toEpochMilli().toDouble(),
+                    endTimeMs = record.endTime.toEpochMilli().toDouble(),
+                    distanceMeters = record.distance.inMeters
+                )
+            }.toTypedArray()
+        }
+    }
+
+    override fun readDailyDistanceTotals(query: NativeHealthDateRangeQuery): Promise<Array<NativeDistanceSample>> {
+        return Promise.async {
+            val context = NitroModules.applicationContext
+                ?: throw IllegalStateException("Android application context is unavailable")
+
+            if (getAvailabilityStatus() != HealthAvailabilityStatus.AVAILABLE) {
+                throw IllegalStateException("Health Connect is not available")
+            }
+
+            val client = HealthConnectClient.getOrCreate(context)
+            requireReadPermission(client, DistanceRecord::class, "distance")
+
+            val zoneId = ZoneId.systemDefault()
+            val request = AggregateGroupByPeriodRequest(
+                metrics = setOf(DistanceRecord.DISTANCE_TOTAL),
+                timeRangeFilter = TimeRangeFilter.between(
+                    Instant.ofEpochMilli(query.startTimeMs.toLong()).atZone(zoneId).toLocalDateTime(),
+                    Instant.ofEpochMilli(query.endTimeMs.toLong()).atZone(zoneId).toLocalDateTime()
+                ),
+                timeRangeSlicer = Period.ofDays(1)
+            )
+            val response = client.aggregateGroupByPeriod(request)
+            val samples = response.mapNotNull { group ->
+                val distance = group.result[DistanceRecord.DISTANCE_TOTAL]
+                    ?: return@mapNotNull null
+                val range = clampDailyBucketRange(
+                    bucketStartTimeMs = group.startTime.atZone(zoneId).toInstant().toEpochMilli().toDouble(),
+                    bucketEndTimeMs = group.endTime.atZone(zoneId).toInstant().toEpochMilli().toDouble(),
+                    queryStartTimeMs = query.startTimeMs,
+                    queryEndTimeMs = query.endTimeMs
+                )
+
+                NativeDistanceSample(
+                    startTimeMs = range.startTimeMs,
+                    endTimeMs = range.endTimeMs,
+                    distanceMeters = distance.inMeters
+                )
+            }
+            orderAndLimitDailySamples(samples, query.ascending, query.limit.toInt()) { it.startTimeMs }
+                .toTypedArray()
+        }
+    }
+
+    override fun readActiveEnergyBurned(query: NativeHealthDateRangeQuery): Promise<Array<NativeActiveEnergyBurnedSample>> {
+        return Promise.async {
+            val context = NitroModules.applicationContext
+                ?: throw IllegalStateException("Android application context is unavailable")
+
+            if (getAvailabilityStatus() != HealthAvailabilityStatus.AVAILABLE) {
+                throw IllegalStateException("Health Connect is not available")
+            }
+
+            val client = HealthConnectClient.getOrCreate(context)
+            requireReadPermission(client, ActiveCaloriesBurnedRecord::class, "active energy burned")
+
+            val request = ReadRecordsRequest(
+                recordType = ActiveCaloriesBurnedRecord::class,
+                timeRangeFilter = TimeRangeFilter.between(
+                    Instant.ofEpochMilli(query.startTimeMs.toLong()),
+                    Instant.ofEpochMilli(query.endTimeMs.toLong())
+                ),
+                ascendingOrder = query.ascending,
+                pageSize = query.limit.toInt()
+            )
+            val response = client.readRecords(request)
+
+            response.records.map { record ->
+                NativeActiveEnergyBurnedSample(
+                    startTimeMs = record.startTime.toEpochMilli().toDouble(),
+                    endTimeMs = record.endTime.toEpochMilli().toDouble(),
+                    kilocalories = record.energy.inKilocalories
+                )
+            }.toTypedArray()
+        }
+    }
+
+    override fun readDailyActiveEnergyBurnedTotals(
+        query: NativeHealthDateRangeQuery
+    ): Promise<Array<NativeActiveEnergyBurnedSample>> {
+        return Promise.async {
+            val context = NitroModules.applicationContext
+                ?: throw IllegalStateException("Android application context is unavailable")
+
+            if (getAvailabilityStatus() != HealthAvailabilityStatus.AVAILABLE) {
+                throw IllegalStateException("Health Connect is not available")
+            }
+
+            val client = HealthConnectClient.getOrCreate(context)
+            requireReadPermission(client, ActiveCaloriesBurnedRecord::class, "active energy burned")
+
+            val zoneId = ZoneId.systemDefault()
+            val request = AggregateGroupByPeriodRequest(
+                metrics = setOf(ActiveCaloriesBurnedRecord.ACTIVE_CALORIES_TOTAL),
+                timeRangeFilter = TimeRangeFilter.between(
+                    Instant.ofEpochMilli(query.startTimeMs.toLong()).atZone(zoneId).toLocalDateTime(),
+                    Instant.ofEpochMilli(query.endTimeMs.toLong()).atZone(zoneId).toLocalDateTime()
+                ),
+                timeRangeSlicer = Period.ofDays(1)
+            )
+            val response = client.aggregateGroupByPeriod(request)
+            val samples = response.mapNotNull { group ->
+                val activeCalories = group.result[ActiveCaloriesBurnedRecord.ACTIVE_CALORIES_TOTAL]
+                    ?: return@mapNotNull null
+                val range = clampDailyBucketRange(
+                    bucketStartTimeMs = group.startTime.atZone(zoneId).toInstant().toEpochMilli().toDouble(),
+                    bucketEndTimeMs = group.endTime.atZone(zoneId).toInstant().toEpochMilli().toDouble(),
+                    queryStartTimeMs = query.startTimeMs,
+                    queryEndTimeMs = query.endTimeMs
+                )
+
+                NativeActiveEnergyBurnedSample(
+                    startTimeMs = range.startTimeMs,
+                    endTimeMs = range.endTimeMs,
+                    kilocalories = activeCalories.inKilocalories
+                )
+            }
+            orderAndLimitDailySamples(samples, query.ascending, query.limit.toInt()) { it.startTimeMs }
+                .toTypedArray()
         }
     }
 
@@ -208,6 +374,40 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         }
     }
 
+    override fun readBodyMass(query: NativeHealthDateRangeQuery): Promise<Array<NativeBodyMassSample>> {
+        return Promise.async {
+            val context = NitroModules.applicationContext
+                ?: throw IllegalStateException("Android application context is unavailable")
+
+            if (getAvailabilityStatus() != HealthAvailabilityStatus.AVAILABLE) {
+                throw IllegalStateException("Health Connect is not available")
+            }
+
+            val client = HealthConnectClient.getOrCreate(context)
+            requireReadPermission(client, WeightRecord::class, "body mass")
+
+            val request = ReadRecordsRequest(
+                recordType = WeightRecord::class,
+                timeRangeFilter = TimeRangeFilter.between(
+                    Instant.ofEpochMilli(query.startTimeMs.toLong()),
+                    Instant.ofEpochMilli(query.endTimeMs.toLong())
+                ),
+                ascendingOrder = query.ascending,
+                pageSize = query.limit.toInt()
+            )
+            val response = client.readRecords(request)
+
+            response.records.map { record ->
+                NativeBodyMassSample(
+                    startTimeMs = record.time.toEpochMilli().toDouble(),
+                    endTimeMs = record.time.toEpochMilli().toDouble(),
+                    kilograms = record.weight.inKilograms,
+                    source = record.metadata.dataOrigin.packageName
+                )
+            }.toTypedArray()
+        }
+    }
+
     override fun readHeartRateStatistics(query: NativeHealthTimeRangeQuery): Promise<NativeHeartRateStatistics> {
         return Promise.async {
             val context = NitroModules.applicationContext
@@ -241,6 +441,62 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         }
     }
 
+    override fun readSleepSamples(query: NativeHealthDateRangeQuery): Promise<Array<NativeSleepSample>> {
+        return Promise.async {
+            val context = NitroModules.applicationContext
+                ?: throw IllegalStateException("Android application context is unavailable")
+
+            if (getAvailabilityStatus() != HealthAvailabilityStatus.AVAILABLE) {
+                throw IllegalStateException("Health Connect is not available")
+            }
+
+            val client = HealthConnectClient.getOrCreate(context)
+            requireReadPermission(client, SleepSessionRecord::class, "sleep")
+
+            val request = ReadRecordsRequest(
+                recordType = SleepSessionRecord::class,
+                timeRangeFilter = TimeRangeFilter.between(
+                    Instant.ofEpochMilli(query.startTimeMs.toLong()),
+                    Instant.ofEpochMilli(query.endTimeMs.toLong())
+                ),
+                ascendingOrder = query.ascending,
+                pageSize = query.limit.toInt()
+            )
+            val response = client.readRecords(request)
+            val samples = response.records.flatMap { record ->
+                val stages = record.stages
+
+                if (stages.isEmpty()) {
+                    listOf(
+                        NativeSleepSample(
+                            startTimeMs = record.startTime.toEpochMilli().toDouble(),
+                            endTimeMs = record.endTime.toEpochMilli().toDouble(),
+                            stage = "asleep",
+                            source = record.metadata.dataOrigin.packageName
+                        )
+                    )
+                } else {
+                    stages.map { stage ->
+                        NativeSleepSample(
+                            startTimeMs = stage.startTime.toEpochMilli().toDouble(),
+                            endTimeMs = stage.endTime.toEpochMilli().toDouble(),
+                            stage = makeSleepStage(stage.stage),
+                            source = record.metadata.dataOrigin.packageName
+                        )
+                    }
+                }
+            }
+
+            val ordered = if (query.ascending) {
+                samples.sortedBy { it.startTimeMs }
+            } else {
+                samples.sortedByDescending { it.startTimeMs }
+            }
+
+            ordered.take(query.limit.toInt()).toTypedArray()
+        }
+    }
+
     override fun getRequestStatusForAuthorization(
         permissions: Array<NativeHealthPermission>
     ): Promise<AuthorizationRequestStatus> {
@@ -254,7 +510,9 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         return Promise.async {
             val client = HealthConnectClient.getOrCreate(context)
             val grantedPermissions = client.permissionController.getGrantedPermissions()
-            val requestedPermissions = permissions.map(::toHealthConnectPermission).toSet()
+            val requestedPermissions = permissions.map {
+                toHealthConnectPermission(it.dataType, it.accessType)
+            }.toSet()
 
             if (grantedPermissions.containsAll(requestedPermissions)) {
                 AuthorizationRequestStatus.UNNECESSARY
@@ -291,7 +549,9 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         return Promise.async {
             val client = HealthConnectClient.getOrCreate(context)
             val grantedPermissions = client.permissionController.getGrantedPermissions()
-            val requestedPermissions = permissions.associateWith(::toHealthConnectPermission)
+            val requestedPermissions = permissions.associateWith {
+                toHealthConnectPermission(it.dataType, it.accessType)
+            }
             val requestedPermissionSet = requestedPermissions.values.toSet()
 
             val updatedGrantedPermissions = if (grantedPermissions.containsAll(requestedPermissionSet)) {
@@ -361,19 +621,16 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         }
     }
 
-    private fun toHealthConnectPermission(permission: NativeHealthPermission): String {
-        val recordType: KClass<out Record> = when (permission.dataType) {
-            "steps" -> StepsRecord::class
-            "heartRate" -> HeartRateRecord::class
-            else -> throw IllegalArgumentException("Unsupported health data type: ${permission.dataType}")
-        }
-
-        return when (permission.accessType) {
-            "read" -> HealthPermission.getReadPermission(recordType)
-            "write" -> HealthPermission.getWritePermission(recordType)
-            else -> throw IllegalArgumentException(
-                "Unsupported health permission access type: ${permission.accessType}"
-            )
+    private fun makeSleepStage(stage: Int): String {
+        return when (stage) {
+            1 -> "awake"
+            2 -> "asleep"
+            3 -> "outOfBed"
+            4 -> "asleepCore"
+            5 -> "asleepDeep"
+            6 -> "asleepREM"
+            7 -> "awakeInBed"
+            else -> "unknown"
         }
     }
 }

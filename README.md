@@ -49,14 +49,18 @@ On iOS, apps still need the HealthKit capability and the relevant HealthKit usag
 
 ## Permissions
 
-The first supported unified permission data types are `steps` and `heartRate`.
+The first supported unified permission data types are `steps`, `distance`, `activeEnergyBurned`, `heartRate`, `sleep`, and `bodyMass`.
 
 ```ts
 import { NitroHealth, type HealthPermission } from 'react-native-nitro-health'
 
 const permissions: HealthPermission[] = [
   { accessType: 'read', dataType: 'steps' },
+  { accessType: 'read', dataType: 'distance' },
+  { accessType: 'read', dataType: 'activeEnergyBurned' },
   { accessType: 'read', dataType: 'heartRate' },
+  { accessType: 'read', dataType: 'sleep' },
+  { accessType: 'read', dataType: 'bodyMass' },
 ]
 
 const status = await NitroHealth.getRequestStatusForAuthorization(permissions)
@@ -77,7 +81,9 @@ if (status === 'shouldRequest') {
 
 `openHealthSettings()` opens Android Health Connect settings on Android and the app settings screen on iOS. It returns `false` when settings cannot be opened.
 
-Android consumer apps must declare the matching Health Connect permissions in their own `AndroidManifest.xml`, for example `android.permission.health.READ_HEART_RATE` before requesting `heartRate` read access.
+Android consumer apps must declare the matching Health Connect permissions in their own `AndroidManifest.xml`, for example `android.permission.health.READ_DISTANCE`, `android.permission.health.READ_ACTIVE_CALORIES_BURNED`, `android.permission.health.READ_HEART_RATE`, `android.permission.health.READ_SLEEP`, and `android.permission.health.READ_WEIGHT` before requesting read access.
+
+Read methods behave differently per platform when permission is missing. On Android, reads reject with a missing-permission error until the permission is granted. On iOS, reads reject with an "Authorization not determined" error until the app has requested authorization at least once; after the user responds to the prompt, HealthKit never discloses a read denial — denied reads resolve with empty results, indistinguishable from having no data.
 
 ## Read Steps
 
@@ -94,6 +100,32 @@ const steps = await NitroHealth.readSteps({
 
 `readSteps()` returns step count samples with `startDate`, `endDate`, and `count`. It returns an empty array when the platform query succeeds but no matching samples are available. Apps must request and receive steps read permission before relying on returned data.
 
+## Read Activity Quantities
+
+```ts
+import { NitroHealth } from 'react-native-nitro-health'
+
+const distance = await NitroHealth.readDistance({
+  startDate: new Date('2026-01-01T00:00:00.000Z'),
+  endDate: new Date('2026-01-02T00:00:00.000Z'),
+  limit: 100,
+  ascending: true,
+})
+
+const activeEnergy = await NitroHealth.readActiveEnergyBurned({
+  startDate: new Date('2026-01-01T00:00:00.000Z'),
+  endDate: new Date('2026-01-02T00:00:00.000Z'),
+  limit: 100,
+  ascending: true,
+})
+```
+
+`readDistance()` returns distance samples with `startDate`, `endDate`, and `distanceMeters`. iOS reads HealthKit walking/running distance only — cycling, wheelchair, and swimming distance live under separate HealthKit identifiers and are not included. Android reads Health Connect distance records, which apps may write for any activity (including cycling), so totals for the same user can differ between platforms when non-pedestrian activity is present.
+
+`readActiveEnergyBurned()` returns active-energy samples with `startDate`, `endDate`, and `kilocalories`.
+
+Both methods return an empty array when the platform query succeeds but no matching samples are available. Apps must request and receive the matching read permission before relying on returned data.
+
 ## Aggregation
 
 Use native aggregation when you need totals or statistics. HealthKit and Health Connect can aggregate across device and app sources without double-counting overlapping data, while summing raw samples in JavaScript can over-count data from a phone, watch, and other apps.
@@ -108,13 +140,33 @@ const dailySteps = await NitroHealth.readDailyStepTotals({
   ascending: true,
 })
 
+const dailyDistance = await NitroHealth.readDailyDistanceTotals({
+  startDate: new Date('2026-01-01T00:00:00.000Z'),
+  endDate: new Date('2026-01-08T00:00:00.000Z'),
+  limit: 7,
+  ascending: true,
+})
+
+const dailyActiveEnergy = await NitroHealth.readDailyActiveEnergyBurnedTotals({
+  startDate: new Date('2026-01-01T00:00:00.000Z'),
+  endDate: new Date('2026-01-08T00:00:00.000Z'),
+  limit: 7,
+  ascending: true,
+})
+
 const heartRate = await NitroHealth.readHeartRateStatistics({
   startDate: new Date('2026-01-01T00:00:00.000Z'),
   endDate: new Date('2026-01-02T00:00:00.000Z'),
 })
 ```
 
-`readDailyStepTotals()` returns one step-count bucket per local calendar day with `startDate`, `endDate`, and `count`. Empty days are omitted, so apps that need a continuous chart should zero-fill missing days. First and last buckets may be partial when the query starts or ends mid-day. `ascending` orders the buckets and `limit` caps the returned bucket count.
+Daily total methods return one bucket per day. On iOS, buckets align to local calendar days, so the first and last buckets may be partial when the query starts or ends mid-day. On Android, Health Connect anchors buckets to the query's start time, so a query starting at 15:30 returns 15:30-to-15:30 windows — pass a local-midnight `startDate` when you need calendar-day buckets on both platforms. Empty days are omitted, so apps that need a continuous chart should zero-fill missing days. `ascending` orders the buckets and `limit` caps the returned bucket count.
+
+`readDailyStepTotals()` returns buckets with `startDate`, `endDate`, and `count`.
+
+`readDailyDistanceTotals()` returns buckets with `startDate`, `endDate`, and `distanceMeters`.
+
+`readDailyActiveEnergyBurnedTotals()` returns buckets with `startDate`, `endDate`, and `kilocalories`.
 
 `readHeartRateStatistics()` returns `{ average, min, max }` in beats per minute. Each field is `undefined` when no matching heart-rate data exists.
 
@@ -132,6 +184,38 @@ const heartRate = await NitroHealth.readHeartRate({
 ```
 
 `readHeartRate()` returns individual readings with `date`, `bpm`, and an optional `source` (the originating app or device). On iOS each reading is one `HKQuantitySample`; on Android a `HeartRateRecord` holds many readings, so records are flattened to individual points and `limit` caps the flattened, time-ordered result (records are fetched up to `limit`). It returns an empty array when the query succeeds but no samples are available. Apps must request and receive heart rate read permission before relying on returned data.
+
+## Read Body Mass
+
+```ts
+import { NitroHealth } from 'react-native-nitro-health'
+
+const bodyMass = await NitroHealth.readBodyMass({
+  startDate: new Date('2026-01-01T00:00:00.000Z'),
+  endDate: new Date('2026-02-01T00:00:00.000Z'),
+  limit: 100,
+  ascending: true,
+})
+```
+
+`readBodyMass()` returns body mass samples with `startDate`, `endDate`, `kilograms`, and an optional `source`. It returns an empty array when the platform query succeeds but no matching samples are available. Apps must request and receive body mass read permission before relying on returned data.
+
+## Read Sleep
+
+```ts
+import { NitroHealth } from 'react-native-nitro-health'
+
+const sleep = await NitroHealth.readSleepSamples({
+  startDate: new Date('2026-01-01T00:00:00.000Z'),
+  endDate: new Date('2026-01-08T00:00:00.000Z'),
+  limit: 100,
+  ascending: true,
+})
+```
+
+`readSleepSamples()` returns sleep intervals with `startDate`, `endDate`, `stage`, and an optional `source`. Stages are normalized to `inBed`, `awake`, `awakeInBed`, `asleep`, `asleepCore`, `asleepDeep`, `asleepREM`, `outOfBed`, or `unknown`.
+
+On iOS, HealthKit sleep analysis is category interval data and `inBed` samples can overlap `asleep` stage samples. On Android, Health Connect sleep sessions are flattened to stage intervals; sessions without explicit stages are returned as one `asleep` interval. Apps must request and receive sleep read permission before relying on returned data.
 
 ## Jest
 

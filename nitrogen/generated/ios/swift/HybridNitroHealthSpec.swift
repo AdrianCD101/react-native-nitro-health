@@ -19,8 +19,14 @@ public protocol HybridNitroHealthSpec_protocol: HybridObject {
   func openHealthSettings() throws -> Promise<Bool>
   func readSteps(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeStepSample]>
   func readDailyStepTotals(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeStepSample]>
+  func readDistance(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeDistanceSample]>
+  func readDailyDistanceTotals(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeDistanceSample]>
+  func readActiveEnergyBurned(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeActiveEnergyBurnedSample]>
+  func readDailyActiveEnergyBurnedTotals(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeActiveEnergyBurnedSample]>
+  func readBodyMass(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeBodyMassSample]>
   func readHeartRate(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeHeartRateSample]>
   func readHeartRateStatistics(query: NativeHealthTimeRangeQuery) throws -> Promise<NativeHeartRateStatistics>
+  func readSleepSamples(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeSleepSample]>
   func getRequestStatusForAuthorization(permissions: [NativeHealthPermission]) throws -> Promise<AuthorizationRequestStatus>
   func requestAuthorization(permissions: [NativeHealthPermission]) throws -> Promise<NativeHealthAuthorizationResult>
 }
