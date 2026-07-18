@@ -60,8 +60,8 @@
     "typecheck": "tsc --noEmit",
     "clean": "git clean -dfX",
     "release": "semantic-release",
-    "build": "bun run typecheck && bob build",
-    "codegen": "nitrogen --logLevel=\"debug\" && bun run build && node post-script.js"
+    "build": "node verify-codegen.js && bun run typecheck && bob build",
+    "codegen": "nitrogen --logLevel=\"debug\" && node post-script.js && bun run build"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.3",

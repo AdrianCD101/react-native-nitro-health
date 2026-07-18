@@ -27,6 +27,11 @@ export type NitroHealthMock = Omit<
   | 'readHeartRate'
   | 'readHeartRateStatistics'
   | 'readSleepSamples'
+  | 'saveSteps'
+  | 'saveDistance'
+  | 'saveActiveEnergyBurned'
+  | 'saveHeartRate'
+  | 'saveBodyMass'
   | 'getRequestStatusForAuthorization'
   | 'requestAuthorization'
 > & {
@@ -47,6 +52,11 @@ export type NitroHealthMock = Omit<
   readHeartRate: MockFunction<NitroHealth['readHeartRate']>
   readHeartRateStatistics: MockFunction<NitroHealth['readHeartRateStatistics']>
   readSleepSamples: MockFunction<NitroHealth['readSleepSamples']>
+  saveSteps: MockFunction<NitroHealth['saveSteps']>
+  saveDistance: MockFunction<NitroHealth['saveDistance']>
+  saveActiveEnergyBurned: MockFunction<NitroHealth['saveActiveEnergyBurned']>
+  saveHeartRate: MockFunction<NitroHealth['saveHeartRate']>
+  saveBodyMass: MockFunction<NitroHealth['saveBodyMass']>
   getRequestStatusForAuthorization: MockFunction<NitroHealth['getRequestStatusForAuthorization']>
   requestAuthorization: MockFunction<NitroHealth['requestAuthorization']>
 }

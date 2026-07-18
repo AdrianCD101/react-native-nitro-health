@@ -46,9 +46,10 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         }
     }
 
-    // Note: HealthKit cannot report read-permission denial (a privacy limitation), so a query
-    // without read access resolves to an empty array rather than throwing. Callers should gate on
-    // getRequestStatusForAuthorization / requestAuthorization before reading.
+    // Note: reads reject with a "not determined" error until authorization has been requested
+    // once. After the user responds, HealthKit cannot report read-permission denial (a privacy
+    // limitation), so a query without read access resolves to an empty array rather than
+    // throwing. Callers should gate on requestAuthorization before relying on results.
     func readSteps(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeStepSample]> {
         if !HKHealthStore.isHealthDataAvailable() {
             throw permissionError("Health data is not available")
@@ -63,6 +64,7 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         ]
 
         return Promise<[NativeStepSample]>.async {
+            try await self.requireDeterminedReadAuthorization(for: quantityType, label: "steps")
             let samples = try await self.queryHealthKitSamples(
                 sampleType: quantityType,
                 limit: Int(query.limit),
@@ -99,6 +101,7 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         intervalComponents.day = 1
 
         return Promise<[NativeStepSample]>.async {
+            try await self.requireDeterminedReadAuthorization(for: quantityType, label: "steps")
             let statistics = try await self.queryHealthKitStatisticsCollection(
                 quantityType: quantityType,
                 predicate: predicate,
@@ -149,6 +152,7 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         ]
 
         return Promise<[NativeDistanceSample]>.async {
+            try await self.requireDeterminedReadAuthorization(for: quantityType, label: "distance")
             let samples = try await self.queryHealthKitSamples(
                 sampleType: quantityType,
                 limit: Int(query.limit),
@@ -185,6 +189,7 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         intervalComponents.day = 1
 
         return Promise<[NativeDistanceSample]>.async {
+            try await self.requireDeterminedReadAuthorization(for: quantityType, label: "distance")
             let statistics = try await self.queryHealthKitStatisticsCollection(
                 quantityType: quantityType,
                 predicate: predicate,
@@ -235,6 +240,7 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         ]
 
         return Promise<[NativeActiveEnergyBurnedSample]>.async {
+            try await self.requireDeterminedReadAuthorization(for: quantityType, label: "active energy burned")
             let samples = try await self.queryHealthKitSamples(
                 sampleType: quantityType,
                 limit: Int(query.limit),
@@ -271,6 +277,7 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         intervalComponents.day = 1
 
         return Promise<[NativeActiveEnergyBurnedSample]>.async {
+            try await self.requireDeterminedReadAuthorization(for: quantityType, label: "active energy burned")
             let statistics = try await self.queryHealthKitStatisticsCollection(
                 quantityType: quantityType,
                 predicate: predicate,
@@ -323,6 +330,7 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         ]
 
         return Promise<[NativeHeartRateSample]>.async {
+            try await self.requireDeterminedReadAuthorization(for: quantityType, label: "heart rate")
             let samples = try await self.queryHealthKitSamples(
                 sampleType: quantityType,
                 limit: Int(query.limit),
@@ -360,6 +368,7 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         ]
 
         return Promise<[NativeBodyMassSample]>.async {
+            try await self.requireDeterminedReadAuthorization(for: quantityType, label: "body mass")
             let samples = try await self.queryHealthKitSamples(
                 sampleType: quantityType,
                 limit: Int(query.limit),
@@ -395,6 +404,7 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         let predicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate, options: [])
 
         return Promise<NativeHeartRateStatistics>.async {
+            try await self.requireDeterminedReadAuthorization(for: quantityType, label: "heart rate")
             let statistics = try await self.queryHealthKitStatistics(
                 quantityType: quantityType,
                 predicate: predicate,
@@ -428,6 +438,7 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         ]
 
         return Promise<[NativeSleepSample]>.async {
+            try await self.requireDeterminedReadAuthorization(for: categoryType, label: "sleep")
             let samples = try await self.queryHealthKitSamples(
                 sampleType: categoryType,
                 limit: Int(query.limit),
@@ -447,6 +458,56 @@ class HybridNitroHealth: HybridNitroHealthSpec {
                     source: categorySample.sourceRevision.source.name
                 )
             }
+        }
+    }
+
+    // Note: unlike reads, HealthKit can verify write authorization, so save methods throw a
+    // permission error when sharing is not authorized (including when not yet determined).
+    func saveSteps(samples: [NativeStepSampleInput]) throws -> Promise<Void> {
+        return try saveQuantitySamples(dataType: "steps", label: "steps") { quantityType in
+            makeStepQuantitySamples(samples: samples, quantityType: quantityType)
+        }
+    }
+
+    func saveDistance(samples: [NativeDistanceSampleInput]) throws -> Promise<Void> {
+        return try saveQuantitySamples(dataType: "distance", label: "distance") { quantityType in
+            makeDistanceQuantitySamples(samples: samples, quantityType: quantityType)
+        }
+    }
+
+    func saveActiveEnergyBurned(samples: [NativeActiveEnergyBurnedSampleInput]) throws -> Promise<Void> {
+        return try saveQuantitySamples(dataType: "activeEnergyBurned", label: "active energy burned") { quantityType in
+            makeActiveEnergyBurnedQuantitySamples(samples: samples, quantityType: quantityType)
+        }
+    }
+
+    func saveHeartRate(samples: [NativeHeartRateSampleInput]) throws -> Promise<Void> {
+        return try saveQuantitySamples(dataType: "heartRate", label: "heart rate") { quantityType in
+            makeHeartRateQuantitySamples(samples: samples, quantityType: quantityType)
+        }
+    }
+
+    func saveBodyMass(samples: [NativeBodyMassSampleInput]) throws -> Promise<Void> {
+        return try saveQuantitySamples(dataType: "bodyMass", label: "body mass") { quantityType in
+            makeBodyMassQuantitySamples(samples: samples, quantityType: quantityType)
+        }
+    }
+
+    // The type lookup, authorization check, and sample construction run inside the Promise so
+    // large batches never block the calling JS thread.
+    private func saveQuantitySamples(
+        dataType: String,
+        label: String,
+        makeSamples: @escaping (HKQuantityType) -> [HKQuantitySample]
+    ) throws -> Promise<Void> {
+        if !HKHealthStore.isHealthDataAvailable() {
+            throw permissionError("Health data is not available")
+        }
+
+        return Promise<Void>.async {
+            let quantityType = try self.makeHealthKitQuantityType(dataType: dataType)
+            try self.requireWriteAuthorization(for: quantityType, label: label)
+            try await self.saveHealthKitSamples(makeSamples(quantityType))
         }
     }
 
@@ -539,6 +600,36 @@ class HybridNitroHealth: HybridNitroHealthSpec {
                 @unknown default:
                     continuation.resume(returning: AuthorizationRequestStatus.unknown)
                 }
+            }
+        }
+    }
+
+    // HealthKit never discloses read denials, but it can report whether the app has asked at
+    // all. Reads reject before the first authorization request (matching Android's behavior as
+    // closely as the platform allows); after the user responds, denied reads resolve empty.
+    private func requireDeterminedReadAuthorization(for objectType: HKObjectType, label: String) async throws {
+        let status = try await getAuthorizationRequestStatus(healthKitTypes: (toShare: [], toRead: [objectType]))
+
+        if status == .shouldrequest {
+            throw permissionError("Read authorization is not determined for \(label). Request authorization first.")
+        }
+    }
+
+    private func requireWriteAuthorization(for sampleType: HKSampleType, label: String) throws {
+        if healthStore.authorizationStatus(for: sampleType) != .sharingAuthorized {
+            throw permissionError("Missing permission to write \(label)")
+        }
+    }
+
+    private func saveHealthKitSamples(_ samples: [HKSample]) async throws {
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            healthStore.save(samples) { _, error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                    return
+                }
+
+                continuation.resume(returning: ())
             }
         }
     }

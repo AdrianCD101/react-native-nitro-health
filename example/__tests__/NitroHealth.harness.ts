@@ -18,6 +18,41 @@ const emptyRange = {
   startDate: new Date('2000-01-01T00:00:00.000Z'),
   endDate: new Date('2000-01-02T00:00:00.000Z'),
 }
+const saveInterval = {
+  startDate: new Date('2001-06-01T09:00:00.000Z'),
+  endDate: new Date('2001-06-01T09:30:00.000Z'),
+}
+const saveReadRange = {
+  startDate: new Date('2001-06-01T00:00:00.000Z'),
+  endDate: new Date('2001-06-02T00:00:00.000Z'),
+}
+
+async function isPermissionUnnecessary(permissions: HealthPermission[]): Promise<boolean> {
+  return (await NitroHealth.getRequestStatusForAuthorization(permissions)) === 'unnecessary'
+}
+
+// 'unnecessary' only means the user has already been asked (they may have denied on iOS).
+// For round-trip tests, resolve the grant silently via requestAuthorization — it never opens
+// a prompt once the request status is 'unnecessary'. Note this can only verify WRITE grants:
+// on iOS, read permissions always land in unverifiablePermissions (HealthKit hides read
+// denials by design), so a denied read still passes this check and simply yields empty reads.
+async function hasVerifiedPermissions(permissions: HealthPermission[]): Promise<boolean> {
+  if (!(await isPermissionUnnecessary(permissions))) {
+    return false
+  }
+
+  const result = await NitroHealth.requestAuthorization(permissions)
+
+  return result.deniedPermissions.length === 0
+}
+
+// On iOS a denied read permission is indistinguishable from an empty store: HealthKit returns
+// no samples rather than an error. When a round-trip read comes back empty on iOS, treat the
+// result as inconclusive (read likely denied) instead of failing the assertion. On Android
+// read denials throw, so an empty read there is a real failure.
+function isInconclusiveRead(samples: readonly unknown[]): boolean {
+  return Platform.OS === 'ios' && samples.length === 0
+}
 
 describe('NitroHealth native module', () => {
   it('returns a platform availability status from native code', () => {
@@ -485,6 +520,155 @@ describe('NitroHealth native module', () => {
     }
 
     await expect(NitroHealth.readSleepSamples(emptyRange)).rejects.toThrow(/not determined/i)
+  })
+
+  it('rejects empty save sample arrays before crossing the native boundary', async () => {
+    await expect(NitroHealth.saveSteps([])).rejects.toThrow('At least one sample is required')
+    await expect(NitroHealth.saveDistance([])).rejects.toThrow('At least one sample is required')
+    await expect(NitroHealth.saveActiveEnergyBurned([])).rejects.toThrow(
+      'At least one sample is required'
+    )
+    await expect(NitroHealth.saveHeartRate([])).rejects.toThrow('At least one sample is required')
+    await expect(NitroHealth.saveBodyMass([])).rejects.toThrow('At least one sample is required')
+  })
+
+  it('rejects invalid save sample values before crossing the native boundary', async () => {
+    await expect(NitroHealth.saveSteps([{ ...saveInterval, count: -1 }])).rejects.toThrow(
+      'samples[0]: count must be a positive integer'
+    )
+    await expect(
+      NitroHealth.saveDistance([{ ...saveInterval, distanceMeters: -1 }])
+    ).rejects.toThrow('samples[0]: distanceMeters must be a non-negative number')
+    await expect(
+      NitroHealth.saveActiveEnergyBurned([{ ...saveInterval, kilocalories: -1 }])
+    ).rejects.toThrow('samples[0]: kilocalories must be a non-negative number')
+    await expect(
+      NitroHealth.saveHeartRate([{ date: saveInterval.startDate, bpm: 0 }])
+    ).rejects.toThrow('samples[0]: bpm must be between 1 and 300')
+    await expect(
+      NitroHealth.saveBodyMass([{ date: saveInterval.startDate, kilograms: 0 }])
+    ).rejects.toThrow('samples[0]: kilograms must be greater than 0')
+  })
+
+  it('rejects inverted save sample intervals before crossing the native boundary', async () => {
+    await expect(
+      NitroHealth.saveSteps([
+        { startDate: saveInterval.endDate, endDate: saveInterval.startDate, count: 100 },
+      ])
+    ).rejects.toThrow('samples[0]: startDate must be before endDate')
+  })
+
+  it('rejects saving steps when write permission is not granted', async () => {
+    if (await hasVerifiedPermissions([{ accessType: 'write', dataType: 'steps' }])) {
+      return
+    }
+
+    await expect(NitroHealth.saveSteps([{ ...saveInterval, count: 100 }])).rejects.toThrow(
+      /permission/i
+    )
+  })
+
+  it('rejects saving distance when write permission is not granted', async () => {
+    if (await hasVerifiedPermissions([{ accessType: 'write', dataType: 'distance' }])) {
+      return
+    }
+
+    await expect(
+      NitroHealth.saveDistance([{ ...saveInterval, distanceMeters: 1000 }])
+    ).rejects.toThrow(/permission/i)
+  })
+
+  it('rejects saving active energy burned when write permission is not granted', async () => {
+    if (await hasVerifiedPermissions([{ accessType: 'write', dataType: 'activeEnergyBurned' }])) {
+      return
+    }
+
+    await expect(
+      NitroHealth.saveActiveEnergyBurned([{ ...saveInterval, kilocalories: 100 }])
+    ).rejects.toThrow(/permission/i)
+  })
+
+  it('rejects saving heart rate when write permission is not granted', async () => {
+    if (await hasVerifiedPermissions([{ accessType: 'write', dataType: 'heartRate' }])) {
+      return
+    }
+
+    await expect(
+      NitroHealth.saveHeartRate([{ date: saveInterval.startDate, bpm: 72 }])
+    ).rejects.toThrow(/permission/i)
+  })
+
+  it('rejects saving body mass when write permission is not granted', async () => {
+    if (await hasVerifiedPermissions([{ accessType: 'write', dataType: 'bodyMass' }])) {
+      return
+    }
+
+    await expect(
+      NitroHealth.saveBodyMass([{ date: saveInterval.startDate, kilograms: 72.5 }])
+    ).rejects.toThrow(/permission/i)
+  })
+
+  it('round-trips saved steps through native code when authorized', async () => {
+    const authorized = await hasVerifiedPermissions([
+      { accessType: 'write', dataType: 'steps' },
+      { accessType: 'read', dataType: 'steps' },
+    ])
+
+    if (!authorized) {
+      return
+    }
+
+    await NitroHealth.saveSteps([{ ...saveInterval, count: 321 }])
+
+    const samples = await NitroHealth.readSteps(saveReadRange)
+
+    if (isInconclusiveRead(samples)) {
+      return
+    }
+
+    expect(samples.some((sample) => sample.count === 321)).toBe(true)
+  })
+
+  it('round-trips saved body mass through native code when authorized', async () => {
+    const authorized = await hasVerifiedPermissions([
+      { accessType: 'write', dataType: 'bodyMass' },
+      { accessType: 'read', dataType: 'bodyMass' },
+    ])
+
+    if (!authorized) {
+      return
+    }
+
+    await NitroHealth.saveBodyMass([{ date: saveInterval.startDate, kilograms: 72.5 }])
+
+    const samples = await NitroHealth.readBodyMass(saveReadRange)
+
+    if (isInconclusiveRead(samples)) {
+      return
+    }
+
+    expect(samples.some((sample) => sample.kilograms === 72.5)).toBe(true)
+  })
+
+  it('round-trips saved heart rate through native code when authorized', async () => {
+    const authorized = await hasVerifiedPermissions([
+      { accessType: 'write', dataType: 'heartRate' },
+      { accessType: 'read', dataType: 'heartRate' },
+    ])
+
+    if (!authorized) {
+      return
+    }
+
+    await NitroHealth.saveHeartRate([{ date: saveInterval.startDate, bpm: 123 }])
+
+    const samples = await NitroHealth.readHeartRate(saveReadRange)
+
+    if (isInconclusiveRead(samples)) {
+      return
+    }
+
+    expect(samples.some((sample) => sample.bpm === 123)).toBe(true)
   })
 
   it('returns a resolved result for already-authorized steps permissions without opening a prompt', async () => {

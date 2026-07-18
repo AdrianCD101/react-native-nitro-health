@@ -23,16 +23,21 @@ import com.margelo.nitro.nitrohealth.HealthAuthorizationStatus
 import com.margelo.nitro.nitrohealth.HealthAvailabilityStatus
 import com.margelo.nitro.nitrohealth.HybridNitroHealthSpec
 import com.margelo.nitro.nitrohealth.NativeActiveEnergyBurnedSample
+import com.margelo.nitro.nitrohealth.NativeActiveEnergyBurnedSampleInput
 import com.margelo.nitro.nitrohealth.NativeBodyMassSample
+import com.margelo.nitro.nitrohealth.NativeBodyMassSampleInput
 import com.margelo.nitro.nitrohealth.NativeDistanceSample
+import com.margelo.nitro.nitrohealth.NativeDistanceSampleInput
 import com.margelo.nitro.nitrohealth.NativeHealthAuthorizationResult
 import com.margelo.nitro.nitrohealth.NativeHealthDateRangeQuery
 import com.margelo.nitro.nitrohealth.NativeHealthPermission
 import com.margelo.nitro.nitrohealth.NativeHealthTimeRangeQuery
 import com.margelo.nitro.nitrohealth.NativeHeartRateSample
+import com.margelo.nitro.nitrohealth.NativeHeartRateSampleInput
 import com.margelo.nitro.nitrohealth.NativeHeartRateStatistics
 import com.margelo.nitro.nitrohealth.NativeSleepSample
 import com.margelo.nitro.nitrohealth.NativeStepSample
+import com.margelo.nitro.nitrohealth.NativeStepSampleInput
 import java.time.Instant
 import java.time.Period
 import java.time.ZoneId
@@ -497,6 +502,51 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         }
     }
 
+    override fun saveSteps(samples: Array<NativeStepSampleInput>): Promise<Unit> {
+        return Promise.async {
+            val client = requireWritableClient(StepsRecord::class, "steps")
+            client.insertRecords(toStepsRecords(samples))
+            Unit
+        }
+    }
+
+    override fun saveDistance(samples: Array<NativeDistanceSampleInput>): Promise<Unit> {
+        return Promise.async {
+            val client = requireWritableClient(DistanceRecord::class, "distance")
+            client.insertRecords(toDistanceRecords(samples))
+            Unit
+        }
+    }
+
+    override fun saveActiveEnergyBurned(
+        samples: Array<NativeActiveEnergyBurnedSampleInput>
+    ): Promise<Unit> {
+        return Promise.async {
+            val client = requireWritableClient(
+                ActiveCaloriesBurnedRecord::class,
+                "active energy burned"
+            )
+            client.insertRecords(toActiveCaloriesBurnedRecords(samples))
+            Unit
+        }
+    }
+
+    override fun saveHeartRate(samples: Array<NativeHeartRateSampleInput>): Promise<Unit> {
+        return Promise.async {
+            val client = requireWritableClient(HeartRateRecord::class, "heart rate")
+            client.insertRecords(toHeartRateRecords(samples))
+            Unit
+        }
+    }
+
+    override fun saveBodyMass(samples: Array<NativeBodyMassSampleInput>): Promise<Unit> {
+        return Promise.async {
+            val client = requireWritableClient(WeightRecord::class, "body mass")
+            client.insertRecords(toWeightRecords(samples))
+            Unit
+        }
+    }
+
     override fun getRequestStatusForAuthorization(
         permissions: Array<NativeHealthPermission>
     ): Promise<AuthorizationRequestStatus> {
@@ -608,6 +658,34 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             deniedPermissions = deniedPermissions,
             unverifiablePermissions = unverifiablePermissions
         )
+    }
+
+    private suspend fun requireWritableClient(
+        recordType: KClass<out Record>,
+        label: String
+    ): HealthConnectClient {
+        val context = NitroModules.applicationContext
+            ?: throw IllegalStateException("Android application context is unavailable")
+
+        if (getAvailabilityStatus() != HealthAvailabilityStatus.AVAILABLE) {
+            throw IllegalStateException("Health Connect is not available")
+        }
+
+        val client = HealthConnectClient.getOrCreate(context)
+        requireWritePermission(client, recordType, label)
+
+        return client
+    }
+
+    private suspend fun requireWritePermission(
+        client: HealthConnectClient,
+        recordType: KClass<out Record>,
+        label: String
+    ) {
+        val permission = HealthPermission.getWritePermission(recordType)
+        if (!client.permissionController.getGrantedPermissions().contains(permission)) {
+            throw SecurityException("Missing permission to write $label")
+        }
     }
 
     private suspend fun requireReadPermission(
