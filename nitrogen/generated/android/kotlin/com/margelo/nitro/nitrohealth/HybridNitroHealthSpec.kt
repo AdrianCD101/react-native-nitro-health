@@ -87,6 +87,26 @@ abstract class HybridNitroHealthSpec: HybridObject() {
   
   @DoNotStrip
   @Keep
+  abstract fun saveSteps(samples: Array<NativeStepSampleInput>): Promise<Unit>
+  
+  @DoNotStrip
+  @Keep
+  abstract fun saveDistance(samples: Array<NativeDistanceSampleInput>): Promise<Unit>
+  
+  @DoNotStrip
+  @Keep
+  abstract fun saveActiveEnergyBurned(samples: Array<NativeActiveEnergyBurnedSampleInput>): Promise<Unit>
+  
+  @DoNotStrip
+  @Keep
+  abstract fun saveHeartRate(samples: Array<NativeHeartRateSampleInput>): Promise<Unit>
+  
+  @DoNotStrip
+  @Keep
+  abstract fun saveBodyMass(samples: Array<NativeBodyMassSampleInput>): Promise<Unit>
+  
+  @DoNotStrip
+  @Keep
   abstract fun getRequestStatusForAuthorization(permissions: Array<NativeHealthPermission>): Promise<AuthorizationRequestStatus>
   
   @DoNotStrip

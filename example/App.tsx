@@ -25,6 +25,35 @@ const readPermissions: Array<{ dataType: HealthDataType; label: string }> = [
   { dataType: 'bodyMass', label: 'Body Mass' },
 ]
 
+const writableDataTypes: HealthDataType[] = [
+  'steps',
+  'distance',
+  'activeEnergyBurned',
+  'heartRate',
+  'bodyMass',
+]
+
+// Each card runs one operation at a time, so in-flight work is a single finite activity
+// instead of a boolean per operation.
+type CardActivity =
+  | 'checking'
+  | 'requesting'
+  | 'requestingWrite'
+  | 'openingSettings'
+  | 'reading'
+  | 'saving'
+
+// Permission state lives in the OS; readRequestStatus/readResult/writeResult are the last
+// native answers we saw, cached for display. Gating decisions that must be correct (saving)
+// re-consult native instead of trusting these caches.
+interface CardState {
+  activity?: CardActivity
+  readRequestStatus?: AuthorizationRequestStatus
+  readResult?: HealthAuthorizationResult
+  writeResult?: HealthAuthorizationResult
+  feedback?: { kind: 'error' | 'saved'; message: string }
+}
+
 function getAvailabilityLabel(status: HealthAvailabilityStatus): string {
   switch (status) {
     case 'available':
@@ -36,94 +65,145 @@ function getAvailabilityLabel(status: HealthAvailabilityStatus): string {
   }
 }
 
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error)
+}
+
 function App(): React.JSX.Element {
   const availabilityStatus = NitroHealth.getAvailabilityStatus()
   const isAvailable = availabilityStatus === 'available'
   const canOpenInstall = availabilityStatus === 'providerUpdateRequired'
-  const [authorizationStatuses, setAuthorizationStatuses] = useState<
-    Partial<Record<HealthDataType, AuthorizationRequestStatus>>
-  >({})
-  const [authorizationResults, setAuthorizationResults] = useState<
-    Partial<Record<HealthDataType, HealthAuthorizationResult>>
-  >({})
-  const [checkingPermission, setCheckingPermission] = useState<HealthDataType>()
-  const [requestingPermission, setRequestingPermission] = useState<HealthDataType>()
-  const [openingSettings, setOpeningSettings] = useState<HealthDataType>()
-  const [readingDailyStepTotals, setReadingDailyStepTotals] = useState(false)
+  const [cards, setCards] = useState<Partial<Record<HealthDataType, CardState>>>({})
   const [dailyStepTotals, setDailyStepTotals] = useState<DailyStepTotal[]>()
-  const [readingDailyDistanceTotals, setReadingDailyDistanceTotals] = useState(false)
   const [dailyDistanceTotals, setDailyDistanceTotals] = useState<DailyDistanceTotal[]>()
-  const [readingDailyActiveEnergyTotals, setReadingDailyActiveEnergyTotals] = useState(false)
   const [dailyActiveEnergyTotals, setDailyActiveEnergyTotals] =
     useState<DailyActiveEnergyBurnedTotal[]>()
-  const [readingHeartRateStatistics, setReadingHeartRateStatistics] = useState(false)
   const [heartRateStatistics, setHeartRateStatistics] = useState<HeartRateStatistics>()
-  const [readingSleepSamples, setReadingSleepSamples] = useState(false)
   const [sleepSamples, setSleepSamples] = useState<SleepSample[]>()
-  const [readingBodyMass, setReadingBodyMass] = useState(false)
   const [bodyMassSamples, setBodyMassSamples] = useState<BodyMassSample[]>()
-  const [errorMessages, setErrorMessages] = useState<Partial<Record<HealthDataType, string>>>({})
+  const [openingHealthSettings, setOpeningHealthSettings] = useState(false)
+  const [healthSettingsError, setHealthSettingsError] = useState<string>()
+
+  async function openHealthSettings(): Promise<void> {
+    setOpeningHealthSettings(true)
+    setHealthSettingsError(undefined)
+
+    try {
+      const didOpen = await NitroHealth.openHealthSettings()
+      if (!didOpen) {
+        setHealthSettingsError('Health settings could not be opened on this device.')
+      }
+    } catch (error) {
+      setHealthSettingsError(getErrorMessage(error))
+    } finally {
+      setOpeningHealthSettings(false)
+    }
+  }
+
+  function updateCard(dataType: HealthDataType, patch: Partial<CardState>): void {
+    setCards((current) => ({ ...current, [dataType]: { ...current[dataType], ...patch } }))
+  }
 
   async function checkPermission(dataType: HealthDataType): Promise<void> {
     const permission: HealthPermission[] = [{ accessType: 'read', dataType }]
-    setCheckingPermission(dataType)
-    setErrorMessages((current) => ({ ...current, [dataType]: undefined }))
+    updateCard(dataType, { activity: 'checking', feedback: undefined })
 
     try {
       const status = await NitroHealth.getRequestStatusForAuthorization(permission)
-      setAuthorizationStatuses((current) => ({ ...current, [dataType]: status }))
+      updateCard(dataType, { activity: undefined, readRequestStatus: status })
     } catch (error) {
-      setErrorMessages((current) => ({
-        ...current,
-        [dataType]: error instanceof Error ? error.message : String(error),
-      }))
-    } finally {
-      setCheckingPermission(undefined)
+      updateCard(dataType, {
+        activity: undefined,
+        feedback: { kind: 'error', message: getErrorMessage(error) },
+      })
     }
   }
 
   async function requestPermission(dataType: HealthDataType): Promise<void> {
     const permission: HealthPermission[] = [{ accessType: 'read', dataType }]
-    setRequestingPermission(dataType)
-    setErrorMessages((current) => ({ ...current, [dataType]: undefined }))
-    setAuthorizationResults((current) => ({ ...current, [dataType]: undefined }))
+    updateCard(dataType, { activity: 'requesting', feedback: undefined, readResult: undefined })
 
     try {
       const result = await NitroHealth.requestAuthorization(permission)
-      setAuthorizationResults((current) => ({ ...current, [dataType]: result }))
-      setAuthorizationStatuses((current) => ({
-        ...current,
-        [dataType]: result.requestStatus,
-      }))
+      updateCard(dataType, {
+        activity: undefined,
+        readResult: result,
+        readRequestStatus: result.requestStatus,
+      })
     } catch (error) {
-      setErrorMessages((current) => ({
-        ...current,
-        [dataType]: error instanceof Error ? error.message : String(error),
-      }))
-    } finally {
-      setRequestingPermission(undefined)
+      updateCard(dataType, {
+        activity: undefined,
+        feedback: { kind: 'error', message: getErrorMessage(error) },
+      })
+    }
+  }
+
+  async function requestWritePermission(dataType: HealthDataType): Promise<void> {
+    const permission: HealthPermission[] = [{ accessType: 'write', dataType }]
+    updateCard(dataType, { activity: 'requestingWrite', feedback: undefined })
+
+    try {
+      const result = await NitroHealth.requestAuthorization(permission)
+      updateCard(dataType, { activity: undefined, writeResult: result })
+    } catch (error) {
+      updateCard(dataType, {
+        activity: undefined,
+        feedback: { kind: 'error', message: getErrorMessage(error) },
+      })
     }
   }
 
   async function openSettings(dataType: HealthDataType): Promise<void> {
-    setOpeningSettings(dataType)
-    setErrorMessages((current) => ({ ...current, [dataType]: undefined }))
+    updateCard(dataType, { activity: 'openingSettings', feedback: undefined })
 
     try {
       const didOpen = await NitroHealth.openHealthSettings()
-      if (!didOpen) {
-        setErrorMessages((current) => ({
-          ...current,
-          [dataType]: 'Health settings could not be opened on this device.',
-        }))
-      }
+      updateCard(dataType, {
+        activity: undefined,
+        feedback: didOpen
+          ? undefined
+          : { kind: 'error', message: 'Health settings could not be opened on this device.' },
+      })
     } catch (error) {
-      setErrorMessages((current) => ({
-        ...current,
-        [dataType]: error instanceof Error ? error.message : String(error),
-      }))
-    } finally {
-      setOpeningSettings(undefined)
+      updateCard(dataType, {
+        activity: undefined,
+        feedback: { kind: 'error', message: getErrorMessage(error) },
+      })
+    }
+  }
+
+  // Reading never gates on cached permission state: it asks native for read authorization
+  // first (silent when already determined, prompts only when needed), then reads.
+  async function readData(dataType: HealthDataType, read: () => Promise<void>): Promise<void> {
+    updateCard(dataType, { activity: 'reading', feedback: undefined })
+
+    try {
+      const readResult = await NitroHealth.requestAuthorization([{ accessType: 'read', dataType }])
+
+      if (readResult.deniedPermissions.length > 0) {
+        updateCard(dataType, {
+          activity: undefined,
+          readResult,
+          readRequestStatus: readResult.requestStatus,
+          feedback: {
+            kind: 'error',
+            message: 'Read permission denied. Open health settings to enable it.',
+          },
+        })
+        return
+      }
+
+      await read()
+      updateCard(dataType, {
+        activity: undefined,
+        readResult,
+        readRequestStatus: readResult.requestStatus,
+      })
+    } catch (error) {
+      updateCard(dataType, {
+        activity: undefined,
+        feedback: { kind: 'error', message: getErrorMessage(error) },
+      })
     }
   }
 
@@ -131,147 +211,140 @@ function App(): React.JSX.Element {
     const endDate = new Date()
     const startDate = new Date(endDate.getTime() - 7 * 24 * 60 * 60 * 1000)
 
-    setReadingDailyStepTotals(true)
-    setErrorMessages((current) => ({ ...current, steps: undefined }))
-
-    try {
-      const totals = await NitroHealth.readDailyStepTotals({
-        startDate,
-        endDate,
-        limit: 7,
-        ascending: false,
-      })
-      setDailyStepTotals(totals)
-    } catch (error) {
-      setErrorMessages((current) => ({
-        ...current,
-        steps: error instanceof Error ? error.message : String(error),
-      }))
-    } finally {
-      setReadingDailyStepTotals(false)
-    }
+    await readData('steps', async () => {
+      setDailyStepTotals(
+        await NitroHealth.readDailyStepTotals({ startDate, endDate, limit: 7, ascending: false })
+      )
+    })
   }
 
   async function readDailyDistanceTotals(): Promise<void> {
     const endDate = new Date()
     const startDate = new Date(endDate.getTime() - 7 * 24 * 60 * 60 * 1000)
 
-    setReadingDailyDistanceTotals(true)
-    setErrorMessages((current) => ({ ...current, distance: undefined }))
-
-    try {
-      const totals = await NitroHealth.readDailyDistanceTotals({
-        startDate,
-        endDate,
-        limit: 7,
-        ascending: false,
-      })
-      setDailyDistanceTotals(totals)
-    } catch (error) {
-      setErrorMessages((current) => ({
-        ...current,
-        distance: error instanceof Error ? error.message : String(error),
-      }))
-    } finally {
-      setReadingDailyDistanceTotals(false)
-    }
+    await readData('distance', async () => {
+      setDailyDistanceTotals(
+        await NitroHealth.readDailyDistanceTotals({
+          startDate,
+          endDate,
+          limit: 7,
+          ascending: false,
+        })
+      )
+    })
   }
 
   async function readDailyActiveEnergyBurnedTotals(): Promise<void> {
     const endDate = new Date()
     const startDate = new Date(endDate.getTime() - 7 * 24 * 60 * 60 * 1000)
 
-    setReadingDailyActiveEnergyTotals(true)
-    setErrorMessages((current) => ({ ...current, activeEnergyBurned: undefined }))
-
-    try {
-      const totals = await NitroHealth.readDailyActiveEnergyBurnedTotals({
-        startDate,
-        endDate,
-        limit: 7,
-        ascending: false,
-      })
-      setDailyActiveEnergyTotals(totals)
-    } catch (error) {
-      setErrorMessages((current) => ({
-        ...current,
-        activeEnergyBurned: error instanceof Error ? error.message : String(error),
-      }))
-    } finally {
-      setReadingDailyActiveEnergyTotals(false)
-    }
+    await readData('activeEnergyBurned', async () => {
+      setDailyActiveEnergyTotals(
+        await NitroHealth.readDailyActiveEnergyBurnedTotals({
+          startDate,
+          endDate,
+          limit: 7,
+          ascending: false,
+        })
+      )
+    })
   }
 
   async function readHeartRateStatistics(): Promise<void> {
     const endDate = new Date()
     const startDate = new Date(endDate.getTime() - 24 * 60 * 60 * 1000)
 
-    setReadingHeartRateStatistics(true)
-    setErrorMessages((current) => ({ ...current, heartRate: undefined }))
-
-    try {
-      const statistics = await NitroHealth.readHeartRateStatistics({
-        startDate,
-        endDate,
-      })
-      setHeartRateStatistics(statistics)
-    } catch (error) {
-      setErrorMessages((current) => ({
-        ...current,
-        heartRate: error instanceof Error ? error.message : String(error),
-      }))
-    } finally {
-      setReadingHeartRateStatistics(false)
-    }
+    await readData('heartRate', async () => {
+      setHeartRateStatistics(await NitroHealth.readHeartRateStatistics({ startDate, endDate }))
+    })
   }
 
   async function readSleepSamples(): Promise<void> {
     const endDate = new Date()
     const startDate = new Date(endDate.getTime() - 7 * 24 * 60 * 60 * 1000)
 
-    setReadingSleepSamples(true)
-    setErrorMessages((current) => ({ ...current, sleep: undefined }))
-
-    try {
-      const samples = await NitroHealth.readSleepSamples({
-        startDate,
-        endDate,
-        limit: 50,
-        ascending: false,
-      })
-      setSleepSamples(samples)
-    } catch (error) {
-      setErrorMessages((current) => ({
-        ...current,
-        sleep: error instanceof Error ? error.message : String(error),
-      }))
-    } finally {
-      setReadingSleepSamples(false)
-    }
+    await readData('sleep', async () => {
+      setSleepSamples(
+        await NitroHealth.readSleepSamples({ startDate, endDate, limit: 50, ascending: false })
+      )
+    })
   }
 
   async function readBodyMass(): Promise<void> {
     const endDate = new Date()
     const startDate = new Date(endDate.getTime() - 7 * 24 * 60 * 60 * 1000)
 
-    setReadingBodyMass(true)
-    setErrorMessages((current) => ({ ...current, bodyMass: undefined }))
+    await readData('bodyMass', async () => {
+      setBodyMassSamples(
+        await NitroHealth.readBodyMass({ startDate, endDate, limit: 20, ascending: false })
+      )
+    })
+  }
+
+  // Saving never gates on cached permission state: it asks native for write authorization
+  // first (silent when already granted, prompts only when needed), then saves.
+  // Each save covers the last minute only: Health Connect deduplicates overlapping intervals
+  // when aggregating, so repeatedly saving the same wide window would not accumulate on Android.
+  async function saveSample(dataType: HealthDataType): Promise<void> {
+    const endDate = new Date()
+    const startDate = new Date(endDate.getTime() - 60 * 1000)
+
+    updateCard(dataType, { activity: 'saving', feedback: undefined })
 
     try {
-      const samples = await NitroHealth.readBodyMass({
-        startDate,
-        endDate,
-        limit: 20,
-        ascending: false,
+      const writeResult = await NitroHealth.requestAuthorization([
+        { accessType: 'write', dataType },
+      ])
+
+      if (writeResult.deniedPermissions.length > 0) {
+        updateCard(dataType, {
+          activity: undefined,
+          writeResult,
+          feedback: {
+            kind: 'error',
+            message: 'Write permission denied. Open health settings to enable it.',
+          },
+        })
+        return
+      }
+
+      let message: string
+      switch (dataType) {
+        case 'steps':
+          await NitroHealth.saveSteps([{ startDate, endDate, count: 250 }])
+          message = 'Saved 250 steps over the last minute'
+          break
+        case 'distance':
+          await NitroHealth.saveDistance([{ startDate, endDate, distanceMeters: 400 }])
+          message = 'Saved 400 m over the last minute'
+          break
+        case 'activeEnergyBurned':
+          await NitroHealth.saveActiveEnergyBurned([{ startDate, endDate, kilocalories: 45 }])
+          message = 'Saved 45 kcal over the last minute'
+          break
+        case 'heartRate':
+          await NitroHealth.saveHeartRate([{ date: endDate, bpm: 76 }])
+          message = 'Saved a 76 bpm reading'
+          break
+        case 'bodyMass':
+          await NitroHealth.saveBodyMass([{ date: endDate, kilograms: 72.5 }])
+          message = 'Saved a 72.5 kg measurement'
+          break
+        default:
+          updateCard(dataType, { activity: undefined })
+          return
+      }
+
+      updateCard(dataType, {
+        activity: undefined,
+        writeResult,
+        feedback: { kind: 'saved', message },
       })
-      setBodyMassSamples(samples)
     } catch (error) {
-      setErrorMessages((current) => ({
-        ...current,
-        bodyMass: error instanceof Error ? error.message : String(error),
-      }))
-    } finally {
-      setReadingBodyMass(false)
+      updateCard(dataType, {
+        activity: undefined,
+        feedback: { kind: 'error', message: getErrorMessage(error) },
+      })
     }
   }
 
@@ -283,30 +356,53 @@ function App(): React.JSX.Element {
           {getAvailabilityLabel(availabilityStatus)}
         </Text>
         <Text style={styles.detail}>Status: {availabilityStatus}</Text>
+        <Pressable
+          disabled={openingHealthSettings}
+          onPress={() => {
+            openHealthSettings()
+          }}
+          style={({ pressed }) => [
+            styles.button,
+            styles.settingsButton,
+            styles.settingsLink,
+            pressed ? styles.buttonPressed : null,
+            openingHealthSettings ? styles.buttonDisabled : null,
+          ]}
+        >
+          <Text style={styles.buttonText}>
+            {openingHealthSettings ? 'Opening...' : 'Open health settings'}
+          </Text>
+        </Pressable>
+        {healthSettingsError ? <Text style={styles.error}>{healthSettingsError}</Text> : null}
         {readPermissions.map(({ dataType, label }) => {
-          const isChecking = checkingPermission === dataType
-          const isRequesting = requestingPermission === dataType
-          const isOpeningSettings = openingSettings === dataType
-          const result = authorizationResults[dataType]
-          const requestStatus = authorizationStatuses[dataType]
-          const canOpenSettings = result ? result.status !== 'granted' : false
+          const card = cards[dataType] ?? {}
+          const isBusy = card.activity !== undefined
+          const isChecking = card.activity === 'checking'
+          const isRequesting = card.activity === 'requesting'
+          const isRequestingWrite = card.activity === 'requestingWrite'
+          const isOpeningSettings = card.activity === 'openingSettings'
+          const isReading = card.activity === 'reading'
+          const isSaving = card.activity === 'saving'
+          const result = card.readResult
+          const requestStatus = card.readRequestStatus
+          const writeResult = card.writeResult
+          const canOpenSettings =
+            (result !== undefined && result.status !== 'granted') ||
+            writeResult?.status === 'denied' ||
+            writeResult?.status === 'partial'
+          const canWrite = writableDataTypes.includes(dataType)
           const canReadSteps = dataType === 'steps'
           const canReadDistance = dataType === 'distance'
           const canReadActiveEnergy = dataType === 'activeEnergyBurned'
           const canReadHeartRate = dataType === 'heartRate'
           const canReadSleep = dataType === 'sleep'
           const canReadBodyMass = dataType === 'bodyMass'
-          const hasPermission =
-            result?.status === 'granted' ||
-            result?.status === 'completed' ||
-            (result?.grantedPermissions.length ?? 0) > 0 ||
-            requestStatus === 'unnecessary'
 
           return (
             <View key={dataType} style={styles.permissionCard}>
               <Text style={styles.cardTitle}>{label} permission</Text>
               <Text style={styles.detail}>
-                {label} request status: {authorizationStatuses[dataType] ?? 'not checked'}
+                {label} request status: {requestStatus ?? 'not checked'}
               </Text>
               {result ? (
                 <Text style={styles.detail}>
@@ -320,8 +416,15 @@ function App(): React.JSX.Element {
                   {result.unverifiablePermissions.length}
                 </Text>
               ) : null}
-              {errorMessages[dataType] ? (
-                <Text style={styles.error}>{errorMessages[dataType]}</Text>
+              {writeResult ? (
+                <Text style={styles.detail}>
+                  {label} write authorization result: {writeResult.status}
+                </Text>
+              ) : null}
+              {card.feedback ? (
+                <Text style={card.feedback.kind === 'saved' ? styles.saved : styles.error}>
+                  {card.feedback.message}
+                </Text>
               ) : null}
               {canReadSteps && dailyStepTotals ? (
                 <View style={styles.readResult}>
@@ -392,7 +495,7 @@ function App(): React.JSX.Element {
               ) : null}
               <View style={styles.buttonRow}>
                 <Pressable
-                  disabled={!isAvailable || isChecking}
+                  disabled={!isAvailable || isBusy}
                   onPress={() => {
                     checkPermission(dataType)
                   }}
@@ -400,7 +503,7 @@ function App(): React.JSX.Element {
                     styles.button,
                     styles.secondaryButton,
                     pressed ? styles.buttonPressed : null,
-                    !isAvailable || isChecking ? styles.buttonDisabled : null,
+                    !isAvailable || isBusy ? styles.buttonDisabled : null,
                   ]}
                 >
                   <Text style={styles.buttonText}>
@@ -408,14 +511,14 @@ function App(): React.JSX.Element {
                   </Text>
                 </Pressable>
                 <Pressable
-                  disabled={!isAvailable || isRequesting}
+                  disabled={!isAvailable || isBusy}
                   onPress={() => {
                     requestPermission(dataType)
                   }}
                   style={({ pressed }) => [
                     styles.button,
                     pressed ? styles.buttonPressed : null,
-                    !isAvailable || isRequesting ? styles.buttonDisabled : null,
+                    !isAvailable || isBusy ? styles.buttonDisabled : null,
                   ]}
                 >
                   <Text style={styles.buttonText}>
@@ -424,7 +527,7 @@ function App(): React.JSX.Element {
                 </Pressable>
                 {canOpenSettings ? (
                   <Pressable
-                    disabled={isOpeningSettings}
+                    disabled={isBusy}
                     onPress={() => {
                       openSettings(dataType)
                     }}
@@ -432,7 +535,7 @@ function App(): React.JSX.Element {
                       styles.button,
                       styles.settingsButton,
                       pressed ? styles.buttonPressed : null,
-                      isOpeningSettings ? styles.buttonDisabled : null,
+                      isBusy ? styles.buttonDisabled : null,
                     ]}
                   >
                     <Text style={styles.buttonText}>
@@ -440,12 +543,9 @@ function App(): React.JSX.Element {
                     </Text>
                   </Pressable>
                 ) : null}
-                {canReadSteps && !hasPermission ? (
-                  <Text style={styles.detail}>Grant Steps permission to read</Text>
-                ) : null}
                 {canReadSteps ? (
                   <Pressable
-                    disabled={!isAvailable || readingDailyStepTotals || !hasPermission}
+                    disabled={!isAvailable || isBusy}
                     onPress={() => {
                       readDailyStepTotals()
                     }}
@@ -453,22 +553,17 @@ function App(): React.JSX.Element {
                       styles.button,
                       styles.readButton,
                       pressed ? styles.buttonPressed : null,
-                      !isAvailable || readingDailyStepTotals || !hasPermission
-                        ? styles.buttonDisabled
-                        : null,
+                      !isAvailable || isBusy ? styles.buttonDisabled : null,
                     ]}
                   >
                     <Text style={styles.buttonText}>
-                      {readingDailyStepTotals ? 'Reading...' : 'Read daily step totals'}
+                      {isReading ? 'Reading...' : 'Read daily step totals'}
                     </Text>
                   </Pressable>
                 ) : null}
-                {canReadDistance && !hasPermission ? (
-                  <Text style={styles.detail}>Grant Distance permission to read</Text>
-                ) : null}
                 {canReadDistance ? (
                   <Pressable
-                    disabled={!isAvailable || readingDailyDistanceTotals || !hasPermission}
+                    disabled={!isAvailable || isBusy}
                     onPress={() => {
                       readDailyDistanceTotals()
                     }}
@@ -476,22 +571,17 @@ function App(): React.JSX.Element {
                       styles.button,
                       styles.readButton,
                       pressed ? styles.buttonPressed : null,
-                      !isAvailable || readingDailyDistanceTotals || !hasPermission
-                        ? styles.buttonDisabled
-                        : null,
+                      !isAvailable || isBusy ? styles.buttonDisabled : null,
                     ]}
                   >
                     <Text style={styles.buttonText}>
-                      {readingDailyDistanceTotals ? 'Reading...' : 'Read daily distance totals'}
+                      {isReading ? 'Reading...' : 'Read daily distance totals'}
                     </Text>
                   </Pressable>
                 ) : null}
-                {canReadActiveEnergy && !hasPermission ? (
-                  <Text style={styles.detail}>Grant Active Energy permission to read</Text>
-                ) : null}
                 {canReadActiveEnergy ? (
                   <Pressable
-                    disabled={!isAvailable || readingDailyActiveEnergyTotals || !hasPermission}
+                    disabled={!isAvailable || isBusy}
                     onPress={() => {
                       readDailyActiveEnergyBurnedTotals()
                     }}
@@ -499,24 +589,17 @@ function App(): React.JSX.Element {
                       styles.button,
                       styles.readButton,
                       pressed ? styles.buttonPressed : null,
-                      !isAvailable || readingDailyActiveEnergyTotals || !hasPermission
-                        ? styles.buttonDisabled
-                        : null,
+                      !isAvailable || isBusy ? styles.buttonDisabled : null,
                     ]}
                   >
                     <Text style={styles.buttonText}>
-                      {readingDailyActiveEnergyTotals
-                        ? 'Reading...'
-                        : 'Read daily active energy totals'}
+                      {isReading ? 'Reading...' : 'Read daily active energy totals'}
                     </Text>
                   </Pressable>
                 ) : null}
-                {canReadHeartRate && !hasPermission ? (
-                  <Text style={styles.detail}>Grant Heart Rate permission to read</Text>
-                ) : null}
                 {canReadHeartRate ? (
                   <Pressable
-                    disabled={!isAvailable || readingHeartRateStatistics || !hasPermission}
+                    disabled={!isAvailable || isBusy}
                     onPress={() => {
                       readHeartRateStatistics()
                     }}
@@ -524,22 +607,17 @@ function App(): React.JSX.Element {
                       styles.button,
                       styles.readButton,
                       pressed ? styles.buttonPressed : null,
-                      !isAvailable || readingHeartRateStatistics || !hasPermission
-                        ? styles.buttonDisabled
-                        : null,
+                      !isAvailable || isBusy ? styles.buttonDisabled : null,
                     ]}
                   >
                     <Text style={styles.buttonText}>
-                      {readingHeartRateStatistics ? 'Reading...' : 'Read Heart Rate stats'}
+                      {isReading ? 'Reading...' : 'Read Heart Rate stats'}
                     </Text>
                   </Pressable>
                 ) : null}
-                {canReadSleep && !hasPermission ? (
-                  <Text style={styles.detail}>Grant Sleep permission to read</Text>
-                ) : null}
                 {canReadSleep ? (
                   <Pressable
-                    disabled={!isAvailable || readingSleepSamples || !hasPermission}
+                    disabled={!isAvailable || isBusy}
                     onPress={() => {
                       readSleepSamples()
                     }}
@@ -547,22 +625,17 @@ function App(): React.JSX.Element {
                       styles.button,
                       styles.readButton,
                       pressed ? styles.buttonPressed : null,
-                      !isAvailable || readingSleepSamples || !hasPermission
-                        ? styles.buttonDisabled
-                        : null,
+                      !isAvailable || isBusy ? styles.buttonDisabled : null,
                     ]}
                   >
                     <Text style={styles.buttonText}>
-                      {readingSleepSamples ? 'Reading...' : 'Read sleep samples'}
+                      {isReading ? 'Reading...' : 'Read sleep samples'}
                     </Text>
                   </Pressable>
                 ) : null}
-                {canReadBodyMass && !hasPermission ? (
-                  <Text style={styles.detail}>Grant Body Mass permission to read</Text>
-                ) : null}
                 {canReadBodyMass ? (
                   <Pressable
-                    disabled={!isAvailable || readingBodyMass || !hasPermission}
+                    disabled={!isAvailable || isBusy}
                     onPress={() => {
                       readBodyMass()
                     }}
@@ -570,13 +643,46 @@ function App(): React.JSX.Element {
                       styles.button,
                       styles.readButton,
                       pressed ? styles.buttonPressed : null,
-                      !isAvailable || readingBodyMass || !hasPermission
-                        ? styles.buttonDisabled
-                        : null,
+                      !isAvailable || isBusy ? styles.buttonDisabled : null,
                     ]}
                   >
                     <Text style={styles.buttonText}>
-                      {readingBodyMass ? 'Reading...' : 'Read body mass'}
+                      {isReading ? 'Reading...' : 'Read body mass'}
+                    </Text>
+                  </Pressable>
+                ) : null}
+                {canWrite ? (
+                  <Pressable
+                    disabled={!isAvailable || isBusy}
+                    onPress={() => {
+                      requestWritePermission(dataType)
+                    }}
+                    style={({ pressed }) => [
+                      styles.button,
+                      pressed ? styles.buttonPressed : null,
+                      !isAvailable || isBusy ? styles.buttonDisabled : null,
+                    ]}
+                  >
+                    <Text style={styles.buttonText}>
+                      {isRequestingWrite ? 'Requesting...' : `Request ${label} write permission`}
+                    </Text>
+                  </Pressable>
+                ) : null}
+                {canWrite ? (
+                  <Pressable
+                    disabled={!isAvailable || isBusy}
+                    onPress={() => {
+                      saveSample(dataType)
+                    }}
+                    style={({ pressed }) => [
+                      styles.button,
+                      styles.writeButton,
+                      pressed ? styles.buttonPressed : null,
+                      !isAvailable || isBusy ? styles.buttonDisabled : null,
+                    ]}
+                  >
+                    <Text style={styles.buttonText}>
+                      {isSaving ? 'Saving...' : `Save sample ${label.toLowerCase()}`}
                     </Text>
                   </Pressable>
                 ) : null}
@@ -652,6 +758,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#b91c1c',
   },
+  saved: {
+    marginTop: 12,
+    fontSize: 14,
+    color: '#15803d',
+  },
   buttonRow: {
     marginTop: 16,
     gap: 12,
@@ -677,8 +788,15 @@ const styles = StyleSheet.create({
   readButton: {
     backgroundColor: '#15803d',
   },
+  writeButton: {
+    backgroundColor: '#1d4ed8',
+  },
   installButton: {
     marginTop: 24,
+  },
+  settingsLink: {
+    marginTop: 16,
+    alignSelf: 'stretch',
   },
   buttonPressed: {
     backgroundColor: '#334155',

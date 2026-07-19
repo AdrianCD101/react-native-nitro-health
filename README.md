@@ -79,9 +79,20 @@ if (status === 'shouldRequest') {
 
 `requestAuthorization()` returns a structured result with `status`, `requestStatus`, `grantedPermissions`, `deniedPermissions`, and `unverifiablePermissions`. Android Health Connect can report granted and denied permissions after the prompt. iOS HealthKit cannot verify read permissions after prompting, so read permissions are returned in `unverifiablePermissions` and the aggregate status can be `completed`.
 
-`openHealthSettings()` opens Android Health Connect settings on Android and the app settings screen on iOS. It returns `false` when settings cannot be opened.
+`openHealthSettings()` opens Android Health Connect settings on Android and the app settings screen on iOS. It returns `false` when settings cannot be opened. Note that iOS has no deep link to an app's HealthKit permission screen — users manage access in the Health app under Sharing → Apps.
 
-Android consumer apps must declare the matching Health Connect permissions in their own `AndroidManifest.xml`, for example `android.permission.health.READ_DISTANCE`, `android.permission.health.READ_ACTIVE_CALORIES_BURNED`, `android.permission.health.READ_HEART_RATE`, `android.permission.health.READ_SLEEP`, and `android.permission.health.READ_WEIGHT` before requesting read access.
+Android consumer apps must declare the matching Health Connect permissions in their own `AndroidManifest.xml` before requesting access. Health Connect silently refuses undeclared permissions: the permission screen never shows them and they are never granted, so the corresponding read or write calls keep failing with a missing-permission error.
+
+| Data type            | Android read permission                                 | Android write permission                                 |
+| -------------------- | ------------------------------------------------------- | -------------------------------------------------------- |
+| `steps`              | `android.permission.health.READ_STEPS`                  | `android.permission.health.WRITE_STEPS`                  |
+| `distance`           | `android.permission.health.READ_DISTANCE`               | `android.permission.health.WRITE_DISTANCE`               |
+| `activeEnergyBurned` | `android.permission.health.READ_ACTIVE_CALORIES_BURNED` | `android.permission.health.WRITE_ACTIVE_CALORIES_BURNED` |
+| `heartRate`          | `android.permission.health.READ_HEART_RATE`             | `android.permission.health.WRITE_HEART_RATE`             |
+| `sleep`              | `android.permission.health.READ_SLEEP`                  | n/a (writes not supported yet)                           |
+| `bodyMass`           | `android.permission.health.READ_WEIGHT`                 | `android.permission.health.WRITE_WEIGHT`                 |
+
+On iOS, apps must add `NSHealthShareUsageDescription` (reads) and `NSHealthUpdateUsageDescription` (writes) to `Info.plist`, plus the HealthKit capability.
 
 Read methods behave differently per platform when permission is missing. On Android, reads reject with a missing-permission error until the permission is granted. On iOS, reads reject with an "Authorization not determined" error until the app has requested authorization at least once; after the user responds to the prompt, HealthKit never discloses a read denial — denied reads resolve with empty results, indistinguishable from having no data.
 
@@ -216,6 +227,45 @@ const sleep = await NitroHealth.readSleepSamples({
 `readSleepSamples()` returns sleep intervals with `startDate`, `endDate`, `stage`, and an optional `source`. Stages are normalized to `inBed`, `awake`, `awakeInBed`, `asleep`, `asleepCore`, `asleepDeep`, `asleepREM`, `outOfBed`, or `unknown`.
 
 On iOS, HealthKit sleep analysis is category interval data and `inBed` samples can overlap `asleep` stage samples. On Android, Health Connect sleep sessions are flattened to stage intervals; sessions without explicit stages are returned as one `asleep` interval. Apps must request and receive sleep read permission before relying on returned data.
+
+## Write Samples
+
+Batch save methods are available for `steps`, `distance`, `activeEnergyBurned`, `heartRate`, and `bodyMass` (sleep writes are not supported yet). Request write authorization first, then save:
+
+```ts
+import { NitroHealth } from 'react-native-nitro-health'
+
+const result = await NitroHealth.requestAuthorization([{ accessType: 'write', dataType: 'steps' }])
+
+if (result.deniedPermissions.length === 0) {
+  await NitroHealth.saveSteps([
+    {
+      startDate: new Date('2026-01-01T09:00:00.000Z'),
+      endDate: new Date('2026-01-01T09:30:00.000Z'),
+      count: 512,
+    },
+  ])
+}
+```
+
+Interval samples take `startDate`/`endDate` with `startDate` strictly before `endDate`:
+
+- `saveSteps(samples)` — `{ startDate, endDate, count }`, `count` must be a positive integer up to 1,000,000.
+- `saveDistance(samples)` — `{ startDate, endDate, distanceMeters }`, `distanceMeters` must be non-negative, up to 1,000,000.
+- `saveActiveEnergyBurned(samples)` — `{ startDate, endDate, kilocalories }`, `kilocalories` must be non-negative, up to 1,000,000.
+
+Point-in-time samples take a single `date`:
+
+- `saveHeartRate(samples)` — `{ date, bpm }`, `bpm` must be between 1 and 300. Android stores whole bpm (fractional values are rounded to the nearest integer); iOS stores the exact value.
+- `saveBodyMass(samples)` — `{ date, kilograms }`, `kilograms` must be greater than 0, up to 1,000.
+
+All save methods take a non-empty array, resolve to `void` when every sample is saved (both platforms save each call atomically), and reject before crossing the native boundary when validation fails — error messages include the failing index, for example `samples[2]: bpm must be between 1 and 300`.
+
+The value ranges mirror what Health Connect enforces at insert time, applied on both platforms so a sample that saves on iOS also saves on Android.
+
+Unlike reads, missing write permission is detectable on both platforms: save methods reject with a missing-permission error on Android and iOS alike (on iOS this includes the not-yet-requested state, so request write authorization first). Saved samples are attributed to your app as the source.
+
+Avoid writing samples with overlapping time intervals. The platforms aggregate overlapping records differently: Health Connect deduplicates overlapping intervals when computing totals (writing 250 steps twice over the same 30-minute window still totals roughly 250), while HealthKit cumulative sums count every sample (the same two writes total 500). Raw reads return every stored record on both platforms — only aggregates differ. Writing non-overlapping intervals produces consistent totals everywhere.
 
 ## Jest
 
