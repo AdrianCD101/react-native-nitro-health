@@ -12,7 +12,7 @@ import UIKit
 
 private let healthStore = HKHealthStore()
 
-private func permissionError(_ message: String) -> NSError {
+func permissionError(_ message: String) -> NSError {
     return NSError(domain: "NitroHealth", code: 1, userInfo: [NSLocalizedDescriptionKey: message])
 }
 
@@ -419,6 +419,69 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         }
     }
 
+    // Note: like readHeartRateStatistics, HealthKit resolves with empty buckets when read access
+    // is denied. Bucket boundaries anchor at query.startTimeMs (not startOfDay/calendar weeks),
+    // so 'week' is a rolling 7-day window from the anchor rather than a calendar week.
+    func readStatistics(dataType: String, query: NativeHealthStatisticsQuery) throws -> Promise<[NativeHealthStatistics]> {
+        if !HKHealthStore.isHealthDataAvailable() {
+            throw permissionError("Health data is not available")
+        }
+
+        let descriptor = try makeHealthDataTypeDescriptor(dataType: dataType)
+        let quantityType = try makeHealthKitQuantityType(dataType: dataType)
+        let unit = descriptor.unit
+        let options = try makeStatisticsOptions(dataType: dataType, isCumulative: descriptor.isCumulative, metrics: query.metrics)
+        guard let intervalComponents = makeBucketIntervalComponents(bucket: query.bucket) else {
+            throw permissionError("Unsupported statistics bucket: \(query.bucket)")
+        }
+
+        let startDate = Date(timeIntervalSince1970: query.startTimeMs / 1000)
+        let endDate = Date(timeIntervalSince1970: query.endTimeMs / 1000)
+        let predicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate, options: [])
+        let requestedMetrics = Set(query.metrics)
+        let label = descriptor.label
+
+        return Promise<[NativeHealthStatistics]>.async {
+            try await self.requireDeterminedReadAuthorization(for: quantityType, label: label)
+            let statistics = try await self.queryHealthKitStatisticsCollection(
+                quantityType: quantityType,
+                predicate: predicate,
+                options: options,
+                anchorDate: startDate,
+                intervalComponents: intervalComponents,
+                startDate: startDate,
+                endDate: endDate
+            )
+
+            return statistics.compactMap { statistic -> NativeHealthStatistics? in
+                let sum = requestedMetrics.contains("sum") ? statistic.sumQuantity()?.doubleValue(for: unit) : nil
+                let avg = requestedMetrics.contains("avg") ? statistic.averageQuantity()?.doubleValue(for: unit) : nil
+                let min = requestedMetrics.contains("min") ? statistic.minimumQuantity()?.doubleValue(for: unit) : nil
+                let max = requestedMetrics.contains("max") ? statistic.maximumQuantity()?.doubleValue(for: unit) : nil
+
+                if sum == nil, avg == nil, min == nil, max == nil {
+                    return nil
+                }
+
+                let range = clampDailyBucketRange(
+                    bucketStartTimeMs: statistic.startDate.timeIntervalSince1970 * 1000,
+                    bucketEndTimeMs: statistic.endDate.timeIntervalSince1970 * 1000,
+                    queryStartTimeMs: query.startTimeMs,
+                    queryEndTimeMs: query.endTimeMs
+                )
+
+                return NativeHealthStatistics(
+                    startTimeMs: range.startTimeMs,
+                    endTimeMs: range.endTimeMs,
+                    sum: sum,
+                    avg: avg,
+                    min: min,
+                    max: max
+                )
+            }
+        }
+    }
+
     // Note: HealthKit sleep analysis is category interval data. In-bed and asleep samples can
     // overlap, so this returns raw normalized intervals rather than derived sessions.
     func readSleepSamples(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeSleepSample]> {
@@ -505,7 +568,7 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         }
 
         return Promise<Void>.async {
-            let quantityType = try self.makeHealthKitQuantityType(dataType: dataType)
+            let quantityType = try makeHealthKitQuantityType(dataType: dataType)
             try self.requireWriteAuthorization(for: quantityType, label: label)
             try await self.saveHealthKitSamples(makeSamples(quantityType))
         }
@@ -826,30 +889,6 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         }
 
         return try makeHealthKitQuantityType(dataType: dataType)
-    }
-
-    private func makeHealthKitQuantityType(dataType: String) throws -> HKQuantityType {
-        let identifier: HKQuantityTypeIdentifier
-        switch dataType {
-        case "steps":
-            identifier = .stepCount
-        case "heartRate":
-            identifier = .heartRate
-        case "distance":
-            identifier = .distanceWalkingRunning
-        case "activeEnergyBurned":
-            identifier = .activeEnergyBurned
-        case "bodyMass":
-            identifier = .bodyMass
-        default:
-            throw permissionError("Unsupported health data type: \(dataType)")
-        }
-
-        guard let quantityType = HKObjectType.quantityType(forIdentifier: identifier) else {
-            throw permissionError("Health data type is not available on this device: \(dataType)")
-        }
-
-        return quantityType
     }
 
     private func makeSleepStage(value: Int) -> String {

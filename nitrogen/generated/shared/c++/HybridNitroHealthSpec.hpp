@@ -31,6 +31,10 @@ namespace margelo::nitro::nitrohealth { struct NativeHeartRateSample; }
 namespace margelo::nitro::nitrohealth { struct NativeHeartRateStatistics; }
 // Forward declaration of `NativeHealthTimeRangeQuery` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthTimeRangeQuery; }
+// Forward declaration of `NativeHealthStatistics` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthStatistics; }
+// Forward declaration of `NativeHealthStatisticsQuery` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthStatisticsQuery; }
 // Forward declaration of `NativeSleepSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeSleepSample; }
 // Forward declaration of `NativeStepSampleInput` to properly resolve imports.
@@ -61,6 +65,9 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthAuthorizationResult; 
 #include "NativeHeartRateSample.hpp"
 #include "NativeHeartRateStatistics.hpp"
 #include "NativeHealthTimeRangeQuery.hpp"
+#include "NativeHealthStatistics.hpp"
+#include <string>
+#include "NativeHealthStatisticsQuery.hpp"
 #include "NativeSleepSample.hpp"
 #include "NativeStepSampleInput.hpp"
 #include "NativeDistanceSampleInput.hpp"
@@ -115,6 +122,7 @@ namespace margelo::nitro::nitrohealth {
       virtual std::shared_ptr<Promise<std::vector<NativeBodyMassSample>>> readBodyMass(const NativeHealthDateRangeQuery& query) = 0;
       virtual std::shared_ptr<Promise<std::vector<NativeHeartRateSample>>> readHeartRate(const NativeHealthDateRangeQuery& query) = 0;
       virtual std::shared_ptr<Promise<NativeHeartRateStatistics>> readHeartRateStatistics(const NativeHealthTimeRangeQuery& query) = 0;
+      virtual std::shared_ptr<Promise<std::vector<NativeHealthStatistics>>> readStatistics(const std::string& dataType, const NativeHealthStatisticsQuery& query) = 0;
       virtual std::shared_ptr<Promise<std::vector<NativeSleepSample>>> readSleepSamples(const NativeHealthDateRangeQuery& query) = 0;
       virtual std::shared_ptr<Promise<void>> saveSteps(const std::vector<NativeStepSampleInput>& samples) = 0;
       virtual std::shared_ptr<Promise<void>> saveDistance(const std::vector<NativeDistanceSampleInput>& samples) = 0;

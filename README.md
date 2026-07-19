@@ -139,47 +139,50 @@ Both methods return an empty array when the platform query succeeds but no match
 
 ## Aggregation
 
-Use native aggregation when you need totals or statistics. HealthKit and Health Connect can aggregate across device and app sources without double-counting overlapping data, while summing raw samples in JavaScript can over-count data from a phone, watch, and other apps.
+Use native aggregation when you need totals or statistics. HealthKit and Health Connect can aggregate across device and app sources without double-counting overlapping data, while summing raw samples in JavaScript can over-count data from a phone, watch, and other apps. `readStatistics()` is the primary way to do this: it returns bucketed totals and statistics for a single data type.
 
 ```ts
 import { NitroHealth } from 'react-native-nitro-health'
 
-const dailySteps = await NitroHealth.readDailyStepTotals({
-  startDate: new Date('2026-01-01T00:00:00.000Z'),
+const dailySteps = await NitroHealth.readStatistics('steps', {
+  startDate: new Date('2026-01-01T00:00:00.000Z'), // local midnight anchors calendar-day buckets
   endDate: new Date('2026-01-08T00:00:00.000Z'),
-  limit: 7,
-  ascending: true,
+  bucket: 'day',
+  metrics: ['sum'],
 })
 
-const dailyDistance = await NitroHealth.readDailyDistanceTotals({
-  startDate: new Date('2026-01-01T00:00:00.000Z'),
-  endDate: new Date('2026-01-08T00:00:00.000Z'),
-  limit: 7,
-  ascending: true,
-})
-
-const dailyActiveEnergy = await NitroHealth.readDailyActiveEnergyBurnedTotals({
-  startDate: new Date('2026-01-01T00:00:00.000Z'),
-  endDate: new Date('2026-01-08T00:00:00.000Z'),
-  limit: 7,
-  ascending: true,
-})
-
-const heartRate = await NitroHealth.readHeartRateStatistics({
+const hourlyHeartRate = await NitroHealth.readStatistics('heartRate', {
   startDate: new Date('2026-01-01T00:00:00.000Z'),
   endDate: new Date('2026-01-02T00:00:00.000Z'),
+  bucket: 'hour',
+  metrics: ['avg', 'min', 'max'],
 })
 ```
 
-Daily total methods return one bucket per day. On iOS, buckets align to local calendar days, so the first and last buckets may be partial when the query starts or ends mid-day. On Android, Health Connect anchors buckets to the query's start time, so a query starting at 15:30 returns 15:30-to-15:30 windows — pass a local-midnight `startDate` when you need calendar-day buckets on both platforms. Empty days are omitted, so apps that need a continuous chart should zero-fill missing days. `ascending` orders the buckets and `limit` caps the returned bucket count.
+`readStatistics(dataType, query)` returns one bucket per interval, each with `startDate`, `endDate`, and the requested metric fields. A metric field is only present on the result when it was requested in `query.metrics` and is supported for `dataType`:
 
-`readDailyStepTotals()` returns buckets with `startDate`, `endDate`, and `count`.
+| Data type            | Supported metrics   | Unit                                   |
+| -------------------- | ------------------- | -------------------------------------- |
+| `steps`              | `sum`               | count                                  |
+| `distance`           | `sum`               | meters                                 |
+| `activeEnergyBurned` | `sum`               | kcal                                   |
+| `heartRate`          | `avg`, `min`, `max` | bpm                                    |
+| `bodyMass`           | `avg`, `min`, `max` | kg                                     |
+| `sleep`              | —                   | not supported — use `readSleepSamples` |
 
-`readDailyDistanceTotals()` returns buckets with `startDate`, `endDate`, and `distanceMeters`.
+Requesting a metric that is not supported for `dataType`, an empty `metrics` array, an unknown `bucket`, or the `sleep` data type all reject before crossing the native boundary.
 
-`readDailyActiveEnergyBurnedTotals()` returns buckets with `startDate`, `endDate`, and `kilocalories`.
+**Bucket behavior:** buckets anchor at `query.startDate` on both platforms — pass a local-midnight `startDate` when you need calendar-day buckets. `'week'` buckets are a rolling 7 days from the anchor, not calendar weeks. The final bucket is clamped to `endDate`, empty buckets are omitted, and results are always ascending. `'hour'` buckets are a fixed 3600 seconds; `'day'`, `'week'`, and `'month'` buckets are calendar-aware in the device's local timezone, so a bucket can span 23 or 25 hours across a daylight-saving transition. On Android, heart-rate `avg` is integer-valued (Health Connect's `BPM_AVG` is a `Long`); on iOS it is fractional. As with other reads, HealthKit cannot distinguish a denied read from no data (see the permission caveat in the Permissions section above) — a denied read resolves with empty buckets rather than rejecting.
 
-`readHeartRateStatistics()` returns `{ average, min, max }` in beats per minute. Each field is `undefined` when no matching heart-rate data exists.
+Daily total methods return one bucket per day and predate `readStatistics()`. They are **deprecated** in favor of it and will be removed before 1.0, but keep their existing behavior in the meantime: on iOS, buckets align to local calendar days, so the first and last buckets may be partial when the query starts or ends mid-day — this differs from `readStatistics()`, which always anchors buckets at `query.startDate` rather than local midnight. On Android, Health Connect anchors buckets to the query's start time, so a query starting at 15:30 returns 15:30-to-15:30 windows — pass a local-midnight `startDate` when you need calendar-day buckets on both platforms. Empty days are omitted, so apps that need a continuous chart should zero-fill missing days. `ascending` orders the buckets and `limit` caps the returned bucket count.
+
+`readDailyStepTotals()` returns buckets with `startDate`, `endDate`, and `count`. Use `readStatistics('steps', { ...query, bucket: 'day', metrics: ['sum'] })` instead.
+
+`readDailyDistanceTotals()` returns buckets with `startDate`, `endDate`, and `distanceMeters`. Use `readStatistics('distance', { ...query, bucket: 'day', metrics: ['sum'] })` instead.
+
+`readDailyActiveEnergyBurnedTotals()` returns buckets with `startDate`, `endDate`, and `kilocalories`. Use `readStatistics('activeEnergyBurned', { ...query, bucket: 'day', metrics: ['sum'] })` instead.
+
+`readHeartRateStatistics()` returns `{ average, min, max }` in beats per minute for the whole query range in a single result. Each field is `undefined` when no matching heart-rate data exists. It is not deprecated — it remains the way to get a single whole-range aggregate, which `readStatistics()` cannot express since it always returns one or more buckets.
 
 ## Read Heart Rate
 

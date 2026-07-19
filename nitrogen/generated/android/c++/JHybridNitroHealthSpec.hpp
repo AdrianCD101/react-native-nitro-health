@@ -67,6 +67,7 @@ namespace margelo::nitro::nitrohealth {
     std::shared_ptr<Promise<std::vector<NativeBodyMassSample>>> readBodyMass(const NativeHealthDateRangeQuery& query) override;
     std::shared_ptr<Promise<std::vector<NativeHeartRateSample>>> readHeartRate(const NativeHealthDateRangeQuery& query) override;
     std::shared_ptr<Promise<NativeHeartRateStatistics>> readHeartRateStatistics(const NativeHealthTimeRangeQuery& query) override;
+    std::shared_ptr<Promise<std::vector<NativeHealthStatistics>>> readStatistics(const std::string& dataType, const NativeHealthStatisticsQuery& query) override;
     std::shared_ptr<Promise<std::vector<NativeSleepSample>>> readSleepSamples(const NativeHealthDateRangeQuery& query) override;
     std::shared_ptr<Promise<void>> saveSteps(const std::vector<NativeStepSampleInput>& samples) override;
     std::shared_ptr<Promise<void>> saveDistance(const std::vector<NativeDistanceSampleInput>& samples) override;
