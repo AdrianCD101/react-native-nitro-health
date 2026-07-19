@@ -32,6 +32,8 @@ namespace margelo::nitro::nitrohealth { struct NativeDistanceSample; }
 namespace margelo::nitro::nitrohealth { struct NativeHealthAuthorizationResult; }
 // Forward declaration of `NativeHealthPermission` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthPermission; }
+// Forward declaration of `NativeHealthStatistics` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthStatistics; }
 // Forward declaration of `NativeHeartRateSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHeartRateSampleInput; }
 // Forward declaration of `NativeHeartRateSample` to properly resolve imports.
@@ -62,6 +64,7 @@ namespace NitroHealth { class HybridNitroHealthSpec_cxx; }
 #include "NativeDistanceSampleInput.hpp"
 #include "NativeHealthAuthorizationResult.hpp"
 #include "NativeHealthPermission.hpp"
+#include "NativeHealthStatistics.hpp"
 #include "NativeHeartRateSample.hpp"
 #include "NativeHeartRateSampleInput.hpp"
 #include "NativeHeartRateStatistics.hpp"
@@ -429,6 +432,62 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return Func_void_NativeHeartRateStatistics_Wrapper(std::move(value));
   }
   
+  // pragma MARK: std::vector<NativeHealthStatistics>
+  /**
+   * Specialized version of `std::vector<NativeHealthStatistics>`.
+   */
+  using std__vector_NativeHealthStatistics_ = std::vector<NativeHealthStatistics>;
+  inline std::vector<NativeHealthStatistics> create_std__vector_NativeHealthStatistics_(size_t size) noexcept {
+    std::vector<NativeHealthStatistics> vector;
+    vector.reserve(size);
+    return vector;
+  }
+  
+  // pragma MARK: std::shared_ptr<Promise<std::vector<NativeHealthStatistics>>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<std::vector<NativeHealthStatistics>>>`.
+   */
+  using std__shared_ptr_Promise_std__vector_NativeHealthStatistics___ = std::shared_ptr<Promise<std::vector<NativeHealthStatistics>>>;
+  inline std::shared_ptr<Promise<std::vector<NativeHealthStatistics>>> create_std__shared_ptr_Promise_std__vector_NativeHealthStatistics___() noexcept {
+    return Promise<std::vector<NativeHealthStatistics>>::create();
+  }
+  inline PromiseHolder<std::vector<NativeHealthStatistics>> wrap_std__shared_ptr_Promise_std__vector_NativeHealthStatistics___(std::shared_ptr<Promise<std::vector<NativeHealthStatistics>>> promise) noexcept {
+    return PromiseHolder<std::vector<NativeHealthStatistics>>(std::move(promise));
+  }
+  
+  // pragma MARK: std::function<void(const std::vector<NativeHealthStatistics>& /* result */)>
+  /**
+   * Specialized version of `std::function<void(const std::vector<NativeHealthStatistics>&)>`.
+   */
+  using Func_void_std__vector_NativeHealthStatistics_ = std::function<void(const std::vector<NativeHealthStatistics>& /* result */)>;
+  /**
+   * Wrapper class for a `std::function<void(const std::vector<NativeHealthStatistics>& / * result * /)>`, this can be used from Swift.
+   */
+  class Func_void_std__vector_NativeHealthStatistics__Wrapper final {
+  public:
+    explicit Func_void_std__vector_NativeHealthStatistics__Wrapper(std::function<void(const std::vector<NativeHealthStatistics>& /* result */)>&& func): _function(std::make_unique<std::function<void(const std::vector<NativeHealthStatistics>& /* result */)>>(std::move(func))) {}
+    inline void call(std::vector<NativeHealthStatistics> result) const noexcept {
+      _function->operator()(result);
+    }
+  private:
+    std::unique_ptr<std::function<void(const std::vector<NativeHealthStatistics>& /* result */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_std__vector_NativeHealthStatistics_ create_Func_void_std__vector_NativeHealthStatistics_(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_std__vector_NativeHealthStatistics__Wrapper wrap_Func_void_std__vector_NativeHealthStatistics_(Func_void_std__vector_NativeHealthStatistics_ value) noexcept {
+    return Func_void_std__vector_NativeHealthStatistics__Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::vector<std::string>
+  /**
+   * Specialized version of `std::vector<std::string>`.
+   */
+  using std__vector_std__string_ = std::vector<std::string>;
+  inline std::vector<std::string> create_std__vector_std__string_(size_t size) noexcept {
+    std::vector<std::string> vector;
+    vector.reserve(size);
+    return vector;
+  }
+  
   // pragma MARK: std::vector<NativeSleepSample>
   /**
    * Specialized version of `std::vector<NativeSleepSample>`.
@@ -733,6 +792,15 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
   }
   inline Result_std__shared_ptr_Promise_NativeHeartRateStatistics___ create_Result_std__shared_ptr_Promise_NativeHeartRateStatistics___(const std::exception_ptr& error) noexcept {
     return Result<std::shared_ptr<Promise<NativeHeartRateStatistics>>>::withError(error);
+  }
+  
+  // pragma MARK: Result<std::shared_ptr<Promise<std::vector<NativeHealthStatistics>>>>
+  using Result_std__shared_ptr_Promise_std__vector_NativeHealthStatistics____ = Result<std::shared_ptr<Promise<std::vector<NativeHealthStatistics>>>>;
+  inline Result_std__shared_ptr_Promise_std__vector_NativeHealthStatistics____ create_Result_std__shared_ptr_Promise_std__vector_NativeHealthStatistics____(const std::shared_ptr<Promise<std::vector<NativeHealthStatistics>>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<std::vector<NativeHealthStatistics>>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_std__vector_NativeHealthStatistics____ create_Result_std__shared_ptr_Promise_std__vector_NativeHealthStatistics____(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<std::vector<NativeHealthStatistics>>>>::withError(error);
   }
   
   // pragma MARK: Result<std::shared_ptr<Promise<std::vector<NativeSleepSample>>>>

@@ -21,6 +21,8 @@ namespace margelo::nitro::nitrohealth { struct NativeBodyMassSample; }
 namespace margelo::nitro::nitrohealth { struct NativeHeartRateSample; }
 // Forward declaration of `NativeHeartRateStatistics` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHeartRateStatistics; }
+// Forward declaration of `NativeHealthStatistics` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthStatistics; }
 // Forward declaration of `NativeSleepSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeSleepSample; }
 // Forward declaration of `AuthorizationRequestStatus` to properly resolve imports.
@@ -35,6 +37,8 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthPermission; }
 namespace margelo::nitro::nitrohealth { struct NativeHealthDateRangeQuery; }
 // Forward declaration of `NativeHealthTimeRangeQuery` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthTimeRangeQuery; }
+// Forward declaration of `NativeHealthStatisticsQuery` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthStatisticsQuery; }
 // Forward declaration of `NativeStepSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeStepSampleInput; }
 // Forward declaration of `NativeDistanceSampleInput` to properly resolve imports.
@@ -65,6 +69,8 @@ namespace margelo::nitro::nitrohealth { struct NativeBodyMassSampleInput; }
 #include "JNativeHeartRateSample.hpp"
 #include "NativeHeartRateStatistics.hpp"
 #include "JNativeHeartRateStatistics.hpp"
+#include "NativeHealthStatistics.hpp"
+#include "JNativeHealthStatistics.hpp"
 #include "NativeSleepSample.hpp"
 #include "JNativeSleepSample.hpp"
 #include <NitroModules/JUnit.hpp>
@@ -80,6 +86,8 @@ namespace margelo::nitro::nitrohealth { struct NativeBodyMassSampleInput; }
 #include "JNativeHealthDateRangeQuery.hpp"
 #include "NativeHealthTimeRangeQuery.hpp"
 #include "JNativeHealthTimeRangeQuery.hpp"
+#include "NativeHealthStatisticsQuery.hpp"
+#include "JNativeHealthStatisticsQuery.hpp"
 #include "NativeStepSampleInput.hpp"
 #include "JNativeStepSampleInput.hpp"
 #include "NativeDistanceSampleInput.hpp"
@@ -363,6 +371,31 @@ namespace margelo::nitro::nitrohealth {
       __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {
         auto __result = jni::static_ref_cast<JNativeHeartRateStatistics>(__boxedResult);
         __promise->resolve(__result->toCpp());
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
+  }
+  std::shared_ptr<Promise<std::vector<NativeHealthStatistics>>> JHybridNitroHealthSpec::readStatistics(const std::string& dataType, const NativeHealthStatisticsQuery& query) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<jni::JString> /* dataType */, jni::alias_ref<JNativeHealthStatisticsQuery> /* query */)>("readStatistics");
+    auto __result = method(_javaPart, jni::make_jstring(dataType), JNativeHealthStatisticsQuery::fromCpp(query));
+    return [&]() {
+      auto __promise = Promise<std::vector<NativeHealthStatistics>>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {
+        auto __result = jni::static_ref_cast<jni::JArrayClass<JNativeHealthStatistics>>(__boxedResult);
+        __promise->resolve([&](auto&& __input) {
+          size_t __size = __input->size();
+          std::vector<NativeHealthStatistics> __vector;
+          __vector.reserve(__size);
+          for (size_t __i = 0; __i < __size; __i++) {
+            auto __element = __input->getElement(__i);
+            __vector.push_back(__element->toCpp());
+          }
+          return __vector;
+        }(__result));
       });
       __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
         jni::JniException __jniError(__throwable);

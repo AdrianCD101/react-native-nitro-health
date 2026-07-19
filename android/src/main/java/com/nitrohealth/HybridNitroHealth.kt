@@ -4,6 +4,7 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import androidx.health.connect.client.HealthConnectClient
+import androidx.health.connect.client.aggregate.AggregationResult
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
 import androidx.health.connect.client.records.DistanceRecord
@@ -12,6 +13,7 @@ import androidx.health.connect.client.records.Record
 import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.StepsRecord
 import androidx.health.connect.client.records.WeightRecord
+import androidx.health.connect.client.request.AggregateGroupByDurationRequest
 import androidx.health.connect.client.request.AggregateGroupByPeriodRequest
 import androidx.health.connect.client.request.AggregateRequest
 import androidx.health.connect.client.request.ReadRecordsRequest
@@ -31,6 +33,8 @@ import com.margelo.nitro.nitrohealth.NativeDistanceSampleInput
 import com.margelo.nitro.nitrohealth.NativeHealthAuthorizationResult
 import com.margelo.nitro.nitrohealth.NativeHealthDateRangeQuery
 import com.margelo.nitro.nitrohealth.NativeHealthPermission
+import com.margelo.nitro.nitrohealth.NativeHealthStatistics
+import com.margelo.nitro.nitrohealth.NativeHealthStatisticsQuery
 import com.margelo.nitro.nitrohealth.NativeHealthTimeRangeQuery
 import com.margelo.nitro.nitrohealth.NativeHeartRateSample
 import com.margelo.nitro.nitrohealth.NativeHeartRateSampleInput
@@ -444,6 +448,108 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                 max = result[HeartRateRecord.BPM_MAX]?.toDouble()
             )
         }
+    }
+
+    override fun readStatistics(
+        dataType: String,
+        query: NativeHealthStatisticsQuery
+    ): Promise<Array<NativeHealthStatistics>> {
+        return Promise.async {
+            val context = NitroModules.applicationContext
+                ?: throw IllegalStateException("Android application context is unavailable")
+
+            if (getAvailabilityStatus() != HealthAvailabilityStatus.AVAILABLE) {
+                throw IllegalStateException("Health Connect is not available")
+            }
+
+            val descriptor = statisticsDescriptorForDataType(dataType)
+            val requestedMetrics = query.metrics.associateWith { metricName ->
+                descriptor.metrics[metricName]
+                    ?: throw IllegalArgumentException(
+                        "Unsupported statistics metric \"$metricName\" for data type: $dataType"
+                    )
+            }
+
+            val client = HealthConnectClient.getOrCreate(context)
+            requireReadPermission(client, descriptor.recordType, descriptor.permissionLabel)
+
+            val slicer = makeBucketSlicer(query.bucket)
+                ?: throw IllegalArgumentException("Unsupported statistics bucket: ${query.bucket}")
+            val metrics = requestedMetrics.values.map { it.metric }.toSet()
+
+            val samples = when (slicer) {
+                is BucketSlicer.ByDuration -> {
+                    val request = AggregateGroupByDurationRequest(
+                        metrics = metrics,
+                        timeRangeFilter = TimeRangeFilter.between(
+                            Instant.ofEpochMilli(query.startTimeMs.toLong()),
+                            Instant.ofEpochMilli(query.endTimeMs.toLong())
+                        ),
+                        timeRangeSlicer = slicer.duration
+                    )
+                    client.aggregateGroupByDuration(request).mapNotNull { group ->
+                        makeStatistics(
+                            requestedMetrics = requestedMetrics,
+                            result = group.result,
+                            bucketStartTimeMs = group.startTime.toEpochMilli().toDouble(),
+                            bucketEndTimeMs = group.endTime.toEpochMilli().toDouble(),
+                            query = query
+                        )
+                    }
+                }
+                is BucketSlicer.ByPeriod -> {
+                    val zoneId = ZoneId.systemDefault()
+                    val request = AggregateGroupByPeriodRequest(
+                        metrics = metrics,
+                        timeRangeFilter = TimeRangeFilter.between(
+                            Instant.ofEpochMilli(query.startTimeMs.toLong()).atZone(zoneId).toLocalDateTime(),
+                            Instant.ofEpochMilli(query.endTimeMs.toLong()).atZone(zoneId).toLocalDateTime()
+                        ),
+                        timeRangeSlicer = slicer.period
+                    )
+                    client.aggregateGroupByPeriod(request).mapNotNull { group ->
+                        makeStatistics(
+                            requestedMetrics = requestedMetrics,
+                            result = group.result,
+                            bucketStartTimeMs = group.startTime.atZone(zoneId).toInstant().toEpochMilli().toDouble(),
+                            bucketEndTimeMs = group.endTime.atZone(zoneId).toInstant().toEpochMilli().toDouble(),
+                            query = query
+                        )
+                    }
+                }
+            }
+
+            samples.sortedBy { it.startTimeMs }.toTypedArray()
+        }
+    }
+
+    private fun makeStatistics(
+        requestedMetrics: Map<String, StatisticsMetricBinding>,
+        result: AggregationResult,
+        bucketStartTimeMs: Double,
+        bucketEndTimeMs: Double,
+        query: NativeHealthStatisticsQuery
+    ): NativeHealthStatistics? {
+        val values = requestedMetrics.mapValues { (_, binding) -> binding.extract(result) }
+        if (values.values.all { it == null }) {
+            return null
+        }
+
+        val range = clampDailyBucketRange(
+            bucketStartTimeMs = bucketStartTimeMs,
+            bucketEndTimeMs = bucketEndTimeMs,
+            queryStartTimeMs = query.startTimeMs,
+            queryEndTimeMs = query.endTimeMs
+        )
+
+        return NativeHealthStatistics(
+            startTimeMs = range.startTimeMs,
+            endTimeMs = range.endTimeMs,
+            sum = values["sum"],
+            avg = values["avg"],
+            min = values["min"],
+            max = values["max"]
+        )
     }
 
     override fun readSleepSamples(query: NativeHealthDateRangeQuery): Promise<Array<NativeSleepSample>> {

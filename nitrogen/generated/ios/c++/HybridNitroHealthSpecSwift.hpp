@@ -30,6 +30,10 @@ namespace margelo::nitro::nitrohealth { struct NativeHeartRateSample; }
 namespace margelo::nitro::nitrohealth { struct NativeHeartRateStatistics; }
 // Forward declaration of `NativeHealthTimeRangeQuery` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthTimeRangeQuery; }
+// Forward declaration of `NativeHealthStatistics` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthStatistics; }
+// Forward declaration of `NativeHealthStatisticsQuery` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthStatisticsQuery; }
 // Forward declaration of `NativeSleepSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeSleepSample; }
 // Forward declaration of `NativeStepSampleInput` to properly resolve imports.
@@ -64,6 +68,8 @@ namespace margelo::nitro::nitrohealth { enum class HealthAuthorizationStatus; }
 #include "NativeHeartRateSample.hpp"
 #include "NativeHeartRateStatistics.hpp"
 #include "NativeHealthTimeRangeQuery.hpp"
+#include "NativeHealthStatistics.hpp"
+#include "NativeHealthStatisticsQuery.hpp"
 #include "NativeSleepSample.hpp"
 #include "NativeStepSampleInput.hpp"
 #include "NativeDistanceSampleInput.hpp"
@@ -223,6 +229,14 @@ namespace margelo::nitro::nitrohealth {
     }
     inline std::shared_ptr<Promise<NativeHeartRateStatistics>> readHeartRateStatistics(const NativeHealthTimeRangeQuery& query) override {
       auto __result = _swiftPart.readHeartRateStatistics(std::forward<decltype(query)>(query));
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline std::shared_ptr<Promise<std::vector<NativeHealthStatistics>>> readStatistics(const std::string& dataType, const NativeHealthStatisticsQuery& query) override {
+      auto __result = _swiftPart.readStatistics(dataType, std::forward<decltype(query)>(query));
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }

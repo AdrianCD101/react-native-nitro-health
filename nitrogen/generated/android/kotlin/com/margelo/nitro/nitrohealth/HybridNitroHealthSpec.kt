@@ -83,6 +83,10 @@ abstract class HybridNitroHealthSpec: HybridObject() {
   
   @DoNotStrip
   @Keep
+  abstract fun readStatistics(dataType: String, query: NativeHealthStatisticsQuery): Promise<Array<NativeHealthStatistics>>
+  
+  @DoNotStrip
+  @Keep
   abstract fun readSleepSamples(query: NativeHealthDateRangeQuery): Promise<Array<NativeSleepSample>>
   
   @DoNotStrip

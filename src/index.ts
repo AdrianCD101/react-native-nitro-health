@@ -10,8 +10,11 @@ import type { DailyStepTotal } from './DailyStepTotal'
 import type { DistanceSample } from './DistanceSample'
 import type { DistanceSampleInput } from './DistanceSampleInput'
 import type { HealthAuthorizationResult } from './HealthAuthorizationResult'
+import type { HealthDataType } from './HealthDataType'
 import type { HealthDateRangeQuery } from './HealthDateRangeQuery'
 import type { HealthPermission } from './HealthPermission'
+import type { HealthStatistics } from './HealthStatistics'
+import type { HealthStatisticsQuery } from './HealthStatisticsQuery'
 import type { HealthTimeRangeQuery } from './HealthTimeRangeQuery'
 import type { HeartRateSample } from './HeartRateSample'
 import type { HeartRateSampleInput } from './HeartRateSampleInput'
@@ -23,6 +26,8 @@ import type { NativeBodyMassSampleInput } from './NativeBodyMassSampleInput'
 import type { NativeDistanceSample } from './NativeDistanceSample'
 import type { NativeDistanceSampleInput } from './NativeDistanceSampleInput'
 import type { NativeHealthDateRangeQuery } from './NativeHealthDateRangeQuery'
+import type { NativeHealthStatistics } from './NativeHealthStatistics'
+import type { NativeHealthStatisticsQuery } from './NativeHealthStatisticsQuery'
 import type { NativeHealthTimeRangeQuery } from './NativeHealthTimeRangeQuery'
 import type { NativeHeartRateSample } from './NativeHeartRateSample'
 import type { NativeHeartRateSampleInput } from './NativeHeartRateSampleInput'
@@ -31,6 +36,8 @@ import type { NativeSleepSample } from './NativeSleepSample'
 import type { NativeStepSample } from './NativeStepSample'
 import type { NativeStepSampleInput } from './NativeStepSampleInput'
 import type { SleepSample } from './SleepSample'
+import type { StatisticsBucket } from './StatisticsBucket'
+import type { StatisticsMetric } from './StatisticsMetric'
 import type { StepSample } from './StepSample'
 import type { StepSampleInput } from './StepSampleInput'
 
@@ -51,6 +58,8 @@ export type { HealthDataType } from './HealthDataType'
 export type { HealthDateRangeQuery } from './HealthDateRangeQuery'
 export type { HealthPermission } from './HealthPermission'
 export type { HealthPermissionAccessType } from './HealthPermissionAccessType'
+export type { HealthStatistics } from './HealthStatistics'
+export type { HealthStatisticsQuery } from './HealthStatisticsQuery'
 export type { HealthTimeRangeQuery } from './HealthTimeRangeQuery'
 export type { HeartRateSample } from './HeartRateSample'
 export type { HeartRateSampleInput } from './HeartRateSampleInput'
@@ -63,6 +72,8 @@ export type { NativeDistanceSample } from './NativeDistanceSample'
 export type { NativeDistanceSampleInput } from './NativeDistanceSampleInput'
 export type { NativeHealthAuthorizationResult } from './NativeHealthAuthorizationResult'
 export type { NativeHealthDateRangeQuery } from './NativeHealthDateRangeQuery'
+export type { NativeHealthStatistics } from './NativeHealthStatistics'
+export type { NativeHealthStatisticsQuery } from './NativeHealthStatisticsQuery'
 export type { NativeHealthTimeRangeQuery } from './NativeHealthTimeRangeQuery'
 export type { NativeHealthPermission } from './NativeHealthPermission'
 export type { NativeHeartRateSample } from './NativeHeartRateSample'
@@ -74,6 +85,8 @@ export type { NativeStepSampleInput } from './NativeStepSampleInput'
 export type { NitroHealth as NitroHealthSpec } from './specs/nitro-health.nitro'
 export type { SleepSample } from './SleepSample'
 export type { SleepStage } from './SleepStage'
+export type { StatisticsBucket } from './StatisticsBucket'
+export type { StatisticsMetric } from './StatisticsMetric'
 export type { StepSample } from './StepSample'
 export type { StepSampleInput } from './StepSampleInput'
 
@@ -99,14 +112,26 @@ function assertValidDate(value: Date, name: 'startDate' | 'endDate'): number {
   return timeMs
 }
 
-function makeNativeDateRangeQuery(query: HealthDateRangeQuery): NativeHealthDateRangeQuery {
+function makeTimeRange(query: { startDate: Date; endDate: Date }): {
+  startTimeMs: number
+  endTimeMs: number
+} {
   const startTimeMs = assertValidDate(query.startDate, 'startDate')
   const endTimeMs = assertValidDate(query.endDate, 'endDate')
-  const limit = query.limit ?? 1000
 
   if (startTimeMs >= endTimeMs) {
     throw new Error('startDate must be before endDate')
   }
+
+  return {
+    startTimeMs,
+    endTimeMs,
+  }
+}
+
+function makeNativeDateRangeQuery(query: HealthDateRangeQuery): NativeHealthDateRangeQuery {
+  const { startTimeMs, endTimeMs } = makeTimeRange(query)
+  const limit = query.limit ?? 1000
 
   if (!Number.isInteger(limit) || limit <= 0) {
     throw new Error('limit must be a positive integer')
@@ -121,16 +146,67 @@ function makeNativeDateRangeQuery(query: HealthDateRangeQuery): NativeHealthDate
 }
 
 function makeNativeTimeRangeQuery(query: HealthTimeRangeQuery): NativeHealthTimeRangeQuery {
-  const startTimeMs = assertValidDate(query.startDate, 'startDate')
-  const endTimeMs = assertValidDate(query.endDate, 'endDate')
+  const { startTimeMs, endTimeMs } = makeTimeRange(query)
 
-  if (startTimeMs >= endTimeMs) {
-    throw new Error('startDate must be before endDate')
+  return {
+    startTimeMs,
+    endTimeMs,
+  }
+}
+
+const STATISTICS_BUCKETS: readonly StatisticsBucket[] = ['hour', 'day', 'week', 'month']
+const STATISTICS_METRICS: readonly StatisticsMetric[] = ['sum', 'avg', 'min', 'max']
+
+const STATISTICS_METRICS_BY_DATA_TYPE: Record<HealthDataType, readonly StatisticsMetric[]> = {
+  steps: ['sum'],
+  distance: ['sum'],
+  activeEnergyBurned: ['sum'],
+  heartRate: ['avg', 'min', 'max'],
+  bodyMass: ['avg', 'min', 'max'],
+  sleep: [],
+}
+
+function makeNativeStatisticsQuery(
+  dataType: HealthDataType,
+  query: HealthStatisticsQuery
+): NativeHealthStatisticsQuery {
+  const { startTimeMs, endTimeMs } = makeTimeRange(query)
+
+  if (!STATISTICS_BUCKETS.includes(query.bucket)) {
+    throw new Error('bucket must be one of: hour, day, week, month')
+  }
+
+  if (query.metrics.length === 0) {
+    throw new Error('At least one metric is required')
+  }
+
+  const metrics = Array.from(new Set(query.metrics))
+
+  for (const metric of metrics) {
+    if (!STATISTICS_METRICS.includes(metric)) {
+      throw new Error(`Unsupported statistics metric: ${metric}`)
+    }
+  }
+
+  if (dataType === 'sleep') {
+    throw new Error(`readStatistics does not support the 'sleep' data type`)
+  }
+
+  const supportedMetrics = STATISTICS_METRICS_BY_DATA_TYPE[dataType]
+
+  for (const metric of metrics) {
+    if (!supportedMetrics.includes(metric)) {
+      throw new Error(
+        `Metric '${metric}' is not supported for '${dataType}' (supported: ${supportedMetrics.join(', ')})`
+      )
+    }
   }
 
   return {
     startTimeMs,
     endTimeMs,
+    bucket: query.bucket,
+    metrics,
   }
 }
 
@@ -335,6 +411,17 @@ function makeHeartRateStatistics(statistics: NativeHeartRateStatistics): HeartRa
   }
 }
 
+function makeHealthStatistics(statistics: NativeHealthStatistics): HealthStatistics {
+  return {
+    startDate: new Date(statistics.startTimeMs),
+    endDate: new Date(statistics.endTimeMs),
+    sum: statistics.sum,
+    avg: statistics.avg,
+    min: statistics.min,
+    max: statistics.max,
+  }
+}
+
 export type NitroHealth = Omit<
   NitroHealthSpec,
   | 'getRequestStatusForAuthorization'
@@ -347,6 +434,7 @@ export type NitroHealth = Omit<
   | 'readBodyMass'
   | 'readHeartRate'
   | 'readHeartRateStatistics'
+  | 'readStatistics'
   | 'readSleepSamples'
   | 'saveSteps'
   | 'saveDistance'
@@ -359,16 +447,29 @@ export type NitroHealth = Omit<
     permissions: HealthPermission[]
   ): ReturnType<NitroHealthSpec['getRequestStatusForAuthorization']>
   readSteps(query: HealthDateRangeQuery): Promise<StepSample[]>
+  /**
+   * @deprecated Use readStatistics('steps', { ..., bucket: 'day', metrics: ['sum'] }) instead. Will be removed before 1.0.
+   */
   readDailyStepTotals(query: HealthDateRangeQuery): Promise<DailyStepTotal[]>
   readDistance(query: HealthDateRangeQuery): Promise<DistanceSample[]>
+  /**
+   * @deprecated Use readStatistics('distance', { ..., bucket: 'day', metrics: ['sum'] }) instead. Will be removed before 1.0.
+   */
   readDailyDistanceTotals(query: HealthDateRangeQuery): Promise<DailyDistanceTotal[]>
   readActiveEnergyBurned(query: HealthDateRangeQuery): Promise<ActiveEnergyBurnedSample[]>
+  /**
+   * @deprecated Use readStatistics('activeEnergyBurned', { ..., bucket: 'day', metrics: ['sum'] }) instead. Will be removed before 1.0.
+   */
   readDailyActiveEnergyBurnedTotals(
     query: HealthDateRangeQuery
   ): Promise<DailyActiveEnergyBurnedTotal[]>
   readBodyMass(query: HealthDateRangeQuery): Promise<BodyMassSample[]>
   readHeartRate(query: HealthDateRangeQuery): Promise<HeartRateSample[]>
   readHeartRateStatistics(query: HealthTimeRangeQuery): Promise<HeartRateStatistics>
+  readStatistics(
+    dataType: HealthDataType,
+    query: HealthStatisticsQuery
+  ): Promise<HealthStatistics[]>
   readSleepSamples(query: HealthDateRangeQuery): Promise<SleepSample[]>
   saveSteps(samples: StepSampleInput[]): Promise<void>
   saveDistance(samples: DistanceSampleInput[]): Promise<void>
@@ -451,6 +552,14 @@ export const NitroHealth: NitroHealth = {
     )
 
     return makeHeartRateStatistics(statistics)
+  },
+  async readStatistics(dataType, query) {
+    const statistics = await NitroHealthNative.readStatistics(
+      dataType,
+      makeNativeStatisticsQuery(dataType, query)
+    )
+
+    return statistics.map(makeHealthStatistics)
   },
   async readSleepSamples(query) {
     const samples = await NitroHealthNative.readSleepSamples(makeNativeDateRangeQuery(query))

@@ -9,6 +9,8 @@ import type { NativeDistanceSample } from '../NativeDistanceSample'
 import type { NativeDistanceSampleInput } from '../NativeDistanceSampleInput'
 import type { NativeHealthAuthorizationResult } from '../NativeHealthAuthorizationResult'
 import type { NativeHealthDateRangeQuery } from '../NativeHealthDateRangeQuery'
+import type { NativeHealthStatistics } from '../NativeHealthStatistics'
+import type { NativeHealthStatisticsQuery } from '../NativeHealthStatisticsQuery'
 import type { NativeHealthTimeRangeQuery } from '../NativeHealthTimeRangeQuery'
 import type { NativeHealthPermission } from '../NativeHealthPermission'
 import type { NativeHeartRateSample } from '../NativeHeartRateSample'
@@ -36,6 +38,10 @@ export interface NitroHealth extends HybridObject<{ ios: 'swift'; android: 'kotl
   readBodyMass(query: NativeHealthDateRangeQuery): Promise<NativeBodyMassSample[]>
   readHeartRate(query: NativeHealthDateRangeQuery): Promise<NativeHeartRateSample[]>
   readHeartRateStatistics(query: NativeHealthTimeRangeQuery): Promise<NativeHeartRateStatistics>
+  readStatistics(
+    dataType: string,
+    query: NativeHealthStatisticsQuery
+  ): Promise<NativeHealthStatistics[]>
   readSleepSamples(query: NativeHealthDateRangeQuery): Promise<NativeSleepSample[]>
   saveSteps(samples: NativeStepSampleInput[]): Promise<void>
   saveDistance(samples: NativeDistanceSampleInput[]): Promise<void>

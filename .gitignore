@@ -79,3 +79,7 @@ tsconfig.tsbuildinfo
 
 # SwiftPM (test-only package for ios/ helpers)
 .build/
+
+# Claude Code session machinery (shared config like .claude/settings.json stays committable)
+.claude/worktrees/
+.claude/settings.local.json
