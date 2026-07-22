@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "composite": true,
+    "rootDir": ".",
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
     "esModuleInterop": true,
@@ -10,7 +10,7 @@
     "lib": ["esnext"],
     "module": "esnext",
     "moduleResolution": "node",
-    "noEmit": false,
+    "noEmit": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitReturns": true,
     "noImplicitUseStrict": false,
