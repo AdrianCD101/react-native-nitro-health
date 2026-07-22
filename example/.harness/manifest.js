@@ -1,4 +1,4 @@
-global.RN_HARNESS = {
-  appRegistryComponentName: 'NitroHealthExample',
-  disableViewFlattening: false,
-}
+global.RN_HARNESS = { 
+    appRegistryComponentName: 'NitroHealthExample',
+    disableViewFlattening: false,
+  };

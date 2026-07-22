@@ -45,6 +45,7 @@ import type { NativeRestingHeartRateSampleInput } from './NativeRestingHeartRate
 import type { NativeSleepSample } from './NativeSleepSample'
 import type { NativeStepSample } from './NativeStepSample'
 import type { NativeStepSampleInput } from './NativeStepSampleInput'
+import type { NativeWorkoutSample } from './NativeWorkoutSample'
 import type { OxygenSaturationSample } from './OxygenSaturationSample'
 import type { OxygenSaturationSampleInput } from './OxygenSaturationSampleInput'
 import type { RestingHeartRateSample } from './RestingHeartRateSample'
@@ -54,6 +55,7 @@ import type { StatisticsBucket } from './StatisticsBucket'
 import type { StatisticsMetric } from './StatisticsMetric'
 import type { StepSample } from './StepSample'
 import type { StepSampleInput } from './StepSampleInput'
+import type { WorkoutSample } from './WorkoutSample'
 
 export type { ActiveEnergyBurnedSample } from './ActiveEnergyBurnedSample'
 export type { ActiveEnergyBurnedSampleInput } from './ActiveEnergyBurnedSampleInput'
@@ -107,6 +109,7 @@ export type { NativeRestingHeartRateSampleInput } from './NativeRestingHeartRate
 export type { NativeSleepSample } from './NativeSleepSample'
 export type { NativeStepSample } from './NativeStepSample'
 export type { NativeStepSampleInput } from './NativeStepSampleInput'
+export type { NativeWorkoutSample } from './NativeWorkoutSample'
 export type { NitroHealth as NitroHealthSpec } from './specs/nitro-health.nitro'
 export type { OxygenSaturationSample } from './OxygenSaturationSample'
 export type { OxygenSaturationSampleInput } from './OxygenSaturationSampleInput'
@@ -118,6 +121,8 @@ export type { StatisticsBucket } from './StatisticsBucket'
 export type { StatisticsMetric } from './StatisticsMetric'
 export type { StepSample } from './StepSample'
 export type { StepSampleInput } from './StepSampleInput'
+export type { WorkoutActivityType } from './WorkoutActivityType'
+export type { WorkoutSample } from './WorkoutSample'
 
 const NitroHealthNative = NitroModules.createHybridObject<NitroHealthSpec>('NitroHealth')
 
@@ -127,18 +132,22 @@ function assertPermissions(permissions: HealthPermission[]): void {
   }
 }
 
+function dateToTimeMs(value: Date, message: string): number {
+  if (!(value instanceof Date) || !Number.isFinite(value.getTime())) {
+    throw new Error(message)
+  }
+
+  return value.getTime()
+}
+
+function assertStartBeforeEnd(startTimeMs: number, endTimeMs: number, prefix = ''): void {
+  if (startTimeMs >= endTimeMs) {
+    throw new Error(`${prefix}startDate must be before endDate`)
+  }
+}
+
 function assertValidDate(value: Date, name: 'startDate' | 'endDate'): number {
-  if (!(value instanceof Date)) {
-    throw new Error(`A valid ${name} is required`)
-  }
-
-  const timeMs = value.getTime()
-
-  if (!Number.isFinite(timeMs)) {
-    throw new Error(`A valid ${name} is required`)
-  }
-
-  return timeMs
+  return dateToTimeMs(value, `A valid ${name} is required`)
 }
 
 function makeTimeRange(query: { startDate: Date; endDate: Date }): {
@@ -148,9 +157,7 @@ function makeTimeRange(query: { startDate: Date; endDate: Date }): {
   const startTimeMs = assertValidDate(query.startDate, 'startDate')
   const endTimeMs = assertValidDate(query.endDate, 'endDate')
 
-  if (startTimeMs >= endTimeMs) {
-    throw new Error('startDate must be before endDate')
-  }
+  assertStartBeforeEnd(startTimeMs, endTimeMs)
 
   return {
     startTimeMs,
@@ -196,6 +203,7 @@ const STATISTICS_METRICS_BY_DATA_TYPE: Record<HealthDataType, readonly Statistic
   height: ['avg', 'min', 'max'],
   bodyMass: ['avg', 'min', 'max'],
   sleep: [],
+  workout: [],
 }
 
 const STATISTICS_METRICS: readonly StatisticsMetric[] = Array.from(
@@ -253,23 +261,11 @@ function assertNonEmptySamples(samples: readonly unknown[]): void {
 }
 
 function assertValidSampleDate(value: Date, index: number, name: string): number {
-  if (!(value instanceof Date)) {
-    throw new Error(`samples[${index}]: a valid ${name} is required`)
-  }
-
-  const timeMs = value.getTime()
-
-  if (!Number.isFinite(timeMs)) {
-    throw new Error(`samples[${index}]: a valid ${name} is required`)
-  }
-
-  return timeMs
+  return dateToTimeMs(value, `samples[${index}]: a valid ${name} is required`)
 }
 
 function assertSampleInterval(startTimeMs: number, endTimeMs: number, index: number): void {
-  if (startTimeMs >= endTimeMs) {
-    throw new Error(`samples[${index}]: startDate must be before endDate`)
-  }
+  assertStartBeforeEnd(startTimeMs, endTimeMs, `samples[${index}]: `)
 }
 
 // Upper bounds mirror Health Connect's record constraints (connect-client 1.1.0) so inputs
@@ -527,6 +523,19 @@ function makeSleepSample(sample: NativeSleepSample): SleepSample {
   }
 }
 
+function makeWorkoutSample(sample: NativeWorkoutSample): WorkoutSample {
+  return {
+    startDate: new Date(sample.startTimeMs),
+    endDate: new Date(sample.endTimeMs),
+    durationSeconds: sample.durationSeconds,
+    activityType: sample.activityType as WorkoutSample['activityType'],
+    title: sample.title,
+    source: sample.source,
+    totalDistanceMeters: sample.totalDistanceMeters,
+    totalEnergyBurnedKcal: sample.totalEnergyBurnedKcal,
+  }
+}
+
 function makeHeartRateStatistics(statistics: NativeHeartRateStatistics): HeartRateStatistics {
   return {
     average: statistics.average,
@@ -564,6 +573,7 @@ export type NitroHealth = Omit<
   | 'readHeight'
   | 'readStatistics'
   | 'readSleepSamples'
+  | 'readWorkouts'
   | 'saveSteps'
   | 'saveDistance'
   | 'saveActiveEnergyBurned'
@@ -606,6 +616,7 @@ export type NitroHealth = Omit<
     query: HealthStatisticsQuery
   ): Promise<HealthStatistics[]>
   readSleepSamples(query: HealthDateRangeQuery): Promise<SleepSample[]>
+  readWorkouts(query: HealthDateRangeQuery): Promise<WorkoutSample[]>
   saveSteps(samples: StepSampleInput[]): Promise<void>
   saveDistance(samples: DistanceSampleInput[]): Promise<void>
   saveActiveEnergyBurned(samples: ActiveEnergyBurnedSampleInput[]): Promise<void>
@@ -725,6 +736,11 @@ export const NitroHealth: NitroHealth = {
     const samples = await NitroHealthNative.readSleepSamples(makeNativeDateRangeQuery(query))
 
     return samples.map(makeSleepSample)
+  },
+  async readWorkouts(query) {
+    const samples = await NitroHealthNative.readWorkouts(makeNativeDateRangeQuery(query))
+
+    return samples.map(makeWorkoutSample)
   },
   async saveSteps(samples) {
     assertNonEmptySamples(samples)

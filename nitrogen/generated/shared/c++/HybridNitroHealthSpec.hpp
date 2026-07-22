@@ -45,6 +45,8 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthStatistics; }
 namespace margelo::nitro::nitrohealth { struct NativeHealthStatisticsQuery; }
 // Forward declaration of `NativeSleepSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeSleepSample; }
+// Forward declaration of `NativeWorkoutSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeWorkoutSample; }
 // Forward declaration of `NativeStepSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeStepSampleInput; }
 // Forward declaration of `NativeDistanceSampleInput` to properly resolve imports.
@@ -87,6 +89,7 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthAuthorizationResult; 
 #include <string>
 #include "NativeHealthStatisticsQuery.hpp"
 #include "NativeSleepSample.hpp"
+#include "NativeWorkoutSample.hpp"
 #include "NativeStepSampleInput.hpp"
 #include "NativeDistanceSampleInput.hpp"
 #include "NativeActiveEnergyBurnedSampleInput.hpp"
@@ -149,6 +152,7 @@ namespace margelo::nitro::nitrohealth {
       virtual std::shared_ptr<Promise<std::vector<NativeHeightSample>>> readHeight(const NativeHealthDateRangeQuery& query) = 0;
       virtual std::shared_ptr<Promise<std::vector<NativeHealthStatistics>>> readStatistics(const std::string& dataType, const NativeHealthStatisticsQuery& query) = 0;
       virtual std::shared_ptr<Promise<std::vector<NativeSleepSample>>> readSleepSamples(const NativeHealthDateRangeQuery& query) = 0;
+      virtual std::shared_ptr<Promise<std::vector<NativeWorkoutSample>>> readWorkouts(const NativeHealthDateRangeQuery& query) = 0;
       virtual std::shared_ptr<Promise<void>> saveSteps(const std::vector<NativeStepSampleInput>& samples) = 0;
       virtual std::shared_ptr<Promise<void>> saveDistance(const std::vector<NativeDistanceSampleInput>& samples) = 0;
       virtual std::shared_ptr<Promise<void>> saveActiveEnergyBurned(const std::vector<NativeActiveEnergyBurnedSampleInput>& samples) = 0;

@@ -126,6 +126,14 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     };
   }
   
+  // pragma MARK: std::function<void(const std::vector<NativeWorkoutSample>& /* result */)>
+  Func_void_std__vector_NativeWorkoutSample_ create_Func_void_std__vector_NativeWorkoutSample_(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroHealth::Func_void_std__vector_NativeWorkoutSample_::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const std::vector<NativeWorkoutSample>& result) mutable -> void {
+      swiftClosure.call(result);
+    };
+  }
+  
   // pragma MARK: std::function<void()>
   Func_void create_Func_void(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = NitroHealth::Func_void::fromUnsafe(swiftClosureWrapper);

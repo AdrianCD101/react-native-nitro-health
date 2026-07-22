@@ -66,6 +66,8 @@ namespace margelo::nitro::nitrohealth { struct NativeSleepSample; }
 namespace margelo::nitro::nitrohealth { struct NativeStepSampleInput; }
 // Forward declaration of `NativeStepSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeStepSample; }
+// Forward declaration of `NativeWorkoutSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeWorkoutSample; }
 
 // Include C++ defined types
 #include "AuthorizationRequestStatus.hpp"
@@ -97,6 +99,7 @@ namespace margelo::nitro::nitrohealth { struct NativeStepSample; }
 #include "NativeSleepSample.hpp"
 #include "NativeStepSample.hpp"
 #include "NativeStepSampleInput.hpp"
+#include "NativeWorkoutSample.hpp"
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/Result.hpp>
 #include <exception>

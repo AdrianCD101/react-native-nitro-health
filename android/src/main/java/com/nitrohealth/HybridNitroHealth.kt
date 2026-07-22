@@ -8,6 +8,7 @@ import androidx.health.connect.client.aggregate.AggregationResult
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
 import androidx.health.connect.client.records.DistanceRecord
+import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.HeartRateVariabilityRmssdRecord
 import androidx.health.connect.client.records.HeightRecord
@@ -53,6 +54,7 @@ import com.margelo.nitro.nitrohealth.NativeRestingHeartRateSampleInput
 import com.margelo.nitro.nitrohealth.NativeSleepSample
 import com.margelo.nitro.nitrohealth.NativeStepSample
 import com.margelo.nitro.nitrohealth.NativeStepSampleInput
+import com.margelo.nitro.nitrohealth.NativeWorkoutSample
 import java.time.Instant
 import java.time.Period
 import java.time.ZoneId
@@ -687,6 +689,48 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             }
 
             ordered.take(query.limit.toInt()).toTypedArray()
+        }
+    }
+
+    override fun readWorkouts(query: NativeHealthDateRangeQuery): Promise<Array<NativeWorkoutSample>> {
+        return Promise.async {
+            val context = NitroModules.applicationContext
+                ?: throw IllegalStateException("Android application context is unavailable")
+
+            if (getAvailabilityStatus() != HealthAvailabilityStatus.AVAILABLE) {
+                throw IllegalStateException("Health Connect is not available")
+            }
+
+            val client = HealthConnectClient.getOrCreate(context)
+            requireReadPermission(client, "workout")
+
+            val request = ReadRecordsRequest(
+                recordType = ExerciseSessionRecord::class,
+                timeRangeFilter = TimeRangeFilter.between(
+                    Instant.ofEpochMilli(query.startTimeMs.toLong()),
+                    Instant.ofEpochMilli(query.endTimeMs.toLong())
+                ),
+                ascendingOrder = query.ascending,
+                pageSize = query.limit.toInt()
+            )
+            val response = client.readRecords(request)
+
+            response.records.map { record ->
+                NativeWorkoutSample(
+                    startTimeMs = record.startTime.toEpochMilli().toDouble(),
+                    endTimeMs = record.endTime.toEpochMilli().toDouble(),
+                    // Wall-clock duration; ExerciseSessionRecord has no pause-aware duration
+                    // on the record itself (iOS uses the pause-aware HKWorkout.duration).
+                    durationSeconds = (record.endTime.toEpochMilli() - record.startTime.toEpochMilli()) / 1000.0,
+                    activityType = makeWorkoutActivityType(record.exerciseType),
+                    title = record.title,
+                    source = record.metadata.dataOrigin.packageName,
+                    // Health Connect sessions carry no totals; per-session aggregation is a
+                    // deliberate follow-up (one extra IPC call per session).
+                    totalDistanceMeters = null,
+                    totalEnergyBurnedKcal = null
+                )
+            }.toTypedArray()
         }
     }
 

@@ -14,7 +14,11 @@ let package = Package(
             name: "NitroHealthHelpers",
             path: "ios",
             exclude: ["Tests"],
-            sources: ["DailyBucketUtils.swift", "StatisticsBucketUtils.swift"]
+            sources: [
+                "DailyBucketUtils.swift",
+                "StatisticsBucketUtils.swift",
+                "WorkoutActivityTypeMapping.swift",
+            ]
         ),
         .testTarget(
             name: "NitroHealthHelpersTests",

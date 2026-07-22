@@ -10,3 +10,4 @@ export type HealthDataType =
   | 'height'
   | 'sleep'
   | 'bodyMass'
+  | 'workout'

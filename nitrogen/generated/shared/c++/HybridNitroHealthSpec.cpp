@@ -33,6 +33,7 @@ namespace margelo::nitro::nitrohealth {
       prototype.registerHybridMethod("readHeight", &HybridNitroHealthSpec::readHeight);
       prototype.registerHybridMethod("readStatistics", &HybridNitroHealthSpec::readStatistics);
       prototype.registerHybridMethod("readSleepSamples", &HybridNitroHealthSpec::readSleepSamples);
+      prototype.registerHybridMethod("readWorkouts", &HybridNitroHealthSpec::readWorkouts);
       prototype.registerHybridMethod("saveSteps", &HybridNitroHealthSpec::saveSteps);
       prototype.registerHybridMethod("saveDistance", &HybridNitroHealthSpec::saveDistance);
       prototype.registerHybridMethod("saveActiveEnergyBurned", &HybridNitroHealthSpec::saveActiveEnergyBurned);

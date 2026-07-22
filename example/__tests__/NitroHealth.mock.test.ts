@@ -29,6 +29,7 @@ describe('NitroHealth Jest mock', () => {
       NitroHealth.readStatistics('steps', { ...range, bucket: 'day', metrics: ['sum'] })
     ).resolves.toEqual([])
     await expect(NitroHealth.readSleepSamples(range)).resolves.toEqual([])
+    await expect(NitroHealth.readWorkouts(range)).resolves.toEqual([])
     await expect(NitroHealth.getRequestStatusForAuthorization([])).resolves.toBe('unknown')
   })
 

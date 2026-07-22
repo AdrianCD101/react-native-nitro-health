@@ -34,6 +34,7 @@ export const mockNitroHealth = {
   readHeight: jest.fn(),
   readStatistics: jest.fn(),
   readSleepSamples: jest.fn(),
+  readWorkouts: jest.fn(),
   saveSteps: jest.fn(),
   saveDistance: jest.fn(),
   saveActiveEnergyBurned: jest.fn(),

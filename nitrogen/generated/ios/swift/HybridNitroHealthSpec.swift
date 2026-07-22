@@ -32,6 +32,7 @@ public protocol HybridNitroHealthSpec_protocol: HybridObject {
   func readHeight(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeHeightSample]>
   func readStatistics(dataType: String, query: NativeHealthStatisticsQuery) throws -> Promise<[NativeHealthStatistics]>
   func readSleepSamples(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeSleepSample]>
+  func readWorkouts(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeWorkoutSample]>
   func saveSteps(samples: [NativeStepSampleInput]) throws -> Promise<Void>
   func saveDistance(samples: [NativeDistanceSampleInput]) throws -> Promise<Void>
   func saveActiveEnergyBurned(samples: [NativeActiveEnergyBurnedSampleInput]) throws -> Promise<Void>
