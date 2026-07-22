@@ -47,15 +47,21 @@ function makeNativeTimeRangeQuery(query) {
   }
 }
 const STATISTICS_BUCKETS = ['hour', 'day', 'week', 'month']
-const STATISTICS_METRICS = ['sum', 'avg', 'min', 'max']
 const STATISTICS_METRICS_BY_DATA_TYPE = {
   steps: ['sum'],
   distance: ['sum'],
   activeEnergyBurned: ['sum'],
   heartRate: ['avg', 'min', 'max'],
+  restingHeartRate: ['avg', 'min', 'max'],
+  heartRateVariability: [],
+  oxygenSaturation: [],
+  height: ['avg', 'min', 'max'],
   bodyMass: ['avg', 'min', 'max'],
   sleep: [],
 }
+const STATISTICS_METRICS = Array.from(
+  new Set(Object.values(STATISTICS_METRICS_BY_DATA_TYPE).flat())
+)
 function makeNativeStatisticsQuery(dataType, query) {
   const { startTimeMs, endTimeMs } = makeTimeRange(query)
   if (!STATISTICS_BUCKETS.includes(query.bucket)) {
@@ -70,10 +76,10 @@ function makeNativeStatisticsQuery(dataType, query) {
       throw new Error(`Unsupported statistics metric: ${metric}`)
     }
   }
-  if (dataType === 'sleep') {
-    throw new Error(`readStatistics does not support the 'sleep' data type`)
-  }
   const supportedMetrics = STATISTICS_METRICS_BY_DATA_TYPE[dataType]
+  if (supportedMetrics.length === 0) {
+    throw new Error(`readStatistics does not support the '${dataType}' data type`)
+  }
   for (const metric of metrics) {
     if (!supportedMetrics.includes(metric)) {
       throw new Error(
@@ -117,6 +123,7 @@ const MAX_KILOCALORIES = 1_000_000
 const MIN_BPM = 1
 const MAX_BPM = 300
 const MAX_KILOGRAMS = 1_000
+const MAX_HEIGHT_METERS = 3
 function makeNativeStepSampleInput(sample, index) {
   const startTimeMs = assertValidSampleDate(sample.startDate, index, 'startDate')
   const endTimeMs = assertValidSampleDate(sample.endDate, index, 'endDate')
@@ -188,6 +195,39 @@ function makeNativeBodyMassSampleInput(sample, index) {
     kilograms: sample.kilograms,
   }
 }
+function makeNativeRestingHeartRateSampleInput(sample, index) {
+  const timeMs = assertValidSampleDate(sample.date, index, 'date')
+  if (!Number.isFinite(sample.bpm) || sample.bpm < MIN_BPM || sample.bpm > MAX_BPM) {
+    throw new Error(`samples[${index}]: bpm must be between ${MIN_BPM} and ${MAX_BPM}`)
+  }
+  return {
+    timeMs,
+    bpm: sample.bpm,
+  }
+}
+function makeNativeOxygenSaturationSampleInput(sample, index) {
+  const timeMs = assertValidSampleDate(sample.date, index, 'date')
+  if (!Number.isFinite(sample.percentage) || sample.percentage < 0 || sample.percentage > 100) {
+    throw new Error(`samples[${index}]: percentage must be between 0 and 100`)
+  }
+  return {
+    timeMs,
+    percentage: sample.percentage,
+  }
+}
+function makeNativeHeightSampleInput(sample, index) {
+  const timeMs = assertValidSampleDate(sample.date, index, 'date')
+  if (!Number.isFinite(sample.meters) || sample.meters <= 0) {
+    throw new Error(`samples[${index}]: meters must be greater than 0`)
+  }
+  if (sample.meters > MAX_HEIGHT_METERS) {
+    throw new Error(`samples[${index}]: meters must not exceed ${MAX_HEIGHT_METERS}`)
+  }
+  return {
+    timeMs,
+    meters: sample.meters,
+  }
+}
 function makeStepSample(sample) {
   return {
     startDate: new Date(sample.startTimeMs),
@@ -221,6 +261,35 @@ function makeHeartRateSample(sample) {
   return {
     date: new Date(sample.timeMs),
     bpm: sample.bpm,
+    source: sample.source,
+  }
+}
+function makeRestingHeartRateSample(sample) {
+  return {
+    date: new Date(sample.timeMs),
+    bpm: sample.bpm,
+    source: sample.source,
+  }
+}
+function makeHeartRateVariabilitySample(sample) {
+  return {
+    date: new Date(sample.timeMs),
+    milliseconds: sample.milliseconds,
+    method: sample.method,
+    source: sample.source,
+  }
+}
+function makeOxygenSaturationSample(sample) {
+  return {
+    date: new Date(sample.timeMs),
+    percentage: sample.percentage,
+    source: sample.source,
+  }
+}
+function makeHeightSample(sample) {
+  return {
+    date: new Date(sample.timeMs),
+    meters: sample.meters,
     source: sample.source,
   }
 }
@@ -314,6 +383,24 @@ export const NitroHealth = {
     )
     return makeHeartRateStatistics(statistics)
   },
+  async readRestingHeartRate(query) {
+    const samples = await NitroHealthNative.readRestingHeartRate(makeNativeDateRangeQuery(query))
+    return samples.map(makeRestingHeartRateSample)
+  },
+  async readHeartRateVariability(query) {
+    const samples = await NitroHealthNative.readHeartRateVariability(
+      makeNativeDateRangeQuery(query)
+    )
+    return samples.map(makeHeartRateVariabilitySample)
+  },
+  async readOxygenSaturation(query) {
+    const samples = await NitroHealthNative.readOxygenSaturation(makeNativeDateRangeQuery(query))
+    return samples.map(makeOxygenSaturationSample)
+  },
+  async readHeight(query) {
+    const samples = await NitroHealthNative.readHeight(makeNativeDateRangeQuery(query))
+    return samples.map(makeHeightSample)
+  },
   async readStatistics(dataType, query) {
     const statistics = await NitroHealthNative.readStatistics(
       dataType,
@@ -346,6 +433,22 @@ export const NitroHealth = {
   async saveBodyMass(samples) {
     assertNonEmptySamples(samples)
     return NitroHealthNative.saveBodyMass(samples.map(makeNativeBodyMassSampleInput))
+  },
+  async saveRestingHeartRate(samples) {
+    assertNonEmptySamples(samples)
+    return NitroHealthNative.saveRestingHeartRate(
+      samples.map(makeNativeRestingHeartRateSampleInput)
+    )
+  },
+  async saveOxygenSaturation(samples) {
+    assertNonEmptySamples(samples)
+    return NitroHealthNative.saveOxygenSaturation(
+      samples.map(makeNativeOxygenSaturationSampleInput)
+    )
+  },
+  async saveHeight(samples) {
+    assertNonEmptySamples(samples)
+    return NitroHealthNative.saveHeight(samples.map(makeNativeHeightSampleInput))
   },
   async getRequestStatusForAuthorization(permissions) {
     assertPermissions(permissions)

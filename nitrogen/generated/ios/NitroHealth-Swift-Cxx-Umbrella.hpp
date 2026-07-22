@@ -46,6 +46,20 @@ namespace margelo::nitro::nitrohealth { struct NativeHeartRateSampleInput; }
 namespace margelo::nitro::nitrohealth { struct NativeHeartRateSample; }
 // Forward declaration of `NativeHeartRateStatistics` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHeartRateStatistics; }
+// Forward declaration of `NativeHeartRateVariabilitySample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHeartRateVariabilitySample; }
+// Forward declaration of `NativeHeightSampleInput` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHeightSampleInput; }
+// Forward declaration of `NativeHeightSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHeightSample; }
+// Forward declaration of `NativeOxygenSaturationSampleInput` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeOxygenSaturationSampleInput; }
+// Forward declaration of `NativeOxygenSaturationSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeOxygenSaturationSample; }
+// Forward declaration of `NativeRestingHeartRateSampleInput` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeRestingHeartRateSampleInput; }
+// Forward declaration of `NativeRestingHeartRateSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeRestingHeartRateSample; }
 // Forward declaration of `NativeSleepSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeSleepSample; }
 // Forward declaration of `NativeStepSampleInput` to properly resolve imports.
@@ -73,6 +87,13 @@ namespace margelo::nitro::nitrohealth { struct NativeStepSample; }
 #include "NativeHeartRateSample.hpp"
 #include "NativeHeartRateSampleInput.hpp"
 #include "NativeHeartRateStatistics.hpp"
+#include "NativeHeartRateVariabilitySample.hpp"
+#include "NativeHeightSample.hpp"
+#include "NativeHeightSampleInput.hpp"
+#include "NativeOxygenSaturationSample.hpp"
+#include "NativeOxygenSaturationSampleInput.hpp"
+#include "NativeRestingHeartRateSample.hpp"
+#include "NativeRestingHeartRateSampleInput.hpp"
 #include "NativeSleepSample.hpp"
 #include "NativeStepSample.hpp"
 #include "NativeStepSampleInput.hpp"

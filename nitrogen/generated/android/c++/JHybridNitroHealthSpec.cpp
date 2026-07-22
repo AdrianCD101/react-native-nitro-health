@@ -21,6 +21,14 @@ namespace margelo::nitro::nitrohealth { struct NativeBodyMassSample; }
 namespace margelo::nitro::nitrohealth { struct NativeHeartRateSample; }
 // Forward declaration of `NativeHeartRateStatistics` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHeartRateStatistics; }
+// Forward declaration of `NativeRestingHeartRateSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeRestingHeartRateSample; }
+// Forward declaration of `NativeHeartRateVariabilitySample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHeartRateVariabilitySample; }
+// Forward declaration of `NativeOxygenSaturationSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeOxygenSaturationSample; }
+// Forward declaration of `NativeHeightSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHeightSample; }
 // Forward declaration of `NativeHealthStatistics` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthStatistics; }
 // Forward declaration of `NativeSleepSample` to properly resolve imports.
@@ -49,6 +57,12 @@ namespace margelo::nitro::nitrohealth { struct NativeActiveEnergyBurnedSampleInp
 namespace margelo::nitro::nitrohealth { struct NativeHeartRateSampleInput; }
 // Forward declaration of `NativeBodyMassSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBodyMassSampleInput; }
+// Forward declaration of `NativeRestingHeartRateSampleInput` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeRestingHeartRateSampleInput; }
+// Forward declaration of `NativeOxygenSaturationSampleInput` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeOxygenSaturationSampleInput; }
+// Forward declaration of `NativeHeightSampleInput` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHeightSampleInput; }
 
 #include "HealthAvailabilityStatus.hpp"
 #include "JHealthAvailabilityStatus.hpp"
@@ -69,6 +83,14 @@ namespace margelo::nitro::nitrohealth { struct NativeBodyMassSampleInput; }
 #include "JNativeHeartRateSample.hpp"
 #include "NativeHeartRateStatistics.hpp"
 #include "JNativeHeartRateStatistics.hpp"
+#include "NativeRestingHeartRateSample.hpp"
+#include "JNativeRestingHeartRateSample.hpp"
+#include "NativeHeartRateVariabilitySample.hpp"
+#include "JNativeHeartRateVariabilitySample.hpp"
+#include "NativeOxygenSaturationSample.hpp"
+#include "JNativeOxygenSaturationSample.hpp"
+#include "NativeHeightSample.hpp"
+#include "JNativeHeightSample.hpp"
 #include "NativeHealthStatistics.hpp"
 #include "JNativeHealthStatistics.hpp"
 #include "NativeSleepSample.hpp"
@@ -98,6 +120,12 @@ namespace margelo::nitro::nitrohealth { struct NativeBodyMassSampleInput; }
 #include "JNativeHeartRateSampleInput.hpp"
 #include "NativeBodyMassSampleInput.hpp"
 #include "JNativeBodyMassSampleInput.hpp"
+#include "NativeRestingHeartRateSampleInput.hpp"
+#include "JNativeRestingHeartRateSampleInput.hpp"
+#include "NativeOxygenSaturationSampleInput.hpp"
+#include "JNativeOxygenSaturationSampleInput.hpp"
+#include "NativeHeightSampleInput.hpp"
+#include "JNativeHeightSampleInput.hpp"
 
 namespace margelo::nitro::nitrohealth {
 
@@ -379,6 +407,106 @@ namespace margelo::nitro::nitrohealth {
       return __promise;
     }();
   }
+  std::shared_ptr<Promise<std::vector<NativeRestingHeartRateSample>>> JHybridNitroHealthSpec::readRestingHeartRate(const NativeHealthDateRangeQuery& query) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<JNativeHealthDateRangeQuery> /* query */)>("readRestingHeartRate");
+    auto __result = method(_javaPart, JNativeHealthDateRangeQuery::fromCpp(query));
+    return [&]() {
+      auto __promise = Promise<std::vector<NativeRestingHeartRateSample>>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {
+        auto __result = jni::static_ref_cast<jni::JArrayClass<JNativeRestingHeartRateSample>>(__boxedResult);
+        __promise->resolve([&](auto&& __input) {
+          size_t __size = __input->size();
+          std::vector<NativeRestingHeartRateSample> __vector;
+          __vector.reserve(__size);
+          for (size_t __i = 0; __i < __size; __i++) {
+            auto __element = __input->getElement(__i);
+            __vector.push_back(__element->toCpp());
+          }
+          return __vector;
+        }(__result));
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
+  }
+  std::shared_ptr<Promise<std::vector<NativeHeartRateVariabilitySample>>> JHybridNitroHealthSpec::readHeartRateVariability(const NativeHealthDateRangeQuery& query) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<JNativeHealthDateRangeQuery> /* query */)>("readHeartRateVariability");
+    auto __result = method(_javaPart, JNativeHealthDateRangeQuery::fromCpp(query));
+    return [&]() {
+      auto __promise = Promise<std::vector<NativeHeartRateVariabilitySample>>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {
+        auto __result = jni::static_ref_cast<jni::JArrayClass<JNativeHeartRateVariabilitySample>>(__boxedResult);
+        __promise->resolve([&](auto&& __input) {
+          size_t __size = __input->size();
+          std::vector<NativeHeartRateVariabilitySample> __vector;
+          __vector.reserve(__size);
+          for (size_t __i = 0; __i < __size; __i++) {
+            auto __element = __input->getElement(__i);
+            __vector.push_back(__element->toCpp());
+          }
+          return __vector;
+        }(__result));
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
+  }
+  std::shared_ptr<Promise<std::vector<NativeOxygenSaturationSample>>> JHybridNitroHealthSpec::readOxygenSaturation(const NativeHealthDateRangeQuery& query) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<JNativeHealthDateRangeQuery> /* query */)>("readOxygenSaturation");
+    auto __result = method(_javaPart, JNativeHealthDateRangeQuery::fromCpp(query));
+    return [&]() {
+      auto __promise = Promise<std::vector<NativeOxygenSaturationSample>>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {
+        auto __result = jni::static_ref_cast<jni::JArrayClass<JNativeOxygenSaturationSample>>(__boxedResult);
+        __promise->resolve([&](auto&& __input) {
+          size_t __size = __input->size();
+          std::vector<NativeOxygenSaturationSample> __vector;
+          __vector.reserve(__size);
+          for (size_t __i = 0; __i < __size; __i++) {
+            auto __element = __input->getElement(__i);
+            __vector.push_back(__element->toCpp());
+          }
+          return __vector;
+        }(__result));
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
+  }
+  std::shared_ptr<Promise<std::vector<NativeHeightSample>>> JHybridNitroHealthSpec::readHeight(const NativeHealthDateRangeQuery& query) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<JNativeHealthDateRangeQuery> /* query */)>("readHeight");
+    auto __result = method(_javaPart, JNativeHealthDateRangeQuery::fromCpp(query));
+    return [&]() {
+      auto __promise = Promise<std::vector<NativeHeightSample>>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {
+        auto __result = jni::static_ref_cast<jni::JArrayClass<JNativeHeightSample>>(__boxedResult);
+        __promise->resolve([&](auto&& __input) {
+          size_t __size = __input->size();
+          std::vector<NativeHeightSample> __vector;
+          __vector.reserve(__size);
+          for (size_t __i = 0; __i < __size; __i++) {
+            auto __element = __input->getElement(__i);
+            __vector.push_back(__element->toCpp());
+          }
+          return __vector;
+        }(__result));
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
+  }
   std::shared_ptr<Promise<std::vector<NativeHealthStatistics>>> JHybridNitroHealthSpec::readStatistics(const std::string& dataType, const NativeHealthStatisticsQuery& query) {
     static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<jni::JString> /* dataType */, jni::alias_ref<JNativeHealthStatisticsQuery> /* query */)>("readStatistics");
     auto __result = method(_javaPart, jni::make_jstring(dataType), JNativeHealthStatisticsQuery::fromCpp(query));
@@ -533,6 +661,78 @@ namespace margelo::nitro::nitrohealth {
       for (size_t __i = 0; __i < __size; __i++) {
         const auto& __element = __input[__i];
         auto __elementJni = JNativeBodyMassSampleInput::fromCpp(__element);
+        __array->setElement(__i, *__elementJni);
+      }
+      return __array;
+    }(samples));
+    return [&]() {
+      auto __promise = Promise<void>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& /* unit */) {
+        __promise->resolve();
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
+  }
+  std::shared_ptr<Promise<void>> JHybridNitroHealthSpec::saveRestingHeartRate(const std::vector<NativeRestingHeartRateSampleInput>& samples) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<jni::JArrayClass<JNativeRestingHeartRateSampleInput>> /* samples */)>("saveRestingHeartRate");
+    auto __result = method(_javaPart, [&](auto&& __input) {
+      size_t __size = __input.size();
+      jni::local_ref<jni::JArrayClass<JNativeRestingHeartRateSampleInput>> __array = jni::JArrayClass<JNativeRestingHeartRateSampleInput>::newArray(__size);
+      for (size_t __i = 0; __i < __size; __i++) {
+        const auto& __element = __input[__i];
+        auto __elementJni = JNativeRestingHeartRateSampleInput::fromCpp(__element);
+        __array->setElement(__i, *__elementJni);
+      }
+      return __array;
+    }(samples));
+    return [&]() {
+      auto __promise = Promise<void>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& /* unit */) {
+        __promise->resolve();
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
+  }
+  std::shared_ptr<Promise<void>> JHybridNitroHealthSpec::saveOxygenSaturation(const std::vector<NativeOxygenSaturationSampleInput>& samples) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<jni::JArrayClass<JNativeOxygenSaturationSampleInput>> /* samples */)>("saveOxygenSaturation");
+    auto __result = method(_javaPart, [&](auto&& __input) {
+      size_t __size = __input.size();
+      jni::local_ref<jni::JArrayClass<JNativeOxygenSaturationSampleInput>> __array = jni::JArrayClass<JNativeOxygenSaturationSampleInput>::newArray(__size);
+      for (size_t __i = 0; __i < __size; __i++) {
+        const auto& __element = __input[__i];
+        auto __elementJni = JNativeOxygenSaturationSampleInput::fromCpp(__element);
+        __array->setElement(__i, *__elementJni);
+      }
+      return __array;
+    }(samples));
+    return [&]() {
+      auto __promise = Promise<void>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& /* unit */) {
+        __promise->resolve();
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
+  }
+  std::shared_ptr<Promise<void>> JHybridNitroHealthSpec::saveHeight(const std::vector<NativeHeightSampleInput>& samples) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<jni::JArrayClass<JNativeHeightSampleInput>> /* samples */)>("saveHeight");
+    auto __result = method(_javaPart, [&](auto&& __input) {
+      size_t __size = __input.size();
+      jni::local_ref<jni::JArrayClass<JNativeHeightSampleInput>> __array = jni::JArrayClass<JNativeHeightSampleInput>::newArray(__size);
+      for (size_t __i = 0; __i < __size; __i++) {
+        const auto& __element = __input[__i];
+        auto __elementJni = JNativeHeightSampleInput::fromCpp(__element);
         __array->setElement(__i, *__elementJni);
       }
       return __array;

@@ -19,6 +19,9 @@ import type { HealthTimeRangeQuery } from './HealthTimeRangeQuery'
 import type { HeartRateSample } from './HeartRateSample'
 import type { HeartRateSampleInput } from './HeartRateSampleInput'
 import type { HeartRateStatistics } from './HeartRateStatistics'
+import type { HeartRateVariabilitySample } from './HeartRateVariabilitySample'
+import type { HeightSample } from './HeightSample'
+import type { HeightSampleInput } from './HeightSampleInput'
 import type { NativeActiveEnergyBurnedSample } from './NativeActiveEnergyBurnedSample'
 import type { NativeActiveEnergyBurnedSampleInput } from './NativeActiveEnergyBurnedSampleInput'
 import type { NativeBodyMassSample } from './NativeBodyMassSample'
@@ -32,9 +35,20 @@ import type { NativeHealthTimeRangeQuery } from './NativeHealthTimeRangeQuery'
 import type { NativeHeartRateSample } from './NativeHeartRateSample'
 import type { NativeHeartRateSampleInput } from './NativeHeartRateSampleInput'
 import type { NativeHeartRateStatistics } from './NativeHeartRateStatistics'
+import type { NativeHeartRateVariabilitySample } from './NativeHeartRateVariabilitySample'
+import type { NativeHeightSample } from './NativeHeightSample'
+import type { NativeHeightSampleInput } from './NativeHeightSampleInput'
+import type { NativeOxygenSaturationSample } from './NativeOxygenSaturationSample'
+import type { NativeOxygenSaturationSampleInput } from './NativeOxygenSaturationSampleInput'
+import type { NativeRestingHeartRateSample } from './NativeRestingHeartRateSample'
+import type { NativeRestingHeartRateSampleInput } from './NativeRestingHeartRateSampleInput'
 import type { NativeSleepSample } from './NativeSleepSample'
 import type { NativeStepSample } from './NativeStepSample'
 import type { NativeStepSampleInput } from './NativeStepSampleInput'
+import type { OxygenSaturationSample } from './OxygenSaturationSample'
+import type { OxygenSaturationSampleInput } from './OxygenSaturationSampleInput'
+import type { RestingHeartRateSample } from './RestingHeartRateSample'
+import type { RestingHeartRateSampleInput } from './RestingHeartRateSampleInput'
 import type { SleepSample } from './SleepSample'
 import type { StatisticsBucket } from './StatisticsBucket'
 import type { StatisticsMetric } from './StatisticsMetric'
@@ -64,6 +78,10 @@ export type { HealthTimeRangeQuery } from './HealthTimeRangeQuery'
 export type { HeartRateSample } from './HeartRateSample'
 export type { HeartRateSampleInput } from './HeartRateSampleInput'
 export type { HeartRateStatistics } from './HeartRateStatistics'
+export type { HeartRateVariabilityMethod } from './HeartRateVariabilityMethod'
+export type { HeartRateVariabilitySample } from './HeartRateVariabilitySample'
+export type { HeightSample } from './HeightSample'
+export type { HeightSampleInput } from './HeightSampleInput'
 export type { NativeActiveEnergyBurnedSample } from './NativeActiveEnergyBurnedSample'
 export type { NativeActiveEnergyBurnedSampleInput } from './NativeActiveEnergyBurnedSampleInput'
 export type { NativeBodyMassSample } from './NativeBodyMassSample'
@@ -79,10 +97,21 @@ export type { NativeHealthPermission } from './NativeHealthPermission'
 export type { NativeHeartRateSample } from './NativeHeartRateSample'
 export type { NativeHeartRateSampleInput } from './NativeHeartRateSampleInput'
 export type { NativeHeartRateStatistics } from './NativeHeartRateStatistics'
+export type { NativeHeartRateVariabilitySample } from './NativeHeartRateVariabilitySample'
+export type { NativeHeightSample } from './NativeHeightSample'
+export type { NativeHeightSampleInput } from './NativeHeightSampleInput'
+export type { NativeOxygenSaturationSample } from './NativeOxygenSaturationSample'
+export type { NativeOxygenSaturationSampleInput } from './NativeOxygenSaturationSampleInput'
+export type { NativeRestingHeartRateSample } from './NativeRestingHeartRateSample'
+export type { NativeRestingHeartRateSampleInput } from './NativeRestingHeartRateSampleInput'
 export type { NativeSleepSample } from './NativeSleepSample'
 export type { NativeStepSample } from './NativeStepSample'
 export type { NativeStepSampleInput } from './NativeStepSampleInput'
 export type { NitroHealth as NitroHealthSpec } from './specs/nitro-health.nitro'
+export type { OxygenSaturationSample } from './OxygenSaturationSample'
+export type { OxygenSaturationSampleInput } from './OxygenSaturationSampleInput'
+export type { RestingHeartRateSample } from './RestingHeartRateSample'
+export type { RestingHeartRateSampleInput } from './RestingHeartRateSampleInput'
 export type { SleepSample } from './SleepSample'
 export type { SleepStage } from './SleepStage'
 export type { StatisticsBucket } from './StatisticsBucket'
@@ -155,16 +184,23 @@ function makeNativeTimeRangeQuery(query: HealthTimeRangeQuery): NativeHealthTime
 }
 
 const STATISTICS_BUCKETS: readonly StatisticsBucket[] = ['hour', 'day', 'week', 'month']
-const STATISTICS_METRICS: readonly StatisticsMetric[] = ['sum', 'avg', 'min', 'max']
 
 const STATISTICS_METRICS_BY_DATA_TYPE: Record<HealthDataType, readonly StatisticsMetric[]> = {
   steps: ['sum'],
   distance: ['sum'],
   activeEnergyBurned: ['sum'],
   heartRate: ['avg', 'min', 'max'],
+  restingHeartRate: ['avg', 'min', 'max'],
+  heartRateVariability: [],
+  oxygenSaturation: [],
+  height: ['avg', 'min', 'max'],
   bodyMass: ['avg', 'min', 'max'],
   sleep: [],
 }
+
+const STATISTICS_METRICS: readonly StatisticsMetric[] = Array.from(
+  new Set(Object.values(STATISTICS_METRICS_BY_DATA_TYPE).flat())
+)
 
 function makeNativeStatisticsQuery(
   dataType: HealthDataType,
@@ -188,11 +224,11 @@ function makeNativeStatisticsQuery(
     }
   }
 
-  if (dataType === 'sleep') {
-    throw new Error(`readStatistics does not support the 'sleep' data type`)
-  }
-
   const supportedMetrics = STATISTICS_METRICS_BY_DATA_TYPE[dataType]
+
+  if (supportedMetrics.length === 0) {
+    throw new Error(`readStatistics does not support the '${dataType}' data type`)
+  }
 
   for (const metric of metrics) {
     if (!supportedMetrics.includes(metric)) {
@@ -245,6 +281,7 @@ const MAX_KILOCALORIES = 1_000_000
 const MIN_BPM = 1
 const MAX_BPM = 300
 const MAX_KILOGRAMS = 1_000
+const MAX_HEIGHT_METERS = 3
 
 function makeNativeStepSampleInput(sample: StepSampleInput, index: number): NativeStepSampleInput {
   const startTimeMs = assertValidSampleDate(sample.startDate, index, 'startDate')
@@ -351,6 +388,58 @@ function makeNativeBodyMassSampleInput(
   }
 }
 
+function makeNativeRestingHeartRateSampleInput(
+  sample: RestingHeartRateSampleInput,
+  index: number
+): NativeRestingHeartRateSampleInput {
+  const timeMs = assertValidSampleDate(sample.date, index, 'date')
+
+  if (!Number.isFinite(sample.bpm) || sample.bpm < MIN_BPM || sample.bpm > MAX_BPM) {
+    throw new Error(`samples[${index}]: bpm must be between ${MIN_BPM} and ${MAX_BPM}`)
+  }
+
+  return {
+    timeMs,
+    bpm: sample.bpm,
+  }
+}
+
+function makeNativeOxygenSaturationSampleInput(
+  sample: OxygenSaturationSampleInput,
+  index: number
+): NativeOxygenSaturationSampleInput {
+  const timeMs = assertValidSampleDate(sample.date, index, 'date')
+
+  if (!Number.isFinite(sample.percentage) || sample.percentage < 0 || sample.percentage > 100) {
+    throw new Error(`samples[${index}]: percentage must be between 0 and 100`)
+  }
+
+  return {
+    timeMs,
+    percentage: sample.percentage,
+  }
+}
+
+function makeNativeHeightSampleInput(
+  sample: HeightSampleInput,
+  index: number
+): NativeHeightSampleInput {
+  const timeMs = assertValidSampleDate(sample.date, index, 'date')
+
+  if (!Number.isFinite(sample.meters) || sample.meters <= 0) {
+    throw new Error(`samples[${index}]: meters must be greater than 0`)
+  }
+
+  if (sample.meters > MAX_HEIGHT_METERS) {
+    throw new Error(`samples[${index}]: meters must not exceed ${MAX_HEIGHT_METERS}`)
+  }
+
+  return {
+    timeMs,
+    meters: sample.meters,
+  }
+}
+
 function makeStepSample(sample: NativeStepSample): StepSample {
   return {
     startDate: new Date(sample.startTimeMs),
@@ -390,6 +479,41 @@ function makeHeartRateSample(sample: NativeHeartRateSample): HeartRateSample {
   return {
     date: new Date(sample.timeMs),
     bpm: sample.bpm,
+    source: sample.source,
+  }
+}
+
+function makeRestingHeartRateSample(sample: NativeRestingHeartRateSample): RestingHeartRateSample {
+  return {
+    date: new Date(sample.timeMs),
+    bpm: sample.bpm,
+    source: sample.source,
+  }
+}
+
+function makeHeartRateVariabilitySample(
+  sample: NativeHeartRateVariabilitySample
+): HeartRateVariabilitySample {
+  return {
+    date: new Date(sample.timeMs),
+    milliseconds: sample.milliseconds,
+    method: sample.method as HeartRateVariabilitySample['method'],
+    source: sample.source,
+  }
+}
+
+function makeOxygenSaturationSample(sample: NativeOxygenSaturationSample): OxygenSaturationSample {
+  return {
+    date: new Date(sample.timeMs),
+    percentage: sample.percentage,
+    source: sample.source,
+  }
+}
+
+function makeHeightSample(sample: NativeHeightSample): HeightSample {
+  return {
+    date: new Date(sample.timeMs),
+    meters: sample.meters,
     source: sample.source,
   }
 }
@@ -434,6 +558,10 @@ export type NitroHealth = Omit<
   | 'readBodyMass'
   | 'readHeartRate'
   | 'readHeartRateStatistics'
+  | 'readRestingHeartRate'
+  | 'readHeartRateVariability'
+  | 'readOxygenSaturation'
+  | 'readHeight'
   | 'readStatistics'
   | 'readSleepSamples'
   | 'saveSteps'
@@ -441,6 +569,9 @@ export type NitroHealth = Omit<
   | 'saveActiveEnergyBurned'
   | 'saveHeartRate'
   | 'saveBodyMass'
+  | 'saveRestingHeartRate'
+  | 'saveOxygenSaturation'
+  | 'saveHeight'
   | 'requestAuthorization'
 > & {
   getRequestStatusForAuthorization(
@@ -466,6 +597,10 @@ export type NitroHealth = Omit<
   readBodyMass(query: HealthDateRangeQuery): Promise<BodyMassSample[]>
   readHeartRate(query: HealthDateRangeQuery): Promise<HeartRateSample[]>
   readHeartRateStatistics(query: HealthTimeRangeQuery): Promise<HeartRateStatistics>
+  readRestingHeartRate(query: HealthDateRangeQuery): Promise<RestingHeartRateSample[]>
+  readHeartRateVariability(query: HealthDateRangeQuery): Promise<HeartRateVariabilitySample[]>
+  readOxygenSaturation(query: HealthDateRangeQuery): Promise<OxygenSaturationSample[]>
+  readHeight(query: HealthDateRangeQuery): Promise<HeightSample[]>
   readStatistics(
     dataType: HealthDataType,
     query: HealthStatisticsQuery
@@ -476,6 +611,9 @@ export type NitroHealth = Omit<
   saveActiveEnergyBurned(samples: ActiveEnergyBurnedSampleInput[]): Promise<void>
   saveHeartRate(samples: HeartRateSampleInput[]): Promise<void>
   saveBodyMass(samples: BodyMassSampleInput[]): Promise<void>
+  saveRestingHeartRate(samples: RestingHeartRateSampleInput[]): Promise<void>
+  saveOxygenSaturation(samples: OxygenSaturationSampleInput[]): Promise<void>
+  saveHeight(samples: HeightSampleInput[]): Promise<void>
   requestAuthorization(permissions: HealthPermission[]): Promise<HealthAuthorizationResult>
 }
 
@@ -553,6 +691,28 @@ export const NitroHealth: NitroHealth = {
 
     return makeHeartRateStatistics(statistics)
   },
+  async readRestingHeartRate(query) {
+    const samples = await NitroHealthNative.readRestingHeartRate(makeNativeDateRangeQuery(query))
+
+    return samples.map(makeRestingHeartRateSample)
+  },
+  async readHeartRateVariability(query) {
+    const samples = await NitroHealthNative.readHeartRateVariability(
+      makeNativeDateRangeQuery(query)
+    )
+
+    return samples.map(makeHeartRateVariabilitySample)
+  },
+  async readOxygenSaturation(query) {
+    const samples = await NitroHealthNative.readOxygenSaturation(makeNativeDateRangeQuery(query))
+
+    return samples.map(makeOxygenSaturationSample)
+  },
+  async readHeight(query) {
+    const samples = await NitroHealthNative.readHeight(makeNativeDateRangeQuery(query))
+
+    return samples.map(makeHeightSample)
+  },
   async readStatistics(dataType, query) {
     const statistics = await NitroHealthNative.readStatistics(
       dataType,
@@ -587,6 +747,22 @@ export const NitroHealth: NitroHealth = {
   async saveBodyMass(samples) {
     assertNonEmptySamples(samples)
     return NitroHealthNative.saveBodyMass(samples.map(makeNativeBodyMassSampleInput))
+  },
+  async saveRestingHeartRate(samples) {
+    assertNonEmptySamples(samples)
+    return NitroHealthNative.saveRestingHeartRate(
+      samples.map(makeNativeRestingHeartRateSampleInput)
+    )
+  },
+  async saveOxygenSaturation(samples) {
+    assertNonEmptySamples(samples)
+    return NitroHealthNative.saveOxygenSaturation(
+      samples.map(makeNativeOxygenSaturationSampleInput)
+    )
+  },
+  async saveHeight(samples) {
+    assertNonEmptySamples(samples)
+    return NitroHealthNative.saveHeight(samples.map(makeNativeHeightSampleInput))
   },
   async getRequestStatusForAuthorization(permissions) {
     assertPermissions(permissions)

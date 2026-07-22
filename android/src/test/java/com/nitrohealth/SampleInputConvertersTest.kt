@@ -4,6 +4,9 @@ import com.margelo.nitro.nitrohealth.NativeActiveEnergyBurnedSampleInput
 import com.margelo.nitro.nitrohealth.NativeBodyMassSampleInput
 import com.margelo.nitro.nitrohealth.NativeDistanceSampleInput
 import com.margelo.nitro.nitrohealth.NativeHeartRateSampleInput
+import com.margelo.nitro.nitrohealth.NativeHeightSampleInput
+import com.margelo.nitro.nitrohealth.NativeOxygenSaturationSampleInput
+import com.margelo.nitro.nitrohealth.NativeRestingHeartRateSampleInput
 import com.margelo.nitro.nitrohealth.NativeStepSampleInput
 import java.time.Instant
 import org.junit.Assert.assertEquals
@@ -87,5 +90,51 @@ class SampleInputConvertersTest {
         assertEquals(1, records.size)
         assertEquals(Instant.ofEpochMilli(startTimeMs.toLong()), records[0].time)
         assertEquals(72.5, records[0].weight.inKilograms, 0.0)
+    }
+
+    @Test
+    fun toRestingHeartRateRecordsMapsPointInTimeBpm() {
+        val records = toRestingHeartRateRecords(
+            arrayOf(NativeRestingHeartRateSampleInput(startTimeMs, 58.0))
+        )
+
+        assertEquals(1, records.size)
+        assertEquals(Instant.ofEpochMilli(startTimeMs.toLong()), records[0].time)
+        assertEquals(58L, records[0].beatsPerMinute)
+    }
+
+    @Test
+    fun toRestingHeartRateRecordsRoundsFractionalBpmToNearest() {
+        val records = toRestingHeartRateRecords(
+            arrayOf(
+                NativeRestingHeartRateSampleInput(startTimeMs, 58.9),
+                NativeRestingHeartRateSampleInput(startTimeMs, 58.4)
+            )
+        )
+
+        assertEquals(59L, records[0].beatsPerMinute)
+        assertEquals(58L, records[1].beatsPerMinute)
+    }
+
+    @Test
+    fun toOxygenSaturationRecordsMapsPointInTimePercentage() {
+        val records = toOxygenSaturationRecords(
+            arrayOf(NativeOxygenSaturationSampleInput(startTimeMs, 97.5))
+        )
+
+        assertEquals(1, records.size)
+        assertEquals(Instant.ofEpochMilli(startTimeMs.toLong()), records[0].time)
+        assertEquals(97.5, records[0].percentage.value, 0.0)
+    }
+
+    @Test
+    fun toHeightRecordsMapsPointInTimeMeters() {
+        val records = toHeightRecords(
+            arrayOf(NativeHeightSampleInput(startTimeMs, 1.78))
+        )
+
+        assertEquals(1, records.size)
+        assertEquals(Instant.ofEpochMilli(startTimeMs.toLong()), records[0].time)
+        assertEquals(1.78, records[0].height.inMeters, 0.0)
     }
 }

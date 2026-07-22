@@ -16,6 +16,13 @@ import type { NativeHealthPermission } from '../NativeHealthPermission'
 import type { NativeHeartRateSample } from '../NativeHeartRateSample'
 import type { NativeHeartRateSampleInput } from '../NativeHeartRateSampleInput'
 import type { NativeHeartRateStatistics } from '../NativeHeartRateStatistics'
+import type { NativeHeartRateVariabilitySample } from '../NativeHeartRateVariabilitySample'
+import type { NativeHeightSample } from '../NativeHeightSample'
+import type { NativeHeightSampleInput } from '../NativeHeightSampleInput'
+import type { NativeOxygenSaturationSample } from '../NativeOxygenSaturationSample'
+import type { NativeOxygenSaturationSampleInput } from '../NativeOxygenSaturationSampleInput'
+import type { NativeRestingHeartRateSample } from '../NativeRestingHeartRateSample'
+import type { NativeRestingHeartRateSampleInput } from '../NativeRestingHeartRateSampleInput'
 import type { NativeSleepSample } from '../NativeSleepSample'
 import type { NativeStepSample } from '../NativeStepSample'
 import type { NativeStepSampleInput } from '../NativeStepSampleInput'
@@ -38,6 +45,12 @@ export interface NitroHealth extends HybridObject<{ ios: 'swift'; android: 'kotl
   readBodyMass(query: NativeHealthDateRangeQuery): Promise<NativeBodyMassSample[]>
   readHeartRate(query: NativeHealthDateRangeQuery): Promise<NativeHeartRateSample[]>
   readHeartRateStatistics(query: NativeHealthTimeRangeQuery): Promise<NativeHeartRateStatistics>
+  readRestingHeartRate(query: NativeHealthDateRangeQuery): Promise<NativeRestingHeartRateSample[]>
+  readHeartRateVariability(
+    query: NativeHealthDateRangeQuery
+  ): Promise<NativeHeartRateVariabilitySample[]>
+  readOxygenSaturation(query: NativeHealthDateRangeQuery): Promise<NativeOxygenSaturationSample[]>
+  readHeight(query: NativeHealthDateRangeQuery): Promise<NativeHeightSample[]>
   readStatistics(
     dataType: string,
     query: NativeHealthStatisticsQuery
@@ -48,6 +61,9 @@ export interface NitroHealth extends HybridObject<{ ios: 'swift'; android: 'kotl
   saveActiveEnergyBurned(samples: NativeActiveEnergyBurnedSampleInput[]): Promise<void>
   saveHeartRate(samples: NativeHeartRateSampleInput[]): Promise<void>
   saveBodyMass(samples: NativeBodyMassSampleInput[]): Promise<void>
+  saveRestingHeartRate(samples: NativeRestingHeartRateSampleInput[]): Promise<void>
+  saveOxygenSaturation(samples: NativeOxygenSaturationSampleInput[]): Promise<void>
+  saveHeight(samples: NativeHeightSampleInput[]): Promise<void>
   getRequestStatusForAuthorization(
     permissions: NativeHealthPermission[]
   ): Promise<AuthorizationRequestStatus>
