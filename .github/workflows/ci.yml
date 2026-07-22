@@ -38,6 +38,9 @@ jobs:
       - name: Typecheck
         run: bun run typecheck
 
+      - name: Typecheck example
+        run: bun run typecheck:example
+
       - name: Check formatting
         run: bun run format:check
 

@@ -1,20 +1,4 @@
-const mockNitroHealth = {
-  getAvailabilityStatus: jest.fn(),
-  getRequestStatusForAuthorization: jest.fn(),
-  isAvailable: jest.fn(),
-  openHealthConnectInstall: jest.fn(),
-  readActiveEnergyBurned: jest.fn(),
-  readDailyActiveEnergyBurnedTotals: jest.fn(),
-  readDailyDistanceTotals: jest.fn(),
-  readDailyStepTotals: jest.fn(),
-  readDistance: jest.fn(),
-  readBodyMass: jest.fn(),
-  readHeartRate: jest.fn(),
-  readHeartRateStatistics: jest.fn(),
-  readSleepSamples: jest.fn(),
-  readSteps: jest.fn(),
-  requestAuthorization: jest.fn(),
-}
+import { mockNitroHealth } from './support/mockNitroHealth'
 
 jest.mock('react-native-nitro-modules', () => ({
   NitroModules: {
@@ -22,7 +6,7 @@ jest.mock('react-native-nitro-modules', () => ({
   },
 }))
 
-const { NitroHealth } = require('react-native-nitro-health')
+import { NitroHealth, type HealthPermission } from 'react-native-nitro-health'
 
 describe('NitroHealth permission contract', () => {
   beforeEach(() => {
@@ -30,7 +14,7 @@ describe('NitroHealth permission contract', () => {
   })
 
   it('gets request status through the Nitro hybrid object', async () => {
-    const permissions = [{ accessType: 'read', dataType: 'steps' }]
+    const permissions: HealthPermission[] = [{ accessType: 'read', dataType: 'steps' }]
     mockNitroHealth.getRequestStatusForAuthorization.mockResolvedValue('shouldRequest')
 
     await expect(NitroHealth.getRequestStatusForAuthorization(permissions)).resolves.toBe(
@@ -41,7 +25,7 @@ describe('NitroHealth permission contract', () => {
   })
 
   it('requests authorization through the Nitro hybrid object', async () => {
-    const permissions = [{ accessType: 'read', dataType: 'steps' }]
+    const permissions: HealthPermission[] = [{ accessType: 'read', dataType: 'steps' }]
     const result = {
       status: 'granted',
       availabilityStatus: 'available',

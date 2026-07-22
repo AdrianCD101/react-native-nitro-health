@@ -77,6 +77,11 @@ export type NitroHealthMock = Omit<
   requestAuthorization: MockFunction<NitroHealth['requestAuthorization']>
 }
 
+// 'toString' is omitted from the override surface: every object literal inherits
+// Object.prototype.toString (typed '() => string'), which structurally conflicts with
+// MockFunction<() => string> and would reject all literal overrides.
+export type NitroHealthMockOverrides = Partial<Omit<NitroHealthMock, 'toString'>>
+
 export const NitroHealth: NitroHealthMock
-export function createNitroHealthMock(overrides?: Partial<NitroHealthMock>): NitroHealthMock
-export function resetNitroHealthMock(overrides?: Partial<NitroHealthMock>): NitroHealthMock
+export function createNitroHealthMock(overrides?: NitroHealthMockOverrides): NitroHealthMock
+export function resetNitroHealthMock(overrides?: NitroHealthMockOverrides): NitroHealthMock

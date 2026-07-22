@@ -1,4 +1,6 @@
-const { NitroHealth, createNitroHealthMock, resetNitroHealthMock } = require('../../jest/mock')
+import type { HealthAvailabilityStatus } from 'react-native-nitro-health'
+
+import { NitroHealth, createNitroHealthMock, resetNitroHealthMock } from '../../jest/mock'
 
 describe('NitroHealth Jest mock', () => {
   beforeEach(() => {
@@ -6,27 +8,34 @@ describe('NitroHealth Jest mock', () => {
   })
 
   it('provides default mocked health methods', async () => {
+    const range = {
+      startDate: new Date('2026-01-01T00:00:00.000Z'),
+      endDate: new Date('2026-01-02T00:00:00.000Z'),
+    }
+
     expect(NitroHealth.isAvailable()).toBe(true)
     expect(NitroHealth.getAvailabilityStatus()).toBe('available')
     await expect(NitroHealth.openHealthSettings()).resolves.toBe(true)
-    await expect(NitroHealth.readActiveEnergyBurned({})).resolves.toEqual([])
-    await expect(NitroHealth.readDailyActiveEnergyBurnedTotals({})).resolves.toEqual([])
-    await expect(NitroHealth.readDailyDistanceTotals({})).resolves.toEqual([])
-    await expect(NitroHealth.readSteps({})).resolves.toEqual([])
-    await expect(NitroHealth.readDailyStepTotals({})).resolves.toEqual([])
-    await expect(NitroHealth.readDistance({})).resolves.toEqual([])
-    await expect(NitroHealth.readBodyMass({})).resolves.toEqual([])
-    await expect(NitroHealth.readHeartRate({})).resolves.toEqual([])
-    await expect(NitroHealth.readHeartRateStatistics({})).resolves.toEqual({})
-    await expect(NitroHealth.readStatistics('steps', {})).resolves.toEqual([])
-    await expect(NitroHealth.readSleepSamples({})).resolves.toEqual([])
+    await expect(NitroHealth.readActiveEnergyBurned(range)).resolves.toEqual([])
+    await expect(NitroHealth.readDailyActiveEnergyBurnedTotals(range)).resolves.toEqual([])
+    await expect(NitroHealth.readDailyDistanceTotals(range)).resolves.toEqual([])
+    await expect(NitroHealth.readSteps(range)).resolves.toEqual([])
+    await expect(NitroHealth.readDailyStepTotals(range)).resolves.toEqual([])
+    await expect(NitroHealth.readDistance(range)).resolves.toEqual([])
+    await expect(NitroHealth.readBodyMass(range)).resolves.toEqual([])
+    await expect(NitroHealth.readHeartRate(range)).resolves.toEqual([])
+    await expect(NitroHealth.readHeartRateStatistics(range)).resolves.toEqual({})
+    await expect(
+      NitroHealth.readStatistics('steps', { ...range, bucket: 'day', metrics: ['sum'] })
+    ).resolves.toEqual([])
+    await expect(NitroHealth.readSleepSamples(range)).resolves.toEqual([])
     await expect(NitroHealth.getRequestStatusForAuthorization([])).resolves.toBe('unknown')
   })
 
   it('allows consumers to override default behavior', () => {
     resetNitroHealthMock({
       isAvailable: jest.fn(() => false),
-      getAvailabilityStatus: jest.fn(() => 'unavailable'),
+      getAvailabilityStatus: jest.fn((): HealthAvailabilityStatus => 'unavailable'),
     })
 
     expect(NitroHealth.isAvailable()).toBe(false)
@@ -35,7 +44,7 @@ describe('NitroHealth Jest mock', () => {
 
   it('creates isolated mock instances', () => {
     const mock = createNitroHealthMock({
-      getAvailabilityStatus: jest.fn(() => 'providerUpdateRequired'),
+      getAvailabilityStatus: jest.fn((): HealthAvailabilityStatus => 'providerUpdateRequired'),
     })
 
     expect(mock.getAvailabilityStatus()).toBe('providerUpdateRequired')
