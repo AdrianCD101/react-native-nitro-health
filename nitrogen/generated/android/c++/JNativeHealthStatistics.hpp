@@ -17,7 +17,7 @@ namespace margelo::nitro::nitrohealth {
   using namespace facebook;
 
   /**
-   * The C++ JNI bridge between the C++ struct "NativeHealthStatistics" and the the Kotlin data class "NativeHealthStatistics".
+   * The C++ JNI bridge between the C++ struct "NativeHealthStatistics" and the Kotlin data class "NativeHealthStatistics".
    */
   struct JNativeHealthStatistics final: public jni::JavaClass<JNativeHealthStatistics> {
   public:

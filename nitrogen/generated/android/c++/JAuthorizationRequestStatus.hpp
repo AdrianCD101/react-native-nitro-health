@@ -15,7 +15,7 @@ namespace margelo::nitro::nitrohealth {
   using namespace facebook;
 
   /**
-   * The C++ JNI bridge between the C++ enum "AuthorizationRequestStatus" and the the Kotlin enum "AuthorizationRequestStatus".
+   * The C++ JNI bridge between the C++ enum "AuthorizationRequestStatus" and the Kotlin enum "AuthorizationRequestStatus".
    */
   struct JAuthorizationRequestStatus final: public jni::JavaClass<JAuthorizationRequestStatus> {
   public:
