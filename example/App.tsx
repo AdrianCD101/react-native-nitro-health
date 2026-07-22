@@ -3,16 +3,10 @@ import { Pressable, ScrollView, Text, View, StyleSheet } from 'react-native'
 import { NitroHealth } from 'react-native-nitro-health'
 import type {
   AuthorizationRequestStatus,
-  BodyMassSample,
-  DailyActiveEnergyBurnedTotal,
-  DailyDistanceTotal,
-  DailyStepTotal,
   HealthAuthorizationResult,
   HealthDataType,
   HealthAvailabilityStatus,
   HealthPermission,
-  HeartRateStatistics,
-  SleepSample,
 } from 'react-native-nitro-health'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
@@ -23,7 +17,136 @@ const readPermissions: Array<{ dataType: HealthDataType; label: string }> = [
   { dataType: 'heartRate', label: 'Heart Rate' },
   { dataType: 'sleep', label: 'Sleep' },
   { dataType: 'bodyMass', label: 'Body Mass' },
+  { dataType: 'workout', label: 'Workouts' },
 ]
+
+function lastDays(days: number): { startDate: Date; endDate: Date } {
+  const endDate = new Date()
+
+  return { startDate: new Date(endDate.getTime() - days * 24 * 60 * 60 * 1000), endDate }
+}
+
+// Each read card normalizes its result to display lines so differently-shaped reads
+// (daily buckets, a single statistics object, sleep stages, workouts) share one renderer.
+const readCards: Partial<
+  Record<HealthDataType, { buttonLabel: string; execute: () => Promise<string[]> }>
+> = {
+  steps: {
+    buttonLabel: 'Read daily step totals',
+    execute: async () => {
+      const buckets = await NitroHealth.readDailyStepTotals({
+        ...lastDays(7),
+        limit: 7,
+        ascending: false,
+      })
+
+      return [
+        `Daily step buckets: ${buckets.length}`,
+        ...buckets.map(
+          (bucket) => `${bucket.startDate.toLocaleDateString()}: ${bucket.count} steps`
+        ),
+      ]
+    },
+  },
+  distance: {
+    buttonLabel: 'Read daily distance totals',
+    execute: async () => {
+      const buckets = await NitroHealth.readDailyDistanceTotals({
+        ...lastDays(7),
+        limit: 7,
+        ascending: false,
+      })
+
+      return [
+        `Daily distance buckets: ${buckets.length}`,
+        ...buckets.map(
+          (bucket) =>
+            `${bucket.startDate.toLocaleDateString()}: ${Math.round(bucket.distanceMeters)} m`
+        ),
+      ]
+    },
+  },
+  activeEnergyBurned: {
+    buttonLabel: 'Read daily active energy totals',
+    execute: async () => {
+      const buckets = await NitroHealth.readDailyActiveEnergyBurnedTotals({
+        ...lastDays(7),
+        limit: 7,
+        ascending: false,
+      })
+
+      return [
+        `Daily active-energy buckets: ${buckets.length}`,
+        ...buckets.map(
+          (bucket) =>
+            `${bucket.startDate.toLocaleDateString()}: ${Math.round(bucket.kilocalories)} kcal`
+        ),
+      ]
+    },
+  },
+  heartRate: {
+    buttonLabel: 'Read Heart Rate stats',
+    execute: async () => {
+      const statistics = await NitroHealth.readHeartRateStatistics(lastDays(1))
+
+      return [
+        `Average bpm: ${statistics.average ?? 'n/a'}`,
+        `Min bpm: ${statistics.min ?? 'n/a'}`,
+        `Max bpm: ${statistics.max ?? 'n/a'}`,
+      ]
+    },
+  },
+  sleep: {
+    buttonLabel: 'Read sleep samples',
+    execute: async () => {
+      const samples = await NitroHealth.readSleepSamples({
+        ...lastDays(7),
+        limit: 50,
+        ascending: false,
+      })
+
+      return [
+        `Sleep samples: ${samples.length}`,
+        ...samples.map((sample) => `${sample.startDate.toLocaleString()}: ${sample.stage}`),
+      ]
+    },
+  },
+  bodyMass: {
+    buttonLabel: 'Read body mass',
+    execute: async () => {
+      const samples = await NitroHealth.readBodyMass({
+        ...lastDays(7),
+        limit: 20,
+        ascending: false,
+      })
+
+      return [
+        `Body mass samples: ${samples.length}`,
+        ...samples.map(
+          (sample) => `${sample.startDate.toLocaleString()}: ${sample.kilograms.toFixed(1)} kg`
+        ),
+      ]
+    },
+  },
+  workout: {
+    buttonLabel: 'Read workouts',
+    execute: async () => {
+      const workouts = await NitroHealth.readWorkouts({
+        ...lastDays(7),
+        limit: 20,
+        ascending: false,
+      })
+
+      return [
+        `Workouts: ${workouts.length}`,
+        ...workouts.map(
+          (workout) =>
+            `${workout.startDate.toLocaleString()}: ${workout.activityType} (${Math.round(workout.durationSeconds / 60)} min)`
+        ),
+      ]
+    },
+  },
+}
 
 const writableDataTypes: HealthDataType[] = [
   'steps',
@@ -74,13 +197,7 @@ function App(): React.JSX.Element {
   const isAvailable = availabilityStatus === 'available'
   const canOpenInstall = availabilityStatus === 'providerUpdateRequired'
   const [cards, setCards] = useState<Partial<Record<HealthDataType, CardState>>>({})
-  const [dailyStepTotals, setDailyStepTotals] = useState<DailyStepTotal[]>()
-  const [dailyDistanceTotals, setDailyDistanceTotals] = useState<DailyDistanceTotal[]>()
-  const [dailyActiveEnergyTotals, setDailyActiveEnergyTotals] =
-    useState<DailyActiveEnergyBurnedTotal[]>()
-  const [heartRateStatistics, setHeartRateStatistics] = useState<HeartRateStatistics>()
-  const [sleepSamples, setSleepSamples] = useState<SleepSample[]>()
-  const [bodyMassSamples, setBodyMassSamples] = useState<BodyMassSample[]>()
+  const [readResults, setReadResults] = useState<Partial<Record<HealthDataType, string[]>>>({})
   const [openingHealthSettings, setOpeningHealthSettings] = useState(false)
   const [healthSettingsError, setHealthSettingsError] = useState<string>()
 
@@ -207,77 +324,16 @@ function App(): React.JSX.Element {
     }
   }
 
-  async function readDailyStepTotals(): Promise<void> {
-    const endDate = new Date()
-    const startDate = new Date(endDate.getTime() - 7 * 24 * 60 * 60 * 1000)
+  async function runReadCard(dataType: HealthDataType): Promise<void> {
+    const readCard = readCards[dataType]
 
-    await readData('steps', async () => {
-      setDailyStepTotals(
-        await NitroHealth.readDailyStepTotals({ startDate, endDate, limit: 7, ascending: false })
-      )
-    })
-  }
+    if (!readCard) {
+      return
+    }
 
-  async function readDailyDistanceTotals(): Promise<void> {
-    const endDate = new Date()
-    const startDate = new Date(endDate.getTime() - 7 * 24 * 60 * 60 * 1000)
-
-    await readData('distance', async () => {
-      setDailyDistanceTotals(
-        await NitroHealth.readDailyDistanceTotals({
-          startDate,
-          endDate,
-          limit: 7,
-          ascending: false,
-        })
-      )
-    })
-  }
-
-  async function readDailyActiveEnergyBurnedTotals(): Promise<void> {
-    const endDate = new Date()
-    const startDate = new Date(endDate.getTime() - 7 * 24 * 60 * 60 * 1000)
-
-    await readData('activeEnergyBurned', async () => {
-      setDailyActiveEnergyTotals(
-        await NitroHealth.readDailyActiveEnergyBurnedTotals({
-          startDate,
-          endDate,
-          limit: 7,
-          ascending: false,
-        })
-      )
-    })
-  }
-
-  async function readHeartRateStatistics(): Promise<void> {
-    const endDate = new Date()
-    const startDate = new Date(endDate.getTime() - 24 * 60 * 60 * 1000)
-
-    await readData('heartRate', async () => {
-      setHeartRateStatistics(await NitroHealth.readHeartRateStatistics({ startDate, endDate }))
-    })
-  }
-
-  async function readSleepSamples(): Promise<void> {
-    const endDate = new Date()
-    const startDate = new Date(endDate.getTime() - 7 * 24 * 60 * 60 * 1000)
-
-    await readData('sleep', async () => {
-      setSleepSamples(
-        await NitroHealth.readSleepSamples({ startDate, endDate, limit: 50, ascending: false })
-      )
-    })
-  }
-
-  async function readBodyMass(): Promise<void> {
-    const endDate = new Date()
-    const startDate = new Date(endDate.getTime() - 7 * 24 * 60 * 60 * 1000)
-
-    await readData('bodyMass', async () => {
-      setBodyMassSamples(
-        await NitroHealth.readBodyMass({ startDate, endDate, limit: 20, ascending: false })
-      )
+    await readData(dataType, async () => {
+      const lines = await readCard.execute()
+      setReadResults((current) => ({ ...current, [dataType]: lines }))
     })
   }
 
@@ -391,12 +447,8 @@ function App(): React.JSX.Element {
             writeResult?.status === 'denied' ||
             writeResult?.status === 'partial'
           const canWrite = writableDataTypes.includes(dataType)
-          const canReadSteps = dataType === 'steps'
-          const canReadDistance = dataType === 'distance'
-          const canReadActiveEnergy = dataType === 'activeEnergyBurned'
-          const canReadHeartRate = dataType === 'heartRate'
-          const canReadSleep = dataType === 'sleep'
-          const canReadBodyMass = dataType === 'bodyMass'
+          const readCard = readCards[dataType]
+          const readLines = readResults[dataType]
 
           return (
             <View key={dataType} style={styles.permissionCard}>
@@ -426,69 +478,11 @@ function App(): React.JSX.Element {
                   {card.feedback.message}
                 </Text>
               ) : null}
-              {canReadSteps && dailyStepTotals ? (
+              {readLines ? (
                 <View style={styles.readResult}>
-                  <Text style={styles.detail}>Daily step buckets: {dailyStepTotals.length}</Text>
-                  {dailyStepTotals.map((bucket) => (
-                    <Text key={bucket.startDate.toISOString()} style={styles.detail}>
-                      {bucket.startDate.toLocaleDateString()}: {bucket.count} steps
-                    </Text>
-                  ))}
-                </View>
-              ) : null}
-              {canReadDistance && dailyDistanceTotals ? (
-                <View style={styles.readResult}>
-                  <Text style={styles.detail}>
-                    Daily distance buckets: {dailyDistanceTotals.length}
-                  </Text>
-                  {dailyDistanceTotals.map((bucket) => (
-                    <Text key={bucket.startDate.toISOString()} style={styles.detail}>
-                      {bucket.startDate.toLocaleDateString()}: {Math.round(bucket.distanceMeters)} m
-                    </Text>
-                  ))}
-                </View>
-              ) : null}
-              {canReadActiveEnergy && dailyActiveEnergyTotals ? (
-                <View style={styles.readResult}>
-                  <Text style={styles.detail}>
-                    Daily active-energy buckets: {dailyActiveEnergyTotals.length}
-                  </Text>
-                  {dailyActiveEnergyTotals.map((bucket) => (
-                    <Text key={bucket.startDate.toISOString()} style={styles.detail}>
-                      {bucket.startDate.toLocaleDateString()}: {Math.round(bucket.kilocalories)}{' '}
-                      kcal
-                    </Text>
-                  ))}
-                </View>
-              ) : null}
-              {canReadHeartRate && heartRateStatistics ? (
-                <View style={styles.readResult}>
-                  <Text style={styles.detail}>
-                    Average bpm: {heartRateStatistics.average ?? 'n/a'}
-                  </Text>
-                  <Text style={styles.detail}>Min bpm: {heartRateStatistics.min ?? 'n/a'}</Text>
-                  <Text style={styles.detail}>Max bpm: {heartRateStatistics.max ?? 'n/a'}</Text>
-                </View>
-              ) : null}
-              {canReadSleep && sleepSamples ? (
-                <View style={styles.readResult}>
-                  <Text style={styles.detail}>Sleep samples: {sleepSamples.length}</Text>
-                  {sleepSamples.map((sample) => (
-                    <Text
-                      key={`${sample.startDate.toISOString()}-${sample.stage}`}
-                      style={styles.detail}
-                    >
-                      {sample.startDate.toLocaleString()}: {sample.stage}
-                    </Text>
-                  ))}
-                </View>
-              ) : null}
-              {canReadBodyMass && bodyMassSamples ? (
-                <View style={styles.readResult}>
-                  <Text style={styles.detail}>Body mass samples: {bodyMassSamples.length}</Text>
-                  {bodyMassSamples.map((sample) => (
-                    <Text key={sample.startDate.toISOString()} style={styles.detail}>
-                      {sample.startDate.toLocaleString()}: {sample.kilograms.toFixed(1)} kg
+                  {readLines.map((line, index) => (
+                    <Text key={`${dataType}-${index}`} style={styles.detail}>
+                      {line}
                     </Text>
                   ))}
                 </View>
@@ -543,11 +537,11 @@ function App(): React.JSX.Element {
                     </Text>
                   </Pressable>
                 ) : null}
-                {canReadSteps ? (
+                {readCard ? (
                   <Pressable
                     disabled={!isAvailable || isBusy}
                     onPress={() => {
-                      readDailyStepTotals()
+                      runReadCard(dataType)
                     }}
                     style={({ pressed }) => [
                       styles.button,
@@ -557,97 +551,7 @@ function App(): React.JSX.Element {
                     ]}
                   >
                     <Text style={styles.buttonText}>
-                      {isReading ? 'Reading...' : 'Read daily step totals'}
-                    </Text>
-                  </Pressable>
-                ) : null}
-                {canReadDistance ? (
-                  <Pressable
-                    disabled={!isAvailable || isBusy}
-                    onPress={() => {
-                      readDailyDistanceTotals()
-                    }}
-                    style={({ pressed }) => [
-                      styles.button,
-                      styles.readButton,
-                      pressed ? styles.buttonPressed : null,
-                      !isAvailable || isBusy ? styles.buttonDisabled : null,
-                    ]}
-                  >
-                    <Text style={styles.buttonText}>
-                      {isReading ? 'Reading...' : 'Read daily distance totals'}
-                    </Text>
-                  </Pressable>
-                ) : null}
-                {canReadActiveEnergy ? (
-                  <Pressable
-                    disabled={!isAvailable || isBusy}
-                    onPress={() => {
-                      readDailyActiveEnergyBurnedTotals()
-                    }}
-                    style={({ pressed }) => [
-                      styles.button,
-                      styles.readButton,
-                      pressed ? styles.buttonPressed : null,
-                      !isAvailable || isBusy ? styles.buttonDisabled : null,
-                    ]}
-                  >
-                    <Text style={styles.buttonText}>
-                      {isReading ? 'Reading...' : 'Read daily active energy totals'}
-                    </Text>
-                  </Pressable>
-                ) : null}
-                {canReadHeartRate ? (
-                  <Pressable
-                    disabled={!isAvailable || isBusy}
-                    onPress={() => {
-                      readHeartRateStatistics()
-                    }}
-                    style={({ pressed }) => [
-                      styles.button,
-                      styles.readButton,
-                      pressed ? styles.buttonPressed : null,
-                      !isAvailable || isBusy ? styles.buttonDisabled : null,
-                    ]}
-                  >
-                    <Text style={styles.buttonText}>
-                      {isReading ? 'Reading...' : 'Read Heart Rate stats'}
-                    </Text>
-                  </Pressable>
-                ) : null}
-                {canReadSleep ? (
-                  <Pressable
-                    disabled={!isAvailable || isBusy}
-                    onPress={() => {
-                      readSleepSamples()
-                    }}
-                    style={({ pressed }) => [
-                      styles.button,
-                      styles.readButton,
-                      pressed ? styles.buttonPressed : null,
-                      !isAvailable || isBusy ? styles.buttonDisabled : null,
-                    ]}
-                  >
-                    <Text style={styles.buttonText}>
-                      {isReading ? 'Reading...' : 'Read sleep samples'}
-                    </Text>
-                  </Pressable>
-                ) : null}
-                {canReadBodyMass ? (
-                  <Pressable
-                    disabled={!isAvailable || isBusy}
-                    onPress={() => {
-                      readBodyMass()
-                    }}
-                    style={({ pressed }) => [
-                      styles.button,
-                      styles.readButton,
-                      pressed ? styles.buttonPressed : null,
-                      !isAvailable || isBusy ? styles.buttonDisabled : null,
-                    ]}
-                  >
-                    <Text style={styles.buttonText}>
-                      {isReading ? 'Reading...' : 'Read body mass'}
+                      {isReading ? 'Reading...' : readCard.buttonLabel}
                     </Text>
                   </Pressable>
                 ) : null}

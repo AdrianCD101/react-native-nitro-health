@@ -49,7 +49,7 @@ On iOS, apps still need the HealthKit capability and the relevant HealthKit usag
 
 ## Permissions
 
-The supported unified permission data types are `steps`, `distance`, `activeEnergyBurned`, `heartRate`, `restingHeartRate`, `heartRateVariability`, `oxygenSaturation`, `height`, `sleep`, and `bodyMass`.
+The supported unified permission data types are `steps`, `distance`, `activeEnergyBurned`, `heartRate`, `restingHeartRate`, `heartRateVariability`, `oxygenSaturation`, `height`, `sleep`, `bodyMass`, and `workout`.
 
 ```ts
 import { NitroHealth, type HealthPermission } from 'react-native-nitro-health'
@@ -95,6 +95,7 @@ Android consumer apps must declare the matching Health Connect permissions in th
 | `height`               | `android.permission.health.READ_HEIGHT`                 | `android.permission.health.WRITE_HEIGHT`                 |
 | `sleep`                | `android.permission.health.READ_SLEEP`                  | n/a (writes not supported yet)                           |
 | `bodyMass`             | `android.permission.health.READ_WEIGHT`                 | `android.permission.health.WRITE_WEIGHT`                 |
+| `workout`              | `android.permission.health.READ_EXERCISE`               | n/a (writes not supported yet)                           |
 
 On iOS, apps must add `NSHealthShareUsageDescription` (reads) and `NSHealthUpdateUsageDescription` (writes) to `Info.plist`, plus the HealthKit capability.
 
@@ -301,6 +302,25 @@ const sleep = await NitroHealth.readSleepSamples({
 `readSleepSamples()` returns sleep intervals with `startDate`, `endDate`, `stage`, and an optional `source`. Stages are normalized to `inBed`, `awake`, `awakeInBed`, `asleep`, `asleepCore`, `asleepDeep`, `asleepREM`, `outOfBed`, or `unknown`.
 
 On iOS, HealthKit sleep analysis is category interval data and `inBed` samples can overlap `asleep` stage samples. On Android, Health Connect sleep sessions are flattened to stage intervals; sessions without explicit stages are returned as one `asleep` interval. Apps must request and receive sleep read permission before relying on returned data.
+
+## Read Workouts
+
+```ts
+import { NitroHealth } from 'react-native-nitro-health'
+
+const workouts = await NitroHealth.readWorkouts({
+  startDate: new Date('2026-01-01T00:00:00.000Z'),
+  endDate: new Date('2026-01-08T00:00:00.000Z'),
+  limit: 50,
+  ascending: false,
+})
+```
+
+`readWorkouts()` returns workout sessions (`HKWorkout` on iOS, `ExerciseSessionRecord` on Android) with `startDate`, `endDate`, `durationSeconds`, `activityType`, and optional `title`, `source`, `totalDistanceMeters`, and `totalEnergyBurnedKcal` fields.
+
+`activityType` is normalized to a single cross-platform union (`running`, `cycling`, `swimming`, `strengthTraining`, `yoga`, `hiking`, ... — see `WorkoutActivityType` for the full list). Platform sub-variants fold into the parent activity: treadmill running and outdoor running both map to `running`, stationary and outdoor biking to `cycling`, pool and open-water swimming to `swimming`, and individual strength exercises (bench press, deadlift, dumbbell curls, ...) to `strengthTraining`. Values with no cross-platform equivalent map to `other`, as do unknown values from future OS versions. Some union members are only ever produced by one platform (for example `archery` on iOS or `paragliding` on Android).
+
+Platform differences: `totalDistanceMeters` and `totalEnergyBurnedKcal` are iOS-only for now — Health Connect exercise sessions carry no totals, so they are `undefined` on Android (per-session aggregation may be added later). `durationSeconds` excludes pauses on iOS (`HKWorkout.duration`) but is the wall-clock `endDate - startDate` on Android, which has no pause-aware duration on the session record. `title` is the user-visible session title on Android; on iOS it falls back to the rarely-set workout brand name metadata. Apps must request and receive workout read permission before relying on returned data.
 
 ## Write Samples
 

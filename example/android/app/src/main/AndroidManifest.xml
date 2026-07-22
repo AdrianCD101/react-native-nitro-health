@@ -23,6 +23,7 @@
     <uses-permission android:name="android.permission.health.WRITE_OXYGEN_SATURATION" />
     <uses-permission android:name="android.permission.health.READ_HEIGHT" />
     <uses-permission android:name="android.permission.health.WRITE_HEIGHT" />
+    <uses-permission android:name="android.permission.health.READ_EXERCISE" />
 
     <!-- Required on Android 11+ so the app can see the Health Connect provider package. -->
     <queries>

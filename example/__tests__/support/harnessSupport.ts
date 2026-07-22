@@ -33,6 +33,9 @@ export const oxygenSaturationReadPermission: HealthPermission[] = [
   { accessType: 'read', dataType: 'oxygenSaturation' },
 ]
 export const heightReadPermission: HealthPermission[] = [{ accessType: 'read', dataType: 'height' }]
+export const workoutReadPermission: HealthPermission[] = [
+  { accessType: 'read', dataType: 'workout' },
+]
 
 export const emptyRange = {
   startDate: new Date('2000-01-01T00:00:00.000Z'),

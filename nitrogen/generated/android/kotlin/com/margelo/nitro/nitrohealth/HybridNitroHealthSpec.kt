@@ -107,6 +107,10 @@ abstract class HybridNitroHealthSpec: HybridObject() {
   
   @DoNotStrip
   @Keep
+  abstract fun readWorkouts(query: NativeHealthDateRangeQuery): Promise<Array<NativeWorkoutSample>>
+  
+  @DoNotStrip
+  @Keep
   abstract fun saveSteps(samples: Array<NativeStepSampleInput>): Promise<Unit>
   
   @DoNotStrip

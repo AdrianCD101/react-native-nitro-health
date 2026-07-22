@@ -4,6 +4,7 @@ import androidx.health.connect.client.aggregate.AggregateMetric
 import androidx.health.connect.client.aggregate.AggregationResult
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
 import androidx.health.connect.client.records.DistanceRecord
+import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.HeartRateVariabilityRmssdRecord
 import androidx.health.connect.client.records.HeightRecord
@@ -96,6 +97,10 @@ internal fun healthDataTypeDescriptorFor(dataType: String): HealthDataTypeDescri
         "sleep" -> HealthDataTypeDescriptor(
             recordType = SleepSessionRecord::class,
             permissionLabel = "sleep"
+        )
+        "workout" -> HealthDataTypeDescriptor(
+            recordType = ExerciseSessionRecord::class,
+            permissionLabel = "workouts"
         )
         "bodyMass" -> HealthDataTypeDescriptor(
             recordType = WeightRecord::class,

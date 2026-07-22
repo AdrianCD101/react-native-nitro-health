@@ -26,6 +26,7 @@ import type { NativeRestingHeartRateSampleInput } from '../NativeRestingHeartRat
 import type { NativeSleepSample } from '../NativeSleepSample'
 import type { NativeStepSample } from '../NativeStepSample'
 import type { NativeStepSampleInput } from '../NativeStepSampleInput'
+import type { NativeWorkoutSample } from '../NativeWorkoutSample'
 
 export interface NitroHealth extends HybridObject<{ ios: 'swift'; android: 'kotlin' }> {
   isAvailable(): boolean
@@ -56,6 +57,7 @@ export interface NitroHealth extends HybridObject<{ ios: 'swift'; android: 'kotl
     query: NativeHealthStatisticsQuery
   ): Promise<NativeHealthStatistics[]>
   readSleepSamples(query: NativeHealthDateRangeQuery): Promise<NativeSleepSample[]>
+  readWorkouts(query: NativeHealthDateRangeQuery): Promise<NativeWorkoutSample[]>
   saveSteps(samples: NativeStepSampleInput[]): Promise<void>
   saveDistance(samples: NativeDistanceSampleInput[]): Promise<void>
   saveActiveEnergyBurned(samples: NativeActiveEnergyBurnedSampleInput[]): Promise<void>

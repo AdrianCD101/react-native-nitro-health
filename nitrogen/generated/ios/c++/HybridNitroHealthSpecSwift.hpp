@@ -44,6 +44,8 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthStatistics; }
 namespace margelo::nitro::nitrohealth { struct NativeHealthStatisticsQuery; }
 // Forward declaration of `NativeSleepSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeSleepSample; }
+// Forward declaration of `NativeWorkoutSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeWorkoutSample; }
 // Forward declaration of `NativeStepSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeStepSampleInput; }
 // Forward declaration of `NativeDistanceSampleInput` to properly resolve imports.
@@ -89,6 +91,7 @@ namespace margelo::nitro::nitrohealth { enum class HealthAuthorizationStatus; }
 #include "NativeHealthStatistics.hpp"
 #include "NativeHealthStatisticsQuery.hpp"
 #include "NativeSleepSample.hpp"
+#include "NativeWorkoutSample.hpp"
 #include "NativeStepSampleInput.hpp"
 #include "NativeDistanceSampleInput.hpp"
 #include "NativeActiveEnergyBurnedSampleInput.hpp"
@@ -298,6 +301,14 @@ namespace margelo::nitro::nitrohealth {
     }
     inline std::shared_ptr<Promise<std::vector<NativeSleepSample>>> readSleepSamples(const NativeHealthDateRangeQuery& query) override {
       auto __result = _swiftPart.readSleepSamples(std::forward<decltype(query)>(query));
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline std::shared_ptr<Promise<std::vector<NativeWorkoutSample>>> readWorkouts(const NativeHealthDateRangeQuery& query) override {
+      auto __result = _swiftPart.readWorkouts(std::forward<decltype(query)>(query));
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }

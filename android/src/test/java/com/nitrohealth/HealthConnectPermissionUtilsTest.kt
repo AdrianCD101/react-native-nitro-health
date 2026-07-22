@@ -3,6 +3,7 @@ package com.nitrohealth
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
 import androidx.health.connect.client.records.DistanceRecord
+import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.HeartRateVariabilityRmssdRecord
 import androidx.health.connect.client.records.HeightRecord
@@ -40,6 +41,10 @@ class HealthConnectPermissionUtilsTest {
             healthConnectRecordTypeForDataType("oxygenSaturation")
         )
         assertEquals(HeightRecord::class, healthConnectRecordTypeForDataType("height"))
+        assertEquals(
+            ExerciseSessionRecord::class,
+            healthConnectRecordTypeForDataType("workout")
+        )
     }
 
     @Test
@@ -83,6 +88,10 @@ class HealthConnectPermissionUtilsTest {
         assertEquals(
             HealthPermission.getReadPermission(HeightRecord::class),
             toHealthConnectPermission("height", "read")
+        )
+        assertEquals(
+            HealthPermission.getReadPermission(ExerciseSessionRecord::class),
+            toHealthConnectPermission("workout", "read")
         )
     }
 

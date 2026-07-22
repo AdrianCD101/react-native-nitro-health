@@ -17,6 +17,7 @@ import {
   restingHeartRateReadPermission,
   sleepReadPermission,
   stepsReadPermission,
+  workoutReadPermission,
 } from './support/harnessSupport'
 
 describe('NitroHealth reads (native)', () => {
@@ -374,6 +375,54 @@ describe('NitroHealth reads (native)', () => {
     }
 
     await expect(NitroHealth.readSleepSamples(emptyRange)).rejects.toThrow(/not determined/i)
+  })
+
+  it('reads workouts from native code without crashing', async () => {
+    try {
+      const workouts = await NitroHealth.readWorkouts(emptyRange)
+
+      expect(Array.isArray(workouts)).toBe(true)
+      for (const workout of workouts) {
+        expect(workout.startDate).toBeInstanceOf(Date)
+        expect(workout.endDate).toBeInstanceOf(Date)
+        expect(typeof workout.durationSeconds).toBe('number')
+        expect(typeof workout.activityType).toBe('string')
+        expect(['string', 'undefined']).toContain(typeof workout.title)
+        expect(['string', 'undefined']).toContain(typeof workout.source)
+        expect(['number', 'undefined']).toContain(typeof workout.totalDistanceMeters)
+        expect(['number', 'undefined']).toContain(typeof workout.totalEnergyBurnedKcal)
+      }
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error)
+    }
+  })
+
+  it('rejects reading workouts on Android when permission is not granted', async () => {
+    if (Platform.OS !== 'android') {
+      return
+    }
+
+    const status = await NitroHealth.getRequestStatusForAuthorization(workoutReadPermission)
+
+    if (status === 'unnecessary') {
+      return
+    }
+
+    await expect(NitroHealth.readWorkouts(emptyRange)).rejects.toThrow(/permission/i)
+  })
+
+  it('rejects reading workouts on iOS before authorization is requested (HealthKit notDetermined)', async () => {
+    if (Platform.OS !== 'ios') {
+      return
+    }
+
+    const status = await NitroHealth.getRequestStatusForAuthorization(workoutReadPermission)
+
+    if (status === 'unnecessary') {
+      return
+    }
+
+    await expect(NitroHealth.readWorkouts(emptyRange)).rejects.toThrow(/not determined/i)
   })
 
   describe('resting heart rate', () => {
