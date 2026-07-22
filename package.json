@@ -71,7 +71,7 @@
     "@types/react": "19.2.15",
     "conventional-changelog-conventionalcommits": "^9.1.0",
     "nitrogen": "0.35.9",
-    "oxfmt": "^0.52.0",
+    "oxfmt": "^0.53.0",
     "oxlint": "^1.67.0",
     "react": "19.2.6",
     "react-native": "0.85.3",
