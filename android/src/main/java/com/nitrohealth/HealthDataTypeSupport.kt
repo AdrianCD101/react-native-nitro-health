@@ -5,9 +5,12 @@ import androidx.health.connect.client.aggregate.AggregationResult
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
 import androidx.health.connect.client.records.DistanceRecord
 import androidx.health.connect.client.records.HeartRateRecord
+import androidx.health.connect.client.records.HeartRateVariabilityRmssdRecord
 import androidx.health.connect.client.records.HeightRecord
+import androidx.health.connect.client.records.OxygenSaturationRecord
 import androidx.health.connect.client.records.Record
 import androidx.health.connect.client.records.RestingHeartRateRecord
+import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.StepsRecord
 import androidx.health.connect.client.records.WeightRecord
 import kotlin.reflect.KClass
@@ -23,42 +26,47 @@ internal data class StatisticsMetricBinding(
 )
 
 /**
- * Describes how a `readStatistics` data type maps onto Health Connect: which record type read
- * permission is required, the label used in permission error messages, and the set of metric
- * names that data type supports.
+ * Single source of truth for the JS-facing "dataType" domain on Android, mirroring iOS's
+ * `makeHealthDataTypeDescriptor` in `ios/HealthKitStatisticsSupport.swift`: the Health Connect
+ * record type behind the data type, the label used in permission error messages, and the
+ * statistics metric names the data type supports (empty for types `readStatistics` rejects
+ * in JS, like sleep, heart rate variability, and oxygen saturation).
+ *
+ * Permissions ([healthConnectRecordTypeForDataType]), reads/saves, and `readStatistics` all
+ * pull from this table, so adding a data type means adding exactly one entry here.
  */
-internal data class StatisticsDescriptor(
+internal data class HealthDataTypeDescriptor(
     val recordType: KClass<out Record>,
     val permissionLabel: String,
-    val metrics: Map<String, StatisticsMetricBinding>
+    val statisticsMetrics: Map<String, StatisticsMetricBinding> = emptyMap()
 )
 
-internal fun statisticsDescriptorForDataType(dataType: String): StatisticsDescriptor {
+internal fun healthDataTypeDescriptorFor(dataType: String): HealthDataTypeDescriptor {
     return when (dataType) {
-        "steps" -> StatisticsDescriptor(
+        "steps" -> HealthDataTypeDescriptor(
             recordType = StepsRecord::class,
             permissionLabel = "steps",
-            metrics = mapOf(
+            statisticsMetrics = mapOf(
                 "sum" to StatisticsMetricBinding(
                     metric = StepsRecord.COUNT_TOTAL,
                     extract = { result -> result[StepsRecord.COUNT_TOTAL]?.toDouble() }
                 )
             )
         )
-        "distance" -> StatisticsDescriptor(
+        "distance" -> HealthDataTypeDescriptor(
             recordType = DistanceRecord::class,
             permissionLabel = "distance",
-            metrics = mapOf(
+            statisticsMetrics = mapOf(
                 "sum" to StatisticsMetricBinding(
                     metric = DistanceRecord.DISTANCE_TOTAL,
                     extract = { result -> result[DistanceRecord.DISTANCE_TOTAL]?.inMeters }
                 )
             )
         )
-        "activeEnergyBurned" -> StatisticsDescriptor(
+        "activeEnergyBurned" -> HealthDataTypeDescriptor(
             recordType = ActiveCaloriesBurnedRecord::class,
             permissionLabel = "active energy burned",
-            metrics = mapOf(
+            statisticsMetrics = mapOf(
                 "sum" to StatisticsMetricBinding(
                     metric = ActiveCaloriesBurnedRecord.ACTIVE_CALORIES_TOTAL,
                     extract = { result ->
@@ -67,10 +75,10 @@ internal fun statisticsDescriptorForDataType(dataType: String): StatisticsDescri
                 )
             )
         )
-        "heartRate" -> StatisticsDescriptor(
+        "heartRate" -> HealthDataTypeDescriptor(
             recordType = HeartRateRecord::class,
             permissionLabel = "heart rate",
-            metrics = mapOf(
+            statisticsMetrics = mapOf(
                 "avg" to StatisticsMetricBinding(
                     metric = HeartRateRecord.BPM_AVG,
                     extract = { result -> result[HeartRateRecord.BPM_AVG]?.toDouble() }
@@ -85,10 +93,14 @@ internal fun statisticsDescriptorForDataType(dataType: String): StatisticsDescri
                 )
             )
         )
-        "bodyMass" -> StatisticsDescriptor(
+        "sleep" -> HealthDataTypeDescriptor(
+            recordType = SleepSessionRecord::class,
+            permissionLabel = "sleep"
+        )
+        "bodyMass" -> HealthDataTypeDescriptor(
             recordType = WeightRecord::class,
             permissionLabel = "body mass",
-            metrics = mapOf(
+            statisticsMetrics = mapOf(
                 "avg" to StatisticsMetricBinding(
                     metric = WeightRecord.WEIGHT_AVG,
                     extract = { result -> result[WeightRecord.WEIGHT_AVG]?.inKilograms }
@@ -103,10 +115,10 @@ internal fun statisticsDescriptorForDataType(dataType: String): StatisticsDescri
                 )
             )
         )
-        "restingHeartRate" -> StatisticsDescriptor(
+        "restingHeartRate" -> HealthDataTypeDescriptor(
             recordType = RestingHeartRateRecord::class,
             permissionLabel = "resting heart rate",
-            metrics = mapOf(
+            statisticsMetrics = mapOf(
                 "avg" to StatisticsMetricBinding(
                     metric = RestingHeartRateRecord.BPM_AVG,
                     extract = { result -> result[RestingHeartRateRecord.BPM_AVG]?.toDouble() }
@@ -121,10 +133,18 @@ internal fun statisticsDescriptorForDataType(dataType: String): StatisticsDescri
                 )
             )
         )
-        "height" -> StatisticsDescriptor(
+        "heartRateVariability" -> HealthDataTypeDescriptor(
+            recordType = HeartRateVariabilityRmssdRecord::class,
+            permissionLabel = "heart rate variability"
+        )
+        "oxygenSaturation" -> HealthDataTypeDescriptor(
+            recordType = OxygenSaturationRecord::class,
+            permissionLabel = "oxygen saturation"
+        )
+        "height" -> HealthDataTypeDescriptor(
             recordType = HeightRecord::class,
             permissionLabel = "height",
-            metrics = mapOf(
+            statisticsMetrics = mapOf(
                 "avg" to StatisticsMetricBinding(
                     metric = HeightRecord.HEIGHT_AVG,
                     extract = { result -> result[HeightRecord.HEIGHT_AVG]?.inMeters }
@@ -139,6 +159,6 @@ internal fun statisticsDescriptorForDataType(dataType: String): StatisticsDescri
                 )
             )
         )
-        else -> throw IllegalArgumentException("Unsupported health data type for statistics: $dataType")
+        else -> throw IllegalArgumentException("Unsupported health data type: $dataType")
     }
 }

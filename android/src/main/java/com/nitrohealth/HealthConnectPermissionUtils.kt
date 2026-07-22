@@ -1,33 +1,11 @@
 package com.nitrohealth
 
 import androidx.health.connect.client.permission.HealthPermission
-import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
-import androidx.health.connect.client.records.DistanceRecord
-import androidx.health.connect.client.records.HeartRateRecord
-import androidx.health.connect.client.records.HeartRateVariabilityRmssdRecord
-import androidx.health.connect.client.records.HeightRecord
-import androidx.health.connect.client.records.OxygenSaturationRecord
 import androidx.health.connect.client.records.Record
-import androidx.health.connect.client.records.RestingHeartRateRecord
-import androidx.health.connect.client.records.SleepSessionRecord
-import androidx.health.connect.client.records.StepsRecord
-import androidx.health.connect.client.records.WeightRecord
 import kotlin.reflect.KClass
 
 internal fun healthConnectRecordTypeForDataType(dataType: String): KClass<out Record> {
-    return when (dataType) {
-        "steps" -> StepsRecord::class
-        "heartRate" -> HeartRateRecord::class
-        "distance" -> DistanceRecord::class
-        "activeEnergyBurned" -> ActiveCaloriesBurnedRecord::class
-        "sleep" -> SleepSessionRecord::class
-        "bodyMass" -> WeightRecord::class
-        "restingHeartRate" -> RestingHeartRateRecord::class
-        "heartRateVariability" -> HeartRateVariabilityRmssdRecord::class
-        "oxygenSaturation" -> OxygenSaturationRecord::class
-        "height" -> HeightRecord::class
-        else -> throw IllegalArgumentException("Unsupported health data type: $dataType")
-    }
+    return healthDataTypeDescriptorFor(dataType).recordType
 }
 
 internal fun toHealthConnectPermission(dataType: String, accessType: String): String {

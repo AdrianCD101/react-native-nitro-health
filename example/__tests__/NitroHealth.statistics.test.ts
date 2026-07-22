@@ -1,6 +1,4 @@
-const mockNitroHealth = {
-  readStatistics: jest.fn(),
-}
+import { mockNitroHealth } from './support/mockNitroHealth'
 
 jest.mock('react-native-nitro-modules', () => ({
   NitroModules: {
@@ -8,7 +6,7 @@ jest.mock('react-native-nitro-modules', () => ({
   },
 }))
 
-const { NitroHealth } = require('react-native-nitro-health')
+import { NitroHealth } from 'react-native-nitro-health'
 
 describe('NitroHealth readStatistics contract', () => {
   beforeEach(() => {
@@ -131,6 +129,7 @@ describe('NitroHealth readStatistics contract', () => {
         startDate,
         endDate,
         bucket: 'day',
+        // @ts-expect-error — intentionally invalid metric to exercise runtime validation
         metrics: ['median'],
       })
     ).rejects.toThrow('Unsupported statistics metric: median')
@@ -146,6 +145,7 @@ describe('NitroHealth readStatistics contract', () => {
       NitroHealth.readStatistics('steps', {
         startDate,
         endDate,
+        // @ts-expect-error — intentionally invalid bucket to exercise runtime validation
         bucket: 'year',
         metrics: ['sum'],
       })

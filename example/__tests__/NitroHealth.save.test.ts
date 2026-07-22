@@ -1,10 +1,4 @@
-const mockNitroHealth = {
-  saveActiveEnergyBurned: jest.fn(),
-  saveBodyMass: jest.fn(),
-  saveDistance: jest.fn(),
-  saveHeartRate: jest.fn(),
-  saveSteps: jest.fn(),
-}
+import { mockNitroHealth } from './support/mockNitroHealth'
 
 jest.mock('react-native-nitro-modules', () => ({
   NitroModules: {
@@ -12,7 +6,7 @@ jest.mock('react-native-nitro-modules', () => ({
   },
 }))
 
-const { NitroHealth } = require('react-native-nitro-health')
+import { NitroHealth } from 'react-native-nitro-health'
 
 describe('NitroHealth save contract', () => {
   beforeEach(() => {

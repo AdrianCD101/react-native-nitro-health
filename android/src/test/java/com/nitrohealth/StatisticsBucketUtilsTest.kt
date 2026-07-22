@@ -46,47 +46,73 @@ class StatisticsBucketUtilsTest {
     }
 
     @Test
-    fun statisticsDescriptorForStepsOnlySupportsSum() {
-        val descriptor = statisticsDescriptorForDataType("steps")
+    fun descriptorForStepsOnlySupportsSum() {
+        val descriptor = healthDataTypeDescriptorFor("steps")
 
-        assertEquals(setOf("sum"), descriptor.metrics.keys)
+        assertEquals(setOf("sum"), descriptor.statisticsMetrics.keys)
     }
 
     @Test
-    fun statisticsDescriptorForDistanceOnlySupportsSum() {
-        val descriptor = statisticsDescriptorForDataType("distance")
+    fun descriptorForDistanceOnlySupportsSum() {
+        val descriptor = healthDataTypeDescriptorFor("distance")
 
-        assertEquals(setOf("sum"), descriptor.metrics.keys)
+        assertEquals(setOf("sum"), descriptor.statisticsMetrics.keys)
     }
 
     @Test
-    fun statisticsDescriptorForActiveEnergyBurnedOnlySupportsSum() {
-        val descriptor = statisticsDescriptorForDataType("activeEnergyBurned")
+    fun descriptorForActiveEnergyBurnedOnlySupportsSum() {
+        val descriptor = healthDataTypeDescriptorFor("activeEnergyBurned")
 
-        assertEquals(setOf("sum"), descriptor.metrics.keys)
+        assertEquals(setOf("sum"), descriptor.statisticsMetrics.keys)
     }
 
     @Test
-    fun statisticsDescriptorForHeartRateSupportsAvgMinMax() {
-        val descriptor = statisticsDescriptorForDataType("heartRate")
+    fun descriptorForHeartRateSupportsAvgMinMax() {
+        val descriptor = healthDataTypeDescriptorFor("heartRate")
 
-        assertEquals(setOf("avg", "min", "max"), descriptor.metrics.keys)
+        assertEquals(setOf("avg", "min", "max"), descriptor.statisticsMetrics.keys)
     }
 
     @Test
-    fun statisticsDescriptorForBodyMassSupportsAvgMinMax() {
-        val descriptor = statisticsDescriptorForDataType("bodyMass")
+    fun descriptorForBodyMassSupportsAvgMinMax() {
+        val descriptor = healthDataTypeDescriptorFor("bodyMass")
 
-        assertEquals(setOf("avg", "min", "max"), descriptor.metrics.keys)
+        assertEquals(setOf("avg", "min", "max"), descriptor.statisticsMetrics.keys)
+    }
+
+    @Test
+    fun descriptorForRestingHeartRateSupportsAvgMinMax() {
+        val descriptor = healthDataTypeDescriptorFor("restingHeartRate")
+
+        assertEquals(setOf("avg", "min", "max"), descriptor.statisticsMetrics.keys)
+    }
+
+    @Test
+    fun descriptorForHeightSupportsAvgMinMax() {
+        val descriptor = healthDataTypeDescriptorFor("height")
+
+        assertEquals(setOf("avg", "min", "max"), descriptor.statisticsMetrics.keys)
+    }
+
+    // These data types exist in the descriptor table (permissions and raw reads need them) but
+    // support no statistics metrics, so any requested metric fails the readStatistics lookup.
+    @Test
+    fun descriptorForSleepSupportsNoStatisticsMetrics() {
+        assertTrue(healthDataTypeDescriptorFor("sleep").statisticsMetrics.isEmpty())
+    }
+
+    @Test
+    fun descriptorForHeartRateVariabilitySupportsNoStatisticsMetrics() {
+        assertTrue(healthDataTypeDescriptorFor("heartRateVariability").statisticsMetrics.isEmpty())
+    }
+
+    @Test
+    fun descriptorForOxygenSaturationSupportsNoStatisticsMetrics() {
+        assertTrue(healthDataTypeDescriptorFor("oxygenSaturation").statisticsMetrics.isEmpty())
     }
 
     @Test(expected = IllegalArgumentException::class)
-    fun statisticsDescriptorThrowsForSleep() {
-        statisticsDescriptorForDataType("sleep")
-    }
-
-    @Test(expected = IllegalArgumentException::class)
-    fun statisticsDescriptorThrowsForUnknownDataType() {
-        statisticsDescriptorForDataType("unknown")
+    fun descriptorThrowsForUnknownDataType() {
+        healthDataTypeDescriptorFor("unknown")
     }
 }

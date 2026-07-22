@@ -58,6 +58,7 @@
     "test:android:native": "example/android/gradlew -p example/android :react-native-nitro-health:testDebugUnitTest",
     "test:ios:native": "swift test",
     "typecheck": "tsc --noEmit",
+    "typecheck:example": "tsc -p example",
     "clean": "git clean -dfX",
     "release": "semantic-release",
     "build": "node verify-codegen.js && bun run typecheck && bob build",

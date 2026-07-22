@@ -73,6 +73,7 @@ After codegen or any native (Swift/Kotlin) change, run `cd example && bun instal
 | Run iOS physical device             | open `example/ios/NitroHealthExample.xcworkspace` in Xcode          |
 | Run Android app                     | `cd example && bun run android`                                     |
 | Run fast tests                      | `bun run test`                                                      |
+| Typecheck package and example       | `bun run typecheck && bun run typecheck:example`                    |
 | Check lint                          | `bun run lint`                                                      |
 | Fix lint                            | `bun run lint:fix`                                                  |
 | Check formatting                    | `bun run format:check`                                              |
