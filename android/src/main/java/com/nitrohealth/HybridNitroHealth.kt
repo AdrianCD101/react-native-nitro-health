@@ -128,7 +128,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             }
 
             val client = HealthConnectClient.getOrCreate(context)
-            requireReadPermission(client, StepsRecord::class, "steps")
+            requireReadPermission(client, "steps")
 
             val request = ReadRecordsRequest(
                 recordType = StepsRecord::class,
@@ -161,7 +161,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             }
 
             val client = HealthConnectClient.getOrCreate(context)
-            requireReadPermission(client, StepsRecord::class, "steps")
+            requireReadPermission(client, "steps")
 
             val zoneId = ZoneId.systemDefault()
             val request = AggregateGroupByPeriodRequest(
@@ -204,7 +204,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             }
 
             val client = HealthConnectClient.getOrCreate(context)
-            requireReadPermission(client, DistanceRecord::class, "distance")
+            requireReadPermission(client, "distance")
 
             val request = ReadRecordsRequest(
                 recordType = DistanceRecord::class,
@@ -237,7 +237,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             }
 
             val client = HealthConnectClient.getOrCreate(context)
-            requireReadPermission(client, DistanceRecord::class, "distance")
+            requireReadPermission(client, "distance")
 
             val zoneId = ZoneId.systemDefault()
             val request = AggregateGroupByPeriodRequest(
@@ -280,7 +280,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             }
 
             val client = HealthConnectClient.getOrCreate(context)
-            requireReadPermission(client, ActiveCaloriesBurnedRecord::class, "active energy burned")
+            requireReadPermission(client, "activeEnergyBurned")
 
             val request = ReadRecordsRequest(
                 recordType = ActiveCaloriesBurnedRecord::class,
@@ -315,7 +315,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             }
 
             val client = HealthConnectClient.getOrCreate(context)
-            requireReadPermission(client, ActiveCaloriesBurnedRecord::class, "active energy burned")
+            requireReadPermission(client, "activeEnergyBurned")
 
             val zoneId = ZoneId.systemDefault()
             val request = AggregateGroupByPeriodRequest(
@@ -358,7 +358,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             }
 
             val client = HealthConnectClient.getOrCreate(context)
-            requireReadPermission(client, HeartRateRecord::class, "heart rate")
+            requireReadPermission(client, "heartRate")
 
             val request = ReadRecordsRequest(
                 recordType = HeartRateRecord::class,
@@ -371,9 +371,10 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             )
             val response = client.readRecords(request)
 
-            // A HeartRateRecord is an interval that holds many (time, bpm) samples, so flatten
-            // records to individual readings, carry the record's source onto each, then order and
-            // cap to the requested limit (pageSize limits records, not flattened samples).
+            // Deliberately NOT built on readInstantRecords: a HeartRateRecord is a series record —
+            // an interval holding many (time, bpm) samples — so records must be flattened to
+            // individual readings, the record's source carried onto each, then ordered and capped
+            // to the requested limit in post (pageSize limits records, not flattened samples).
             val samples = response.records.flatMap { record ->
                 record.samples.map { sample ->
                     NativeHeartRateSample(
@@ -396,28 +397,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
 
     override fun readBodyMass(query: NativeHealthDateRangeQuery): Promise<Array<NativeBodyMassSample>> {
         return Promise.async {
-            val context = NitroModules.applicationContext
-                ?: throw IllegalStateException("Android application context is unavailable")
-
-            if (getAvailabilityStatus() != HealthAvailabilityStatus.AVAILABLE) {
-                throw IllegalStateException("Health Connect is not available")
-            }
-
-            val client = HealthConnectClient.getOrCreate(context)
-            requireReadPermission(client, WeightRecord::class, "body mass")
-
-            val request = ReadRecordsRequest(
-                recordType = WeightRecord::class,
-                timeRangeFilter = TimeRangeFilter.between(
-                    Instant.ofEpochMilli(query.startTimeMs.toLong()),
-                    Instant.ofEpochMilli(query.endTimeMs.toLong())
-                ),
-                ascendingOrder = query.ascending,
-                pageSize = query.limit.toInt()
-            )
-            val response = client.readRecords(request)
-
-            response.records.map { record ->
+            readInstantRecords<WeightRecord>("bodyMass", query).map { record ->
                 NativeBodyMassSample(
                     startTimeMs = record.time.toEpochMilli().toDouble(),
                     endTimeMs = record.time.toEpochMilli().toDouble(),
@@ -432,9 +412,11 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
     // availability check, client creation, read-permission gate, and a time-ranged
     // ReadRecordsRequest that applies the query's ascending order and limit directly (unlike
     // readHeartRate/readSleepSamples, these records don't need post-read flattening).
+    // The record class comes from the data type's descriptor; the type argument T only
+    // re-states it for typed mapping at the call site, so the unchecked cast is safe as long
+    // as T matches the descriptor entry for dataType.
     private suspend fun <T : Record> readInstantRecords(
-        recordType: KClass<T>,
-        label: String,
+        dataType: String,
         query: NativeHealthDateRangeQuery
     ): List<T> {
         val context = NitroModules.applicationContext
@@ -445,8 +427,10 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         }
 
         val client = HealthConnectClient.getOrCreate(context)
-        requireReadPermission(client, recordType, label)
+        requireReadPermission(client, dataType)
 
+        @Suppress("UNCHECKED_CAST")
+        val recordType = healthDataTypeDescriptorFor(dataType).recordType as KClass<T>
         val request = ReadRecordsRequest(
             recordType = recordType,
             timeRangeFilter = TimeRangeFilter.between(
@@ -464,7 +448,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         query: NativeHealthDateRangeQuery
     ): Promise<Array<NativeRestingHeartRateSample>> {
         return Promise.async {
-            readInstantRecords(RestingHeartRateRecord::class, "resting heart rate", query).map { record ->
+            readInstantRecords<RestingHeartRateRecord>("restingHeartRate", query).map { record ->
                 NativeRestingHeartRateSample(
                     timeMs = record.time.toEpochMilli().toDouble(),
                     bpm = record.beatsPerMinute.toDouble(),
@@ -478,11 +462,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         query: NativeHealthDateRangeQuery
     ): Promise<Array<NativeHeartRateVariabilitySample>> {
         return Promise.async {
-            readInstantRecords(
-                HeartRateVariabilityRmssdRecord::class,
-                "heart rate variability",
-                query
-            ).map { record ->
+            readInstantRecords<HeartRateVariabilityRmssdRecord>("heartRateVariability", query).map { record ->
                 NativeHeartRateVariabilitySample(
                     timeMs = record.time.toEpochMilli().toDouble(),
                     milliseconds = record.heartRateVariabilityMillis,
@@ -497,7 +477,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         query: NativeHealthDateRangeQuery
     ): Promise<Array<NativeOxygenSaturationSample>> {
         return Promise.async {
-            readInstantRecords(OxygenSaturationRecord::class, "oxygen saturation", query).map { record ->
+            readInstantRecords<OxygenSaturationRecord>("oxygenSaturation", query).map { record ->
                 NativeOxygenSaturationSample(
                     timeMs = record.time.toEpochMilli().toDouble(),
                     percentage = record.percentage.value,
@@ -509,7 +489,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
 
     override fun readHeight(query: NativeHealthDateRangeQuery): Promise<Array<NativeHeightSample>> {
         return Promise.async {
-            readInstantRecords(HeightRecord::class, "height", query).map { record ->
+            readInstantRecords<HeightRecord>("height", query).map { record ->
                 NativeHeightSample(
                     timeMs = record.time.toEpochMilli().toDouble(),
                     meters = record.height.inMeters,
@@ -529,7 +509,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             }
 
             val client = HealthConnectClient.getOrCreate(context)
-            requireReadPermission(client, HeartRateRecord::class, "heart rate")
+            requireReadPermission(client, "heartRate")
 
             val request = AggregateRequest(
                 metrics = setOf(
@@ -564,16 +544,16 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                 throw IllegalStateException("Health Connect is not available")
             }
 
-            val descriptor = statisticsDescriptorForDataType(dataType)
+            val descriptor = healthDataTypeDescriptorFor(dataType)
             val requestedMetrics = query.metrics.associateWith { metricName ->
-                descriptor.metrics[metricName]
+                descriptor.statisticsMetrics[metricName]
                     ?: throw IllegalArgumentException(
                         "Unsupported statistics metric \"$metricName\" for data type: $dataType"
                     )
             }
 
             val client = HealthConnectClient.getOrCreate(context)
-            requireReadPermission(client, descriptor.recordType, descriptor.permissionLabel)
+            requireReadPermission(client, dataType)
 
             val slicer = makeBucketSlicer(query.bucket)
                 ?: throw IllegalArgumentException("Unsupported statistics bucket: ${query.bucket}")
@@ -664,7 +644,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             }
 
             val client = HealthConnectClient.getOrCreate(context)
-            requireReadPermission(client, SleepSessionRecord::class, "sleep")
+            requireReadPermission(client, "sleep")
 
             val request = ReadRecordsRequest(
                 recordType = SleepSessionRecord::class,
@@ -712,7 +692,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
 
     override fun saveSteps(samples: Array<NativeStepSampleInput>): Promise<Unit> {
         return Promise.async {
-            val client = requireWritableClient(StepsRecord::class, "steps")
+            val client = requireWritableClient("steps")
             client.insertRecords(toStepsRecords(samples))
             Unit
         }
@@ -720,7 +700,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
 
     override fun saveDistance(samples: Array<NativeDistanceSampleInput>): Promise<Unit> {
         return Promise.async {
-            val client = requireWritableClient(DistanceRecord::class, "distance")
+            val client = requireWritableClient("distance")
             client.insertRecords(toDistanceRecords(samples))
             Unit
         }
@@ -730,10 +710,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         samples: Array<NativeActiveEnergyBurnedSampleInput>
     ): Promise<Unit> {
         return Promise.async {
-            val client = requireWritableClient(
-                ActiveCaloriesBurnedRecord::class,
-                "active energy burned"
-            )
+            val client = requireWritableClient("activeEnergyBurned")
             client.insertRecords(toActiveCaloriesBurnedRecords(samples))
             Unit
         }
@@ -741,7 +718,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
 
     override fun saveHeartRate(samples: Array<NativeHeartRateSampleInput>): Promise<Unit> {
         return Promise.async {
-            val client = requireWritableClient(HeartRateRecord::class, "heart rate")
+            val client = requireWritableClient("heartRate")
             client.insertRecords(toHeartRateRecords(samples))
             Unit
         }
@@ -749,7 +726,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
 
     override fun saveBodyMass(samples: Array<NativeBodyMassSampleInput>): Promise<Unit> {
         return Promise.async {
-            val client = requireWritableClient(WeightRecord::class, "body mass")
+            val client = requireWritableClient("bodyMass")
             client.insertRecords(toWeightRecords(samples))
             Unit
         }
@@ -757,7 +734,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
 
     override fun saveRestingHeartRate(samples: Array<NativeRestingHeartRateSampleInput>): Promise<Unit> {
         return Promise.async {
-            val client = requireWritableClient(RestingHeartRateRecord::class, "resting heart rate")
+            val client = requireWritableClient("restingHeartRate")
             client.insertRecords(toRestingHeartRateRecords(samples))
             Unit
         }
@@ -765,7 +742,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
 
     override fun saveOxygenSaturation(samples: Array<NativeOxygenSaturationSampleInput>): Promise<Unit> {
         return Promise.async {
-            val client = requireWritableClient(OxygenSaturationRecord::class, "oxygen saturation")
+            val client = requireWritableClient("oxygenSaturation")
             client.insertRecords(toOxygenSaturationRecords(samples))
             Unit
         }
@@ -773,7 +750,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
 
     override fun saveHeight(samples: Array<NativeHeightSampleInput>): Promise<Unit> {
         return Promise.async {
-            val client = requireWritableClient(HeightRecord::class, "height")
+            val client = requireWritableClient("height")
             client.insertRecords(toHeightRecords(samples))
             Unit
         }
@@ -892,10 +869,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         )
     }
 
-    private suspend fun requireWritableClient(
-        recordType: KClass<out Record>,
-        label: String
-    ): HealthConnectClient {
+    private suspend fun requireWritableClient(dataType: String): HealthConnectClient {
         val context = NitroModules.applicationContext
             ?: throw IllegalStateException("Android application context is unavailable")
 
@@ -904,30 +878,24 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         }
 
         val client = HealthConnectClient.getOrCreate(context)
-        requireWritePermission(client, recordType, label)
+        requireWritePermission(client, dataType)
 
         return client
     }
 
-    private suspend fun requireWritePermission(
-        client: HealthConnectClient,
-        recordType: KClass<out Record>,
-        label: String
-    ) {
-        val permission = HealthPermission.getWritePermission(recordType)
+    private suspend fun requireWritePermission(client: HealthConnectClient, dataType: String) {
+        val descriptor = healthDataTypeDescriptorFor(dataType)
+        val permission = HealthPermission.getWritePermission(descriptor.recordType)
         if (!client.permissionController.getGrantedPermissions().contains(permission)) {
-            throw SecurityException("Missing permission to write $label")
+            throw SecurityException("Missing permission to write ${descriptor.permissionLabel}")
         }
     }
 
-    private suspend fun requireReadPermission(
-        client: HealthConnectClient,
-        recordType: KClass<out Record>,
-        label: String
-    ) {
-        val permission = HealthPermission.getReadPermission(recordType)
+    private suspend fun requireReadPermission(client: HealthConnectClient, dataType: String) {
+        val descriptor = healthDataTypeDescriptorFor(dataType)
+        val permission = HealthPermission.getReadPermission(descriptor.recordType)
         if (!client.permissionController.getGrantedPermissions().contains(permission)) {
-            throw SecurityException("Missing permission to read $label")
+            throw SecurityException("Missing permission to read ${descriptor.permissionLabel}")
         }
     }
 

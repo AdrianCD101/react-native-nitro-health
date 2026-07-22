@@ -2,11 +2,11 @@
 //  HybridNitroHealth+QuantityReads.swift
 //  Pods
 //
-//  Instantaneous-quantity reads/writes for the breadth batch (restingHeartRate,
-//  heartRateVariability, oxygenSaturation, height). This file is HealthKit-only, so it must
-//  NOT be added to Package.swift's pure-Foundation SPM test target; the podspec globs
-//  ios/**/*.swift and picks it up automatically. Kept separate from HybridNitroHealth.swift to
-//  stay under that file's line budget.
+//  Instantaneous-quantity reads/writes (restingHeartRate, heartRateVariability,
+//  oxygenSaturation, height; readBodyMass in HybridNitroHealth.swift shares the read helper).
+//  This file is HealthKit-only, so it must NOT be added to Package.swift's pure-Foundation SPM
+//  test target; the podspec globs ios/**/*.swift and picks it up automatically. Kept separate
+//  from HybridNitroHealth.swift to stay under that file's line budget.
 //
 
 import Foundation
@@ -16,8 +16,9 @@ import NitroModules
 extension HybridNitroHealth {
     // Shared boilerplate for instantaneous (point-in-time) quantity reads: availability check,
     // descriptor/type lookup, predicate + sort/limit, auth gate, query, then per-sample mapping.
-    // Mirrors readHeartRate/readBodyMass, generalized so each data type only supplies its unit
-    // conversion and struct construction.
+    // Each data type only supplies its unit conversion and struct construction. readHeartRate
+    // stays bespoke to remain symmetric with Android, where HeartRateRecord is a series record
+    // that needs post-read flattening.
     func readInstantQuantitySamples<T>(
         dataType: String,
         query: NativeHealthDateRangeQuery,

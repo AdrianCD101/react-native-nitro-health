@@ -354,40 +354,13 @@ class HybridNitroHealth: HybridNitroHealthSpec {
 
     // Note: like readSteps, HealthKit resolves with an empty array when read access is denied.
     func readBodyMass(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeBodyMassSample]> {
-        if !HKHealthStore.isHealthDataAvailable() {
-            throw permissionError("Health data is not available")
-        }
-
-        let quantityType = try makeHealthKitQuantityType(dataType: "bodyMass")
-        let kilogramUnit = HKUnit.gramUnit(with: .kilo)
-        let startDate = Date(timeIntervalSince1970: query.startTimeMs / 1000)
-        let endDate = Date(timeIntervalSince1970: query.endTimeMs / 1000)
-        let predicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate, options: [])
-        let sortDescriptors = [
-            NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: query.ascending),
-        ]
-
-        return Promise<[NativeBodyMassSample]>.async {
-            try await self.requireDeterminedReadAuthorization(for: quantityType, label: "body mass")
-            let samples = try await self.queryHealthKitSamples(
-                sampleType: quantityType,
-                limit: Int(query.limit),
-                predicate: predicate,
-                sortDescriptors: sortDescriptors
+        return try readInstantQuantitySamples(dataType: "bodyMass", query: query) { quantitySample, unit in
+            NativeBodyMassSample(
+                startTimeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
+                endTimeMs: quantitySample.endDate.timeIntervalSince1970 * 1000,
+                kilograms: quantitySample.quantity.doubleValue(for: unit),
+                source: quantitySample.sourceRevision.source.name
             )
-
-            return samples.compactMap { sample in
-                guard let quantitySample = sample as? HKQuantitySample else {
-                    return nil
-                }
-
-                return NativeBodyMassSample(
-                    startTimeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
-                    endTimeMs: quantitySample.endDate.timeIntervalSince1970 * 1000,
-                    kilograms: quantitySample.quantity.doubleValue(for: kilogramUnit),
-                    source: quantitySample.sourceRevision.source.name
-                )
-            }
         }
     }
 
