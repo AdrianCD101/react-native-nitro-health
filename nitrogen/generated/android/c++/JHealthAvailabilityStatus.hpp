@@ -15,7 +15,7 @@ namespace margelo::nitro::nitrohealth {
   using namespace facebook;
 
   /**
-   * The C++ JNI bridge between the C++ enum "HealthAvailabilityStatus" and the the Kotlin enum "HealthAvailabilityStatus".
+   * The C++ JNI bridge between the C++ enum "HealthAvailabilityStatus" and the Kotlin enum "HealthAvailabilityStatus".
    */
   struct JHealthAvailabilityStatus final: public jni::JavaClass<JHealthAvailabilityStatus> {
   public:

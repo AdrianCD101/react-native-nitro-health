@@ -17,7 +17,7 @@ namespace margelo::nitro::nitrohealth {
   using namespace facebook;
 
   /**
-   * The C++ JNI bridge between the C++ struct "NativeHealthDateRangeQuery" and the the Kotlin data class "NativeHealthDateRangeQuery".
+   * The C++ JNI bridge between the C++ struct "NativeHealthDateRangeQuery" and the Kotlin data class "NativeHealthDateRangeQuery".
    */
   struct JNativeHealthDateRangeQuery final: public jni::JavaClass<JNativeHealthDateRangeQuery> {
   public:
