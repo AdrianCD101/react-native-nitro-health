@@ -18,6 +18,16 @@ const activeEnergyReadPermission: HealthPermission[] = [
 const heartRateReadPermission: HealthPermission[] = [{ accessType: 'read', dataType: 'heartRate' }]
 const sleepReadPermission: HealthPermission[] = [{ accessType: 'read', dataType: 'sleep' }]
 const bodyMassReadPermission: HealthPermission[] = [{ accessType: 'read', dataType: 'bodyMass' }]
+const restingHeartRateReadPermission: HealthPermission[] = [
+  { accessType: 'read', dataType: 'restingHeartRate' },
+]
+const heartRateVariabilityReadPermission: HealthPermission[] = [
+  { accessType: 'read', dataType: 'heartRateVariability' },
+]
+const oxygenSaturationReadPermission: HealthPermission[] = [
+  { accessType: 'read', dataType: 'oxygenSaturation' },
+]
+const heightReadPermission: HealthPermission[] = [{ accessType: 'read', dataType: 'height' }]
 const emptyRange = {
   startDate: new Date('2000-01-01T00:00:00.000Z'),
   endDate: new Date('2000-01-02T00:00:00.000Z'),
@@ -728,6 +738,326 @@ describe('NitroHealth native module', () => {
     expect(['granted', 'completed']).toContain(result.status)
   })
 
+  describe('resting heart rate', () => {
+    it('reads resting heart rate from native code without crashing', async () => {
+      try {
+        const samples = await NitroHealth.readRestingHeartRate(emptyRange)
+
+        expect(Array.isArray(samples)).toBe(true)
+        for (const sample of samples) {
+          expect(typeof sample.bpm).toBe('number')
+          expect(['string', 'undefined']).toContain(typeof sample.source)
+        }
+      } catch (error) {
+        expect(error).toBeInstanceOf(Error)
+      }
+    })
+
+    it('rejects reading resting heart rate on Android when permission is not granted', async () => {
+      if (Platform.OS !== 'android') {
+        return
+      }
+
+      const status = await NitroHealth.getRequestStatusForAuthorization(
+        restingHeartRateReadPermission
+      )
+
+      if (status === 'unnecessary') {
+        return
+      }
+
+      await expect(NitroHealth.readRestingHeartRate(emptyRange)).rejects.toThrow(/permission/i)
+    })
+
+    it('rejects reading resting heart rate on iOS before authorization is requested (HealthKit notDetermined)', async () => {
+      if (Platform.OS !== 'ios') {
+        return
+      }
+
+      const status = await NitroHealth.getRequestStatusForAuthorization(
+        restingHeartRateReadPermission
+      )
+
+      if (status === 'unnecessary') {
+        return
+      }
+
+      await expect(NitroHealth.readRestingHeartRate(emptyRange)).rejects.toThrow(/not determined/i)
+    })
+
+    it('rejects saving resting heart rate when write permission is not granted', async () => {
+      if (await hasVerifiedPermissions([{ accessType: 'write', dataType: 'restingHeartRate' }])) {
+        return
+      }
+
+      await expect(
+        NitroHealth.saveRestingHeartRate([{ date: saveInterval.startDate, bpm: 58 }])
+      ).rejects.toThrow(/permission/i)
+    })
+
+    it('round-trips saved resting heart rate through native code when authorized', async () => {
+      const authorized = await hasVerifiedPermissions([
+        { accessType: 'write', dataType: 'restingHeartRate' },
+        { accessType: 'read', dataType: 'restingHeartRate' },
+      ])
+
+      if (!authorized) {
+        return
+      }
+
+      await NitroHealth.saveRestingHeartRate([{ date: saveInterval.startDate, bpm: 58 }])
+
+      const samples = await NitroHealth.readRestingHeartRate(saveReadRange)
+
+      if (isInconclusiveRead(samples)) {
+        return
+      }
+
+      expect(samples.some((sample) => sample.bpm === 58)).toBe(true)
+    })
+  })
+
+  // HRV has no save method: SDNN (iOS) and RMSSD (Android) are different, non-comparable
+  // measures, so there is no single value that would be correct to write on both platforms
+  // (see HeartRateVariabilitySample doc comment). Only reads are exercised here.
+  describe('heart rate variability', () => {
+    it('reads heart rate variability from native code without crashing', async () => {
+      try {
+        const samples = await NitroHealth.readHeartRateVariability(emptyRange)
+
+        expect(Array.isArray(samples)).toBe(true)
+        for (const sample of samples) {
+          expect(typeof sample.milliseconds).toBe('number')
+          expect(['sdnn', 'rmssd']).toContain(sample.method)
+          expect(['string', 'undefined']).toContain(typeof sample.source)
+        }
+      } catch (error) {
+        expect(error).toBeInstanceOf(Error)
+      }
+    })
+
+    it('rejects reading heart rate variability on Android when permission is not granted', async () => {
+      if (Platform.OS !== 'android') {
+        return
+      }
+
+      const status = await NitroHealth.getRequestStatusForAuthorization(
+        heartRateVariabilityReadPermission
+      )
+
+      if (status === 'unnecessary') {
+        return
+      }
+
+      await expect(NitroHealth.readHeartRateVariability(emptyRange)).rejects.toThrow(/permission/i)
+    })
+
+    it('rejects reading heart rate variability on iOS before authorization is requested (HealthKit notDetermined)', async () => {
+      if (Platform.OS !== 'ios') {
+        return
+      }
+
+      const status = await NitroHealth.getRequestStatusForAuthorization(
+        heartRateVariabilityReadPermission
+      )
+
+      if (status === 'unnecessary') {
+        return
+      }
+
+      await expect(NitroHealth.readHeartRateVariability(emptyRange)).rejects.toThrow(
+        /not determined/i
+      )
+    })
+
+    // The designated proof that `method` discriminates correctly per platform: iOS always
+    // reports HealthKit's SDNN metric, Android always reports Health Connect's RMSSD metric.
+    // SDNN and RMSSD are non-comparable, so this field must never disagree with Platform.OS.
+    it('reports the method matching this platform (SDNN on iOS, RMSSD on Android) when samples are returned', async () => {
+      if (!(await isPermissionUnnecessary(heartRateVariabilityReadPermission))) {
+        return
+      }
+
+      const samples = await NitroHealth.readHeartRateVariability(last7DaysRange)
+
+      if (isInconclusiveRead(samples)) {
+        return
+      }
+
+      const expectedMethod = Platform.OS === 'ios' ? 'sdnn' : 'rmssd'
+      for (const sample of samples) {
+        expect(sample.method).toBe(expectedMethod)
+      }
+    })
+  })
+
+  describe('oxygen saturation', () => {
+    it('reads oxygen saturation from native code without crashing', async () => {
+      try {
+        const samples = await NitroHealth.readOxygenSaturation(emptyRange)
+
+        expect(Array.isArray(samples)).toBe(true)
+        for (const sample of samples) {
+          expect(typeof sample.percentage).toBe('number')
+          expect(sample.percentage).toBeGreaterThanOrEqual(0)
+          expect(sample.percentage).toBeLessThanOrEqual(100)
+          expect(['string', 'undefined']).toContain(typeof sample.source)
+        }
+      } catch (error) {
+        expect(error).toBeInstanceOf(Error)
+      }
+    })
+
+    it('rejects reading oxygen saturation on Android when permission is not granted', async () => {
+      if (Platform.OS !== 'android') {
+        return
+      }
+
+      const status = await NitroHealth.getRequestStatusForAuthorization(
+        oxygenSaturationReadPermission
+      )
+
+      if (status === 'unnecessary') {
+        return
+      }
+
+      await expect(NitroHealth.readOxygenSaturation(emptyRange)).rejects.toThrow(/permission/i)
+    })
+
+    it('rejects reading oxygen saturation on iOS before authorization is requested (HealthKit notDetermined)', async () => {
+      if (Platform.OS !== 'ios') {
+        return
+      }
+
+      const status = await NitroHealth.getRequestStatusForAuthorization(
+        oxygenSaturationReadPermission
+      )
+
+      if (status === 'unnecessary') {
+        return
+      }
+
+      await expect(NitroHealth.readOxygenSaturation(emptyRange)).rejects.toThrow(/not determined/i)
+    })
+
+    it('rejects saving oxygen saturation when write permission is not granted', async () => {
+      if (await hasVerifiedPermissions([{ accessType: 'write', dataType: 'oxygenSaturation' }])) {
+        return
+      }
+
+      await expect(
+        NitroHealth.saveOxygenSaturation([{ date: saveInterval.startDate, percentage: 97.5 }])
+      ).rejects.toThrow(/permission/i)
+    })
+
+    // The designated on-device proof of the iOS fraction conversion: iOS stores this value as
+    // HealthKit's 0-1 fraction (percentage / 100) and reads it back multiplied by 100. A small
+    // tolerance absorbs floating-point round-trip error; the value must still land in 0-100.
+    it('round-trips saved oxygen saturation through native code when authorized', async () => {
+      const authorized = await hasVerifiedPermissions([
+        { accessType: 'write', dataType: 'oxygenSaturation' },
+        { accessType: 'read', dataType: 'oxygenSaturation' },
+      ])
+
+      if (!authorized) {
+        return
+      }
+
+      const savedPercentage = 97.5
+
+      await NitroHealth.saveOxygenSaturation([
+        { date: saveInterval.startDate, percentage: savedPercentage },
+      ])
+
+      const samples = await NitroHealth.readOxygenSaturation(saveReadRange)
+
+      if (isInconclusiveRead(samples)) {
+        return
+      }
+
+      const match = samples.find((sample) => Math.abs(sample.percentage - savedPercentage) < 0.01)
+
+      expect(match).toBeDefined()
+      expect(match?.percentage).toBeGreaterThanOrEqual(0)
+      expect(match?.percentage).toBeLessThanOrEqual(100)
+    })
+  })
+
+  describe('height', () => {
+    it('reads height from native code without crashing', async () => {
+      try {
+        const samples = await NitroHealth.readHeight(emptyRange)
+
+        expect(Array.isArray(samples)).toBe(true)
+        for (const sample of samples) {
+          expect(typeof sample.meters).toBe('number')
+          expect(['string', 'undefined']).toContain(typeof sample.source)
+        }
+      } catch (error) {
+        expect(error).toBeInstanceOf(Error)
+      }
+    })
+
+    it('rejects reading height on Android when permission is not granted', async () => {
+      if (Platform.OS !== 'android') {
+        return
+      }
+
+      const status = await NitroHealth.getRequestStatusForAuthorization(heightReadPermission)
+
+      if (status === 'unnecessary') {
+        return
+      }
+
+      await expect(NitroHealth.readHeight(emptyRange)).rejects.toThrow(/permission/i)
+    })
+
+    it('rejects reading height on iOS before authorization is requested (HealthKit notDetermined)', async () => {
+      if (Platform.OS !== 'ios') {
+        return
+      }
+
+      const status = await NitroHealth.getRequestStatusForAuthorization(heightReadPermission)
+
+      if (status === 'unnecessary') {
+        return
+      }
+
+      await expect(NitroHealth.readHeight(emptyRange)).rejects.toThrow(/not determined/i)
+    })
+
+    it('rejects saving height when write permission is not granted', async () => {
+      if (await hasVerifiedPermissions([{ accessType: 'write', dataType: 'height' }])) {
+        return
+      }
+
+      await expect(
+        NitroHealth.saveHeight([{ date: saveInterval.startDate, meters: 1.78 }])
+      ).rejects.toThrow(/permission/i)
+    })
+
+    it('round-trips saved height through native code when authorized', async () => {
+      const authorized = await hasVerifiedPermissions([
+        { accessType: 'write', dataType: 'height' },
+        { accessType: 'read', dataType: 'height' },
+      ])
+
+      if (!authorized) {
+        return
+      }
+
+      await NitroHealth.saveHeight([{ date: saveInterval.startDate, meters: 1.78 }])
+
+      const samples = await NitroHealth.readHeight(saveReadRange)
+
+      if (isInconclusiveRead(samples)) {
+        return
+      }
+
+      expect(samples.some((sample) => sample.meters === 1.78)).toBe(true)
+    })
+  })
+
   describe('readStatistics', () => {
     it('reads statistics from native code without crashing', async () => {
       try {
@@ -759,6 +1089,36 @@ describe('NitroHealth native module', () => {
       } catch (error) {
         expect(error).toBeInstanceOf(Error)
       }
+
+      try {
+        const dailyRestingHeartRate = await NitroHealth.readStatistics('restingHeartRate', {
+          ...last7DaysRange,
+          bucket: 'day',
+          metrics: ['avg', 'min', 'max'],
+        })
+
+        expect(Array.isArray(dailyRestingHeartRate)).toBe(true)
+        for (const entry of dailyRestingHeartRate) {
+          assertStatisticsEntry(entry, ['avg', 'min', 'max'])
+        }
+      } catch (error) {
+        expect(error).toBeInstanceOf(Error)
+      }
+
+      try {
+        const dailyHeight = await NitroHealth.readStatistics('height', {
+          ...last7DaysRange,
+          bucket: 'day',
+          metrics: ['avg', 'min', 'max'],
+        })
+
+        expect(Array.isArray(dailyHeight)).toBe(true)
+        for (const entry of dailyHeight) {
+          assertStatisticsEntry(entry, ['avg', 'min', 'max'])
+        }
+      } catch (error) {
+        expect(error).toBeInstanceOf(Error)
+      }
     })
 
     it('rejects unsupported metric/data-type combinations and invalid inputs before crossing the native boundary', async () => {
@@ -785,6 +1145,26 @@ describe('NitroHealth native module', () => {
           metrics: ['sum'],
         })
       ).rejects.toThrow(`readStatistics does not support the 'sleep' data type`)
+
+      // HRV and SpO2 have no aggregate metrics on either platform (Android physically cannot
+      // aggregate them; see HeartRateVariabilitySample/OxygenSaturationSample), so both are
+      // rejected in JS before any native call — use readHeartRateVariability/readOxygenSaturation
+      // instead.
+      await expect(
+        NitroHealth.readStatistics('heartRateVariability', {
+          ...emptyRange,
+          bucket: 'day',
+          metrics: ['avg'],
+        })
+      ).rejects.toThrow(`readStatistics does not support the 'heartRateVariability' data type`)
+
+      await expect(
+        NitroHealth.readStatistics('oxygenSaturation', {
+          ...emptyRange,
+          bucket: 'day',
+          metrics: ['avg'],
+        })
+      ).rejects.toThrow(`readStatistics does not support the 'oxygenSaturation' data type`)
 
       await expect(
         NitroHealth.readStatistics('steps', {

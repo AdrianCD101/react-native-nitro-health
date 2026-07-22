@@ -5,7 +5,9 @@ import androidx.health.connect.client.aggregate.AggregationResult
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
 import androidx.health.connect.client.records.DistanceRecord
 import androidx.health.connect.client.records.HeartRateRecord
+import androidx.health.connect.client.records.HeightRecord
 import androidx.health.connect.client.records.Record
+import androidx.health.connect.client.records.RestingHeartRateRecord
 import androidx.health.connect.client.records.StepsRecord
 import androidx.health.connect.client.records.WeightRecord
 import kotlin.reflect.KClass
@@ -98,6 +100,42 @@ internal fun statisticsDescriptorForDataType(dataType: String): StatisticsDescri
                 "max" to StatisticsMetricBinding(
                     metric = WeightRecord.WEIGHT_MAX,
                     extract = { result -> result[WeightRecord.WEIGHT_MAX]?.inKilograms }
+                )
+            )
+        )
+        "restingHeartRate" -> StatisticsDescriptor(
+            recordType = RestingHeartRateRecord::class,
+            permissionLabel = "resting heart rate",
+            metrics = mapOf(
+                "avg" to StatisticsMetricBinding(
+                    metric = RestingHeartRateRecord.BPM_AVG,
+                    extract = { result -> result[RestingHeartRateRecord.BPM_AVG]?.toDouble() }
+                ),
+                "min" to StatisticsMetricBinding(
+                    metric = RestingHeartRateRecord.BPM_MIN,
+                    extract = { result -> result[RestingHeartRateRecord.BPM_MIN]?.toDouble() }
+                ),
+                "max" to StatisticsMetricBinding(
+                    metric = RestingHeartRateRecord.BPM_MAX,
+                    extract = { result -> result[RestingHeartRateRecord.BPM_MAX]?.toDouble() }
+                )
+            )
+        )
+        "height" -> StatisticsDescriptor(
+            recordType = HeightRecord::class,
+            permissionLabel = "height",
+            metrics = mapOf(
+                "avg" to StatisticsMetricBinding(
+                    metric = HeightRecord.HEIGHT_AVG,
+                    extract = { result -> result[HeightRecord.HEIGHT_AVG]?.inMeters }
+                ),
+                "min" to StatisticsMetricBinding(
+                    metric = HeightRecord.HEIGHT_MIN,
+                    extract = { result -> result[HeightRecord.HEIGHT_MIN]?.inMeters }
+                ),
+                "max" to StatisticsMetricBinding(
+                    metric = HeightRecord.HEIGHT_MAX,
+                    extract = { result -> result[HeightRecord.HEIGHT_MAX]?.inMeters }
                 )
             )
         )

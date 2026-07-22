@@ -3,16 +3,23 @@ package com.nitrohealth
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
 import androidx.health.connect.client.records.DistanceRecord
 import androidx.health.connect.client.records.HeartRateRecord
+import androidx.health.connect.client.records.HeightRecord
+import androidx.health.connect.client.records.OxygenSaturationRecord
+import androidx.health.connect.client.records.RestingHeartRateRecord
 import androidx.health.connect.client.records.StepsRecord
 import androidx.health.connect.client.records.WeightRecord
 import androidx.health.connect.client.records.metadata.Metadata
 import androidx.health.connect.client.units.Energy
 import androidx.health.connect.client.units.Length
 import androidx.health.connect.client.units.Mass
+import androidx.health.connect.client.units.Percentage
 import com.margelo.nitro.nitrohealth.NativeActiveEnergyBurnedSampleInput
 import com.margelo.nitro.nitrohealth.NativeBodyMassSampleInput
 import com.margelo.nitro.nitrohealth.NativeDistanceSampleInput
 import com.margelo.nitro.nitrohealth.NativeHeartRateSampleInput
+import com.margelo.nitro.nitrohealth.NativeHeightSampleInput
+import com.margelo.nitro.nitrohealth.NativeOxygenSaturationSampleInput
+import com.margelo.nitro.nitrohealth.NativeRestingHeartRateSampleInput
 import com.margelo.nitro.nitrohealth.NativeStepSampleInput
 import java.time.Instant
 import kotlin.math.roundToLong
@@ -88,6 +95,45 @@ internal fun toWeightRecords(samples: Array<NativeBodyMassSampleInput>): List<We
             time = Instant.ofEpochMilli(sample.timeMs.toLong()),
             zoneOffset = null,
             weight = Mass.kilograms(sample.kilograms),
+            metadata = Metadata.unknownRecordingMethod()
+        )
+    }
+}
+
+internal fun toRestingHeartRateRecords(
+    samples: Array<NativeRestingHeartRateSampleInput>
+): List<RestingHeartRateRecord> {
+    return samples.map { sample ->
+        RestingHeartRateRecord(
+            time = Instant.ofEpochMilli(sample.timeMs.toLong()),
+            zoneOffset = null,
+            // Health Connect stores whole bpm; round to nearest instead of truncating
+            // so fractional readings (e.g. 72.9) don't lose almost a full beat.
+            beatsPerMinute = sample.bpm.roundToLong(),
+            metadata = Metadata.unknownRecordingMethod()
+        )
+    }
+}
+
+internal fun toOxygenSaturationRecords(
+    samples: Array<NativeOxygenSaturationSampleInput>
+): List<OxygenSaturationRecord> {
+    return samples.map { sample ->
+        OxygenSaturationRecord(
+            time = Instant.ofEpochMilli(sample.timeMs.toLong()),
+            zoneOffset = null,
+            percentage = Percentage(sample.percentage),
+            metadata = Metadata.unknownRecordingMethod()
+        )
+    }
+}
+
+internal fun toHeightRecords(samples: Array<NativeHeightSampleInput>): List<HeightRecord> {
+    return samples.map { sample ->
+        HeightRecord(
+            time = Instant.ofEpochMilli(sample.timeMs.toLong()),
+            zoneOffset = null,
+            height = Length.meters(sample.meters),
             metadata = Metadata.unknownRecordingMethod()
         )
     }

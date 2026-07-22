@@ -9,7 +9,11 @@ import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
 import androidx.health.connect.client.records.DistanceRecord
 import androidx.health.connect.client.records.HeartRateRecord
+import androidx.health.connect.client.records.HeartRateVariabilityRmssdRecord
+import androidx.health.connect.client.records.HeightRecord
+import androidx.health.connect.client.records.OxygenSaturationRecord
 import androidx.health.connect.client.records.Record
+import androidx.health.connect.client.records.RestingHeartRateRecord
 import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.StepsRecord
 import androidx.health.connect.client.records.WeightRecord
@@ -39,6 +43,13 @@ import com.margelo.nitro.nitrohealth.NativeHealthTimeRangeQuery
 import com.margelo.nitro.nitrohealth.NativeHeartRateSample
 import com.margelo.nitro.nitrohealth.NativeHeartRateSampleInput
 import com.margelo.nitro.nitrohealth.NativeHeartRateStatistics
+import com.margelo.nitro.nitrohealth.NativeHeartRateVariabilitySample
+import com.margelo.nitro.nitrohealth.NativeHeightSample
+import com.margelo.nitro.nitrohealth.NativeHeightSampleInput
+import com.margelo.nitro.nitrohealth.NativeOxygenSaturationSample
+import com.margelo.nitro.nitrohealth.NativeOxygenSaturationSampleInput
+import com.margelo.nitro.nitrohealth.NativeRestingHeartRateSample
+import com.margelo.nitro.nitrohealth.NativeRestingHeartRateSampleInput
 import com.margelo.nitro.nitrohealth.NativeSleepSample
 import com.margelo.nitro.nitrohealth.NativeStepSample
 import com.margelo.nitro.nitrohealth.NativeStepSampleInput
@@ -417,6 +428,97 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         }
     }
 
+    // Shared boilerplate for instantaneous (single-instant, one-record-per-reading) data types:
+    // availability check, client creation, read-permission gate, and a time-ranged
+    // ReadRecordsRequest that applies the query's ascending order and limit directly (unlike
+    // readHeartRate/readSleepSamples, these records don't need post-read flattening).
+    private suspend fun <T : Record> readInstantRecords(
+        recordType: KClass<T>,
+        label: String,
+        query: NativeHealthDateRangeQuery
+    ): List<T> {
+        val context = NitroModules.applicationContext
+            ?: throw IllegalStateException("Android application context is unavailable")
+
+        if (getAvailabilityStatus() != HealthAvailabilityStatus.AVAILABLE) {
+            throw IllegalStateException("Health Connect is not available")
+        }
+
+        val client = HealthConnectClient.getOrCreate(context)
+        requireReadPermission(client, recordType, label)
+
+        val request = ReadRecordsRequest(
+            recordType = recordType,
+            timeRangeFilter = TimeRangeFilter.between(
+                Instant.ofEpochMilli(query.startTimeMs.toLong()),
+                Instant.ofEpochMilli(query.endTimeMs.toLong())
+            ),
+            ascendingOrder = query.ascending,
+            pageSize = query.limit.toInt()
+        )
+
+        return client.readRecords(request).records
+    }
+
+    override fun readRestingHeartRate(
+        query: NativeHealthDateRangeQuery
+    ): Promise<Array<NativeRestingHeartRateSample>> {
+        return Promise.async {
+            readInstantRecords(RestingHeartRateRecord::class, "resting heart rate", query).map { record ->
+                NativeRestingHeartRateSample(
+                    timeMs = record.time.toEpochMilli().toDouble(),
+                    bpm = record.beatsPerMinute.toDouble(),
+                    source = record.metadata.dataOrigin.packageName
+                )
+            }.toTypedArray()
+        }
+    }
+
+    override fun readHeartRateVariability(
+        query: NativeHealthDateRangeQuery
+    ): Promise<Array<NativeHeartRateVariabilitySample>> {
+        return Promise.async {
+            readInstantRecords(
+                HeartRateVariabilityRmssdRecord::class,
+                "heart rate variability",
+                query
+            ).map { record ->
+                NativeHeartRateVariabilitySample(
+                    timeMs = record.time.toEpochMilli().toDouble(),
+                    milliseconds = record.heartRateVariabilityMillis,
+                    method = "rmssd",
+                    source = record.metadata.dataOrigin.packageName
+                )
+            }.toTypedArray()
+        }
+    }
+
+    override fun readOxygenSaturation(
+        query: NativeHealthDateRangeQuery
+    ): Promise<Array<NativeOxygenSaturationSample>> {
+        return Promise.async {
+            readInstantRecords(OxygenSaturationRecord::class, "oxygen saturation", query).map { record ->
+                NativeOxygenSaturationSample(
+                    timeMs = record.time.toEpochMilli().toDouble(),
+                    percentage = record.percentage.value,
+                    source = record.metadata.dataOrigin.packageName
+                )
+            }.toTypedArray()
+        }
+    }
+
+    override fun readHeight(query: NativeHealthDateRangeQuery): Promise<Array<NativeHeightSample>> {
+        return Promise.async {
+            readInstantRecords(HeightRecord::class, "height", query).map { record ->
+                NativeHeightSample(
+                    timeMs = record.time.toEpochMilli().toDouble(),
+                    meters = record.height.inMeters,
+                    source = record.metadata.dataOrigin.packageName
+                )
+            }.toTypedArray()
+        }
+    }
+
     override fun readHeartRateStatistics(query: NativeHealthTimeRangeQuery): Promise<NativeHeartRateStatistics> {
         return Promise.async {
             val context = NitroModules.applicationContext
@@ -649,6 +751,30 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         return Promise.async {
             val client = requireWritableClient(WeightRecord::class, "body mass")
             client.insertRecords(toWeightRecords(samples))
+            Unit
+        }
+    }
+
+    override fun saveRestingHeartRate(samples: Array<NativeRestingHeartRateSampleInput>): Promise<Unit> {
+        return Promise.async {
+            val client = requireWritableClient(RestingHeartRateRecord::class, "resting heart rate")
+            client.insertRecords(toRestingHeartRateRecords(samples))
+            Unit
+        }
+    }
+
+    override fun saveOxygenSaturation(samples: Array<NativeOxygenSaturationSampleInput>): Promise<Unit> {
+        return Promise.async {
+            val client = requireWritableClient(OxygenSaturationRecord::class, "oxygen saturation")
+            client.insertRecords(toOxygenSaturationRecords(samples))
+            Unit
+        }
+    }
+
+    override fun saveHeight(samples: Array<NativeHeightSampleInput>): Promise<Unit> {
+        return Promise.async {
+            val client = requireWritableClient(HeightRecord::class, "height")
+            client.insertRecords(toHeightRecords(samples))
             Unit
         }
     }

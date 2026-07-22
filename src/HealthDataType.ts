@@ -2,7 +2,11 @@
 export type HealthDataType =
   | 'steps'
   | 'heartRate'
+  | 'restingHeartRate'
+  | 'heartRateVariability'
   | 'distance'
   | 'activeEnergyBurned'
+  | 'oxygenSaturation'
+  | 'height'
   | 'sleep'
   | 'bodyMass'

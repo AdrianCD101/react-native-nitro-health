@@ -9,7 +9,8 @@ module.exports = (api) => {
       [
         'module-resolver',
         {
-          extensions: ['.js', '.ts', '.json', '.jsx', '.tsx'],
+          // .ts/.tsx before .js so stray compiled artifacts can never shadow sources
+          extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
           alias: {
             [pak.name]: path.join(__dirname, '../', pak.source),
           },

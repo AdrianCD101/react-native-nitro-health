@@ -40,6 +40,28 @@ func makeHealthDataTypeDescriptor(dataType: String) throws -> HealthDataTypeDesc
         )
     case "bodyMass":
         return HealthDataTypeDescriptor(identifier: .bodyMass, unit: HKUnit.gramUnit(with: .kilo), label: "body mass", isCumulative: false)
+    case "restingHeartRate":
+        return HealthDataTypeDescriptor(
+            identifier: .restingHeartRate,
+            unit: HKUnit.count().unitDivided(by: HKUnit.minute()),
+            label: "resting heart rate",
+            isCumulative: false
+        )
+    case "heartRateVariability":
+        return HealthDataTypeDescriptor(
+            identifier: .heartRateVariabilitySDNN,
+            unit: HKUnit.secondUnit(with: .milli),
+            label: "heart rate variability",
+            isCumulative: false
+        )
+    case "oxygenSaturation":
+        // HealthKit stores this as a fraction (0-1 via HKUnit.percent()); the JS surface uses
+        // 0-100. Statistics are unreachable today because JS rejects metrics for this data type
+        // (see STATISTICS_METRICS_BY_DATA_TYPE), but if that ever changes, readStatistics must
+        // convert this unit's output the same way readOxygenSaturation/save do (*100 / /100).
+        return HealthDataTypeDescriptor(identifier: .oxygenSaturation, unit: HKUnit.percent(), label: "oxygen saturation", isCumulative: false)
+    case "height":
+        return HealthDataTypeDescriptor(identifier: .height, unit: HKUnit.meter(), label: "height", isCumulative: false)
     default:
         throw permissionError("Unsupported health data type: \(dataType)")
     }

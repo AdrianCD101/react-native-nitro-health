@@ -67,6 +67,10 @@ namespace margelo::nitro::nitrohealth {
     std::shared_ptr<Promise<std::vector<NativeBodyMassSample>>> readBodyMass(const NativeHealthDateRangeQuery& query) override;
     std::shared_ptr<Promise<std::vector<NativeHeartRateSample>>> readHeartRate(const NativeHealthDateRangeQuery& query) override;
     std::shared_ptr<Promise<NativeHeartRateStatistics>> readHeartRateStatistics(const NativeHealthTimeRangeQuery& query) override;
+    std::shared_ptr<Promise<std::vector<NativeRestingHeartRateSample>>> readRestingHeartRate(const NativeHealthDateRangeQuery& query) override;
+    std::shared_ptr<Promise<std::vector<NativeHeartRateVariabilitySample>>> readHeartRateVariability(const NativeHealthDateRangeQuery& query) override;
+    std::shared_ptr<Promise<std::vector<NativeOxygenSaturationSample>>> readOxygenSaturation(const NativeHealthDateRangeQuery& query) override;
+    std::shared_ptr<Promise<std::vector<NativeHeightSample>>> readHeight(const NativeHealthDateRangeQuery& query) override;
     std::shared_ptr<Promise<std::vector<NativeHealthStatistics>>> readStatistics(const std::string& dataType, const NativeHealthStatisticsQuery& query) override;
     std::shared_ptr<Promise<std::vector<NativeSleepSample>>> readSleepSamples(const NativeHealthDateRangeQuery& query) override;
     std::shared_ptr<Promise<void>> saveSteps(const std::vector<NativeStepSampleInput>& samples) override;
@@ -74,6 +78,9 @@ namespace margelo::nitro::nitrohealth {
     std::shared_ptr<Promise<void>> saveActiveEnergyBurned(const std::vector<NativeActiveEnergyBurnedSampleInput>& samples) override;
     std::shared_ptr<Promise<void>> saveHeartRate(const std::vector<NativeHeartRateSampleInput>& samples) override;
     std::shared_ptr<Promise<void>> saveBodyMass(const std::vector<NativeBodyMassSampleInput>& samples) override;
+    std::shared_ptr<Promise<void>> saveRestingHeartRate(const std::vector<NativeRestingHeartRateSampleInput>& samples) override;
+    std::shared_ptr<Promise<void>> saveOxygenSaturation(const std::vector<NativeOxygenSaturationSampleInput>& samples) override;
+    std::shared_ptr<Promise<void>> saveHeight(const std::vector<NativeHeightSampleInput>& samples) override;
     std::shared_ptr<Promise<AuthorizationRequestStatus>> getRequestStatusForAuthorization(const std::vector<NativeHealthPermission>& permissions) override;
     std::shared_ptr<Promise<NativeHealthAuthorizationResult>> requestAuthorization(const std::vector<NativeHealthPermission>& permissions) override;
 

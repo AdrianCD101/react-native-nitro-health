@@ -49,7 +49,7 @@ On iOS, apps still need the HealthKit capability and the relevant HealthKit usag
 
 ## Permissions
 
-The first supported unified permission data types are `steps`, `distance`, `activeEnergyBurned`, `heartRate`, `sleep`, and `bodyMass`.
+The supported unified permission data types are `steps`, `distance`, `activeEnergyBurned`, `heartRate`, `restingHeartRate`, `heartRateVariability`, `oxygenSaturation`, `height`, `sleep`, and `bodyMass`.
 
 ```ts
 import { NitroHealth, type HealthPermission } from 'react-native-nitro-health'
@@ -83,14 +83,18 @@ if (status === 'shouldRequest') {
 
 Android consumer apps must declare the matching Health Connect permissions in their own `AndroidManifest.xml` before requesting access. Health Connect silently refuses undeclared permissions: the permission screen never shows them and they are never granted, so the corresponding read or write calls keep failing with a missing-permission error.
 
-| Data type            | Android read permission                                 | Android write permission                                 |
-| -------------------- | ------------------------------------------------------- | -------------------------------------------------------- |
-| `steps`              | `android.permission.health.READ_STEPS`                  | `android.permission.health.WRITE_STEPS`                  |
-| `distance`           | `android.permission.health.READ_DISTANCE`               | `android.permission.health.WRITE_DISTANCE`               |
-| `activeEnergyBurned` | `android.permission.health.READ_ACTIVE_CALORIES_BURNED` | `android.permission.health.WRITE_ACTIVE_CALORIES_BURNED` |
-| `heartRate`          | `android.permission.health.READ_HEART_RATE`             | `android.permission.health.WRITE_HEART_RATE`             |
-| `sleep`              | `android.permission.health.READ_SLEEP`                  | n/a (writes not supported yet)                           |
-| `bodyMass`           | `android.permission.health.READ_WEIGHT`                 | `android.permission.health.WRITE_WEIGHT`                 |
+| Data type              | Android read permission                                 | Android write permission                                 |
+| ---------------------- | ------------------------------------------------------- | -------------------------------------------------------- |
+| `steps`                | `android.permission.health.READ_STEPS`                  | `android.permission.health.WRITE_STEPS`                  |
+| `distance`             | `android.permission.health.READ_DISTANCE`               | `android.permission.health.WRITE_DISTANCE`               |
+| `activeEnergyBurned`   | `android.permission.health.READ_ACTIVE_CALORIES_BURNED` | `android.permission.health.WRITE_ACTIVE_CALORIES_BURNED` |
+| `heartRate`            | `android.permission.health.READ_HEART_RATE`             | `android.permission.health.WRITE_HEART_RATE`             |
+| `restingHeartRate`     | `android.permission.health.READ_RESTING_HEART_RATE`     | `android.permission.health.WRITE_RESTING_HEART_RATE`     |
+| `heartRateVariability` | `android.permission.health.READ_HEART_RATE_VARIABILITY` | n/a (writes not supported yet)                           |
+| `oxygenSaturation`     | `android.permission.health.READ_OXYGEN_SATURATION`      | `android.permission.health.WRITE_OXYGEN_SATURATION`      |
+| `height`               | `android.permission.health.READ_HEIGHT`                 | `android.permission.health.WRITE_HEIGHT`                 |
+| `sleep`                | `android.permission.health.READ_SLEEP`                  | n/a (writes not supported yet)                           |
+| `bodyMass`             | `android.permission.health.READ_WEIGHT`                 | `android.permission.health.WRITE_WEIGHT`                 |
 
 On iOS, apps must add `NSHealthShareUsageDescription` (reads) and `NSHealthUpdateUsageDescription` (writes) to `Info.plist`, plus the HealthKit capability.
 
@@ -161,18 +165,22 @@ const hourlyHeartRate = await NitroHealth.readStatistics('heartRate', {
 
 `readStatistics(dataType, query)` returns one bucket per interval, each with `startDate`, `endDate`, and the requested metric fields. A metric field is only present on the result when it was requested in `query.metrics` and is supported for `dataType`:
 
-| Data type            | Supported metrics   | Unit                                   |
-| -------------------- | ------------------- | -------------------------------------- |
-| `steps`              | `sum`               | count                                  |
-| `distance`           | `sum`               | meters                                 |
-| `activeEnergyBurned` | `sum`               | kcal                                   |
-| `heartRate`          | `avg`, `min`, `max` | bpm                                    |
-| `bodyMass`           | `avg`, `min`, `max` | kg                                     |
-| `sleep`              | —                   | not supported — use `readSleepSamples` |
+| Data type              | Supported metrics   | Unit                                           |
+| ---------------------- | ------------------- | ---------------------------------------------- |
+| `steps`                | `sum`               | count                                          |
+| `distance`             | `sum`               | meters                                         |
+| `activeEnergyBurned`   | `sum`               | kcal                                           |
+| `heartRate`            | `avg`, `min`, `max` | bpm                                            |
+| `restingHeartRate`     | `avg`, `min`, `max` | bpm                                            |
+| `heartRateVariability` | —                   | not supported — use `readHeartRateVariability` |
+| `oxygenSaturation`     | —                   | not supported — use `readOxygenSaturation`     |
+| `height`               | `avg`, `min`, `max` | meters                                         |
+| `bodyMass`             | `avg`, `min`, `max` | kg                                             |
+| `sleep`                | —                   | not supported — use `readSleepSamples`         |
 
-Requesting a metric that is not supported for `dataType`, an empty `metrics` array, an unknown `bucket`, or the `sleep` data type all reject before crossing the native boundary.
+Requesting a metric that is not supported for `dataType`, an empty `metrics` array, an unknown `bucket`, or the `sleep`, `heartRateVariability`, or `oxygenSaturation` data type all reject before crossing the native boundary.
 
-**Bucket behavior:** buckets anchor at `query.startDate` on both platforms — pass a local-midnight `startDate` when you need calendar-day buckets. `'week'` buckets are a rolling 7 days from the anchor, not calendar weeks. The final bucket is clamped to `endDate`, empty buckets are omitted, and results are always ascending. `'hour'` buckets are a fixed 3600 seconds; `'day'`, `'week'`, and `'month'` buckets are calendar-aware in the device's local timezone, so a bucket can span 23 or 25 hours across a daylight-saving transition. On Android, heart-rate `avg` is integer-valued (Health Connect's `BPM_AVG` is a `Long`); on iOS it is fractional. As with other reads, HealthKit cannot distinguish a denied read from no data (see the permission caveat in the Permissions section above) — a denied read resolves with empty buckets rather than rejecting.
+**Bucket behavior:** buckets anchor at `query.startDate` on both platforms — pass a local-midnight `startDate` when you need calendar-day buckets. `'week'` buckets are a rolling 7 days from the anchor, not calendar weeks. The final bucket is clamped to `endDate`, empty buckets are omitted, and results are always ascending. `'hour'` buckets are a fixed 3600 seconds; `'day'`, `'week'`, and `'month'` buckets are calendar-aware in the device's local timezone, so a bucket can span 23 or 25 hours across a daylight-saving transition. On Android, heart-rate and resting-heart-rate `avg` are integer-valued (Health Connect's `BPM_AVG` is a `Long`); on iOS they are fractional. As with other reads, HealthKit cannot distinguish a denied read from no data (see the permission caveat in the Permissions section above) — a denied read resolves with empty buckets rather than rejecting.
 
 Daily total methods return one bucket per day and predate `readStatistics()`. They are **deprecated** in favor of it and will be removed before 1.0, but keep their existing behavior in the meantime: on iOS, buckets align to local calendar days, so the first and last buckets may be partial when the query starts or ends mid-day — this differs from `readStatistics()`, which always anchors buckets at `query.startDate` rather than local midnight. On Android, Health Connect anchors buckets to the query's start time, so a query starting at 15:30 returns 15:30-to-15:30 windows — pass a local-midnight `startDate` when you need calendar-day buckets on both platforms. Empty days are omitted, so apps that need a continuous chart should zero-fill missing days. `ascending` orders the buckets and `limit` caps the returned bucket count.
 
@@ -199,6 +207,39 @@ const heartRate = await NitroHealth.readHeartRate({
 
 `readHeartRate()` returns individual readings with `date`, `bpm`, and an optional `source` (the originating app or device). On iOS each reading is one `HKQuantitySample`; on Android a `HeartRateRecord` holds many readings, so records are flattened to individual points and `limit` caps the flattened, time-ordered result (records are fetched up to `limit`). It returns an empty array when the query succeeds but no samples are available. Apps must request and receive heart rate read permission before relying on returned data.
 
+## Read Resting Heart Rate
+
+```ts
+import { NitroHealth } from 'react-native-nitro-health'
+
+const restingHeartRate = await NitroHealth.readRestingHeartRate({
+  startDate: new Date('2026-01-01T00:00:00.000Z'),
+  endDate: new Date('2026-01-08T00:00:00.000Z'),
+  limit: 100,
+  ascending: true,
+})
+```
+
+`readRestingHeartRate()` returns individual readings with `date`, `bpm`, and an optional `source`. It returns an empty array when the query succeeds but no samples are available. Apps must request and receive resting heart rate read permission before relying on returned data.
+
+## Read Heart Rate Variability
+
+```ts
+import { NitroHealth } from 'react-native-nitro-health'
+
+const hrv = await NitroHealth.readHeartRateVariability({
+  startDate: new Date('2026-01-01T00:00:00.000Z'),
+  endDate: new Date('2026-01-08T00:00:00.000Z'),
+  limit: 100,
+  ascending: true,
+})
+```
+
+`readHeartRateVariability()` returns individual readings with `date`, `milliseconds`, a `method` field, and an optional `source`.
+
+> [!IMPORTANT]
+> **SDNN and RMSSD are different, non-comparable HRV measures — never mix or chart samples with different `method` values together.** iOS reports HealthKit's HRV SDNN metric, so every sample read on iOS has `method: 'sdnn'`. Android reports Health Connect's HRV RMSSD metric, so every sample read on Android has `method: 'rmssd'`. The `method` field exists precisely so app code can tell which metric a sample used and avoid combining SDNN and RMSSD values in the same average, trend line, or chart. There is no `saveHeartRateVariability()`: because the two platforms use non-comparable metrics, there is no single value that would be meaningful to write on both.
+
 ## Read Body Mass
 
 ```ts
@@ -213,6 +254,36 @@ const bodyMass = await NitroHealth.readBodyMass({
 ```
 
 `readBodyMass()` returns body mass samples with `startDate`, `endDate`, `kilograms`, and an optional `source`. It returns an empty array when the platform query succeeds but no matching samples are available. Apps must request and receive body mass read permission before relying on returned data.
+
+## Read Oxygen Saturation
+
+```ts
+import { NitroHealth } from 'react-native-nitro-health'
+
+const oxygenSaturation = await NitroHealth.readOxygenSaturation({
+  startDate: new Date('2026-01-01T00:00:00.000Z'),
+  endDate: new Date('2026-01-08T00:00:00.000Z'),
+  limit: 100,
+  ascending: true,
+})
+```
+
+`readOxygenSaturation()` returns individual readings with `date`, `percentage`, and an optional `source`. `percentage` is 0-100 on both platforms: Health Connect's `Percentage` is used directly, while HealthKit stores oxygen saturation as a 0-1 fraction, so iOS reads are converted (`× 100`) before they reach JavaScript. It returns an empty array when the query succeeds but no samples are available. Apps must request and receive oxygen saturation read permission before relying on returned data.
+
+## Read Height
+
+```ts
+import { NitroHealth } from 'react-native-nitro-health'
+
+const height = await NitroHealth.readHeight({
+  startDate: new Date('2026-01-01T00:00:00.000Z'),
+  endDate: new Date('2026-01-08T00:00:00.000Z'),
+  limit: 100,
+  ascending: true,
+})
+```
+
+`readHeight()` returns individual readings with `date`, `meters`, and an optional `source`. It returns an empty array when the query succeeds but no samples are available. Apps must request and receive height read permission before relying on returned data.
 
 ## Read Sleep
 
@@ -233,7 +304,7 @@ On iOS, HealthKit sleep analysis is category interval data and `inBed` samples c
 
 ## Write Samples
 
-Batch save methods are available for `steps`, `distance`, `activeEnergyBurned`, `heartRate`, and `bodyMass` (sleep writes are not supported yet). Request write authorization first, then save:
+Batch save methods are available for `steps`, `distance`, `activeEnergyBurned`, `heartRate`, `restingHeartRate`, `oxygenSaturation`, `height`, and `bodyMass` (sleep and heart rate variability writes are not supported yet — see [Read Heart Rate Variability](#read-heart-rate-variability) for why HRV has no save method). Request write authorization first, then save:
 
 ```ts
 import { NitroHealth } from 'react-native-nitro-health'
@@ -260,6 +331,9 @@ Interval samples take `startDate`/`endDate` with `startDate` strictly before `en
 Point-in-time samples take a single `date`:
 
 - `saveHeartRate(samples)` — `{ date, bpm }`, `bpm` must be between 1 and 300. Android stores whole bpm (fractional values are rounded to the nearest integer); iOS stores the exact value.
+- `saveRestingHeartRate(samples)` — `{ date, bpm }`, `bpm` must be between 1 and 300. Android stores whole bpm (fractional values are rounded to the nearest integer); iOS stores the exact value.
+- `saveOxygenSaturation(samples)` — `{ date, percentage }`, `percentage` must be between 0 and 100 inclusive. iOS converts to HealthKit's 0-1 fraction before saving (`÷ 100`); Android stores the value directly.
+- `saveHeight(samples)` — `{ date, meters }`, `meters` must be greater than 0, up to 3.
 - `saveBodyMass(samples)` — `{ date, kilograms }`, `kilograms` must be greater than 0, up to 1,000.
 
 All save methods take a non-empty array, resolve to `void` when every sample is saved (both platforms save each call atomically), and reject before crossing the native boundary when validation fails — error messages include the failing index, for example `samples[2]: bpm must be between 1 and 300`.

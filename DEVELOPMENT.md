@@ -11,12 +11,14 @@ flowchart TD
   B1 --> C
 
   C -->|Yes: src/specs/*.nitro.ts| C1[bun run codegen]
-  C1 --> C2{iOS?}
-  C2 -->|Yes| C3[cd example && bun run pod && bun run ios]
-  C2 -->|No: Android| C4[cd example && bun run android]
+  C1 --> CI[cd example && bun install]
+  CI --> C2{iOS?}
+  C2 -->|Yes| C3[bun run pod && bun run ios]
+  C2 -->|No: Android| C4[bun run android]
 
   C -->|No| D{Native implementation changed?}
-  D -->|Yes: Swift/Kotlin| D1[cd example && bun run ios or bun run android]
+  D -->|Yes: Swift/Kotlin| DI[cd example && bun install]
+  DI --> D1[bun run ios or bun run android]
 
   D -->|No| E{Package TypeScript changed?}
   E -->|Yes: src/*.ts| E1[bun run build]
@@ -30,7 +32,8 @@ flowchart TD
 
   F -->|No| G[No build step needed]
 
-  C1 --> Q[Before commit]
+  C3 --> Q[Before commit]
+  C4 --> Q
   D1 --> Q
   E1 --> Q
   F3 --> Q
@@ -53,25 +56,27 @@ bun run pod # iOS only
 
 Do not run `bun install` every time. Run it for a new clone or when dependencies change.
 
+After codegen or any native (Swift/Kotlin) change, run `cd example && bun install` before rebuilding the example app. Bun's workspace linking otherwise leaves the example app building against a stale copy of the library in `example/node_modules`, which manifests as `undefined is not a function` when calling a newly added method — even though `bun run codegen`/`bun run build` succeeded and the native code is correct.
+
 ## If/Then
 
-| Change                              | Run                                                        |
-| ----------------------------------- | ---------------------------------------------------------- |
-| New clone                           | `bun install`                                              |
-| Dependencies changed                | `bun install`                                              |
-| Nitro spec changed                  | `bun run codegen`                                          |
-| Package TypeScript changed          | `bun run build`                                            |
-| Swift/Kotlin implementation changed | `cd example && bun run ios` or `bun run android`           |
-| iOS native deps/pods changed        | `cd example && bun run pod`                                |
-| Example app JS changed              | `cd example && bun run start`                              |
-| Run iOS app                         | `cd example && bun run ios`                                |
-| Run iOS physical device             | open `example/ios/NitroHealthExample.xcworkspace` in Xcode |
-| Run Android app                     | `cd example && bun run android`                            |
-| Run fast tests                      | `bun run test`                                             |
-| Check lint                          | `bun run lint`                                             |
-| Fix lint                            | `bun run lint:fix`                                         |
-| Check formatting                    | `bun run format:check`                                     |
-| Apply formatting                    | `bun run format`                                           |
+| Change                              | Run                                                                 |
+| ----------------------------------- | ------------------------------------------------------------------- |
+| New clone                           | `bun install`                                                       |
+| Dependencies changed                | `bun install`                                                       |
+| Nitro spec changed                  | `bun run codegen` then `cd example && bun install`                  |
+| Package TypeScript changed          | `bun run build`                                                     |
+| Swift/Kotlin implementation changed | `cd example && bun install` then `bun run ios` or `bun run android` |
+| iOS native deps/pods changed        | `cd example && bun run pod`                                         |
+| Example app JS changed              | `cd example && bun run start`                                       |
+| Run iOS app                         | `cd example && bun run ios`                                         |
+| Run iOS physical device             | open `example/ios/NitroHealthExample.xcworkspace` in Xcode          |
+| Run Android app                     | `cd example && bun run android`                                     |
+| Run fast tests                      | `bun run test`                                                      |
+| Check lint                          | `bun run lint`                                                      |
+| Fix lint                            | `bun run lint:fix`                                                  |
+| Check formatting                    | `bun run format:check`                                              |
+| Apply formatting                    | `bun run format`                                                    |
 
 ## Common Flows
 
@@ -144,6 +149,7 @@ Example: added or renamed a method in `src/specs/*.nitro.ts`.
 bun run codegen
 bun run test
 cd example
+bun install # required: re-links the example app to the rebuilt library, see note above
 bun run pod # iOS only
 bun run ios # or bun run android
 ```
@@ -156,6 +162,7 @@ Example: changed method behavior but the `.nitro.ts` signature stayed the same.
 
 ```sh
 cd example
+bun install # required, see note above — skipping it silently rebuilds against the stale library copy
 bun run ios # or bun run android
 ```
 

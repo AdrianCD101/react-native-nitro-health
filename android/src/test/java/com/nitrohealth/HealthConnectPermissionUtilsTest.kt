@@ -4,6 +4,10 @@ import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
 import androidx.health.connect.client.records.DistanceRecord
 import androidx.health.connect.client.records.HeartRateRecord
+import androidx.health.connect.client.records.HeartRateVariabilityRmssdRecord
+import androidx.health.connect.client.records.HeightRecord
+import androidx.health.connect.client.records.OxygenSaturationRecord
+import androidx.health.connect.client.records.RestingHeartRateRecord
 import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.StepsRecord
 import androidx.health.connect.client.records.WeightRecord
@@ -23,6 +27,19 @@ class HealthConnectPermissionUtilsTest {
         )
         assertEquals(SleepSessionRecord::class, healthConnectRecordTypeForDataType("sleep"))
         assertEquals(WeightRecord::class, healthConnectRecordTypeForDataType("bodyMass"))
+        assertEquals(
+            RestingHeartRateRecord::class,
+            healthConnectRecordTypeForDataType("restingHeartRate")
+        )
+        assertEquals(
+            HeartRateVariabilityRmssdRecord::class,
+            healthConnectRecordTypeForDataType("heartRateVariability")
+        )
+        assertEquals(
+            OxygenSaturationRecord::class,
+            healthConnectRecordTypeForDataType("oxygenSaturation")
+        )
+        assertEquals(HeightRecord::class, healthConnectRecordTypeForDataType("height"))
     }
 
     @Test
@@ -51,6 +68,22 @@ class HealthConnectPermissionUtilsTest {
             HealthPermission.getReadPermission(WeightRecord::class),
             toHealthConnectPermission("bodyMass", "read")
         )
+        assertEquals(
+            HealthPermission.getReadPermission(RestingHeartRateRecord::class),
+            toHealthConnectPermission("restingHeartRate", "read")
+        )
+        assertEquals(
+            HealthPermission.getReadPermission(HeartRateVariabilityRmssdRecord::class),
+            toHealthConnectPermission("heartRateVariability", "read")
+        )
+        assertEquals(
+            HealthPermission.getReadPermission(OxygenSaturationRecord::class),
+            toHealthConnectPermission("oxygenSaturation", "read")
+        )
+        assertEquals(
+            HealthPermission.getReadPermission(HeightRecord::class),
+            toHealthConnectPermission("height", "read")
+        )
     }
 
     @Test
@@ -78,6 +111,18 @@ class HealthConnectPermissionUtilsTest {
         assertEquals(
             HealthPermission.getWritePermission(WeightRecord::class),
             toHealthConnectPermission("bodyMass", "write")
+        )
+        assertEquals(
+            HealthPermission.getWritePermission(RestingHeartRateRecord::class),
+            toHealthConnectPermission("restingHeartRate", "write")
+        )
+        assertEquals(
+            HealthPermission.getWritePermission(OxygenSaturationRecord::class),
+            toHealthConnectPermission("oxygenSaturation", "write")
+        )
+        assertEquals(
+            HealthPermission.getWritePermission(HeightRecord::class),
+            toHealthConnectPermission("height", "write")
         )
     }
 

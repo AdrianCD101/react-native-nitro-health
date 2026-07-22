@@ -558,7 +558,10 @@ class HybridNitroHealth: HybridNitroHealthSpec {
 
     // The type lookup, authorization check, and sample construction run inside the Promise so
     // large batches never block the calling JS thread.
-    private func saveQuantitySamples(
+    //
+    // Internal (not private) so HybridNitroHealth+QuantityReads.swift can reuse it for the
+    // instantaneous-quantity save methods without duplicating this boilerplate.
+    func saveQuantitySamples(
         dataType: String,
         label: String,
         makeSamples: @escaping (HKQuantityType) -> [HKQuantitySample]
@@ -670,7 +673,9 @@ class HybridNitroHealth: HybridNitroHealthSpec {
     // HealthKit never discloses read denials, but it can report whether the app has asked at
     // all. Reads reject before the first authorization request (matching Android's behavior as
     // closely as the platform allows); after the user responds, denied reads resolve empty.
-    private func requireDeterminedReadAuthorization(for objectType: HKObjectType, label: String) async throws {
+    //
+    // Internal (not private) so HybridNitroHealth+QuantityReads.swift can reuse it.
+    func requireDeterminedReadAuthorization(for objectType: HKObjectType, label: String) async throws {
         let status = try await getAuthorizationRequestStatus(healthKitTypes: (toShare: [], toRead: [objectType]))
 
         if status == .shouldrequest {
@@ -697,7 +702,8 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         }
     }
 
-    private func queryHealthKitSamples(
+    // Internal (not private) so HybridNitroHealth+QuantityReads.swift can reuse it.
+    func queryHealthKitSamples(
         sampleType: HKSampleType,
         limit: Int,
         predicate: NSPredicate?,
