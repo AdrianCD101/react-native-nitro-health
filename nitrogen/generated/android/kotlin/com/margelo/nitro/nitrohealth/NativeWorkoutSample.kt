@@ -20,6 +20,9 @@ import java.util.Objects
 data class NativeWorkoutSample(
   @DoNotStrip
   @Keep
+  val uuid: String,
+  @DoNotStrip
+  @Keep
   val startTimeMs: Double,
   @DoNotStrip
   @Keep
@@ -48,7 +51,8 @@ data class NativeWorkoutSample(
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other !is NativeWorkoutSample) return false
-    return Objects.deepEquals(this.startTimeMs, other.startTimeMs)
+    return Objects.deepEquals(this.uuid, other.uuid)
+      && Objects.deepEquals(this.startTimeMs, other.startTimeMs)
       && Objects.deepEquals(this.endTimeMs, other.endTimeMs)
       && Objects.deepEquals(this.durationSeconds, other.durationSeconds)
       && Objects.deepEquals(this.activityType, other.activityType)
@@ -60,6 +64,7 @@ data class NativeWorkoutSample(
 
   override fun hashCode(): Int {
     return arrayOf<Any?>(
+      uuid,
       startTimeMs,
       endTimeMs,
       durationSeconds,
@@ -79,8 +84,8 @@ data class NativeWorkoutSample(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(startTimeMs: Double, endTimeMs: Double, durationSeconds: Double, activityType: String, title: String?, source: String?, totalDistanceMeters: Double?, totalEnergyBurnedKcal: Double?): NativeWorkoutSample {
-      return NativeWorkoutSample(startTimeMs, endTimeMs, durationSeconds, activityType, title, source, totalDistanceMeters, totalEnergyBurnedKcal)
+    private fun fromCpp(uuid: String, startTimeMs: Double, endTimeMs: Double, durationSeconds: Double, activityType: String, title: String?, source: String?, totalDistanceMeters: Double?, totalEnergyBurnedKcal: Double?): NativeWorkoutSample {
+      return NativeWorkoutSample(uuid, startTimeMs, endTimeMs, durationSeconds, activityType, title, source, totalDistanceMeters, totalEnergyBurnedKcal)
     }
   }
 }

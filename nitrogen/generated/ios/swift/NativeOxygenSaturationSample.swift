@@ -18,8 +18,8 @@ public extension NativeOxygenSaturationSample {
   /**
    * Create a new instance of `NativeOxygenSaturationSample`.
    */
-  init(timeMs: Double, percentage: Double, source: String?) {
-    self.init(timeMs, percentage, { () -> bridge.std__optional_std__string_ in
+  init(uuid: String, timeMs: Double, percentage: Double, source: String?) {
+    self.init(std.string(uuid), timeMs, percentage, { () -> bridge.std__optional_std__string_ in
       if let __unwrappedValue = source {
         return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
       } else {
@@ -28,6 +28,11 @@ public extension NativeOxygenSaturationSample {
     }())
   }
 
+  @inline(__always)
+  var uuid: String {
+    return String(self.__uuid)
+  }
+  
   @inline(__always)
   var timeMs: Double {
     return self.__timeMs

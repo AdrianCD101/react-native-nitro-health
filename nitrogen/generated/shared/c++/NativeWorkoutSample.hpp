@@ -40,6 +40,7 @@ namespace margelo::nitro::nitrohealth {
    */
   struct NativeWorkoutSample final {
   public:
+    std::string uuid     SWIFT_PRIVATE;
     double startTimeMs     SWIFT_PRIVATE;
     double endTimeMs     SWIFT_PRIVATE;
     double durationSeconds     SWIFT_PRIVATE;
@@ -51,7 +52,7 @@ namespace margelo::nitro::nitrohealth {
 
   public:
     NativeWorkoutSample() = default;
-    explicit NativeWorkoutSample(double startTimeMs, double endTimeMs, double durationSeconds, std::string activityType, std::optional<std::string> title, std::optional<std::string> source, std::optional<double> totalDistanceMeters, std::optional<double> totalEnergyBurnedKcal): startTimeMs(startTimeMs), endTimeMs(endTimeMs), durationSeconds(durationSeconds), activityType(activityType), title(title), source(source), totalDistanceMeters(totalDistanceMeters), totalEnergyBurnedKcal(totalEnergyBurnedKcal) {}
+    explicit NativeWorkoutSample(std::string uuid, double startTimeMs, double endTimeMs, double durationSeconds, std::string activityType, std::optional<std::string> title, std::optional<std::string> source, std::optional<double> totalDistanceMeters, std::optional<double> totalEnergyBurnedKcal): uuid(uuid), startTimeMs(startTimeMs), endTimeMs(endTimeMs), durationSeconds(durationSeconds), activityType(activityType), title(title), source(source), totalDistanceMeters(totalDistanceMeters), totalEnergyBurnedKcal(totalEnergyBurnedKcal) {}
 
   public:
     friend bool operator==(const NativeWorkoutSample& lhs, const NativeWorkoutSample& rhs) = default;
@@ -67,6 +68,7 @@ namespace margelo::nitro {
     static inline margelo::nitro::nitrohealth::NativeWorkoutSample fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       jsi::Object obj = arg.asObject(runtime);
       return margelo::nitro::nitrohealth::NativeWorkoutSample(
+        JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "uuid"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "startTimeMs"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "durationSeconds"))),
@@ -79,6 +81,7 @@ namespace margelo::nitro {
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::nitrohealth::NativeWorkoutSample& arg) {
       jsi::Object obj(runtime);
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "uuid"), JSIConverter<std::string>::toJSI(runtime, arg.uuid));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "startTimeMs"), JSIConverter<double>::toJSI(runtime, arg.startTimeMs));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs"), JSIConverter<double>::toJSI(runtime, arg.endTimeMs));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "durationSeconds"), JSIConverter<double>::toJSI(runtime, arg.durationSeconds));
@@ -97,6 +100,7 @@ namespace margelo::nitro {
       if (!nitro::isPlainObject(runtime, obj)) {
         return false;
       }
+      if (!JSIConverter<std::string>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "uuid")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "startTimeMs")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "durationSeconds")))) return false;

@@ -18,8 +18,14 @@ public extension NativeHealthDateRangeQuery {
   /**
    * Create a new instance of `NativeHealthDateRangeQuery`.
    */
-  init(startTimeMs: Double, endTimeMs: Double, limit: Double, ascending: Bool) {
-    self.init(startTimeMs, endTimeMs, limit, ascending)
+  init(startTimeMs: Double, endTimeMs: Double, limit: Double, ascending: Bool, cursor: String?) {
+    self.init(startTimeMs, endTimeMs, limit, ascending, { () -> bridge.std__optional_std__string_ in
+      if let __unwrappedValue = cursor {
+        return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
+      } else {
+        return .init()
+      }
+    }())
   }
 
   @inline(__always)
@@ -40,5 +46,17 @@ public extension NativeHealthDateRangeQuery {
   @inline(__always)
   var ascending: Bool {
     return self.__ascending
+  }
+  
+  @inline(__always)
+  var cursor: String? {
+    return { () -> String? in
+      if bridge.has_value_std__optional_std__string_(self.__cursor) {
+        let __unwrapped = bridge.get_std__optional_std__string_(self.__cursor)
+        return String(__unwrapped)
+      } else {
+        return nil
+      }
+    }()
   }
 }

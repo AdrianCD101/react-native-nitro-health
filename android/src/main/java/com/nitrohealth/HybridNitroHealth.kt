@@ -22,6 +22,7 @@ import androidx.health.connect.client.request.AggregateGroupByDurationRequest
 import androidx.health.connect.client.request.AggregateGroupByPeriodRequest
 import androidx.health.connect.client.request.AggregateRequest
 import androidx.health.connect.client.request.ReadRecordsRequest
+import androidx.health.connect.client.response.ReadRecordsResponse
 import androidx.health.connect.client.time.TimeRangeFilter
 import com.margelo.nitro.NitroModules
 import com.margelo.nitro.core.Promise
@@ -31,10 +32,16 @@ import com.margelo.nitro.nitrohealth.HealthAvailabilityStatus
 import com.margelo.nitro.nitrohealth.HybridNitroHealthSpec
 import com.margelo.nitro.nitrohealth.NativeActiveEnergyBurnedSample
 import com.margelo.nitro.nitrohealth.NativeActiveEnergyBurnedSampleInput
+import com.margelo.nitro.nitrohealth.NativeActiveEnergyBurnedSamplePage
 import com.margelo.nitro.nitrohealth.NativeBodyMassSample
 import com.margelo.nitro.nitrohealth.NativeBodyMassSampleInput
+import com.margelo.nitro.nitrohealth.NativeBodyMassSamplePage
+import com.margelo.nitro.nitrohealth.NativeDailyActiveEnergyBurnedTotal
+import com.margelo.nitro.nitrohealth.NativeDailyDistanceTotal
+import com.margelo.nitro.nitrohealth.NativeDailyStepTotal
 import com.margelo.nitro.nitrohealth.NativeDistanceSample
 import com.margelo.nitro.nitrohealth.NativeDistanceSampleInput
+import com.margelo.nitro.nitrohealth.NativeDistanceSamplePage
 import com.margelo.nitro.nitrohealth.NativeHealthAuthorizationResult
 import com.margelo.nitro.nitrohealth.NativeHealthDateRangeQuery
 import com.margelo.nitro.nitrohealth.NativeHealthPermission
@@ -43,18 +50,26 @@ import com.margelo.nitro.nitrohealth.NativeHealthStatisticsQuery
 import com.margelo.nitro.nitrohealth.NativeHealthTimeRangeQuery
 import com.margelo.nitro.nitrohealth.NativeHeartRateSample
 import com.margelo.nitro.nitrohealth.NativeHeartRateSampleInput
+import com.margelo.nitro.nitrohealth.NativeHeartRateSamplePage
 import com.margelo.nitro.nitrohealth.NativeHeartRateStatistics
 import com.margelo.nitro.nitrohealth.NativeHeartRateVariabilitySample
+import com.margelo.nitro.nitrohealth.NativeHeartRateVariabilitySamplePage
 import com.margelo.nitro.nitrohealth.NativeHeightSample
 import com.margelo.nitro.nitrohealth.NativeHeightSampleInput
+import com.margelo.nitro.nitrohealth.NativeHeightSamplePage
 import com.margelo.nitro.nitrohealth.NativeOxygenSaturationSample
 import com.margelo.nitro.nitrohealth.NativeOxygenSaturationSampleInput
+import com.margelo.nitro.nitrohealth.NativeOxygenSaturationSamplePage
 import com.margelo.nitro.nitrohealth.NativeRestingHeartRateSample
 import com.margelo.nitro.nitrohealth.NativeRestingHeartRateSampleInput
+import com.margelo.nitro.nitrohealth.NativeRestingHeartRateSamplePage
 import com.margelo.nitro.nitrohealth.NativeSleepSample
+import com.margelo.nitro.nitrohealth.NativeSleepSamplePage
 import com.margelo.nitro.nitrohealth.NativeStepSample
 import com.margelo.nitro.nitrohealth.NativeStepSampleInput
+import com.margelo.nitro.nitrohealth.NativeStepSamplePage
 import com.margelo.nitro.nitrohealth.NativeWorkoutSample
+import com.margelo.nitro.nitrohealth.NativeWorkoutSamplePage
 import java.time.Instant
 import java.time.Period
 import java.time.ZoneId
@@ -120,7 +135,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         )
     }
 
-    override fun readSteps(query: NativeHealthDateRangeQuery): Promise<Array<NativeStepSample>> {
+    override fun readSteps(query: NativeHealthDateRangeQuery): Promise<NativeStepSamplePage> {
         return Promise.async {
             val context = NitroModules.applicationContext
                 ?: throw IllegalStateException("Android application context is unavailable")
@@ -139,21 +154,26 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                     Instant.ofEpochMilli(query.endTimeMs.toLong())
                 ),
                 ascendingOrder = query.ascending,
-                pageSize = query.limit.toInt()
+                pageSize = query.limit.toInt(),
+                pageToken = query.cursor?.let { decodeSampleCursor(it, "steps", query.ascending) }
             )
             val response = client.readRecords(request)
 
-            response.records.map { record ->
-                NativeStepSample(
-                    startTimeMs = record.startTime.toEpochMilli().toDouble(),
-                    endTimeMs = record.endTime.toEpochMilli().toDouble(),
-                    count = record.count.toDouble()
-                )
-            }.toTypedArray()
+            NativeStepSamplePage(
+                samples = response.records.map { record ->
+                    NativeStepSample(
+                        uuid = record.metadata.id,
+                        startTimeMs = record.startTime.toEpochMilli().toDouble(),
+                        endTimeMs = record.endTime.toEpochMilli().toDouble(),
+                        count = record.count.toDouble()
+                    )
+                }.toTypedArray(),
+                nextCursor = response.pageToken?.let { encodeSampleCursor("steps", query.ascending, it) }
+            )
         }
     }
 
-    override fun readDailyStepTotals(query: NativeHealthDateRangeQuery): Promise<Array<NativeStepSample>> {
+    override fun readDailyStepTotals(query: NativeHealthDateRangeQuery): Promise<Array<NativeDailyStepTotal>> {
         return Promise.async {
             val context = NitroModules.applicationContext
                 ?: throw IllegalStateException("Android application context is unavailable")
@@ -185,7 +205,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                     queryEndTimeMs = query.endTimeMs
                 )
 
-                NativeStepSample(
+                NativeDailyStepTotal(
                     startTimeMs = range.startTimeMs,
                     endTimeMs = range.endTimeMs,
                     count = count.toDouble()
@@ -196,7 +216,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         }
     }
 
-    override fun readDistance(query: NativeHealthDateRangeQuery): Promise<Array<NativeDistanceSample>> {
+    override fun readDistance(query: NativeHealthDateRangeQuery): Promise<NativeDistanceSamplePage> {
         return Promise.async {
             val context = NitroModules.applicationContext
                 ?: throw IllegalStateException("Android application context is unavailable")
@@ -215,21 +235,26 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                     Instant.ofEpochMilli(query.endTimeMs.toLong())
                 ),
                 ascendingOrder = query.ascending,
-                pageSize = query.limit.toInt()
+                pageSize = query.limit.toInt(),
+                pageToken = query.cursor?.let { decodeSampleCursor(it, "distance", query.ascending) }
             )
             val response = client.readRecords(request)
 
-            response.records.map { record ->
-                NativeDistanceSample(
-                    startTimeMs = record.startTime.toEpochMilli().toDouble(),
-                    endTimeMs = record.endTime.toEpochMilli().toDouble(),
-                    distanceMeters = record.distance.inMeters
-                )
-            }.toTypedArray()
+            NativeDistanceSamplePage(
+                samples = response.records.map { record ->
+                    NativeDistanceSample(
+                        uuid = record.metadata.id,
+                        startTimeMs = record.startTime.toEpochMilli().toDouble(),
+                        endTimeMs = record.endTime.toEpochMilli().toDouble(),
+                        distanceMeters = record.distance.inMeters
+                    )
+                }.toTypedArray(),
+                nextCursor = response.pageToken?.let { encodeSampleCursor("distance", query.ascending, it) }
+            )
         }
     }
 
-    override fun readDailyDistanceTotals(query: NativeHealthDateRangeQuery): Promise<Array<NativeDistanceSample>> {
+    override fun readDailyDistanceTotals(query: NativeHealthDateRangeQuery): Promise<Array<NativeDailyDistanceTotal>> {
         return Promise.async {
             val context = NitroModules.applicationContext
                 ?: throw IllegalStateException("Android application context is unavailable")
@@ -261,7 +286,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                     queryEndTimeMs = query.endTimeMs
                 )
 
-                NativeDistanceSample(
+                NativeDailyDistanceTotal(
                     startTimeMs = range.startTimeMs,
                     endTimeMs = range.endTimeMs,
                     distanceMeters = distance.inMeters
@@ -272,7 +297,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         }
     }
 
-    override fun readActiveEnergyBurned(query: NativeHealthDateRangeQuery): Promise<Array<NativeActiveEnergyBurnedSample>> {
+    override fun readActiveEnergyBurned(query: NativeHealthDateRangeQuery): Promise<NativeActiveEnergyBurnedSamplePage> {
         return Promise.async {
             val context = NitroModules.applicationContext
                 ?: throw IllegalStateException("Android application context is unavailable")
@@ -291,23 +316,28 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                     Instant.ofEpochMilli(query.endTimeMs.toLong())
                 ),
                 ascendingOrder = query.ascending,
-                pageSize = query.limit.toInt()
+                pageSize = query.limit.toInt(),
+                pageToken = query.cursor?.let { decodeSampleCursor(it, "activeEnergyBurned", query.ascending) }
             )
             val response = client.readRecords(request)
 
-            response.records.map { record ->
-                NativeActiveEnergyBurnedSample(
-                    startTimeMs = record.startTime.toEpochMilli().toDouble(),
-                    endTimeMs = record.endTime.toEpochMilli().toDouble(),
-                    kilocalories = record.energy.inKilocalories
-                )
-            }.toTypedArray()
+            NativeActiveEnergyBurnedSamplePage(
+                samples = response.records.map { record ->
+                    NativeActiveEnergyBurnedSample(
+                        uuid = record.metadata.id,
+                        startTimeMs = record.startTime.toEpochMilli().toDouble(),
+                        endTimeMs = record.endTime.toEpochMilli().toDouble(),
+                        kilocalories = record.energy.inKilocalories
+                    )
+                }.toTypedArray(),
+                nextCursor = response.pageToken?.let { encodeSampleCursor("activeEnergyBurned", query.ascending, it) }
+            )
         }
     }
 
     override fun readDailyActiveEnergyBurnedTotals(
         query: NativeHealthDateRangeQuery
-    ): Promise<Array<NativeActiveEnergyBurnedSample>> {
+    ): Promise<Array<NativeDailyActiveEnergyBurnedTotal>> {
         return Promise.async {
             val context = NitroModules.applicationContext
                 ?: throw IllegalStateException("Android application context is unavailable")
@@ -339,7 +369,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                     queryEndTimeMs = query.endTimeMs
                 )
 
-                NativeActiveEnergyBurnedSample(
+                NativeDailyActiveEnergyBurnedTotal(
                     startTimeMs = range.startTimeMs,
                     endTimeMs = range.endTimeMs,
                     kilocalories = activeCalories.inKilocalories
@@ -350,7 +380,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         }
     }
 
-    override fun readHeartRate(query: NativeHealthDateRangeQuery): Promise<Array<NativeHeartRateSample>> {
+    override fun readHeartRate(query: NativeHealthDateRangeQuery): Promise<NativeHeartRateSamplePage> {
         return Promise.async {
             val context = NitroModules.applicationContext
                 ?: throw IllegalStateException("Android application context is unavailable")
@@ -369,17 +399,21 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                     Instant.ofEpochMilli(query.endTimeMs.toLong())
                 ),
                 ascendingOrder = query.ascending,
-                pageSize = query.limit.toInt()
+                pageSize = query.limit.toInt(),
+                pageToken = query.cursor?.let { decodeSampleCursor(it, "heartRate", query.ascending) }
             )
             val response = client.readRecords(request)
 
             // Deliberately NOT built on readInstantRecords: a HeartRateRecord is a series record —
             // an interval holding many (time, bpm) samples — so records must be flattened to
-            // individual readings, the record's source carried onto each, then ordered and capped
-            // to the requested limit in post (pageSize limits records, not flattened samples).
+            // individual readings, the record's source carried onto each, then ordered in post.
+            // Paging counts records (pageSize/limit and the cursor operate on records, not
+            // flattened samples), so every reading of every returned record is kept — capping
+            // in post would silently drop data between pages.
             val samples = response.records.flatMap { record ->
-                record.samples.map { sample ->
+                record.samples.mapIndexed { index, sample ->
                     NativeHeartRateSample(
+                        uuid = "${record.metadata.id}#$index",
                         timeMs = sample.time.toEpochMilli().toDouble(),
                         bpm = sample.beatsPerMinute.toDouble(),
                         source = record.metadata.dataOrigin.packageName
@@ -393,34 +427,43 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                 samples.sortedByDescending { it.timeMs }
             }
 
-            ordered.take(query.limit.toInt()).toTypedArray()
+            NativeHeartRateSamplePage(
+                samples = ordered.toTypedArray(),
+                nextCursor = response.pageToken?.let { encodeSampleCursor("heartRate", query.ascending, it) }
+            )
         }
     }
 
-    override fun readBodyMass(query: NativeHealthDateRangeQuery): Promise<Array<NativeBodyMassSample>> {
+    override fun readBodyMass(query: NativeHealthDateRangeQuery): Promise<NativeBodyMassSamplePage> {
         return Promise.async {
-            readInstantRecords<WeightRecord>("bodyMass", query).map { record ->
-                NativeBodyMassSample(
-                    startTimeMs = record.time.toEpochMilli().toDouble(),
-                    endTimeMs = record.time.toEpochMilli().toDouble(),
-                    kilograms = record.weight.inKilograms,
-                    source = record.metadata.dataOrigin.packageName
-                )
-            }.toTypedArray()
+            val response = readInstantRecords<WeightRecord>("bodyMass", query)
+            NativeBodyMassSamplePage(
+                samples = response.records.map { record ->
+                    NativeBodyMassSample(
+                        uuid = record.metadata.id,
+                        startTimeMs = record.time.toEpochMilli().toDouble(),
+                        endTimeMs = record.time.toEpochMilli().toDouble(),
+                        kilograms = record.weight.inKilograms,
+                        source = record.metadata.dataOrigin.packageName
+                    )
+                }.toTypedArray(),
+                nextCursor = response.pageToken?.let { encodeSampleCursor("bodyMass", query.ascending, it) }
+            )
         }
     }
 
     // Shared boilerplate for instantaneous (single-instant, one-record-per-reading) data types:
     // availability check, client creation, read-permission gate, and a time-ranged
-    // ReadRecordsRequest that applies the query's ascending order and limit directly (unlike
-    // readHeartRate/readSleepSamples, these records don't need post-read flattening).
-    // The record class comes from the data type's descriptor; the type argument T only
+    // ReadRecordsRequest that applies the query's ascending order, limit, and cursor directly
+    // (unlike readHeartRate/readSleepSamples, these records don't need post-read flattening).
+    // Returns the full response so callers can map the records and wrap the next-page token in
+    // a cursor. The record class comes from the data type's descriptor; the type argument T only
     // re-states it for typed mapping at the call site, so the unchecked cast is safe as long
     // as T matches the descriptor entry for dataType.
     private suspend fun <T : Record> readInstantRecords(
         dataType: String,
         query: NativeHealthDateRangeQuery
-    ): List<T> {
+    ): ReadRecordsResponse<T> {
         val context = NitroModules.applicationContext
             ?: throw IllegalStateException("Android application context is unavailable")
 
@@ -440,64 +483,85 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                 Instant.ofEpochMilli(query.endTimeMs.toLong())
             ),
             ascendingOrder = query.ascending,
-            pageSize = query.limit.toInt()
+            pageSize = query.limit.toInt(),
+            pageToken = query.cursor?.let { decodeSampleCursor(it, dataType, query.ascending) }
         )
 
-        return client.readRecords(request).records
+        return client.readRecords(request)
     }
 
     override fun readRestingHeartRate(
         query: NativeHealthDateRangeQuery
-    ): Promise<Array<NativeRestingHeartRateSample>> {
+    ): Promise<NativeRestingHeartRateSamplePage> {
         return Promise.async {
-            readInstantRecords<RestingHeartRateRecord>("restingHeartRate", query).map { record ->
-                NativeRestingHeartRateSample(
-                    timeMs = record.time.toEpochMilli().toDouble(),
-                    bpm = record.beatsPerMinute.toDouble(),
-                    source = record.metadata.dataOrigin.packageName
-                )
-            }.toTypedArray()
+            val response = readInstantRecords<RestingHeartRateRecord>("restingHeartRate", query)
+            NativeRestingHeartRateSamplePage(
+                samples = response.records.map { record ->
+                    NativeRestingHeartRateSample(
+                        uuid = record.metadata.id,
+                        timeMs = record.time.toEpochMilli().toDouble(),
+                        bpm = record.beatsPerMinute.toDouble(),
+                        source = record.metadata.dataOrigin.packageName
+                    )
+                }.toTypedArray(),
+                nextCursor = response.pageToken?.let { encodeSampleCursor("restingHeartRate", query.ascending, it) }
+            )
         }
     }
 
     override fun readHeartRateVariability(
         query: NativeHealthDateRangeQuery
-    ): Promise<Array<NativeHeartRateVariabilitySample>> {
+    ): Promise<NativeHeartRateVariabilitySamplePage> {
         return Promise.async {
-            readInstantRecords<HeartRateVariabilityRmssdRecord>("heartRateVariability", query).map { record ->
-                NativeHeartRateVariabilitySample(
-                    timeMs = record.time.toEpochMilli().toDouble(),
-                    milliseconds = record.heartRateVariabilityMillis,
-                    method = "rmssd",
-                    source = record.metadata.dataOrigin.packageName
-                )
-            }.toTypedArray()
+            val response = readInstantRecords<HeartRateVariabilityRmssdRecord>("heartRateVariability", query)
+            NativeHeartRateVariabilitySamplePage(
+                samples = response.records.map { record ->
+                    NativeHeartRateVariabilitySample(
+                        uuid = record.metadata.id,
+                        timeMs = record.time.toEpochMilli().toDouble(),
+                        milliseconds = record.heartRateVariabilityMillis,
+                        method = "rmssd",
+                        source = record.metadata.dataOrigin.packageName
+                    )
+                }.toTypedArray(),
+                nextCursor = response.pageToken?.let { encodeSampleCursor("heartRateVariability", query.ascending, it) }
+            )
         }
     }
 
     override fun readOxygenSaturation(
         query: NativeHealthDateRangeQuery
-    ): Promise<Array<NativeOxygenSaturationSample>> {
+    ): Promise<NativeOxygenSaturationSamplePage> {
         return Promise.async {
-            readInstantRecords<OxygenSaturationRecord>("oxygenSaturation", query).map { record ->
-                NativeOxygenSaturationSample(
-                    timeMs = record.time.toEpochMilli().toDouble(),
-                    percentage = record.percentage.value,
-                    source = record.metadata.dataOrigin.packageName
-                )
-            }.toTypedArray()
+            val response = readInstantRecords<OxygenSaturationRecord>("oxygenSaturation", query)
+            NativeOxygenSaturationSamplePage(
+                samples = response.records.map { record ->
+                    NativeOxygenSaturationSample(
+                        uuid = record.metadata.id,
+                        timeMs = record.time.toEpochMilli().toDouble(),
+                        percentage = record.percentage.value,
+                        source = record.metadata.dataOrigin.packageName
+                    )
+                }.toTypedArray(),
+                nextCursor = response.pageToken?.let { encodeSampleCursor("oxygenSaturation", query.ascending, it) }
+            )
         }
     }
 
-    override fun readHeight(query: NativeHealthDateRangeQuery): Promise<Array<NativeHeightSample>> {
+    override fun readHeight(query: NativeHealthDateRangeQuery): Promise<NativeHeightSamplePage> {
         return Promise.async {
-            readInstantRecords<HeightRecord>("height", query).map { record ->
-                NativeHeightSample(
-                    timeMs = record.time.toEpochMilli().toDouble(),
-                    meters = record.height.inMeters,
-                    source = record.metadata.dataOrigin.packageName
-                )
-            }.toTypedArray()
+            val response = readInstantRecords<HeightRecord>("height", query)
+            NativeHeightSamplePage(
+                samples = response.records.map { record ->
+                    NativeHeightSample(
+                        uuid = record.metadata.id,
+                        timeMs = record.time.toEpochMilli().toDouble(),
+                        meters = record.height.inMeters,
+                        source = record.metadata.dataOrigin.packageName
+                    )
+                }.toTypedArray(),
+                nextCursor = response.pageToken?.let { encodeSampleCursor("height", query.ascending, it) }
+            )
         }
     }
 
@@ -636,7 +700,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         )
     }
 
-    override fun readSleepSamples(query: NativeHealthDateRangeQuery): Promise<Array<NativeSleepSample>> {
+    override fun readSleepSamples(query: NativeHealthDateRangeQuery): Promise<NativeSleepSamplePage> {
         return Promise.async {
             val context = NitroModules.applicationContext
                 ?: throw IllegalStateException("Android application context is unavailable")
@@ -655,15 +719,20 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                     Instant.ofEpochMilli(query.endTimeMs.toLong())
                 ),
                 ascendingOrder = query.ascending,
-                pageSize = query.limit.toInt()
+                pageSize = query.limit.toInt(),
+                pageToken = query.cursor?.let { decodeSampleCursor(it, "sleep", query.ascending) }
             )
             val response = client.readRecords(request)
+            // Paging counts sessions (pageSize/limit and the cursor operate on records, not
+            // flattened stages), so every stage of every returned session is kept — capping
+            // in post would silently drop data between pages.
             val samples = response.records.flatMap { record ->
                 val stages = record.stages
 
                 if (stages.isEmpty()) {
                     listOf(
                         NativeSleepSample(
+                            uuid = record.metadata.id,
                             startTimeMs = record.startTime.toEpochMilli().toDouble(),
                             endTimeMs = record.endTime.toEpochMilli().toDouble(),
                             stage = "asleep",
@@ -671,8 +740,9 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                         )
                     )
                 } else {
-                    stages.map { stage ->
+                    stages.mapIndexed { index, stage ->
                         NativeSleepSample(
+                            uuid = "${record.metadata.id}#$index",
                             startTimeMs = stage.startTime.toEpochMilli().toDouble(),
                             endTimeMs = stage.endTime.toEpochMilli().toDouble(),
                             stage = makeSleepStage(stage.stage),
@@ -688,11 +758,14 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                 samples.sortedByDescending { it.startTimeMs }
             }
 
-            ordered.take(query.limit.toInt()).toTypedArray()
+            NativeSleepSamplePage(
+                samples = ordered.toTypedArray(),
+                nextCursor = response.pageToken?.let { encodeSampleCursor("sleep", query.ascending, it) }
+            )
         }
     }
 
-    override fun readWorkouts(query: NativeHealthDateRangeQuery): Promise<Array<NativeWorkoutSample>> {
+    override fun readWorkouts(query: NativeHealthDateRangeQuery): Promise<NativeWorkoutSamplePage> {
         return Promise.async {
             val context = NitroModules.applicationContext
                 ?: throw IllegalStateException("Android application context is unavailable")
@@ -711,26 +784,31 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                     Instant.ofEpochMilli(query.endTimeMs.toLong())
                 ),
                 ascendingOrder = query.ascending,
-                pageSize = query.limit.toInt()
+                pageSize = query.limit.toInt(),
+                pageToken = query.cursor?.let { decodeSampleCursor(it, "workout", query.ascending) }
             )
             val response = client.readRecords(request)
 
-            response.records.map { record ->
-                NativeWorkoutSample(
-                    startTimeMs = record.startTime.toEpochMilli().toDouble(),
-                    endTimeMs = record.endTime.toEpochMilli().toDouble(),
-                    // Wall-clock duration; ExerciseSessionRecord has no pause-aware duration
-                    // on the record itself (iOS uses the pause-aware HKWorkout.duration).
-                    durationSeconds = (record.endTime.toEpochMilli() - record.startTime.toEpochMilli()) / 1000.0,
-                    activityType = makeWorkoutActivityType(record.exerciseType),
-                    title = record.title,
-                    source = record.metadata.dataOrigin.packageName,
-                    // Health Connect sessions carry no totals; per-session aggregation is a
-                    // deliberate follow-up (one extra IPC call per session).
-                    totalDistanceMeters = null,
-                    totalEnergyBurnedKcal = null
-                )
-            }.toTypedArray()
+            NativeWorkoutSamplePage(
+                samples = response.records.map { record ->
+                    NativeWorkoutSample(
+                        uuid = record.metadata.id,
+                        startTimeMs = record.startTime.toEpochMilli().toDouble(),
+                        endTimeMs = record.endTime.toEpochMilli().toDouble(),
+                        // Wall-clock duration; ExerciseSessionRecord has no pause-aware duration
+                        // on the record itself (iOS uses the pause-aware HKWorkout.duration).
+                        durationSeconds = (record.endTime.toEpochMilli() - record.startTime.toEpochMilli()) / 1000.0,
+                        activityType = makeWorkoutActivityType(record.exerciseType),
+                        title = record.title,
+                        source = record.metadata.dataOrigin.packageName,
+                        // Health Connect sessions carry no totals; per-session aggregation is a
+                        // deliberate follow-up (one extra IPC call per session).
+                        totalDistanceMeters = null,
+                        totalEnergyBurnedKcal = null
+                    )
+                }.toTypedArray(),
+                nextCursor = response.pageToken?.let { encodeSampleCursor("workout", query.ascending, it) }
+            )
         }
     }
 

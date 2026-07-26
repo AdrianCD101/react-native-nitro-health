@@ -19,18 +19,21 @@ describe('NitroHealth workouts contract', () => {
       const endDate = new Date('2026-01-08T00:00:00.000Z')
       const workoutStartMs = new Date('2026-01-02T07:00:00.000Z').getTime()
       const workoutEndMs = new Date('2026-01-02T07:45:00.000Z').getTime()
-      mockNitroHealth.readWorkouts.mockResolvedValue([
-        {
-          startTimeMs: workoutStartMs,
-          endTimeMs: workoutEndMs,
-          durationSeconds: 2580,
-          activityType: 'running',
-          title: 'Morning Run',
-          source: 'Watch',
-          totalDistanceMeters: 7500,
-          totalEnergyBurnedKcal: 512.5,
-        },
-      ])
+      mockNitroHealth.readWorkouts.mockResolvedValue({
+        samples: [
+          {
+            uuid: 'uuid-1',
+            startTimeMs: workoutStartMs,
+            endTimeMs: workoutEndMs,
+            durationSeconds: 2580,
+            activityType: 'running',
+            title: 'Morning Run',
+            source: 'Watch',
+            totalDistanceMeters: 7500,
+            totalEnergyBurnedKcal: 512.5,
+          },
+        ],
+      })
 
       const result = await NitroHealth.readWorkouts({ startDate, endDate })
 
@@ -40,23 +43,24 @@ describe('NitroHealth workouts contract', () => {
         limit: 1000,
         ascending: true,
       })
-      expect(result).toHaveLength(1)
-      expect(result[0].startDate).toBeInstanceOf(Date)
-      expect(result[0].startDate.getTime()).toBe(workoutStartMs)
-      expect(result[0].endDate).toBeInstanceOf(Date)
-      expect(result[0].endDate.getTime()).toBe(workoutEndMs)
-      expect(result[0].durationSeconds).toBe(2580)
-      expect(result[0].activityType).toBe('running')
-      expect(result[0].title).toBe('Morning Run')
-      expect(result[0].source).toBe('Watch')
-      expect(result[0].totalDistanceMeters).toBe(7500)
-      expect(result[0].totalEnergyBurnedKcal).toBe(512.5)
+      expect(result.samples).toHaveLength(1)
+      expect(result.samples[0].uuid).toBe('uuid-1')
+      expect(result.samples[0].startDate).toBeInstanceOf(Date)
+      expect(result.samples[0].startDate.getTime()).toBe(workoutStartMs)
+      expect(result.samples[0].endDate).toBeInstanceOf(Date)
+      expect(result.samples[0].endDate.getTime()).toBe(workoutEndMs)
+      expect(result.samples[0].durationSeconds).toBe(2580)
+      expect(result.samples[0].activityType).toBe('running')
+      expect(result.samples[0].title).toBe('Morning Run')
+      expect(result.samples[0].source).toBe('Watch')
+      expect(result.samples[0].totalDistanceMeters).toBe(7500)
+      expect(result.samples[0].totalEnergyBurnedKcal).toBe(512.5)
     })
 
     it('forwards explicit limit and ascending options', async () => {
       const startDate = new Date('2026-01-01T00:00:00.000Z')
       const endDate = new Date('2026-01-08T00:00:00.000Z')
-      mockNitroHealth.readWorkouts.mockResolvedValue([])
+      mockNitroHealth.readWorkouts.mockResolvedValue({ samples: [] })
 
       await NitroHealth.readWorkouts({ startDate, endDate, limit: 20, ascending: false })
 
@@ -71,22 +75,25 @@ describe('NitroHealth workouts contract', () => {
     it('leaves optional fields undefined when the native side omits them (Android totals)', async () => {
       const startDate = new Date('2026-01-01T00:00:00.000Z')
       const endDate = new Date('2026-01-08T00:00:00.000Z')
-      mockNitroHealth.readWorkouts.mockResolvedValue([
-        {
-          startTimeMs: startDate.getTime(),
-          endTimeMs: endDate.getTime(),
-          durationSeconds: 1800,
-          activityType: 'yoga',
-        },
-      ])
+      mockNitroHealth.readWorkouts.mockResolvedValue({
+        samples: [
+          {
+            uuid: 'uuid-1',
+            startTimeMs: startDate.getTime(),
+            endTimeMs: endDate.getTime(),
+            durationSeconds: 1800,
+            activityType: 'yoga',
+          },
+        ],
+      })
 
       const result = await NitroHealth.readWorkouts({ startDate, endDate })
 
-      expect(result[0].activityType).toBe('yoga')
-      expect(result[0].title).toBeUndefined()
-      expect(result[0].source).toBeUndefined()
-      expect(result[0].totalDistanceMeters).toBeUndefined()
-      expect(result[0].totalEnergyBurnedKcal).toBeUndefined()
+      expect(result.samples[0].activityType).toBe('yoga')
+      expect(result.samples[0].title).toBeUndefined()
+      expect(result.samples[0].source).toBeUndefined()
+      expect(result.samples[0].totalDistanceMeters).toBeUndefined()
+      expect(result.samples[0].totalEnergyBurnedKcal).toBeUndefined()
     })
 
     it('rejects an invalid date range without crossing the bridge', async () => {

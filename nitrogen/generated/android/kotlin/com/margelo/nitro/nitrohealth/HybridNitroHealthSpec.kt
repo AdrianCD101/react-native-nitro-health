@@ -47,35 +47,35 @@ abstract class HybridNitroHealthSpec: HybridObject() {
   
   @DoNotStrip
   @Keep
-  abstract fun readSteps(query: NativeHealthDateRangeQuery): Promise<Array<NativeStepSample>>
+  abstract fun readSteps(query: NativeHealthDateRangeQuery): Promise<NativeStepSamplePage>
   
   @DoNotStrip
   @Keep
-  abstract fun readDailyStepTotals(query: NativeHealthDateRangeQuery): Promise<Array<NativeStepSample>>
+  abstract fun readDailyStepTotals(query: NativeHealthDateRangeQuery): Promise<Array<NativeDailyStepTotal>>
   
   @DoNotStrip
   @Keep
-  abstract fun readDistance(query: NativeHealthDateRangeQuery): Promise<Array<NativeDistanceSample>>
+  abstract fun readDistance(query: NativeHealthDateRangeQuery): Promise<NativeDistanceSamplePage>
   
   @DoNotStrip
   @Keep
-  abstract fun readDailyDistanceTotals(query: NativeHealthDateRangeQuery): Promise<Array<NativeDistanceSample>>
+  abstract fun readDailyDistanceTotals(query: NativeHealthDateRangeQuery): Promise<Array<NativeDailyDistanceTotal>>
   
   @DoNotStrip
   @Keep
-  abstract fun readActiveEnergyBurned(query: NativeHealthDateRangeQuery): Promise<Array<NativeActiveEnergyBurnedSample>>
+  abstract fun readActiveEnergyBurned(query: NativeHealthDateRangeQuery): Promise<NativeActiveEnergyBurnedSamplePage>
   
   @DoNotStrip
   @Keep
-  abstract fun readDailyActiveEnergyBurnedTotals(query: NativeHealthDateRangeQuery): Promise<Array<NativeActiveEnergyBurnedSample>>
+  abstract fun readDailyActiveEnergyBurnedTotals(query: NativeHealthDateRangeQuery): Promise<Array<NativeDailyActiveEnergyBurnedTotal>>
   
   @DoNotStrip
   @Keep
-  abstract fun readBodyMass(query: NativeHealthDateRangeQuery): Promise<Array<NativeBodyMassSample>>
+  abstract fun readBodyMass(query: NativeHealthDateRangeQuery): Promise<NativeBodyMassSamplePage>
   
   @DoNotStrip
   @Keep
-  abstract fun readHeartRate(query: NativeHealthDateRangeQuery): Promise<Array<NativeHeartRateSample>>
+  abstract fun readHeartRate(query: NativeHealthDateRangeQuery): Promise<NativeHeartRateSamplePage>
   
   @DoNotStrip
   @Keep
@@ -83,19 +83,19 @@ abstract class HybridNitroHealthSpec: HybridObject() {
   
   @DoNotStrip
   @Keep
-  abstract fun readRestingHeartRate(query: NativeHealthDateRangeQuery): Promise<Array<NativeRestingHeartRateSample>>
+  abstract fun readRestingHeartRate(query: NativeHealthDateRangeQuery): Promise<NativeRestingHeartRateSamplePage>
   
   @DoNotStrip
   @Keep
-  abstract fun readHeartRateVariability(query: NativeHealthDateRangeQuery): Promise<Array<NativeHeartRateVariabilitySample>>
+  abstract fun readHeartRateVariability(query: NativeHealthDateRangeQuery): Promise<NativeHeartRateVariabilitySamplePage>
   
   @DoNotStrip
   @Keep
-  abstract fun readOxygenSaturation(query: NativeHealthDateRangeQuery): Promise<Array<NativeOxygenSaturationSample>>
+  abstract fun readOxygenSaturation(query: NativeHealthDateRangeQuery): Promise<NativeOxygenSaturationSamplePage>
   
   @DoNotStrip
   @Keep
-  abstract fun readHeight(query: NativeHealthDateRangeQuery): Promise<Array<NativeHeightSample>>
+  abstract fun readHeight(query: NativeHealthDateRangeQuery): Promise<NativeHeightSamplePage>
   
   @DoNotStrip
   @Keep
@@ -103,11 +103,11 @@ abstract class HybridNitroHealthSpec: HybridObject() {
   
   @DoNotStrip
   @Keep
-  abstract fun readSleepSamples(query: NativeHealthDateRangeQuery): Promise<Array<NativeSleepSample>>
+  abstract fun readSleepSamples(query: NativeHealthDateRangeQuery): Promise<NativeSleepSamplePage>
   
   @DoNotStrip
   @Keep
-  abstract fun readWorkouts(query: NativeHealthDateRangeQuery): Promise<Array<NativeWorkoutSample>>
+  abstract fun readWorkouts(query: NativeHealthDateRangeQuery): Promise<NativeWorkoutSamplePage>
   
   @DoNotStrip
   @Keep

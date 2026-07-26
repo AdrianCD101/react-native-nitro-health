@@ -18,7 +18,9 @@ describe('NitroHealth breadth data types contract', () => {
       const startDate = new Date('2026-01-01T00:00:00.000Z')
       const endDate = new Date('2026-01-02T00:00:00.000Z')
       const timeMs = new Date('2026-01-01T09:00:00.000Z').getTime()
-      mockNitroHealth.readRestingHeartRate.mockResolvedValue([{ timeMs, bpm: 58, source: 'Watch' }])
+      mockNitroHealth.readRestingHeartRate.mockResolvedValue({
+        samples: [{ uuid: 'uuid-1', timeMs, bpm: 58, source: 'Watch' }],
+      })
 
       const result = await NitroHealth.readRestingHeartRate({ startDate, endDate })
 
@@ -28,11 +30,12 @@ describe('NitroHealth breadth data types contract', () => {
         limit: 1000,
         ascending: true,
       })
-      expect(result).toHaveLength(1)
-      expect(result[0].date).toBeInstanceOf(Date)
-      expect(result[0].date.getTime()).toBe(timeMs)
-      expect(result[0].bpm).toBe(58)
-      expect(result[0].source).toBe('Watch')
+      expect(result.samples).toHaveLength(1)
+      expect(result.samples[0].uuid).toBe('uuid-1')
+      expect(result.samples[0].date).toBeInstanceOf(Date)
+      expect(result.samples[0].date.getTime()).toBe(timeMs)
+      expect(result.samples[0].bpm).toBe(58)
+      expect(result.samples[0].source).toBe('Watch')
     })
   })
 
@@ -41,31 +44,31 @@ describe('NitroHealth breadth data types contract', () => {
       const startDate = new Date('2026-01-01T00:00:00.000Z')
       const endDate = new Date('2026-01-02T00:00:00.000Z')
       const timeMs = new Date('2026-01-01T09:00:00.000Z').getTime()
-      mockNitroHealth.readHeartRateVariability.mockResolvedValue([
-        { timeMs, milliseconds: 42.5, method: 'sdnn', source: 'Watch' },
-      ])
+      mockNitroHealth.readHeartRateVariability.mockResolvedValue({
+        samples: [{ uuid: 'uuid-1', timeMs, milliseconds: 42.5, method: 'sdnn', source: 'Watch' }],
+      })
 
       const result = await NitroHealth.readHeartRateVariability({ startDate, endDate })
 
-      expect(result).toHaveLength(1)
-      expect(result[0].date).toBeInstanceOf(Date)
-      expect(result[0].milliseconds).toBe(42.5)
-      expect(result[0].method).toBe('sdnn')
-      expect(result[0].source).toBe('Watch')
+      expect(result.samples).toHaveLength(1)
+      expect(result.samples[0].date).toBeInstanceOf(Date)
+      expect(result.samples[0].milliseconds).toBe(42.5)
+      expect(result.samples[0].method).toBe('sdnn')
+      expect(result.samples[0].source).toBe('Watch')
     })
 
     it('passes the rmssd method through untouched', async () => {
       const startDate = new Date('2026-01-01T00:00:00.000Z')
       const endDate = new Date('2026-01-02T00:00:00.000Z')
       const timeMs = new Date('2026-01-01T09:00:00.000Z').getTime()
-      mockNitroHealth.readHeartRateVariability.mockResolvedValue([
-        { timeMs, milliseconds: 30, method: 'rmssd' },
-      ])
+      mockNitroHealth.readHeartRateVariability.mockResolvedValue({
+        samples: [{ uuid: 'uuid-1', timeMs, milliseconds: 30, method: 'rmssd' }],
+      })
 
       const result = await NitroHealth.readHeartRateVariability({ startDate, endDate })
 
-      expect(result[0].method).toBe('rmssd')
-      expect(result[0].source).toBeUndefined()
+      expect(result.samples[0].method).toBe('rmssd')
+      expect(result.samples[0].source).toBeUndefined()
     })
   })
 
@@ -74,16 +77,16 @@ describe('NitroHealth breadth data types contract', () => {
       const startDate = new Date('2026-01-01T00:00:00.000Z')
       const endDate = new Date('2026-01-02T00:00:00.000Z')
       const timeMs = new Date('2026-01-01T09:00:00.000Z').getTime()
-      mockNitroHealth.readOxygenSaturation.mockResolvedValue([
-        { timeMs, percentage: 97.5, source: 'Watch' },
-      ])
+      mockNitroHealth.readOxygenSaturation.mockResolvedValue({
+        samples: [{ uuid: 'uuid-1', timeMs, percentage: 97.5, source: 'Watch' }],
+      })
 
       const result = await NitroHealth.readOxygenSaturation({ startDate, endDate })
 
-      expect(result).toHaveLength(1)
-      expect(result[0].date).toBeInstanceOf(Date)
-      expect(result[0].percentage).toBe(97.5)
-      expect(result[0].source).toBe('Watch')
+      expect(result.samples).toHaveLength(1)
+      expect(result.samples[0].date).toBeInstanceOf(Date)
+      expect(result.samples[0].percentage).toBe(97.5)
+      expect(result.samples[0].source).toBe('Watch')
     })
   })
 
@@ -92,7 +95,9 @@ describe('NitroHealth breadth data types contract', () => {
       const startDate = new Date('2026-01-01T00:00:00.000Z')
       const endDate = new Date('2026-01-02T00:00:00.000Z')
       const timeMs = new Date('2026-01-01T09:00:00.000Z').getTime()
-      mockNitroHealth.readHeight.mockResolvedValue([{ timeMs, meters: 1.78 }])
+      mockNitroHealth.readHeight.mockResolvedValue({
+        samples: [{ uuid: 'uuid-1', timeMs, meters: 1.78 }],
+      })
 
       const result = await NitroHealth.readHeight({ startDate, endDate })
 
@@ -102,9 +107,9 @@ describe('NitroHealth breadth data types contract', () => {
         limit: 1000,
         ascending: true,
       })
-      expect(result).toHaveLength(1)
-      expect(result[0].date).toBeInstanceOf(Date)
-      expect(result[0].meters).toBe(1.78)
+      expect(result.samples).toHaveLength(1)
+      expect(result.samples[0].date).toBeInstanceOf(Date)
+      expect(result.samples[0].meters).toBe(1.78)
     })
   })
 

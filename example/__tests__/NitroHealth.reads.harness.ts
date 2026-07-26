@@ -1,12 +1,14 @@
 import { describe, expect, it } from 'react-native-harness'
 import { Platform } from 'react-native'
 import { NitroHealth } from 'react-native-nitro-health'
+import type { StepSample } from 'react-native-nitro-health'
 
 import {
   activeEnergyReadPermission,
   bodyMassReadPermission,
   distanceReadPermission,
   emptyRange,
+  hasVerifiedPermissions,
   heartRateReadPermission,
   heartRateVariabilityReadPermission,
   heightReadPermission,
@@ -15,6 +17,7 @@ import {
   last7DaysRange,
   oxygenSaturationReadPermission,
   restingHeartRateReadPermission,
+  saveReadRange,
   sleepReadPermission,
   stepsReadPermission,
   workoutReadPermission,
@@ -23,9 +26,10 @@ import {
 describe('NitroHealth reads (native)', () => {
   it('reads steps from native code without crashing', async () => {
     try {
-      const steps = await NitroHealth.readSteps(emptyRange)
+      const page = await NitroHealth.readSteps(emptyRange)
 
-      expect(Array.isArray(steps)).toBe(true)
+      expect(Array.isArray(page.samples)).toBe(true)
+      expect(['string', 'undefined']).toContain(typeof page.nextCursor)
     } catch (error) {
       expect(error).toBeInstanceOf(Error)
     }
@@ -99,10 +103,11 @@ describe('NitroHealth reads (native)', () => {
 
   it('reads distance from native code without crashing', async () => {
     try {
-      const samples = await NitroHealth.readDistance(emptyRange)
+      const page = await NitroHealth.readDistance(emptyRange)
 
-      expect(Array.isArray(samples)).toBe(true)
-      for (const sample of samples) {
+      expect(Array.isArray(page.samples)).toBe(true)
+      for (const sample of page.samples) {
+        expect(typeof sample.uuid).toBe('string')
         expect(typeof sample.distanceMeters).toBe('number')
       }
     } catch (error) {
@@ -184,10 +189,10 @@ describe('NitroHealth reads (native)', () => {
 
   it('reads active energy burned from native code without crashing', async () => {
     try {
-      const samples = await NitroHealth.readActiveEnergyBurned(emptyRange)
+      const page = await NitroHealth.readActiveEnergyBurned(emptyRange)
 
-      expect(Array.isArray(samples)).toBe(true)
-      for (const sample of samples) {
+      expect(Array.isArray(page.samples)).toBe(true)
+      for (const sample of page.samples) {
         expect(typeof sample.kilocalories).toBe('number')
       }
     } catch (error) {
@@ -251,10 +256,11 @@ describe('NitroHealth reads (native)', () => {
 
   it('reads heart rate from native code without crashing', async () => {
     try {
-      const samples = await NitroHealth.readHeartRate(emptyRange)
+      const page = await NitroHealth.readHeartRate(emptyRange)
 
-      expect(Array.isArray(samples)).toBe(true)
-      for (const sample of samples) {
+      expect(Array.isArray(page.samples)).toBe(true)
+      for (const sample of page.samples) {
+        expect(typeof sample.uuid).toBe('string')
         expect(typeof sample.bpm).toBe('number')
         expect(['string', 'undefined']).toContain(typeof sample.source)
       }
@@ -265,10 +271,10 @@ describe('NitroHealth reads (native)', () => {
 
   it('reads body mass from native code without crashing', async () => {
     try {
-      const samples = await NitroHealth.readBodyMass(emptyRange)
+      const page = await NitroHealth.readBodyMass(emptyRange)
 
-      expect(Array.isArray(samples)).toBe(true)
-      for (const sample of samples) {
+      expect(Array.isArray(page.samples)).toBe(true)
+      for (const sample of page.samples) {
         expect(typeof sample.kilograms).toBe('number')
         expect(['string', 'undefined']).toContain(typeof sample.source)
       }
@@ -335,10 +341,10 @@ describe('NitroHealth reads (native)', () => {
 
   it('reads sleep samples from native code without crashing', async () => {
     try {
-      const samples = await NitroHealth.readSleepSamples(emptyRange)
+      const page = await NitroHealth.readSleepSamples(emptyRange)
 
-      expect(Array.isArray(samples)).toBe(true)
-      for (const sample of samples) {
+      expect(Array.isArray(page.samples)).toBe(true)
+      for (const sample of page.samples) {
         expect(sample.startDate).toBeInstanceOf(Date)
         expect(sample.endDate).toBeInstanceOf(Date)
         expect(typeof sample.stage).toBe('string')
@@ -379,10 +385,11 @@ describe('NitroHealth reads (native)', () => {
 
   it('reads workouts from native code without crashing', async () => {
     try {
-      const workouts = await NitroHealth.readWorkouts(emptyRange)
+      const page = await NitroHealth.readWorkouts(emptyRange)
 
-      expect(Array.isArray(workouts)).toBe(true)
-      for (const workout of workouts) {
+      expect(Array.isArray(page.samples)).toBe(true)
+      for (const workout of page.samples) {
+        expect(typeof workout.uuid).toBe('string')
         expect(workout.startDate).toBeInstanceOf(Date)
         expect(workout.endDate).toBeInstanceOf(Date)
         expect(typeof workout.durationSeconds).toBe('number')
@@ -428,10 +435,10 @@ describe('NitroHealth reads (native)', () => {
   describe('resting heart rate', () => {
     it('reads resting heart rate from native code without crashing', async () => {
       try {
-        const samples = await NitroHealth.readRestingHeartRate(emptyRange)
+        const page = await NitroHealth.readRestingHeartRate(emptyRange)
 
-        expect(Array.isArray(samples)).toBe(true)
-        for (const sample of samples) {
+        expect(Array.isArray(page.samples)).toBe(true)
+        for (const sample of page.samples) {
           expect(typeof sample.bpm).toBe('number')
           expect(['string', 'undefined']).toContain(typeof sample.source)
         }
@@ -479,10 +486,10 @@ describe('NitroHealth reads (native)', () => {
   describe('heart rate variability', () => {
     it('reads heart rate variability from native code without crashing', async () => {
       try {
-        const samples = await NitroHealth.readHeartRateVariability(emptyRange)
+        const page = await NitroHealth.readHeartRateVariability(emptyRange)
 
-        expect(Array.isArray(samples)).toBe(true)
-        for (const sample of samples) {
+        expect(Array.isArray(page.samples)).toBe(true)
+        for (const sample of page.samples) {
           expect(typeof sample.milliseconds).toBe('number')
           expect(['sdnn', 'rmssd']).toContain(sample.method)
           expect(['string', 'undefined']).toContain(typeof sample.source)
@@ -534,14 +541,14 @@ describe('NitroHealth reads (native)', () => {
         return
       }
 
-      const samples = await NitroHealth.readHeartRateVariability(last7DaysRange)
+      const page = await NitroHealth.readHeartRateVariability(last7DaysRange)
 
-      if (isInconclusiveRead(samples)) {
+      if (isInconclusiveRead(page.samples)) {
         return
       }
 
       const expectedMethod = Platform.OS === 'ios' ? 'sdnn' : 'rmssd'
-      for (const sample of samples) {
+      for (const sample of page.samples) {
         expect(sample.method).toBe(expectedMethod)
       }
     })
@@ -550,10 +557,10 @@ describe('NitroHealth reads (native)', () => {
   describe('oxygen saturation', () => {
     it('reads oxygen saturation from native code without crashing', async () => {
       try {
-        const samples = await NitroHealth.readOxygenSaturation(emptyRange)
+        const page = await NitroHealth.readOxygenSaturation(emptyRange)
 
-        expect(Array.isArray(samples)).toBe(true)
-        for (const sample of samples) {
+        expect(Array.isArray(page.samples)).toBe(true)
+        for (const sample of page.samples) {
           expect(typeof sample.percentage).toBe('number')
           expect(sample.percentage).toBeGreaterThanOrEqual(0)
           expect(sample.percentage).toBeLessThanOrEqual(100)
@@ -600,10 +607,10 @@ describe('NitroHealth reads (native)', () => {
   describe('height', () => {
     it('reads height from native code without crashing', async () => {
       try {
-        const samples = await NitroHealth.readHeight(emptyRange)
+        const page = await NitroHealth.readHeight(emptyRange)
 
-        expect(Array.isArray(samples)).toBe(true)
-        for (const sample of samples) {
+        expect(Array.isArray(page.samples)).toBe(true)
+        for (const sample of page.samples) {
           expect(typeof sample.meters).toBe('number')
           expect(['string', 'undefined']).toContain(typeof sample.source)
         }
@@ -638,6 +645,71 @@ describe('NitroHealth reads (native)', () => {
       }
 
       await expect(NitroHealth.readHeight(emptyRange)).rejects.toThrow(/not determined/i)
+    })
+  })
+
+  describe('pagination', () => {
+    // Five distinct intervals inside saveReadRange (the fixed synthetic day the save suite
+    // also uses). Harness runs accumulate samples in this range, so assertions compare a
+    // paged walk against a single big read instead of expecting exact totals.
+    const pagingIntervals = [10, 11, 12, 13, 14].map((hour) => ({
+      startDate: new Date(`2001-06-01T${hour}:00:00.000Z`),
+      endDate: new Date(`2001-06-01T${hour}:30:00.000Z`),
+    }))
+
+    it('walks step pages to exhaustion without duplicating or dropping samples', async () => {
+      const authorized = await hasVerifiedPermissions([
+        { accessType: 'write', dataType: 'steps' },
+        { accessType: 'read', dataType: 'steps' },
+      ])
+
+      if (!authorized) {
+        return
+      }
+
+      await NitroHealth.saveSteps(
+        pagingIntervals.map((interval, index) => ({ ...interval, count: 100 + index }))
+      )
+
+      const fullPage = await NitroHealth.readSteps({ ...saveReadRange, limit: 1000 })
+
+      if (isInconclusiveRead(fullPage.samples)) {
+        return
+      }
+
+      expect(fullPage.nextCursor).toBeUndefined()
+      expect(fullPage.samples.length).toBeGreaterThanOrEqual(pagingIntervals.length)
+
+      const collected: StepSample[] = []
+      let cursor: string | undefined
+      let pages = 0
+      const maxPages = Math.ceil(fullPage.samples.length / 2) + 3
+
+      do {
+        const page = await NitroHealth.readSteps({ ...saveReadRange, limit: 2, cursor })
+
+        collected.push(...page.samples)
+        cursor = page.nextCursor
+        pages += 1
+
+        if (cursor !== undefined) {
+          expect(page.samples.length).toBe(2)
+        }
+      } while (cursor !== undefined && pages < maxPages)
+
+      expect(cursor).toBeUndefined()
+      expect(collected.length).toBe(fullPage.samples.length)
+      expect(new Set(collected.map((sample) => sample.uuid)).size).toBe(collected.length)
+    })
+
+    it('rejects a garbage cursor with a descriptive error', async () => {
+      if (!(await hasVerifiedPermissions(stepsReadPermission))) {
+        return
+      }
+
+      await expect(
+        NitroHealth.readSteps({ ...saveReadRange, cursor: 'not-a-real-cursor' })
+      ).rejects.toThrow(/invalid cursor/i)
     })
   })
 })

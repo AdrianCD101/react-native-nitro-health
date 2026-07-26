@@ -30,34 +30,26 @@ private extension HKWorkout {
 }
 
 extension HybridNitroHealth {
-    func readWorkouts(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeWorkoutSample]> {
+    func readWorkouts(query: NativeHealthDateRangeQuery) throws -> Promise<NativeWorkoutSamplePage> {
         if !HKHealthStore.isHealthDataAvailable() {
             throw permissionError("Health data is not available")
         }
 
         let workoutType = HKObjectType.workoutType()
-        let startDate = Date(timeIntervalSince1970: query.startTimeMs / 1000)
-        let endDate = Date(timeIntervalSince1970: query.endTimeMs / 1000)
-        let predicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate, options: [])
-        let sortDescriptors = [
-            NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: query.ascending),
-        ]
 
-        return Promise<[NativeWorkoutSample]>.async {
+        return Promise<NativeWorkoutSamplePage>.async {
             try await self.requireDeterminedReadAuthorization(for: workoutType, label: "workouts")
-            let samples = try await self.queryHealthKitSamples(
+            let page = try await self.queryPagedSamples(
                 sampleType: workoutType,
-                limit: Int(query.limit),
-                predicate: predicate,
-                sortDescriptors: sortDescriptors
-            )
-
-            return samples.compactMap { sample in
+                dataType: "workout",
+                query: query
+            ) { sample -> NativeWorkoutSample? in
                 guard let workout = sample as? HKWorkout else {
                     return nil
                 }
 
                 return NativeWorkoutSample(
+                    uuid: workout.uuid.uuidString,
                     startTimeMs: workout.startDate.timeIntervalSince1970 * 1000,
                     endTimeMs: workout.endDate.timeIntervalSince1970 * 1000,
                     durationSeconds: workout.duration,
@@ -70,6 +62,8 @@ extension HybridNitroHealth {
                     totalEnergyBurnedKcal: workout.legacyTotalEnergyBurnedKcal
                 )
             }
+
+            return NativeWorkoutSamplePage(samples: page.samples, nextCursor: page.nextCursor)
         }
     }
 }

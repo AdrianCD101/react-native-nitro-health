@@ -8,6 +8,8 @@ import type { HeartRateVariabilityMethod } from './HeartRateVariabilityMethod'
  * samples with different methods together.
  */
 export interface HeartRateVariabilitySample {
+  /** Stable sample identifier: the HealthKit sample UUID on iOS, the Health Connect record id on Android. */
+  uuid: string
   /** Instant the reading was taken. */
   date: Date
   /** Heart rate variability in milliseconds. */

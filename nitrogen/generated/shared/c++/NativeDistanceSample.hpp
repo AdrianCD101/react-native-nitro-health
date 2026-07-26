@@ -30,7 +30,7 @@
 
 
 
-
+#include <string>
 
 namespace margelo::nitro::nitrohealth {
 
@@ -39,13 +39,14 @@ namespace margelo::nitro::nitrohealth {
    */
   struct NativeDistanceSample final {
   public:
+    std::string uuid     SWIFT_PRIVATE;
     double startTimeMs     SWIFT_PRIVATE;
     double endTimeMs     SWIFT_PRIVATE;
     double distanceMeters     SWIFT_PRIVATE;
 
   public:
     NativeDistanceSample() = default;
-    explicit NativeDistanceSample(double startTimeMs, double endTimeMs, double distanceMeters): startTimeMs(startTimeMs), endTimeMs(endTimeMs), distanceMeters(distanceMeters) {}
+    explicit NativeDistanceSample(std::string uuid, double startTimeMs, double endTimeMs, double distanceMeters): uuid(uuid), startTimeMs(startTimeMs), endTimeMs(endTimeMs), distanceMeters(distanceMeters) {}
 
   public:
     friend bool operator==(const NativeDistanceSample& lhs, const NativeDistanceSample& rhs) = default;
@@ -61,6 +62,7 @@ namespace margelo::nitro {
     static inline margelo::nitro::nitrohealth::NativeDistanceSample fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       jsi::Object obj = arg.asObject(runtime);
       return margelo::nitro::nitrohealth::NativeDistanceSample(
+        JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "uuid"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "startTimeMs"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "distanceMeters")))
@@ -68,6 +70,7 @@ namespace margelo::nitro {
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::nitrohealth::NativeDistanceSample& arg) {
       jsi::Object obj(runtime);
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "uuid"), JSIConverter<std::string>::toJSI(runtime, arg.uuid));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "startTimeMs"), JSIConverter<double>::toJSI(runtime, arg.startTimeMs));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs"), JSIConverter<double>::toJSI(runtime, arg.endTimeMs));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "distanceMeters"), JSIConverter<double>::toJSI(runtime, arg.distanceMeters));
@@ -81,6 +84,7 @@ namespace margelo::nitro {
       if (!nitro::isPlainObject(runtime, obj)) {
         return false;
       }
+      if (!JSIConverter<std::string>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "uuid")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "startTimeMs")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "distanceMeters")))) return false;

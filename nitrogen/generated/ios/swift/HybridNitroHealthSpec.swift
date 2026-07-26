@@ -17,22 +17,22 @@ public protocol HybridNitroHealthSpec_protocol: HybridObject {
   func getAvailabilityStatus() throws -> HealthAvailabilityStatus
   func openHealthConnectInstall() throws -> Bool
   func openHealthSettings() throws -> Promise<Bool>
-  func readSteps(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeStepSample]>
-  func readDailyStepTotals(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeStepSample]>
-  func readDistance(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeDistanceSample]>
-  func readDailyDistanceTotals(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeDistanceSample]>
-  func readActiveEnergyBurned(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeActiveEnergyBurnedSample]>
-  func readDailyActiveEnergyBurnedTotals(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeActiveEnergyBurnedSample]>
-  func readBodyMass(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeBodyMassSample]>
-  func readHeartRate(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeHeartRateSample]>
+  func readSteps(query: NativeHealthDateRangeQuery) throws -> Promise<NativeStepSamplePage>
+  func readDailyStepTotals(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeDailyStepTotal]>
+  func readDistance(query: NativeHealthDateRangeQuery) throws -> Promise<NativeDistanceSamplePage>
+  func readDailyDistanceTotals(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeDailyDistanceTotal]>
+  func readActiveEnergyBurned(query: NativeHealthDateRangeQuery) throws -> Promise<NativeActiveEnergyBurnedSamplePage>
+  func readDailyActiveEnergyBurnedTotals(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeDailyActiveEnergyBurnedTotal]>
+  func readBodyMass(query: NativeHealthDateRangeQuery) throws -> Promise<NativeBodyMassSamplePage>
+  func readHeartRate(query: NativeHealthDateRangeQuery) throws -> Promise<NativeHeartRateSamplePage>
   func readHeartRateStatistics(query: NativeHealthTimeRangeQuery) throws -> Promise<NativeHeartRateStatistics>
-  func readRestingHeartRate(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeRestingHeartRateSample]>
-  func readHeartRateVariability(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeHeartRateVariabilitySample]>
-  func readOxygenSaturation(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeOxygenSaturationSample]>
-  func readHeight(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeHeightSample]>
+  func readRestingHeartRate(query: NativeHealthDateRangeQuery) throws -> Promise<NativeRestingHeartRateSamplePage>
+  func readHeartRateVariability(query: NativeHealthDateRangeQuery) throws -> Promise<NativeHeartRateVariabilitySamplePage>
+  func readOxygenSaturation(query: NativeHealthDateRangeQuery) throws -> Promise<NativeOxygenSaturationSamplePage>
+  func readHeight(query: NativeHealthDateRangeQuery) throws -> Promise<NativeHeightSamplePage>
   func readStatistics(dataType: String, query: NativeHealthStatisticsQuery) throws -> Promise<[NativeHealthStatistics]>
-  func readSleepSamples(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeSleepSample]>
-  func readWorkouts(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeWorkoutSample]>
+  func readSleepSamples(query: NativeHealthDateRangeQuery) throws -> Promise<NativeSleepSamplePage>
+  func readWorkouts(query: NativeHealthDateRangeQuery) throws -> Promise<NativeWorkoutSamplePage>
   func saveSteps(samples: [NativeStepSampleInput]) throws -> Promise<Void>
   func saveDistance(samples: [NativeDistanceSampleInput]) throws -> Promise<Void>
   func saveActiveEnergyBurned(samples: [NativeActiveEnergyBurnedSampleInput]) throws -> Promise<Void>

@@ -18,14 +18,26 @@ namespace margelo::nitro::nitrohealth { enum class HealthAvailabilityStatus; }
 namespace margelo::nitro::nitrohealth { class HybridNitroHealthSpec; }
 // Forward declaration of `NativeActiveEnergyBurnedSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeActiveEnergyBurnedSampleInput; }
+// Forward declaration of `NativeActiveEnergyBurnedSamplePage` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeActiveEnergyBurnedSamplePage; }
 // Forward declaration of `NativeActiveEnergyBurnedSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeActiveEnergyBurnedSample; }
 // Forward declaration of `NativeBodyMassSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBodyMassSampleInput; }
+// Forward declaration of `NativeBodyMassSamplePage` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeBodyMassSamplePage; }
 // Forward declaration of `NativeBodyMassSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBodyMassSample; }
+// Forward declaration of `NativeDailyActiveEnergyBurnedTotal` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeDailyActiveEnergyBurnedTotal; }
+// Forward declaration of `NativeDailyDistanceTotal` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeDailyDistanceTotal; }
+// Forward declaration of `NativeDailyStepTotal` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeDailyStepTotal; }
 // Forward declaration of `NativeDistanceSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeDistanceSampleInput; }
+// Forward declaration of `NativeDistanceSamplePage` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeDistanceSamplePage; }
 // Forward declaration of `NativeDistanceSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeDistanceSample; }
 // Forward declaration of `NativeHealthAuthorizationResult` to properly resolve imports.
@@ -36,30 +48,46 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthPermission; }
 namespace margelo::nitro::nitrohealth { struct NativeHealthStatistics; }
 // Forward declaration of `NativeHeartRateSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHeartRateSampleInput; }
+// Forward declaration of `NativeHeartRateSamplePage` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHeartRateSamplePage; }
 // Forward declaration of `NativeHeartRateSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHeartRateSample; }
 // Forward declaration of `NativeHeartRateStatistics` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHeartRateStatistics; }
+// Forward declaration of `NativeHeartRateVariabilitySamplePage` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHeartRateVariabilitySamplePage; }
 // Forward declaration of `NativeHeartRateVariabilitySample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHeartRateVariabilitySample; }
 // Forward declaration of `NativeHeightSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHeightSampleInput; }
+// Forward declaration of `NativeHeightSamplePage` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHeightSamplePage; }
 // Forward declaration of `NativeHeightSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHeightSample; }
 // Forward declaration of `NativeOxygenSaturationSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeOxygenSaturationSampleInput; }
+// Forward declaration of `NativeOxygenSaturationSamplePage` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeOxygenSaturationSamplePage; }
 // Forward declaration of `NativeOxygenSaturationSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeOxygenSaturationSample; }
 // Forward declaration of `NativeRestingHeartRateSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeRestingHeartRateSampleInput; }
+// Forward declaration of `NativeRestingHeartRateSamplePage` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeRestingHeartRateSamplePage; }
 // Forward declaration of `NativeRestingHeartRateSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeRestingHeartRateSample; }
+// Forward declaration of `NativeSleepSamplePage` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeSleepSamplePage; }
 // Forward declaration of `NativeSleepSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeSleepSample; }
 // Forward declaration of `NativeStepSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeStepSampleInput; }
+// Forward declaration of `NativeStepSamplePage` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeStepSamplePage; }
 // Forward declaration of `NativeStepSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeStepSample; }
+// Forward declaration of `NativeWorkoutSamplePage` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeWorkoutSamplePage; }
 // Forward declaration of `NativeWorkoutSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeWorkoutSample; }
 
@@ -74,27 +102,41 @@ namespace NitroHealth { class HybridNitroHealthSpec_cxx; }
 #include "HybridNitroHealthSpec.hpp"
 #include "NativeActiveEnergyBurnedSample.hpp"
 #include "NativeActiveEnergyBurnedSampleInput.hpp"
+#include "NativeActiveEnergyBurnedSamplePage.hpp"
 #include "NativeBodyMassSample.hpp"
 #include "NativeBodyMassSampleInput.hpp"
+#include "NativeBodyMassSamplePage.hpp"
+#include "NativeDailyActiveEnergyBurnedTotal.hpp"
+#include "NativeDailyDistanceTotal.hpp"
+#include "NativeDailyStepTotal.hpp"
 #include "NativeDistanceSample.hpp"
 #include "NativeDistanceSampleInput.hpp"
+#include "NativeDistanceSamplePage.hpp"
 #include "NativeHealthAuthorizationResult.hpp"
 #include "NativeHealthPermission.hpp"
 #include "NativeHealthStatistics.hpp"
 #include "NativeHeartRateSample.hpp"
 #include "NativeHeartRateSampleInput.hpp"
+#include "NativeHeartRateSamplePage.hpp"
 #include "NativeHeartRateStatistics.hpp"
 #include "NativeHeartRateVariabilitySample.hpp"
+#include "NativeHeartRateVariabilitySamplePage.hpp"
 #include "NativeHeightSample.hpp"
 #include "NativeHeightSampleInput.hpp"
+#include "NativeHeightSamplePage.hpp"
 #include "NativeOxygenSaturationSample.hpp"
 #include "NativeOxygenSaturationSampleInput.hpp"
+#include "NativeOxygenSaturationSamplePage.hpp"
 #include "NativeRestingHeartRateSample.hpp"
 #include "NativeRestingHeartRateSampleInput.hpp"
+#include "NativeRestingHeartRateSamplePage.hpp"
 #include "NativeSleepSample.hpp"
+#include "NativeSleepSamplePage.hpp"
 #include "NativeStepSample.hpp"
 #include "NativeStepSampleInput.hpp"
+#include "NativeStepSamplePage.hpp"
 #include "NativeWorkoutSample.hpp"
+#include "NativeWorkoutSamplePage.hpp"
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/PromiseHolder.hpp>
 #include <NitroModules/Result.hpp>
@@ -178,130 +220,6 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return vector;
   }
   
-  // pragma MARK: std::shared_ptr<Promise<std::vector<NativeStepSample>>>
-  /**
-   * Specialized version of `std::shared_ptr<Promise<std::vector<NativeStepSample>>>`.
-   */
-  using std__shared_ptr_Promise_std__vector_NativeStepSample___ = std::shared_ptr<Promise<std::vector<NativeStepSample>>>;
-  inline std::shared_ptr<Promise<std::vector<NativeStepSample>>> create_std__shared_ptr_Promise_std__vector_NativeStepSample___() noexcept {
-    return Promise<std::vector<NativeStepSample>>::create();
-  }
-  inline PromiseHolder<std::vector<NativeStepSample>> wrap_std__shared_ptr_Promise_std__vector_NativeStepSample___(std::shared_ptr<Promise<std::vector<NativeStepSample>>> promise) noexcept {
-    return PromiseHolder<std::vector<NativeStepSample>>(std::move(promise));
-  }
-  
-  // pragma MARK: std::function<void(const std::vector<NativeStepSample>& /* result */)>
-  /**
-   * Specialized version of `std::function<void(const std::vector<NativeStepSample>&)>`.
-   */
-  using Func_void_std__vector_NativeStepSample_ = std::function<void(const std::vector<NativeStepSample>& /* result */)>;
-  /**
-   * Wrapper class for a `std::function<void(const std::vector<NativeStepSample>& / * result * /)>`, this can be used from Swift.
-   */
-  class Func_void_std__vector_NativeStepSample__Wrapper final {
-  public:
-    explicit Func_void_std__vector_NativeStepSample__Wrapper(std::function<void(const std::vector<NativeStepSample>& /* result */)>&& func): _function(std::make_unique<std::function<void(const std::vector<NativeStepSample>& /* result */)>>(std::move(func))) {}
-    inline void call(std::vector<NativeStepSample> result) const noexcept {
-      _function->operator()(result);
-    }
-  private:
-    std::unique_ptr<std::function<void(const std::vector<NativeStepSample>& /* result */)>> _function;
-  } SWIFT_NONCOPYABLE;
-  Func_void_std__vector_NativeStepSample_ create_Func_void_std__vector_NativeStepSample_(void* NON_NULL swiftClosureWrapper) noexcept;
-  inline Func_void_std__vector_NativeStepSample__Wrapper wrap_Func_void_std__vector_NativeStepSample_(Func_void_std__vector_NativeStepSample_ value) noexcept {
-    return Func_void_std__vector_NativeStepSample__Wrapper(std::move(value));
-  }
-  
-  // pragma MARK: std::vector<NativeDistanceSample>
-  /**
-   * Specialized version of `std::vector<NativeDistanceSample>`.
-   */
-  using std__vector_NativeDistanceSample_ = std::vector<NativeDistanceSample>;
-  inline std::vector<NativeDistanceSample> create_std__vector_NativeDistanceSample_(size_t size) noexcept {
-    std::vector<NativeDistanceSample> vector;
-    vector.reserve(size);
-    return vector;
-  }
-  
-  // pragma MARK: std::shared_ptr<Promise<std::vector<NativeDistanceSample>>>
-  /**
-   * Specialized version of `std::shared_ptr<Promise<std::vector<NativeDistanceSample>>>`.
-   */
-  using std__shared_ptr_Promise_std__vector_NativeDistanceSample___ = std::shared_ptr<Promise<std::vector<NativeDistanceSample>>>;
-  inline std::shared_ptr<Promise<std::vector<NativeDistanceSample>>> create_std__shared_ptr_Promise_std__vector_NativeDistanceSample___() noexcept {
-    return Promise<std::vector<NativeDistanceSample>>::create();
-  }
-  inline PromiseHolder<std::vector<NativeDistanceSample>> wrap_std__shared_ptr_Promise_std__vector_NativeDistanceSample___(std::shared_ptr<Promise<std::vector<NativeDistanceSample>>> promise) noexcept {
-    return PromiseHolder<std::vector<NativeDistanceSample>>(std::move(promise));
-  }
-  
-  // pragma MARK: std::function<void(const std::vector<NativeDistanceSample>& /* result */)>
-  /**
-   * Specialized version of `std::function<void(const std::vector<NativeDistanceSample>&)>`.
-   */
-  using Func_void_std__vector_NativeDistanceSample_ = std::function<void(const std::vector<NativeDistanceSample>& /* result */)>;
-  /**
-   * Wrapper class for a `std::function<void(const std::vector<NativeDistanceSample>& / * result * /)>`, this can be used from Swift.
-   */
-  class Func_void_std__vector_NativeDistanceSample__Wrapper final {
-  public:
-    explicit Func_void_std__vector_NativeDistanceSample__Wrapper(std::function<void(const std::vector<NativeDistanceSample>& /* result */)>&& func): _function(std::make_unique<std::function<void(const std::vector<NativeDistanceSample>& /* result */)>>(std::move(func))) {}
-    inline void call(std::vector<NativeDistanceSample> result) const noexcept {
-      _function->operator()(result);
-    }
-  private:
-    std::unique_ptr<std::function<void(const std::vector<NativeDistanceSample>& /* result */)>> _function;
-  } SWIFT_NONCOPYABLE;
-  Func_void_std__vector_NativeDistanceSample_ create_Func_void_std__vector_NativeDistanceSample_(void* NON_NULL swiftClosureWrapper) noexcept;
-  inline Func_void_std__vector_NativeDistanceSample__Wrapper wrap_Func_void_std__vector_NativeDistanceSample_(Func_void_std__vector_NativeDistanceSample_ value) noexcept {
-    return Func_void_std__vector_NativeDistanceSample__Wrapper(std::move(value));
-  }
-  
-  // pragma MARK: std::vector<NativeActiveEnergyBurnedSample>
-  /**
-   * Specialized version of `std::vector<NativeActiveEnergyBurnedSample>`.
-   */
-  using std__vector_NativeActiveEnergyBurnedSample_ = std::vector<NativeActiveEnergyBurnedSample>;
-  inline std::vector<NativeActiveEnergyBurnedSample> create_std__vector_NativeActiveEnergyBurnedSample_(size_t size) noexcept {
-    std::vector<NativeActiveEnergyBurnedSample> vector;
-    vector.reserve(size);
-    return vector;
-  }
-  
-  // pragma MARK: std::shared_ptr<Promise<std::vector<NativeActiveEnergyBurnedSample>>>
-  /**
-   * Specialized version of `std::shared_ptr<Promise<std::vector<NativeActiveEnergyBurnedSample>>>`.
-   */
-  using std__shared_ptr_Promise_std__vector_NativeActiveEnergyBurnedSample___ = std::shared_ptr<Promise<std::vector<NativeActiveEnergyBurnedSample>>>;
-  inline std::shared_ptr<Promise<std::vector<NativeActiveEnergyBurnedSample>>> create_std__shared_ptr_Promise_std__vector_NativeActiveEnergyBurnedSample___() noexcept {
-    return Promise<std::vector<NativeActiveEnergyBurnedSample>>::create();
-  }
-  inline PromiseHolder<std::vector<NativeActiveEnergyBurnedSample>> wrap_std__shared_ptr_Promise_std__vector_NativeActiveEnergyBurnedSample___(std::shared_ptr<Promise<std::vector<NativeActiveEnergyBurnedSample>>> promise) noexcept {
-    return PromiseHolder<std::vector<NativeActiveEnergyBurnedSample>>(std::move(promise));
-  }
-  
-  // pragma MARK: std::function<void(const std::vector<NativeActiveEnergyBurnedSample>& /* result */)>
-  /**
-   * Specialized version of `std::function<void(const std::vector<NativeActiveEnergyBurnedSample>&)>`.
-   */
-  using Func_void_std__vector_NativeActiveEnergyBurnedSample_ = std::function<void(const std::vector<NativeActiveEnergyBurnedSample>& /* result */)>;
-  /**
-   * Wrapper class for a `std::function<void(const std::vector<NativeActiveEnergyBurnedSample>& / * result * /)>`, this can be used from Swift.
-   */
-  class Func_void_std__vector_NativeActiveEnergyBurnedSample__Wrapper final {
-  public:
-    explicit Func_void_std__vector_NativeActiveEnergyBurnedSample__Wrapper(std::function<void(const std::vector<NativeActiveEnergyBurnedSample>& /* result */)>&& func): _function(std::make_unique<std::function<void(const std::vector<NativeActiveEnergyBurnedSample>& /* result */)>>(std::move(func))) {}
-    inline void call(std::vector<NativeActiveEnergyBurnedSample> result) const noexcept {
-      _function->operator()(result);
-    }
-  private:
-    std::unique_ptr<std::function<void(const std::vector<NativeActiveEnergyBurnedSample>& /* result */)>> _function;
-  } SWIFT_NONCOPYABLE;
-  Func_void_std__vector_NativeActiveEnergyBurnedSample_ create_Func_void_std__vector_NativeActiveEnergyBurnedSample_(void* NON_NULL swiftClosureWrapper) noexcept;
-  inline Func_void_std__vector_NativeActiveEnergyBurnedSample__Wrapper wrap_Func_void_std__vector_NativeActiveEnergyBurnedSample_(Func_void_std__vector_NativeActiveEnergyBurnedSample_ value) noexcept {
-    return Func_void_std__vector_NativeActiveEnergyBurnedSample__Wrapper(std::move(value));
-  }
-  
   // pragma MARK: std::optional<std::string>
   /**
    * Specialized version of `std::optional<std::string>`.
@@ -317,6 +235,265 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return optional.value();
   }
   
+  // pragma MARK: std::shared_ptr<Promise<NativeStepSamplePage>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<NativeStepSamplePage>>`.
+   */
+  using std__shared_ptr_Promise_NativeStepSamplePage__ = std::shared_ptr<Promise<NativeStepSamplePage>>;
+  inline std::shared_ptr<Promise<NativeStepSamplePage>> create_std__shared_ptr_Promise_NativeStepSamplePage__() noexcept {
+    return Promise<NativeStepSamplePage>::create();
+  }
+  inline PromiseHolder<NativeStepSamplePage> wrap_std__shared_ptr_Promise_NativeStepSamplePage__(std::shared_ptr<Promise<NativeStepSamplePage>> promise) noexcept {
+    return PromiseHolder<NativeStepSamplePage>(std::move(promise));
+  }
+  
+  // pragma MARK: std::function<void(const NativeStepSamplePage& /* result */)>
+  /**
+   * Specialized version of `std::function<void(const NativeStepSamplePage&)>`.
+   */
+  using Func_void_NativeStepSamplePage = std::function<void(const NativeStepSamplePage& /* result */)>;
+  /**
+   * Wrapper class for a `std::function<void(const NativeStepSamplePage& / * result * /)>`, this can be used from Swift.
+   */
+  class Func_void_NativeStepSamplePage_Wrapper final {
+  public:
+    explicit Func_void_NativeStepSamplePage_Wrapper(std::function<void(const NativeStepSamplePage& /* result */)>&& func): _function(std::make_unique<std::function<void(const NativeStepSamplePage& /* result */)>>(std::move(func))) {}
+    inline void call(NativeStepSamplePage result) const noexcept {
+      _function->operator()(result);
+    }
+  private:
+    std::unique_ptr<std::function<void(const NativeStepSamplePage& /* result */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_NativeStepSamplePage create_Func_void_NativeStepSamplePage(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_NativeStepSamplePage_Wrapper wrap_Func_void_NativeStepSamplePage(Func_void_NativeStepSamplePage value) noexcept {
+    return Func_void_NativeStepSamplePage_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::vector<NativeDailyStepTotal>
+  /**
+   * Specialized version of `std::vector<NativeDailyStepTotal>`.
+   */
+  using std__vector_NativeDailyStepTotal_ = std::vector<NativeDailyStepTotal>;
+  inline std::vector<NativeDailyStepTotal> create_std__vector_NativeDailyStepTotal_(size_t size) noexcept {
+    std::vector<NativeDailyStepTotal> vector;
+    vector.reserve(size);
+    return vector;
+  }
+  
+  // pragma MARK: std::shared_ptr<Promise<std::vector<NativeDailyStepTotal>>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<std::vector<NativeDailyStepTotal>>>`.
+   */
+  using std__shared_ptr_Promise_std__vector_NativeDailyStepTotal___ = std::shared_ptr<Promise<std::vector<NativeDailyStepTotal>>>;
+  inline std::shared_ptr<Promise<std::vector<NativeDailyStepTotal>>> create_std__shared_ptr_Promise_std__vector_NativeDailyStepTotal___() noexcept {
+    return Promise<std::vector<NativeDailyStepTotal>>::create();
+  }
+  inline PromiseHolder<std::vector<NativeDailyStepTotal>> wrap_std__shared_ptr_Promise_std__vector_NativeDailyStepTotal___(std::shared_ptr<Promise<std::vector<NativeDailyStepTotal>>> promise) noexcept {
+    return PromiseHolder<std::vector<NativeDailyStepTotal>>(std::move(promise));
+  }
+  
+  // pragma MARK: std::function<void(const std::vector<NativeDailyStepTotal>& /* result */)>
+  /**
+   * Specialized version of `std::function<void(const std::vector<NativeDailyStepTotal>&)>`.
+   */
+  using Func_void_std__vector_NativeDailyStepTotal_ = std::function<void(const std::vector<NativeDailyStepTotal>& /* result */)>;
+  /**
+   * Wrapper class for a `std::function<void(const std::vector<NativeDailyStepTotal>& / * result * /)>`, this can be used from Swift.
+   */
+  class Func_void_std__vector_NativeDailyStepTotal__Wrapper final {
+  public:
+    explicit Func_void_std__vector_NativeDailyStepTotal__Wrapper(std::function<void(const std::vector<NativeDailyStepTotal>& /* result */)>&& func): _function(std::make_unique<std::function<void(const std::vector<NativeDailyStepTotal>& /* result */)>>(std::move(func))) {}
+    inline void call(std::vector<NativeDailyStepTotal> result) const noexcept {
+      _function->operator()(result);
+    }
+  private:
+    std::unique_ptr<std::function<void(const std::vector<NativeDailyStepTotal>& /* result */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_std__vector_NativeDailyStepTotal_ create_Func_void_std__vector_NativeDailyStepTotal_(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_std__vector_NativeDailyStepTotal__Wrapper wrap_Func_void_std__vector_NativeDailyStepTotal_(Func_void_std__vector_NativeDailyStepTotal_ value) noexcept {
+    return Func_void_std__vector_NativeDailyStepTotal__Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::vector<NativeDistanceSample>
+  /**
+   * Specialized version of `std::vector<NativeDistanceSample>`.
+   */
+  using std__vector_NativeDistanceSample_ = std::vector<NativeDistanceSample>;
+  inline std::vector<NativeDistanceSample> create_std__vector_NativeDistanceSample_(size_t size) noexcept {
+    std::vector<NativeDistanceSample> vector;
+    vector.reserve(size);
+    return vector;
+  }
+  
+  // pragma MARK: std::shared_ptr<Promise<NativeDistanceSamplePage>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<NativeDistanceSamplePage>>`.
+   */
+  using std__shared_ptr_Promise_NativeDistanceSamplePage__ = std::shared_ptr<Promise<NativeDistanceSamplePage>>;
+  inline std::shared_ptr<Promise<NativeDistanceSamplePage>> create_std__shared_ptr_Promise_NativeDistanceSamplePage__() noexcept {
+    return Promise<NativeDistanceSamplePage>::create();
+  }
+  inline PromiseHolder<NativeDistanceSamplePage> wrap_std__shared_ptr_Promise_NativeDistanceSamplePage__(std::shared_ptr<Promise<NativeDistanceSamplePage>> promise) noexcept {
+    return PromiseHolder<NativeDistanceSamplePage>(std::move(promise));
+  }
+  
+  // pragma MARK: std::function<void(const NativeDistanceSamplePage& /* result */)>
+  /**
+   * Specialized version of `std::function<void(const NativeDistanceSamplePage&)>`.
+   */
+  using Func_void_NativeDistanceSamplePage = std::function<void(const NativeDistanceSamplePage& /* result */)>;
+  /**
+   * Wrapper class for a `std::function<void(const NativeDistanceSamplePage& / * result * /)>`, this can be used from Swift.
+   */
+  class Func_void_NativeDistanceSamplePage_Wrapper final {
+  public:
+    explicit Func_void_NativeDistanceSamplePage_Wrapper(std::function<void(const NativeDistanceSamplePage& /* result */)>&& func): _function(std::make_unique<std::function<void(const NativeDistanceSamplePage& /* result */)>>(std::move(func))) {}
+    inline void call(NativeDistanceSamplePage result) const noexcept {
+      _function->operator()(result);
+    }
+  private:
+    std::unique_ptr<std::function<void(const NativeDistanceSamplePage& /* result */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_NativeDistanceSamplePage create_Func_void_NativeDistanceSamplePage(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_NativeDistanceSamplePage_Wrapper wrap_Func_void_NativeDistanceSamplePage(Func_void_NativeDistanceSamplePage value) noexcept {
+    return Func_void_NativeDistanceSamplePage_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::vector<NativeDailyDistanceTotal>
+  /**
+   * Specialized version of `std::vector<NativeDailyDistanceTotal>`.
+   */
+  using std__vector_NativeDailyDistanceTotal_ = std::vector<NativeDailyDistanceTotal>;
+  inline std::vector<NativeDailyDistanceTotal> create_std__vector_NativeDailyDistanceTotal_(size_t size) noexcept {
+    std::vector<NativeDailyDistanceTotal> vector;
+    vector.reserve(size);
+    return vector;
+  }
+  
+  // pragma MARK: std::shared_ptr<Promise<std::vector<NativeDailyDistanceTotal>>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<std::vector<NativeDailyDistanceTotal>>>`.
+   */
+  using std__shared_ptr_Promise_std__vector_NativeDailyDistanceTotal___ = std::shared_ptr<Promise<std::vector<NativeDailyDistanceTotal>>>;
+  inline std::shared_ptr<Promise<std::vector<NativeDailyDistanceTotal>>> create_std__shared_ptr_Promise_std__vector_NativeDailyDistanceTotal___() noexcept {
+    return Promise<std::vector<NativeDailyDistanceTotal>>::create();
+  }
+  inline PromiseHolder<std::vector<NativeDailyDistanceTotal>> wrap_std__shared_ptr_Promise_std__vector_NativeDailyDistanceTotal___(std::shared_ptr<Promise<std::vector<NativeDailyDistanceTotal>>> promise) noexcept {
+    return PromiseHolder<std::vector<NativeDailyDistanceTotal>>(std::move(promise));
+  }
+  
+  // pragma MARK: std::function<void(const std::vector<NativeDailyDistanceTotal>& /* result */)>
+  /**
+   * Specialized version of `std::function<void(const std::vector<NativeDailyDistanceTotal>&)>`.
+   */
+  using Func_void_std__vector_NativeDailyDistanceTotal_ = std::function<void(const std::vector<NativeDailyDistanceTotal>& /* result */)>;
+  /**
+   * Wrapper class for a `std::function<void(const std::vector<NativeDailyDistanceTotal>& / * result * /)>`, this can be used from Swift.
+   */
+  class Func_void_std__vector_NativeDailyDistanceTotal__Wrapper final {
+  public:
+    explicit Func_void_std__vector_NativeDailyDistanceTotal__Wrapper(std::function<void(const std::vector<NativeDailyDistanceTotal>& /* result */)>&& func): _function(std::make_unique<std::function<void(const std::vector<NativeDailyDistanceTotal>& /* result */)>>(std::move(func))) {}
+    inline void call(std::vector<NativeDailyDistanceTotal> result) const noexcept {
+      _function->operator()(result);
+    }
+  private:
+    std::unique_ptr<std::function<void(const std::vector<NativeDailyDistanceTotal>& /* result */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_std__vector_NativeDailyDistanceTotal_ create_Func_void_std__vector_NativeDailyDistanceTotal_(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_std__vector_NativeDailyDistanceTotal__Wrapper wrap_Func_void_std__vector_NativeDailyDistanceTotal_(Func_void_std__vector_NativeDailyDistanceTotal_ value) noexcept {
+    return Func_void_std__vector_NativeDailyDistanceTotal__Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::vector<NativeActiveEnergyBurnedSample>
+  /**
+   * Specialized version of `std::vector<NativeActiveEnergyBurnedSample>`.
+   */
+  using std__vector_NativeActiveEnergyBurnedSample_ = std::vector<NativeActiveEnergyBurnedSample>;
+  inline std::vector<NativeActiveEnergyBurnedSample> create_std__vector_NativeActiveEnergyBurnedSample_(size_t size) noexcept {
+    std::vector<NativeActiveEnergyBurnedSample> vector;
+    vector.reserve(size);
+    return vector;
+  }
+  
+  // pragma MARK: std::shared_ptr<Promise<NativeActiveEnergyBurnedSamplePage>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<NativeActiveEnergyBurnedSamplePage>>`.
+   */
+  using std__shared_ptr_Promise_NativeActiveEnergyBurnedSamplePage__ = std::shared_ptr<Promise<NativeActiveEnergyBurnedSamplePage>>;
+  inline std::shared_ptr<Promise<NativeActiveEnergyBurnedSamplePage>> create_std__shared_ptr_Promise_NativeActiveEnergyBurnedSamplePage__() noexcept {
+    return Promise<NativeActiveEnergyBurnedSamplePage>::create();
+  }
+  inline PromiseHolder<NativeActiveEnergyBurnedSamplePage> wrap_std__shared_ptr_Promise_NativeActiveEnergyBurnedSamplePage__(std::shared_ptr<Promise<NativeActiveEnergyBurnedSamplePage>> promise) noexcept {
+    return PromiseHolder<NativeActiveEnergyBurnedSamplePage>(std::move(promise));
+  }
+  
+  // pragma MARK: std::function<void(const NativeActiveEnergyBurnedSamplePage& /* result */)>
+  /**
+   * Specialized version of `std::function<void(const NativeActiveEnergyBurnedSamplePage&)>`.
+   */
+  using Func_void_NativeActiveEnergyBurnedSamplePage = std::function<void(const NativeActiveEnergyBurnedSamplePage& /* result */)>;
+  /**
+   * Wrapper class for a `std::function<void(const NativeActiveEnergyBurnedSamplePage& / * result * /)>`, this can be used from Swift.
+   */
+  class Func_void_NativeActiveEnergyBurnedSamplePage_Wrapper final {
+  public:
+    explicit Func_void_NativeActiveEnergyBurnedSamplePage_Wrapper(std::function<void(const NativeActiveEnergyBurnedSamplePage& /* result */)>&& func): _function(std::make_unique<std::function<void(const NativeActiveEnergyBurnedSamplePage& /* result */)>>(std::move(func))) {}
+    inline void call(NativeActiveEnergyBurnedSamplePage result) const noexcept {
+      _function->operator()(result);
+    }
+  private:
+    std::unique_ptr<std::function<void(const NativeActiveEnergyBurnedSamplePage& /* result */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_NativeActiveEnergyBurnedSamplePage create_Func_void_NativeActiveEnergyBurnedSamplePage(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_NativeActiveEnergyBurnedSamplePage_Wrapper wrap_Func_void_NativeActiveEnergyBurnedSamplePage(Func_void_NativeActiveEnergyBurnedSamplePage value) noexcept {
+    return Func_void_NativeActiveEnergyBurnedSamplePage_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::vector<NativeDailyActiveEnergyBurnedTotal>
+  /**
+   * Specialized version of `std::vector<NativeDailyActiveEnergyBurnedTotal>`.
+   */
+  using std__vector_NativeDailyActiveEnergyBurnedTotal_ = std::vector<NativeDailyActiveEnergyBurnedTotal>;
+  inline std::vector<NativeDailyActiveEnergyBurnedTotal> create_std__vector_NativeDailyActiveEnergyBurnedTotal_(size_t size) noexcept {
+    std::vector<NativeDailyActiveEnergyBurnedTotal> vector;
+    vector.reserve(size);
+    return vector;
+  }
+  
+  // pragma MARK: std::shared_ptr<Promise<std::vector<NativeDailyActiveEnergyBurnedTotal>>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<std::vector<NativeDailyActiveEnergyBurnedTotal>>>`.
+   */
+  using std__shared_ptr_Promise_std__vector_NativeDailyActiveEnergyBurnedTotal___ = std::shared_ptr<Promise<std::vector<NativeDailyActiveEnergyBurnedTotal>>>;
+  inline std::shared_ptr<Promise<std::vector<NativeDailyActiveEnergyBurnedTotal>>> create_std__shared_ptr_Promise_std__vector_NativeDailyActiveEnergyBurnedTotal___() noexcept {
+    return Promise<std::vector<NativeDailyActiveEnergyBurnedTotal>>::create();
+  }
+  inline PromiseHolder<std::vector<NativeDailyActiveEnergyBurnedTotal>> wrap_std__shared_ptr_Promise_std__vector_NativeDailyActiveEnergyBurnedTotal___(std::shared_ptr<Promise<std::vector<NativeDailyActiveEnergyBurnedTotal>>> promise) noexcept {
+    return PromiseHolder<std::vector<NativeDailyActiveEnergyBurnedTotal>>(std::move(promise));
+  }
+  
+  // pragma MARK: std::function<void(const std::vector<NativeDailyActiveEnergyBurnedTotal>& /* result */)>
+  /**
+   * Specialized version of `std::function<void(const std::vector<NativeDailyActiveEnergyBurnedTotal>&)>`.
+   */
+  using Func_void_std__vector_NativeDailyActiveEnergyBurnedTotal_ = std::function<void(const std::vector<NativeDailyActiveEnergyBurnedTotal>& /* result */)>;
+  /**
+   * Wrapper class for a `std::function<void(const std::vector<NativeDailyActiveEnergyBurnedTotal>& / * result * /)>`, this can be used from Swift.
+   */
+  class Func_void_std__vector_NativeDailyActiveEnergyBurnedTotal__Wrapper final {
+  public:
+    explicit Func_void_std__vector_NativeDailyActiveEnergyBurnedTotal__Wrapper(std::function<void(const std::vector<NativeDailyActiveEnergyBurnedTotal>& /* result */)>&& func): _function(std::make_unique<std::function<void(const std::vector<NativeDailyActiveEnergyBurnedTotal>& /* result */)>>(std::move(func))) {}
+    inline void call(std::vector<NativeDailyActiveEnergyBurnedTotal> result) const noexcept {
+      _function->operator()(result);
+    }
+  private:
+    std::unique_ptr<std::function<void(const std::vector<NativeDailyActiveEnergyBurnedTotal>& /* result */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_std__vector_NativeDailyActiveEnergyBurnedTotal_ create_Func_void_std__vector_NativeDailyActiveEnergyBurnedTotal_(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_std__vector_NativeDailyActiveEnergyBurnedTotal__Wrapper wrap_Func_void_std__vector_NativeDailyActiveEnergyBurnedTotal_(Func_void_std__vector_NativeDailyActiveEnergyBurnedTotal_ value) noexcept {
+    return Func_void_std__vector_NativeDailyActiveEnergyBurnedTotal__Wrapper(std::move(value));
+  }
+  
   // pragma MARK: std::vector<NativeBodyMassSample>
   /**
    * Specialized version of `std::vector<NativeBodyMassSample>`.
@@ -328,38 +505,38 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return vector;
   }
   
-  // pragma MARK: std::shared_ptr<Promise<std::vector<NativeBodyMassSample>>>
+  // pragma MARK: std::shared_ptr<Promise<NativeBodyMassSamplePage>>
   /**
-   * Specialized version of `std::shared_ptr<Promise<std::vector<NativeBodyMassSample>>>`.
+   * Specialized version of `std::shared_ptr<Promise<NativeBodyMassSamplePage>>`.
    */
-  using std__shared_ptr_Promise_std__vector_NativeBodyMassSample___ = std::shared_ptr<Promise<std::vector<NativeBodyMassSample>>>;
-  inline std::shared_ptr<Promise<std::vector<NativeBodyMassSample>>> create_std__shared_ptr_Promise_std__vector_NativeBodyMassSample___() noexcept {
-    return Promise<std::vector<NativeBodyMassSample>>::create();
+  using std__shared_ptr_Promise_NativeBodyMassSamplePage__ = std::shared_ptr<Promise<NativeBodyMassSamplePage>>;
+  inline std::shared_ptr<Promise<NativeBodyMassSamplePage>> create_std__shared_ptr_Promise_NativeBodyMassSamplePage__() noexcept {
+    return Promise<NativeBodyMassSamplePage>::create();
   }
-  inline PromiseHolder<std::vector<NativeBodyMassSample>> wrap_std__shared_ptr_Promise_std__vector_NativeBodyMassSample___(std::shared_ptr<Promise<std::vector<NativeBodyMassSample>>> promise) noexcept {
-    return PromiseHolder<std::vector<NativeBodyMassSample>>(std::move(promise));
+  inline PromiseHolder<NativeBodyMassSamplePage> wrap_std__shared_ptr_Promise_NativeBodyMassSamplePage__(std::shared_ptr<Promise<NativeBodyMassSamplePage>> promise) noexcept {
+    return PromiseHolder<NativeBodyMassSamplePage>(std::move(promise));
   }
   
-  // pragma MARK: std::function<void(const std::vector<NativeBodyMassSample>& /* result */)>
+  // pragma MARK: std::function<void(const NativeBodyMassSamplePage& /* result */)>
   /**
-   * Specialized version of `std::function<void(const std::vector<NativeBodyMassSample>&)>`.
+   * Specialized version of `std::function<void(const NativeBodyMassSamplePage&)>`.
    */
-  using Func_void_std__vector_NativeBodyMassSample_ = std::function<void(const std::vector<NativeBodyMassSample>& /* result */)>;
+  using Func_void_NativeBodyMassSamplePage = std::function<void(const NativeBodyMassSamplePage& /* result */)>;
   /**
-   * Wrapper class for a `std::function<void(const std::vector<NativeBodyMassSample>& / * result * /)>`, this can be used from Swift.
+   * Wrapper class for a `std::function<void(const NativeBodyMassSamplePage& / * result * /)>`, this can be used from Swift.
    */
-  class Func_void_std__vector_NativeBodyMassSample__Wrapper final {
+  class Func_void_NativeBodyMassSamplePage_Wrapper final {
   public:
-    explicit Func_void_std__vector_NativeBodyMassSample__Wrapper(std::function<void(const std::vector<NativeBodyMassSample>& /* result */)>&& func): _function(std::make_unique<std::function<void(const std::vector<NativeBodyMassSample>& /* result */)>>(std::move(func))) {}
-    inline void call(std::vector<NativeBodyMassSample> result) const noexcept {
+    explicit Func_void_NativeBodyMassSamplePage_Wrapper(std::function<void(const NativeBodyMassSamplePage& /* result */)>&& func): _function(std::make_unique<std::function<void(const NativeBodyMassSamplePage& /* result */)>>(std::move(func))) {}
+    inline void call(NativeBodyMassSamplePage result) const noexcept {
       _function->operator()(result);
     }
   private:
-    std::unique_ptr<std::function<void(const std::vector<NativeBodyMassSample>& /* result */)>> _function;
+    std::unique_ptr<std::function<void(const NativeBodyMassSamplePage& /* result */)>> _function;
   } SWIFT_NONCOPYABLE;
-  Func_void_std__vector_NativeBodyMassSample_ create_Func_void_std__vector_NativeBodyMassSample_(void* NON_NULL swiftClosureWrapper) noexcept;
-  inline Func_void_std__vector_NativeBodyMassSample__Wrapper wrap_Func_void_std__vector_NativeBodyMassSample_(Func_void_std__vector_NativeBodyMassSample_ value) noexcept {
-    return Func_void_std__vector_NativeBodyMassSample__Wrapper(std::move(value));
+  Func_void_NativeBodyMassSamplePage create_Func_void_NativeBodyMassSamplePage(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_NativeBodyMassSamplePage_Wrapper wrap_Func_void_NativeBodyMassSamplePage(Func_void_NativeBodyMassSamplePage value) noexcept {
+    return Func_void_NativeBodyMassSamplePage_Wrapper(std::move(value));
   }
   
   // pragma MARK: std::vector<NativeHeartRateSample>
@@ -373,38 +550,38 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return vector;
   }
   
-  // pragma MARK: std::shared_ptr<Promise<std::vector<NativeHeartRateSample>>>
+  // pragma MARK: std::shared_ptr<Promise<NativeHeartRateSamplePage>>
   /**
-   * Specialized version of `std::shared_ptr<Promise<std::vector<NativeHeartRateSample>>>`.
+   * Specialized version of `std::shared_ptr<Promise<NativeHeartRateSamplePage>>`.
    */
-  using std__shared_ptr_Promise_std__vector_NativeHeartRateSample___ = std::shared_ptr<Promise<std::vector<NativeHeartRateSample>>>;
-  inline std::shared_ptr<Promise<std::vector<NativeHeartRateSample>>> create_std__shared_ptr_Promise_std__vector_NativeHeartRateSample___() noexcept {
-    return Promise<std::vector<NativeHeartRateSample>>::create();
+  using std__shared_ptr_Promise_NativeHeartRateSamplePage__ = std::shared_ptr<Promise<NativeHeartRateSamplePage>>;
+  inline std::shared_ptr<Promise<NativeHeartRateSamplePage>> create_std__shared_ptr_Promise_NativeHeartRateSamplePage__() noexcept {
+    return Promise<NativeHeartRateSamplePage>::create();
   }
-  inline PromiseHolder<std::vector<NativeHeartRateSample>> wrap_std__shared_ptr_Promise_std__vector_NativeHeartRateSample___(std::shared_ptr<Promise<std::vector<NativeHeartRateSample>>> promise) noexcept {
-    return PromiseHolder<std::vector<NativeHeartRateSample>>(std::move(promise));
+  inline PromiseHolder<NativeHeartRateSamplePage> wrap_std__shared_ptr_Promise_NativeHeartRateSamplePage__(std::shared_ptr<Promise<NativeHeartRateSamplePage>> promise) noexcept {
+    return PromiseHolder<NativeHeartRateSamplePage>(std::move(promise));
   }
   
-  // pragma MARK: std::function<void(const std::vector<NativeHeartRateSample>& /* result */)>
+  // pragma MARK: std::function<void(const NativeHeartRateSamplePage& /* result */)>
   /**
-   * Specialized version of `std::function<void(const std::vector<NativeHeartRateSample>&)>`.
+   * Specialized version of `std::function<void(const NativeHeartRateSamplePage&)>`.
    */
-  using Func_void_std__vector_NativeHeartRateSample_ = std::function<void(const std::vector<NativeHeartRateSample>& /* result */)>;
+  using Func_void_NativeHeartRateSamplePage = std::function<void(const NativeHeartRateSamplePage& /* result */)>;
   /**
-   * Wrapper class for a `std::function<void(const std::vector<NativeHeartRateSample>& / * result * /)>`, this can be used from Swift.
+   * Wrapper class for a `std::function<void(const NativeHeartRateSamplePage& / * result * /)>`, this can be used from Swift.
    */
-  class Func_void_std__vector_NativeHeartRateSample__Wrapper final {
+  class Func_void_NativeHeartRateSamplePage_Wrapper final {
   public:
-    explicit Func_void_std__vector_NativeHeartRateSample__Wrapper(std::function<void(const std::vector<NativeHeartRateSample>& /* result */)>&& func): _function(std::make_unique<std::function<void(const std::vector<NativeHeartRateSample>& /* result */)>>(std::move(func))) {}
-    inline void call(std::vector<NativeHeartRateSample> result) const noexcept {
+    explicit Func_void_NativeHeartRateSamplePage_Wrapper(std::function<void(const NativeHeartRateSamplePage& /* result */)>&& func): _function(std::make_unique<std::function<void(const NativeHeartRateSamplePage& /* result */)>>(std::move(func))) {}
+    inline void call(NativeHeartRateSamplePage result) const noexcept {
       _function->operator()(result);
     }
   private:
-    std::unique_ptr<std::function<void(const std::vector<NativeHeartRateSample>& /* result */)>> _function;
+    std::unique_ptr<std::function<void(const NativeHeartRateSamplePage& /* result */)>> _function;
   } SWIFT_NONCOPYABLE;
-  Func_void_std__vector_NativeHeartRateSample_ create_Func_void_std__vector_NativeHeartRateSample_(void* NON_NULL swiftClosureWrapper) noexcept;
-  inline Func_void_std__vector_NativeHeartRateSample__Wrapper wrap_Func_void_std__vector_NativeHeartRateSample_(Func_void_std__vector_NativeHeartRateSample_ value) noexcept {
-    return Func_void_std__vector_NativeHeartRateSample__Wrapper(std::move(value));
+  Func_void_NativeHeartRateSamplePage create_Func_void_NativeHeartRateSamplePage(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_NativeHeartRateSamplePage_Wrapper wrap_Func_void_NativeHeartRateSamplePage(Func_void_NativeHeartRateSamplePage value) noexcept {
+    return Func_void_NativeHeartRateSamplePage_Wrapper(std::move(value));
   }
   
   // pragma MARK: std::optional<double>
@@ -467,38 +644,38 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return vector;
   }
   
-  // pragma MARK: std::shared_ptr<Promise<std::vector<NativeRestingHeartRateSample>>>
+  // pragma MARK: std::shared_ptr<Promise<NativeRestingHeartRateSamplePage>>
   /**
-   * Specialized version of `std::shared_ptr<Promise<std::vector<NativeRestingHeartRateSample>>>`.
+   * Specialized version of `std::shared_ptr<Promise<NativeRestingHeartRateSamplePage>>`.
    */
-  using std__shared_ptr_Promise_std__vector_NativeRestingHeartRateSample___ = std::shared_ptr<Promise<std::vector<NativeRestingHeartRateSample>>>;
-  inline std::shared_ptr<Promise<std::vector<NativeRestingHeartRateSample>>> create_std__shared_ptr_Promise_std__vector_NativeRestingHeartRateSample___() noexcept {
-    return Promise<std::vector<NativeRestingHeartRateSample>>::create();
+  using std__shared_ptr_Promise_NativeRestingHeartRateSamplePage__ = std::shared_ptr<Promise<NativeRestingHeartRateSamplePage>>;
+  inline std::shared_ptr<Promise<NativeRestingHeartRateSamplePage>> create_std__shared_ptr_Promise_NativeRestingHeartRateSamplePage__() noexcept {
+    return Promise<NativeRestingHeartRateSamplePage>::create();
   }
-  inline PromiseHolder<std::vector<NativeRestingHeartRateSample>> wrap_std__shared_ptr_Promise_std__vector_NativeRestingHeartRateSample___(std::shared_ptr<Promise<std::vector<NativeRestingHeartRateSample>>> promise) noexcept {
-    return PromiseHolder<std::vector<NativeRestingHeartRateSample>>(std::move(promise));
+  inline PromiseHolder<NativeRestingHeartRateSamplePage> wrap_std__shared_ptr_Promise_NativeRestingHeartRateSamplePage__(std::shared_ptr<Promise<NativeRestingHeartRateSamplePage>> promise) noexcept {
+    return PromiseHolder<NativeRestingHeartRateSamplePage>(std::move(promise));
   }
   
-  // pragma MARK: std::function<void(const std::vector<NativeRestingHeartRateSample>& /* result */)>
+  // pragma MARK: std::function<void(const NativeRestingHeartRateSamplePage& /* result */)>
   /**
-   * Specialized version of `std::function<void(const std::vector<NativeRestingHeartRateSample>&)>`.
+   * Specialized version of `std::function<void(const NativeRestingHeartRateSamplePage&)>`.
    */
-  using Func_void_std__vector_NativeRestingHeartRateSample_ = std::function<void(const std::vector<NativeRestingHeartRateSample>& /* result */)>;
+  using Func_void_NativeRestingHeartRateSamplePage = std::function<void(const NativeRestingHeartRateSamplePage& /* result */)>;
   /**
-   * Wrapper class for a `std::function<void(const std::vector<NativeRestingHeartRateSample>& / * result * /)>`, this can be used from Swift.
+   * Wrapper class for a `std::function<void(const NativeRestingHeartRateSamplePage& / * result * /)>`, this can be used from Swift.
    */
-  class Func_void_std__vector_NativeRestingHeartRateSample__Wrapper final {
+  class Func_void_NativeRestingHeartRateSamplePage_Wrapper final {
   public:
-    explicit Func_void_std__vector_NativeRestingHeartRateSample__Wrapper(std::function<void(const std::vector<NativeRestingHeartRateSample>& /* result */)>&& func): _function(std::make_unique<std::function<void(const std::vector<NativeRestingHeartRateSample>& /* result */)>>(std::move(func))) {}
-    inline void call(std::vector<NativeRestingHeartRateSample> result) const noexcept {
+    explicit Func_void_NativeRestingHeartRateSamplePage_Wrapper(std::function<void(const NativeRestingHeartRateSamplePage& /* result */)>&& func): _function(std::make_unique<std::function<void(const NativeRestingHeartRateSamplePage& /* result */)>>(std::move(func))) {}
+    inline void call(NativeRestingHeartRateSamplePage result) const noexcept {
       _function->operator()(result);
     }
   private:
-    std::unique_ptr<std::function<void(const std::vector<NativeRestingHeartRateSample>& /* result */)>> _function;
+    std::unique_ptr<std::function<void(const NativeRestingHeartRateSamplePage& /* result */)>> _function;
   } SWIFT_NONCOPYABLE;
-  Func_void_std__vector_NativeRestingHeartRateSample_ create_Func_void_std__vector_NativeRestingHeartRateSample_(void* NON_NULL swiftClosureWrapper) noexcept;
-  inline Func_void_std__vector_NativeRestingHeartRateSample__Wrapper wrap_Func_void_std__vector_NativeRestingHeartRateSample_(Func_void_std__vector_NativeRestingHeartRateSample_ value) noexcept {
-    return Func_void_std__vector_NativeRestingHeartRateSample__Wrapper(std::move(value));
+  Func_void_NativeRestingHeartRateSamplePage create_Func_void_NativeRestingHeartRateSamplePage(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_NativeRestingHeartRateSamplePage_Wrapper wrap_Func_void_NativeRestingHeartRateSamplePage(Func_void_NativeRestingHeartRateSamplePage value) noexcept {
+    return Func_void_NativeRestingHeartRateSamplePage_Wrapper(std::move(value));
   }
   
   // pragma MARK: std::vector<NativeHeartRateVariabilitySample>
@@ -512,38 +689,38 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return vector;
   }
   
-  // pragma MARK: std::shared_ptr<Promise<std::vector<NativeHeartRateVariabilitySample>>>
+  // pragma MARK: std::shared_ptr<Promise<NativeHeartRateVariabilitySamplePage>>
   /**
-   * Specialized version of `std::shared_ptr<Promise<std::vector<NativeHeartRateVariabilitySample>>>`.
+   * Specialized version of `std::shared_ptr<Promise<NativeHeartRateVariabilitySamplePage>>`.
    */
-  using std__shared_ptr_Promise_std__vector_NativeHeartRateVariabilitySample___ = std::shared_ptr<Promise<std::vector<NativeHeartRateVariabilitySample>>>;
-  inline std::shared_ptr<Promise<std::vector<NativeHeartRateVariabilitySample>>> create_std__shared_ptr_Promise_std__vector_NativeHeartRateVariabilitySample___() noexcept {
-    return Promise<std::vector<NativeHeartRateVariabilitySample>>::create();
+  using std__shared_ptr_Promise_NativeHeartRateVariabilitySamplePage__ = std::shared_ptr<Promise<NativeHeartRateVariabilitySamplePage>>;
+  inline std::shared_ptr<Promise<NativeHeartRateVariabilitySamplePage>> create_std__shared_ptr_Promise_NativeHeartRateVariabilitySamplePage__() noexcept {
+    return Promise<NativeHeartRateVariabilitySamplePage>::create();
   }
-  inline PromiseHolder<std::vector<NativeHeartRateVariabilitySample>> wrap_std__shared_ptr_Promise_std__vector_NativeHeartRateVariabilitySample___(std::shared_ptr<Promise<std::vector<NativeHeartRateVariabilitySample>>> promise) noexcept {
-    return PromiseHolder<std::vector<NativeHeartRateVariabilitySample>>(std::move(promise));
+  inline PromiseHolder<NativeHeartRateVariabilitySamplePage> wrap_std__shared_ptr_Promise_NativeHeartRateVariabilitySamplePage__(std::shared_ptr<Promise<NativeHeartRateVariabilitySamplePage>> promise) noexcept {
+    return PromiseHolder<NativeHeartRateVariabilitySamplePage>(std::move(promise));
   }
   
-  // pragma MARK: std::function<void(const std::vector<NativeHeartRateVariabilitySample>& /* result */)>
+  // pragma MARK: std::function<void(const NativeHeartRateVariabilitySamplePage& /* result */)>
   /**
-   * Specialized version of `std::function<void(const std::vector<NativeHeartRateVariabilitySample>&)>`.
+   * Specialized version of `std::function<void(const NativeHeartRateVariabilitySamplePage&)>`.
    */
-  using Func_void_std__vector_NativeHeartRateVariabilitySample_ = std::function<void(const std::vector<NativeHeartRateVariabilitySample>& /* result */)>;
+  using Func_void_NativeHeartRateVariabilitySamplePage = std::function<void(const NativeHeartRateVariabilitySamplePage& /* result */)>;
   /**
-   * Wrapper class for a `std::function<void(const std::vector<NativeHeartRateVariabilitySample>& / * result * /)>`, this can be used from Swift.
+   * Wrapper class for a `std::function<void(const NativeHeartRateVariabilitySamplePage& / * result * /)>`, this can be used from Swift.
    */
-  class Func_void_std__vector_NativeHeartRateVariabilitySample__Wrapper final {
+  class Func_void_NativeHeartRateVariabilitySamplePage_Wrapper final {
   public:
-    explicit Func_void_std__vector_NativeHeartRateVariabilitySample__Wrapper(std::function<void(const std::vector<NativeHeartRateVariabilitySample>& /* result */)>&& func): _function(std::make_unique<std::function<void(const std::vector<NativeHeartRateVariabilitySample>& /* result */)>>(std::move(func))) {}
-    inline void call(std::vector<NativeHeartRateVariabilitySample> result) const noexcept {
+    explicit Func_void_NativeHeartRateVariabilitySamplePage_Wrapper(std::function<void(const NativeHeartRateVariabilitySamplePage& /* result */)>&& func): _function(std::make_unique<std::function<void(const NativeHeartRateVariabilitySamplePage& /* result */)>>(std::move(func))) {}
+    inline void call(NativeHeartRateVariabilitySamplePage result) const noexcept {
       _function->operator()(result);
     }
   private:
-    std::unique_ptr<std::function<void(const std::vector<NativeHeartRateVariabilitySample>& /* result */)>> _function;
+    std::unique_ptr<std::function<void(const NativeHeartRateVariabilitySamplePage& /* result */)>> _function;
   } SWIFT_NONCOPYABLE;
-  Func_void_std__vector_NativeHeartRateVariabilitySample_ create_Func_void_std__vector_NativeHeartRateVariabilitySample_(void* NON_NULL swiftClosureWrapper) noexcept;
-  inline Func_void_std__vector_NativeHeartRateVariabilitySample__Wrapper wrap_Func_void_std__vector_NativeHeartRateVariabilitySample_(Func_void_std__vector_NativeHeartRateVariabilitySample_ value) noexcept {
-    return Func_void_std__vector_NativeHeartRateVariabilitySample__Wrapper(std::move(value));
+  Func_void_NativeHeartRateVariabilitySamplePage create_Func_void_NativeHeartRateVariabilitySamplePage(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_NativeHeartRateVariabilitySamplePage_Wrapper wrap_Func_void_NativeHeartRateVariabilitySamplePage(Func_void_NativeHeartRateVariabilitySamplePage value) noexcept {
+    return Func_void_NativeHeartRateVariabilitySamplePage_Wrapper(std::move(value));
   }
   
   // pragma MARK: std::vector<NativeOxygenSaturationSample>
@@ -557,38 +734,38 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return vector;
   }
   
-  // pragma MARK: std::shared_ptr<Promise<std::vector<NativeOxygenSaturationSample>>>
+  // pragma MARK: std::shared_ptr<Promise<NativeOxygenSaturationSamplePage>>
   /**
-   * Specialized version of `std::shared_ptr<Promise<std::vector<NativeOxygenSaturationSample>>>`.
+   * Specialized version of `std::shared_ptr<Promise<NativeOxygenSaturationSamplePage>>`.
    */
-  using std__shared_ptr_Promise_std__vector_NativeOxygenSaturationSample___ = std::shared_ptr<Promise<std::vector<NativeOxygenSaturationSample>>>;
-  inline std::shared_ptr<Promise<std::vector<NativeOxygenSaturationSample>>> create_std__shared_ptr_Promise_std__vector_NativeOxygenSaturationSample___() noexcept {
-    return Promise<std::vector<NativeOxygenSaturationSample>>::create();
+  using std__shared_ptr_Promise_NativeOxygenSaturationSamplePage__ = std::shared_ptr<Promise<NativeOxygenSaturationSamplePage>>;
+  inline std::shared_ptr<Promise<NativeOxygenSaturationSamplePage>> create_std__shared_ptr_Promise_NativeOxygenSaturationSamplePage__() noexcept {
+    return Promise<NativeOxygenSaturationSamplePage>::create();
   }
-  inline PromiseHolder<std::vector<NativeOxygenSaturationSample>> wrap_std__shared_ptr_Promise_std__vector_NativeOxygenSaturationSample___(std::shared_ptr<Promise<std::vector<NativeOxygenSaturationSample>>> promise) noexcept {
-    return PromiseHolder<std::vector<NativeOxygenSaturationSample>>(std::move(promise));
+  inline PromiseHolder<NativeOxygenSaturationSamplePage> wrap_std__shared_ptr_Promise_NativeOxygenSaturationSamplePage__(std::shared_ptr<Promise<NativeOxygenSaturationSamplePage>> promise) noexcept {
+    return PromiseHolder<NativeOxygenSaturationSamplePage>(std::move(promise));
   }
   
-  // pragma MARK: std::function<void(const std::vector<NativeOxygenSaturationSample>& /* result */)>
+  // pragma MARK: std::function<void(const NativeOxygenSaturationSamplePage& /* result */)>
   /**
-   * Specialized version of `std::function<void(const std::vector<NativeOxygenSaturationSample>&)>`.
+   * Specialized version of `std::function<void(const NativeOxygenSaturationSamplePage&)>`.
    */
-  using Func_void_std__vector_NativeOxygenSaturationSample_ = std::function<void(const std::vector<NativeOxygenSaturationSample>& /* result */)>;
+  using Func_void_NativeOxygenSaturationSamplePage = std::function<void(const NativeOxygenSaturationSamplePage& /* result */)>;
   /**
-   * Wrapper class for a `std::function<void(const std::vector<NativeOxygenSaturationSample>& / * result * /)>`, this can be used from Swift.
+   * Wrapper class for a `std::function<void(const NativeOxygenSaturationSamplePage& / * result * /)>`, this can be used from Swift.
    */
-  class Func_void_std__vector_NativeOxygenSaturationSample__Wrapper final {
+  class Func_void_NativeOxygenSaturationSamplePage_Wrapper final {
   public:
-    explicit Func_void_std__vector_NativeOxygenSaturationSample__Wrapper(std::function<void(const std::vector<NativeOxygenSaturationSample>& /* result */)>&& func): _function(std::make_unique<std::function<void(const std::vector<NativeOxygenSaturationSample>& /* result */)>>(std::move(func))) {}
-    inline void call(std::vector<NativeOxygenSaturationSample> result) const noexcept {
+    explicit Func_void_NativeOxygenSaturationSamplePage_Wrapper(std::function<void(const NativeOxygenSaturationSamplePage& /* result */)>&& func): _function(std::make_unique<std::function<void(const NativeOxygenSaturationSamplePage& /* result */)>>(std::move(func))) {}
+    inline void call(NativeOxygenSaturationSamplePage result) const noexcept {
       _function->operator()(result);
     }
   private:
-    std::unique_ptr<std::function<void(const std::vector<NativeOxygenSaturationSample>& /* result */)>> _function;
+    std::unique_ptr<std::function<void(const NativeOxygenSaturationSamplePage& /* result */)>> _function;
   } SWIFT_NONCOPYABLE;
-  Func_void_std__vector_NativeOxygenSaturationSample_ create_Func_void_std__vector_NativeOxygenSaturationSample_(void* NON_NULL swiftClosureWrapper) noexcept;
-  inline Func_void_std__vector_NativeOxygenSaturationSample__Wrapper wrap_Func_void_std__vector_NativeOxygenSaturationSample_(Func_void_std__vector_NativeOxygenSaturationSample_ value) noexcept {
-    return Func_void_std__vector_NativeOxygenSaturationSample__Wrapper(std::move(value));
+  Func_void_NativeOxygenSaturationSamplePage create_Func_void_NativeOxygenSaturationSamplePage(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_NativeOxygenSaturationSamplePage_Wrapper wrap_Func_void_NativeOxygenSaturationSamplePage(Func_void_NativeOxygenSaturationSamplePage value) noexcept {
+    return Func_void_NativeOxygenSaturationSamplePage_Wrapper(std::move(value));
   }
   
   // pragma MARK: std::vector<NativeHeightSample>
@@ -602,38 +779,38 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return vector;
   }
   
-  // pragma MARK: std::shared_ptr<Promise<std::vector<NativeHeightSample>>>
+  // pragma MARK: std::shared_ptr<Promise<NativeHeightSamplePage>>
   /**
-   * Specialized version of `std::shared_ptr<Promise<std::vector<NativeHeightSample>>>`.
+   * Specialized version of `std::shared_ptr<Promise<NativeHeightSamplePage>>`.
    */
-  using std__shared_ptr_Promise_std__vector_NativeHeightSample___ = std::shared_ptr<Promise<std::vector<NativeHeightSample>>>;
-  inline std::shared_ptr<Promise<std::vector<NativeHeightSample>>> create_std__shared_ptr_Promise_std__vector_NativeHeightSample___() noexcept {
-    return Promise<std::vector<NativeHeightSample>>::create();
+  using std__shared_ptr_Promise_NativeHeightSamplePage__ = std::shared_ptr<Promise<NativeHeightSamplePage>>;
+  inline std::shared_ptr<Promise<NativeHeightSamplePage>> create_std__shared_ptr_Promise_NativeHeightSamplePage__() noexcept {
+    return Promise<NativeHeightSamplePage>::create();
   }
-  inline PromiseHolder<std::vector<NativeHeightSample>> wrap_std__shared_ptr_Promise_std__vector_NativeHeightSample___(std::shared_ptr<Promise<std::vector<NativeHeightSample>>> promise) noexcept {
-    return PromiseHolder<std::vector<NativeHeightSample>>(std::move(promise));
+  inline PromiseHolder<NativeHeightSamplePage> wrap_std__shared_ptr_Promise_NativeHeightSamplePage__(std::shared_ptr<Promise<NativeHeightSamplePage>> promise) noexcept {
+    return PromiseHolder<NativeHeightSamplePage>(std::move(promise));
   }
   
-  // pragma MARK: std::function<void(const std::vector<NativeHeightSample>& /* result */)>
+  // pragma MARK: std::function<void(const NativeHeightSamplePage& /* result */)>
   /**
-   * Specialized version of `std::function<void(const std::vector<NativeHeightSample>&)>`.
+   * Specialized version of `std::function<void(const NativeHeightSamplePage&)>`.
    */
-  using Func_void_std__vector_NativeHeightSample_ = std::function<void(const std::vector<NativeHeightSample>& /* result */)>;
+  using Func_void_NativeHeightSamplePage = std::function<void(const NativeHeightSamplePage& /* result */)>;
   /**
-   * Wrapper class for a `std::function<void(const std::vector<NativeHeightSample>& / * result * /)>`, this can be used from Swift.
+   * Wrapper class for a `std::function<void(const NativeHeightSamplePage& / * result * /)>`, this can be used from Swift.
    */
-  class Func_void_std__vector_NativeHeightSample__Wrapper final {
+  class Func_void_NativeHeightSamplePage_Wrapper final {
   public:
-    explicit Func_void_std__vector_NativeHeightSample__Wrapper(std::function<void(const std::vector<NativeHeightSample>& /* result */)>&& func): _function(std::make_unique<std::function<void(const std::vector<NativeHeightSample>& /* result */)>>(std::move(func))) {}
-    inline void call(std::vector<NativeHeightSample> result) const noexcept {
+    explicit Func_void_NativeHeightSamplePage_Wrapper(std::function<void(const NativeHeightSamplePage& /* result */)>&& func): _function(std::make_unique<std::function<void(const NativeHeightSamplePage& /* result */)>>(std::move(func))) {}
+    inline void call(NativeHeightSamplePage result) const noexcept {
       _function->operator()(result);
     }
   private:
-    std::unique_ptr<std::function<void(const std::vector<NativeHeightSample>& /* result */)>> _function;
+    std::unique_ptr<std::function<void(const NativeHeightSamplePage& /* result */)>> _function;
   } SWIFT_NONCOPYABLE;
-  Func_void_std__vector_NativeHeightSample_ create_Func_void_std__vector_NativeHeightSample_(void* NON_NULL swiftClosureWrapper) noexcept;
-  inline Func_void_std__vector_NativeHeightSample__Wrapper wrap_Func_void_std__vector_NativeHeightSample_(Func_void_std__vector_NativeHeightSample_ value) noexcept {
-    return Func_void_std__vector_NativeHeightSample__Wrapper(std::move(value));
+  Func_void_NativeHeightSamplePage create_Func_void_NativeHeightSamplePage(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_NativeHeightSamplePage_Wrapper wrap_Func_void_NativeHeightSamplePage(Func_void_NativeHeightSamplePage value) noexcept {
+    return Func_void_NativeHeightSamplePage_Wrapper(std::move(value));
   }
   
   // pragma MARK: std::vector<NativeHealthStatistics>
@@ -703,38 +880,38 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return vector;
   }
   
-  // pragma MARK: std::shared_ptr<Promise<std::vector<NativeSleepSample>>>
+  // pragma MARK: std::shared_ptr<Promise<NativeSleepSamplePage>>
   /**
-   * Specialized version of `std::shared_ptr<Promise<std::vector<NativeSleepSample>>>`.
+   * Specialized version of `std::shared_ptr<Promise<NativeSleepSamplePage>>`.
    */
-  using std__shared_ptr_Promise_std__vector_NativeSleepSample___ = std::shared_ptr<Promise<std::vector<NativeSleepSample>>>;
-  inline std::shared_ptr<Promise<std::vector<NativeSleepSample>>> create_std__shared_ptr_Promise_std__vector_NativeSleepSample___() noexcept {
-    return Promise<std::vector<NativeSleepSample>>::create();
+  using std__shared_ptr_Promise_NativeSleepSamplePage__ = std::shared_ptr<Promise<NativeSleepSamplePage>>;
+  inline std::shared_ptr<Promise<NativeSleepSamplePage>> create_std__shared_ptr_Promise_NativeSleepSamplePage__() noexcept {
+    return Promise<NativeSleepSamplePage>::create();
   }
-  inline PromiseHolder<std::vector<NativeSleepSample>> wrap_std__shared_ptr_Promise_std__vector_NativeSleepSample___(std::shared_ptr<Promise<std::vector<NativeSleepSample>>> promise) noexcept {
-    return PromiseHolder<std::vector<NativeSleepSample>>(std::move(promise));
+  inline PromiseHolder<NativeSleepSamplePage> wrap_std__shared_ptr_Promise_NativeSleepSamplePage__(std::shared_ptr<Promise<NativeSleepSamplePage>> promise) noexcept {
+    return PromiseHolder<NativeSleepSamplePage>(std::move(promise));
   }
   
-  // pragma MARK: std::function<void(const std::vector<NativeSleepSample>& /* result */)>
+  // pragma MARK: std::function<void(const NativeSleepSamplePage& /* result */)>
   /**
-   * Specialized version of `std::function<void(const std::vector<NativeSleepSample>&)>`.
+   * Specialized version of `std::function<void(const NativeSleepSamplePage&)>`.
    */
-  using Func_void_std__vector_NativeSleepSample_ = std::function<void(const std::vector<NativeSleepSample>& /* result */)>;
+  using Func_void_NativeSleepSamplePage = std::function<void(const NativeSleepSamplePage& /* result */)>;
   /**
-   * Wrapper class for a `std::function<void(const std::vector<NativeSleepSample>& / * result * /)>`, this can be used from Swift.
+   * Wrapper class for a `std::function<void(const NativeSleepSamplePage& / * result * /)>`, this can be used from Swift.
    */
-  class Func_void_std__vector_NativeSleepSample__Wrapper final {
+  class Func_void_NativeSleepSamplePage_Wrapper final {
   public:
-    explicit Func_void_std__vector_NativeSleepSample__Wrapper(std::function<void(const std::vector<NativeSleepSample>& /* result */)>&& func): _function(std::make_unique<std::function<void(const std::vector<NativeSleepSample>& /* result */)>>(std::move(func))) {}
-    inline void call(std::vector<NativeSleepSample> result) const noexcept {
+    explicit Func_void_NativeSleepSamplePage_Wrapper(std::function<void(const NativeSleepSamplePage& /* result */)>&& func): _function(std::make_unique<std::function<void(const NativeSleepSamplePage& /* result */)>>(std::move(func))) {}
+    inline void call(NativeSleepSamplePage result) const noexcept {
       _function->operator()(result);
     }
   private:
-    std::unique_ptr<std::function<void(const std::vector<NativeSleepSample>& /* result */)>> _function;
+    std::unique_ptr<std::function<void(const NativeSleepSamplePage& /* result */)>> _function;
   } SWIFT_NONCOPYABLE;
-  Func_void_std__vector_NativeSleepSample_ create_Func_void_std__vector_NativeSleepSample_(void* NON_NULL swiftClosureWrapper) noexcept;
-  inline Func_void_std__vector_NativeSleepSample__Wrapper wrap_Func_void_std__vector_NativeSleepSample_(Func_void_std__vector_NativeSleepSample_ value) noexcept {
-    return Func_void_std__vector_NativeSleepSample__Wrapper(std::move(value));
+  Func_void_NativeSleepSamplePage create_Func_void_NativeSleepSamplePage(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_NativeSleepSamplePage_Wrapper wrap_Func_void_NativeSleepSamplePage(Func_void_NativeSleepSamplePage value) noexcept {
+    return Func_void_NativeSleepSamplePage_Wrapper(std::move(value));
   }
   
   // pragma MARK: std::vector<NativeWorkoutSample>
@@ -748,38 +925,38 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return vector;
   }
   
-  // pragma MARK: std::shared_ptr<Promise<std::vector<NativeWorkoutSample>>>
+  // pragma MARK: std::shared_ptr<Promise<NativeWorkoutSamplePage>>
   /**
-   * Specialized version of `std::shared_ptr<Promise<std::vector<NativeWorkoutSample>>>`.
+   * Specialized version of `std::shared_ptr<Promise<NativeWorkoutSamplePage>>`.
    */
-  using std__shared_ptr_Promise_std__vector_NativeWorkoutSample___ = std::shared_ptr<Promise<std::vector<NativeWorkoutSample>>>;
-  inline std::shared_ptr<Promise<std::vector<NativeWorkoutSample>>> create_std__shared_ptr_Promise_std__vector_NativeWorkoutSample___() noexcept {
-    return Promise<std::vector<NativeWorkoutSample>>::create();
+  using std__shared_ptr_Promise_NativeWorkoutSamplePage__ = std::shared_ptr<Promise<NativeWorkoutSamplePage>>;
+  inline std::shared_ptr<Promise<NativeWorkoutSamplePage>> create_std__shared_ptr_Promise_NativeWorkoutSamplePage__() noexcept {
+    return Promise<NativeWorkoutSamplePage>::create();
   }
-  inline PromiseHolder<std::vector<NativeWorkoutSample>> wrap_std__shared_ptr_Promise_std__vector_NativeWorkoutSample___(std::shared_ptr<Promise<std::vector<NativeWorkoutSample>>> promise) noexcept {
-    return PromiseHolder<std::vector<NativeWorkoutSample>>(std::move(promise));
+  inline PromiseHolder<NativeWorkoutSamplePage> wrap_std__shared_ptr_Promise_NativeWorkoutSamplePage__(std::shared_ptr<Promise<NativeWorkoutSamplePage>> promise) noexcept {
+    return PromiseHolder<NativeWorkoutSamplePage>(std::move(promise));
   }
   
-  // pragma MARK: std::function<void(const std::vector<NativeWorkoutSample>& /* result */)>
+  // pragma MARK: std::function<void(const NativeWorkoutSamplePage& /* result */)>
   /**
-   * Specialized version of `std::function<void(const std::vector<NativeWorkoutSample>&)>`.
+   * Specialized version of `std::function<void(const NativeWorkoutSamplePage&)>`.
    */
-  using Func_void_std__vector_NativeWorkoutSample_ = std::function<void(const std::vector<NativeWorkoutSample>& /* result */)>;
+  using Func_void_NativeWorkoutSamplePage = std::function<void(const NativeWorkoutSamplePage& /* result */)>;
   /**
-   * Wrapper class for a `std::function<void(const std::vector<NativeWorkoutSample>& / * result * /)>`, this can be used from Swift.
+   * Wrapper class for a `std::function<void(const NativeWorkoutSamplePage& / * result * /)>`, this can be used from Swift.
    */
-  class Func_void_std__vector_NativeWorkoutSample__Wrapper final {
+  class Func_void_NativeWorkoutSamplePage_Wrapper final {
   public:
-    explicit Func_void_std__vector_NativeWorkoutSample__Wrapper(std::function<void(const std::vector<NativeWorkoutSample>& /* result */)>&& func): _function(std::make_unique<std::function<void(const std::vector<NativeWorkoutSample>& /* result */)>>(std::move(func))) {}
-    inline void call(std::vector<NativeWorkoutSample> result) const noexcept {
+    explicit Func_void_NativeWorkoutSamplePage_Wrapper(std::function<void(const NativeWorkoutSamplePage& /* result */)>&& func): _function(std::make_unique<std::function<void(const NativeWorkoutSamplePage& /* result */)>>(std::move(func))) {}
+    inline void call(NativeWorkoutSamplePage result) const noexcept {
       _function->operator()(result);
     }
   private:
-    std::unique_ptr<std::function<void(const std::vector<NativeWorkoutSample>& /* result */)>> _function;
+    std::unique_ptr<std::function<void(const NativeWorkoutSamplePage& /* result */)>> _function;
   } SWIFT_NONCOPYABLE;
-  Func_void_std__vector_NativeWorkoutSample_ create_Func_void_std__vector_NativeWorkoutSample_(void* NON_NULL swiftClosureWrapper) noexcept;
-  inline Func_void_std__vector_NativeWorkoutSample__Wrapper wrap_Func_void_std__vector_NativeWorkoutSample_(Func_void_std__vector_NativeWorkoutSample_ value) noexcept {
-    return Func_void_std__vector_NativeWorkoutSample__Wrapper(std::move(value));
+  Func_void_NativeWorkoutSamplePage create_Func_void_NativeWorkoutSamplePage(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_NativeWorkoutSamplePage_Wrapper wrap_Func_void_NativeWorkoutSamplePage(Func_void_NativeWorkoutSamplePage value) noexcept {
+    return Func_void_NativeWorkoutSamplePage_Wrapper(std::move(value));
   }
   
   // pragma MARK: std::shared_ptr<Promise<void>>
@@ -1022,49 +1199,76 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return Result<std::shared_ptr<Promise<bool>>>::withError(error);
   }
   
-  // pragma MARK: Result<std::shared_ptr<Promise<std::vector<NativeStepSample>>>>
-  using Result_std__shared_ptr_Promise_std__vector_NativeStepSample____ = Result<std::shared_ptr<Promise<std::vector<NativeStepSample>>>>;
-  inline Result_std__shared_ptr_Promise_std__vector_NativeStepSample____ create_Result_std__shared_ptr_Promise_std__vector_NativeStepSample____(const std::shared_ptr<Promise<std::vector<NativeStepSample>>>& value) noexcept {
-    return Result<std::shared_ptr<Promise<std::vector<NativeStepSample>>>>::withValue(value);
+  // pragma MARK: Result<std::shared_ptr<Promise<NativeStepSamplePage>>>
+  using Result_std__shared_ptr_Promise_NativeStepSamplePage___ = Result<std::shared_ptr<Promise<NativeStepSamplePage>>>;
+  inline Result_std__shared_ptr_Promise_NativeStepSamplePage___ create_Result_std__shared_ptr_Promise_NativeStepSamplePage___(const std::shared_ptr<Promise<NativeStepSamplePage>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<NativeStepSamplePage>>>::withValue(value);
   }
-  inline Result_std__shared_ptr_Promise_std__vector_NativeStepSample____ create_Result_std__shared_ptr_Promise_std__vector_NativeStepSample____(const std::exception_ptr& error) noexcept {
-    return Result<std::shared_ptr<Promise<std::vector<NativeStepSample>>>>::withError(error);
-  }
-  
-  // pragma MARK: Result<std::shared_ptr<Promise<std::vector<NativeDistanceSample>>>>
-  using Result_std__shared_ptr_Promise_std__vector_NativeDistanceSample____ = Result<std::shared_ptr<Promise<std::vector<NativeDistanceSample>>>>;
-  inline Result_std__shared_ptr_Promise_std__vector_NativeDistanceSample____ create_Result_std__shared_ptr_Promise_std__vector_NativeDistanceSample____(const std::shared_ptr<Promise<std::vector<NativeDistanceSample>>>& value) noexcept {
-    return Result<std::shared_ptr<Promise<std::vector<NativeDistanceSample>>>>::withValue(value);
-  }
-  inline Result_std__shared_ptr_Promise_std__vector_NativeDistanceSample____ create_Result_std__shared_ptr_Promise_std__vector_NativeDistanceSample____(const std::exception_ptr& error) noexcept {
-    return Result<std::shared_ptr<Promise<std::vector<NativeDistanceSample>>>>::withError(error);
+  inline Result_std__shared_ptr_Promise_NativeStepSamplePage___ create_Result_std__shared_ptr_Promise_NativeStepSamplePage___(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<NativeStepSamplePage>>>::withError(error);
   }
   
-  // pragma MARK: Result<std::shared_ptr<Promise<std::vector<NativeActiveEnergyBurnedSample>>>>
-  using Result_std__shared_ptr_Promise_std__vector_NativeActiveEnergyBurnedSample____ = Result<std::shared_ptr<Promise<std::vector<NativeActiveEnergyBurnedSample>>>>;
-  inline Result_std__shared_ptr_Promise_std__vector_NativeActiveEnergyBurnedSample____ create_Result_std__shared_ptr_Promise_std__vector_NativeActiveEnergyBurnedSample____(const std::shared_ptr<Promise<std::vector<NativeActiveEnergyBurnedSample>>>& value) noexcept {
-    return Result<std::shared_ptr<Promise<std::vector<NativeActiveEnergyBurnedSample>>>>::withValue(value);
+  // pragma MARK: Result<std::shared_ptr<Promise<std::vector<NativeDailyStepTotal>>>>
+  using Result_std__shared_ptr_Promise_std__vector_NativeDailyStepTotal____ = Result<std::shared_ptr<Promise<std::vector<NativeDailyStepTotal>>>>;
+  inline Result_std__shared_ptr_Promise_std__vector_NativeDailyStepTotal____ create_Result_std__shared_ptr_Promise_std__vector_NativeDailyStepTotal____(const std::shared_ptr<Promise<std::vector<NativeDailyStepTotal>>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<std::vector<NativeDailyStepTotal>>>>::withValue(value);
   }
-  inline Result_std__shared_ptr_Promise_std__vector_NativeActiveEnergyBurnedSample____ create_Result_std__shared_ptr_Promise_std__vector_NativeActiveEnergyBurnedSample____(const std::exception_ptr& error) noexcept {
-    return Result<std::shared_ptr<Promise<std::vector<NativeActiveEnergyBurnedSample>>>>::withError(error);
-  }
-  
-  // pragma MARK: Result<std::shared_ptr<Promise<std::vector<NativeBodyMassSample>>>>
-  using Result_std__shared_ptr_Promise_std__vector_NativeBodyMassSample____ = Result<std::shared_ptr<Promise<std::vector<NativeBodyMassSample>>>>;
-  inline Result_std__shared_ptr_Promise_std__vector_NativeBodyMassSample____ create_Result_std__shared_ptr_Promise_std__vector_NativeBodyMassSample____(const std::shared_ptr<Promise<std::vector<NativeBodyMassSample>>>& value) noexcept {
-    return Result<std::shared_ptr<Promise<std::vector<NativeBodyMassSample>>>>::withValue(value);
-  }
-  inline Result_std__shared_ptr_Promise_std__vector_NativeBodyMassSample____ create_Result_std__shared_ptr_Promise_std__vector_NativeBodyMassSample____(const std::exception_ptr& error) noexcept {
-    return Result<std::shared_ptr<Promise<std::vector<NativeBodyMassSample>>>>::withError(error);
+  inline Result_std__shared_ptr_Promise_std__vector_NativeDailyStepTotal____ create_Result_std__shared_ptr_Promise_std__vector_NativeDailyStepTotal____(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<std::vector<NativeDailyStepTotal>>>>::withError(error);
   }
   
-  // pragma MARK: Result<std::shared_ptr<Promise<std::vector<NativeHeartRateSample>>>>
-  using Result_std__shared_ptr_Promise_std__vector_NativeHeartRateSample____ = Result<std::shared_ptr<Promise<std::vector<NativeHeartRateSample>>>>;
-  inline Result_std__shared_ptr_Promise_std__vector_NativeHeartRateSample____ create_Result_std__shared_ptr_Promise_std__vector_NativeHeartRateSample____(const std::shared_ptr<Promise<std::vector<NativeHeartRateSample>>>& value) noexcept {
-    return Result<std::shared_ptr<Promise<std::vector<NativeHeartRateSample>>>>::withValue(value);
+  // pragma MARK: Result<std::shared_ptr<Promise<NativeDistanceSamplePage>>>
+  using Result_std__shared_ptr_Promise_NativeDistanceSamplePage___ = Result<std::shared_ptr<Promise<NativeDistanceSamplePage>>>;
+  inline Result_std__shared_ptr_Promise_NativeDistanceSamplePage___ create_Result_std__shared_ptr_Promise_NativeDistanceSamplePage___(const std::shared_ptr<Promise<NativeDistanceSamplePage>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<NativeDistanceSamplePage>>>::withValue(value);
   }
-  inline Result_std__shared_ptr_Promise_std__vector_NativeHeartRateSample____ create_Result_std__shared_ptr_Promise_std__vector_NativeHeartRateSample____(const std::exception_ptr& error) noexcept {
-    return Result<std::shared_ptr<Promise<std::vector<NativeHeartRateSample>>>>::withError(error);
+  inline Result_std__shared_ptr_Promise_NativeDistanceSamplePage___ create_Result_std__shared_ptr_Promise_NativeDistanceSamplePage___(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<NativeDistanceSamplePage>>>::withError(error);
+  }
+  
+  // pragma MARK: Result<std::shared_ptr<Promise<std::vector<NativeDailyDistanceTotal>>>>
+  using Result_std__shared_ptr_Promise_std__vector_NativeDailyDistanceTotal____ = Result<std::shared_ptr<Promise<std::vector<NativeDailyDistanceTotal>>>>;
+  inline Result_std__shared_ptr_Promise_std__vector_NativeDailyDistanceTotal____ create_Result_std__shared_ptr_Promise_std__vector_NativeDailyDistanceTotal____(const std::shared_ptr<Promise<std::vector<NativeDailyDistanceTotal>>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<std::vector<NativeDailyDistanceTotal>>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_std__vector_NativeDailyDistanceTotal____ create_Result_std__shared_ptr_Promise_std__vector_NativeDailyDistanceTotal____(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<std::vector<NativeDailyDistanceTotal>>>>::withError(error);
+  }
+  
+  // pragma MARK: Result<std::shared_ptr<Promise<NativeActiveEnergyBurnedSamplePage>>>
+  using Result_std__shared_ptr_Promise_NativeActiveEnergyBurnedSamplePage___ = Result<std::shared_ptr<Promise<NativeActiveEnergyBurnedSamplePage>>>;
+  inline Result_std__shared_ptr_Promise_NativeActiveEnergyBurnedSamplePage___ create_Result_std__shared_ptr_Promise_NativeActiveEnergyBurnedSamplePage___(const std::shared_ptr<Promise<NativeActiveEnergyBurnedSamplePage>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<NativeActiveEnergyBurnedSamplePage>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_NativeActiveEnergyBurnedSamplePage___ create_Result_std__shared_ptr_Promise_NativeActiveEnergyBurnedSamplePage___(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<NativeActiveEnergyBurnedSamplePage>>>::withError(error);
+  }
+  
+  // pragma MARK: Result<std::shared_ptr<Promise<std::vector<NativeDailyActiveEnergyBurnedTotal>>>>
+  using Result_std__shared_ptr_Promise_std__vector_NativeDailyActiveEnergyBurnedTotal____ = Result<std::shared_ptr<Promise<std::vector<NativeDailyActiveEnergyBurnedTotal>>>>;
+  inline Result_std__shared_ptr_Promise_std__vector_NativeDailyActiveEnergyBurnedTotal____ create_Result_std__shared_ptr_Promise_std__vector_NativeDailyActiveEnergyBurnedTotal____(const std::shared_ptr<Promise<std::vector<NativeDailyActiveEnergyBurnedTotal>>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<std::vector<NativeDailyActiveEnergyBurnedTotal>>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_std__vector_NativeDailyActiveEnergyBurnedTotal____ create_Result_std__shared_ptr_Promise_std__vector_NativeDailyActiveEnergyBurnedTotal____(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<std::vector<NativeDailyActiveEnergyBurnedTotal>>>>::withError(error);
+  }
+  
+  // pragma MARK: Result<std::shared_ptr<Promise<NativeBodyMassSamplePage>>>
+  using Result_std__shared_ptr_Promise_NativeBodyMassSamplePage___ = Result<std::shared_ptr<Promise<NativeBodyMassSamplePage>>>;
+  inline Result_std__shared_ptr_Promise_NativeBodyMassSamplePage___ create_Result_std__shared_ptr_Promise_NativeBodyMassSamplePage___(const std::shared_ptr<Promise<NativeBodyMassSamplePage>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<NativeBodyMassSamplePage>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_NativeBodyMassSamplePage___ create_Result_std__shared_ptr_Promise_NativeBodyMassSamplePage___(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<NativeBodyMassSamplePage>>>::withError(error);
+  }
+  
+  // pragma MARK: Result<std::shared_ptr<Promise<NativeHeartRateSamplePage>>>
+  using Result_std__shared_ptr_Promise_NativeHeartRateSamplePage___ = Result<std::shared_ptr<Promise<NativeHeartRateSamplePage>>>;
+  inline Result_std__shared_ptr_Promise_NativeHeartRateSamplePage___ create_Result_std__shared_ptr_Promise_NativeHeartRateSamplePage___(const std::shared_ptr<Promise<NativeHeartRateSamplePage>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<NativeHeartRateSamplePage>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_NativeHeartRateSamplePage___ create_Result_std__shared_ptr_Promise_NativeHeartRateSamplePage___(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<NativeHeartRateSamplePage>>>::withError(error);
   }
   
   // pragma MARK: Result<std::shared_ptr<Promise<NativeHeartRateStatistics>>>
@@ -1076,40 +1280,40 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return Result<std::shared_ptr<Promise<NativeHeartRateStatistics>>>::withError(error);
   }
   
-  // pragma MARK: Result<std::shared_ptr<Promise<std::vector<NativeRestingHeartRateSample>>>>
-  using Result_std__shared_ptr_Promise_std__vector_NativeRestingHeartRateSample____ = Result<std::shared_ptr<Promise<std::vector<NativeRestingHeartRateSample>>>>;
-  inline Result_std__shared_ptr_Promise_std__vector_NativeRestingHeartRateSample____ create_Result_std__shared_ptr_Promise_std__vector_NativeRestingHeartRateSample____(const std::shared_ptr<Promise<std::vector<NativeRestingHeartRateSample>>>& value) noexcept {
-    return Result<std::shared_ptr<Promise<std::vector<NativeRestingHeartRateSample>>>>::withValue(value);
+  // pragma MARK: Result<std::shared_ptr<Promise<NativeRestingHeartRateSamplePage>>>
+  using Result_std__shared_ptr_Promise_NativeRestingHeartRateSamplePage___ = Result<std::shared_ptr<Promise<NativeRestingHeartRateSamplePage>>>;
+  inline Result_std__shared_ptr_Promise_NativeRestingHeartRateSamplePage___ create_Result_std__shared_ptr_Promise_NativeRestingHeartRateSamplePage___(const std::shared_ptr<Promise<NativeRestingHeartRateSamplePage>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<NativeRestingHeartRateSamplePage>>>::withValue(value);
   }
-  inline Result_std__shared_ptr_Promise_std__vector_NativeRestingHeartRateSample____ create_Result_std__shared_ptr_Promise_std__vector_NativeRestingHeartRateSample____(const std::exception_ptr& error) noexcept {
-    return Result<std::shared_ptr<Promise<std::vector<NativeRestingHeartRateSample>>>>::withError(error);
-  }
-  
-  // pragma MARK: Result<std::shared_ptr<Promise<std::vector<NativeHeartRateVariabilitySample>>>>
-  using Result_std__shared_ptr_Promise_std__vector_NativeHeartRateVariabilitySample____ = Result<std::shared_ptr<Promise<std::vector<NativeHeartRateVariabilitySample>>>>;
-  inline Result_std__shared_ptr_Promise_std__vector_NativeHeartRateVariabilitySample____ create_Result_std__shared_ptr_Promise_std__vector_NativeHeartRateVariabilitySample____(const std::shared_ptr<Promise<std::vector<NativeHeartRateVariabilitySample>>>& value) noexcept {
-    return Result<std::shared_ptr<Promise<std::vector<NativeHeartRateVariabilitySample>>>>::withValue(value);
-  }
-  inline Result_std__shared_ptr_Promise_std__vector_NativeHeartRateVariabilitySample____ create_Result_std__shared_ptr_Promise_std__vector_NativeHeartRateVariabilitySample____(const std::exception_ptr& error) noexcept {
-    return Result<std::shared_ptr<Promise<std::vector<NativeHeartRateVariabilitySample>>>>::withError(error);
+  inline Result_std__shared_ptr_Promise_NativeRestingHeartRateSamplePage___ create_Result_std__shared_ptr_Promise_NativeRestingHeartRateSamplePage___(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<NativeRestingHeartRateSamplePage>>>::withError(error);
   }
   
-  // pragma MARK: Result<std::shared_ptr<Promise<std::vector<NativeOxygenSaturationSample>>>>
-  using Result_std__shared_ptr_Promise_std__vector_NativeOxygenSaturationSample____ = Result<std::shared_ptr<Promise<std::vector<NativeOxygenSaturationSample>>>>;
-  inline Result_std__shared_ptr_Promise_std__vector_NativeOxygenSaturationSample____ create_Result_std__shared_ptr_Promise_std__vector_NativeOxygenSaturationSample____(const std::shared_ptr<Promise<std::vector<NativeOxygenSaturationSample>>>& value) noexcept {
-    return Result<std::shared_ptr<Promise<std::vector<NativeOxygenSaturationSample>>>>::withValue(value);
+  // pragma MARK: Result<std::shared_ptr<Promise<NativeHeartRateVariabilitySamplePage>>>
+  using Result_std__shared_ptr_Promise_NativeHeartRateVariabilitySamplePage___ = Result<std::shared_ptr<Promise<NativeHeartRateVariabilitySamplePage>>>;
+  inline Result_std__shared_ptr_Promise_NativeHeartRateVariabilitySamplePage___ create_Result_std__shared_ptr_Promise_NativeHeartRateVariabilitySamplePage___(const std::shared_ptr<Promise<NativeHeartRateVariabilitySamplePage>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<NativeHeartRateVariabilitySamplePage>>>::withValue(value);
   }
-  inline Result_std__shared_ptr_Promise_std__vector_NativeOxygenSaturationSample____ create_Result_std__shared_ptr_Promise_std__vector_NativeOxygenSaturationSample____(const std::exception_ptr& error) noexcept {
-    return Result<std::shared_ptr<Promise<std::vector<NativeOxygenSaturationSample>>>>::withError(error);
+  inline Result_std__shared_ptr_Promise_NativeHeartRateVariabilitySamplePage___ create_Result_std__shared_ptr_Promise_NativeHeartRateVariabilitySamplePage___(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<NativeHeartRateVariabilitySamplePage>>>::withError(error);
   }
   
-  // pragma MARK: Result<std::shared_ptr<Promise<std::vector<NativeHeightSample>>>>
-  using Result_std__shared_ptr_Promise_std__vector_NativeHeightSample____ = Result<std::shared_ptr<Promise<std::vector<NativeHeightSample>>>>;
-  inline Result_std__shared_ptr_Promise_std__vector_NativeHeightSample____ create_Result_std__shared_ptr_Promise_std__vector_NativeHeightSample____(const std::shared_ptr<Promise<std::vector<NativeHeightSample>>>& value) noexcept {
-    return Result<std::shared_ptr<Promise<std::vector<NativeHeightSample>>>>::withValue(value);
+  // pragma MARK: Result<std::shared_ptr<Promise<NativeOxygenSaturationSamplePage>>>
+  using Result_std__shared_ptr_Promise_NativeOxygenSaturationSamplePage___ = Result<std::shared_ptr<Promise<NativeOxygenSaturationSamplePage>>>;
+  inline Result_std__shared_ptr_Promise_NativeOxygenSaturationSamplePage___ create_Result_std__shared_ptr_Promise_NativeOxygenSaturationSamplePage___(const std::shared_ptr<Promise<NativeOxygenSaturationSamplePage>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<NativeOxygenSaturationSamplePage>>>::withValue(value);
   }
-  inline Result_std__shared_ptr_Promise_std__vector_NativeHeightSample____ create_Result_std__shared_ptr_Promise_std__vector_NativeHeightSample____(const std::exception_ptr& error) noexcept {
-    return Result<std::shared_ptr<Promise<std::vector<NativeHeightSample>>>>::withError(error);
+  inline Result_std__shared_ptr_Promise_NativeOxygenSaturationSamplePage___ create_Result_std__shared_ptr_Promise_NativeOxygenSaturationSamplePage___(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<NativeOxygenSaturationSamplePage>>>::withError(error);
+  }
+  
+  // pragma MARK: Result<std::shared_ptr<Promise<NativeHeightSamplePage>>>
+  using Result_std__shared_ptr_Promise_NativeHeightSamplePage___ = Result<std::shared_ptr<Promise<NativeHeightSamplePage>>>;
+  inline Result_std__shared_ptr_Promise_NativeHeightSamplePage___ create_Result_std__shared_ptr_Promise_NativeHeightSamplePage___(const std::shared_ptr<Promise<NativeHeightSamplePage>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<NativeHeightSamplePage>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_NativeHeightSamplePage___ create_Result_std__shared_ptr_Promise_NativeHeightSamplePage___(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<NativeHeightSamplePage>>>::withError(error);
   }
   
   // pragma MARK: Result<std::shared_ptr<Promise<std::vector<NativeHealthStatistics>>>>
@@ -1121,22 +1325,22 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return Result<std::shared_ptr<Promise<std::vector<NativeHealthStatistics>>>>::withError(error);
   }
   
-  // pragma MARK: Result<std::shared_ptr<Promise<std::vector<NativeSleepSample>>>>
-  using Result_std__shared_ptr_Promise_std__vector_NativeSleepSample____ = Result<std::shared_ptr<Promise<std::vector<NativeSleepSample>>>>;
-  inline Result_std__shared_ptr_Promise_std__vector_NativeSleepSample____ create_Result_std__shared_ptr_Promise_std__vector_NativeSleepSample____(const std::shared_ptr<Promise<std::vector<NativeSleepSample>>>& value) noexcept {
-    return Result<std::shared_ptr<Promise<std::vector<NativeSleepSample>>>>::withValue(value);
+  // pragma MARK: Result<std::shared_ptr<Promise<NativeSleepSamplePage>>>
+  using Result_std__shared_ptr_Promise_NativeSleepSamplePage___ = Result<std::shared_ptr<Promise<NativeSleepSamplePage>>>;
+  inline Result_std__shared_ptr_Promise_NativeSleepSamplePage___ create_Result_std__shared_ptr_Promise_NativeSleepSamplePage___(const std::shared_ptr<Promise<NativeSleepSamplePage>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<NativeSleepSamplePage>>>::withValue(value);
   }
-  inline Result_std__shared_ptr_Promise_std__vector_NativeSleepSample____ create_Result_std__shared_ptr_Promise_std__vector_NativeSleepSample____(const std::exception_ptr& error) noexcept {
-    return Result<std::shared_ptr<Promise<std::vector<NativeSleepSample>>>>::withError(error);
+  inline Result_std__shared_ptr_Promise_NativeSleepSamplePage___ create_Result_std__shared_ptr_Promise_NativeSleepSamplePage___(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<NativeSleepSamplePage>>>::withError(error);
   }
   
-  // pragma MARK: Result<std::shared_ptr<Promise<std::vector<NativeWorkoutSample>>>>
-  using Result_std__shared_ptr_Promise_std__vector_NativeWorkoutSample____ = Result<std::shared_ptr<Promise<std::vector<NativeWorkoutSample>>>>;
-  inline Result_std__shared_ptr_Promise_std__vector_NativeWorkoutSample____ create_Result_std__shared_ptr_Promise_std__vector_NativeWorkoutSample____(const std::shared_ptr<Promise<std::vector<NativeWorkoutSample>>>& value) noexcept {
-    return Result<std::shared_ptr<Promise<std::vector<NativeWorkoutSample>>>>::withValue(value);
+  // pragma MARK: Result<std::shared_ptr<Promise<NativeWorkoutSamplePage>>>
+  using Result_std__shared_ptr_Promise_NativeWorkoutSamplePage___ = Result<std::shared_ptr<Promise<NativeWorkoutSamplePage>>>;
+  inline Result_std__shared_ptr_Promise_NativeWorkoutSamplePage___ create_Result_std__shared_ptr_Promise_NativeWorkoutSamplePage___(const std::shared_ptr<Promise<NativeWorkoutSamplePage>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<NativeWorkoutSamplePage>>>::withValue(value);
   }
-  inline Result_std__shared_ptr_Promise_std__vector_NativeWorkoutSample____ create_Result_std__shared_ptr_Promise_std__vector_NativeWorkoutSample____(const std::exception_ptr& error) noexcept {
-    return Result<std::shared_ptr<Promise<std::vector<NativeWorkoutSample>>>>::withError(error);
+  inline Result_std__shared_ptr_Promise_NativeWorkoutSamplePage___ create_Result_std__shared_ptr_Promise_NativeWorkoutSamplePage___(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<NativeWorkoutSamplePage>>>::withError(error);
   }
   
   // pragma MARK: Result<std::shared_ptr<Promise<void>>>

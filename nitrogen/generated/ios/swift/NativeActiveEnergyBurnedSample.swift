@@ -18,10 +18,15 @@ public extension NativeActiveEnergyBurnedSample {
   /**
    * Create a new instance of `NativeActiveEnergyBurnedSample`.
    */
-  init(startTimeMs: Double, endTimeMs: Double, kilocalories: Double) {
-    self.init(startTimeMs, endTimeMs, kilocalories)
+  init(uuid: String, startTimeMs: Double, endTimeMs: Double, kilocalories: Double) {
+    self.init(std.string(uuid), startTimeMs, endTimeMs, kilocalories)
   }
 
+  @inline(__always)
+  var uuid: String {
+    return String(self.__uuid)
+  }
+  
   @inline(__always)
   var startTimeMs: Double {
     return self.__startTimeMs

@@ -20,6 +20,9 @@ import java.util.Objects
 data class NativeBodyMassSample(
   @DoNotStrip
   @Keep
+  val uuid: String,
+  @DoNotStrip
+  @Keep
   val startTimeMs: Double,
   @DoNotStrip
   @Keep
@@ -36,7 +39,8 @@ data class NativeBodyMassSample(
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other !is NativeBodyMassSample) return false
-    return Objects.deepEquals(this.startTimeMs, other.startTimeMs)
+    return Objects.deepEquals(this.uuid, other.uuid)
+      && Objects.deepEquals(this.startTimeMs, other.startTimeMs)
       && Objects.deepEquals(this.endTimeMs, other.endTimeMs)
       && Objects.deepEquals(this.kilograms, other.kilograms)
       && Objects.deepEquals(this.source, other.source)
@@ -44,6 +48,7 @@ data class NativeBodyMassSample(
 
   override fun hashCode(): Int {
     return arrayOf<Any?>(
+      uuid,
       startTimeMs,
       endTimeMs,
       kilograms,
@@ -59,8 +64,8 @@ data class NativeBodyMassSample(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(startTimeMs: Double, endTimeMs: Double, kilograms: Double, source: String?): NativeBodyMassSample {
-      return NativeBodyMassSample(startTimeMs, endTimeMs, kilograms, source)
+    private fun fromCpp(uuid: String, startTimeMs: Double, endTimeMs: Double, kilograms: Double, source: String?): NativeBodyMassSample {
+      return NativeBodyMassSample(uuid, startTimeMs, endTimeMs, kilograms, source)
     }
   }
 }

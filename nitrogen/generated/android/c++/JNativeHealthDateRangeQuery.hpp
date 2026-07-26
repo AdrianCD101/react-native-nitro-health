@@ -10,7 +10,8 @@
 #include <fbjni/fbjni.h>
 #include "NativeHealthDateRangeQuery.hpp"
 
-
+#include <optional>
+#include <string>
 
 namespace margelo::nitro::nitrohealth {
 
@@ -39,11 +40,14 @@ namespace margelo::nitro::nitrohealth {
       double limit = this->getFieldValue(fieldLimit);
       static const auto fieldAscending = clazz->getField<jboolean>("ascending");
       jboolean ascending = this->getFieldValue(fieldAscending);
+      static const auto fieldCursor = clazz->getField<jni::JString>("cursor");
+      jni::local_ref<jni::JString> cursor = this->getFieldValue(fieldCursor);
       return NativeHealthDateRangeQuery(
         startTimeMs,
         endTimeMs,
         limit,
-        static_cast<bool>(ascending)
+        static_cast<bool>(ascending),
+        cursor != nullptr ? std::make_optional(cursor->toStdString()) : std::nullopt
       );
     }
 
@@ -53,7 +57,7 @@ namespace margelo::nitro::nitrohealth {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeHealthDateRangeQuery::javaobject> fromCpp(const NativeHealthDateRangeQuery& value) {
-      using JSignature = JNativeHealthDateRangeQuery(double, double, double, jboolean);
+      using JSignature = JNativeHealthDateRangeQuery(double, double, double, jboolean, jni::alias_ref<jni::JString>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
@@ -61,7 +65,8 @@ namespace margelo::nitro::nitrohealth {
         value.startTimeMs,
         value.endTimeMs,
         value.limit,
-        value.ascending
+        value.ascending,
+        value.cursor.has_value() ? jni::make_jstring(value.cursor.value()) : nullptr
       );
     }
   };
