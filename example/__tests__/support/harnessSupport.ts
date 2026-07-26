@@ -49,6 +49,16 @@ export const saveReadRange = {
   startDate: new Date('2001-06-01T00:00:00.000Z'),
   endDate: new Date('2001-06-02T00:00:00.000Z'),
 }
+// Dedicated to NitroHealth.deletes.harness.ts: the deletes suite removes data inside these
+// ranges, so they must never overlap saveInterval/saveReadRange (or any other suite's fixtures).
+export const deleteInterval = {
+  startDate: new Date('2002-06-01T09:00:00.000Z'),
+  endDate: new Date('2002-06-01T09:30:00.000Z'),
+}
+export const deleteReadRange = {
+  startDate: new Date('2002-06-01T00:00:00.000Z'),
+  endDate: new Date('2002-06-02T00:00:00.000Z'),
+}
 export const last7DaysRange = {
   startDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
   endDate: new Date(),

@@ -385,6 +385,36 @@ Unlike reads, missing write permission is detectable on both platforms: save met
 
 Avoid writing samples with overlapping time intervals. The platforms aggregate overlapping records differently: Health Connect deduplicates overlapping intervals when computing totals (writing 250 steps twice over the same 30-minute window still totals roughly 250), while HealthKit cumulative sums count every sample (the same two writes total 500). Raw reads return every stored record on both platforms — only aggregates differ. Writing non-overlapping intervals produces consistent totals everywhere.
 
+## Delete Samples
+
+Samples can be deleted by uuid or by time range for every `HealthDataType` (`steps`, `heartRate`, `restingHeartRate`, `heartRateVariability`, `distance`, `activeEnergyBurned`, `oxygenSaturation`, `height`, `sleep`, `bodyMass`, and `workout`). Deletion only removes data **your app wrote** — Health Connect automatically restricts deletes to records owned by the calling app, and HealthKit can only delete objects your app saved. Like saves, deletes are gated on write permission and reject with a missing-permission error otherwise (on iOS this includes the not-yet-requested state, so request write authorization first).
+
+```ts
+import { NitroHealth } from 'react-native-nitro-health'
+
+const result = await NitroHealth.requestAuthorization([{ accessType: 'write', dataType: 'steps' }])
+
+if (result.deniedPermissions.length === 0) {
+  // Delete specific samples using the `uuid` values returned by reads:
+  await NitroHealth.deleteSamplesByUuids('steps', [sample.uuid])
+
+  // Or delete everything your app wrote in a time range:
+  await NitroHealth.deleteSamplesByTimeRange('steps', {
+    startDate: new Date('2026-01-01T00:00:00.000Z'),
+    endDate: new Date('2026-01-02T00:00:00.000Z'),
+  })
+}
+```
+
+- `deleteSamplesByUuids(dataType, uuids)` — deletes the samples with the given `uuid` values (as returned by reads). Takes a non-empty array and rejects before crossing the native boundary when validation fails — error messages include the failing index, for example `uuids[0]: a non-empty uuid string is required`.
+- `deleteSamplesByTimeRange(dataType, { startDate, endDate })` — deletes every sample your app wrote in `[startDate, endDate)` on both platforms: `startDate` inclusive, `endDate` exclusive, `startDate` strictly before `endDate`. A time-range delete removes exactly the own-app samples a read over the same range returns, and resolves even when nothing matches.
+
+Both methods resolve to `void` — Health Connect does not report how many records were deleted, so neither platform exposes a count.
+
+On Android, heart-rate readings and sleep stages live inside parent Health Connect records and are read back under synthetic `uuid` values of the form `recordId#index`. Health Connect can only delete whole records, so passing a synthetic uuid to `deleteSamplesByUuids` rejects with `uuids[N]: synthetic reading ids (record id + '#index') cannot be deleted individually; use deleteSamplesByTimeRange instead` — it never silently deletes the parent record and its sibling readings. A sleep session without stages keeps its plain record id and stays deletable by uuid. On iOS every sample — including each heart-rate reading and sleep interval — is its own HealthKit object with a real UUID, so per-sample deletion works there; use time-range deletion when the same code path must also cover Android. iOS additionally rejects malformed uuid strings with `uuids[N]: "…" is not a valid HealthKit sample uuid`.
+
+The no-match behavior of `deleteSamplesByUuids` also differs by platform. On iOS, deleting uuids that match nothing resolves successfully with nothing deleted (HealthKit's no-data error is normalized to success). On Android, delete-by-id is transactional and all-or-nothing: a uuid that does not exist rejects (Health Connect reports it as an IPC failure), a uuid owned by another app rejects with a security error, and in both cases none of the requested records are deleted.
+
 ## Jest
 
 The package ships a Jest mock so app tests do not need to mock Nitro internals. By default, mocked raw sample reads resolve with an empty page (`{ samples: [] }`) and the deprecated daily total methods resolve with `[]`.

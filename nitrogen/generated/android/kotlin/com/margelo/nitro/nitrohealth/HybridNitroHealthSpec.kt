@@ -143,6 +143,14 @@ abstract class HybridNitroHealthSpec: HybridObject() {
   
   @DoNotStrip
   @Keep
+  abstract fun deleteSamplesByUuids(dataType: String, uuids: Array<String>): Promise<Unit>
+  
+  @DoNotStrip
+  @Keep
+  abstract fun deleteSamplesByTimeRange(dataType: String, query: NativeHealthTimeRangeQuery): Promise<Unit>
+  
+  @DoNotStrip
+  @Keep
   abstract fun getRequestStatusForAuthorization(permissions: Array<NativeHealthPermission>): Promise<AuthorizationRequestStatus>
   
   @DoNotStrip

@@ -878,6 +878,38 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         }
     }
 
+    override fun deleteSamplesByUuids(dataType: String, uuids: Array<String>): Promise<Unit> {
+        return Promise.async {
+            val recordIds = ensureDeletableRecordIds(uuids)
+            val client = requireWritableClient(dataType)
+            // Health Connect only deletes records owned by the calling app, and delete-by-id is
+            // transactional: a nonexistent or foreign id fails the whole call (see README).
+            client.deleteRecords(
+                recordType = healthDataTypeDescriptorFor(dataType).recordType,
+                recordIdsList = recordIds,
+                clientRecordIdsList = emptyList()
+            )
+            Unit
+        }
+    }
+
+    override fun deleteSamplesByTimeRange(
+        dataType: String,
+        query: NativeHealthTimeRangeQuery
+    ): Promise<Unit> {
+        return Promise.async {
+            val client = requireWritableClient(dataType)
+            client.deleteRecords(
+                recordType = healthDataTypeDescriptorFor(dataType).recordType,
+                timeRangeFilter = TimeRangeFilter.between(
+                    Instant.ofEpochMilli(query.startTimeMs.toLong()),
+                    Instant.ofEpochMilli(query.endTimeMs.toLong())
+                )
+            )
+            Unit
+        }
+    }
+
     override fun getRequestStatusForAuthorization(
         permissions: Array<NativeHealthPermission>
     ): Promise<AuthorizationRequestStatus> {
