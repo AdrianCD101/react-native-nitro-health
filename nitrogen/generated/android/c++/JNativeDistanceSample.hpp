@@ -10,7 +10,7 @@
 #include <fbjni/fbjni.h>
 #include "NativeDistanceSample.hpp"
 
-
+#include <string>
 
 namespace margelo::nitro::nitrohealth {
 
@@ -31,6 +31,8 @@ namespace margelo::nitro::nitrohealth {
     [[nodiscard]]
     NativeDistanceSample toCpp() const {
       static const auto clazz = javaClassStatic();
+      static const auto fieldUuid = clazz->getField<jni::JString>("uuid");
+      jni::local_ref<jni::JString> uuid = this->getFieldValue(fieldUuid);
       static const auto fieldStartTimeMs = clazz->getField<double>("startTimeMs");
       double startTimeMs = this->getFieldValue(fieldStartTimeMs);
       static const auto fieldEndTimeMs = clazz->getField<double>("endTimeMs");
@@ -38,6 +40,7 @@ namespace margelo::nitro::nitrohealth {
       static const auto fieldDistanceMeters = clazz->getField<double>("distanceMeters");
       double distanceMeters = this->getFieldValue(fieldDistanceMeters);
       return NativeDistanceSample(
+        uuid->toStdString(),
         startTimeMs,
         endTimeMs,
         distanceMeters
@@ -50,11 +53,12 @@ namespace margelo::nitro::nitrohealth {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeDistanceSample::javaobject> fromCpp(const NativeDistanceSample& value) {
-      using JSignature = JNativeDistanceSample(double, double, double);
+      using JSignature = JNativeDistanceSample(jni::alias_ref<jni::JString>, double, double, double);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
         clazz,
+        jni::make_jstring(value.uuid),
         value.startTimeMs,
         value.endTimeMs,
         value.distanceMeters

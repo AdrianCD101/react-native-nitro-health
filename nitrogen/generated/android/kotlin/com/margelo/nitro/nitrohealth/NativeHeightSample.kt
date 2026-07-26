@@ -20,6 +20,9 @@ import java.util.Objects
 data class NativeHeightSample(
   @DoNotStrip
   @Keep
+  val uuid: String,
+  @DoNotStrip
+  @Keep
   val timeMs: Double,
   @DoNotStrip
   @Keep
@@ -33,13 +36,15 @@ data class NativeHeightSample(
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other !is NativeHeightSample) return false
-    return Objects.deepEquals(this.timeMs, other.timeMs)
+    return Objects.deepEquals(this.uuid, other.uuid)
+      && Objects.deepEquals(this.timeMs, other.timeMs)
       && Objects.deepEquals(this.meters, other.meters)
       && Objects.deepEquals(this.source, other.source)
   }
 
   override fun hashCode(): Int {
     return arrayOf<Any?>(
+      uuid,
       timeMs,
       meters,
       source
@@ -54,8 +59,8 @@ data class NativeHeightSample(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(timeMs: Double, meters: Double, source: String?): NativeHeightSample {
-      return NativeHeightSample(timeMs, meters, source)
+    private fun fromCpp(uuid: String, timeMs: Double, meters: Double, source: String?): NativeHeightSample {
+      return NativeHeightSample(uuid, timeMs, meters, source)
     }
   }
 }

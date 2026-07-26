@@ -18,8 +18,8 @@ public extension NativeWorkoutSample {
   /**
    * Create a new instance of `NativeWorkoutSample`.
    */
-  init(startTimeMs: Double, endTimeMs: Double, durationSeconds: Double, activityType: String, title: String?, source: String?, totalDistanceMeters: Double?, totalEnergyBurnedKcal: Double?) {
-    self.init(startTimeMs, endTimeMs, durationSeconds, std.string(activityType), { () -> bridge.std__optional_std__string_ in
+  init(uuid: String, startTimeMs: Double, endTimeMs: Double, durationSeconds: Double, activityType: String, title: String?, source: String?, totalDistanceMeters: Double?, totalEnergyBurnedKcal: Double?) {
+    self.init(std.string(uuid), startTimeMs, endTimeMs, durationSeconds, std.string(activityType), { () -> bridge.std__optional_std__string_ in
       if let __unwrappedValue = title {
         return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
       } else {
@@ -46,6 +46,11 @@ public extension NativeWorkoutSample {
     }())
   }
 
+  @inline(__always)
+  var uuid: String {
+    return String(self.__uuid)
+  }
+  
   @inline(__always)
   var startTimeMs: Double {
     return self.__startTimeMs

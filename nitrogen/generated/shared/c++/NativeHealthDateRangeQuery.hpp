@@ -30,7 +30,8 @@
 
 
 
-
+#include <string>
+#include <optional>
 
 namespace margelo::nitro::nitrohealth {
 
@@ -43,10 +44,11 @@ namespace margelo::nitro::nitrohealth {
     double endTimeMs     SWIFT_PRIVATE;
     double limit     SWIFT_PRIVATE;
     bool ascending     SWIFT_PRIVATE;
+    std::optional<std::string> cursor     SWIFT_PRIVATE;
 
   public:
     NativeHealthDateRangeQuery() = default;
-    explicit NativeHealthDateRangeQuery(double startTimeMs, double endTimeMs, double limit, bool ascending): startTimeMs(startTimeMs), endTimeMs(endTimeMs), limit(limit), ascending(ascending) {}
+    explicit NativeHealthDateRangeQuery(double startTimeMs, double endTimeMs, double limit, bool ascending, std::optional<std::string> cursor): startTimeMs(startTimeMs), endTimeMs(endTimeMs), limit(limit), ascending(ascending), cursor(cursor) {}
 
   public:
     friend bool operator==(const NativeHealthDateRangeQuery& lhs, const NativeHealthDateRangeQuery& rhs) = default;
@@ -65,7 +67,8 @@ namespace margelo::nitro {
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "startTimeMs"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "limit"))),
-        JSIConverter<bool>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "ascending")))
+        JSIConverter<bool>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "ascending"))),
+        JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "cursor")))
       );
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::nitrohealth::NativeHealthDateRangeQuery& arg) {
@@ -74,6 +77,7 @@ namespace margelo::nitro {
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs"), JSIConverter<double>::toJSI(runtime, arg.endTimeMs));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "limit"), JSIConverter<double>::toJSI(runtime, arg.limit));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "ascending"), JSIConverter<bool>::toJSI(runtime, arg.ascending));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "cursor"), JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.cursor));
       return obj;
     }
     static inline bool canConvert(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -88,6 +92,7 @@ namespace margelo::nitro {
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "limit")))) return false;
       if (!JSIConverter<bool>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "ascending")))) return false;
+      if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "cursor")))) return false;
       return true;
     }
   };

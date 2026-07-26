@@ -107,13 +107,13 @@ describe('NitroHealth saves (native)', () => {
 
     await NitroHealth.saveSteps([{ ...saveInterval, count: 321 }])
 
-    const samples = await NitroHealth.readSteps(saveReadRange)
+    const page = await NitroHealth.readSteps(saveReadRange)
 
-    if (isInconclusiveRead(samples)) {
+    if (isInconclusiveRead(page.samples)) {
       return
     }
 
-    expect(samples.some((sample) => sample.count === 321)).toBe(true)
+    expect(page.samples.some((sample) => sample.count === 321)).toBe(true)
   })
 
   it('round-trips saved body mass through native code when authorized', async () => {
@@ -128,13 +128,13 @@ describe('NitroHealth saves (native)', () => {
 
     await NitroHealth.saveBodyMass([{ date: saveInterval.startDate, kilograms: 72.5 }])
 
-    const samples = await NitroHealth.readBodyMass(saveReadRange)
+    const page = await NitroHealth.readBodyMass(saveReadRange)
 
-    if (isInconclusiveRead(samples)) {
+    if (isInconclusiveRead(page.samples)) {
       return
     }
 
-    expect(samples.some((sample) => sample.kilograms === 72.5)).toBe(true)
+    expect(page.samples.some((sample) => sample.kilograms === 72.5)).toBe(true)
   })
 
   it('round-trips saved heart rate through native code when authorized', async () => {
@@ -149,13 +149,13 @@ describe('NitroHealth saves (native)', () => {
 
     await NitroHealth.saveHeartRate([{ date: saveInterval.startDate, bpm: 123 }])
 
-    const samples = await NitroHealth.readHeartRate(saveReadRange)
+    const page = await NitroHealth.readHeartRate(saveReadRange)
 
-    if (isInconclusiveRead(samples)) {
+    if (isInconclusiveRead(page.samples)) {
       return
     }
 
-    expect(samples.some((sample) => sample.bpm === 123)).toBe(true)
+    expect(page.samples.some((sample) => sample.bpm === 123)).toBe(true)
   })
 
   describe('resting heart rate', () => {
@@ -181,13 +181,13 @@ describe('NitroHealth saves (native)', () => {
 
       await NitroHealth.saveRestingHeartRate([{ date: saveInterval.startDate, bpm: 58 }])
 
-      const samples = await NitroHealth.readRestingHeartRate(saveReadRange)
+      const page = await NitroHealth.readRestingHeartRate(saveReadRange)
 
-      if (isInconclusiveRead(samples)) {
+      if (isInconclusiveRead(page.samples)) {
         return
       }
 
-      expect(samples.some((sample) => sample.bpm === 58)).toBe(true)
+      expect(page.samples.some((sample) => sample.bpm === 58)).toBe(true)
     })
   })
 
@@ -221,13 +221,15 @@ describe('NitroHealth saves (native)', () => {
         { date: saveInterval.startDate, percentage: savedPercentage },
       ])
 
-      const samples = await NitroHealth.readOxygenSaturation(saveReadRange)
+      const page = await NitroHealth.readOxygenSaturation(saveReadRange)
 
-      if (isInconclusiveRead(samples)) {
+      if (isInconclusiveRead(page.samples)) {
         return
       }
 
-      const match = samples.find((sample) => Math.abs(sample.percentage - savedPercentage) < 0.01)
+      const match = page.samples.find(
+        (sample) => Math.abs(sample.percentage - savedPercentage) < 0.01
+      )
 
       expect(match).toBeDefined()
       expect(match?.percentage).toBeGreaterThanOrEqual(0)
@@ -258,13 +260,13 @@ describe('NitroHealth saves (native)', () => {
 
       await NitroHealth.saveHeight([{ date: saveInterval.startDate, meters: 1.78 }])
 
-      const samples = await NitroHealth.readHeight(saveReadRange)
+      const page = await NitroHealth.readHeight(saveReadRange)
 
-      if (isInconclusiveRead(samples)) {
+      if (isInconclusiveRead(page.samples)) {
         return
       }
 
-      expect(samples.some((sample) => sample.meters === 1.78)).toBe(true)
+      expect(page.samples.some((sample) => sample.meters === 1.78)).toBe(true)
     })
   })
 })

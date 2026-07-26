@@ -20,6 +20,9 @@ import java.util.Objects
 data class NativeDistanceSample(
   @DoNotStrip
   @Keep
+  val uuid: String,
+  @DoNotStrip
+  @Keep
   val startTimeMs: Double,
   @DoNotStrip
   @Keep
@@ -33,13 +36,15 @@ data class NativeDistanceSample(
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other !is NativeDistanceSample) return false
-    return Objects.deepEquals(this.startTimeMs, other.startTimeMs)
+    return Objects.deepEquals(this.uuid, other.uuid)
+      && Objects.deepEquals(this.startTimeMs, other.startTimeMs)
       && Objects.deepEquals(this.endTimeMs, other.endTimeMs)
       && Objects.deepEquals(this.distanceMeters, other.distanceMeters)
   }
 
   override fun hashCode(): Int {
     return arrayOf<Any?>(
+      uuid,
       startTimeMs,
       endTimeMs,
       distanceMeters
@@ -54,8 +59,8 @@ data class NativeDistanceSample(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(startTimeMs: Double, endTimeMs: Double, distanceMeters: Double): NativeDistanceSample {
-      return NativeDistanceSample(startTimeMs, endTimeMs, distanceMeters)
+    private fun fromCpp(uuid: String, startTimeMs: Double, endTimeMs: Double, distanceMeters: Double): NativeDistanceSample {
+      return NativeDistanceSample(uuid, startTimeMs, endTimeMs, distanceMeters)
     }
   }
 }

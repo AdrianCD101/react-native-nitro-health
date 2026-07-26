@@ -18,10 +18,15 @@ public extension NativeDistanceSample {
   /**
    * Create a new instance of `NativeDistanceSample`.
    */
-  init(startTimeMs: Double, endTimeMs: Double, distanceMeters: Double) {
-    self.init(startTimeMs, endTimeMs, distanceMeters)
+  init(uuid: String, startTimeMs: Double, endTimeMs: Double, distanceMeters: Double) {
+    self.init(std.string(uuid), startTimeMs, endTimeMs, distanceMeters)
   }
 
+  @inline(__always)
+  var uuid: String {
+    return String(self.__uuid)
+  }
+  
   @inline(__always)
   var startTimeMs: Double {
     return self.__startTimeMs

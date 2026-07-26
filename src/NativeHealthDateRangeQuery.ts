@@ -4,4 +4,6 @@ export interface NativeHealthDateRangeQuery {
   endTimeMs: number
   limit: number
   ascending: boolean
+  /** Opaque pagination cursor from a previous page's `nextCursor`. Absent for the first page. */
+  cursor?: string
 }

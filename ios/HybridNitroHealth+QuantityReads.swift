@@ -14,93 +14,114 @@ import HealthKit
 import NitroModules
 
 extension HybridNitroHealth {
-    // Shared boilerplate for instantaneous (point-in-time) quantity reads: availability check,
-    // descriptor/type lookup, predicate + sort/limit, auth gate, query, then per-sample mapping.
-    // Each data type only supplies its unit conversion and struct construction. readHeartRate
-    // stays bespoke to remain symmetric with Android, where HeartRateRecord is a series record
-    // that needs post-read flattening.
-    func readInstantQuantitySamples<T>(
+    // Shared boilerplate for instantaneous (point-in-time) quantity reads: descriptor/type
+    // lookup, auth gate, cursor-paged query, then per-sample mapping. Each data type only
+    // supplies its unit conversion and struct construction. readHeartRate stays bespoke to
+    // remain symmetric with Android, where HeartRateRecord is a series record that needs
+    // post-read flattening.
+    func readInstantQuantitySamplePage<T>(
         dataType: String,
         query: NativeHealthDateRangeQuery,
-        map: @escaping (HKQuantitySample, HKUnit) -> T
-    ) throws -> Promise<[T]> {
+        map: (HKQuantitySample, HKUnit) -> T
+    ) async throws -> (samples: [T], nextCursor: String?) {
+        let descriptor = try makeHealthDataTypeDescriptor(dataType: dataType)
+        let quantityType = try makeHealthKitQuantityType(dataType: dataType)
+        let unit = descriptor.unit
+
+        try await requireDeterminedReadAuthorization(for: quantityType, label: descriptor.label)
+
+        return try await queryPagedSamples(
+            sampleType: quantityType,
+            dataType: dataType,
+            query: query
+        ) { sample in
+            guard let quantitySample = sample as? HKQuantitySample else {
+                return nil
+            }
+
+            return map(quantitySample, unit)
+        }
+    }
+
+    func readRestingHeartRate(query: NativeHealthDateRangeQuery) throws -> Promise<NativeRestingHeartRateSamplePage> {
         if !HKHealthStore.isHealthDataAvailable() {
             throw permissionError("Health data is not available")
         }
 
-        let descriptor = try makeHealthDataTypeDescriptor(dataType: dataType)
-        let quantityType = try makeHealthKitQuantityType(dataType: dataType)
-        let startDate = Date(timeIntervalSince1970: query.startTimeMs / 1000)
-        let endDate = Date(timeIntervalSince1970: query.endTimeMs / 1000)
-        let predicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate, options: [])
-        let sortDescriptors = [
-            NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: query.ascending),
-        ]
-        let label = descriptor.label
-        let unit = descriptor.unit
-
-        return Promise<[T]>.async {
-            try await self.requireDeterminedReadAuthorization(for: quantityType, label: label)
-            let samples = try await self.queryHealthKitSamples(
-                sampleType: quantityType,
-                limit: Int(query.limit),
-                predicate: predicate,
-                sortDescriptors: sortDescriptors
-            )
-
-            return samples.compactMap { sample in
-                guard let quantitySample = sample as? HKQuantitySample else {
-                    return nil
-                }
-
-                return map(quantitySample, unit)
+        return Promise<NativeRestingHeartRateSamplePage>.async {
+            let page = try await self.readInstantQuantitySamplePage(dataType: "restingHeartRate", query: query) { quantitySample, unit in
+                NativeRestingHeartRateSample(
+                    uuid: quantitySample.uuid.uuidString,
+                    timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
+                    bpm: quantitySample.quantity.doubleValue(for: unit),
+                    source: quantitySample.sourceRevision.source.name
+                )
             }
-        }
-    }
 
-    func readRestingHeartRate(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeRestingHeartRateSample]> {
-        return try readInstantQuantitySamples(dataType: "restingHeartRate", query: query) { quantitySample, unit in
-            NativeRestingHeartRateSample(
-                timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
-                bpm: quantitySample.quantity.doubleValue(for: unit),
-                source: quantitySample.sourceRevision.source.name
-            )
+            return NativeRestingHeartRateSamplePage(samples: page.samples, nextCursor: page.nextCursor)
         }
     }
 
     // iOS only ever reports SDNN for HRV (Android reports RMSSD); `method` lets JS distinguish
     // the two so callers never mix/chart them together.
-    func readHeartRateVariability(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeHeartRateVariabilitySample]> {
-        return try readInstantQuantitySamples(dataType: "heartRateVariability", query: query) { quantitySample, unit in
-            NativeHeartRateVariabilitySample(
-                timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
-                milliseconds: quantitySample.quantity.doubleValue(for: unit),
-                method: "sdnn",
-                source: quantitySample.sourceRevision.source.name
-            )
+    func readHeartRateVariability(query: NativeHealthDateRangeQuery) throws -> Promise<NativeHeartRateVariabilitySamplePage> {
+        if !HKHealthStore.isHealthDataAvailable() {
+            throw permissionError("Health data is not available")
+        }
+
+        return Promise<NativeHeartRateVariabilitySamplePage>.async {
+            let page = try await self.readInstantQuantitySamplePage(dataType: "heartRateVariability", query: query) { quantitySample, unit in
+                NativeHeartRateVariabilitySample(
+                    uuid: quantitySample.uuid.uuidString,
+                    timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
+                    milliseconds: quantitySample.quantity.doubleValue(for: unit),
+                    method: "sdnn",
+                    source: quantitySample.sourceRevision.source.name
+                )
+            }
+
+            return NativeHeartRateVariabilitySamplePage(samples: page.samples, nextCursor: page.nextCursor)
         }
     }
 
     // HealthKit stores oxygen saturation as a fraction (0-1 via HKUnit.percent()); the JS
     // surface uses percentage (0-100), so convert here (inverse of the /100 in
     // makeOxygenSaturationQuantitySamples).
-    func readOxygenSaturation(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeOxygenSaturationSample]> {
-        return try readInstantQuantitySamples(dataType: "oxygenSaturation", query: query) { quantitySample, unit in
-            NativeOxygenSaturationSample(
-                timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
-                percentage: quantitySample.quantity.doubleValue(for: unit) * 100,
-                source: quantitySample.sourceRevision.source.name
-            )
+    func readOxygenSaturation(query: NativeHealthDateRangeQuery) throws -> Promise<NativeOxygenSaturationSamplePage> {
+        if !HKHealthStore.isHealthDataAvailable() {
+            throw permissionError("Health data is not available")
+        }
+
+        return Promise<NativeOxygenSaturationSamplePage>.async {
+            let page = try await self.readInstantQuantitySamplePage(dataType: "oxygenSaturation", query: query) { quantitySample, unit in
+                NativeOxygenSaturationSample(
+                    uuid: quantitySample.uuid.uuidString,
+                    timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
+                    percentage: quantitySample.quantity.doubleValue(for: unit) * 100,
+                    source: quantitySample.sourceRevision.source.name
+                )
+            }
+
+            return NativeOxygenSaturationSamplePage(samples: page.samples, nextCursor: page.nextCursor)
         }
     }
 
-    func readHeight(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeHeightSample]> {
-        return try readInstantQuantitySamples(dataType: "height", query: query) { quantitySample, unit in
-            NativeHeightSample(
-                timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
-                meters: quantitySample.quantity.doubleValue(for: unit),
-                source: quantitySample.sourceRevision.source.name
-            )
+    func readHeight(query: NativeHealthDateRangeQuery) throws -> Promise<NativeHeightSamplePage> {
+        if !HKHealthStore.isHealthDataAvailable() {
+            throw permissionError("Health data is not available")
+        }
+
+        return Promise<NativeHeightSamplePage>.async {
+            let page = try await self.readInstantQuantitySamplePage(dataType: "height", query: query) { quantitySample, unit in
+                NativeHeightSample(
+                    uuid: quantitySample.uuid.uuidString,
+                    timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
+                    meters: quantitySample.quantity.doubleValue(for: unit),
+                    source: quantitySample.sourceRevision.source.name
+                )
+            }
+
+            return NativeHeightSamplePage(samples: page.samples, nextCursor: page.nextCursor)
         }
     }
 

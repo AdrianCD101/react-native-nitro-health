@@ -32,6 +32,8 @@ namespace margelo::nitro::nitrohealth {
     [[nodiscard]]
     NativeOxygenSaturationSample toCpp() const {
       static const auto clazz = javaClassStatic();
+      static const auto fieldUuid = clazz->getField<jni::JString>("uuid");
+      jni::local_ref<jni::JString> uuid = this->getFieldValue(fieldUuid);
       static const auto fieldTimeMs = clazz->getField<double>("timeMs");
       double timeMs = this->getFieldValue(fieldTimeMs);
       static const auto fieldPercentage = clazz->getField<double>("percentage");
@@ -39,6 +41,7 @@ namespace margelo::nitro::nitrohealth {
       static const auto fieldSource = clazz->getField<jni::JString>("source");
       jni::local_ref<jni::JString> source = this->getFieldValue(fieldSource);
       return NativeOxygenSaturationSample(
+        uuid->toStdString(),
         timeMs,
         percentage,
         source != nullptr ? std::make_optional(source->toStdString()) : std::nullopt
@@ -51,11 +54,12 @@ namespace margelo::nitro::nitrohealth {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeOxygenSaturationSample::javaobject> fromCpp(const NativeOxygenSaturationSample& value) {
-      using JSignature = JNativeOxygenSaturationSample(double, double, jni::alias_ref<jni::JString>);
+      using JSignature = JNativeOxygenSaturationSample(jni::alias_ref<jni::JString>, double, double, jni::alias_ref<jni::JString>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
         clazz,
+        jni::make_jstring(value.uuid),
         value.timeMs,
         value.percentage,
         value.source.has_value() ? jni::make_jstring(value.source.value()) : nullptr

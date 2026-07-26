@@ -32,6 +32,8 @@ namespace margelo::nitro::nitrohealth {
     [[nodiscard]]
     NativeSleepSample toCpp() const {
       static const auto clazz = javaClassStatic();
+      static const auto fieldUuid = clazz->getField<jni::JString>("uuid");
+      jni::local_ref<jni::JString> uuid = this->getFieldValue(fieldUuid);
       static const auto fieldStartTimeMs = clazz->getField<double>("startTimeMs");
       double startTimeMs = this->getFieldValue(fieldStartTimeMs);
       static const auto fieldEndTimeMs = clazz->getField<double>("endTimeMs");
@@ -41,6 +43,7 @@ namespace margelo::nitro::nitrohealth {
       static const auto fieldSource = clazz->getField<jni::JString>("source");
       jni::local_ref<jni::JString> source = this->getFieldValue(fieldSource);
       return NativeSleepSample(
+        uuid->toStdString(),
         startTimeMs,
         endTimeMs,
         stage->toStdString(),
@@ -54,11 +57,12 @@ namespace margelo::nitro::nitrohealth {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeSleepSample::javaobject> fromCpp(const NativeSleepSample& value) {
-      using JSignature = JNativeSleepSample(double, double, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>);
+      using JSignature = JNativeSleepSample(jni::alias_ref<jni::JString>, double, double, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
         clazz,
+        jni::make_jstring(value.uuid),
         value.startTimeMs,
         value.endTimeMs,
         jni::make_jstring(value.stage),

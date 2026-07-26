@@ -20,6 +20,9 @@ import java.util.Objects
 data class NativeActiveEnergyBurnedSample(
   @DoNotStrip
   @Keep
+  val uuid: String,
+  @DoNotStrip
+  @Keep
   val startTimeMs: Double,
   @DoNotStrip
   @Keep
@@ -33,13 +36,15 @@ data class NativeActiveEnergyBurnedSample(
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other !is NativeActiveEnergyBurnedSample) return false
-    return Objects.deepEquals(this.startTimeMs, other.startTimeMs)
+    return Objects.deepEquals(this.uuid, other.uuid)
+      && Objects.deepEquals(this.startTimeMs, other.startTimeMs)
       && Objects.deepEquals(this.endTimeMs, other.endTimeMs)
       && Objects.deepEquals(this.kilocalories, other.kilocalories)
   }
 
   override fun hashCode(): Int {
     return arrayOf<Any?>(
+      uuid,
       startTimeMs,
       endTimeMs,
       kilocalories
@@ -54,8 +59,8 @@ data class NativeActiveEnergyBurnedSample(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(startTimeMs: Double, endTimeMs: Double, kilocalories: Double): NativeActiveEnergyBurnedSample {
-      return NativeActiveEnergyBurnedSample(startTimeMs, endTimeMs, kilocalories)
+    private fun fromCpp(uuid: String, startTimeMs: Double, endTimeMs: Double, kilocalories: Double): NativeActiveEnergyBurnedSample {
+      return NativeActiveEnergyBurnedSample(uuid, startTimeMs, endTimeMs, kilocalories)
     }
   }
 }

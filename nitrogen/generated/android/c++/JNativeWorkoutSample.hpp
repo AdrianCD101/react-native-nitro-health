@@ -32,6 +32,8 @@ namespace margelo::nitro::nitrohealth {
     [[nodiscard]]
     NativeWorkoutSample toCpp() const {
       static const auto clazz = javaClassStatic();
+      static const auto fieldUuid = clazz->getField<jni::JString>("uuid");
+      jni::local_ref<jni::JString> uuid = this->getFieldValue(fieldUuid);
       static const auto fieldStartTimeMs = clazz->getField<double>("startTimeMs");
       double startTimeMs = this->getFieldValue(fieldStartTimeMs);
       static const auto fieldEndTimeMs = clazz->getField<double>("endTimeMs");
@@ -49,6 +51,7 @@ namespace margelo::nitro::nitrohealth {
       static const auto fieldTotalEnergyBurnedKcal = clazz->getField<jni::JDouble>("totalEnergyBurnedKcal");
       jni::local_ref<jni::JDouble> totalEnergyBurnedKcal = this->getFieldValue(fieldTotalEnergyBurnedKcal);
       return NativeWorkoutSample(
+        uuid->toStdString(),
         startTimeMs,
         endTimeMs,
         durationSeconds,
@@ -66,11 +69,12 @@ namespace margelo::nitro::nitrohealth {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeWorkoutSample::javaobject> fromCpp(const NativeWorkoutSample& value) {
-      using JSignature = JNativeWorkoutSample(double, double, double, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>);
+      using JSignature = JNativeWorkoutSample(jni::alias_ref<jni::JString>, double, double, double, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
         clazz,
+        jni::make_jstring(value.uuid),
         value.startTimeMs,
         value.endTimeMs,
         value.durationSeconds,

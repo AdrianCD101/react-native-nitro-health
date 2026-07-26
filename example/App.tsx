@@ -99,30 +99,30 @@ const readCards: Partial<
   sleep: {
     buttonLabel: 'Read sleep samples',
     execute: async () => {
-      const samples = await NitroHealth.readSleepSamples({
+      const page = await NitroHealth.readSleepSamples({
         ...lastDays(7),
         limit: 50,
         ascending: false,
       })
 
       return [
-        `Sleep samples: ${samples.length}`,
-        ...samples.map((sample) => `${sample.startDate.toLocaleString()}: ${sample.stage}`),
+        `Sleep samples: ${page.samples.length}${page.nextCursor ? ' (more available)' : ''}`,
+        ...page.samples.map((sample) => `${sample.startDate.toLocaleString()}: ${sample.stage}`),
       ]
     },
   },
   bodyMass: {
     buttonLabel: 'Read body mass',
     execute: async () => {
-      const samples = await NitroHealth.readBodyMass({
+      const page = await NitroHealth.readBodyMass({
         ...lastDays(7),
         limit: 20,
         ascending: false,
       })
 
       return [
-        `Body mass samples: ${samples.length}`,
-        ...samples.map(
+        `Body mass samples: ${page.samples.length}${page.nextCursor ? ' (more available)' : ''}`,
+        ...page.samples.map(
           (sample) => `${sample.startDate.toLocaleString()}: ${sample.kilograms.toFixed(1)} kg`
         ),
       ]
@@ -131,15 +131,15 @@ const readCards: Partial<
   workout: {
     buttonLabel: 'Read workouts',
     execute: async () => {
-      const workouts = await NitroHealth.readWorkouts({
+      const page = await NitroHealth.readWorkouts({
         ...lastDays(7),
         limit: 20,
         ascending: false,
       })
 
       return [
-        `Workouts: ${workouts.length}`,
-        ...workouts.map(
+        `Workouts: ${page.samples.length}${page.nextCursor ? ' (more available)' : ''}`,
+        ...page.samples.map(
           (workout) =>
             `${workout.startDate.toLocaleString()}: ${workout.activityType} (${Math.round(workout.durationSeconds / 60)} min)`
         ),

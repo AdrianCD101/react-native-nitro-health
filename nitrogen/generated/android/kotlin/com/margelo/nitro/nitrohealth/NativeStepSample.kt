@@ -20,6 +20,9 @@ import java.util.Objects
 data class NativeStepSample(
   @DoNotStrip
   @Keep
+  val uuid: String,
+  @DoNotStrip
+  @Keep
   val startTimeMs: Double,
   @DoNotStrip
   @Keep
@@ -33,13 +36,15 @@ data class NativeStepSample(
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other !is NativeStepSample) return false
-    return Objects.deepEquals(this.startTimeMs, other.startTimeMs)
+    return Objects.deepEquals(this.uuid, other.uuid)
+      && Objects.deepEquals(this.startTimeMs, other.startTimeMs)
       && Objects.deepEquals(this.endTimeMs, other.endTimeMs)
       && Objects.deepEquals(this.count, other.count)
   }
 
   override fun hashCode(): Int {
     return arrayOf<Any?>(
+      uuid,
       startTimeMs,
       endTimeMs,
       count
@@ -54,8 +59,8 @@ data class NativeStepSample(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(startTimeMs: Double, endTimeMs: Double, count: Double): NativeStepSample {
-      return NativeStepSample(startTimeMs, endTimeMs, count)
+    private fun fromCpp(uuid: String, startTimeMs: Double, endTimeMs: Double, count: Double): NativeStepSample {
+      return NativeStepSample(uuid, startTimeMs, endTimeMs, count)
     }
   }
 }

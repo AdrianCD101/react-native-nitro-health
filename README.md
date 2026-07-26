@@ -106,29 +106,50 @@ Read methods behave differently per platform when permission is missing. On Andr
 ```ts
 import { NitroHealth } from 'react-native-nitro-health'
 
-const steps = await NitroHealth.readSteps({
+const page = await NitroHealth.readSteps({
   startDate: new Date('2026-01-01T00:00:00.000Z'),
   endDate: new Date('2026-01-02T00:00:00.000Z'),
   limit: 100,
   ascending: true,
 })
+
+const steps = page.samples
 ```
 
-`readSteps()` returns step count samples with `startDate`, `endDate`, and `count`. It returns an empty array when the platform query succeeds but no matching samples are available. Apps must request and receive steps read permission before relying on returned data.
+`readSteps()` resolves with a page of step count samples with `uuid`, `startDate`, `endDate`, and `count`. `uuid` is a stable sample identifier — the HealthKit sample UUID on iOS, the Health Connect record id on Android. When the platform query succeeds but no matching samples are available, `samples` is empty and `nextCursor` is absent; when more data exists beyond `limit`, the page carries a `nextCursor` (see [Pagination](#pagination)). Apps must request and receive steps read permission before relying on returned data.
+
+## Pagination
+
+All raw sample reads (`readSteps`, `readDistance`, `readActiveEnergyBurned`, `readBodyMass`, `readHeartRate`, `readRestingHeartRate`, `readHeartRateVariability`, `readOxygenSaturation`, `readHeight`, `readSleepSamples`, and `readWorkouts`) resolve with a page — `{ samples, nextCursor }`. `limit` (default 1000) caps the samples per page, and `nextCursor` is present if and only if more data exists. Pass it back as `cursor` to fetch the next page:
+
+```ts
+let cursor: string | undefined
+do {
+  const page = await NitroHealth.readSteps({ startDate, endDate, limit: 500, cursor })
+  handle(page.samples)
+  cursor = page.nextCursor
+} while (cursor)
+```
+
+Cursors are opaque and platform-specific — never parse or construct one. A cursor is only valid for the read method and the same `startDate`, `endDate`, and `ascending` that produced it. Treat cursors as short-lived: use them to walk pages within one read loop, and do not persist them. Passing an invalid or foreign cursor (from the other platform, a different read method, a different `ascending`, or a malformed string) rejects with a descriptive `Invalid cursor…` error.
+
+On Android, heart rate and sleep reads page by underlying Health Connect record, so a page may contain more samples than `limit` when a record holds multiple readings or stages; iOS honors `limit` exactly. Either way, nothing is silently truncated — whenever data remains, the page carries a `nextCursor`.
+
+The deprecated daily total methods (`readDaily*Totals`) still return plain arrays and do not accept a `cursor`.
 
 ## Read Activity Quantities
 
 ```ts
 import { NitroHealth } from 'react-native-nitro-health'
 
-const distance = await NitroHealth.readDistance({
+const { samples: distance } = await NitroHealth.readDistance({
   startDate: new Date('2026-01-01T00:00:00.000Z'),
   endDate: new Date('2026-01-02T00:00:00.000Z'),
   limit: 100,
   ascending: true,
 })
 
-const activeEnergy = await NitroHealth.readActiveEnergyBurned({
+const { samples: activeEnergy } = await NitroHealth.readActiveEnergyBurned({
   startDate: new Date('2026-01-01T00:00:00.000Z'),
   endDate: new Date('2026-01-02T00:00:00.000Z'),
   limit: 100,
@@ -136,11 +157,11 @@ const activeEnergy = await NitroHealth.readActiveEnergyBurned({
 })
 ```
 
-`readDistance()` returns distance samples with `startDate`, `endDate`, and `distanceMeters`. iOS reads HealthKit walking/running distance only — cycling, wheelchair, and swimming distance live under separate HealthKit identifiers and are not included. Android reads Health Connect distance records, which apps may write for any activity (including cycling), so totals for the same user can differ between platforms when non-pedestrian activity is present.
+`readDistance()` resolves with a page of distance samples with `uuid`, `startDate`, `endDate`, and `distanceMeters`. iOS reads HealthKit walking/running distance only — cycling, wheelchair, and swimming distance live under separate HealthKit identifiers and are not included. Android reads Health Connect distance records, which apps may write for any activity (including cycling), so totals for the same user can differ between platforms when non-pedestrian activity is present.
 
-`readActiveEnergyBurned()` returns active-energy samples with `startDate`, `endDate`, and `kilocalories`.
+`readActiveEnergyBurned()` resolves with a page of active-energy samples with `uuid`, `startDate`, `endDate`, and `kilocalories`.
 
-Both methods return an empty array when the platform query succeeds but no matching samples are available. Apps must request and receive the matching read permission before relying on returned data.
+For both methods, `samples` is empty and `nextCursor` absent when the platform query succeeds but no matching samples are available. Apps must request and receive the matching read permission before relying on returned data.
 
 ## Aggregation
 
@@ -183,7 +204,7 @@ Requesting a metric that is not supported for `dataType`, an empty `metrics` arr
 
 **Bucket behavior:** buckets anchor at `query.startDate` on both platforms — pass a local-midnight `startDate` when you need calendar-day buckets. `'week'` buckets are a rolling 7 days from the anchor, not calendar weeks. The final bucket is clamped to `endDate`, empty buckets are omitted, and results are always ascending. `'hour'` buckets are a fixed 3600 seconds; `'day'`, `'week'`, and `'month'` buckets are calendar-aware in the device's local timezone, so a bucket can span 23 or 25 hours across a daylight-saving transition. On Android, heart-rate and resting-heart-rate `avg` are integer-valued (Health Connect's `BPM_AVG` is a `Long`); on iOS they are fractional. As with other reads, HealthKit cannot distinguish a denied read from no data (see the permission caveat in the Permissions section above) — a denied read resolves with empty buckets rather than rejecting.
 
-Daily total methods return one bucket per day and predate `readStatistics()`. They are **deprecated** in favor of it and will be removed before 1.0, but keep their existing behavior in the meantime: on iOS, buckets align to local calendar days, so the first and last buckets may be partial when the query starts or ends mid-day — this differs from `readStatistics()`, which always anchors buckets at `query.startDate` rather than local midnight. On Android, Health Connect anchors buckets to the query's start time, so a query starting at 15:30 returns 15:30-to-15:30 windows — pass a local-midnight `startDate` when you need calendar-day buckets on both platforms. Empty days are omitted, so apps that need a continuous chart should zero-fill missing days. `ascending` orders the buckets and `limit` caps the returned bucket count.
+Daily total methods return one bucket per day and predate `readStatistics()`. They are **deprecated** in favor of it and will be removed before 1.0, but keep their existing behavior in the meantime: on iOS, buckets align to local calendar days, so the first and last buckets may be partial when the query starts or ends mid-day — this differs from `readStatistics()`, which always anchors buckets at `query.startDate` rather than local midnight. On Android, Health Connect anchors buckets to the query's start time, so a query starting at 15:30 returns 15:30-to-15:30 windows — pass a local-midnight `startDate` when you need calendar-day buckets on both platforms. Empty days are omitted, so apps that need a continuous chart should zero-fill missing days. `ascending` orders the buckets and `limit` caps the returned bucket count. Unlike the raw sample reads, daily total methods return plain arrays — they do not paginate, do not accept a `cursor`, and their aggregated buckets carry no `uuid`.
 
 `readDailyStepTotals()` returns buckets with `startDate`, `endDate`, and `count`. Use `readStatistics('steps', { ...query, bucket: 'day', metrics: ['sum'] })` instead.
 
@@ -198,7 +219,7 @@ Daily total methods return one bucket per day and predate `readStatistics()`. Th
 ```ts
 import { NitroHealth } from 'react-native-nitro-health'
 
-const heartRate = await NitroHealth.readHeartRate({
+const { samples: heartRate } = await NitroHealth.readHeartRate({
   startDate: new Date('2026-01-01T00:00:00.000Z'),
   endDate: new Date('2026-01-02T00:00:00.000Z'),
   limit: 100,
@@ -206,14 +227,14 @@ const heartRate = await NitroHealth.readHeartRate({
 })
 ```
 
-`readHeartRate()` returns individual readings with `date`, `bpm`, and an optional `source` (the originating app or device). On iOS each reading is one `HKQuantitySample`; on Android a `HeartRateRecord` holds many readings, so records are flattened to individual points and `limit` caps the flattened, time-ordered result (records are fetched up to `limit`). It returns an empty array when the query succeeds but no samples are available. Apps must request and receive heart rate read permission before relying on returned data.
+`readHeartRate()` resolves with a page of individual readings with `uuid`, `date`, `bpm`, and an optional `source` (the originating app or device). On iOS each reading is one `HKQuantitySample`, its `uuid` is the HealthKit sample UUID, and `limit` caps the readings per page exactly. On Android a `HeartRateRecord` holds many readings, so records are flattened to individual points and pages are cut by record: `limit` counts records, and a page can contain more readings than `limit` when records hold multiple readings. Because Android readings live inside a parent record, each reading's `uuid` is the record id plus a `#index` suffix (for example `"a1b2…#3"`). `samples` is empty and `nextCursor` absent when the query succeeds but no samples are available. Apps must request and receive heart rate read permission before relying on returned data.
 
 ## Read Resting Heart Rate
 
 ```ts
 import { NitroHealth } from 'react-native-nitro-health'
 
-const restingHeartRate = await NitroHealth.readRestingHeartRate({
+const { samples: restingHeartRate } = await NitroHealth.readRestingHeartRate({
   startDate: new Date('2026-01-01T00:00:00.000Z'),
   endDate: new Date('2026-01-08T00:00:00.000Z'),
   limit: 100,
@@ -221,14 +242,14 @@ const restingHeartRate = await NitroHealth.readRestingHeartRate({
 })
 ```
 
-`readRestingHeartRate()` returns individual readings with `date`, `bpm`, and an optional `source`. It returns an empty array when the query succeeds but no samples are available. Apps must request and receive resting heart rate read permission before relying on returned data.
+`readRestingHeartRate()` resolves with a page of individual readings with `uuid`, `date`, `bpm`, and an optional `source`. `samples` is empty and `nextCursor` absent when the query succeeds but no samples are available. Apps must request and receive resting heart rate read permission before relying on returned data.
 
 ## Read Heart Rate Variability
 
 ```ts
 import { NitroHealth } from 'react-native-nitro-health'
 
-const hrv = await NitroHealth.readHeartRateVariability({
+const { samples: hrv } = await NitroHealth.readHeartRateVariability({
   startDate: new Date('2026-01-01T00:00:00.000Z'),
   endDate: new Date('2026-01-08T00:00:00.000Z'),
   limit: 100,
@@ -236,7 +257,7 @@ const hrv = await NitroHealth.readHeartRateVariability({
 })
 ```
 
-`readHeartRateVariability()` returns individual readings with `date`, `milliseconds`, a `method` field, and an optional `source`.
+`readHeartRateVariability()` resolves with a page of individual readings with `uuid`, `date`, `milliseconds`, a `method` field, and an optional `source`. `samples` is empty and `nextCursor` absent when the query succeeds but no samples are available.
 
 > [!IMPORTANT]
 > **SDNN and RMSSD are different, non-comparable HRV measures — never mix or chart samples with different `method` values together.** iOS reports HealthKit's HRV SDNN metric, so every sample read on iOS has `method: 'sdnn'`. Android reports Health Connect's HRV RMSSD metric, so every sample read on Android has `method: 'rmssd'`. The `method` field exists precisely so app code can tell which metric a sample used and avoid combining SDNN and RMSSD values in the same average, trend line, or chart. There is no `saveHeartRateVariability()`: because the two platforms use non-comparable metrics, there is no single value that would be meaningful to write on both.
@@ -246,7 +267,7 @@ const hrv = await NitroHealth.readHeartRateVariability({
 ```ts
 import { NitroHealth } from 'react-native-nitro-health'
 
-const bodyMass = await NitroHealth.readBodyMass({
+const { samples: bodyMass } = await NitroHealth.readBodyMass({
   startDate: new Date('2026-01-01T00:00:00.000Z'),
   endDate: new Date('2026-02-01T00:00:00.000Z'),
   limit: 100,
@@ -254,14 +275,14 @@ const bodyMass = await NitroHealth.readBodyMass({
 })
 ```
 
-`readBodyMass()` returns body mass samples with `startDate`, `endDate`, `kilograms`, and an optional `source`. It returns an empty array when the platform query succeeds but no matching samples are available. Apps must request and receive body mass read permission before relying on returned data.
+`readBodyMass()` resolves with a page of body mass samples with `uuid`, `startDate`, `endDate`, `kilograms`, and an optional `source`. `samples` is empty and `nextCursor` absent when the platform query succeeds but no matching samples are available. Apps must request and receive body mass read permission before relying on returned data.
 
 ## Read Oxygen Saturation
 
 ```ts
 import { NitroHealth } from 'react-native-nitro-health'
 
-const oxygenSaturation = await NitroHealth.readOxygenSaturation({
+const { samples: oxygenSaturation } = await NitroHealth.readOxygenSaturation({
   startDate: new Date('2026-01-01T00:00:00.000Z'),
   endDate: new Date('2026-01-08T00:00:00.000Z'),
   limit: 100,
@@ -269,14 +290,14 @@ const oxygenSaturation = await NitroHealth.readOxygenSaturation({
 })
 ```
 
-`readOxygenSaturation()` returns individual readings with `date`, `percentage`, and an optional `source`. `percentage` is 0-100 on both platforms: Health Connect's `Percentage` is used directly, while HealthKit stores oxygen saturation as a 0-1 fraction, so iOS reads are converted (`× 100`) before they reach JavaScript. It returns an empty array when the query succeeds but no samples are available. Apps must request and receive oxygen saturation read permission before relying on returned data.
+`readOxygenSaturation()` resolves with a page of individual readings with `uuid`, `date`, `percentage`, and an optional `source`. `percentage` is 0-100 on both platforms: Health Connect's `Percentage` is used directly, while HealthKit stores oxygen saturation as a 0-1 fraction, so iOS reads are converted (`× 100`) before they reach JavaScript. `samples` is empty and `nextCursor` absent when the query succeeds but no samples are available. Apps must request and receive oxygen saturation read permission before relying on returned data.
 
 ## Read Height
 
 ```ts
 import { NitroHealth } from 'react-native-nitro-health'
 
-const height = await NitroHealth.readHeight({
+const { samples: height } = await NitroHealth.readHeight({
   startDate: new Date('2026-01-01T00:00:00.000Z'),
   endDate: new Date('2026-01-08T00:00:00.000Z'),
   limit: 100,
@@ -284,14 +305,14 @@ const height = await NitroHealth.readHeight({
 })
 ```
 
-`readHeight()` returns individual readings with `date`, `meters`, and an optional `source`. It returns an empty array when the query succeeds but no samples are available. Apps must request and receive height read permission before relying on returned data.
+`readHeight()` resolves with a page of individual readings with `uuid`, `date`, `meters`, and an optional `source`. `samples` is empty and `nextCursor` absent when the query succeeds but no samples are available. Apps must request and receive height read permission before relying on returned data.
 
 ## Read Sleep
 
 ```ts
 import { NitroHealth } from 'react-native-nitro-health'
 
-const sleep = await NitroHealth.readSleepSamples({
+const { samples: sleep } = await NitroHealth.readSleepSamples({
   startDate: new Date('2026-01-01T00:00:00.000Z'),
   endDate: new Date('2026-01-08T00:00:00.000Z'),
   limit: 100,
@@ -299,16 +320,16 @@ const sleep = await NitroHealth.readSleepSamples({
 })
 ```
 
-`readSleepSamples()` returns sleep intervals with `startDate`, `endDate`, `stage`, and an optional `source`. Stages are normalized to `inBed`, `awake`, `awakeInBed`, `asleep`, `asleepCore`, `asleepDeep`, `asleepREM`, `outOfBed`, or `unknown`.
+`readSleepSamples()` resolves with a page of sleep intervals with `uuid`, `startDate`, `endDate`, `stage`, and an optional `source`. Stages are normalized to `inBed`, `awake`, `awakeInBed`, `asleep`, `asleepCore`, `asleepDeep`, `asleepREM`, `outOfBed`, or `unknown`. `samples` is empty and `nextCursor` absent when the query succeeds but no samples are available.
 
-On iOS, HealthKit sleep analysis is category interval data and `inBed` samples can overlap `asleep` stage samples. On Android, Health Connect sleep sessions are flattened to stage intervals; sessions without explicit stages are returned as one `asleep` interval. Apps must request and receive sleep read permission before relying on returned data.
+On iOS, HealthKit sleep analysis is category interval data and `inBed` samples can overlap `asleep` stage samples; each interval's `uuid` is the HealthKit sample UUID and `limit` caps the intervals per page exactly. On Android, Health Connect sleep sessions are flattened to stage intervals and pages are cut by session record: `limit` counts sessions, and a page can contain more intervals than `limit` when sessions hold multiple stages. Because Android stages live inside a session record, each stage's `uuid` is the session record id plus a `#index` suffix; a session without explicit stages is returned as one `asleep` interval that keeps the plain record id. Apps must request and receive sleep read permission before relying on returned data.
 
 ## Read Workouts
 
 ```ts
 import { NitroHealth } from 'react-native-nitro-health'
 
-const workouts = await NitroHealth.readWorkouts({
+const { samples: workouts } = await NitroHealth.readWorkouts({
   startDate: new Date('2026-01-01T00:00:00.000Z'),
   endDate: new Date('2026-01-08T00:00:00.000Z'),
   limit: 50,
@@ -316,7 +337,7 @@ const workouts = await NitroHealth.readWorkouts({
 })
 ```
 
-`readWorkouts()` returns workout sessions (`HKWorkout` on iOS, `ExerciseSessionRecord` on Android) with `startDate`, `endDate`, `durationSeconds`, `activityType`, and optional `title`, `source`, `totalDistanceMeters`, and `totalEnergyBurnedKcal` fields.
+`readWorkouts()` resolves with a page of workout sessions (`HKWorkout` on iOS, `ExerciseSessionRecord` on Android) with `uuid`, `startDate`, `endDate`, `durationSeconds`, `activityType`, and optional `title`, `source`, `totalDistanceMeters`, and `totalEnergyBurnedKcal` fields. `samples` is empty and `nextCursor` absent when the query succeeds but no sessions are available.
 
 `activityType` is normalized to a single cross-platform union (`running`, `cycling`, `swimming`, `strengthTraining`, `yoga`, `hiking`, ... — see `WorkoutActivityType` for the full list). Platform sub-variants fold into the parent activity: treadmill running and outdoor running both map to `running`, stationary and outdoor biking to `cycling`, pool and open-water swimming to `swimming`, and individual strength exercises (bench press, deadlift, dumbbell curls, ...) to `strengthTraining`. Values with no cross-platform equivalent map to `other`, as do unknown values from future OS versions. Some union members are only ever produced by one platform (for example `archery` on iOS or `paragliding` on Android).
 
@@ -366,7 +387,7 @@ Avoid writing samples with overlapping time intervals. The platforms aggregate o
 
 ## Jest
 
-The package ships a Jest mock so app tests do not need to mock Nitro internals.
+The package ships a Jest mock so app tests do not need to mock Nitro internals. By default, mocked raw sample reads resolve with an empty page (`{ samples: [] }`) and the deprecated daily total methods resolve with `[]`.
 
 Add it to your Jest setup file:
 

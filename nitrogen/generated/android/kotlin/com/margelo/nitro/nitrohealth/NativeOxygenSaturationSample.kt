@@ -20,6 +20,9 @@ import java.util.Objects
 data class NativeOxygenSaturationSample(
   @DoNotStrip
   @Keep
+  val uuid: String,
+  @DoNotStrip
+  @Keep
   val timeMs: Double,
   @DoNotStrip
   @Keep
@@ -33,13 +36,15 @@ data class NativeOxygenSaturationSample(
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other !is NativeOxygenSaturationSample) return false
-    return Objects.deepEquals(this.timeMs, other.timeMs)
+    return Objects.deepEquals(this.uuid, other.uuid)
+      && Objects.deepEquals(this.timeMs, other.timeMs)
       && Objects.deepEquals(this.percentage, other.percentage)
       && Objects.deepEquals(this.source, other.source)
   }
 
   override fun hashCode(): Int {
     return arrayOf<Any?>(
+      uuid,
       timeMs,
       percentage,
       source
@@ -54,8 +59,8 @@ data class NativeOxygenSaturationSample(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(timeMs: Double, percentage: Double, source: String?): NativeOxygenSaturationSample {
-      return NativeOxygenSaturationSample(timeMs, percentage, source)
+    private fun fromCpp(uuid: String, timeMs: Double, percentage: Double, source: String?): NativeOxygenSaturationSample {
+      return NativeOxygenSaturationSample(uuid, timeMs, percentage, source)
     }
   }
 }

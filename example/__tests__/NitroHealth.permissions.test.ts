@@ -60,18 +60,21 @@ describe('NitroHealth permission contract', () => {
   it('reads steps through the Nitro hybrid object', async () => {
     const startDate = new Date('2026-01-01T00:00:00.000Z')
     const endDate = new Date('2026-01-02T00:00:00.000Z')
-    const nativeResult = [
-      {
-        startTimeMs: startDate.getTime(),
-        endTimeMs: endDate.getTime(),
-        count: 123,
-      },
-    ]
+    const nativeResult = {
+      samples: [
+        {
+          uuid: 'uuid-1',
+          startTimeMs: startDate.getTime(),
+          endTimeMs: endDate.getTime(),
+          count: 123,
+        },
+      ],
+    }
     mockNitroHealth.readSteps.mockResolvedValue(nativeResult)
 
     await expect(
       NitroHealth.readSteps({ startDate, endDate, limit: 25, ascending: false })
-    ).resolves.toEqual([{ startDate, endDate, count: 123 }])
+    ).resolves.toEqual({ samples: [{ uuid: 'uuid-1', startDate, endDate, count: 123 }] })
 
     expect(mockNitroHealth.readSteps).toHaveBeenCalledWith({
       startTimeMs: startDate.getTime(),
@@ -84,9 +87,9 @@ describe('NitroHealth permission contract', () => {
   it('applies read steps defaults before crossing the native boundary', async () => {
     const startDate = new Date('2026-01-01T00:00:00.000Z')
     const endDate = new Date('2026-01-02T00:00:00.000Z')
-    mockNitroHealth.readSteps.mockResolvedValue([])
+    mockNitroHealth.readSteps.mockResolvedValue({ samples: [] })
 
-    await expect(NitroHealth.readSteps({ startDate, endDate })).resolves.toEqual([])
+    await expect(NitroHealth.readSteps({ startDate, endDate })).resolves.toEqual({ samples: [] })
 
     expect(mockNitroHealth.readSteps).toHaveBeenCalledWith({
       startTimeMs: startDate.getTime(),
@@ -129,18 +132,21 @@ describe('NitroHealth permission contract', () => {
   it('reads distance through the Nitro hybrid object', async () => {
     const startDate = new Date('2026-01-01T00:00:00.000Z')
     const endDate = new Date('2026-01-02T00:00:00.000Z')
-    const nativeResult = [
-      {
-        startTimeMs: startDate.getTime(),
-        endTimeMs: endDate.getTime(),
-        distanceMeters: 1234,
-      },
-    ]
+    const nativeResult = {
+      samples: [
+        {
+          uuid: 'uuid-1',
+          startTimeMs: startDate.getTime(),
+          endTimeMs: endDate.getTime(),
+          distanceMeters: 1234,
+        },
+      ],
+    }
     mockNitroHealth.readDistance.mockResolvedValue(nativeResult)
 
     await expect(
       NitroHealth.readDistance({ startDate, endDate, limit: 25, ascending: false })
-    ).resolves.toEqual([{ startDate, endDate, distanceMeters: 1234 }])
+    ).resolves.toEqual({ samples: [{ uuid: 'uuid-1', startDate, endDate, distanceMeters: 1234 }] })
 
     expect(mockNitroHealth.readDistance).toHaveBeenCalledWith({
       startTimeMs: startDate.getTime(),
@@ -183,17 +189,20 @@ describe('NitroHealth permission contract', () => {
   it('reads active energy burned through the Nitro hybrid object', async () => {
     const startDate = new Date('2026-01-01T00:00:00.000Z')
     const endDate = new Date('2026-01-02T00:00:00.000Z')
-    mockNitroHealth.readActiveEnergyBurned.mockResolvedValue([
-      {
-        startTimeMs: startDate.getTime(),
-        endTimeMs: endDate.getTime(),
-        kilocalories: 321,
-      },
-    ])
+    mockNitroHealth.readActiveEnergyBurned.mockResolvedValue({
+      samples: [
+        {
+          uuid: 'uuid-1',
+          startTimeMs: startDate.getTime(),
+          endTimeMs: endDate.getTime(),
+          kilocalories: 321,
+        },
+      ],
+    })
 
     await expect(
       NitroHealth.readActiveEnergyBurned({ startDate, endDate, limit: 25, ascending: false })
-    ).resolves.toEqual([{ startDate, endDate, kilocalories: 321 }])
+    ).resolves.toEqual({ samples: [{ uuid: 'uuid-1', startDate, endDate, kilocalories: 321 }] })
 
     expect(mockNitroHealth.readActiveEnergyBurned).toHaveBeenCalledWith({
       startTimeMs: startDate.getTime(),
@@ -241,18 +250,23 @@ describe('NitroHealth permission contract', () => {
   it('reads heart rate through the Nitro hybrid object', async () => {
     const startDate = new Date('2026-01-01T00:00:00.000Z')
     const endDate = new Date('2026-01-02T00:00:00.000Z')
-    const nativeResult = [
-      {
-        timeMs: startDate.getTime(),
-        bpm: 72,
-        source: 'com.example.health',
-      },
-    ]
+    const nativeResult = {
+      samples: [
+        {
+          uuid: 'uuid-1',
+          timeMs: startDate.getTime(),
+          bpm: 72,
+          source: 'com.example.health',
+        },
+      ],
+    }
     mockNitroHealth.readHeartRate.mockResolvedValue(nativeResult)
 
     await expect(
       NitroHealth.readHeartRate({ startDate, endDate, limit: 25, ascending: false })
-    ).resolves.toEqual([{ date: startDate, bpm: 72, source: 'com.example.health' }])
+    ).resolves.toEqual({
+      samples: [{ uuid: 'uuid-1', date: startDate, bpm: 72, source: 'com.example.health' }],
+    })
 
     expect(mockNitroHealth.readHeartRate).toHaveBeenCalledWith({
       startTimeMs: startDate.getTime(),
@@ -265,25 +279,31 @@ describe('NitroHealth permission contract', () => {
   it('reads body mass through the Nitro hybrid object', async () => {
     const startDate = new Date('2026-01-01T00:00:00.000Z')
     const endDate = new Date('2026-01-02T00:00:00.000Z')
-    mockNitroHealth.readBodyMass.mockResolvedValue([
-      {
-        startTimeMs: startDate.getTime(),
-        endTimeMs: endDate.getTime(),
-        kilograms: 72.5,
-        source: 'com.example.health',
-      },
-    ])
+    mockNitroHealth.readBodyMass.mockResolvedValue({
+      samples: [
+        {
+          uuid: 'uuid-1',
+          startTimeMs: startDate.getTime(),
+          endTimeMs: endDate.getTime(),
+          kilograms: 72.5,
+          source: 'com.example.health',
+        },
+      ],
+    })
 
     await expect(
       NitroHealth.readBodyMass({ startDate, endDate, limit: 25, ascending: false })
-    ).resolves.toEqual([
-      {
-        startDate,
-        endDate,
-        kilograms: 72.5,
-        source: 'com.example.health',
-      },
-    ])
+    ).resolves.toEqual({
+      samples: [
+        {
+          uuid: 'uuid-1',
+          startDate,
+          endDate,
+          kilograms: 72.5,
+          source: 'com.example.health',
+        },
+      ],
+    })
 
     expect(mockNitroHealth.readBodyMass).toHaveBeenCalledWith({
       startTimeMs: startDate.getTime(),
@@ -296,9 +316,11 @@ describe('NitroHealth permission contract', () => {
   it('applies read heart rate defaults before crossing the native boundary', async () => {
     const startDate = new Date('2026-01-01T00:00:00.000Z')
     const endDate = new Date('2026-01-02T00:00:00.000Z')
-    mockNitroHealth.readHeartRate.mockResolvedValue([])
+    mockNitroHealth.readHeartRate.mockResolvedValue({ samples: [] })
 
-    await expect(NitroHealth.readHeartRate({ startDate, endDate })).resolves.toEqual([])
+    await expect(NitroHealth.readHeartRate({ startDate, endDate })).resolves.toEqual({
+      samples: [],
+    })
 
     expect(mockNitroHealth.readHeartRate).toHaveBeenCalledWith({
       startTimeMs: startDate.getTime(),
@@ -332,25 +354,31 @@ describe('NitroHealth permission contract', () => {
   it('reads sleep samples through the Nitro hybrid object', async () => {
     const startDate = new Date('2026-01-01T00:00:00.000Z')
     const endDate = new Date('2026-01-02T00:00:00.000Z')
-    mockNitroHealth.readSleepSamples.mockResolvedValue([
-      {
-        startTimeMs: startDate.getTime(),
-        endTimeMs: endDate.getTime(),
-        stage: 'asleepREM',
-        source: 'com.example.health',
-      },
-    ])
+    mockNitroHealth.readSleepSamples.mockResolvedValue({
+      samples: [
+        {
+          uuid: 'uuid-1',
+          startTimeMs: startDate.getTime(),
+          endTimeMs: endDate.getTime(),
+          stage: 'asleepREM',
+          source: 'com.example.health',
+        },
+      ],
+    })
 
     await expect(
       NitroHealth.readSleepSamples({ startDate, endDate, limit: 25, ascending: false })
-    ).resolves.toEqual([
-      {
-        startDate,
-        endDate,
-        stage: 'asleepREM',
-        source: 'com.example.health',
-      },
-    ])
+    ).resolves.toEqual({
+      samples: [
+        {
+          uuid: 'uuid-1',
+          startDate,
+          endDate,
+          stage: 'asleepREM',
+          source: 'com.example.health',
+        },
+      ],
+    })
 
     expect(mockNitroHealth.readSleepSamples).toHaveBeenCalledWith({
       startTimeMs: startDate.getTime(),

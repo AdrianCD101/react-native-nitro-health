@@ -18,8 +18,8 @@ public extension NativeBodyMassSample {
   /**
    * Create a new instance of `NativeBodyMassSample`.
    */
-  init(startTimeMs: Double, endTimeMs: Double, kilograms: Double, source: String?) {
-    self.init(startTimeMs, endTimeMs, kilograms, { () -> bridge.std__optional_std__string_ in
+  init(uuid: String, startTimeMs: Double, endTimeMs: Double, kilograms: Double, source: String?) {
+    self.init(std.string(uuid), startTimeMs, endTimeMs, kilograms, { () -> bridge.std__optional_std__string_ in
       if let __unwrappedValue = source {
         return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
       } else {
@@ -28,6 +28,11 @@ public extension NativeBodyMassSample {
     }())
   }
 
+  @inline(__always)
+  var uuid: String {
+    return String(self.__uuid)
+  }
+  
   @inline(__always)
   var startTimeMs: Double {
     return self.__startTimeMs

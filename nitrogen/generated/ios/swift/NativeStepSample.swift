@@ -18,10 +18,15 @@ public extension NativeStepSample {
   /**
    * Create a new instance of `NativeStepSample`.
    */
-  init(startTimeMs: Double, endTimeMs: Double, count: Double) {
-    self.init(startTimeMs, endTimeMs, count)
+  init(uuid: String, startTimeMs: Double, endTimeMs: Double, count: Double) {
+    self.init(std.string(uuid), startTimeMs, endTimeMs, count)
   }
 
+  @inline(__always)
+  var uuid: String {
+    return String(self.__uuid)
+  }
+  
   @inline(__always)
   var startTimeMs: Double {
     return self.__startTimeMs
