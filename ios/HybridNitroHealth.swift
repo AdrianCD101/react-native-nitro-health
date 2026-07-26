@@ -634,7 +634,8 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         }
     }
 
-    private func requireWriteAuthorization(for sampleType: HKSampleType, label: String) throws {
+    // Internal (not private) so HybridNitroHealth+Deletes.swift can reuse it.
+    func requireWriteAuthorization(for sampleType: HKSampleType, label: String) throws {
         if healthStore.authorizationStatus(for: sampleType) != .sharingAuthorized {
             throw permissionError("Missing permission to write \(label)")
         }
@@ -644,6 +645,29 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             healthStore.save(samples) { _, error in
                 if let error = error {
+                    continuation.resume(throwing: error)
+                    return
+                }
+
+                continuation.resume(returning: ())
+            }
+        }
+    }
+
+    // Internal (not private) so HybridNitroHealth+Deletes.swift can reuse it — healthStore is
+    // file-private, so the deleteObjects bridge has to live here. Apple leaves the no-match
+    // behavior of deleteObjects undefined; errorNoData is normalized to success so a delete
+    // that matches nothing resolves (mirroring the statistics queries below). The completion
+    // Bool is ignored in favor of `error`, matching saveHealthKitSamples above.
+    func deleteHealthKitObjects(of objectType: HKObjectType, predicate: NSPredicate) async throws {
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            healthStore.deleteObjects(of: objectType, predicate: predicate) { _, _, error in
+                if let error = error {
+                    if let hkError = error as? HKError, hkError.code == .errorNoData {
+                        continuation.resume(returning: ())
+                        return
+                    }
+
                     continuation.resume(throwing: error)
                     return
                 }
@@ -836,7 +860,8 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         return (toShare, toRead)
     }
 
-    private func makeHealthKitSampleType(dataType: String) throws -> HKSampleType {
+    // Internal (not private) so HybridNitroHealth+Deletes.swift can reuse it.
+    func makeHealthKitSampleType(dataType: String) throws -> HKSampleType {
         if dataType == "workout" {
             return HKObjectType.workoutType()
         }

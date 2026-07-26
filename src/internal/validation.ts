@@ -38,6 +38,28 @@ export function assertNonEmptySamples(samples: readonly unknown[]): void {
   }
 }
 
+export function assertDeletableUuids(uuids: readonly string[]): void {
+  if (uuids.length === 0) {
+    throw new Error('At least one uuid is required')
+  }
+
+  uuids.forEach((uuid, index) => {
+    if (typeof uuid !== 'string' || uuid.trim() === '') {
+      throw new Error(`uuids[${index}]: a non-empty uuid string is required`)
+    }
+
+    // Android reads flatten heart-rate readings and sleep stages out of parent Health Connect
+    // records under synthetic "<recordId>#<index>" ids; Health Connect can only delete whole
+    // records, so deleting by such an id would silently remove sibling readings. Mirrors
+    // ensureDeletableRecordIds in android/.../DeleteRecordIdValidation.kt — keep messages in sync.
+    if (uuid.includes('#')) {
+      throw new Error(
+        `uuids[${index}]: synthetic reading ids (record id + '#index') cannot be deleted individually; use deleteSamplesByTimeRange instead`
+      )
+    }
+  })
+}
+
 export function assertSamplePositiveInteger(value: number, index: number, name: string): void {
   if (!Number.isInteger(value) || value <= 0) {
     throw new Error(`samples[${index}]: ${name} must be a positive integer`)

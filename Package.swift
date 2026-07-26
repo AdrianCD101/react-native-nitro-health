@@ -17,6 +17,7 @@ let package = Package(
             sources: [
                 "DailyBucketUtils.swift",
                 "SampleCursorUtils.swift",
+                "SampleUuidParsing.swift",
                 "StatisticsBucketUtils.swift",
                 "WorkoutActivityTypeMapping.swift",
             ]

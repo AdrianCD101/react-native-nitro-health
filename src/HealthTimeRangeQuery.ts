@@ -1,4 +1,8 @@
-/** Time range query used by aggregate health APIs such as {@linkcode NitroHealth.readHeartRateStatistics}. */
+/**
+ * Time range query used by aggregate health APIs such as
+ * {@linkcode NitroHealth.readHeartRateStatistics} and by
+ * {@linkcode NitroHealth.deleteSamplesByTimeRange}.
+ */
 export interface HealthTimeRangeQuery {
   /** Inclusive start of the query range. Must be before {@linkcode endDate}. */
   startDate: Date

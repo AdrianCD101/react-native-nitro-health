@@ -69,6 +69,8 @@ export interface NitroHealth extends HybridObject<{ ios: 'swift'; android: 'kotl
   saveRestingHeartRate(samples: NativeRestingHeartRateSampleInput[]): Promise<void>
   saveOxygenSaturation(samples: NativeOxygenSaturationSampleInput[]): Promise<void>
   saveHeight(samples: NativeHeightSampleInput[]): Promise<void>
+  deleteSamplesByUuids(dataType: string, uuids: string[]): Promise<void>
+  deleteSamplesByTimeRange(dataType: string, query: NativeHealthTimeRangeQuery): Promise<void>
   getRequestStatusForAuthorization(
     permissions: NativeHealthPermission[]
   ): Promise<AuthorizationRequestStatus>

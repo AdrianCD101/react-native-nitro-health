@@ -64,7 +64,11 @@ import {
   makeStepSample,
   makeWorkoutSample,
 } from './internal/sampleMapping'
-import { assertNonEmptySamples, assertPermissions } from './internal/validation'
+import {
+  assertDeletableUuids,
+  assertNonEmptySamples,
+  assertPermissions,
+} from './internal/validation'
 
 export type { ActiveEnergyBurnedSample } from './ActiveEnergyBurnedSample'
 export type { ActiveEnergyBurnedSampleInput } from './ActiveEnergyBurnedSampleInput'
@@ -177,6 +181,8 @@ export type NitroHealth = Omit<
   | 'saveRestingHeartRate'
   | 'saveOxygenSaturation'
   | 'saveHeight'
+  | 'deleteSamplesByUuids'
+  | 'deleteSamplesByTimeRange'
   | 'requestAuthorization'
 > & {
   getRequestStatusForAuthorization(
@@ -230,6 +236,8 @@ export type NitroHealth = Omit<
   saveRestingHeartRate(samples: RestingHeartRateSampleInput[]): Promise<void>
   saveOxygenSaturation(samples: OxygenSaturationSampleInput[]): Promise<void>
   saveHeight(samples: HeightSampleInput[]): Promise<void>
+  deleteSamplesByUuids(dataType: HealthDataType, uuids: string[]): Promise<void>
+  deleteSamplesByTimeRange(dataType: HealthDataType, query: HealthTimeRangeQuery): Promise<void>
   requestAuthorization(permissions: HealthPermission[]): Promise<HealthAuthorizationResult>
 }
 
@@ -384,6 +392,13 @@ export const NitroHealth: NitroHealth = {
   async saveHeight(samples) {
     assertNonEmptySamples(samples)
     return NitroHealthNative.saveHeight(samples.map(makeNativeHeightSampleInput))
+  },
+  async deleteSamplesByUuids(dataType, uuids) {
+    assertDeletableUuids(uuids)
+    return NitroHealthNative.deleteSamplesByUuids(dataType, uuids)
+  },
+  async deleteSamplesByTimeRange(dataType, query) {
+    return NitroHealthNative.deleteSamplesByTimeRange(dataType, makeNativeTimeRangeQuery(query))
   },
   async getRequestStatusForAuthorization(permissions) {
     assertPermissions(permissions)

@@ -1,0 +1,79 @@
+//
+//  HybridNitroHealth+Deletes.swift
+//  Pods
+//
+//  Sample deletion by uuid and by time range. HealthKit only deletes objects
+//  this app saved, and deletes are gated on write (sharing) authorization,
+//  like saves. The pure uuid parsing lives in SampleUuidParsing.swift
+//  (SPM-tested); this file is HealthKit-only, so it must NOT be added to
+//  Package.swift's pure-Foundation SPM test target; the podspec globs
+//  ios/**/*.swift and picks it up automatically.
+//
+
+import Foundation
+import HealthKit
+import NitroModules
+
+extension HybridNitroHealth {
+    func deleteSamplesByUuids(dataType: String, uuids: [String]) throws -> Promise<Void> {
+        if !HKHealthStore.isHealthDataAvailable() {
+            throw permissionError("Health data is not available")
+        }
+
+        return Promise<Void>.async {
+            let sampleType = try self.makeHealthKitSampleType(dataType: dataType)
+            try self.requireWriteAuthorization(
+                for: sampleType,
+                label: makeHealthDataTypeLabel(dataType: dataType)
+            )
+
+            let sampleUuids = try makeSampleUuids(uuids)
+            try await self.deleteHealthKitObjects(
+                of: sampleType,
+                predicate: HKQuery.predicateForObjects(with: Set(sampleUuids))
+            )
+        }
+    }
+
+    func deleteSamplesByTimeRange(dataType: String, query: NativeHealthTimeRangeQuery) throws -> Promise<Void> {
+        if !HKHealthStore.isHealthDataAvailable() {
+            throw permissionError("Health data is not available")
+        }
+
+        return Promise<Void>.async {
+            let sampleType = try self.makeHealthKitSampleType(dataType: dataType)
+            try self.requireWriteAuthorization(
+                for: sampleType,
+                label: makeHealthDataTypeLabel(dataType: dataType)
+            )
+
+            // options: [] matches the read predicates, so a time-range delete removes exactly
+            // the own-app samples a read of the same range returns.
+            let predicate = HKQuery.predicateForSamples(
+                withStart: Date(timeIntervalSince1970: query.startTimeMs / 1000),
+                end: Date(timeIntervalSince1970: query.endTimeMs / 1000),
+                options: []
+            )
+            try await self.deleteHealthKitObjects(of: sampleType, predicate: predicate)
+        }
+    }
+}
+
+// sleep and workout have no quantity descriptor (makeHealthDataTypeDescriptor throws for
+// them); their labels mirror the read paths and Android's permissionLabel values. Falls back
+// to the raw dataType for unsupported values — makeHealthKitSampleType has already thrown by
+// the time labels matter.
+private func makeHealthDataTypeLabel(dataType: String) -> String {
+    switch dataType {
+    case "sleep":
+        return "sleep"
+    case "workout":
+        return "workouts"
+    default:
+        guard let descriptor = try? makeHealthDataTypeDescriptor(dataType: dataType) else {
+            return dataType
+        }
+
+        return descriptor.label
+    }
+}
