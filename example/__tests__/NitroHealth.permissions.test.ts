@@ -99,36 +99,6 @@ describe('NitroHealth permission contract', () => {
     })
   })
 
-  it('reads daily step totals through the Nitro hybrid object', async () => {
-    const startDate = new Date('2026-01-01T00:00:00.000Z')
-    const endDate = new Date('2026-01-08T00:00:00.000Z')
-    const nativeResult = [
-      {
-        startTimeMs: startDate.getTime(),
-        endTimeMs: new Date('2026-01-02T00:00:00.000Z').getTime(),
-        count: 456,
-      },
-    ]
-    mockNitroHealth.readDailyStepTotals.mockResolvedValue(nativeResult)
-
-    await expect(
-      NitroHealth.readDailyStepTotals({ startDate, endDate, limit: 7, ascending: false })
-    ).resolves.toEqual([
-      {
-        startDate,
-        endDate: new Date('2026-01-02T00:00:00.000Z'),
-        count: 456,
-      },
-    ])
-
-    expect(mockNitroHealth.readDailyStepTotals).toHaveBeenCalledWith({
-      startTimeMs: startDate.getTime(),
-      endTimeMs: endDate.getTime(),
-      limit: 7,
-      ascending: false,
-    })
-  })
-
   it('reads distance through the Nitro hybrid object', async () => {
     const startDate = new Date('2026-01-01T00:00:00.000Z')
     const endDate = new Date('2026-01-02T00:00:00.000Z')
@@ -156,36 +126,6 @@ describe('NitroHealth permission contract', () => {
     })
   })
 
-  it('reads daily distance totals through the Nitro hybrid object', async () => {
-    const startDate = new Date('2026-01-01T00:00:00.000Z')
-    const endDate = new Date('2026-01-08T00:00:00.000Z')
-    const bucketEndDate = new Date('2026-01-02T00:00:00.000Z')
-    mockNitroHealth.readDailyDistanceTotals.mockResolvedValue([
-      {
-        startTimeMs: startDate.getTime(),
-        endTimeMs: bucketEndDate.getTime(),
-        distanceMeters: 2500,
-      },
-    ])
-
-    await expect(
-      NitroHealth.readDailyDistanceTotals({ startDate, endDate, limit: 7, ascending: false })
-    ).resolves.toEqual([
-      {
-        startDate,
-        endDate: bucketEndDate,
-        distanceMeters: 2500,
-      },
-    ])
-
-    expect(mockNitroHealth.readDailyDistanceTotals).toHaveBeenCalledWith({
-      startTimeMs: startDate.getTime(),
-      endTimeMs: endDate.getTime(),
-      limit: 7,
-      ascending: false,
-    })
-  })
-
   it('reads active energy burned through the Nitro hybrid object', async () => {
     const startDate = new Date('2026-01-01T00:00:00.000Z')
     const endDate = new Date('2026-01-02T00:00:00.000Z')
@@ -208,41 +148,6 @@ describe('NitroHealth permission contract', () => {
       startTimeMs: startDate.getTime(),
       endTimeMs: endDate.getTime(),
       limit: 25,
-      ascending: false,
-    })
-  })
-
-  it('reads daily active energy burned totals through the Nitro hybrid object', async () => {
-    const startDate = new Date('2026-01-01T00:00:00.000Z')
-    const endDate = new Date('2026-01-08T00:00:00.000Z')
-    const bucketEndDate = new Date('2026-01-02T00:00:00.000Z')
-    mockNitroHealth.readDailyActiveEnergyBurnedTotals.mockResolvedValue([
-      {
-        startTimeMs: startDate.getTime(),
-        endTimeMs: bucketEndDate.getTime(),
-        kilocalories: 456,
-      },
-    ])
-
-    await expect(
-      NitroHealth.readDailyActiveEnergyBurnedTotals({
-        startDate,
-        endDate,
-        limit: 7,
-        ascending: false,
-      })
-    ).resolves.toEqual([
-      {
-        startDate,
-        endDate: bucketEndDate,
-        kilocalories: 456,
-      },
-    ])
-
-    expect(mockNitroHealth.readDailyActiveEnergyBurnedTotals).toHaveBeenCalledWith({
-      startTimeMs: startDate.getTime(),
-      endTimeMs: endDate.getTime(),
-      limit: 7,
       ascending: false,
     })
   })
@@ -454,16 +359,10 @@ describe('NitroHealth permission contract', () => {
     await expect(NitroHealth.readDistance(invalidDateRange)).rejects.toThrow(
       'A valid startDate is required'
     )
-    await expect(NitroHealth.readDailyDistanceTotals(invalidDateRange)).rejects.toThrow(
-      'A valid startDate is required'
-    )
     await expect(NitroHealth.readActiveEnergyBurned(invalidDateRange)).rejects.toThrow(
       'A valid startDate is required'
     )
     await expect(NitroHealth.readBodyMass(invalidDateRange)).rejects.toThrow(
-      'A valid startDate is required'
-    )
-    await expect(NitroHealth.readDailyActiveEnergyBurnedTotals(invalidDateRange)).rejects.toThrow(
       'A valid startDate is required'
     )
     await expect(NitroHealth.readSleepSamples(invalidDateRange)).rejects.toThrow(
@@ -471,10 +370,8 @@ describe('NitroHealth permission contract', () => {
     )
 
     expect(mockNitroHealth.readDistance).not.toHaveBeenCalled()
-    expect(mockNitroHealth.readDailyDistanceTotals).not.toHaveBeenCalled()
     expect(mockNitroHealth.readActiveEnergyBurned).not.toHaveBeenCalled()
     expect(mockNitroHealth.readBodyMass).not.toHaveBeenCalled()
-    expect(mockNitroHealth.readDailyActiveEnergyBurnedTotals).not.toHaveBeenCalled()
     expect(mockNitroHealth.readSleepSamples).not.toHaveBeenCalled()
   })
 
@@ -487,16 +384,10 @@ describe('NitroHealth permission contract', () => {
     await expect(NitroHealth.readDistance(invalidRange)).rejects.toThrow(
       'startDate must be before endDate'
     )
-    await expect(NitroHealth.readDailyDistanceTotals(invalidRange)).rejects.toThrow(
-      'startDate must be before endDate'
-    )
     await expect(NitroHealth.readActiveEnergyBurned(invalidRange)).rejects.toThrow(
       'startDate must be before endDate'
     )
     await expect(NitroHealth.readBodyMass(invalidRange)).rejects.toThrow(
-      'startDate must be before endDate'
-    )
-    await expect(NitroHealth.readDailyActiveEnergyBurnedTotals(invalidRange)).rejects.toThrow(
       'startDate must be before endDate'
     )
     await expect(NitroHealth.readSleepSamples(invalidRange)).rejects.toThrow(
@@ -504,10 +395,8 @@ describe('NitroHealth permission contract', () => {
     )
 
     expect(mockNitroHealth.readDistance).not.toHaveBeenCalled()
-    expect(mockNitroHealth.readDailyDistanceTotals).not.toHaveBeenCalled()
     expect(mockNitroHealth.readActiveEnergyBurned).not.toHaveBeenCalled()
     expect(mockNitroHealth.readBodyMass).not.toHaveBeenCalled()
-    expect(mockNitroHealth.readDailyActiveEnergyBurnedTotals).not.toHaveBeenCalled()
     expect(mockNitroHealth.readSleepSamples).not.toHaveBeenCalled()
   })
 
@@ -522,28 +411,20 @@ describe('NitroHealth permission contract', () => {
       await expect(NitroHealth.readDistance(invalidLimitRange)).rejects.toThrow(
         'limit must be a positive integer'
       )
-      await expect(NitroHealth.readDailyDistanceTotals(invalidLimitRange)).rejects.toThrow(
-        'limit must be a positive integer'
-      )
       await expect(NitroHealth.readActiveEnergyBurned(invalidLimitRange)).rejects.toThrow(
         'limit must be a positive integer'
       )
       await expect(NitroHealth.readBodyMass(invalidLimitRange)).rejects.toThrow(
         'limit must be a positive integer'
       )
-      await expect(
-        NitroHealth.readDailyActiveEnergyBurnedTotals(invalidLimitRange)
-      ).rejects.toThrow('limit must be a positive integer')
       await expect(NitroHealth.readSleepSamples(invalidLimitRange)).rejects.toThrow(
         'limit must be a positive integer'
       )
     }
 
     expect(mockNitroHealth.readDistance).not.toHaveBeenCalled()
-    expect(mockNitroHealth.readDailyDistanceTotals).not.toHaveBeenCalled()
     expect(mockNitroHealth.readActiveEnergyBurned).not.toHaveBeenCalled()
     expect(mockNitroHealth.readBodyMass).not.toHaveBeenCalled()
-    expect(mockNitroHealth.readDailyActiveEnergyBurnedTotals).not.toHaveBeenCalled()
     expect(mockNitroHealth.readSleepSamples).not.toHaveBeenCalled()
   })
 })

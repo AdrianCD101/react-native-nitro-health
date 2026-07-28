@@ -2,9 +2,6 @@ import type { ActiveEnergyBurnedSample } from '../ActiveEnergyBurnedSample'
 import type { ActiveEnergyBurnedSampleInput } from '../ActiveEnergyBurnedSampleInput'
 import type { BodyMassSample } from '../BodyMassSample'
 import type { BodyMassSampleInput } from '../BodyMassSampleInput'
-import type { DailyActiveEnergyBurnedTotal } from '../DailyActiveEnergyBurnedTotal'
-import type { DailyDistanceTotal } from '../DailyDistanceTotal'
-import type { DailyStepTotal } from '../DailyStepTotal'
 import type { DistanceSample } from '../DistanceSample'
 import type { DistanceSampleInput } from '../DistanceSampleInput'
 import type { HealthSamplePage } from '../HealthSamplePage'
@@ -19,9 +16,6 @@ import type { NativeActiveEnergyBurnedSample } from '../NativeActiveEnergyBurned
 import type { NativeActiveEnergyBurnedSampleInput } from '../NativeActiveEnergyBurnedSampleInput'
 import type { NativeBodyMassSample } from '../NativeBodyMassSample'
 import type { NativeBodyMassSampleInput } from '../NativeBodyMassSampleInput'
-import type { NativeDailyActiveEnergyBurnedTotal } from '../NativeDailyActiveEnergyBurnedTotal'
-import type { NativeDailyDistanceTotal } from '../NativeDailyDistanceTotal'
-import type { NativeDailyStepTotal } from '../NativeDailyStepTotal'
 import type { NativeDistanceSample } from '../NativeDistanceSample'
 import type { NativeDistanceSampleInput } from '../NativeDistanceSampleInput'
 import type { NativeHealthStatistics } from '../NativeHealthStatistics'
@@ -223,28 +217,12 @@ export function makeStepSample(sample: NativeStepSample): StepSample {
   }
 }
 
-export function makeDailyStepTotal(total: NativeDailyStepTotal): DailyStepTotal {
-  return {
-    startDate: new Date(total.startTimeMs),
-    endDate: new Date(total.endTimeMs),
-    count: total.count,
-  }
-}
-
 export function makeDistanceSample(sample: NativeDistanceSample): DistanceSample {
   return {
     uuid: sample.uuid,
     startDate: new Date(sample.startTimeMs),
     endDate: new Date(sample.endTimeMs),
     distanceMeters: sample.distanceMeters,
-  }
-}
-
-export function makeDailyDistanceTotal(total: NativeDailyDistanceTotal): DailyDistanceTotal {
-  return {
-    startDate: new Date(total.startTimeMs),
-    endDate: new Date(total.endTimeMs),
-    distanceMeters: total.distanceMeters,
   }
 }
 
@@ -256,16 +234,6 @@ export function makeActiveEnergyBurnedSample(
     startDate: new Date(sample.startTimeMs),
     endDate: new Date(sample.endTimeMs),
     kilocalories: sample.kilocalories,
-  }
-}
-
-export function makeDailyActiveEnergyBurnedTotal(
-  total: NativeDailyActiveEnergyBurnedTotal
-): DailyActiveEnergyBurnedTotal {
-  return {
-    startDate: new Date(total.startTimeMs),
-    endDate: new Date(total.endTimeMs),
-    kilocalories: total.kilocalories,
   }
 }
 

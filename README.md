@@ -135,8 +135,6 @@ Cursors are opaque and platform-specific — never parse or construct one. A cur
 
 On Android, heart rate and sleep reads page by underlying Health Connect record, so a page may contain more samples than `limit` when a record holds multiple readings or stages; iOS honors `limit` exactly. Either way, nothing is silently truncated — whenever data remains, the page carries a `nextCursor`.
 
-The deprecated daily total methods (`readDaily*Totals`) still return plain arrays and do not accept a `cursor`.
-
 ## Read Activity Quantities
 
 ```ts
@@ -203,14 +201,6 @@ const hourlyHeartRate = await NitroHealth.readStatistics('heartRate', {
 Requesting a metric that is not supported for `dataType`, an empty `metrics` array, an unknown `bucket`, or the `sleep`, `heartRateVariability`, or `oxygenSaturation` data type all reject before crossing the native boundary.
 
 **Bucket behavior:** buckets anchor at `query.startDate` on both platforms — pass a local-midnight `startDate` when you need calendar-day buckets. `'week'` buckets are a rolling 7 days from the anchor, not calendar weeks. The final bucket is clamped to `endDate`, empty buckets are omitted, and results are always ascending. `'hour'` buckets are a fixed 3600 seconds; `'day'`, `'week'`, and `'month'` buckets are calendar-aware in the device's local timezone, so a bucket can span 23 or 25 hours across a daylight-saving transition. On Android, heart-rate and resting-heart-rate `avg` are integer-valued (Health Connect's `BPM_AVG` is a `Long`); on iOS they are fractional. As with other reads, HealthKit cannot distinguish a denied read from no data (see the permission caveat in the Permissions section above) — a denied read resolves with empty buckets rather than rejecting.
-
-Daily total methods return one bucket per day and predate `readStatistics()`. They are **deprecated** in favor of it and will be removed before 1.0, but keep their existing behavior in the meantime: on iOS, buckets align to local calendar days, so the first and last buckets may be partial when the query starts or ends mid-day — this differs from `readStatistics()`, which always anchors buckets at `query.startDate` rather than local midnight. On Android, Health Connect anchors buckets to the query's start time, so a query starting at 15:30 returns 15:30-to-15:30 windows — pass a local-midnight `startDate` when you need calendar-day buckets on both platforms. Empty days are omitted, so apps that need a continuous chart should zero-fill missing days. `ascending` orders the buckets and `limit` caps the returned bucket count. Unlike the raw sample reads, daily total methods return plain arrays — they do not paginate, do not accept a `cursor`, and their aggregated buckets carry no `uuid`.
-
-`readDailyStepTotals()` returns buckets with `startDate`, `endDate`, and `count`. Use `readStatistics('steps', { ...query, bucket: 'day', metrics: ['sum'] })` instead.
-
-`readDailyDistanceTotals()` returns buckets with `startDate`, `endDate`, and `distanceMeters`. Use `readStatistics('distance', { ...query, bucket: 'day', metrics: ['sum'] })` instead.
-
-`readDailyActiveEnergyBurnedTotals()` returns buckets with `startDate`, `endDate`, and `kilocalories`. Use `readStatistics('activeEnergyBurned', { ...query, bucket: 'day', metrics: ['sum'] })` instead.
 
 `readHeartRateStatistics()` returns `{ average, min, max }` in beats per minute for the whole query range in a single result. Each field is `undefined` when no matching heart-rate data exists. It is not deprecated — it remains the way to get a single whole-range aggregate, which `readStatistics()` cannot express since it always returns one or more buckets.
 
@@ -417,7 +407,7 @@ The no-match behavior of `deleteSamplesByUuids` also differs by platform. On iOS
 
 ## Jest
 
-The package ships a Jest mock so app tests do not need to mock Nitro internals. By default, mocked raw sample reads resolve with an empty page (`{ samples: [] }`) and the deprecated daily total methods resolve with `[]`.
+The package ships a Jest mock so app tests do not need to mock Nitro internals. By default, mocked raw sample reads resolve with an empty page (`{ samples: [] }`) and `readStatistics` resolves with `[]`.
 
 Add it to your Jest setup file:
 

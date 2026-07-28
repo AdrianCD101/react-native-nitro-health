@@ -63,44 +63,6 @@ describe('NitroHealth reads (native)', () => {
     await expect(NitroHealth.readSteps(emptyRange)).rejects.toThrow(/not determined/i)
   })
 
-  it('reads daily step totals from native code without crashing', async () => {
-    try {
-      const totals = await NitroHealth.readDailyStepTotals(emptyRange)
-
-      expect(Array.isArray(totals)).toBe(true)
-    } catch (error) {
-      expect(error).toBeInstanceOf(Error)
-    }
-  })
-
-  it('rejects reading daily step totals on Android when permission is not granted', async () => {
-    if (Platform.OS !== 'android') {
-      return
-    }
-
-    const status = await NitroHealth.getRequestStatusForAuthorization(stepsReadPermission)
-
-    if (status === 'unnecessary') {
-      return
-    }
-
-    await expect(NitroHealth.readDailyStepTotals(emptyRange)).rejects.toThrow(/permission/i)
-  })
-
-  it('rejects reading daily step totals on iOS before authorization is requested (HealthKit notDetermined)', async () => {
-    if (Platform.OS !== 'ios') {
-      return
-    }
-
-    const status = await NitroHealth.getRequestStatusForAuthorization(stepsReadPermission)
-
-    if (status === 'unnecessary') {
-      return
-    }
-
-    await expect(NitroHealth.readDailyStepTotals(emptyRange)).rejects.toThrow(/not determined/i)
-  })
-
   it('reads distance from native code without crashing', async () => {
     try {
       const page = await NitroHealth.readDistance(emptyRange)
@@ -143,16 +105,6 @@ describe('NitroHealth reads (native)', () => {
     await expect(NitroHealth.readDistance(emptyRange)).rejects.toThrow(/not determined/i)
   })
 
-  it('reads daily distance totals from native code without crashing', async () => {
-    try {
-      const totals = await NitroHealth.readDailyDistanceTotals(emptyRange)
-
-      expect(Array.isArray(totals)).toBe(true)
-    } catch (error) {
-      expect(error).toBeInstanceOf(Error)
-    }
-  })
-
   it('rejects invalid activity quantity ranges before crossing the native boundary', async () => {
     const invalidRange = {
       startDate: new Date('2026-01-02T00:00:00.000Z'),
@@ -162,29 +114,9 @@ describe('NitroHealth reads (native)', () => {
     await expect(NitroHealth.readDistance(invalidRange)).rejects.toThrow(
       'startDate must be before endDate'
     )
-    await expect(NitroHealth.readDailyDistanceTotals(invalidRange)).rejects.toThrow(
-      'startDate must be before endDate'
-    )
     await expect(NitroHealth.readActiveEnergyBurned(invalidRange)).rejects.toThrow(
       'startDate must be before endDate'
     )
-    await expect(NitroHealth.readDailyActiveEnergyBurnedTotals(invalidRange)).rejects.toThrow(
-      'startDate must be before endDate'
-    )
-  })
-
-  it('rejects reading daily distance totals on Android when permission is not granted', async () => {
-    if (Platform.OS !== 'android') {
-      return
-    }
-
-    const status = await NitroHealth.getRequestStatusForAuthorization(distanceReadPermission)
-
-    if (status === 'unnecessary') {
-      return
-    }
-
-    await expect(NitroHealth.readDailyDistanceTotals(emptyRange)).rejects.toThrow(/permission/i)
   })
 
   it('reads active energy burned from native code without crashing', async () => {
@@ -226,32 +158,6 @@ describe('NitroHealth reads (native)', () => {
     }
 
     await expect(NitroHealth.readActiveEnergyBurned(emptyRange)).rejects.toThrow(/not determined/i)
-  })
-
-  it('reads daily active energy burned totals from native code without crashing', async () => {
-    try {
-      const totals = await NitroHealth.readDailyActiveEnergyBurnedTotals(emptyRange)
-
-      expect(Array.isArray(totals)).toBe(true)
-    } catch (error) {
-      expect(error).toBeInstanceOf(Error)
-    }
-  })
-
-  it('rejects reading daily active energy burned totals on Android when permission is not granted', async () => {
-    if (Platform.OS !== 'android') {
-      return
-    }
-
-    const status = await NitroHealth.getRequestStatusForAuthorization(activeEnergyReadPermission)
-
-    if (status === 'unnecessary') {
-      return
-    }
-
-    await expect(NitroHealth.readDailyActiveEnergyBurnedTotals(emptyRange)).rejects.toThrow(
-      /permission/i
-    )
   })
 
   it('reads heart rate from native code without crashing', async () => {

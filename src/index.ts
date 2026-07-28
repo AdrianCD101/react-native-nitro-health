@@ -4,9 +4,6 @@ import type { ActiveEnergyBurnedSample } from './ActiveEnergyBurnedSample'
 import type { ActiveEnergyBurnedSampleInput } from './ActiveEnergyBurnedSampleInput'
 import type { BodyMassSample } from './BodyMassSample'
 import type { BodyMassSampleInput } from './BodyMassSampleInput'
-import type { DailyActiveEnergyBurnedTotal } from './DailyActiveEnergyBurnedTotal'
-import type { DailyDistanceTotal } from './DailyDistanceTotal'
-import type { DailyStepTotal } from './DailyStepTotal'
 import type { DistanceSample } from './DistanceSample'
 import type { DistanceSampleInput } from './DistanceSampleInput'
 import type { HealthAuthorizationResult } from './HealthAuthorizationResult'
@@ -32,7 +29,6 @@ import type { StepSample } from './StepSample'
 import type { StepSampleInput } from './StepSampleInput'
 import type { WorkoutSample } from './WorkoutSample'
 import {
-  makeNativeDailyTotalsQuery,
   makeNativeSampleQuery,
   makeNativeStatisticsQuery,
   makeNativeTimeRangeQuery,
@@ -40,9 +36,6 @@ import {
 import {
   makeActiveEnergyBurnedSample,
   makeBodyMassSample,
-  makeDailyActiveEnergyBurnedTotal,
-  makeDailyDistanceTotal,
-  makeDailyStepTotal,
   makeDistanceSample,
   makeHealthStatistics,
   makeHeartRateSample,
@@ -75,9 +68,6 @@ export type { ActiveEnergyBurnedSampleInput } from './ActiveEnergyBurnedSampleIn
 export type { AuthorizationRequestStatus } from './AuthorizationRequestStatus'
 export type { BodyMassSample } from './BodyMassSample'
 export type { BodyMassSampleInput } from './BodyMassSampleInput'
-export type { DailyActiveEnergyBurnedTotal } from './DailyActiveEnergyBurnedTotal'
-export type { DailyDistanceTotal } from './DailyDistanceTotal'
-export type { DailyStepTotal } from './DailyStepTotal'
 export type { DistanceSample } from './DistanceSample'
 export type { DistanceSampleInput } from './DistanceSampleInput'
 export type { HealthAuthorizationResult } from './HealthAuthorizationResult'
@@ -104,9 +94,6 @@ export type { NativeActiveEnergyBurnedSamplePage } from './NativeActiveEnergyBur
 export type { NativeBodyMassSample } from './NativeBodyMassSample'
 export type { NativeBodyMassSampleInput } from './NativeBodyMassSampleInput'
 export type { NativeBodyMassSamplePage } from './NativeBodyMassSamplePage'
-export type { NativeDailyActiveEnergyBurnedTotal } from './NativeDailyActiveEnergyBurnedTotal'
-export type { NativeDailyDistanceTotal } from './NativeDailyDistanceTotal'
-export type { NativeDailyStepTotal } from './NativeDailyStepTotal'
 export type { NativeDistanceSample } from './NativeDistanceSample'
 export type { NativeDistanceSampleInput } from './NativeDistanceSampleInput'
 export type { NativeDistanceSamplePage } from './NativeDistanceSamplePage'
@@ -158,11 +145,8 @@ export type NitroHealth = Omit<
   NitroHealthSpec,
   | 'getRequestStatusForAuthorization'
   | 'readSteps'
-  | 'readDailyStepTotals'
   | 'readDistance'
-  | 'readDailyDistanceTotals'
   | 'readActiveEnergyBurned'
-  | 'readDailyActiveEnergyBurnedTotals'
   | 'readBodyMass'
   | 'readHeartRate'
   | 'readHeartRateStatistics'
@@ -189,26 +173,10 @@ export type NitroHealth = Omit<
     permissions: HealthPermission[]
   ): ReturnType<NitroHealthSpec['getRequestStatusForAuthorization']>
   readSteps(query: HealthDateRangeQuery): Promise<HealthSamplePage<StepSample>>
-  /**
-   * @deprecated Use readStatistics('steps', { ..., bucket: 'day', metrics: ['sum'] }) instead. Will be removed before 1.0.
-   */
-  readDailyStepTotals(query: Omit<HealthDateRangeQuery, 'cursor'>): Promise<DailyStepTotal[]>
   readDistance(query: HealthDateRangeQuery): Promise<HealthSamplePage<DistanceSample>>
-  /**
-   * @deprecated Use readStatistics('distance', { ..., bucket: 'day', metrics: ['sum'] }) instead. Will be removed before 1.0.
-   */
-  readDailyDistanceTotals(
-    query: Omit<HealthDateRangeQuery, 'cursor'>
-  ): Promise<DailyDistanceTotal[]>
   readActiveEnergyBurned(
     query: HealthDateRangeQuery
   ): Promise<HealthSamplePage<ActiveEnergyBurnedSample>>
-  /**
-   * @deprecated Use readStatistics('activeEnergyBurned', { ..., bucket: 'day', metrics: ['sum'] }) instead. Will be removed before 1.0.
-   */
-  readDailyActiveEnergyBurnedTotals(
-    query: Omit<HealthDateRangeQuery, 'cursor'>
-  ): Promise<DailyActiveEnergyBurnedTotal[]>
   readBodyMass(query: HealthDateRangeQuery): Promise<HealthSamplePage<BodyMassSample>>
   readHeartRate(query: HealthDateRangeQuery): Promise<HealthSamplePage<HeartRateSample>>
   readHeartRateStatistics(query: HealthTimeRangeQuery): Promise<HeartRateStatistics>
@@ -271,34 +239,15 @@ export const NitroHealth: NitroHealth = {
 
     return makeSamplePage(page, makeStepSample)
   },
-  async readDailyStepTotals(query) {
-    const totals = await NitroHealthNative.readDailyStepTotals(makeNativeDailyTotalsQuery(query))
-
-    return totals.map(makeDailyStepTotal)
-  },
   async readDistance(query) {
     const page = await NitroHealthNative.readDistance(makeNativeSampleQuery(query))
 
     return makeSamplePage(page, makeDistanceSample)
   },
-  async readDailyDistanceTotals(query) {
-    const totals = await NitroHealthNative.readDailyDistanceTotals(
-      makeNativeDailyTotalsQuery(query)
-    )
-
-    return totals.map(makeDailyDistanceTotal)
-  },
   async readActiveEnergyBurned(query) {
     const page = await NitroHealthNative.readActiveEnergyBurned(makeNativeSampleQuery(query))
 
     return makeSamplePage(page, makeActiveEnergyBurnedSample)
-  },
-  async readDailyActiveEnergyBurnedTotals(query) {
-    const totals = await NitroHealthNative.readDailyActiveEnergyBurnedTotals(
-      makeNativeDailyTotalsQuery(query)
-    )
-
-    return totals.map(makeDailyActiveEnergyBurnedTotal)
   },
   async readBodyMass(query) {
     const page = await NitroHealthNative.readBodyMass(makeNativeSampleQuery(query))

@@ -19,16 +19,10 @@ namespace margelo::nitro::nitrohealth { enum class HealthAvailabilityStatus; }
 namespace margelo::nitro::nitrohealth { struct NativeStepSamplePage; }
 // Forward declaration of `NativeHealthDateRangeQuery` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthDateRangeQuery; }
-// Forward declaration of `NativeDailyStepTotal` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeDailyStepTotal; }
 // Forward declaration of `NativeDistanceSamplePage` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeDistanceSamplePage; }
-// Forward declaration of `NativeDailyDistanceTotal` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeDailyDistanceTotal; }
 // Forward declaration of `NativeActiveEnergyBurnedSamplePage` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeActiveEnergyBurnedSamplePage; }
-// Forward declaration of `NativeDailyActiveEnergyBurnedTotal` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeDailyActiveEnergyBurnedTotal; }
 // Forward declaration of `NativeBodyMassSamplePage` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBodyMassSamplePage; }
 // Forward declaration of `NativeHeartRateSamplePage` to properly resolve imports.
@@ -80,12 +74,8 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthAuthorizationResult; 
 #include <NitroModules/Promise.hpp>
 #include "NativeStepSamplePage.hpp"
 #include "NativeHealthDateRangeQuery.hpp"
-#include "NativeDailyStepTotal.hpp"
-#include <vector>
 #include "NativeDistanceSamplePage.hpp"
-#include "NativeDailyDistanceTotal.hpp"
 #include "NativeActiveEnergyBurnedSamplePage.hpp"
-#include "NativeDailyActiveEnergyBurnedTotal.hpp"
 #include "NativeBodyMassSamplePage.hpp"
 #include "NativeHeartRateSamplePage.hpp"
 #include "NativeHeartRateStatistics.hpp"
@@ -95,6 +85,7 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthAuthorizationResult; 
 #include "NativeOxygenSaturationSamplePage.hpp"
 #include "NativeHeightSamplePage.hpp"
 #include "NativeHealthStatistics.hpp"
+#include <vector>
 #include <string>
 #include "NativeHealthStatisticsQuery.hpp"
 #include "NativeSleepSamplePage.hpp"
@@ -147,11 +138,8 @@ namespace margelo::nitro::nitrohealth {
       virtual bool openHealthConnectInstall() = 0;
       virtual std::shared_ptr<Promise<bool>> openHealthSettings() = 0;
       virtual std::shared_ptr<Promise<NativeStepSamplePage>> readSteps(const NativeHealthDateRangeQuery& query) = 0;
-      virtual std::shared_ptr<Promise<std::vector<NativeDailyStepTotal>>> readDailyStepTotals(const NativeHealthDateRangeQuery& query) = 0;
       virtual std::shared_ptr<Promise<NativeDistanceSamplePage>> readDistance(const NativeHealthDateRangeQuery& query) = 0;
-      virtual std::shared_ptr<Promise<std::vector<NativeDailyDistanceTotal>>> readDailyDistanceTotals(const NativeHealthDateRangeQuery& query) = 0;
       virtual std::shared_ptr<Promise<NativeActiveEnergyBurnedSamplePage>> readActiveEnergyBurned(const NativeHealthDateRangeQuery& query) = 0;
-      virtual std::shared_ptr<Promise<std::vector<NativeDailyActiveEnergyBurnedTotal>>> readDailyActiveEnergyBurnedTotals(const NativeHealthDateRangeQuery& query) = 0;
       virtual std::shared_ptr<Promise<NativeBodyMassSamplePage>> readBodyMass(const NativeHealthDateRangeQuery& query) = 0;
       virtual std::shared_ptr<Promise<NativeHeartRateSamplePage>> readHeartRate(const NativeHealthDateRangeQuery& query) = 0;
       virtual std::shared_ptr<Promise<NativeHeartRateStatistics>> readHeartRateStatistics(const NativeHealthTimeRangeQuery& query) = 0;

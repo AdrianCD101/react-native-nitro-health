@@ -18,10 +18,7 @@ export type NitroHealthMock = Omit<
   | 'openHealthConnectInstall'
   | 'openHealthSettings'
   | 'readActiveEnergyBurned'
-  | 'readDailyActiveEnergyBurnedTotals'
-  | 'readDailyDistanceTotals'
   | 'readSteps'
-  | 'readDailyStepTotals'
   | 'readDistance'
   | 'readBodyMass'
   | 'readHeartRate'
@@ -54,10 +51,7 @@ export type NitroHealthMock = Omit<
   openHealthConnectInstall: MockFunction<NitroHealth['openHealthConnectInstall']>
   openHealthSettings: MockFunction<NitroHealth['openHealthSettings']>
   readActiveEnergyBurned: MockFunction<NitroHealth['readActiveEnergyBurned']>
-  readDailyActiveEnergyBurnedTotals: MockFunction<NitroHealth['readDailyActiveEnergyBurnedTotals']>
-  readDailyDistanceTotals: MockFunction<NitroHealth['readDailyDistanceTotals']>
   readSteps: MockFunction<NitroHealth['readSteps']>
-  readDailyStepTotals: MockFunction<NitroHealth['readDailyStepTotals']>
   readDistance: MockFunction<NitroHealth['readDistance']>
   readBodyMass: MockFunction<NitroHealth['readBodyMass']>
   readHeartRate: MockFunction<NitroHealth['readHeartRate']>

@@ -199,31 +199,6 @@ open class HybridNitroHealthSpec_cxx {
   }
   
   @inline(__always)
-  public final func readDailyStepTotals(query: NativeHealthDateRangeQuery) -> bridge.Result_std__shared_ptr_Promise_std__vector_NativeDailyStepTotal____ {
-    do {
-      let __result = try self.__implementation.readDailyStepTotals(query: query)
-      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_std__vector_NativeDailyStepTotal___ in
-        let __promise = bridge.create_std__shared_ptr_Promise_std__vector_NativeDailyStepTotal___()
-        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_std__vector_NativeDailyStepTotal___(__promise)
-        __result
-          .then({ __result in __promiseHolder.resolve({ () -> bridge.std__vector_NativeDailyStepTotal_ in
-              var __vector = bridge.create_std__vector_NativeDailyStepTotal_(__result.count)
-              for __item in __result {
-                __vector.push_back(__item)
-              }
-              return __vector
-            }()) })
-          .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
-        return __promise
-      }()
-      return bridge.create_Result_std__shared_ptr_Promise_std__vector_NativeDailyStepTotal____(__resultCpp)
-    } catch (let __error) {
-      let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_std__shared_ptr_Promise_std__vector_NativeDailyStepTotal____(__exceptionPtr)
-    }
-  }
-  
-  @inline(__always)
   public final func readDistance(query: NativeHealthDateRangeQuery) -> bridge.Result_std__shared_ptr_Promise_NativeDistanceSamplePage___ {
     do {
       let __result = try self.__implementation.readDistance(query: query)
@@ -243,31 +218,6 @@ open class HybridNitroHealthSpec_cxx {
   }
   
   @inline(__always)
-  public final func readDailyDistanceTotals(query: NativeHealthDateRangeQuery) -> bridge.Result_std__shared_ptr_Promise_std__vector_NativeDailyDistanceTotal____ {
-    do {
-      let __result = try self.__implementation.readDailyDistanceTotals(query: query)
-      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_std__vector_NativeDailyDistanceTotal___ in
-        let __promise = bridge.create_std__shared_ptr_Promise_std__vector_NativeDailyDistanceTotal___()
-        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_std__vector_NativeDailyDistanceTotal___(__promise)
-        __result
-          .then({ __result in __promiseHolder.resolve({ () -> bridge.std__vector_NativeDailyDistanceTotal_ in
-              var __vector = bridge.create_std__vector_NativeDailyDistanceTotal_(__result.count)
-              for __item in __result {
-                __vector.push_back(__item)
-              }
-              return __vector
-            }()) })
-          .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
-        return __promise
-      }()
-      return bridge.create_Result_std__shared_ptr_Promise_std__vector_NativeDailyDistanceTotal____(__resultCpp)
-    } catch (let __error) {
-      let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_std__shared_ptr_Promise_std__vector_NativeDailyDistanceTotal____(__exceptionPtr)
-    }
-  }
-  
-  @inline(__always)
   public final func readActiveEnergyBurned(query: NativeHealthDateRangeQuery) -> bridge.Result_std__shared_ptr_Promise_NativeActiveEnergyBurnedSamplePage___ {
     do {
       let __result = try self.__implementation.readActiveEnergyBurned(query: query)
@@ -283,31 +233,6 @@ open class HybridNitroHealthSpec_cxx {
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()
       return bridge.create_Result_std__shared_ptr_Promise_NativeActiveEnergyBurnedSamplePage___(__exceptionPtr)
-    }
-  }
-  
-  @inline(__always)
-  public final func readDailyActiveEnergyBurnedTotals(query: NativeHealthDateRangeQuery) -> bridge.Result_std__shared_ptr_Promise_std__vector_NativeDailyActiveEnergyBurnedTotal____ {
-    do {
-      let __result = try self.__implementation.readDailyActiveEnergyBurnedTotals(query: query)
-      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_std__vector_NativeDailyActiveEnergyBurnedTotal___ in
-        let __promise = bridge.create_std__shared_ptr_Promise_std__vector_NativeDailyActiveEnergyBurnedTotal___()
-        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_std__vector_NativeDailyActiveEnergyBurnedTotal___(__promise)
-        __result
-          .then({ __result in __promiseHolder.resolve({ () -> bridge.std__vector_NativeDailyActiveEnergyBurnedTotal_ in
-              var __vector = bridge.create_std__vector_NativeDailyActiveEnergyBurnedTotal_(__result.count)
-              for __item in __result {
-                __vector.push_back(__item)
-              }
-              return __vector
-            }()) })
-          .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
-        return __promise
-      }()
-      return bridge.create_Result_std__shared_ptr_Promise_std__vector_NativeDailyActiveEnergyBurnedTotal____(__resultCpp)
-    } catch (let __error) {
-      let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_std__shared_ptr_Promise_std__vector_NativeDailyActiveEnergyBurnedTotal____(__exceptionPtr)
     }
   }
   
