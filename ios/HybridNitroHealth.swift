@@ -80,57 +80,6 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         }
     }
 
-    // Daily totals use HealthKit statistics so overlapping sources are aggregated by the OS.
-    func readDailyStepTotals(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeDailyStepTotal]> {
-        if !HKHealthStore.isHealthDataAvailable() {
-            throw permissionError("Health data is not available")
-        }
-
-        let quantityType = try makeHealthKitQuantityType(dataType: "steps")
-        let startDate = Date(timeIntervalSince1970: query.startTimeMs / 1000)
-        let endDate = Date(timeIntervalSince1970: query.endTimeMs / 1000)
-        let predicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate, options: [])
-        let anchorDate = Calendar.current.startOfDay(for: startDate)
-        var intervalComponents = DateComponents()
-        intervalComponents.day = 1
-
-        return Promise<[NativeDailyStepTotal]>.async {
-            try await self.requireDeterminedReadAuthorization(for: quantityType, label: "steps")
-            let statistics = try await self.queryHealthKitStatisticsCollection(
-                quantityType: quantityType,
-                predicate: predicate,
-                options: .cumulativeSum,
-                anchorDate: anchorDate,
-                intervalComponents: intervalComponents,
-                startDate: startDate,
-                endDate: endDate
-            )
-            let samples = statistics.compactMap { statistic -> NativeDailyStepTotal? in
-                guard let sum = statistic.sumQuantity() else {
-                    return nil
-                }
-                let range = clampDailyBucketRange(
-                    bucketStartTimeMs: statistic.startDate.timeIntervalSince1970 * 1000,
-                    bucketEndTimeMs: statistic.endDate.timeIntervalSince1970 * 1000,
-                    queryStartTimeMs: query.startTimeMs,
-                    queryEndTimeMs: query.endTimeMs
-                )
-
-                return NativeDailyStepTotal(
-                    startTimeMs: range.startTimeMs,
-                    endTimeMs: range.endTimeMs,
-                    count: sum.doubleValue(for: HKUnit.count())
-                )
-            }
-
-            return orderAndLimitDailySamples(
-                samples,
-                ascending: query.ascending,
-                limit: Int(query.limit)
-            ) { $0.startTimeMs }
-        }
-    }
-
     // Note: like readSteps, HealthKit resolves with an empty array when read access is denied.
     func readDistance(query: NativeHealthDateRangeQuery) throws -> Promise<NativeDistanceSamplePage> {
         if !HKHealthStore.isHealthDataAvailable() {
@@ -162,57 +111,6 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         }
     }
 
-    // Daily totals use HealthKit statistics so overlapping sources are aggregated by the OS.
-    func readDailyDistanceTotals(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeDailyDistanceTotal]> {
-        if !HKHealthStore.isHealthDataAvailable() {
-            throw permissionError("Health data is not available")
-        }
-
-        let quantityType = try makeHealthKitQuantityType(dataType: "distance")
-        let startDate = Date(timeIntervalSince1970: query.startTimeMs / 1000)
-        let endDate = Date(timeIntervalSince1970: query.endTimeMs / 1000)
-        let predicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate, options: [])
-        let anchorDate = Calendar.current.startOfDay(for: startDate)
-        var intervalComponents = DateComponents()
-        intervalComponents.day = 1
-
-        return Promise<[NativeDailyDistanceTotal]>.async {
-            try await self.requireDeterminedReadAuthorization(for: quantityType, label: "distance")
-            let statistics = try await self.queryHealthKitStatisticsCollection(
-                quantityType: quantityType,
-                predicate: predicate,
-                options: .cumulativeSum,
-                anchorDate: anchorDate,
-                intervalComponents: intervalComponents,
-                startDate: startDate,
-                endDate: endDate
-            )
-            let samples = statistics.compactMap { statistic -> NativeDailyDistanceTotal? in
-                guard let sum = statistic.sumQuantity() else {
-                    return nil
-                }
-                let range = clampDailyBucketRange(
-                    bucketStartTimeMs: statistic.startDate.timeIntervalSince1970 * 1000,
-                    bucketEndTimeMs: statistic.endDate.timeIntervalSince1970 * 1000,
-                    queryStartTimeMs: query.startTimeMs,
-                    queryEndTimeMs: query.endTimeMs
-                )
-
-                return NativeDailyDistanceTotal(
-                    startTimeMs: range.startTimeMs,
-                    endTimeMs: range.endTimeMs,
-                    distanceMeters: sum.doubleValue(for: HKUnit.meter())
-                )
-            }
-
-            return orderAndLimitDailySamples(
-                samples,
-                ascending: query.ascending,
-                limit: Int(query.limit)
-            ) { $0.startTimeMs }
-        }
-    }
-
     // Note: like readSteps, HealthKit resolves with an empty array when read access is denied.
     func readActiveEnergyBurned(query: NativeHealthDateRangeQuery) throws -> Promise<NativeActiveEnergyBurnedSamplePage> {
         if !HKHealthStore.isHealthDataAvailable() {
@@ -241,57 +139,6 @@ class HybridNitroHealth: HybridNitroHealthSpec {
             }
 
             return NativeActiveEnergyBurnedSamplePage(samples: page.samples, nextCursor: page.nextCursor)
-        }
-    }
-
-    // Daily totals use HealthKit statistics so overlapping sources are aggregated by the OS.
-    func readDailyActiveEnergyBurnedTotals(query: NativeHealthDateRangeQuery) throws -> Promise<[NativeDailyActiveEnergyBurnedTotal]> {
-        if !HKHealthStore.isHealthDataAvailable() {
-            throw permissionError("Health data is not available")
-        }
-
-        let quantityType = try makeHealthKitQuantityType(dataType: "activeEnergyBurned")
-        let startDate = Date(timeIntervalSince1970: query.startTimeMs / 1000)
-        let endDate = Date(timeIntervalSince1970: query.endTimeMs / 1000)
-        let predicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate, options: [])
-        let anchorDate = Calendar.current.startOfDay(for: startDate)
-        var intervalComponents = DateComponents()
-        intervalComponents.day = 1
-
-        return Promise<[NativeDailyActiveEnergyBurnedTotal]>.async {
-            try await self.requireDeterminedReadAuthorization(for: quantityType, label: "active energy burned")
-            let statistics = try await self.queryHealthKitStatisticsCollection(
-                quantityType: quantityType,
-                predicate: predicate,
-                options: .cumulativeSum,
-                anchorDate: anchorDate,
-                intervalComponents: intervalComponents,
-                startDate: startDate,
-                endDate: endDate
-            )
-            let samples = statistics.compactMap { statistic -> NativeDailyActiveEnergyBurnedTotal? in
-                guard let sum = statistic.sumQuantity() else {
-                    return nil
-                }
-                let range = clampDailyBucketRange(
-                    bucketStartTimeMs: statistic.startDate.timeIntervalSince1970 * 1000,
-                    bucketEndTimeMs: statistic.endDate.timeIntervalSince1970 * 1000,
-                    queryStartTimeMs: query.startTimeMs,
-                    queryEndTimeMs: query.endTimeMs
-                )
-
-                return NativeDailyActiveEnergyBurnedTotal(
-                    startTimeMs: range.startTimeMs,
-                    endTimeMs: range.endTimeMs,
-                    kilocalories: sum.doubleValue(for: HKUnit.kilocalorie())
-                )
-            }
-
-            return orderAndLimitDailySamples(
-                samples,
-                ascending: query.ascending,
-                limit: Int(query.limit)
-            ) { $0.startTimeMs }
         }
     }
 

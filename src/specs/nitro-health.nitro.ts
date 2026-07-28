@@ -5,9 +5,6 @@ import type { NativeActiveEnergyBurnedSampleInput } from '../NativeActiveEnergyB
 import type { NativeActiveEnergyBurnedSamplePage } from '../NativeActiveEnergyBurnedSamplePage'
 import type { NativeBodyMassSampleInput } from '../NativeBodyMassSampleInput'
 import type { NativeBodyMassSamplePage } from '../NativeBodyMassSamplePage'
-import type { NativeDailyActiveEnergyBurnedTotal } from '../NativeDailyActiveEnergyBurnedTotal'
-import type { NativeDailyDistanceTotal } from '../NativeDailyDistanceTotal'
-import type { NativeDailyStepTotal } from '../NativeDailyStepTotal'
 import type { NativeDistanceSampleInput } from '../NativeDistanceSampleInput'
 import type { NativeDistanceSamplePage } from '../NativeDistanceSamplePage'
 import type { NativeHealthAuthorizationResult } from '../NativeHealthAuthorizationResult'
@@ -37,15 +34,10 @@ export interface NitroHealth extends HybridObject<{ ios: 'swift'; android: 'kotl
   openHealthConnectInstall(): boolean
   openHealthSettings(): Promise<boolean>
   readSteps(query: NativeHealthDateRangeQuery): Promise<NativeStepSamplePage>
-  readDailyStepTotals(query: NativeHealthDateRangeQuery): Promise<NativeDailyStepTotal[]>
   readDistance(query: NativeHealthDateRangeQuery): Promise<NativeDistanceSamplePage>
-  readDailyDistanceTotals(query: NativeHealthDateRangeQuery): Promise<NativeDailyDistanceTotal[]>
   readActiveEnergyBurned(
     query: NativeHealthDateRangeQuery
   ): Promise<NativeActiveEnergyBurnedSamplePage>
-  readDailyActiveEnergyBurnedTotals(
-    query: NativeHealthDateRangeQuery
-  ): Promise<NativeDailyActiveEnergyBurnedTotal[]>
   readBodyMass(query: NativeHealthDateRangeQuery): Promise<NativeBodyMassSamplePage>
   readHeartRate(query: NativeHealthDateRangeQuery): Promise<NativeHeartRateSamplePage>
   readHeartRateStatistics(query: NativeHealthTimeRangeQuery): Promise<NativeHeartRateStatistics>

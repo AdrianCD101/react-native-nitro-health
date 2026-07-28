@@ -122,16 +122,4 @@ describe('NitroHealth pagination contract', () => {
       expect(mockNitroHealth.readSteps).not.toHaveBeenCalled()
     })
   })
-
-  describe('daily total reads', () => {
-    it('rejects a cursor without crossing the bridge', async () => {
-      const startDate = new Date('2026-01-01T00:00:00.000Z')
-      const endDate = new Date('2026-01-08T00:00:00.000Z')
-
-      await expect(
-        NitroHealth.readDailyStepTotals({ startDate, endDate, cursor: 'opaque-cursor-1' } as any)
-      ).rejects.toThrow('cursor is not supported for daily total reads')
-      expect(mockNitroHealth.readDailyStepTotals).not.toHaveBeenCalled()
-    })
-  })
 })

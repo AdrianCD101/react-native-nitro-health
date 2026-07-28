@@ -27,23 +27,24 @@ function lastDays(days: number): { startDate: Date; endDate: Date } {
 }
 
 // Each read card normalizes its result to display lines so differently-shaped reads
-// (daily buckets, a single statistics object, sleep stages, workouts) share one renderer.
+// (statistics buckets, a single statistics object, sleep stages, workouts) share one renderer.
 const readCards: Partial<
   Record<HealthDataType, { buttonLabel: string; execute: () => Promise<string[]> }>
 > = {
   steps: {
     buttonLabel: 'Read daily step totals',
     execute: async () => {
-      const buckets = await NitroHealth.readDailyStepTotals({
+      const buckets = await NitroHealth.readStatistics('steps', {
         ...lastDays(7),
-        limit: 7,
-        ascending: false,
+        bucket: 'day',
+        metrics: ['sum'],
       })
+      const latestBuckets = buckets.slice(-7).reverse()
 
       return [
-        `Daily step buckets: ${buckets.length}`,
-        ...buckets.map(
-          (bucket) => `${bucket.startDate.toLocaleDateString()}: ${bucket.count} steps`
+        `Daily step buckets: ${latestBuckets.length}`,
+        ...latestBuckets.map(
+          (bucket) => `${bucket.startDate.toLocaleDateString()}: ${bucket.sum ?? 0} steps`
         ),
       ]
     },
@@ -51,17 +52,17 @@ const readCards: Partial<
   distance: {
     buttonLabel: 'Read daily distance totals',
     execute: async () => {
-      const buckets = await NitroHealth.readDailyDistanceTotals({
+      const buckets = await NitroHealth.readStatistics('distance', {
         ...lastDays(7),
-        limit: 7,
-        ascending: false,
+        bucket: 'day',
+        metrics: ['sum'],
       })
+      const latestBuckets = buckets.slice(-7).reverse()
 
       return [
-        `Daily distance buckets: ${buckets.length}`,
-        ...buckets.map(
-          (bucket) =>
-            `${bucket.startDate.toLocaleDateString()}: ${Math.round(bucket.distanceMeters)} m`
+        `Daily distance buckets: ${latestBuckets.length}`,
+        ...latestBuckets.map(
+          (bucket) => `${bucket.startDate.toLocaleDateString()}: ${Math.round(bucket.sum ?? 0)} m`
         ),
       ]
     },
@@ -69,17 +70,18 @@ const readCards: Partial<
   activeEnergyBurned: {
     buttonLabel: 'Read daily active energy totals',
     execute: async () => {
-      const buckets = await NitroHealth.readDailyActiveEnergyBurnedTotals({
+      const buckets = await NitroHealth.readStatistics('activeEnergyBurned', {
         ...lastDays(7),
-        limit: 7,
-        ascending: false,
+        bucket: 'day',
+        metrics: ['sum'],
       })
+      const latestBuckets = buckets.slice(-7).reverse()
 
       return [
-        `Daily active-energy buckets: ${buckets.length}`,
-        ...buckets.map(
+        `Daily active-energy buckets: ${latestBuckets.length}`,
+        ...latestBuckets.map(
           (bucket) =>
-            `${bucket.startDate.toLocaleDateString()}: ${Math.round(bucket.kilocalories)} kcal`
+            `${bucket.startDate.toLocaleDateString()}: ${Math.round(bucket.sum ?? 0)} kcal`
         ),
       ]
     },

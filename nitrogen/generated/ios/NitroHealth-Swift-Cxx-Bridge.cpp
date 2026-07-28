@@ -38,14 +38,6 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     };
   }
   
-  // pragma MARK: std::function<void(const std::vector<NativeDailyStepTotal>& /* result */)>
-  Func_void_std__vector_NativeDailyStepTotal_ create_Func_void_std__vector_NativeDailyStepTotal_(void* NON_NULL swiftClosureWrapper) noexcept {
-    auto swiftClosure = NitroHealth::Func_void_std__vector_NativeDailyStepTotal_::fromUnsafe(swiftClosureWrapper);
-    return [swiftClosure = std::move(swiftClosure)](const std::vector<NativeDailyStepTotal>& result) mutable -> void {
-      swiftClosure.call(result);
-    };
-  }
-  
   // pragma MARK: std::function<void(const NativeDistanceSamplePage& /* result */)>
   Func_void_NativeDistanceSamplePage create_Func_void_NativeDistanceSamplePage(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = NitroHealth::Func_void_NativeDistanceSamplePage::fromUnsafe(swiftClosureWrapper);
@@ -54,26 +46,10 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     };
   }
   
-  // pragma MARK: std::function<void(const std::vector<NativeDailyDistanceTotal>& /* result */)>
-  Func_void_std__vector_NativeDailyDistanceTotal_ create_Func_void_std__vector_NativeDailyDistanceTotal_(void* NON_NULL swiftClosureWrapper) noexcept {
-    auto swiftClosure = NitroHealth::Func_void_std__vector_NativeDailyDistanceTotal_::fromUnsafe(swiftClosureWrapper);
-    return [swiftClosure = std::move(swiftClosure)](const std::vector<NativeDailyDistanceTotal>& result) mutable -> void {
-      swiftClosure.call(result);
-    };
-  }
-  
   // pragma MARK: std::function<void(const NativeActiveEnergyBurnedSamplePage& /* result */)>
   Func_void_NativeActiveEnergyBurnedSamplePage create_Func_void_NativeActiveEnergyBurnedSamplePage(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = NitroHealth::Func_void_NativeActiveEnergyBurnedSamplePage::fromUnsafe(swiftClosureWrapper);
     return [swiftClosure = std::move(swiftClosure)](const NativeActiveEnergyBurnedSamplePage& result) mutable -> void {
-      swiftClosure.call(result);
-    };
-  }
-  
-  // pragma MARK: std::function<void(const std::vector<NativeDailyActiveEnergyBurnedTotal>& /* result */)>
-  Func_void_std__vector_NativeDailyActiveEnergyBurnedTotal_ create_Func_void_std__vector_NativeDailyActiveEnergyBurnedTotal_(void* NON_NULL swiftClosureWrapper) noexcept {
-    auto swiftClosure = NitroHealth::Func_void_std__vector_NativeDailyActiveEnergyBurnedTotal_::fromUnsafe(swiftClosureWrapper);
-    return [swiftClosure = std::move(swiftClosure)](const std::vector<NativeDailyActiveEnergyBurnedTotal>& result) mutable -> void {
       swiftClosure.call(result);
     };
   }

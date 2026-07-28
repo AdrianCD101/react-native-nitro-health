@@ -36,9 +36,6 @@ import com.margelo.nitro.nitrohealth.NativeActiveEnergyBurnedSamplePage
 import com.margelo.nitro.nitrohealth.NativeBodyMassSample
 import com.margelo.nitro.nitrohealth.NativeBodyMassSampleInput
 import com.margelo.nitro.nitrohealth.NativeBodyMassSamplePage
-import com.margelo.nitro.nitrohealth.NativeDailyActiveEnergyBurnedTotal
-import com.margelo.nitro.nitrohealth.NativeDailyDistanceTotal
-import com.margelo.nitro.nitrohealth.NativeDailyStepTotal
 import com.margelo.nitro.nitrohealth.NativeDistanceSample
 import com.margelo.nitro.nitrohealth.NativeDistanceSampleInput
 import com.margelo.nitro.nitrohealth.NativeDistanceSamplePage
@@ -173,49 +170,6 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         }
     }
 
-    override fun readDailyStepTotals(query: NativeHealthDateRangeQuery): Promise<Array<NativeDailyStepTotal>> {
-        return Promise.async {
-            val context = NitroModules.applicationContext
-                ?: throw IllegalStateException("Android application context is unavailable")
-
-            if (getAvailabilityStatus() != HealthAvailabilityStatus.AVAILABLE) {
-                throw IllegalStateException("Health Connect is not available")
-            }
-
-            val client = HealthConnectClient.getOrCreate(context)
-            requireReadPermission(client, "steps")
-
-            val zoneId = ZoneId.systemDefault()
-            val request = AggregateGroupByPeriodRequest(
-                metrics = setOf(StepsRecord.COUNT_TOTAL),
-                timeRangeFilter = TimeRangeFilter.between(
-                    Instant.ofEpochMilli(query.startTimeMs.toLong()).atZone(zoneId).toLocalDateTime(),
-                    Instant.ofEpochMilli(query.endTimeMs.toLong()).atZone(zoneId).toLocalDateTime()
-                ),
-                timeRangeSlicer = Period.ofDays(1)
-            )
-            val response = client.aggregateGroupByPeriod(request)
-            val samples = response.mapNotNull { group ->
-                val count = group.result[StepsRecord.COUNT_TOTAL]
-                    ?: return@mapNotNull null
-                val range = clampDailyBucketRange(
-                    bucketStartTimeMs = group.startTime.atZone(zoneId).toInstant().toEpochMilli().toDouble(),
-                    bucketEndTimeMs = group.endTime.atZone(zoneId).toInstant().toEpochMilli().toDouble(),
-                    queryStartTimeMs = query.startTimeMs,
-                    queryEndTimeMs = query.endTimeMs
-                )
-
-                NativeDailyStepTotal(
-                    startTimeMs = range.startTimeMs,
-                    endTimeMs = range.endTimeMs,
-                    count = count.toDouble()
-                )
-            }
-            orderAndLimitDailySamples(samples, query.ascending, query.limit.toInt()) { it.startTimeMs }
-                .toTypedArray()
-        }
-    }
-
     override fun readDistance(query: NativeHealthDateRangeQuery): Promise<NativeDistanceSamplePage> {
         return Promise.async {
             val context = NitroModules.applicationContext
@@ -254,49 +208,6 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         }
     }
 
-    override fun readDailyDistanceTotals(query: NativeHealthDateRangeQuery): Promise<Array<NativeDailyDistanceTotal>> {
-        return Promise.async {
-            val context = NitroModules.applicationContext
-                ?: throw IllegalStateException("Android application context is unavailable")
-
-            if (getAvailabilityStatus() != HealthAvailabilityStatus.AVAILABLE) {
-                throw IllegalStateException("Health Connect is not available")
-            }
-
-            val client = HealthConnectClient.getOrCreate(context)
-            requireReadPermission(client, "distance")
-
-            val zoneId = ZoneId.systemDefault()
-            val request = AggregateGroupByPeriodRequest(
-                metrics = setOf(DistanceRecord.DISTANCE_TOTAL),
-                timeRangeFilter = TimeRangeFilter.between(
-                    Instant.ofEpochMilli(query.startTimeMs.toLong()).atZone(zoneId).toLocalDateTime(),
-                    Instant.ofEpochMilli(query.endTimeMs.toLong()).atZone(zoneId).toLocalDateTime()
-                ),
-                timeRangeSlicer = Period.ofDays(1)
-            )
-            val response = client.aggregateGroupByPeriod(request)
-            val samples = response.mapNotNull { group ->
-                val distance = group.result[DistanceRecord.DISTANCE_TOTAL]
-                    ?: return@mapNotNull null
-                val range = clampDailyBucketRange(
-                    bucketStartTimeMs = group.startTime.atZone(zoneId).toInstant().toEpochMilli().toDouble(),
-                    bucketEndTimeMs = group.endTime.atZone(zoneId).toInstant().toEpochMilli().toDouble(),
-                    queryStartTimeMs = query.startTimeMs,
-                    queryEndTimeMs = query.endTimeMs
-                )
-
-                NativeDailyDistanceTotal(
-                    startTimeMs = range.startTimeMs,
-                    endTimeMs = range.endTimeMs,
-                    distanceMeters = distance.inMeters
-                )
-            }
-            orderAndLimitDailySamples(samples, query.ascending, query.limit.toInt()) { it.startTimeMs }
-                .toTypedArray()
-        }
-    }
-
     override fun readActiveEnergyBurned(query: NativeHealthDateRangeQuery): Promise<NativeActiveEnergyBurnedSamplePage> {
         return Promise.async {
             val context = NitroModules.applicationContext
@@ -332,51 +243,6 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                 }.toTypedArray(),
                 nextCursor = response.pageToken?.let { encodeSampleCursor("activeEnergyBurned", query.ascending, it) }
             )
-        }
-    }
-
-    override fun readDailyActiveEnergyBurnedTotals(
-        query: NativeHealthDateRangeQuery
-    ): Promise<Array<NativeDailyActiveEnergyBurnedTotal>> {
-        return Promise.async {
-            val context = NitroModules.applicationContext
-                ?: throw IllegalStateException("Android application context is unavailable")
-
-            if (getAvailabilityStatus() != HealthAvailabilityStatus.AVAILABLE) {
-                throw IllegalStateException("Health Connect is not available")
-            }
-
-            val client = HealthConnectClient.getOrCreate(context)
-            requireReadPermission(client, "activeEnergyBurned")
-
-            val zoneId = ZoneId.systemDefault()
-            val request = AggregateGroupByPeriodRequest(
-                metrics = setOf(ActiveCaloriesBurnedRecord.ACTIVE_CALORIES_TOTAL),
-                timeRangeFilter = TimeRangeFilter.between(
-                    Instant.ofEpochMilli(query.startTimeMs.toLong()).atZone(zoneId).toLocalDateTime(),
-                    Instant.ofEpochMilli(query.endTimeMs.toLong()).atZone(zoneId).toLocalDateTime()
-                ),
-                timeRangeSlicer = Period.ofDays(1)
-            )
-            val response = client.aggregateGroupByPeriod(request)
-            val samples = response.mapNotNull { group ->
-                val activeCalories = group.result[ActiveCaloriesBurnedRecord.ACTIVE_CALORIES_TOTAL]
-                    ?: return@mapNotNull null
-                val range = clampDailyBucketRange(
-                    bucketStartTimeMs = group.startTime.atZone(zoneId).toInstant().toEpochMilli().toDouble(),
-                    bucketEndTimeMs = group.endTime.atZone(zoneId).toInstant().toEpochMilli().toDouble(),
-                    queryStartTimeMs = query.startTimeMs,
-                    queryEndTimeMs = query.endTimeMs
-                )
-
-                NativeDailyActiveEnergyBurnedTotal(
-                    startTimeMs = range.startTimeMs,
-                    endTimeMs = range.endTimeMs,
-                    kilocalories = activeCalories.inKilocalories
-                )
-            }
-            orderAndLimitDailySamples(samples, query.ascending, query.limit.toInt()) { it.startTimeMs }
-                .toTypedArray()
         }
     }
 

@@ -20,18 +20,3 @@ internal fun clampDailyBucketRange(
         endTimeMs = bucketEndTimeMs.coerceAtMost(queryEndTimeMs).coerceAtLeast(startTimeMs)
     )
 }
-
-internal fun <T> orderAndLimitDailySamples(
-    samples: List<T>,
-    ascending: Boolean,
-    limit: Int,
-    getStartTimeMs: (T) -> Double
-): List<T> {
-    val ordered = if (ascending) {
-        samples.sortedBy(getStartTimeMs)
-    } else {
-        samples.sortedByDescending(getStartTimeMs)
-    }
-
-    return ordered.take(limit)
-}

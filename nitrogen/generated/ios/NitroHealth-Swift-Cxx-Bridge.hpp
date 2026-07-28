@@ -28,12 +28,6 @@ namespace margelo::nitro::nitrohealth { struct NativeBodyMassSampleInput; }
 namespace margelo::nitro::nitrohealth { struct NativeBodyMassSamplePage; }
 // Forward declaration of `NativeBodyMassSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBodyMassSample; }
-// Forward declaration of `NativeDailyActiveEnergyBurnedTotal` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeDailyActiveEnergyBurnedTotal; }
-// Forward declaration of `NativeDailyDistanceTotal` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeDailyDistanceTotal; }
-// Forward declaration of `NativeDailyStepTotal` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeDailyStepTotal; }
 // Forward declaration of `NativeDistanceSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeDistanceSampleInput; }
 // Forward declaration of `NativeDistanceSamplePage` to properly resolve imports.
@@ -106,9 +100,6 @@ namespace NitroHealth { class HybridNitroHealthSpec_cxx; }
 #include "NativeBodyMassSample.hpp"
 #include "NativeBodyMassSampleInput.hpp"
 #include "NativeBodyMassSamplePage.hpp"
-#include "NativeDailyActiveEnergyBurnedTotal.hpp"
-#include "NativeDailyDistanceTotal.hpp"
-#include "NativeDailyStepTotal.hpp"
 #include "NativeDistanceSample.hpp"
 #include "NativeDistanceSampleInput.hpp"
 #include "NativeDistanceSamplePage.hpp"
@@ -269,51 +260,6 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return Func_void_NativeStepSamplePage_Wrapper(std::move(value));
   }
   
-  // pragma MARK: std::vector<NativeDailyStepTotal>
-  /**
-   * Specialized version of `std::vector<NativeDailyStepTotal>`.
-   */
-  using std__vector_NativeDailyStepTotal_ = std::vector<NativeDailyStepTotal>;
-  inline std::vector<NativeDailyStepTotal> create_std__vector_NativeDailyStepTotal_(size_t size) noexcept {
-    std::vector<NativeDailyStepTotal> vector;
-    vector.reserve(size);
-    return vector;
-  }
-  
-  // pragma MARK: std::shared_ptr<Promise<std::vector<NativeDailyStepTotal>>>
-  /**
-   * Specialized version of `std::shared_ptr<Promise<std::vector<NativeDailyStepTotal>>>`.
-   */
-  using std__shared_ptr_Promise_std__vector_NativeDailyStepTotal___ = std::shared_ptr<Promise<std::vector<NativeDailyStepTotal>>>;
-  inline std::shared_ptr<Promise<std::vector<NativeDailyStepTotal>>> create_std__shared_ptr_Promise_std__vector_NativeDailyStepTotal___() noexcept {
-    return Promise<std::vector<NativeDailyStepTotal>>::create();
-  }
-  inline PromiseHolder<std::vector<NativeDailyStepTotal>> wrap_std__shared_ptr_Promise_std__vector_NativeDailyStepTotal___(std::shared_ptr<Promise<std::vector<NativeDailyStepTotal>>> promise) noexcept {
-    return PromiseHolder<std::vector<NativeDailyStepTotal>>(std::move(promise));
-  }
-  
-  // pragma MARK: std::function<void(const std::vector<NativeDailyStepTotal>& /* result */)>
-  /**
-   * Specialized version of `std::function<void(const std::vector<NativeDailyStepTotal>&)>`.
-   */
-  using Func_void_std__vector_NativeDailyStepTotal_ = std::function<void(const std::vector<NativeDailyStepTotal>& /* result */)>;
-  /**
-   * Wrapper class for a `std::function<void(const std::vector<NativeDailyStepTotal>& / * result * /)>`, this can be used from Swift.
-   */
-  class Func_void_std__vector_NativeDailyStepTotal__Wrapper final {
-  public:
-    explicit Func_void_std__vector_NativeDailyStepTotal__Wrapper(std::function<void(const std::vector<NativeDailyStepTotal>& /* result */)>&& func): _function(std::make_unique<std::function<void(const std::vector<NativeDailyStepTotal>& /* result */)>>(std::move(func))) {}
-    inline void call(std::vector<NativeDailyStepTotal> result) const noexcept {
-      _function->operator()(result);
-    }
-  private:
-    std::unique_ptr<std::function<void(const std::vector<NativeDailyStepTotal>& /* result */)>> _function;
-  } SWIFT_NONCOPYABLE;
-  Func_void_std__vector_NativeDailyStepTotal_ create_Func_void_std__vector_NativeDailyStepTotal_(void* NON_NULL swiftClosureWrapper) noexcept;
-  inline Func_void_std__vector_NativeDailyStepTotal__Wrapper wrap_Func_void_std__vector_NativeDailyStepTotal_(Func_void_std__vector_NativeDailyStepTotal_ value) noexcept {
-    return Func_void_std__vector_NativeDailyStepTotal__Wrapper(std::move(value));
-  }
-  
   // pragma MARK: std::vector<NativeDistanceSample>
   /**
    * Specialized version of `std::vector<NativeDistanceSample>`.
@@ -359,51 +305,6 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return Func_void_NativeDistanceSamplePage_Wrapper(std::move(value));
   }
   
-  // pragma MARK: std::vector<NativeDailyDistanceTotal>
-  /**
-   * Specialized version of `std::vector<NativeDailyDistanceTotal>`.
-   */
-  using std__vector_NativeDailyDistanceTotal_ = std::vector<NativeDailyDistanceTotal>;
-  inline std::vector<NativeDailyDistanceTotal> create_std__vector_NativeDailyDistanceTotal_(size_t size) noexcept {
-    std::vector<NativeDailyDistanceTotal> vector;
-    vector.reserve(size);
-    return vector;
-  }
-  
-  // pragma MARK: std::shared_ptr<Promise<std::vector<NativeDailyDistanceTotal>>>
-  /**
-   * Specialized version of `std::shared_ptr<Promise<std::vector<NativeDailyDistanceTotal>>>`.
-   */
-  using std__shared_ptr_Promise_std__vector_NativeDailyDistanceTotal___ = std::shared_ptr<Promise<std::vector<NativeDailyDistanceTotal>>>;
-  inline std::shared_ptr<Promise<std::vector<NativeDailyDistanceTotal>>> create_std__shared_ptr_Promise_std__vector_NativeDailyDistanceTotal___() noexcept {
-    return Promise<std::vector<NativeDailyDistanceTotal>>::create();
-  }
-  inline PromiseHolder<std::vector<NativeDailyDistanceTotal>> wrap_std__shared_ptr_Promise_std__vector_NativeDailyDistanceTotal___(std::shared_ptr<Promise<std::vector<NativeDailyDistanceTotal>>> promise) noexcept {
-    return PromiseHolder<std::vector<NativeDailyDistanceTotal>>(std::move(promise));
-  }
-  
-  // pragma MARK: std::function<void(const std::vector<NativeDailyDistanceTotal>& /* result */)>
-  /**
-   * Specialized version of `std::function<void(const std::vector<NativeDailyDistanceTotal>&)>`.
-   */
-  using Func_void_std__vector_NativeDailyDistanceTotal_ = std::function<void(const std::vector<NativeDailyDistanceTotal>& /* result */)>;
-  /**
-   * Wrapper class for a `std::function<void(const std::vector<NativeDailyDistanceTotal>& / * result * /)>`, this can be used from Swift.
-   */
-  class Func_void_std__vector_NativeDailyDistanceTotal__Wrapper final {
-  public:
-    explicit Func_void_std__vector_NativeDailyDistanceTotal__Wrapper(std::function<void(const std::vector<NativeDailyDistanceTotal>& /* result */)>&& func): _function(std::make_unique<std::function<void(const std::vector<NativeDailyDistanceTotal>& /* result */)>>(std::move(func))) {}
-    inline void call(std::vector<NativeDailyDistanceTotal> result) const noexcept {
-      _function->operator()(result);
-    }
-  private:
-    std::unique_ptr<std::function<void(const std::vector<NativeDailyDistanceTotal>& /* result */)>> _function;
-  } SWIFT_NONCOPYABLE;
-  Func_void_std__vector_NativeDailyDistanceTotal_ create_Func_void_std__vector_NativeDailyDistanceTotal_(void* NON_NULL swiftClosureWrapper) noexcept;
-  inline Func_void_std__vector_NativeDailyDistanceTotal__Wrapper wrap_Func_void_std__vector_NativeDailyDistanceTotal_(Func_void_std__vector_NativeDailyDistanceTotal_ value) noexcept {
-    return Func_void_std__vector_NativeDailyDistanceTotal__Wrapper(std::move(value));
-  }
-  
   // pragma MARK: std::vector<NativeActiveEnergyBurnedSample>
   /**
    * Specialized version of `std::vector<NativeActiveEnergyBurnedSample>`.
@@ -447,51 +348,6 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
   Func_void_NativeActiveEnergyBurnedSamplePage create_Func_void_NativeActiveEnergyBurnedSamplePage(void* NON_NULL swiftClosureWrapper) noexcept;
   inline Func_void_NativeActiveEnergyBurnedSamplePage_Wrapper wrap_Func_void_NativeActiveEnergyBurnedSamplePage(Func_void_NativeActiveEnergyBurnedSamplePage value) noexcept {
     return Func_void_NativeActiveEnergyBurnedSamplePage_Wrapper(std::move(value));
-  }
-  
-  // pragma MARK: std::vector<NativeDailyActiveEnergyBurnedTotal>
-  /**
-   * Specialized version of `std::vector<NativeDailyActiveEnergyBurnedTotal>`.
-   */
-  using std__vector_NativeDailyActiveEnergyBurnedTotal_ = std::vector<NativeDailyActiveEnergyBurnedTotal>;
-  inline std::vector<NativeDailyActiveEnergyBurnedTotal> create_std__vector_NativeDailyActiveEnergyBurnedTotal_(size_t size) noexcept {
-    std::vector<NativeDailyActiveEnergyBurnedTotal> vector;
-    vector.reserve(size);
-    return vector;
-  }
-  
-  // pragma MARK: std::shared_ptr<Promise<std::vector<NativeDailyActiveEnergyBurnedTotal>>>
-  /**
-   * Specialized version of `std::shared_ptr<Promise<std::vector<NativeDailyActiveEnergyBurnedTotal>>>`.
-   */
-  using std__shared_ptr_Promise_std__vector_NativeDailyActiveEnergyBurnedTotal___ = std::shared_ptr<Promise<std::vector<NativeDailyActiveEnergyBurnedTotal>>>;
-  inline std::shared_ptr<Promise<std::vector<NativeDailyActiveEnergyBurnedTotal>>> create_std__shared_ptr_Promise_std__vector_NativeDailyActiveEnergyBurnedTotal___() noexcept {
-    return Promise<std::vector<NativeDailyActiveEnergyBurnedTotal>>::create();
-  }
-  inline PromiseHolder<std::vector<NativeDailyActiveEnergyBurnedTotal>> wrap_std__shared_ptr_Promise_std__vector_NativeDailyActiveEnergyBurnedTotal___(std::shared_ptr<Promise<std::vector<NativeDailyActiveEnergyBurnedTotal>>> promise) noexcept {
-    return PromiseHolder<std::vector<NativeDailyActiveEnergyBurnedTotal>>(std::move(promise));
-  }
-  
-  // pragma MARK: std::function<void(const std::vector<NativeDailyActiveEnergyBurnedTotal>& /* result */)>
-  /**
-   * Specialized version of `std::function<void(const std::vector<NativeDailyActiveEnergyBurnedTotal>&)>`.
-   */
-  using Func_void_std__vector_NativeDailyActiveEnergyBurnedTotal_ = std::function<void(const std::vector<NativeDailyActiveEnergyBurnedTotal>& /* result */)>;
-  /**
-   * Wrapper class for a `std::function<void(const std::vector<NativeDailyActiveEnergyBurnedTotal>& / * result * /)>`, this can be used from Swift.
-   */
-  class Func_void_std__vector_NativeDailyActiveEnergyBurnedTotal__Wrapper final {
-  public:
-    explicit Func_void_std__vector_NativeDailyActiveEnergyBurnedTotal__Wrapper(std::function<void(const std::vector<NativeDailyActiveEnergyBurnedTotal>& /* result */)>&& func): _function(std::make_unique<std::function<void(const std::vector<NativeDailyActiveEnergyBurnedTotal>& /* result */)>>(std::move(func))) {}
-    inline void call(std::vector<NativeDailyActiveEnergyBurnedTotal> result) const noexcept {
-      _function->operator()(result);
-    }
-  private:
-    std::unique_ptr<std::function<void(const std::vector<NativeDailyActiveEnergyBurnedTotal>& /* result */)>> _function;
-  } SWIFT_NONCOPYABLE;
-  Func_void_std__vector_NativeDailyActiveEnergyBurnedTotal_ create_Func_void_std__vector_NativeDailyActiveEnergyBurnedTotal_(void* NON_NULL swiftClosureWrapper) noexcept;
-  inline Func_void_std__vector_NativeDailyActiveEnergyBurnedTotal__Wrapper wrap_Func_void_std__vector_NativeDailyActiveEnergyBurnedTotal_(Func_void_std__vector_NativeDailyActiveEnergyBurnedTotal_ value) noexcept {
-    return Func_void_std__vector_NativeDailyActiveEnergyBurnedTotal__Wrapper(std::move(value));
   }
   
   // pragma MARK: std::vector<NativeBodyMassSample>
@@ -1208,15 +1064,6 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return Result<std::shared_ptr<Promise<NativeStepSamplePage>>>::withError(error);
   }
   
-  // pragma MARK: Result<std::shared_ptr<Promise<std::vector<NativeDailyStepTotal>>>>
-  using Result_std__shared_ptr_Promise_std__vector_NativeDailyStepTotal____ = Result<std::shared_ptr<Promise<std::vector<NativeDailyStepTotal>>>>;
-  inline Result_std__shared_ptr_Promise_std__vector_NativeDailyStepTotal____ create_Result_std__shared_ptr_Promise_std__vector_NativeDailyStepTotal____(const std::shared_ptr<Promise<std::vector<NativeDailyStepTotal>>>& value) noexcept {
-    return Result<std::shared_ptr<Promise<std::vector<NativeDailyStepTotal>>>>::withValue(value);
-  }
-  inline Result_std__shared_ptr_Promise_std__vector_NativeDailyStepTotal____ create_Result_std__shared_ptr_Promise_std__vector_NativeDailyStepTotal____(const std::exception_ptr& error) noexcept {
-    return Result<std::shared_ptr<Promise<std::vector<NativeDailyStepTotal>>>>::withError(error);
-  }
-  
   // pragma MARK: Result<std::shared_ptr<Promise<NativeDistanceSamplePage>>>
   using Result_std__shared_ptr_Promise_NativeDistanceSamplePage___ = Result<std::shared_ptr<Promise<NativeDistanceSamplePage>>>;
   inline Result_std__shared_ptr_Promise_NativeDistanceSamplePage___ create_Result_std__shared_ptr_Promise_NativeDistanceSamplePage___(const std::shared_ptr<Promise<NativeDistanceSamplePage>>& value) noexcept {
@@ -1226,15 +1073,6 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return Result<std::shared_ptr<Promise<NativeDistanceSamplePage>>>::withError(error);
   }
   
-  // pragma MARK: Result<std::shared_ptr<Promise<std::vector<NativeDailyDistanceTotal>>>>
-  using Result_std__shared_ptr_Promise_std__vector_NativeDailyDistanceTotal____ = Result<std::shared_ptr<Promise<std::vector<NativeDailyDistanceTotal>>>>;
-  inline Result_std__shared_ptr_Promise_std__vector_NativeDailyDistanceTotal____ create_Result_std__shared_ptr_Promise_std__vector_NativeDailyDistanceTotal____(const std::shared_ptr<Promise<std::vector<NativeDailyDistanceTotal>>>& value) noexcept {
-    return Result<std::shared_ptr<Promise<std::vector<NativeDailyDistanceTotal>>>>::withValue(value);
-  }
-  inline Result_std__shared_ptr_Promise_std__vector_NativeDailyDistanceTotal____ create_Result_std__shared_ptr_Promise_std__vector_NativeDailyDistanceTotal____(const std::exception_ptr& error) noexcept {
-    return Result<std::shared_ptr<Promise<std::vector<NativeDailyDistanceTotal>>>>::withError(error);
-  }
-  
   // pragma MARK: Result<std::shared_ptr<Promise<NativeActiveEnergyBurnedSamplePage>>>
   using Result_std__shared_ptr_Promise_NativeActiveEnergyBurnedSamplePage___ = Result<std::shared_ptr<Promise<NativeActiveEnergyBurnedSamplePage>>>;
   inline Result_std__shared_ptr_Promise_NativeActiveEnergyBurnedSamplePage___ create_Result_std__shared_ptr_Promise_NativeActiveEnergyBurnedSamplePage___(const std::shared_ptr<Promise<NativeActiveEnergyBurnedSamplePage>>& value) noexcept {
@@ -1242,15 +1080,6 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
   }
   inline Result_std__shared_ptr_Promise_NativeActiveEnergyBurnedSamplePage___ create_Result_std__shared_ptr_Promise_NativeActiveEnergyBurnedSamplePage___(const std::exception_ptr& error) noexcept {
     return Result<std::shared_ptr<Promise<NativeActiveEnergyBurnedSamplePage>>>::withError(error);
-  }
-  
-  // pragma MARK: Result<std::shared_ptr<Promise<std::vector<NativeDailyActiveEnergyBurnedTotal>>>>
-  using Result_std__shared_ptr_Promise_std__vector_NativeDailyActiveEnergyBurnedTotal____ = Result<std::shared_ptr<Promise<std::vector<NativeDailyActiveEnergyBurnedTotal>>>>;
-  inline Result_std__shared_ptr_Promise_std__vector_NativeDailyActiveEnergyBurnedTotal____ create_Result_std__shared_ptr_Promise_std__vector_NativeDailyActiveEnergyBurnedTotal____(const std::shared_ptr<Promise<std::vector<NativeDailyActiveEnergyBurnedTotal>>>& value) noexcept {
-    return Result<std::shared_ptr<Promise<std::vector<NativeDailyActiveEnergyBurnedTotal>>>>::withValue(value);
-  }
-  inline Result_std__shared_ptr_Promise_std__vector_NativeDailyActiveEnergyBurnedTotal____ create_Result_std__shared_ptr_Promise_std__vector_NativeDailyActiveEnergyBurnedTotal____(const std::exception_ptr& error) noexcept {
-    return Result<std::shared_ptr<Promise<std::vector<NativeDailyActiveEnergyBurnedTotal>>>>::withError(error);
   }
   
   // pragma MARK: Result<std::shared_ptr<Promise<NativeBodyMassSamplePage>>>

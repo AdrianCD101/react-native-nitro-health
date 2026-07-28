@@ -20,20 +20,3 @@ func clampDailyBucketRange(
         endTimeMs: max(min(bucketEndTimeMs, queryEndTimeMs), startTimeMs)
     )
 }
-
-func orderAndLimitDailySamples<T>(
-    _ samples: [T],
-    ascending: Bool,
-    limit: Int,
-    getStartTimeMs: (T) -> Double
-) -> [T] {
-    let ordered = samples.sorted {
-        if ascending {
-            return getStartTimeMs($0) < getStartTimeMs($1)
-        }
-
-        return getStartTimeMs($0) > getStartTimeMs($1)
-    }
-
-    return Array(ordered.prefix(limit))
-}

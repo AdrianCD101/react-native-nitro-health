@@ -45,16 +45,6 @@ export function makeNativeSampleQuery(query: HealthDateRangeQuery): NativeHealth
   }
 }
 
-export function makeNativeDailyTotalsQuery(
-  query: Omit<HealthDateRangeQuery, 'cursor'>
-): NativeHealthDateRangeQuery {
-  if ((query as HealthDateRangeQuery).cursor !== undefined) {
-    throw new Error('cursor is not supported for daily total reads')
-  }
-
-  return makeNativeSampleQuery(query)
-}
-
 export function makeNativeTimeRangeQuery(query: HealthTimeRangeQuery): NativeHealthTimeRangeQuery {
   const { startTimeMs, endTimeMs } = makeTimeRange(query)
 

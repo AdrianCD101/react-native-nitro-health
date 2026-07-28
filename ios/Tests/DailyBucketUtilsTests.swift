@@ -73,40 +73,4 @@ final class DailyBucketUtilsTests: XCTestCase {
         XCTAssertEqual(range.startTimeMs, 30)
         XCTAssertEqual(range.endTimeMs, 30)
     }
-
-    func testOrderAndLimitDailySamplesSortsAscendingBeforeApplyingLimit() {
-        let samples = [
-            DailySample(startTimeMs: 30),
-            DailySample(startTimeMs: 10),
-            DailySample(startTimeMs: 20),
-        ]
-
-        let result = orderAndLimitDailySamples(
-            samples,
-            ascending: true,
-            limit: 2
-        ) { $0.startTimeMs }
-
-        XCTAssertEqual(result.map(\.startTimeMs), [10, 20])
-    }
-
-    func testOrderAndLimitDailySamplesSortsDescendingBeforeApplyingLimit() {
-        let samples = [
-            DailySample(startTimeMs: 20),
-            DailySample(startTimeMs: 10),
-            DailySample(startTimeMs: 30),
-        ]
-
-        let result = orderAndLimitDailySamples(
-            samples,
-            ascending: false,
-            limit: 2
-        ) { $0.startTimeMs }
-
-        XCTAssertEqual(result.map(\.startTimeMs), [30, 20])
-    }
-}
-
-private struct DailySample {
-    let startTimeMs: Double
 }

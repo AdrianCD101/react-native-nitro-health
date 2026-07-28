@@ -13,20 +13,14 @@ namespace margelo::nitro::nitrohealth { enum class HealthAvailabilityStatus; }
 namespace margelo::nitro::nitrohealth { struct NativeStepSamplePage; }
 // Forward declaration of `NativeStepSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeStepSample; }
-// Forward declaration of `NativeDailyStepTotal` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeDailyStepTotal; }
 // Forward declaration of `NativeDistanceSamplePage` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeDistanceSamplePage; }
 // Forward declaration of `NativeDistanceSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeDistanceSample; }
-// Forward declaration of `NativeDailyDistanceTotal` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeDailyDistanceTotal; }
 // Forward declaration of `NativeActiveEnergyBurnedSamplePage` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeActiveEnergyBurnedSamplePage; }
 // Forward declaration of `NativeActiveEnergyBurnedSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeActiveEnergyBurnedSample; }
-// Forward declaration of `NativeDailyActiveEnergyBurnedTotal` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeDailyActiveEnergyBurnedTotal; }
 // Forward declaration of `NativeBodyMassSamplePage` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBodyMassSamplePage; }
 // Forward declaration of `NativeBodyMassSample` to properly resolve imports.
@@ -105,20 +99,14 @@ namespace margelo::nitro::nitrohealth { struct NativeHeightSampleInput; }
 #include "JNativeStepSample.hpp"
 #include <string>
 #include <optional>
-#include "NativeDailyStepTotal.hpp"
-#include "JNativeDailyStepTotal.hpp"
 #include "NativeDistanceSamplePage.hpp"
 #include "JNativeDistanceSamplePage.hpp"
 #include "NativeDistanceSample.hpp"
 #include "JNativeDistanceSample.hpp"
-#include "NativeDailyDistanceTotal.hpp"
-#include "JNativeDailyDistanceTotal.hpp"
 #include "NativeActiveEnergyBurnedSamplePage.hpp"
 #include "JNativeActiveEnergyBurnedSamplePage.hpp"
 #include "NativeActiveEnergyBurnedSample.hpp"
 #include "JNativeActiveEnergyBurnedSample.hpp"
-#include "NativeDailyActiveEnergyBurnedTotal.hpp"
-#include "JNativeDailyActiveEnergyBurnedTotal.hpp"
 #include "NativeBodyMassSamplePage.hpp"
 #include "JNativeBodyMassSamplePage.hpp"
 #include "NativeBodyMassSample.hpp"
@@ -267,31 +255,6 @@ namespace margelo::nitro::nitrohealth {
       return __promise;
     }();
   }
-  std::shared_ptr<Promise<std::vector<NativeDailyStepTotal>>> JHybridNitroHealthSpec::readDailyStepTotals(const NativeHealthDateRangeQuery& query) {
-    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<JNativeHealthDateRangeQuery> /* query */)>("readDailyStepTotals");
-    auto __result = method(_javaPart, JNativeHealthDateRangeQuery::fromCpp(query));
-    return [&]() {
-      auto __promise = Promise<std::vector<NativeDailyStepTotal>>::create();
-      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {
-        auto __result = jni::static_ref_cast<jni::JArrayClass<JNativeDailyStepTotal>>(__boxedResult);
-        __promise->resolve([&](auto&& __input) {
-          size_t __size = __input->size();
-          std::vector<NativeDailyStepTotal> __vector;
-          __vector.reserve(__size);
-          for (size_t __i = 0; __i < __size; __i++) {
-            auto __element = __input->getElement(__i);
-            __vector.push_back(__element->toCpp());
-          }
-          return __vector;
-        }(__result));
-      });
-      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
-        jni::JniException __jniError(__throwable);
-        __promise->reject(std::make_exception_ptr(__jniError));
-      });
-      return __promise;
-    }();
-  }
   std::shared_ptr<Promise<NativeDistanceSamplePage>> JHybridNitroHealthSpec::readDistance(const NativeHealthDateRangeQuery& query) {
     static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<JNativeHealthDateRangeQuery> /* query */)>("readDistance");
     auto __result = method(_javaPart, JNativeHealthDateRangeQuery::fromCpp(query));
@@ -308,31 +271,6 @@ namespace margelo::nitro::nitrohealth {
       return __promise;
     }();
   }
-  std::shared_ptr<Promise<std::vector<NativeDailyDistanceTotal>>> JHybridNitroHealthSpec::readDailyDistanceTotals(const NativeHealthDateRangeQuery& query) {
-    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<JNativeHealthDateRangeQuery> /* query */)>("readDailyDistanceTotals");
-    auto __result = method(_javaPart, JNativeHealthDateRangeQuery::fromCpp(query));
-    return [&]() {
-      auto __promise = Promise<std::vector<NativeDailyDistanceTotal>>::create();
-      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {
-        auto __result = jni::static_ref_cast<jni::JArrayClass<JNativeDailyDistanceTotal>>(__boxedResult);
-        __promise->resolve([&](auto&& __input) {
-          size_t __size = __input->size();
-          std::vector<NativeDailyDistanceTotal> __vector;
-          __vector.reserve(__size);
-          for (size_t __i = 0; __i < __size; __i++) {
-            auto __element = __input->getElement(__i);
-            __vector.push_back(__element->toCpp());
-          }
-          return __vector;
-        }(__result));
-      });
-      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
-        jni::JniException __jniError(__throwable);
-        __promise->reject(std::make_exception_ptr(__jniError));
-      });
-      return __promise;
-    }();
-  }
   std::shared_ptr<Promise<NativeActiveEnergyBurnedSamplePage>> JHybridNitroHealthSpec::readActiveEnergyBurned(const NativeHealthDateRangeQuery& query) {
     static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<JNativeHealthDateRangeQuery> /* query */)>("readActiveEnergyBurned");
     auto __result = method(_javaPart, JNativeHealthDateRangeQuery::fromCpp(query));
@@ -341,31 +279,6 @@ namespace margelo::nitro::nitrohealth {
       __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {
         auto __result = jni::static_ref_cast<JNativeActiveEnergyBurnedSamplePage>(__boxedResult);
         __promise->resolve(__result->toCpp());
-      });
-      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
-        jni::JniException __jniError(__throwable);
-        __promise->reject(std::make_exception_ptr(__jniError));
-      });
-      return __promise;
-    }();
-  }
-  std::shared_ptr<Promise<std::vector<NativeDailyActiveEnergyBurnedTotal>>> JHybridNitroHealthSpec::readDailyActiveEnergyBurnedTotals(const NativeHealthDateRangeQuery& query) {
-    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<JNativeHealthDateRangeQuery> /* query */)>("readDailyActiveEnergyBurnedTotals");
-    auto __result = method(_javaPart, JNativeHealthDateRangeQuery::fromCpp(query));
-    return [&]() {
-      auto __promise = Promise<std::vector<NativeDailyActiveEnergyBurnedTotal>>::create();
-      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {
-        auto __result = jni::static_ref_cast<jni::JArrayClass<JNativeDailyActiveEnergyBurnedTotal>>(__boxedResult);
-        __promise->resolve([&](auto&& __input) {
-          size_t __size = __input->size();
-          std::vector<NativeDailyActiveEnergyBurnedTotal> __vector;
-          __vector.reserve(__size);
-          for (size_t __i = 0; __i < __size; __i++) {
-            auto __element = __input->getElement(__i);
-            __vector.push_back(__element->toCpp());
-          }
-          return __vector;
-        }(__result));
       });
       __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
         jni::JniException __jniError(__throwable);

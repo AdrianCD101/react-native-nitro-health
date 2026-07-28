@@ -173,14 +173,14 @@ describe('App', () => {
     ])
   })
 
-  it('reads daily step totals from the app UI after steps permission is granted', async () => {
+  it('reads daily step statistics from the app UI after steps permission is granted', async () => {
     mockNitroHealth.getAvailabilityStatus.mockReturnValue('available')
     mockNitroHealth.requestAuthorization.mockResolvedValue(grantedStepsResult)
-    mockNitroHealth.readDailyStepTotals.mockResolvedValue([
+    mockNitroHealth.readStatistics.mockResolvedValue([
       {
         startDate: new Date('2026-01-01T00:00:00.000Z'),
         endDate: new Date('2026-01-02T00:00:00.000Z'),
-        count: 123,
+        sum: 123,
       },
     ])
 
@@ -193,22 +193,22 @@ describe('App', () => {
 
     expect(await screen.findByText('Daily step buckets: 1')).toBeTruthy()
     expect(screen.getByText(/123 steps/)).toBeTruthy()
-    expect(mockNitroHealth.readDailyStepTotals).toHaveBeenCalledWith({
+    expect(mockNitroHealth.readStatistics).toHaveBeenCalledWith('steps', {
       startDate: expect.any(Date),
       endDate: expect.any(Date),
-      limit: 7,
-      ascending: false,
+      bucket: 'day',
+      metrics: ['sum'],
     })
   })
 
-  it('reads daily distance totals from the app UI after distance permission is granted', async () => {
+  it('reads daily distance statistics from the app UI after distance permission is granted', async () => {
     mockNitroHealth.getAvailabilityStatus.mockReturnValue('available')
     mockNitroHealth.requestAuthorization.mockResolvedValue(grantedDistanceResult)
-    mockNitroHealth.readDailyDistanceTotals.mockResolvedValue([
+    mockNitroHealth.readStatistics.mockResolvedValue([
       {
         startDate: new Date('2026-01-01T00:00:00.000Z'),
         endDate: new Date('2026-01-02T00:00:00.000Z'),
-        distanceMeters: 1234,
+        sum: 1234,
       },
     ])
 
@@ -221,22 +221,22 @@ describe('App', () => {
 
     expect(await screen.findByText('Daily distance buckets: 1')).toBeTruthy()
     expect(screen.getByText(/1234 m/)).toBeTruthy()
-    expect(mockNitroHealth.readDailyDistanceTotals).toHaveBeenCalledWith({
+    expect(mockNitroHealth.readStatistics).toHaveBeenCalledWith('distance', {
       startDate: expect.any(Date),
       endDate: expect.any(Date),
-      limit: 7,
-      ascending: false,
+      bucket: 'day',
+      metrics: ['sum'],
     })
   })
 
-  it('reads daily active energy totals from the app UI after active energy permission is granted', async () => {
+  it('reads daily active energy statistics from the app UI after active energy permission is granted', async () => {
     mockNitroHealth.getAvailabilityStatus.mockReturnValue('available')
     mockNitroHealth.requestAuthorization.mockResolvedValue(grantedActiveEnergyResult)
-    mockNitroHealth.readDailyActiveEnergyBurnedTotals.mockResolvedValue([
+    mockNitroHealth.readStatistics.mockResolvedValue([
       {
         startDate: new Date('2026-01-01T00:00:00.000Z'),
         endDate: new Date('2026-01-02T00:00:00.000Z'),
-        kilocalories: 321,
+        sum: 321,
       },
     ])
 
@@ -249,18 +249,18 @@ describe('App', () => {
 
     expect(await screen.findByText('Daily active-energy buckets: 1')).toBeTruthy()
     expect(screen.getByText(/321 kcal/)).toBeTruthy()
-    expect(mockNitroHealth.readDailyActiveEnergyBurnedTotals).toHaveBeenCalledWith({
+    expect(mockNitroHealth.readStatistics).toHaveBeenCalledWith('activeEnergyBurned', {
       startDate: expect.any(Date),
       endDate: expect.any(Date),
-      limit: 7,
-      ascending: false,
+      bucket: 'day',
+      metrics: ['sum'],
     })
   })
 
-  it('requests steps permission on demand when reading daily step totals', async () => {
+  it('requests steps permission on demand when reading daily step statistics', async () => {
     mockNitroHealth.getAvailabilityStatus.mockReturnValue('available')
     mockNitroHealth.requestAuthorization.mockResolvedValue(grantedStepsResult)
-    mockNitroHealth.readDailyStepTotals.mockResolvedValue([])
+    mockNitroHealth.readStatistics.mockResolvedValue([])
 
     render(<App />)
 
@@ -268,14 +268,14 @@ describe('App', () => {
     fireEvent.press(screen.getByText('Read daily step totals'))
 
     await waitFor(() => {
-      expect(mockNitroHealth.readDailyStepTotals).toHaveBeenCalledTimes(1)
+      expect(mockNitroHealth.readStatistics).toHaveBeenCalledTimes(1)
     })
     expect(mockNitroHealth.requestAuthorization).toHaveBeenCalledWith([
       { accessType: 'read', dataType: 'steps' },
     ])
   })
 
-  it('blocks reading daily step totals when read permission is denied', async () => {
+  it('blocks reading daily step statistics when read permission is denied', async () => {
     mockNitroHealth.getAvailabilityStatus.mockReturnValue('available')
     mockNitroHealth.requestAuthorization.mockResolvedValue({
       status: 'denied',
@@ -293,7 +293,7 @@ describe('App', () => {
     expect(
       await screen.findByText('Read permission denied. Open health settings to enable it.')
     ).toBeTruthy()
-    expect(mockNitroHealth.readDailyStepTotals).not.toHaveBeenCalled()
+    expect(mockNitroHealth.readStatistics).not.toHaveBeenCalled()
   })
 
   it('saves a steps sample after requesting write permission on demand', async () => {
