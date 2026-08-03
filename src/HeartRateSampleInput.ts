@@ -1,3 +1,5 @@
+import type { HealthRecordSync } from './HealthRecordSync'
+
 /** Heart rate sample accepted by {@linkcode NitroHealth.saveHeartRate}. */
 export interface HeartRateSampleInput {
   /** Instant the reading was taken. */
@@ -8,4 +10,6 @@ export interface HeartRateSampleInput {
    * integer there; iOS stores the exact value.
    */
   bpm: number
+  /** Optional logical identity that makes retries idempotent and higher versions replace. */
+  sync?: HealthRecordSync
 }

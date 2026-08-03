@@ -2,4 +2,6 @@
 export interface NativeHeartRateSampleInput {
   timeMs: number
   bpm: number
+  syncId?: string
+  syncVersion?: number
 }

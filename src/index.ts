@@ -64,6 +64,7 @@ import {
   assertChangesToken,
   assertNonEmptySamples,
   assertPermissions,
+  assertUniqueSampleSyncIds,
 } from './internal/validation'
 
 export type { ActiveEnergyBurnedSample } from './ActiveEnergyBurnedSample'
@@ -82,6 +83,7 @@ export type { HealthDateRangeQuery } from './HealthDateRangeQuery'
 export type { HealthPermission } from './HealthPermission'
 export type { HealthPermissionAccessType } from './HealthPermissionAccessType'
 export type { HealthRecordChange } from './HealthRecordChange'
+export type { HealthRecordSync } from './HealthRecordSync'
 export type { HealthSamplePage } from './HealthSamplePage'
 export type { HealthSampleByDataType } from './HealthSampleByDataType'
 export type { HealthSampleIdentity } from './HealthSampleIdentity'
@@ -333,41 +335,51 @@ export const NitroHealth: NitroHealth = {
   },
   async saveSteps(samples) {
     assertNonEmptySamples(samples)
-    return NitroHealthNative.saveSteps(samples.map(makeNativeStepSampleInput))
+    const nativeSamples = samples.map(makeNativeStepSampleInput)
+    assertUniqueSampleSyncIds(samples)
+    return NitroHealthNative.saveSteps(nativeSamples)
   },
   async saveDistance(samples) {
     assertNonEmptySamples(samples)
-    return NitroHealthNative.saveDistance(samples.map(makeNativeDistanceSampleInput))
+    const nativeSamples = samples.map(makeNativeDistanceSampleInput)
+    assertUniqueSampleSyncIds(samples)
+    return NitroHealthNative.saveDistance(nativeSamples)
   },
   async saveActiveEnergyBurned(samples) {
     assertNonEmptySamples(samples)
-    return NitroHealthNative.saveActiveEnergyBurned(
-      samples.map(makeNativeActiveEnergyBurnedSampleInput)
-    )
+    const nativeSamples = samples.map(makeNativeActiveEnergyBurnedSampleInput)
+    assertUniqueSampleSyncIds(samples)
+    return NitroHealthNative.saveActiveEnergyBurned(nativeSamples)
   },
   async saveHeartRate(samples) {
     assertNonEmptySamples(samples)
-    return NitroHealthNative.saveHeartRate(samples.map(makeNativeHeartRateSampleInput))
+    const nativeSamples = samples.map(makeNativeHeartRateSampleInput)
+    assertUniqueSampleSyncIds(samples)
+    return NitroHealthNative.saveHeartRate(nativeSamples)
   },
   async saveBodyMass(samples) {
     assertNonEmptySamples(samples)
-    return NitroHealthNative.saveBodyMass(samples.map(makeNativeBodyMassSampleInput))
+    const nativeSamples = samples.map(makeNativeBodyMassSampleInput)
+    assertUniqueSampleSyncIds(samples)
+    return NitroHealthNative.saveBodyMass(nativeSamples)
   },
   async saveRestingHeartRate(samples) {
     assertNonEmptySamples(samples)
-    return NitroHealthNative.saveRestingHeartRate(
-      samples.map(makeNativeRestingHeartRateSampleInput)
-    )
+    const nativeSamples = samples.map(makeNativeRestingHeartRateSampleInput)
+    assertUniqueSampleSyncIds(samples)
+    return NitroHealthNative.saveRestingHeartRate(nativeSamples)
   },
   async saveOxygenSaturation(samples) {
     assertNonEmptySamples(samples)
-    return NitroHealthNative.saveOxygenSaturation(
-      samples.map(makeNativeOxygenSaturationSampleInput)
-    )
+    const nativeSamples = samples.map(makeNativeOxygenSaturationSampleInput)
+    assertUniqueSampleSyncIds(samples)
+    return NitroHealthNative.saveOxygenSaturation(nativeSamples)
   },
   async saveHeight(samples) {
     assertNonEmptySamples(samples)
-    return NitroHealthNative.saveHeight(samples.map(makeNativeHeightSampleInput))
+    const nativeSamples = samples.map(makeNativeHeightSampleInput)
+    assertUniqueSampleSyncIds(samples)
+    return NitroHealthNative.saveHeight(nativeSamples)
   },
   async deleteSamplesByUuids(dataType, uuids) {
     assertDeletableUuids(uuids)

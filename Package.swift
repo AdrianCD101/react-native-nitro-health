@@ -20,6 +20,7 @@ let package = Package(
                 "SampleCursorUtils.swift",
                 "SampleUuidParsing.swift",
                 "StatisticsBucketUtils.swift",
+                "SyncMetadataNormalization.swift",
                 "WorkoutActivityTypeMapping.swift",
             ]
         ),

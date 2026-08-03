@@ -127,19 +127,19 @@ extension HybridNitroHealth {
 
     func saveRestingHeartRate(samples: [NativeRestingHeartRateSampleInput]) throws -> Promise<Void> {
         return try saveQuantitySamples(dataType: "restingHeartRate", label: "resting heart rate") { quantityType in
-            makeRestingHeartRateQuantitySamples(samples: samples, quantityType: quantityType)
+            try makeRestingHeartRateQuantitySamples(samples: samples, quantityType: quantityType)
         }
     }
 
     func saveOxygenSaturation(samples: [NativeOxygenSaturationSampleInput]) throws -> Promise<Void> {
         return try saveQuantitySamples(dataType: "oxygenSaturation", label: "oxygen saturation") { quantityType in
-            makeOxygenSaturationQuantitySamples(samples: samples, quantityType: quantityType)
+            try makeOxygenSaturationQuantitySamples(samples: samples, quantityType: quantityType)
         }
     }
 
     func saveHeight(samples: [NativeHeightSampleInput]) throws -> Promise<Void> {
         return try saveQuantitySamples(dataType: "height", label: "height") { quantityType in
-            makeHeightQuantitySamples(samples: samples, quantityType: quantityType)
+            try makeHeightQuantitySamples(samples: samples, quantityType: quantityType)
         }
     }
 }

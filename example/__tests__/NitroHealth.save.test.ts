@@ -95,6 +95,155 @@ describe('NitroHealth save contract', () => {
     ])
   })
 
+  it('maps versioned sync identity for every writable sample type', async () => {
+    const startDate = new Date('2026-01-01T09:00:00.000Z')
+    const endDate = new Date('2026-01-01T09:30:00.000Z')
+    const sync = { id: ' backend-record-42 ', version: 7 }
+    const nativeSync = { syncId: sync.id, syncVersion: sync.version }
+
+    await NitroHealth.saveSteps([{ startDate, endDate, count: 512, sync }])
+    await NitroHealth.saveDistance([{ startDate, endDate, distanceMeters: 1250.5, sync }])
+    await NitroHealth.saveActiveEnergyBurned([{ startDate, endDate, kilocalories: 215, sync }])
+    await NitroHealth.saveHeartRate([{ date: startDate, bpm: 72, sync }])
+    await NitroHealth.saveBodyMass([{ date: startDate, kilograms: 72.5, sync }])
+    await NitroHealth.saveRestingHeartRate([{ date: startDate, bpm: 58, sync }])
+    await NitroHealth.saveOxygenSaturation([{ date: startDate, percentage: 97.5, sync }])
+    await NitroHealth.saveHeight([{ date: startDate, meters: 1.78, sync }])
+
+    expect(mockNitroHealth.saveSteps).toHaveBeenCalledWith([
+      { startTimeMs: startDate.getTime(), endTimeMs: endDate.getTime(), count: 512, ...nativeSync },
+    ])
+    expect(mockNitroHealth.saveDistance).toHaveBeenCalledWith([
+      {
+        startTimeMs: startDate.getTime(),
+        endTimeMs: endDate.getTime(),
+        distanceMeters: 1250.5,
+        ...nativeSync,
+      },
+    ])
+    expect(mockNitroHealth.saveActiveEnergyBurned).toHaveBeenCalledWith([
+      {
+        startTimeMs: startDate.getTime(),
+        endTimeMs: endDate.getTime(),
+        kilocalories: 215,
+        ...nativeSync,
+      },
+    ])
+    expect(mockNitroHealth.saveHeartRate).toHaveBeenCalledWith([
+      { timeMs: startDate.getTime(), bpm: 72, ...nativeSync },
+    ])
+    expect(mockNitroHealth.saveBodyMass).toHaveBeenCalledWith([
+      { timeMs: startDate.getTime(), kilograms: 72.5, ...nativeSync },
+    ])
+    expect(mockNitroHealth.saveRestingHeartRate).toHaveBeenCalledWith([
+      { timeMs: startDate.getTime(), bpm: 58, ...nativeSync },
+    ])
+    expect(mockNitroHealth.saveOxygenSaturation).toHaveBeenCalledWith([
+      { timeMs: startDate.getTime(), percentage: 97.5, ...nativeSync },
+    ])
+    expect(mockNitroHealth.saveHeight).toHaveBeenCalledWith([
+      { timeMs: startDate.getTime(), meters: 1.78, ...nativeSync },
+    ])
+  })
+
+  it('rejects invalid sync identity before crossing the native boundary', async () => {
+    const startDate = new Date('2026-01-01T09:00:00.000Z')
+    const endDate = new Date('2026-01-01T09:30:00.000Z')
+
+    for (const sync of [null, 'record-1']) {
+      await expect(
+        NitroHealth.saveSteps([{ startDate, endDate, count: 100, sync: sync as never }])
+      ).rejects.toThrow('samples[0]: sync must contain an id and version')
+    }
+
+    for (const id of ['', '  ']) {
+      await expect(
+        NitroHealth.saveSteps([{ startDate, endDate, count: 100, sync: { id, version: 0 } }])
+      ).rejects.toThrow('samples[0]: sync.id must be a non-empty string')
+    }
+
+    await expect(
+      NitroHealth.saveSteps([
+        {
+          startDate,
+          endDate,
+          count: 100,
+          sync: { id: 42, version: 0 } as never,
+        },
+      ])
+    ).rejects.toThrow('samples[0]: sync.id must be a non-empty string')
+
+    for (const version of [
+      -1,
+      1.5,
+      Number.NaN,
+      Number.POSITIVE_INFINITY,
+      Number.MAX_SAFE_INTEGER + 1,
+    ]) {
+      await expect(
+        NitroHealth.saveSteps([
+          { startDate, endDate, count: 100, sync: { id: 'record-1', version } },
+        ])
+      ).rejects.toThrow('samples[0]: sync.version must be a non-negative safe integer')
+    }
+
+    await expect(
+      NitroHealth.saveSteps([
+        {
+          startDate,
+          endDate,
+          count: 100,
+          sync: { id: 'record-1' } as never,
+        },
+      ])
+    ).rejects.toThrow('samples[0]: sync.version must be a non-negative safe integer')
+
+    expect(mockNitroHealth.saveSteps).not.toHaveBeenCalled()
+  })
+
+  it('rejects duplicate sync identities within one save call', async () => {
+    const startDate = new Date('2026-01-01T09:00:00.000Z')
+    const endDate = new Date('2026-01-01T09:30:00.000Z')
+
+    await expect(
+      NitroHealth.saveSteps([
+        { startDate, endDate, count: 100, sync: { id: 'record-1', version: 0 } },
+        { startDate, endDate, count: 200, sync: { id: 'record-1', version: 1 } },
+      ])
+    ).rejects.toThrow('samples[1]: sync.id duplicates samples[0].sync.id within this save call')
+
+    expect(mockNitroHealth.saveSteps).not.toHaveBeenCalled()
+  })
+
+  it('allows keyed and unkeyed samples in one save call', async () => {
+    const startDate = new Date('2026-01-01T09:00:00.000Z')
+    const endDate = new Date('2026-01-01T09:30:00.000Z')
+
+    await NitroHealth.saveSteps([
+      { startDate, endDate, count: 100 },
+      { startDate, endDate, count: 200, sync: { id: 'Record-A', version: 0 } },
+      { startDate, endDate, count: 300, sync: { id: 'record-a', version: 0 } },
+    ])
+
+    expect(mockNitroHealth.saveSteps).toHaveBeenCalledWith([
+      { startTimeMs: startDate.getTime(), endTimeMs: endDate.getTime(), count: 100 },
+      {
+        startTimeMs: startDate.getTime(),
+        endTimeMs: endDate.getTime(),
+        count: 200,
+        syncId: 'Record-A',
+        syncVersion: 0,
+      },
+      {
+        startTimeMs: startDate.getTime(),
+        endTimeMs: endDate.getTime(),
+        count: 300,
+        syncId: 'record-a',
+        syncVersion: 0,
+      },
+    ])
+  })
+
   it('rejects empty sample arrays before crossing the native boundary', async () => {
     await expect(NitroHealth.saveSteps([])).rejects.toThrow('At least one sample is required')
     await expect(NitroHealth.saveDistance([])).rejects.toThrow('At least one sample is required')

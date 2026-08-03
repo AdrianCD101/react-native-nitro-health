@@ -8,7 +8,6 @@ import androidx.health.connect.client.records.OxygenSaturationRecord
 import androidx.health.connect.client.records.RestingHeartRateRecord
 import androidx.health.connect.client.records.StepsRecord
 import androidx.health.connect.client.records.WeightRecord
-import androidx.health.connect.client.records.metadata.Metadata
 import androidx.health.connect.client.units.Energy
 import androidx.health.connect.client.units.Length
 import androidx.health.connect.client.units.Mass
@@ -32,7 +31,7 @@ internal fun toStepsRecords(samples: Array<NativeStepSampleInput>): List<StepsRe
             endTime = Instant.ofEpochMilli(sample.endTimeMs.toLong()),
             endZoneOffset = null,
             count = sample.count.toLong(),
-            metadata = Metadata.unknownRecordingMethod()
+            metadata = makeSampleMetadata(sample.syncId, sample.syncVersion)
         )
     }
 }
@@ -45,7 +44,7 @@ internal fun toDistanceRecords(samples: Array<NativeDistanceSampleInput>): List<
             endTime = Instant.ofEpochMilli(sample.endTimeMs.toLong()),
             endZoneOffset = null,
             distance = Length.meters(sample.distanceMeters),
-            metadata = Metadata.unknownRecordingMethod()
+            metadata = makeSampleMetadata(sample.syncId, sample.syncVersion)
         )
     }
 }
@@ -60,7 +59,7 @@ internal fun toActiveCaloriesBurnedRecords(
             endTime = Instant.ofEpochMilli(sample.endTimeMs.toLong()),
             endZoneOffset = null,
             energy = Energy.kilocalories(sample.kilocalories),
-            metadata = Metadata.unknownRecordingMethod()
+            metadata = makeSampleMetadata(sample.syncId, sample.syncVersion)
         )
     }
 }
@@ -84,7 +83,7 @@ internal fun toHeartRateRecords(samples: Array<NativeHeartRateSampleInput>): Lis
                     beatsPerMinute = sample.bpm.roundToLong()
                 )
             ),
-            metadata = Metadata.unknownRecordingMethod()
+            metadata = makeSampleMetadata(sample.syncId, sample.syncVersion)
         )
     }
 }
@@ -95,7 +94,7 @@ internal fun toWeightRecords(samples: Array<NativeBodyMassSampleInput>): List<We
             time = Instant.ofEpochMilli(sample.timeMs.toLong()),
             zoneOffset = null,
             weight = Mass.kilograms(sample.kilograms),
-            metadata = Metadata.unknownRecordingMethod()
+            metadata = makeSampleMetadata(sample.syncId, sample.syncVersion)
         )
     }
 }
@@ -110,7 +109,7 @@ internal fun toRestingHeartRateRecords(
             // Health Connect stores whole bpm; round to nearest instead of truncating
             // so fractional readings (e.g. 72.9) don't lose almost a full beat.
             beatsPerMinute = sample.bpm.roundToLong(),
-            metadata = Metadata.unknownRecordingMethod()
+            metadata = makeSampleMetadata(sample.syncId, sample.syncVersion)
         )
     }
 }
@@ -123,7 +122,7 @@ internal fun toOxygenSaturationRecords(
             time = Instant.ofEpochMilli(sample.timeMs.toLong()),
             zoneOffset = null,
             percentage = Percentage(sample.percentage),
-            metadata = Metadata.unknownRecordingMethod()
+            metadata = makeSampleMetadata(sample.syncId, sample.syncVersion)
         )
     }
 }
@@ -134,7 +133,7 @@ internal fun toHeightRecords(samples: Array<NativeHeightSampleInput>): List<Heig
             time = Instant.ofEpochMilli(sample.timeMs.toLong()),
             zoneOffset = null,
             height = Length.meters(sample.meters),
-            metadata = Metadata.unknownRecordingMethod()
+            metadata = makeSampleMetadata(sample.syncId, sample.syncVersion)
         )
     }
 }

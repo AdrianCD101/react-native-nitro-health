@@ -23,7 +23,13 @@ data class NativeRestingHeartRateSampleInput(
   val timeMs: Double,
   @DoNotStrip
   @Keep
-  val bpm: Double
+  val bpm: Double,
+  @DoNotStrip
+  @Keep
+  val syncId: String?,
+  @DoNotStrip
+  @Keep
+  val syncVersion: Double?
 ) {
   /* primary constructor */
 
@@ -32,12 +38,16 @@ data class NativeRestingHeartRateSampleInput(
     if (other !is NativeRestingHeartRateSampleInput) return false
     return Objects.deepEquals(this.timeMs, other.timeMs)
       && Objects.deepEquals(this.bpm, other.bpm)
+      && Objects.deepEquals(this.syncId, other.syncId)
+      && Objects.deepEquals(this.syncVersion, other.syncVersion)
   }
 
   override fun hashCode(): Int {
     return arrayOf<Any?>(
       timeMs,
-      bpm
+      bpm,
+      syncId,
+      syncVersion
     ).contentDeepHashCode()
   }
 
@@ -49,8 +59,8 @@ data class NativeRestingHeartRateSampleInput(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(timeMs: Double, bpm: Double): NativeRestingHeartRateSampleInput {
-      return NativeRestingHeartRateSampleInput(timeMs, bpm)
+    private fun fromCpp(timeMs: Double, bpm: Double, syncId: String?, syncVersion: Double?): NativeRestingHeartRateSampleInput {
+      return NativeRestingHeartRateSampleInput(timeMs, bpm, syncId, syncVersion)
     }
   }
 }

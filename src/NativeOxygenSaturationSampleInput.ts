@@ -2,4 +2,6 @@
 export interface NativeOxygenSaturationSampleInput {
   timeMs: number
   percentage: number
+  syncId?: string
+  syncVersion?: number
 }

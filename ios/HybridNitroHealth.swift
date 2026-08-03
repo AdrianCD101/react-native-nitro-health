@@ -328,31 +328,31 @@ class HybridNitroHealth: HybridNitroHealthSpec {
     // permission error when sharing is not authorized (including when not yet determined).
     func saveSteps(samples: [NativeStepSampleInput]) throws -> Promise<Void> {
         return try saveQuantitySamples(dataType: "steps", label: "steps") { quantityType in
-            makeStepQuantitySamples(samples: samples, quantityType: quantityType)
+            try makeStepQuantitySamples(samples: samples, quantityType: quantityType)
         }
     }
 
     func saveDistance(samples: [NativeDistanceSampleInput]) throws -> Promise<Void> {
         return try saveQuantitySamples(dataType: "distance", label: "distance") { quantityType in
-            makeDistanceQuantitySamples(samples: samples, quantityType: quantityType)
+            try makeDistanceQuantitySamples(samples: samples, quantityType: quantityType)
         }
     }
 
     func saveActiveEnergyBurned(samples: [NativeActiveEnergyBurnedSampleInput]) throws -> Promise<Void> {
         return try saveQuantitySamples(dataType: "activeEnergyBurned", label: "active energy burned") { quantityType in
-            makeActiveEnergyBurnedQuantitySamples(samples: samples, quantityType: quantityType)
+            try makeActiveEnergyBurnedQuantitySamples(samples: samples, quantityType: quantityType)
         }
     }
 
     func saveHeartRate(samples: [NativeHeartRateSampleInput]) throws -> Promise<Void> {
         return try saveQuantitySamples(dataType: "heartRate", label: "heart rate") { quantityType in
-            makeHeartRateQuantitySamples(samples: samples, quantityType: quantityType)
+            try makeHeartRateQuantitySamples(samples: samples, quantityType: quantityType)
         }
     }
 
     func saveBodyMass(samples: [NativeBodyMassSampleInput]) throws -> Promise<Void> {
         return try saveQuantitySamples(dataType: "bodyMass", label: "body mass") { quantityType in
-            makeBodyMassQuantitySamples(samples: samples, quantityType: quantityType)
+            try makeBodyMassQuantitySamples(samples: samples, quantityType: quantityType)
         }
     }
 
@@ -364,7 +364,7 @@ class HybridNitroHealth: HybridNitroHealthSpec {
     func saveQuantitySamples(
         dataType: String,
         label: String,
-        makeSamples: @escaping (HKQuantityType) -> [HKQuantitySample]
+        makeSamples: @escaping (HKQuantityType) throws -> [HKQuantitySample]
     ) throws -> Promise<Void> {
         if !HKHealthStore.isHealthDataAvailable() {
             throw permissionError("Health data is not available")
@@ -373,7 +373,8 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         return Promise<Void>.async {
             let quantityType = try makeHealthKitQuantityType(dataType: dataType)
             try self.requireWriteAuthorization(for: quantityType, label: label)
-            try await self.saveHealthKitSamples(makeSamples(quantityType))
+            let samples = try makeSamples(quantityType)
+            try await self.saveHealthKitSamples(samples)
         }
     }
 

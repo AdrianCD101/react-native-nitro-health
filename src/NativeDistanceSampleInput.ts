@@ -3,4 +3,6 @@ export interface NativeDistanceSampleInput {
   startTimeMs: number
   endTimeMs: number
   distanceMeters: number
+  syncId?: string
+  syncVersion?: number
 }

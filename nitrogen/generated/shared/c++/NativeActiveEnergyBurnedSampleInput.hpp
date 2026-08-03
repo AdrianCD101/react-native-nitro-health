@@ -30,7 +30,8 @@
 
 
 
-
+#include <string>
+#include <optional>
 
 namespace margelo::nitro::nitrohealth {
 
@@ -42,10 +43,12 @@ namespace margelo::nitro::nitrohealth {
     double startTimeMs     SWIFT_PRIVATE;
     double endTimeMs     SWIFT_PRIVATE;
     double kilocalories     SWIFT_PRIVATE;
+    std::optional<std::string> syncId     SWIFT_PRIVATE;
+    std::optional<double> syncVersion     SWIFT_PRIVATE;
 
   public:
     NativeActiveEnergyBurnedSampleInput() = default;
-    explicit NativeActiveEnergyBurnedSampleInput(double startTimeMs, double endTimeMs, double kilocalories): startTimeMs(startTimeMs), endTimeMs(endTimeMs), kilocalories(kilocalories) {}
+    explicit NativeActiveEnergyBurnedSampleInput(double startTimeMs, double endTimeMs, double kilocalories, std::optional<std::string> syncId, std::optional<double> syncVersion): startTimeMs(startTimeMs), endTimeMs(endTimeMs), kilocalories(kilocalories), syncId(syncId), syncVersion(syncVersion) {}
 
   public:
     friend bool operator==(const NativeActiveEnergyBurnedSampleInput& lhs, const NativeActiveEnergyBurnedSampleInput& rhs) = default;
@@ -63,7 +66,9 @@ namespace margelo::nitro {
       return margelo::nitro::nitrohealth::NativeActiveEnergyBurnedSampleInput(
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "startTimeMs"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs"))),
-        JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "kilocalories")))
+        JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "kilocalories"))),
+        JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "syncId"))),
+        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "syncVersion")))
       );
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::nitrohealth::NativeActiveEnergyBurnedSampleInput& arg) {
@@ -71,6 +76,8 @@ namespace margelo::nitro {
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "startTimeMs"), JSIConverter<double>::toJSI(runtime, arg.startTimeMs));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs"), JSIConverter<double>::toJSI(runtime, arg.endTimeMs));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "kilocalories"), JSIConverter<double>::toJSI(runtime, arg.kilocalories));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "syncId"), JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.syncId));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "syncVersion"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.syncVersion));
       return obj;
     }
     static inline bool canConvert(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -84,6 +91,8 @@ namespace margelo::nitro {
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "startTimeMs")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "kilocalories")))) return false;
+      if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "syncId")))) return false;
+      if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "syncVersion")))) return false;
       return true;
     }
   };

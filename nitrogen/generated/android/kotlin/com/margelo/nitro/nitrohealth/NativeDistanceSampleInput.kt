@@ -26,7 +26,13 @@ data class NativeDistanceSampleInput(
   val endTimeMs: Double,
   @DoNotStrip
   @Keep
-  val distanceMeters: Double
+  val distanceMeters: Double,
+  @DoNotStrip
+  @Keep
+  val syncId: String?,
+  @DoNotStrip
+  @Keep
+  val syncVersion: Double?
 ) {
   /* primary constructor */
 
@@ -36,13 +42,17 @@ data class NativeDistanceSampleInput(
     return Objects.deepEquals(this.startTimeMs, other.startTimeMs)
       && Objects.deepEquals(this.endTimeMs, other.endTimeMs)
       && Objects.deepEquals(this.distanceMeters, other.distanceMeters)
+      && Objects.deepEquals(this.syncId, other.syncId)
+      && Objects.deepEquals(this.syncVersion, other.syncVersion)
   }
 
   override fun hashCode(): Int {
     return arrayOf<Any?>(
       startTimeMs,
       endTimeMs,
-      distanceMeters
+      distanceMeters,
+      syncId,
+      syncVersion
     ).contentDeepHashCode()
   }
 
@@ -54,8 +64,8 @@ data class NativeDistanceSampleInput(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(startTimeMs: Double, endTimeMs: Double, distanceMeters: Double): NativeDistanceSampleInput {
-      return NativeDistanceSampleInput(startTimeMs, endTimeMs, distanceMeters)
+    private fun fromCpp(startTimeMs: Double, endTimeMs: Double, distanceMeters: Double, syncId: String?, syncVersion: Double?): NativeDistanceSampleInput {
+      return NativeDistanceSampleInput(startTimeMs, endTimeMs, distanceMeters, syncId, syncVersion)
     }
   }
 }

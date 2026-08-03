@@ -10,7 +10,8 @@
 #include <fbjni/fbjni.h>
 #include "NativeHeartRateSampleInput.hpp"
 
-
+#include <optional>
+#include <string>
 
 namespace margelo::nitro::nitrohealth {
 
@@ -35,9 +36,15 @@ namespace margelo::nitro::nitrohealth {
       double timeMs = this->getFieldValue(fieldTimeMs);
       static const auto fieldBpm = clazz->getField<double>("bpm");
       double bpm = this->getFieldValue(fieldBpm);
+      static const auto fieldSyncId = clazz->getField<jni::JString>("syncId");
+      jni::local_ref<jni::JString> syncId = this->getFieldValue(fieldSyncId);
+      static const auto fieldSyncVersion = clazz->getField<jni::JDouble>("syncVersion");
+      jni::local_ref<jni::JDouble> syncVersion = this->getFieldValue(fieldSyncVersion);
       return NativeHeartRateSampleInput(
         timeMs,
-        bpm
+        bpm,
+        syncId != nullptr ? std::make_optional(syncId->toStdString()) : std::nullopt,
+        syncVersion != nullptr ? std::make_optional(syncVersion->value()) : std::nullopt
       );
     }
 
@@ -47,13 +54,15 @@ namespace margelo::nitro::nitrohealth {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeHeartRateSampleInput::javaobject> fromCpp(const NativeHeartRateSampleInput& value) {
-      using JSignature = JNativeHeartRateSampleInput(double, double);
+      using JSignature = JNativeHeartRateSampleInput(double, double, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JDouble>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
         clazz,
         value.timeMs,
-        value.bpm
+        value.bpm,
+        value.syncId.has_value() ? jni::make_jstring(value.syncId.value()) : nullptr,
+        value.syncVersion.has_value() ? jni::JDouble::valueOf(value.syncVersion.value()) : nullptr
       );
     }
   };

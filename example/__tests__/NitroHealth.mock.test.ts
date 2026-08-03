@@ -38,6 +38,22 @@ describe('NitroHealth Jest mock', () => {
     await expect(NitroHealth.readHeight(range)).resolves.toEqual({ samples: [] })
     await expect(NitroHealth.readSleepSamples(range)).resolves.toEqual({ samples: [] })
     await expect(NitroHealth.readWorkouts(range)).resolves.toEqual({ samples: [] })
+    await expect(
+      NitroHealth.saveSteps([
+        {
+          ...range,
+          count: 100,
+          sync: { id: 'mock-step-record', version: 0 },
+        },
+      ])
+    ).resolves.toBeUndefined()
+    expect(NitroHealth.saveSteps).toHaveBeenCalledWith([
+      {
+        ...range,
+        count: 100,
+        sync: { id: 'mock-step-record', version: 0 },
+      },
+    ])
     await expect(NitroHealth.getRequestStatusForAuthorization([])).resolves.toBe('unknown')
   })
 

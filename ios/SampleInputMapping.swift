@@ -8,16 +8,37 @@
 import Foundation
 import HealthKit
 
+private func makeHealthKitSyncMetadata(
+    syncId: String?,
+    syncVersion: Double?
+) throws -> [String: Any]? {
+    guard let syncMetadata = try normalizeSyncMetadata(
+        syncId: syncId,
+        syncVersion: syncVersion
+    ) else {
+        return nil
+    }
+
+    return [
+        HKMetadataKeySyncIdentifier: syncMetadata.identifier,
+        HKMetadataKeySyncVersion: NSNumber(value: syncMetadata.version),
+    ]
+}
+
 func makeStepQuantitySamples(
     samples: [NativeStepSampleInput],
     quantityType: HKQuantityType
-) -> [HKQuantitySample] {
-    return samples.map { sample in
+) throws -> [HKQuantitySample] {
+    return try samples.map { sample in
         HKQuantitySample(
             type: quantityType,
             quantity: HKQuantity(unit: HKUnit.count(), doubleValue: sample.count),
             start: Date(timeIntervalSince1970: sample.startTimeMs / 1000),
-            end: Date(timeIntervalSince1970: sample.endTimeMs / 1000)
+            end: Date(timeIntervalSince1970: sample.endTimeMs / 1000),
+            metadata: try makeHealthKitSyncMetadata(
+                syncId: sample.syncId,
+                syncVersion: sample.syncVersion
+            )
         )
     }
 }
@@ -25,13 +46,17 @@ func makeStepQuantitySamples(
 func makeDistanceQuantitySamples(
     samples: [NativeDistanceSampleInput],
     quantityType: HKQuantityType
-) -> [HKQuantitySample] {
-    return samples.map { sample in
+) throws -> [HKQuantitySample] {
+    return try samples.map { sample in
         HKQuantitySample(
             type: quantityType,
             quantity: HKQuantity(unit: HKUnit.meter(), doubleValue: sample.distanceMeters),
             start: Date(timeIntervalSince1970: sample.startTimeMs / 1000),
-            end: Date(timeIntervalSince1970: sample.endTimeMs / 1000)
+            end: Date(timeIntervalSince1970: sample.endTimeMs / 1000),
+            metadata: try makeHealthKitSyncMetadata(
+                syncId: sample.syncId,
+                syncVersion: sample.syncVersion
+            )
         )
     }
 }
@@ -39,13 +64,17 @@ func makeDistanceQuantitySamples(
 func makeActiveEnergyBurnedQuantitySamples(
     samples: [NativeActiveEnergyBurnedSampleInput],
     quantityType: HKQuantityType
-) -> [HKQuantitySample] {
-    return samples.map { sample in
+) throws -> [HKQuantitySample] {
+    return try samples.map { sample in
         HKQuantitySample(
             type: quantityType,
             quantity: HKQuantity(unit: HKUnit.kilocalorie(), doubleValue: sample.kilocalories),
             start: Date(timeIntervalSince1970: sample.startTimeMs / 1000),
-            end: Date(timeIntervalSince1970: sample.endTimeMs / 1000)
+            end: Date(timeIntervalSince1970: sample.endTimeMs / 1000),
+            metadata: try makeHealthKitSyncMetadata(
+                syncId: sample.syncId,
+                syncVersion: sample.syncVersion
+            )
         )
     }
 }
@@ -53,17 +82,21 @@ func makeActiveEnergyBurnedQuantitySamples(
 func makeHeartRateQuantitySamples(
     samples: [NativeHeartRateSampleInput],
     quantityType: HKQuantityType
-) -> [HKQuantitySample] {
+) throws -> [HKQuantitySample] {
     let bpmUnit = HKUnit.count().unitDivided(by: HKUnit.minute())
 
-    return samples.map { sample in
+    return try samples.map { sample in
         let date = Date(timeIntervalSince1970: sample.timeMs / 1000)
 
         return HKQuantitySample(
             type: quantityType,
             quantity: HKQuantity(unit: bpmUnit, doubleValue: sample.bpm),
             start: date,
-            end: date
+            end: date,
+            metadata: try makeHealthKitSyncMetadata(
+                syncId: sample.syncId,
+                syncVersion: sample.syncVersion
+            )
         )
     }
 }
@@ -71,17 +104,21 @@ func makeHeartRateQuantitySamples(
 func makeBodyMassQuantitySamples(
     samples: [NativeBodyMassSampleInput],
     quantityType: HKQuantityType
-) -> [HKQuantitySample] {
+) throws -> [HKQuantitySample] {
     let kilogramUnit = HKUnit.gramUnit(with: .kilo)
 
-    return samples.map { sample in
+    return try samples.map { sample in
         let date = Date(timeIntervalSince1970: sample.timeMs / 1000)
 
         return HKQuantitySample(
             type: quantityType,
             quantity: HKQuantity(unit: kilogramUnit, doubleValue: sample.kilograms),
             start: date,
-            end: date
+            end: date,
+            metadata: try makeHealthKitSyncMetadata(
+                syncId: sample.syncId,
+                syncVersion: sample.syncVersion
+            )
         )
     }
 }
@@ -89,17 +126,21 @@ func makeBodyMassQuantitySamples(
 func makeRestingHeartRateQuantitySamples(
     samples: [NativeRestingHeartRateSampleInput],
     quantityType: HKQuantityType
-) -> [HKQuantitySample] {
+) throws -> [HKQuantitySample] {
     let bpmUnit = HKUnit.count().unitDivided(by: HKUnit.minute())
 
-    return samples.map { sample in
+    return try samples.map { sample in
         let date = Date(timeIntervalSince1970: sample.timeMs / 1000)
 
         return HKQuantitySample(
             type: quantityType,
             quantity: HKQuantity(unit: bpmUnit, doubleValue: sample.bpm),
             start: date,
-            end: date
+            end: date,
+            metadata: try makeHealthKitSyncMetadata(
+                syncId: sample.syncId,
+                syncVersion: sample.syncVersion
+            )
         )
     }
 }
@@ -107,8 +148,8 @@ func makeRestingHeartRateQuantitySamples(
 func makeOxygenSaturationQuantitySamples(
     samples: [NativeOxygenSaturationSampleInput],
     quantityType: HKQuantityType
-) -> [HKQuantitySample] {
-    return samples.map { sample in
+) throws -> [HKQuantitySample] {
+    return try samples.map { sample in
         let date = Date(timeIntervalSince1970: sample.timeMs / 1000)
 
         return HKQuantitySample(
@@ -117,7 +158,11 @@ func makeOxygenSaturationQuantitySamples(
             // percentage (0-100), so convert here (inverse of the *100 in readOxygenSaturation).
             quantity: HKQuantity(unit: HKUnit.percent(), doubleValue: sample.percentage / 100),
             start: date,
-            end: date
+            end: date,
+            metadata: try makeHealthKitSyncMetadata(
+                syncId: sample.syncId,
+                syncVersion: sample.syncVersion
+            )
         )
     }
 }
@@ -125,15 +170,19 @@ func makeOxygenSaturationQuantitySamples(
 func makeHeightQuantitySamples(
     samples: [NativeHeightSampleInput],
     quantityType: HKQuantityType
-) -> [HKQuantitySample] {
-    return samples.map { sample in
+) throws -> [HKQuantitySample] {
+    return try samples.map { sample in
         let date = Date(timeIntervalSince1970: sample.timeMs / 1000)
 
         return HKQuantitySample(
             type: quantityType,
             quantity: HKQuantity(unit: HKUnit.meter(), doubleValue: sample.meters),
             start: date,
-            end: date
+            end: date,
+            metadata: try makeHealthKitSyncMetadata(
+                syncId: sample.syncId,
+                syncVersion: sample.syncVersion
+            )
         )
     }
 }

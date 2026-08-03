@@ -2,4 +2,6 @@
 export interface NativeHeightSampleInput {
   timeMs: number
   meters: number
+  syncId?: string
+  syncVersion?: number
 }

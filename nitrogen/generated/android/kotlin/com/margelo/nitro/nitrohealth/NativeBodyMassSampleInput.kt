@@ -23,7 +23,13 @@ data class NativeBodyMassSampleInput(
   val timeMs: Double,
   @DoNotStrip
   @Keep
-  val kilograms: Double
+  val kilograms: Double,
+  @DoNotStrip
+  @Keep
+  val syncId: String?,
+  @DoNotStrip
+  @Keep
+  val syncVersion: Double?
 ) {
   /* primary constructor */
 
@@ -32,12 +38,16 @@ data class NativeBodyMassSampleInput(
     if (other !is NativeBodyMassSampleInput) return false
     return Objects.deepEquals(this.timeMs, other.timeMs)
       && Objects.deepEquals(this.kilograms, other.kilograms)
+      && Objects.deepEquals(this.syncId, other.syncId)
+      && Objects.deepEquals(this.syncVersion, other.syncVersion)
   }
 
   override fun hashCode(): Int {
     return arrayOf<Any?>(
       timeMs,
-      kilograms
+      kilograms,
+      syncId,
+      syncVersion
     ).contentDeepHashCode()
   }
 
@@ -49,8 +59,8 @@ data class NativeBodyMassSampleInput(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(timeMs: Double, kilograms: Double): NativeBodyMassSampleInput {
-      return NativeBodyMassSampleInput(timeMs, kilograms)
+    private fun fromCpp(timeMs: Double, kilograms: Double, syncId: String?, syncVersion: Double?): NativeBodyMassSampleInput {
+      return NativeBodyMassSampleInput(timeMs, kilograms, syncId, syncVersion)
     }
   }
 }

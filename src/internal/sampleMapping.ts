@@ -8,6 +8,7 @@ import type { HealthSamplePage } from '../HealthSamplePage'
 import type { HealthChangesResult } from '../HealthChangesResult'
 import type { HealthDataType } from '../HealthDataType'
 import type { HealthRecordChange } from '../HealthRecordChange'
+import type { HealthRecordSync } from '../HealthRecordSync'
 import type { HealthSampleByDataType } from '../HealthSampleByDataType'
 import type { HealthStatistics } from '../HealthStatistics'
 import type { HeartRateSample } from '../HeartRateSample'
@@ -84,6 +85,27 @@ function makeSampleInstant(sample: { date: Date }, index: number): number {
   return assertValidSampleDate(sample.date, index, 'date')
 }
 
+function makeNativeSync(
+  sync: HealthRecordSync | undefined,
+  index: number
+): { syncId?: string; syncVersion?: number } {
+  if (sync === undefined) return {}
+
+  if (typeof sync !== 'object' || sync === null) {
+    throw new Error(`samples[${index}]: sync must contain an id and version`)
+  }
+
+  if (typeof sync.id !== 'string' || sync.id.trim() === '') {
+    throw new Error(`samples[${index}]: sync.id must be a non-empty string`)
+  }
+
+  if (!Number.isSafeInteger(sync.version) || sync.version < 0) {
+    throw new Error(`samples[${index}]: sync.version must be a non-negative safe integer`)
+  }
+
+  return { syncId: sync.id, syncVersion: sync.version }
+}
+
 export function makeNativeStepSampleInput(
   sample: StepSampleInput,
   index: number
@@ -97,6 +119,7 @@ export function makeNativeStepSampleInput(
     startTimeMs,
     endTimeMs,
     count: sample.count,
+    ...makeNativeSync(sample.sync, index),
   }
 }
 
@@ -113,6 +136,7 @@ export function makeNativeDistanceSampleInput(
     startTimeMs,
     endTimeMs,
     distanceMeters: sample.distanceMeters,
+    ...makeNativeSync(sample.sync, index),
   }
 }
 
@@ -129,6 +153,7 @@ export function makeNativeActiveEnergyBurnedSampleInput(
     startTimeMs,
     endTimeMs,
     kilocalories: sample.kilocalories,
+    ...makeNativeSync(sample.sync, index),
   }
 }
 
@@ -143,6 +168,7 @@ export function makeNativeHeartRateSampleInput(
   return {
     timeMs,
     bpm: sample.bpm,
+    ...makeNativeSync(sample.sync, index),
   }
 }
 
@@ -158,6 +184,7 @@ export function makeNativeBodyMassSampleInput(
   return {
     timeMs,
     kilograms: sample.kilograms,
+    ...makeNativeSync(sample.sync, index),
   }
 }
 
@@ -172,6 +199,7 @@ export function makeNativeRestingHeartRateSampleInput(
   return {
     timeMs,
     bpm: sample.bpm,
+    ...makeNativeSync(sample.sync, index),
   }
 }
 
@@ -186,6 +214,7 @@ export function makeNativeOxygenSaturationSampleInput(
   return {
     timeMs,
     percentage: sample.percentage,
+    ...makeNativeSync(sample.sync, index),
   }
 }
 
@@ -201,6 +230,7 @@ export function makeNativeHeightSampleInput(
   return {
     timeMs,
     meters: sample.meters,
+    ...makeNativeSync(sample.sync, index),
   }
 }
 
