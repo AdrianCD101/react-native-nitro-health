@@ -180,6 +180,141 @@ open class HybridNitroHealthSpec_cxx {
   }
   
   @inline(__always)
+  public final func enableBackgroundDelivery(dataType: std.string, frequency: Int32) -> bridge.Result_std__shared_ptr_Promise_void___ {
+    do {
+      let __result = try self.__implementation.enableBackgroundDelivery(dataType: String(dataType), frequency: margelo.nitro.nitrohealth.BackgroundDeliveryFrequency(rawValue: frequency)!)
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_void__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_void__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_void__(__promise)
+        __result
+          .then({ __result in __promiseHolder.resolve() })
+          .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
+        return __promise
+      }()
+      return bridge.create_Result_std__shared_ptr_Promise_void___(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func disableBackgroundDelivery(dataType: std.string) -> bridge.Result_std__shared_ptr_Promise_void___ {
+    do {
+      let __result = try self.__implementation.disableBackgroundDelivery(dataType: String(dataType))
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_void__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_void__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_void__(__promise)
+        __result
+          .then({ __result in __promiseHolder.resolve() })
+          .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
+        return __promise
+      }()
+      return bridge.create_Result_std__shared_ptr_Promise_void___(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func disableAllBackgroundDelivery() -> bridge.Result_std__shared_ptr_Promise_void___ {
+    do {
+      let __result = try self.__implementation.disableAllBackgroundDelivery()
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_void__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_void__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_void__(__promise)
+        __result
+          .then({ __result in __promiseHolder.resolve() })
+          .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
+        return __promise
+      }()
+      return bridge.create_Result_std__shared_ptr_Promise_void___(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func setOnChangeNotificationListener(listener: bridge.std__optional_std__function_void_const_std__vector_std__string______dataTypes_____const_std__string_____deliveryId______) -> bridge.Result_void_ {
+    do {
+      try self.__implementation.setOnChangeNotificationListener(listener: { () -> ((_ dataTypes: [String], _ deliveryId: String) -> Void)? in
+        if bridge.has_value_std__optional_std__function_void_const_std__vector_std__string______dataTypes_____const_std__string_____deliveryId______(listener) {
+          let __unwrapped = bridge.get_std__optional_std__function_void_const_std__vector_std__string______dataTypes_____const_std__string_____deliveryId______(listener)
+          return { () -> ([String], String) -> Void in
+            let __wrappedFunction = bridge.wrap_Func_void_std__vector_std__string__std__string(__unwrapped)
+            return { (__dataTypes: [String], __deliveryId: String) -> Void in
+              __wrappedFunction.call({ () -> bridge.std__vector_std__string_ in
+                var __vector = bridge.create_std__vector_std__string_(__dataTypes.count)
+                for __item in __dataTypes {
+                  __vector.push_back(std.string(__item))
+                }
+                return __vector
+              }(), std.string(__deliveryId))
+            }
+          }()
+        } else {
+          return nil
+        }
+      }())
+      return bridge.create_Result_void_()
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_void_(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func acknowledgeChangeNotification(deliveryId: std.string) -> bridge.Result_void_ {
+    do {
+      try self.__implementation.acknowledgeChangeNotification(deliveryId: String(deliveryId))
+      return bridge.create_Result_void_()
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_void_(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func getBackgroundReadAuthorizationStatus() -> bridge.Result_std__shared_ptr_Promise_BackgroundReadAuthorizationStatus___ {
+    do {
+      let __result = try self.__implementation.getBackgroundReadAuthorizationStatus()
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_BackgroundReadAuthorizationStatus__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_BackgroundReadAuthorizationStatus__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_BackgroundReadAuthorizationStatus__(__promise)
+        __result
+          .then({ __result in __promiseHolder.resolve(__result) })
+          .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
+        return __promise
+      }()
+      return bridge.create_Result_std__shared_ptr_Promise_BackgroundReadAuthorizationStatus___(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_std__shared_ptr_Promise_BackgroundReadAuthorizationStatus___(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func requestBackgroundReadAuthorization() -> bridge.Result_std__shared_ptr_Promise_BackgroundReadAuthorizationStatus___ {
+    do {
+      let __result = try self.__implementation.requestBackgroundReadAuthorization()
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_BackgroundReadAuthorizationStatus__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_BackgroundReadAuthorizationStatus__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_BackgroundReadAuthorizationStatus__(__promise)
+        __result
+          .then({ __result in __promiseHolder.resolve(__result) })
+          .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
+        return __promise
+      }()
+      return bridge.create_Result_std__shared_ptr_Promise_BackgroundReadAuthorizationStatus___(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_std__shared_ptr_Promise_BackgroundReadAuthorizationStatus___(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
   public final func createChangesToken(dataType: std.string) -> bridge.Result_std__shared_ptr_Promise_std__string___ {
     do {
       let __result = try self.__implementation.createChangesToken(dataType: String(dataType))

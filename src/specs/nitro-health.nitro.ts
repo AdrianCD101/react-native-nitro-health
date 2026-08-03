@@ -1,5 +1,7 @@
 import type { HybridObject } from 'react-native-nitro-modules'
 import type { AuthorizationRequestStatus } from '../AuthorizationRequestStatus'
+import type { BackgroundDeliveryFrequency } from '../BackgroundDeliveryFrequency'
+import type { BackgroundReadAuthorizationStatus } from '../BackgroundReadAuthorizationStatus'
 import type { HealthAvailabilityStatus } from '../HealthAvailabilityStatus'
 import type { NativeActiveEnergyBurnedSampleInput } from '../NativeActiveEnergyBurnedSampleInput'
 import type { NativeActiveEnergyBurnedSamplePage } from '../NativeActiveEnergyBurnedSamplePage'
@@ -34,6 +36,15 @@ export interface NitroHealth extends HybridObject<{ ios: 'swift'; android: 'kotl
   getAvailabilityStatus(): HealthAvailabilityStatus
   openHealthConnectInstall(): boolean
   openHealthSettings(): Promise<boolean>
+  enableBackgroundDelivery(dataType: string, frequency: BackgroundDeliveryFrequency): Promise<void>
+  disableBackgroundDelivery(dataType: string): Promise<void>
+  disableAllBackgroundDelivery(): Promise<void>
+  setOnChangeNotificationListener(
+    listener: ((dataTypes: string[], deliveryId: string) => void) | undefined
+  ): void
+  acknowledgeChangeNotification(deliveryId: string): void
+  getBackgroundReadAuthorizationStatus(): Promise<BackgroundReadAuthorizationStatus>
+  requestBackgroundReadAuthorization(): Promise<BackgroundReadAuthorizationStatus>
   createChangesToken(dataType: string): Promise<string>
   getChanges(dataType: string, changesToken: string): Promise<NativeHealthChangesResult>
   readSteps(query: NativeHealthDateRangeQuery): Promise<NativeStepSamplePage>

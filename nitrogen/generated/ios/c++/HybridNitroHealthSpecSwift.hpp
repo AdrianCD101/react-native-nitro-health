@@ -14,6 +14,10 @@ namespace NitroHealth { class HybridNitroHealthSpec_cxx; }
 
 // Forward declaration of `HealthAvailabilityStatus` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class HealthAvailabilityStatus; }
+// Forward declaration of `BackgroundDeliveryFrequency` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class BackgroundDeliveryFrequency; }
+// Forward declaration of `BackgroundReadAuthorizationStatus` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class BackgroundReadAuthorizationStatus; }
 // Forward declaration of `NativeHealthChangesResult` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthChangesResult; }
 // Forward declaration of `NativeHealthChange` to properly resolve imports.
@@ -100,11 +104,14 @@ namespace margelo::nitro::nitrohealth { enum class HealthAuthorizationStatus; }
 #include "HealthAvailabilityStatus.hpp"
 #include <NitroModules/Promise.hpp>
 #include <string>
+#include "BackgroundDeliveryFrequency.hpp"
+#include <vector>
+#include <functional>
+#include <optional>
+#include "BackgroundReadAuthorizationStatus.hpp"
 #include "NativeHealthChangesResult.hpp"
 #include "NativeHealthChange.hpp"
-#include <vector>
 #include "NativeStepSample.hpp"
-#include <optional>
 #include "NativeHeartRateSample.hpp"
 #include "NativeRestingHeartRateSample.hpp"
 #include "NativeHeartRateVariabilitySample.hpp"
@@ -115,7 +122,6 @@ namespace margelo::nitro::nitrohealth { enum class HealthAuthorizationStatus; }
 #include "NativeSleepSample.hpp"
 #include "NativeBodyMassSample.hpp"
 #include "NativeWorkoutSample.hpp"
-#include <functional>
 #include "NativeStepSamplePage.hpp"
 #include "NativeHealthDateRangeQuery.hpp"
 #include "NativeDistanceSamplePage.hpp"
@@ -221,6 +227,58 @@ namespace margelo::nitro::nitrohealth {
     }
     inline std::shared_ptr<Promise<bool>> openHealthSettings() override {
       auto __result = _swiftPart.openHealthSettings();
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline std::shared_ptr<Promise<void>> enableBackgroundDelivery(const std::string& dataType, BackgroundDeliveryFrequency frequency) override {
+      auto __result = _swiftPart.enableBackgroundDelivery(dataType, static_cast<int>(frequency));
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline std::shared_ptr<Promise<void>> disableBackgroundDelivery(const std::string& dataType) override {
+      auto __result = _swiftPart.disableBackgroundDelivery(dataType);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline std::shared_ptr<Promise<void>> disableAllBackgroundDelivery() override {
+      auto __result = _swiftPart.disableAllBackgroundDelivery();
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline void setOnChangeNotificationListener(const std::optional<std::function<void(const std::vector<std::string>& /* dataTypes */, const std::string& /* deliveryId */)>>& listener) override {
+      auto __result = _swiftPart.setOnChangeNotificationListener(listener);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+    }
+    inline void acknowledgeChangeNotification(const std::string& deliveryId) override {
+      auto __result = _swiftPart.acknowledgeChangeNotification(deliveryId);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+    }
+    inline std::shared_ptr<Promise<BackgroundReadAuthorizationStatus>> getBackgroundReadAuthorizationStatus() override {
+      auto __result = _swiftPart.getBackgroundReadAuthorizationStatus();
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline std::shared_ptr<Promise<BackgroundReadAuthorizationStatus>> requestBackgroundReadAuthorization() override {
+      auto __result = _swiftPart.requestBackgroundReadAuthorization();
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }

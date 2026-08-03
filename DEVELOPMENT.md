@@ -106,6 +106,10 @@ Set `permissions: true` in the Harness config only when adding tests that need H
 
 The permission Harness tests intentionally skip interactive request flows unless the requested permission is already unnecessary/granted. HealthKit and Health Connect use specialized permission sheets, so do not assume Harness can auto-accept them like camera/location prompts.
 
+HealthKit observer callbacks can be exercised while the iOS Harness app is running, but true background server delivery and cold-launch wakeups require a signed physical device. Validate configured observer restoration after an OS-terminated launch, a change written by another source while the app is backgrounded, pending notification handoff before JavaScript is ready, locked-device retry, permission revocation, and disable/re-enable behavior. A user force-quit can suppress HealthKit relaunch and is not equivalent to OS termination.
+
+Android Harness can verify background-read feature and permission status. Scheduling, Doze behavior, process death, reboot, and force-stop behavior belong to the consumer application's WorkManager integration and remain outside this library's Harness suite.
+
 ### Android Native Unit Tests
 
 Use JVM unit tests for pure Kotlin logic that does not need Android framework state, Health Connect, or user permissions.

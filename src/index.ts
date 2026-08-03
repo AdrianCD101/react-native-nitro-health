@@ -2,12 +2,15 @@ import { NitroModules } from 'react-native-nitro-modules'
 import type { NitroHealth as NitroHealthSpec } from './specs/nitro-health.nitro'
 import type { ActiveEnergyBurnedSample } from './ActiveEnergyBurnedSample'
 import type { ActiveEnergyBurnedSampleInput } from './ActiveEnergyBurnedSampleInput'
+import type { BackgroundDeliveryFrequency } from './BackgroundDeliveryFrequency'
+import type { BackgroundReadAuthorizationStatus } from './BackgroundReadAuthorizationStatus'
 import type { BodyMassSample } from './BodyMassSample'
 import type { BodyMassSampleInput } from './BodyMassSampleInput'
 import type { DistanceSample } from './DistanceSample'
 import type { DistanceSampleInput } from './DistanceSampleInput'
 import type { HealthAuthorizationResult } from './HealthAuthorizationResult'
 import type { HealthChangesResult } from './HealthChangesResult'
+import type { HealthChangeNotification } from './HealthChangeNotification'
 import type { HealthDataType } from './HealthDataType'
 import type { HealthDateRangeQuery } from './HealthDateRangeQuery'
 import type { HealthPermission } from './HealthPermission'
@@ -21,6 +24,7 @@ import type { HeartRateStatistics } from './HeartRateStatistics'
 import type { HeartRateVariabilitySample } from './HeartRateVariabilitySample'
 import type { HeightSample } from './HeightSample'
 import type { HeightSampleInput } from './HeightSampleInput'
+import type { ListenerSubscription } from './ListenerSubscription'
 import type { OxygenSaturationSample } from './OxygenSaturationSample'
 import type { OxygenSaturationSampleInput } from './OxygenSaturationSampleInput'
 import type { RestingHeartRateSample } from './RestingHeartRateSample'
@@ -70,6 +74,8 @@ import {
 export type { ActiveEnergyBurnedSample } from './ActiveEnergyBurnedSample'
 export type { ActiveEnergyBurnedSampleInput } from './ActiveEnergyBurnedSampleInput'
 export type { AuthorizationRequestStatus } from './AuthorizationRequestStatus'
+export type { BackgroundDeliveryFrequency } from './BackgroundDeliveryFrequency'
+export type { BackgroundReadAuthorizationStatus } from './BackgroundReadAuthorizationStatus'
 export type { BodyMassSample } from './BodyMassSample'
 export type { BodyMassSampleInput } from './BodyMassSampleInput'
 export type { DistanceSample } from './DistanceSample'
@@ -78,6 +84,7 @@ export type { HealthAuthorizationResult } from './HealthAuthorizationResult'
 export type { HealthAuthorizationStatus } from './HealthAuthorizationStatus'
 export type { HealthAvailabilityStatus } from './HealthAvailabilityStatus'
 export type { HealthChangesResult } from './HealthChangesResult'
+export type { HealthChangeNotification } from './HealthChangeNotification'
 export type { HealthDataType } from './HealthDataType'
 export type { HealthDateRangeQuery } from './HealthDateRangeQuery'
 export type { HealthPermission } from './HealthPermission'
@@ -97,6 +104,7 @@ export type { HeartRateVariabilityMethod } from './HeartRateVariabilityMethod'
 export type { HeartRateVariabilitySample } from './HeartRateVariabilitySample'
 export type { HeightSample } from './HeightSample'
 export type { HeightSampleInput } from './HeightSampleInput'
+export type { ListenerSubscription } from './ListenerSubscription'
 export type { NativeActiveEnergyBurnedSample } from './NativeActiveEnergyBurnedSample'
 export type { NativeActiveEnergyBurnedSampleInput } from './NativeActiveEnergyBurnedSampleInput'
 export type { NativeActiveEnergyBurnedSamplePage } from './NativeActiveEnergyBurnedSamplePage'
@@ -152,9 +160,50 @@ export type { WorkoutSample } from './WorkoutSample'
 
 const NitroHealthNative = NitroModules.createHybridObject<NitroHealthSpec>('NitroHealth')
 
+const changeNotificationListeners = new Map<
+  number,
+  (notification: HealthChangeNotification) => void
+>()
+let nextChangeNotificationListenerId = 1
+
+function notifyChangeNotificationListeners(dataTypes: string[], deliveryId: string): void {
+  const notification: HealthChangeNotification = {
+    dataTypes: [...new Set(dataTypes)] as HealthDataType[],
+  }
+  const listeners = [...changeNotificationListeners.values()]
+  if (listeners.length === 0) return
+
+  let hasError = false
+  let firstError: unknown
+
+  for (const listener of listeners) {
+    try {
+      listener(notification)
+    } catch (error) {
+      if (!hasError) {
+        hasError = true
+        firstError = error
+      }
+    }
+  }
+
+  NitroHealthNative.acknowledgeChangeNotification(deliveryId)
+
+  if (hasError) {
+    void Promise.resolve().then(() => {
+      throw firstError
+    })
+  }
+}
+
 export type NitroHealth = Omit<
   NitroHealthSpec,
   | 'getRequestStatusForAuthorization'
+  | 'enableBackgroundDelivery'
+  | 'disableBackgroundDelivery'
+  | 'disableAllBackgroundDelivery'
+  | 'setOnChangeNotificationListener'
+  | 'acknowledgeChangeNotification'
   | 'createChangesToken'
   | 'getChanges'
   | 'readSteps'
@@ -182,6 +231,37 @@ export type NitroHealth = Omit<
   | 'deleteSamplesByTimeRange'
   | 'requestAuthorization'
 > & {
+  /**
+   * Enables persistent HealthKit background delivery for one data type.
+   *
+   * @platform iOS
+   * @throws On Android or when HealthKit cannot enable delivery.
+   */
+  enableBackgroundDelivery(
+    dataType: HealthDataType,
+    frequency: BackgroundDeliveryFrequency
+  ): Promise<void>
+  /**
+   * Disables persistent HealthKit background delivery for one data type.
+   *
+   * @platform iOS
+   */
+  disableBackgroundDelivery(dataType: HealthDataType): Promise<void>
+  /** Disables every background delivery type configured through Nitro Health. */
+  disableAllBackgroundDelivery(): Promise<void>
+  /**
+   * Adds an iOS change-notification listener. Notifications are hints to drain change tokens.
+   *
+   * @platform iOS
+   * @throws On Android.
+   */
+  addOnChangeNotificationListener(
+    listener: (notification: HealthChangeNotification) => void
+  ): ListenerSubscription
+  /** Returns Android Health Connect's background-read authorization state. */
+  getBackgroundReadAuthorizationStatus(): Promise<BackgroundReadAuthorizationStatus>
+  /** Requests Android Health Connect background-read authorization when available. */
+  requestBackgroundReadAuthorization(): Promise<BackgroundReadAuthorizationStatus>
   /** Creates a durable checkpoint for future changes to one health data type. */
   createChangesToken(dataType: HealthDataType): Promise<string>
   /** Reads record changes after a checkpoint created for the same data type. */
@@ -240,6 +320,10 @@ export const NitroHealth: NitroHealth = {
     return NitroHealthNative.equals(other)
   },
   dispose() {
+    if (changeNotificationListeners.size > 0) {
+      NitroHealthNative.setOnChangeNotificationListener(undefined)
+    }
+    changeNotificationListeners.clear()
     NitroHealthNative.dispose()
   },
   isAvailable() {
@@ -253,6 +337,47 @@ export const NitroHealth: NitroHealth = {
   },
   openHealthSettings() {
     return NitroHealthNative.openHealthSettings()
+  },
+  enableBackgroundDelivery(dataType, frequency) {
+    return NitroHealthNative.enableBackgroundDelivery(dataType, frequency)
+  },
+  disableBackgroundDelivery(dataType) {
+    return NitroHealthNative.disableBackgroundDelivery(dataType)
+  },
+  disableAllBackgroundDelivery() {
+    return NitroHealthNative.disableAllBackgroundDelivery()
+  },
+  addOnChangeNotificationListener(listener) {
+    if (typeof listener !== 'function') {
+      throw new Error('A change notification listener function is required')
+    }
+
+    if (changeNotificationListeners.size === 0) {
+      NitroHealthNative.setOnChangeNotificationListener(notifyChangeNotificationListeners)
+    }
+
+    const listenerId = nextChangeNotificationListenerId
+    nextChangeNotificationListenerId += 1
+    changeNotificationListeners.set(listenerId, listener)
+    let isRemoved = false
+
+    return {
+      remove() {
+        if (isRemoved) return
+        isRemoved = true
+        changeNotificationListeners.delete(listenerId)
+
+        if (changeNotificationListeners.size === 0) {
+          NitroHealthNative.setOnChangeNotificationListener(undefined)
+        }
+      },
+    }
+  },
+  getBackgroundReadAuthorizationStatus() {
+    return NitroHealthNative.getBackgroundReadAuthorizationStatus()
+  },
+  requestBackgroundReadAuthorization() {
+    return NitroHealthNative.requestBackgroundReadAuthorization()
   },
   createChangesToken(dataType) {
     return NitroHealthNative.createChangesToken(dataType)

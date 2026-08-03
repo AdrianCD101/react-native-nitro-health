@@ -47,6 +47,39 @@ abstract class HybridNitroHealthSpec: HybridObject() {
   
   @DoNotStrip
   @Keep
+  abstract fun enableBackgroundDelivery(dataType: String, frequency: BackgroundDeliveryFrequency): Promise<Unit>
+  
+  @DoNotStrip
+  @Keep
+  abstract fun disableBackgroundDelivery(dataType: String): Promise<Unit>
+  
+  @DoNotStrip
+  @Keep
+  abstract fun disableAllBackgroundDelivery(): Promise<Unit>
+  
+  abstract fun setOnChangeNotificationListener(listener: ((dataTypes: Array<String>, deliveryId: String) -> Unit)?): Unit
+  
+  @DoNotStrip
+  @Keep
+  private fun setOnChangeNotificationListener_cxx(listener: Func_void_std__vector_std__string__std__string?): Unit {
+    val __result = setOnChangeNotificationListener(listener?.let { it })
+    return __result
+  }
+  
+  @DoNotStrip
+  @Keep
+  abstract fun acknowledgeChangeNotification(deliveryId: String): Unit
+  
+  @DoNotStrip
+  @Keep
+  abstract fun getBackgroundReadAuthorizationStatus(): Promise<BackgroundReadAuthorizationStatus>
+  
+  @DoNotStrip
+  @Keep
+  abstract fun requestBackgroundReadAuthorization(): Promise<BackgroundReadAuthorizationStatus>
+  
+  @DoNotStrip
+  @Keep
   abstract fun createChangesToken(dataType: String): Promise<String>
   
   @DoNotStrip

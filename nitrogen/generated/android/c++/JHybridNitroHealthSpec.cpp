@@ -9,6 +9,8 @@
 
 // Forward declaration of `HealthAvailabilityStatus` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class HealthAvailabilityStatus; }
+// Forward declaration of `BackgroundReadAuthorizationStatus` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class BackgroundReadAuthorizationStatus; }
 // Forward declaration of `NativeHealthChangesResult` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthChangesResult; }
 // Forward declaration of `NativeHealthChange` to properly resolve imports.
@@ -69,6 +71,8 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthAuthorizationResult; 
 namespace margelo::nitro::nitrohealth { enum class HealthAuthorizationStatus; }
 // Forward declaration of `NativeHealthPermission` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthPermission; }
+// Forward declaration of `BackgroundDeliveryFrequency` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class BackgroundDeliveryFrequency; }
 // Forward declaration of `NativeHealthDateRangeQuery` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthDateRangeQuery; }
 // Forward declaration of `NativeHealthTimeRangeQuery` to properly resolve imports.
@@ -96,6 +100,9 @@ namespace margelo::nitro::nitrohealth { struct NativeHeightSampleInput; }
 #include "JHealthAvailabilityStatus.hpp"
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/JPromise.hpp>
+#include <NitroModules/JUnit.hpp>
+#include "BackgroundReadAuthorizationStatus.hpp"
+#include "JBackgroundReadAuthorizationStatus.hpp"
 #include <string>
 #include "NativeHealthChangesResult.hpp"
 #include "JNativeHealthChangesResult.hpp"
@@ -154,7 +161,6 @@ namespace margelo::nitro::nitrohealth { struct NativeHeightSampleInput; }
 #include "JNativeSleepSamplePage.hpp"
 #include "NativeWorkoutSamplePage.hpp"
 #include "JNativeWorkoutSamplePage.hpp"
-#include <NitroModules/JUnit.hpp>
 #include "AuthorizationRequestStatus.hpp"
 #include "JAuthorizationRequestStatus.hpp"
 #include "NativeHealthAuthorizationResult.hpp"
@@ -163,6 +169,9 @@ namespace margelo::nitro::nitrohealth { struct NativeHeightSampleInput; }
 #include "JHealthAuthorizationStatus.hpp"
 #include "NativeHealthPermission.hpp"
 #include "JNativeHealthPermission.hpp"
+#include "BackgroundDeliveryFrequency.hpp"
+#include "JBackgroundDeliveryFrequency.hpp"
+#include "JFunc_void_std__vector_std__string__std__string.hpp"
 #include "NativeHealthDateRangeQuery.hpp"
 #include "JNativeHealthDateRangeQuery.hpp"
 #include "NativeHealthTimeRangeQuery.hpp"
@@ -242,6 +251,91 @@ namespace margelo::nitro::nitrohealth {
       __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {
         auto __result = jni::static_ref_cast<jni::JBoolean>(__boxedResult);
         __promise->resolve(static_cast<bool>(__result->value()));
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
+  }
+  std::shared_ptr<Promise<void>> JHybridNitroHealthSpec::enableBackgroundDelivery(const std::string& dataType, BackgroundDeliveryFrequency frequency) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<jni::JString> /* dataType */, jni::alias_ref<JBackgroundDeliveryFrequency> /* frequency */)>("enableBackgroundDelivery");
+    auto __result = method(_javaPart, jni::make_jstring(dataType), JBackgroundDeliveryFrequency::fromCpp(frequency));
+    return [&]() {
+      auto __promise = Promise<void>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& /* unit */) {
+        __promise->resolve();
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
+  }
+  std::shared_ptr<Promise<void>> JHybridNitroHealthSpec::disableBackgroundDelivery(const std::string& dataType) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<jni::JString> /* dataType */)>("disableBackgroundDelivery");
+    auto __result = method(_javaPart, jni::make_jstring(dataType));
+    return [&]() {
+      auto __promise = Promise<void>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& /* unit */) {
+        __promise->resolve();
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
+  }
+  std::shared_ptr<Promise<void>> JHybridNitroHealthSpec::disableAllBackgroundDelivery() {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>()>("disableAllBackgroundDelivery");
+    auto __result = method(_javaPart);
+    return [&]() {
+      auto __promise = Promise<void>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& /* unit */) {
+        __promise->resolve();
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
+  }
+  void JHybridNitroHealthSpec::setOnChangeNotificationListener(const std::optional<std::function<void(const std::vector<std::string>& /* dataTypes */, const std::string& /* deliveryId */)>>& listener) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void_std__vector_std__string__std__string::javaobject> /* listener */)>("setOnChangeNotificationListener_cxx");
+    method(_javaPart, listener.has_value() ? JFunc_void_std__vector_std__string__std__string_cxx::fromCpp(listener.value()) : nullptr);
+  }
+  void JHybridNitroHealthSpec::acknowledgeChangeNotification(const std::string& deliveryId) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<jni::JString> /* deliveryId */)>("acknowledgeChangeNotification");
+    method(_javaPart, jni::make_jstring(deliveryId));
+  }
+  std::shared_ptr<Promise<BackgroundReadAuthorizationStatus>> JHybridNitroHealthSpec::getBackgroundReadAuthorizationStatus() {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>()>("getBackgroundReadAuthorizationStatus");
+    auto __result = method(_javaPart);
+    return [&]() {
+      auto __promise = Promise<BackgroundReadAuthorizationStatus>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {
+        auto __result = jni::static_ref_cast<JBackgroundReadAuthorizationStatus>(__boxedResult);
+        __promise->resolve(__result->toCpp());
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
+  }
+  std::shared_ptr<Promise<BackgroundReadAuthorizationStatus>> JHybridNitroHealthSpec::requestBackgroundReadAuthorization() {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>()>("requestBackgroundReadAuthorization");
+    auto __result = method(_javaPart);
+    return [&]() {
+      auto __promise = Promise<BackgroundReadAuthorizationStatus>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {
+        auto __result = jni::static_ref_cast<JBackgroundReadAuthorizationStatus>(__boxedResult);
+        __promise->resolve(__result->toCpp());
       });
       __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
         jni::JniException __jniError(__throwable);

@@ -17,6 +17,7 @@
 
 #include "JHybridNitroHealthSpec.hpp"
 #include "JFunc_void.hpp"
+#include "JFunc_void_std__vector_std__string__std__string.hpp"
 #include <NitroModules/DefaultConstructableObject.hpp>
 
 namespace margelo::nitro::nitrohealth {
@@ -43,6 +44,7 @@ void registerAllNatives() {
   // Register native JNI methods
   margelo::nitro::nitrohealth::JHybridNitroHealthSpec::CxxPart::registerNatives();
   margelo::nitro::nitrohealth::JFunc_void_cxx::registerNatives();
+  margelo::nitro::nitrohealth::JFunc_void_std__vector_std__string__std__string_cxx::registerNatives();
 
   // Register Nitro Hybrid Objects
   HybridObjectRegistry::registerHybridObjectConstructor(

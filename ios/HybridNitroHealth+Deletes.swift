@@ -21,7 +21,7 @@ extension HybridNitroHealth {
         }
 
         return Promise<Void>.async {
-            let sampleType = try self.makeHealthKitSampleType(dataType: dataType)
+            let sampleType = try makeHealthKitSampleType(dataType: dataType)
             try self.requireWriteAuthorization(
                 for: sampleType,
                 label: makeHealthDataTypeLabel(dataType: dataType)
@@ -41,7 +41,7 @@ extension HybridNitroHealth {
         }
 
         return Promise<Void>.async {
-            let sampleType = try self.makeHealthKitSampleType(dataType: dataType)
+            let sampleType = try makeHealthKitSampleType(dataType: dataType)
             try self.requireWriteAuthorization(
                 for: sampleType,
                 label: makeHealthDataTypeLabel(dataType: dataType)
