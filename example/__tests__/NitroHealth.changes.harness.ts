@@ -9,6 +9,14 @@ const changeInterval = {
   startDate: new Date('2003-06-01T09:00:00.000Z'),
   endDate: new Date('2003-06-01T09:30:00.000Z'),
 }
+const replacementChangeInterval = {
+  startDate: new Date('2003-06-02T09:00:00.000Z'),
+  endDate: new Date('2003-06-02T09:30:00.000Z'),
+}
+const replacementChangeRange = {
+  startDate: new Date('2003-06-02T00:00:00.000Z'),
+  endDate: new Date('2003-06-03T00:00:00.000Z'),
+}
 
 async function drainStepChanges(changesToken: string): Promise<{
   changes: HealthRecordChange<'steps'>[]
@@ -75,6 +83,80 @@ describe('NitroHealth changes (native)', () => {
         (change) => change.type === 'delete' && change.recordUuid === upsert.recordUuid
       )
     ).toBe(true)
+  })
+
+  it('reports platform-specific changes when a higher step version replaces a record', async () => {
+    const authorized = await hasVerifiedPermissions([
+      { accessType: 'read', dataType: 'steps' },
+      { accessType: 'write', dataType: 'steps' },
+    ])
+
+    if (!authorized) {
+      return
+    }
+
+    await NitroHealth.deleteSamplesByTimeRange('steps', replacementChangeRange)
+
+    try {
+      const baselineToken = await NitroHealth.createChangesToken('steps')
+      await NitroHealth.saveSteps([
+        {
+          ...replacementChangeInterval,
+          count: 987_651,
+          sync: { id: 'nitro-health-harness-changes-replacement', version: 1 },
+        },
+      ])
+
+      const afterInitialSave = await drainStepChanges(baselineToken)
+      const initialUpsert = afterInitialSave.changes.find(
+        (change) =>
+          change.type === 'upsert' && change.samples.some((sample) => sample.count === 987_651)
+      )
+
+      // HealthKit hides read denials and returns no changes, even when writing is allowed.
+      if (Platform.OS === 'ios' && initialUpsert === undefined) {
+        return
+      }
+
+      expect(initialUpsert).toBeDefined()
+      if (initialUpsert === undefined || initialUpsert.type !== 'upsert') {
+        return
+      }
+
+      await NitroHealth.saveSteps([
+        {
+          ...replacementChangeInterval,
+          count: 987_652,
+          sync: { id: 'nitro-health-harness-changes-replacement', version: 2 },
+        },
+      ])
+
+      const afterReplacement = await drainStepChanges(afterInitialSave.changesToken)
+      const replacementUpserts = afterReplacement.changes.filter(
+        (change) =>
+          change.type === 'upsert' && change.samples.some((sample) => sample.count === 987_652)
+      )
+
+      expect(replacementUpserts).toHaveLength(1)
+      const replacementUpsert = replacementUpserts[0]
+      if (replacementUpsert === undefined || replacementUpsert.type !== 'upsert') {
+        return
+      }
+
+      const deletedInitialRecord = afterReplacement.changes.some(
+        (change) => change.type === 'delete' && change.recordUuid === initialUpsert.recordUuid
+      )
+
+      if (Platform.OS === 'android') {
+        expect(replacementUpsert.recordUuid).toBe(initialUpsert.recordUuid)
+        expect(deletedInitialRecord).toBe(false)
+      } else if (Platform.OS === 'ios') {
+        expect(replacementUpsert.recordUuid).not.toBe(initialUpsert.recordUuid)
+        expect(deletedInitialRecord).toBe(true)
+      }
+    } finally {
+      await NitroHealth.deleteSamplesByTimeRange('steps', replacementChangeRange)
+    }
   })
 
   it('rejects a malformed changes token', async () => {

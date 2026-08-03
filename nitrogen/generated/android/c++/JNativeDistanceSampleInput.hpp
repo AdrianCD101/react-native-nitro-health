@@ -10,7 +10,8 @@
 #include <fbjni/fbjni.h>
 #include "NativeDistanceSampleInput.hpp"
 
-
+#include <optional>
+#include <string>
 
 namespace margelo::nitro::nitrohealth {
 
@@ -37,10 +38,16 @@ namespace margelo::nitro::nitrohealth {
       double endTimeMs = this->getFieldValue(fieldEndTimeMs);
       static const auto fieldDistanceMeters = clazz->getField<double>("distanceMeters");
       double distanceMeters = this->getFieldValue(fieldDistanceMeters);
+      static const auto fieldSyncId = clazz->getField<jni::JString>("syncId");
+      jni::local_ref<jni::JString> syncId = this->getFieldValue(fieldSyncId);
+      static const auto fieldSyncVersion = clazz->getField<jni::JDouble>("syncVersion");
+      jni::local_ref<jni::JDouble> syncVersion = this->getFieldValue(fieldSyncVersion);
       return NativeDistanceSampleInput(
         startTimeMs,
         endTimeMs,
-        distanceMeters
+        distanceMeters,
+        syncId != nullptr ? std::make_optional(syncId->toStdString()) : std::nullopt,
+        syncVersion != nullptr ? std::make_optional(syncVersion->value()) : std::nullopt
       );
     }
 
@@ -50,14 +57,16 @@ namespace margelo::nitro::nitrohealth {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeDistanceSampleInput::javaobject> fromCpp(const NativeDistanceSampleInput& value) {
-      using JSignature = JNativeDistanceSampleInput(double, double, double);
+      using JSignature = JNativeDistanceSampleInput(double, double, double, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JDouble>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
         clazz,
         value.startTimeMs,
         value.endTimeMs,
-        value.distanceMeters
+        value.distanceMeters,
+        value.syncId.has_value() ? jni::make_jstring(value.syncId.value()) : nullptr,
+        value.syncVersion.has_value() ? jni::JDouble::valueOf(value.syncVersion.value()) : nullptr
       );
     }
   };

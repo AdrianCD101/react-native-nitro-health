@@ -23,7 +23,13 @@ data class NativeOxygenSaturationSampleInput(
   val timeMs: Double,
   @DoNotStrip
   @Keep
-  val percentage: Double
+  val percentage: Double,
+  @DoNotStrip
+  @Keep
+  val syncId: String?,
+  @DoNotStrip
+  @Keep
+  val syncVersion: Double?
 ) {
   /* primary constructor */
 
@@ -32,12 +38,16 @@ data class NativeOxygenSaturationSampleInput(
     if (other !is NativeOxygenSaturationSampleInput) return false
     return Objects.deepEquals(this.timeMs, other.timeMs)
       && Objects.deepEquals(this.percentage, other.percentage)
+      && Objects.deepEquals(this.syncId, other.syncId)
+      && Objects.deepEquals(this.syncVersion, other.syncVersion)
   }
 
   override fun hashCode(): Int {
     return arrayOf<Any?>(
       timeMs,
-      percentage
+      percentage,
+      syncId,
+      syncVersion
     ).contentDeepHashCode()
   }
 
@@ -49,8 +59,8 @@ data class NativeOxygenSaturationSampleInput(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(timeMs: Double, percentage: Double): NativeOxygenSaturationSampleInput {
-      return NativeOxygenSaturationSampleInput(timeMs, percentage)
+    private fun fromCpp(timeMs: Double, percentage: Double, syncId: String?, syncVersion: Double?): NativeOxygenSaturationSampleInput {
+      return NativeOxygenSaturationSampleInput(timeMs, percentage, syncId, syncVersion)
     }
   }
 }

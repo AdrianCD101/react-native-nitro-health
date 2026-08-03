@@ -1,3 +1,5 @@
+import type { HealthRecordSync } from './HealthRecordSync'
+
 /** Oxygen saturation sample accepted by {@linkcode NitroHealth.saveOxygenSaturation}. */
 export interface OxygenSaturationSampleInput {
   /** Instant the reading was taken. */
@@ -7,4 +9,6 @@ export interface OxygenSaturationSampleInput {
    * as HealthKit's 0-1 fraction (divided by 100 before saving); Android stores it directly.
    */
   percentage: number
+  /** Optional logical identity that makes retries idempotent and higher versions replace. */
+  sync?: HealthRecordSync
 }

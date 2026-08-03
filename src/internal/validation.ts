@@ -38,6 +38,23 @@ export function assertNonEmptySamples(samples: readonly unknown[]): void {
   }
 }
 
+export function assertUniqueSampleSyncIds(samples: readonly { sync?: { id: string } }[]): void {
+  const firstIndexById = new Map<string, number>()
+
+  samples.forEach((sample, index) => {
+    if (sample.sync === undefined) return
+
+    const previousIndex = firstIndexById.get(sample.sync.id)
+    if (previousIndex !== undefined) {
+      throw new Error(
+        `samples[${index}]: sync.id duplicates samples[${previousIndex}].sync.id within this save call`
+      )
+    }
+
+    firstIndexById.set(sample.sync.id, index)
+  })
+}
+
 export function assertDeletableUuids(uuids: readonly string[]): void {
   if (uuids.length === 0) {
     throw new Error('At least one uuid is required')

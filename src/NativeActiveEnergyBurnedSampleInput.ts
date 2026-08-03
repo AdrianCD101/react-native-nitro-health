@@ -3,4 +3,6 @@ export interface NativeActiveEnergyBurnedSampleInput {
   startTimeMs: number
   endTimeMs: number
   kilocalories: number
+  syncId?: string
+  syncVersion?: number
 }

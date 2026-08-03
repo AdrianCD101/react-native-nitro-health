@@ -2,4 +2,6 @@
 export interface NativeBodyMassSampleInput {
   timeMs: number
   kilograms: number
+  syncId?: string
+  syncVersion?: number
 }

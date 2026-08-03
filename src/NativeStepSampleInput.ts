@@ -3,4 +3,6 @@ export interface NativeStepSampleInput {
   startTimeMs: number
   endTimeMs: number
   count: number
+  syncId?: string
+  syncVersion?: number
 }

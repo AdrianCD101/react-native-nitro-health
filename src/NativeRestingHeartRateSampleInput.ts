@@ -2,4 +2,6 @@
 export interface NativeRestingHeartRateSampleInput {
   timeMs: number
   bpm: number
+  syncId?: string
+  syncVersion?: number
 }

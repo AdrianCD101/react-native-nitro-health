@@ -18,8 +18,20 @@ public extension NativeHeightSampleInput {
   /**
    * Create a new instance of `NativeHeightSampleInput`.
    */
-  init(timeMs: Double, meters: Double) {
-    self.init(timeMs, meters)
+  init(timeMs: Double, meters: Double, syncId: String?, syncVersion: Double?) {
+    self.init(timeMs, meters, { () -> bridge.std__optional_std__string_ in
+      if let __unwrappedValue = syncId {
+        return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_double_ in
+      if let __unwrappedValue = syncVersion {
+        return bridge.create_std__optional_double_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }())
   }
 
   @inline(__always)
@@ -30,5 +42,29 @@ public extension NativeHeightSampleInput {
   @inline(__always)
   var meters: Double {
     return self.__meters
+  }
+  
+  @inline(__always)
+  var syncId: String? {
+    return { () -> String? in
+      if bridge.has_value_std__optional_std__string_(self.__syncId) {
+        let __unwrapped = bridge.get_std__optional_std__string_(self.__syncId)
+        return String(__unwrapped)
+      } else {
+        return nil
+      }
+    }()
+  }
+  
+  @inline(__always)
+  var syncVersion: Double? {
+    return { () -> Double? in
+      if bridge.has_value_std__optional_double_(self.__syncVersion) {
+        let __unwrapped = bridge.get_std__optional_double_(self.__syncVersion)
+        return __unwrapped
+      } else {
+        return nil
+      }
+    }()
   }
 }

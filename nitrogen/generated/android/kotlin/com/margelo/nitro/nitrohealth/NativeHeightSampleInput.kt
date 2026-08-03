@@ -23,7 +23,13 @@ data class NativeHeightSampleInput(
   val timeMs: Double,
   @DoNotStrip
   @Keep
-  val meters: Double
+  val meters: Double,
+  @DoNotStrip
+  @Keep
+  val syncId: String?,
+  @DoNotStrip
+  @Keep
+  val syncVersion: Double?
 ) {
   /* primary constructor */
 
@@ -32,12 +38,16 @@ data class NativeHeightSampleInput(
     if (other !is NativeHeightSampleInput) return false
     return Objects.deepEquals(this.timeMs, other.timeMs)
       && Objects.deepEquals(this.meters, other.meters)
+      && Objects.deepEquals(this.syncId, other.syncId)
+      && Objects.deepEquals(this.syncVersion, other.syncVersion)
   }
 
   override fun hashCode(): Int {
     return arrayOf<Any?>(
       timeMs,
-      meters
+      meters,
+      syncId,
+      syncVersion
     ).contentDeepHashCode()
   }
 
@@ -49,8 +59,8 @@ data class NativeHeightSampleInput(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(timeMs: Double, meters: Double): NativeHeightSampleInput {
-      return NativeHeightSampleInput(timeMs, meters)
+    private fun fromCpp(timeMs: Double, meters: Double, syncId: String?, syncVersion: Double?): NativeHeightSampleInput {
+      return NativeHeightSampleInput(timeMs, meters, syncId, syncVersion)
     }
   }
 }

@@ -26,7 +26,13 @@ data class NativeStepSampleInput(
   val endTimeMs: Double,
   @DoNotStrip
   @Keep
-  val count: Double
+  val count: Double,
+  @DoNotStrip
+  @Keep
+  val syncId: String?,
+  @DoNotStrip
+  @Keep
+  val syncVersion: Double?
 ) {
   /* primary constructor */
 
@@ -36,13 +42,17 @@ data class NativeStepSampleInput(
     return Objects.deepEquals(this.startTimeMs, other.startTimeMs)
       && Objects.deepEquals(this.endTimeMs, other.endTimeMs)
       && Objects.deepEquals(this.count, other.count)
+      && Objects.deepEquals(this.syncId, other.syncId)
+      && Objects.deepEquals(this.syncVersion, other.syncVersion)
   }
 
   override fun hashCode(): Int {
     return arrayOf<Any?>(
       startTimeMs,
       endTimeMs,
-      count
+      count,
+      syncId,
+      syncVersion
     ).contentDeepHashCode()
   }
 
@@ -54,8 +64,8 @@ data class NativeStepSampleInput(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(startTimeMs: Double, endTimeMs: Double, count: Double): NativeStepSampleInput {
-      return NativeStepSampleInput(startTimeMs, endTimeMs, count)
+    private fun fromCpp(startTimeMs: Double, endTimeMs: Double, count: Double, syncId: String?, syncVersion: Double?): NativeStepSampleInput {
+      return NativeStepSampleInput(startTimeMs, endTimeMs, count, syncId, syncVersion)
     }
   }
 }

@@ -1,5 +1,6 @@
 package com.nitrohealth
 
+import androidx.health.connect.client.records.metadata.Metadata
 import com.margelo.nitro.nitrohealth.NativeActiveEnergyBurnedSampleInput
 import com.margelo.nitro.nitrohealth.NativeBodyMassSampleInput
 import com.margelo.nitro.nitrohealth.NativeDistanceSampleInput
@@ -10,6 +11,7 @@ import com.margelo.nitro.nitrohealth.NativeRestingHeartRateSampleInput
 import com.margelo.nitro.nitrohealth.NativeStepSampleInput
 import java.time.Instant
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Test
 
 class SampleInputConvertersTest {
@@ -19,7 +21,15 @@ class SampleInputConvertersTest {
     @Test
     fun toStepsRecordsMapsTimesAndCount() {
         val records = toStepsRecords(
-            arrayOf(NativeStepSampleInput(startTimeMs, endTimeMs, 512.0))
+            arrayOf(
+                NativeStepSampleInput(
+                    startTimeMs = startTimeMs,
+                    endTimeMs = endTimeMs,
+                    count = 512.0,
+                    syncId = null,
+                    syncVersion = null
+                )
+            )
         )
 
         assertEquals(1, records.size)
@@ -31,7 +41,15 @@ class SampleInputConvertersTest {
     @Test
     fun toDistanceRecordsMapsMeters() {
         val records = toDistanceRecords(
-            arrayOf(NativeDistanceSampleInput(startTimeMs, endTimeMs, 1250.5))
+            arrayOf(
+                NativeDistanceSampleInput(
+                    startTimeMs = startTimeMs,
+                    endTimeMs = endTimeMs,
+                    distanceMeters = 1250.5,
+                    syncId = null,
+                    syncVersion = null
+                )
+            )
         )
 
         assertEquals(1, records.size)
@@ -41,7 +59,15 @@ class SampleInputConvertersTest {
     @Test
     fun toActiveCaloriesBurnedRecordsMapsKilocalories() {
         val records = toActiveCaloriesBurnedRecords(
-            arrayOf(NativeActiveEnergyBurnedSampleInput(startTimeMs, endTimeMs, 215.25))
+            arrayOf(
+                NativeActiveEnergyBurnedSampleInput(
+                    startTimeMs = startTimeMs,
+                    endTimeMs = endTimeMs,
+                    kilocalories = 215.25,
+                    syncId = null,
+                    syncVersion = null
+                )
+            )
         )
 
         assertEquals(1, records.size)
@@ -54,8 +80,18 @@ class SampleInputConvertersTest {
 
         val records = toHeartRateRecords(
             arrayOf(
-                NativeHeartRateSampleInput(startTimeMs, 72.0),
-                NativeHeartRateSampleInput(secondTimeMs, 138.0)
+                NativeHeartRateSampleInput(
+                    timeMs = startTimeMs,
+                    bpm = 72.0,
+                    syncId = null,
+                    syncVersion = null
+                ),
+                NativeHeartRateSampleInput(
+                    timeMs = secondTimeMs,
+                    bpm = 138.0,
+                    syncId = null,
+                    syncVersion = null
+                )
             )
         )
 
@@ -72,8 +108,18 @@ class SampleInputConvertersTest {
     fun toHeartRateRecordsRoundsFractionalBpmToNearest() {
         val records = toHeartRateRecords(
             arrayOf(
-                NativeHeartRateSampleInput(startTimeMs, 72.9),
-                NativeHeartRateSampleInput(startTimeMs, 72.4)
+                NativeHeartRateSampleInput(
+                    timeMs = startTimeMs,
+                    bpm = 72.9,
+                    syncId = null,
+                    syncVersion = null
+                ),
+                NativeHeartRateSampleInput(
+                    timeMs = startTimeMs,
+                    bpm = 72.4,
+                    syncId = null,
+                    syncVersion = null
+                )
             )
         )
 
@@ -84,7 +130,14 @@ class SampleInputConvertersTest {
     @Test
     fun toWeightRecordsMapsPointInTimeKilograms() {
         val records = toWeightRecords(
-            arrayOf(NativeBodyMassSampleInput(startTimeMs, 72.5))
+            arrayOf(
+                NativeBodyMassSampleInput(
+                    timeMs = startTimeMs,
+                    kilograms = 72.5,
+                    syncId = null,
+                    syncVersion = null
+                )
+            )
         )
 
         assertEquals(1, records.size)
@@ -95,7 +148,14 @@ class SampleInputConvertersTest {
     @Test
     fun toRestingHeartRateRecordsMapsPointInTimeBpm() {
         val records = toRestingHeartRateRecords(
-            arrayOf(NativeRestingHeartRateSampleInput(startTimeMs, 58.0))
+            arrayOf(
+                NativeRestingHeartRateSampleInput(
+                    timeMs = startTimeMs,
+                    bpm = 58.0,
+                    syncId = null,
+                    syncVersion = null
+                )
+            )
         )
 
         assertEquals(1, records.size)
@@ -107,8 +167,18 @@ class SampleInputConvertersTest {
     fun toRestingHeartRateRecordsRoundsFractionalBpmToNearest() {
         val records = toRestingHeartRateRecords(
             arrayOf(
-                NativeRestingHeartRateSampleInput(startTimeMs, 58.9),
-                NativeRestingHeartRateSampleInput(startTimeMs, 58.4)
+                NativeRestingHeartRateSampleInput(
+                    timeMs = startTimeMs,
+                    bpm = 58.9,
+                    syncId = null,
+                    syncVersion = null
+                ),
+                NativeRestingHeartRateSampleInput(
+                    timeMs = startTimeMs,
+                    bpm = 58.4,
+                    syncId = null,
+                    syncVersion = null
+                )
             )
         )
 
@@ -119,7 +189,14 @@ class SampleInputConvertersTest {
     @Test
     fun toOxygenSaturationRecordsMapsPointInTimePercentage() {
         val records = toOxygenSaturationRecords(
-            arrayOf(NativeOxygenSaturationSampleInput(startTimeMs, 97.5))
+            arrayOf(
+                NativeOxygenSaturationSampleInput(
+                    timeMs = startTimeMs,
+                    percentage = 97.5,
+                    syncId = null,
+                    syncVersion = null
+                )
+            )
         )
 
         assertEquals(1, records.size)
@@ -130,11 +207,152 @@ class SampleInputConvertersTest {
     @Test
     fun toHeightRecordsMapsPointInTimeMeters() {
         val records = toHeightRecords(
-            arrayOf(NativeHeightSampleInput(startTimeMs, 1.78))
+            arrayOf(
+                NativeHeightSampleInput(
+                    timeMs = startTimeMs,
+                    meters = 1.78,
+                    syncId = null,
+                    syncVersion = null
+                )
+            )
         )
 
         assertEquals(1, records.size)
         assertEquals(Instant.ofEpochMilli(startTimeMs.toLong()), records[0].time)
         assertEquals(1.78, records[0].height.inMeters, 0.0)
+    }
+
+    @Test
+    fun allConvertersPreserveUnknownUnkeyedMetadata() {
+        val metadata = metadataFromAllConverters(syncId = null, syncVersion = null)
+
+        assertEquals(8, metadata.size)
+        metadata.forEach {
+            assertNull(it.clientRecordId)
+            assertEquals(0L, it.clientRecordVersion)
+            assertEquals(Metadata.RECORDING_METHOD_UNKNOWN, it.recordingMethod)
+        }
+    }
+
+    @Test
+    fun allConvertersMapVersionedSyncMetadata() {
+        val metadata = metadataFromAllConverters(syncId = "sample-sync-id", syncVersion = 42.0)
+
+        assertEquals(8, metadata.size)
+        metadata.forEach {
+            assertEquals("sample-sync-id", it.clientRecordId)
+            assertEquals(42L, it.clientRecordVersion)
+            assertEquals(Metadata.RECORDING_METHOD_UNKNOWN, it.recordingMethod)
+        }
+    }
+
+    @Test
+    fun toHeartRateRecordsSetsSyncMetadataOnParentRecord() {
+        val record = toHeartRateRecords(
+            arrayOf(
+                NativeHeartRateSampleInput(
+                    timeMs = startTimeMs,
+                    bpm = 72.0,
+                    syncId = "heart-rate-sync-id",
+                    syncVersion = 7.0
+                )
+            )
+        ).single()
+
+        assertEquals("heart-rate-sync-id", record.metadata.clientRecordId)
+        assertEquals(7L, record.metadata.clientRecordVersion)
+        assertEquals(Metadata.RECORDING_METHOD_UNKNOWN, record.metadata.recordingMethod)
+        assertEquals(1, record.samples.size)
+    }
+
+    private fun metadataFromAllConverters(
+        syncId: String?,
+        syncVersion: Double?
+    ): List<Metadata> {
+        return listOf(
+            toStepsRecords(
+                arrayOf(
+                    NativeStepSampleInput(
+                        startTimeMs = startTimeMs,
+                        endTimeMs = endTimeMs,
+                        count = 512.0,
+                        syncId = syncId,
+                        syncVersion = syncVersion
+                    )
+                )
+            ).single().metadata,
+            toDistanceRecords(
+                arrayOf(
+                    NativeDistanceSampleInput(
+                        startTimeMs = startTimeMs,
+                        endTimeMs = endTimeMs,
+                        distanceMeters = 1250.5,
+                        syncId = syncId,
+                        syncVersion = syncVersion
+                    )
+                )
+            ).single().metadata,
+            toActiveCaloriesBurnedRecords(
+                arrayOf(
+                    NativeActiveEnergyBurnedSampleInput(
+                        startTimeMs = startTimeMs,
+                        endTimeMs = endTimeMs,
+                        kilocalories = 215.25,
+                        syncId = syncId,
+                        syncVersion = syncVersion
+                    )
+                )
+            ).single().metadata,
+            toHeartRateRecords(
+                arrayOf(
+                    NativeHeartRateSampleInput(
+                        timeMs = startTimeMs,
+                        bpm = 72.0,
+                        syncId = syncId,
+                        syncVersion = syncVersion
+                    )
+                )
+            ).single().metadata,
+            toWeightRecords(
+                arrayOf(
+                    NativeBodyMassSampleInput(
+                        timeMs = startTimeMs,
+                        kilograms = 72.5,
+                        syncId = syncId,
+                        syncVersion = syncVersion
+                    )
+                )
+            ).single().metadata,
+            toRestingHeartRateRecords(
+                arrayOf(
+                    NativeRestingHeartRateSampleInput(
+                        timeMs = startTimeMs,
+                        bpm = 58.0,
+                        syncId = syncId,
+                        syncVersion = syncVersion
+                    )
+                )
+            ).single().metadata,
+            toOxygenSaturationRecords(
+                arrayOf(
+                    NativeOxygenSaturationSampleInput(
+                        timeMs = startTimeMs,
+                        percentage = 97.5,
+                        syncId = syncId,
+                        syncVersion = syncVersion
+                    )
+                )
+            ).single().metadata,
+            toHeightRecords(
+                arrayOf(
+                    NativeHeightSampleInput(
+                        timeMs = startTimeMs,
+                        meters = 1.78,
+                        syncId = syncId,
+                        syncVersion = syncVersion
+                    )
+                )
+            ).single().metadata
+        )
     }
 }

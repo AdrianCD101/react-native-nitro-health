@@ -30,7 +30,8 @@
 
 
 
-
+#include <string>
+#include <optional>
 
 namespace margelo::nitro::nitrohealth {
 
@@ -41,10 +42,12 @@ namespace margelo::nitro::nitrohealth {
   public:
     double timeMs     SWIFT_PRIVATE;
     double meters     SWIFT_PRIVATE;
+    std::optional<std::string> syncId     SWIFT_PRIVATE;
+    std::optional<double> syncVersion     SWIFT_PRIVATE;
 
   public:
     NativeHeightSampleInput() = default;
-    explicit NativeHeightSampleInput(double timeMs, double meters): timeMs(timeMs), meters(meters) {}
+    explicit NativeHeightSampleInput(double timeMs, double meters, std::optional<std::string> syncId, std::optional<double> syncVersion): timeMs(timeMs), meters(meters), syncId(syncId), syncVersion(syncVersion) {}
 
   public:
     friend bool operator==(const NativeHeightSampleInput& lhs, const NativeHeightSampleInput& rhs) = default;
@@ -61,13 +64,17 @@ namespace margelo::nitro {
       jsi::Object obj = arg.asObject(runtime);
       return margelo::nitro::nitrohealth::NativeHeightSampleInput(
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeMs"))),
-        JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "meters")))
+        JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "meters"))),
+        JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "syncId"))),
+        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "syncVersion")))
       );
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::nitrohealth::NativeHeightSampleInput& arg) {
       jsi::Object obj(runtime);
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "timeMs"), JSIConverter<double>::toJSI(runtime, arg.timeMs));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "meters"), JSIConverter<double>::toJSI(runtime, arg.meters));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "syncId"), JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.syncId));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "syncVersion"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.syncVersion));
       return obj;
     }
     static inline bool canConvert(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -80,6 +87,8 @@ namespace margelo::nitro {
       }
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeMs")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "meters")))) return false;
+      if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "syncId")))) return false;
+      if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "syncVersion")))) return false;
       return true;
     }
   };

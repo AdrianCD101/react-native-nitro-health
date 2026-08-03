@@ -116,7 +116,7 @@ const page = await NitroHealth.readSteps({
 const steps = page.samples
 ```
 
-`readSteps()` resolves with a page of step count samples with `uuid`, `startDate`, `endDate`, and `count`. `uuid` is a stable sample identifier — the HealthKit sample UUID on iOS, the Health Connect record id on Android. When the platform query succeeds but no matching samples are available, `samples` is empty and `nextCursor` is absent; when more data exists beyond `limit`, the page carries a `nextCursor` (see [Pagination](#pagination)). Apps must request and receive steps read permission before relying on returned data.
+`readSteps()` resolves with a page of step count samples with `uuid`, `startDate`, `endDate`, and `count`. `uuid` identifies the physical native sample — the HealthKit sample UUID on iOS, the Health Connect record id on Android. It remains valid for that physical sample, but a higher-version iOS write replaces the sample and creates a new UUID. When the platform query succeeds but no matching samples are available, `samples` is empty and `nextCursor` is absent; when more data exists beyond `limit`, the page carries a `nextCursor` (see [Pagination](#pagination)). Apps must request and receive steps read permission before relying on returned data.
 
 ## Pagination
 
@@ -185,6 +185,8 @@ async function applyRecordChange(change: HealthRecordChange<'steps'>) {
 ```
 
 Every public sample has both `uuid` and `recordUuid`. `uuid` identifies the returned sample. `recordUuid` identifies its native parent record and is the key used by change tracking. They are equal except for Android heart-rate readings and sleep stages, where one Health Connect record is flattened into several samples such as `recordUuid#0`, `recordUuid#1`, and so on. Those index-based sample identifiers can change when an updated parent record reorders its children. Always replace all cached samples sharing an upsert's `recordUuid`; never append an upsert blindly. An upsert may contain an empty `samples` array, which means the parent record currently has no child samples and any cached children must be removed.
+
+For versioned writes, `sync.id` is the logical application identity; `uuid` and `recordUuid` remain physical native identities. Current Health Connect implementations keep the same `recordUuid` when a higher version replaces a record. iOS creates a sample with a new UUID and deletes the previous sample, so change tracking reports an upsert under the new `recordUuid` and a deletion for the old one. Any previously cached iOS UUID is stale after that replacement.
 
 `getChanges()` returns a sequence of `upsert` and `delete` changes. Process them in the returned order, but do not treat that order as a cross-platform event timeline. A successful page includes `nextChangesToken`; apply the page transactionally and persist that token only afterward. Reusing the previous token safely replays a page, while saving the next token before applying the page can permanently lose changes. Serialize drains for each data type, or use compare-and-swap persistence against the input token, so two foreground/background syncs cannot commit checkpoints out of order. Continue immediately while `hasMore` is true. iOS deliberately performs one terminal empty anchored query, so its final non-empty page may still report `hasMore: true`.
 
@@ -405,6 +407,7 @@ if (result.deniedPermissions.length === 0) {
       startDate: new Date('2026-01-01T09:00:00.000Z'),
       endDate: new Date('2026-01-01T09:30:00.000Z'),
       count: 512,
+      sync: { id: 'morning-walk', version: 1 },
     },
   ])
 }
@@ -424,7 +427,9 @@ Point-in-time samples take a single `date`:
 - `saveHeight(samples)` — `{ date, meters }`, `meters` must be greater than 0, up to 3.
 - `saveBodyMass(samples)` — `{ date, kilograms }`, `kilograms` must be greater than 0, up to 1,000.
 
-All save methods take a non-empty array, resolve to `void` when every sample is saved (both platforms save each call atomically), and reject before crossing the native boundary when validation fails — error messages include the failing index, for example `samples[2]: bpm must be between 1 and 300`.
+Every input may include `sync: { id, version }` for retry-safe, versioned writes. Without `sync`, the write has no application-controlled identity and retries are not portably idempotent. With `sync`, an exact retry of the same id, version, and payload is idempotent in stored state; a strictly higher version replaces the logical record, and a lower version is ignored. Native change tracking may still emit a current-state upsert for a retry. Reusing an id and version with a changed payload is unsupported — increment `version` whenever the payload changes. IDs must be nonblank, versions must be non-negative safe integers, and duplicate IDs within one save call reject. IDs are case-sensitive and scoped to the writing app and `HealthDataType`, so one id must identify only one logical record of that type.
+
+All save methods take a non-empty array, resolve to `void` after the atomic call succeeds, and do not report whether an input was inserted, retried, replaced, or ignored. They reject before crossing the native boundary when validation fails — error messages include the failing index, for example `samples[2]: bpm must be between 1 and 300`.
 
 The value ranges mirror what Health Connect enforces at insert time, applied on both platforms so a sample that saves on iOS also saves on Android.
 
@@ -453,7 +458,7 @@ if (result.deniedPermissions.length === 0) {
 }
 ```
 
-- `deleteSamplesByUuids(dataType, uuids)` — deletes the samples with the given `uuid` values (as returned by reads). Takes a non-empty array and rejects before crossing the native boundary when validation fails — error messages include the failing index, for example `uuids[0]: a non-empty uuid string is required`.
+- `deleteSamplesByUuids(dataType, uuids)` — deletes samples by the physical `uuid` values returned by reads, not by logical `sync.id`. Takes a non-empty array and rejects before crossing the native boundary when validation fails — error messages include the failing index, for example `uuids[0]: a non-empty uuid string is required`.
 - `deleteSamplesByTimeRange(dataType, { startDate, endDate })` — deletes every sample your app wrote in `[startDate, endDate)` on both platforms: `startDate` inclusive, `endDate` exclusive, `startDate` strictly before `endDate`. A time-range delete removes exactly the own-app samples a read over the same range returns, and resolves even when nothing matches.
 
 Both methods resolve to `void` — Health Connect does not report how many records were deleted, so neither platform exposes a count.
@@ -462,9 +467,11 @@ On Android, heart-rate readings and sleep stages live inside parent Health Conne
 
 The no-match behavior of `deleteSamplesByUuids` also differs by platform. On iOS, deleting uuids that match nothing resolves successfully with nothing deleted (HealthKit's no-data error is normalized to success). On Android, delete-by-id is transactional and all-or-nothing: a uuid that does not exist rejects (Health Connect reports it as an IPC failure), a uuid owned by another app rejects with a security error, and in both cases none of the requested records are deleted.
 
+After a higher-version write, current Health Connect implementations retain the record UUID, so it remains valid for deletion. iOS replaces the physical sample, so an older UUID is stale and deleting it is a successful no-op; use the latest UUID from reads or change tracking, or delete by time range.
+
 ## Jest
 
-The package ships a Jest mock so app tests do not need to mock Nitro internals. By default, mocked raw sample reads resolve with an empty page (`{ samples: [] }`), `readStatistics` resolves with `[]`, `createChangesToken` resolves with `'mock-changes-token'`, and `getChanges` resolves with an empty successful changes page.
+The package ships a Jest mock so app tests do not need to mock Nitro internals. By default, mocked raw sample reads resolve with an empty page (`{ samples: [] }`), `readStatistics` resolves with `[]`, `createChangesToken` resolves with `'mock-changes-token'`, and `getChanges` resolves with an empty successful changes page. The mock is stateless: saves and deletes resolve to `void` but do not affect reads, track sync ids or versions, or emulate retry, replacement, and change-tracking behavior.
 
 Add it to your Jest setup file:
 
