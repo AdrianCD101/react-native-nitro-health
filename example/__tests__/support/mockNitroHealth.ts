@@ -17,6 +17,8 @@ export const mockNitroHealth = {
   getAvailabilityStatus: jest.fn(),
   openHealthConnectInstall: jest.fn(),
   openHealthSettings: jest.fn(),
+  createChangesToken: jest.fn(),
+  getChanges: jest.fn(),
   requestAuthorization: jest.fn(),
   getRequestStatusForAuthorization: jest.fn(),
   readSteps: jest.fn(),

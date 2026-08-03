@@ -63,7 +63,7 @@ extension HybridNitroHealth {
 // them); their labels mirror the read paths and Android's permissionLabel values. Falls back
 // to the raw dataType for unsupported values — makeHealthKitSampleType has already thrown by
 // the time labels matter.
-private func makeHealthDataTypeLabel(dataType: String) -> String {
+func makeHealthDataTypeLabel(dataType: String) -> String {
     switch dataType {
     case "sleep":
         return "sleep"

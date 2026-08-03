@@ -135,6 +135,63 @@ Cursors are opaque and platform-specific — never parse or construct one. A cur
 
 On Android, heart rate and sleep reads page by underlying Health Connect record, so a page may contain more samples than `limit` when a record holds multiple readings or stages; iOS honors `limit` exactly. Either way, nothing is silently truncated — whenever data remains, the page carries a `nextCursor`.
 
+## Change Tracking
+
+Use change tracking to keep a local database or backend synchronized after an initial snapshot. Changes tokens are durable checkpoints and are separate from the short-lived pagination cursors above. Create and persist one token per `HealthDataType`.
+
+Create the token **before** reading the initial snapshot. That ordering ensures changes made while the snapshot is being paged are returned afterward:
+
+```ts
+import { NitroHealth } from 'react-native-nitro-health'
+import type { HealthRecordChange } from 'react-native-nitro-health'
+
+let changesToken = await NitroHealth.createChangesToken('steps')
+
+// Read and store the initial snapshot using readSteps() and its pagination cursor.
+await storeInitialStepSnapshot()
+
+do {
+  const result = await NitroHealth.getChanges('steps', changesToken)
+
+  if (result.tokenExpired) {
+    // Create a new token before replacing the local snapshot, then drain it.
+    changesToken = await NitroHealth.createChangesToken('steps')
+    await replaceInitialStepSnapshot()
+    continue
+  }
+
+  await database.transaction(async () => {
+    for (const change of result.changes) {
+      await applyRecordChange(change)
+    }
+
+    // Persist only after every change in the page was applied successfully.
+    await saveChangesToken(result.nextChangesToken)
+  })
+
+  changesToken = result.nextChangesToken
+  if (!result.hasMore) break
+} while (true)
+
+async function applyRecordChange(change: HealthRecordChange<'steps'>) {
+  if (change.type === 'delete') {
+    await removeSamplesByRecordUuid(change.recordUuid)
+    return
+  }
+
+  // An upsert contains the complete current contents of its native record.
+  await replaceSamplesByRecordUuid(change.recordUuid, change.samples)
+}
+```
+
+Every public sample has both `uuid` and `recordUuid`. `uuid` identifies the returned sample. `recordUuid` identifies its native parent record and is the key used by change tracking. They are equal except for Android heart-rate readings and sleep stages, where one Health Connect record is flattened into several samples such as `recordUuid#0`, `recordUuid#1`, and so on. Those index-based sample identifiers can change when an updated parent record reorders its children. Always replace all cached samples sharing an upsert's `recordUuid`; never append an upsert blindly. An upsert may contain an empty `samples` array, which means the parent record currently has no child samples and any cached children must be removed.
+
+`getChanges()` returns a sequence of `upsert` and `delete` changes. Process them in the returned order, but do not treat that order as a cross-platform event timeline. A successful page includes `nextChangesToken`; apply the page transactionally and persist that token only afterward. Reusing the previous token safely replays a page, while saving the next token before applying the page can permanently lose changes. Serialize drains for each data type, or use compare-and-swap persistence against the input token, so two foreground/background syncs cannot commit checkpoints out of order. Continue immediately while `hasMore` is true. iOS deliberately performs one terminal empty anchored query, so its final non-empty page may still report `hasMore: true`.
+
+Changes tokens are opaque, platform-specific, data-type-specific, and device/store-specific. Never parse, modify, or transfer them between devices. Invalid, foreign-platform, pagination, or wrong-data-type tokens reject. Health Connect tokens expire after approximately 30 days; an expired token returns `{ tokenExpired: true }` and requires the token-before-snapshot sequence again. HealthKit does not expose token expiration, but native query failures still reject. Creating the first iOS token drains existing HealthKit history internally to establish the current checkpoint, so it can take longer for data types with substantial history.
+
+Change tracking uses the same read authorization as raw reads. HealthKit cannot reveal a denied read permission after the authorization prompt, so denial can still appear as an empty result on iOS. Request authorization before creating tokens, and perform a full resync after material permission changes.
+
 ## Read Activity Quantities
 
 ```ts
@@ -407,7 +464,7 @@ The no-match behavior of `deleteSamplesByUuids` also differs by platform. On iOS
 
 ## Jest
 
-The package ships a Jest mock so app tests do not need to mock Nitro internals. By default, mocked raw sample reads resolve with an empty page (`{ samples: [] }`) and `readStatistics` resolves with `[]`.
+The package ships a Jest mock so app tests do not need to mock Nitro internals. By default, mocked raw sample reads resolve with an empty page (`{ samples: [] }`), `readStatistics` resolves with `[]`, `createChangesToken` resolves with `'mock-changes-token'`, and `getChanges` resolves with an empty successful changes page.
 
 Add it to your Jest setup file:
 

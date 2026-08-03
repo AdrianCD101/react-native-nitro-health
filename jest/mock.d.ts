@@ -17,6 +17,8 @@ export type NitroHealthMock = Omit<
   | 'getAvailabilityStatus'
   | 'openHealthConnectInstall'
   | 'openHealthSettings'
+  | 'createChangesToken'
+  | 'getChanges'
   | 'readActiveEnergyBurned'
   | 'readSteps'
   | 'readDistance'
@@ -50,6 +52,8 @@ export type NitroHealthMock = Omit<
   getAvailabilityStatus: MockFunction<NitroHealth['getAvailabilityStatus']>
   openHealthConnectInstall: MockFunction<NitroHealth['openHealthConnectInstall']>
   openHealthSettings: MockFunction<NitroHealth['openHealthSettings']>
+  createChangesToken: MockFunction<NitroHealth['createChangesToken']>
+  getChanges: MockFunction<NitroHealth['getChanges']>
   readActiveEnergyBurned: MockFunction<NitroHealth['readActiveEnergyBurned']>
   readSteps: MockFunction<NitroHealth['readSteps']>
   readDistance: MockFunction<NitroHealth['readDistance']>

@@ -41,6 +41,7 @@ namespace margelo::nitro::nitrohealth {
   struct NativeSleepSample final {
   public:
     std::string uuid     SWIFT_PRIVATE;
+    std::string recordUuid     SWIFT_PRIVATE;
     double startTimeMs     SWIFT_PRIVATE;
     double endTimeMs     SWIFT_PRIVATE;
     std::string stage     SWIFT_PRIVATE;
@@ -48,7 +49,7 @@ namespace margelo::nitro::nitrohealth {
 
   public:
     NativeSleepSample() = default;
-    explicit NativeSleepSample(std::string uuid, double startTimeMs, double endTimeMs, std::string stage, std::optional<std::string> source): uuid(uuid), startTimeMs(startTimeMs), endTimeMs(endTimeMs), stage(stage), source(source) {}
+    explicit NativeSleepSample(std::string uuid, std::string recordUuid, double startTimeMs, double endTimeMs, std::string stage, std::optional<std::string> source): uuid(uuid), recordUuid(recordUuid), startTimeMs(startTimeMs), endTimeMs(endTimeMs), stage(stage), source(source) {}
 
   public:
     friend bool operator==(const NativeSleepSample& lhs, const NativeSleepSample& rhs) = default;
@@ -65,6 +66,7 @@ namespace margelo::nitro {
       jsi::Object obj = arg.asObject(runtime);
       return margelo::nitro::nitrohealth::NativeSleepSample(
         JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "uuid"))),
+        JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "recordUuid"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "startTimeMs"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs"))),
         JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "stage"))),
@@ -74,6 +76,7 @@ namespace margelo::nitro {
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::nitrohealth::NativeSleepSample& arg) {
       jsi::Object obj(runtime);
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "uuid"), JSIConverter<std::string>::toJSI(runtime, arg.uuid));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "recordUuid"), JSIConverter<std::string>::toJSI(runtime, arg.recordUuid));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "startTimeMs"), JSIConverter<double>::toJSI(runtime, arg.startTimeMs));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs"), JSIConverter<double>::toJSI(runtime, arg.endTimeMs));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "stage"), JSIConverter<std::string>::toJSI(runtime, arg.stage));
@@ -89,6 +92,7 @@ namespace margelo::nitro {
         return false;
       }
       if (!JSIConverter<std::string>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "uuid")))) return false;
+      if (!JSIConverter<std::string>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "recordUuid")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "startTimeMs")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs")))) return false;
       if (!JSIConverter<std::string>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "stage")))) return false;

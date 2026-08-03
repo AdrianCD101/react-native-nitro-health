@@ -1,7 +1,7 @@
+import type { HealthSampleIdentity } from './HealthSampleIdentity'
+
 /** Active energy interval returned by {@linkcode NitroHealth.readActiveEnergyBurned}. */
-export interface ActiveEnergyBurnedSample {
-  /** Stable sample identifier: the HealthKit sample UUID on iOS, the Health Connect record id on Android. */
-  uuid: string
+export interface ActiveEnergyBurnedSample extends HealthSampleIdentity {
   /** Inclusive start of the sample interval. */
   startDate: Date
   /** Exclusive end of the sample interval. */

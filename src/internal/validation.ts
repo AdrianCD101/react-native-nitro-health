@@ -60,6 +60,12 @@ export function assertDeletableUuids(uuids: readonly string[]): void {
   })
 }
 
+export function assertChangesToken(changesToken: string): void {
+  if (typeof changesToken !== 'string' || changesToken.trim() === '') {
+    throw new Error('changesToken must be a non-empty string')
+  }
+}
+
 export function assertSamplePositiveInteger(value: number, index: number, name: string): void {
   if (!Number.isInteger(value) || value <= 0) {
     throw new Error(`samples[${index}]: ${name} must be a positive integer`)

@@ -1,9 +1,8 @@
+import type { HealthSampleIdentity } from './HealthSampleIdentity'
 import type { WorkoutActivityType } from './WorkoutActivityType'
 
 /** Workout session returned by {@linkcode NitroHealth.readWorkouts}. */
-export interface WorkoutSample {
-  /** Stable sample identifier: the HealthKit sample UUID on iOS, the Health Connect record id on Android. */
-  uuid: string
+export interface WorkoutSample extends HealthSampleIdentity {
   /** Start of the workout session. */
   startDate: Date
   /** End of the workout session. */

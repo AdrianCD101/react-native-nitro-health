@@ -36,6 +36,10 @@ namespace margelo::nitro::nitrohealth { struct NativeDistanceSamplePage; }
 namespace margelo::nitro::nitrohealth { struct NativeDistanceSample; }
 // Forward declaration of `NativeHealthAuthorizationResult` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthAuthorizationResult; }
+// Forward declaration of `NativeHealthChange` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthChange; }
+// Forward declaration of `NativeHealthChangesResult` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthChangesResult; }
 // Forward declaration of `NativeHealthDateRangeQuery` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthDateRangeQuery; }
 // Forward declaration of `NativeHealthPermission` to properly resolve imports.
@@ -106,6 +110,8 @@ namespace margelo::nitro::nitrohealth { struct NativeWorkoutSample; }
 #include "NativeDistanceSampleInput.hpp"
 #include "NativeDistanceSamplePage.hpp"
 #include "NativeHealthAuthorizationResult.hpp"
+#include "NativeHealthChange.hpp"
+#include "NativeHealthChangesResult.hpp"
 #include "NativeHealthDateRangeQuery.hpp"
 #include "NativeHealthPermission.hpp"
 #include "NativeHealthStatistics.hpp"
@@ -136,6 +142,7 @@ namespace margelo::nitro::nitrohealth { struct NativeWorkoutSample; }
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/Result.hpp>
 #include <exception>
+#include <functional>
 #include <memory>
 #include <optional>
 #include <string>

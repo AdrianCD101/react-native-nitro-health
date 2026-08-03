@@ -23,6 +23,9 @@ data class NativeSleepSample(
   val uuid: String,
   @DoNotStrip
   @Keep
+  val recordUuid: String,
+  @DoNotStrip
+  @Keep
   val startTimeMs: Double,
   @DoNotStrip
   @Keep
@@ -40,6 +43,7 @@ data class NativeSleepSample(
     if (this === other) return true
     if (other !is NativeSleepSample) return false
     return Objects.deepEquals(this.uuid, other.uuid)
+      && Objects.deepEquals(this.recordUuid, other.recordUuid)
       && Objects.deepEquals(this.startTimeMs, other.startTimeMs)
       && Objects.deepEquals(this.endTimeMs, other.endTimeMs)
       && Objects.deepEquals(this.stage, other.stage)
@@ -49,6 +53,7 @@ data class NativeSleepSample(
   override fun hashCode(): Int {
     return arrayOf<Any?>(
       uuid,
+      recordUuid,
       startTimeMs,
       endTimeMs,
       stage,
@@ -64,8 +69,8 @@ data class NativeSleepSample(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(uuid: String, startTimeMs: Double, endTimeMs: Double, stage: String, source: String?): NativeSleepSample {
-      return NativeSleepSample(uuid, startTimeMs, endTimeMs, stage, source)
+    private fun fromCpp(uuid: String, recordUuid: String, startTimeMs: Double, endTimeMs: Double, stage: String, source: String?): NativeSleepSample {
+      return NativeSleepSample(uuid, recordUuid, startTimeMs, endTimeMs, stage, source)
     }
   }
 }

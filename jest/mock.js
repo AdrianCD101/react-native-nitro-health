@@ -16,6 +16,15 @@ function createNitroHealthMock(overrides = {}) {
     getAvailabilityStatus: createMockFunction(() => 'available'),
     openHealthConnectInstall: createMockFunction(() => false),
     openHealthSettings: createMockFunction(() => Promise.resolve(true)),
+    createChangesToken: createMockFunction(() => Promise.resolve('mock-changes-token')),
+    getChanges: createMockFunction(() =>
+      Promise.resolve({
+        tokenExpired: false,
+        changes: [],
+        nextChangesToken: 'mock-changes-token',
+        hasMore: false,
+      })
+    ),
     readActiveEnergyBurned: createMockFunction(() => Promise.resolve({ samples: [] })),
     readSteps: createMockFunction(() => Promise.resolve({ samples: [] })),
     readDistance: createMockFunction(() => Promise.resolve({ samples: [] })),

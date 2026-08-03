@@ -58,6 +58,8 @@ namespace margelo::nitro::nitrohealth {
     HealthAvailabilityStatus getAvailabilityStatus() override;
     bool openHealthConnectInstall() override;
     std::shared_ptr<Promise<bool>> openHealthSettings() override;
+    std::shared_ptr<Promise<std::string>> createChangesToken(const std::string& dataType) override;
+    std::shared_ptr<Promise<NativeHealthChangesResult>> getChanges(const std::string& dataType, const std::string& changesToken) override;
     std::shared_ptr<Promise<NativeStepSamplePage>> readSteps(const NativeHealthDateRangeQuery& query) override;
     std::shared_ptr<Promise<NativeDistanceSamplePage>> readDistance(const NativeHealthDateRangeQuery& query) override;
     std::shared_ptr<Promise<NativeActiveEnergyBurnedSamplePage>> readActiveEnergyBurned(const NativeHealthDateRangeQuery& query) override;

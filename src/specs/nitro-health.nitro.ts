@@ -8,6 +8,7 @@ import type { NativeBodyMassSamplePage } from '../NativeBodyMassSamplePage'
 import type { NativeDistanceSampleInput } from '../NativeDistanceSampleInput'
 import type { NativeDistanceSamplePage } from '../NativeDistanceSamplePage'
 import type { NativeHealthAuthorizationResult } from '../NativeHealthAuthorizationResult'
+import type { NativeHealthChangesResult } from '../NativeHealthChangesResult'
 import type { NativeHealthDateRangeQuery } from '../NativeHealthDateRangeQuery'
 import type { NativeHealthStatistics } from '../NativeHealthStatistics'
 import type { NativeHealthStatisticsQuery } from '../NativeHealthStatisticsQuery'
@@ -33,6 +34,8 @@ export interface NitroHealth extends HybridObject<{ ios: 'swift'; android: 'kotl
   getAvailabilityStatus(): HealthAvailabilityStatus
   openHealthConnectInstall(): boolean
   openHealthSettings(): Promise<boolean>
+  createChangesToken(dataType: string): Promise<string>
+  getChanges(dataType: string, changesToken: string): Promise<NativeHealthChangesResult>
   readSteps(query: NativeHealthDateRangeQuery): Promise<NativeStepSamplePage>
   readDistance(query: NativeHealthDateRangeQuery): Promise<NativeDistanceSamplePage>
   readActiveEnergyBurned(

@@ -5,6 +5,10 @@ import type { BodyMassSampleInput } from '../BodyMassSampleInput'
 import type { DistanceSample } from '../DistanceSample'
 import type { DistanceSampleInput } from '../DistanceSampleInput'
 import type { HealthSamplePage } from '../HealthSamplePage'
+import type { HealthChangesResult } from '../HealthChangesResult'
+import type { HealthDataType } from '../HealthDataType'
+import type { HealthRecordChange } from '../HealthRecordChange'
+import type { HealthSampleByDataType } from '../HealthSampleByDataType'
 import type { HealthStatistics } from '../HealthStatistics'
 import type { HeartRateSample } from '../HeartRateSample'
 import type { HeartRateSampleInput } from '../HeartRateSampleInput'
@@ -19,6 +23,8 @@ import type { NativeBodyMassSampleInput } from '../NativeBodyMassSampleInput'
 import type { NativeDistanceSample } from '../NativeDistanceSample'
 import type { NativeDistanceSampleInput } from '../NativeDistanceSampleInput'
 import type { NativeHealthStatistics } from '../NativeHealthStatistics'
+import type { NativeHealthChange } from '../NativeHealthChange'
+import type { NativeHealthChangesResult } from '../NativeHealthChangesResult'
 import type { NativeHeartRateSample } from '../NativeHeartRateSample'
 import type { NativeHeartRateSampleInput } from '../NativeHeartRateSampleInput'
 import type { NativeHeartRateStatistics } from '../NativeHeartRateStatistics'
@@ -211,6 +217,7 @@ export function makeSamplePage<TNative, TSample>(
 export function makeStepSample(sample: NativeStepSample): StepSample {
   return {
     uuid: sample.uuid,
+    recordUuid: sample.uuid,
     startDate: new Date(sample.startTimeMs),
     endDate: new Date(sample.endTimeMs),
     count: sample.count,
@@ -220,6 +227,7 @@ export function makeStepSample(sample: NativeStepSample): StepSample {
 export function makeDistanceSample(sample: NativeDistanceSample): DistanceSample {
   return {
     uuid: sample.uuid,
+    recordUuid: sample.uuid,
     startDate: new Date(sample.startTimeMs),
     endDate: new Date(sample.endTimeMs),
     distanceMeters: sample.distanceMeters,
@@ -231,6 +239,7 @@ export function makeActiveEnergyBurnedSample(
 ): ActiveEnergyBurnedSample {
   return {
     uuid: sample.uuid,
+    recordUuid: sample.uuid,
     startDate: new Date(sample.startTimeMs),
     endDate: new Date(sample.endTimeMs),
     kilocalories: sample.kilocalories,
@@ -240,6 +249,7 @@ export function makeActiveEnergyBurnedSample(
 export function makeBodyMassSample(sample: NativeBodyMassSample): BodyMassSample {
   return {
     uuid: sample.uuid,
+    recordUuid: sample.uuid,
     startDate: new Date(sample.startTimeMs),
     endDate: new Date(sample.endTimeMs),
     kilograms: sample.kilograms,
@@ -250,6 +260,7 @@ export function makeBodyMassSample(sample: NativeBodyMassSample): BodyMassSample
 export function makeHeartRateSample(sample: NativeHeartRateSample): HeartRateSample {
   return {
     uuid: sample.uuid,
+    recordUuid: sample.recordUuid,
     date: new Date(sample.timeMs),
     bpm: sample.bpm,
     source: sample.source,
@@ -261,6 +272,7 @@ export function makeRestingHeartRateSample(
 ): RestingHeartRateSample {
   return {
     uuid: sample.uuid,
+    recordUuid: sample.uuid,
     date: new Date(sample.timeMs),
     bpm: sample.bpm,
     source: sample.source,
@@ -272,6 +284,7 @@ export function makeHeartRateVariabilitySample(
 ): HeartRateVariabilitySample {
   return {
     uuid: sample.uuid,
+    recordUuid: sample.uuid,
     date: new Date(sample.timeMs),
     milliseconds: sample.milliseconds,
     method: sample.method as HeartRateVariabilitySample['method'],
@@ -284,6 +297,7 @@ export function makeOxygenSaturationSample(
 ): OxygenSaturationSample {
   return {
     uuid: sample.uuid,
+    recordUuid: sample.uuid,
     date: new Date(sample.timeMs),
     percentage: sample.percentage,
     source: sample.source,
@@ -293,6 +307,7 @@ export function makeOxygenSaturationSample(
 export function makeHeightSample(sample: NativeHeightSample): HeightSample {
   return {
     uuid: sample.uuid,
+    recordUuid: sample.uuid,
     date: new Date(sample.timeMs),
     meters: sample.meters,
     source: sample.source,
@@ -302,6 +317,7 @@ export function makeHeightSample(sample: NativeHeightSample): HeightSample {
 export function makeSleepSample(sample: NativeSleepSample): SleepSample {
   return {
     uuid: sample.uuid,
+    recordUuid: sample.recordUuid,
     startDate: new Date(sample.startTimeMs),
     endDate: new Date(sample.endTimeMs),
     stage: sample.stage as SleepSample['stage'],
@@ -312,6 +328,7 @@ export function makeSleepSample(sample: NativeSleepSample): SleepSample {
 export function makeWorkoutSample(sample: NativeWorkoutSample): WorkoutSample {
   return {
     uuid: sample.uuid,
+    recordUuid: sample.uuid,
     startDate: new Date(sample.startTimeMs),
     endDate: new Date(sample.endTimeMs),
     durationSeconds: sample.durationSeconds,
@@ -341,5 +358,153 @@ export function makeHealthStatistics(statistics: NativeHealthStatistics): Health
     avg: statistics.avg,
     min: statistics.min,
     max: statistics.max,
+  }
+}
+
+const CHANGE_SAMPLE_FIELDS = [
+  'stepSamples',
+  'heartRateSamples',
+  'restingHeartRateSamples',
+  'heartRateVariabilitySamples',
+  'distanceSamples',
+  'activeEnergyBurnedSamples',
+  'oxygenSaturationSamples',
+  'heightSamples',
+  'sleepSamples',
+  'bodyMassSamples',
+  'workoutSamples',
+] as const
+
+function assertNativeChangeIdentity(change: NativeHealthChange): void {
+  if (typeof change.recordUuid !== 'string' || change.recordUuid.trim() === '') {
+    throw new Error('Native health change has an invalid recordUuid')
+  }
+}
+
+function makeUpsertSamples(
+  dataType: HealthDataType,
+  change: NativeHealthChange
+): HealthRecordChange<HealthDataType> & { type: 'upsert' } {
+  const populatedFields = CHANGE_SAMPLE_FIELDS.filter((field) => change[field] !== undefined)
+
+  if (populatedFields.length !== 1) {
+    throw new Error(`Native '${dataType}' upsert must contain exactly one sample payload`)
+  }
+
+  let samples: HealthSampleByDataType[HealthDataType][]
+  switch (dataType) {
+    case 'steps':
+      if (change.stepSamples === undefined)
+        throw new Error("Native 'steps' upsert is missing samples")
+      samples = change.stepSamples.map(makeStepSample)
+      break
+    case 'heartRate':
+      if (change.heartRateSamples === undefined)
+        throw new Error("Native 'heartRate' upsert is missing samples")
+      samples = change.heartRateSamples.map(makeHeartRateSample)
+      break
+    case 'restingHeartRate':
+      if (change.restingHeartRateSamples === undefined)
+        throw new Error("Native 'restingHeartRate' upsert is missing samples")
+      samples = change.restingHeartRateSamples.map(makeRestingHeartRateSample)
+      break
+    case 'heartRateVariability':
+      if (change.heartRateVariabilitySamples === undefined)
+        throw new Error("Native 'heartRateVariability' upsert is missing samples")
+      samples = change.heartRateVariabilitySamples.map(makeHeartRateVariabilitySample)
+      break
+    case 'distance':
+      if (change.distanceSamples === undefined)
+        throw new Error("Native 'distance' upsert is missing samples")
+      samples = change.distanceSamples.map(makeDistanceSample)
+      break
+    case 'activeEnergyBurned':
+      if (change.activeEnergyBurnedSamples === undefined)
+        throw new Error("Native 'activeEnergyBurned' upsert is missing samples")
+      samples = change.activeEnergyBurnedSamples.map(makeActiveEnergyBurnedSample)
+      break
+    case 'oxygenSaturation':
+      if (change.oxygenSaturationSamples === undefined)
+        throw new Error("Native 'oxygenSaturation' upsert is missing samples")
+      samples = change.oxygenSaturationSamples.map(makeOxygenSaturationSample)
+      break
+    case 'height':
+      if (change.heightSamples === undefined)
+        throw new Error("Native 'height' upsert is missing samples")
+      samples = change.heightSamples.map(makeHeightSample)
+      break
+    case 'sleep':
+      if (change.sleepSamples === undefined)
+        throw new Error("Native 'sleep' upsert is missing samples")
+      samples = change.sleepSamples.map(makeSleepSample)
+      break
+    case 'bodyMass':
+      if (change.bodyMassSamples === undefined)
+        throw new Error("Native 'bodyMass' upsert is missing samples")
+      samples = change.bodyMassSamples.map(makeBodyMassSample)
+      break
+    case 'workout':
+      if (change.workoutSamples === undefined)
+        throw new Error("Native 'workout' upsert is missing samples")
+      samples = change.workoutSamples.map(makeWorkoutSample)
+      break
+  }
+
+  if (samples.some((sample) => sample.recordUuid !== change.recordUuid)) {
+    throw new Error(`Native '${dataType}' upsert samples do not match recordUuid`)
+  }
+
+  return {
+    type: 'upsert',
+    recordUuid: change.recordUuid,
+    samples,
+  }
+}
+
+function makeHealthRecordChange<T extends HealthDataType>(
+  dataType: T,
+  change: NativeHealthChange
+): HealthRecordChange<T> {
+  assertNativeChangeIdentity(change)
+
+  if (change.type === 'delete') {
+    if (CHANGE_SAMPLE_FIELDS.some((field) => change[field] !== undefined)) {
+      throw new Error('Native delete change must not contain samples')
+    }
+
+    return {
+      type: 'delete',
+      recordUuid: change.recordUuid,
+    }
+  }
+
+  if (change.type !== 'upsert') {
+    throw new Error(`Unsupported native health change type: ${change.type}`)
+  }
+
+  return makeUpsertSamples(dataType, change) as HealthRecordChange<T>
+}
+
+export function makeHealthChangesResult<T extends HealthDataType>(
+  dataType: T,
+  result: NativeHealthChangesResult
+): HealthChangesResult<T> {
+  if (result.tokenExpired) {
+    if (result.changes.length !== 0 || result.hasMore || result.nextChangesToken !== undefined) {
+      throw new Error('Expired native changes result contains usable change data')
+    }
+
+    return { tokenExpired: true }
+  }
+
+  if (typeof result.nextChangesToken !== 'string' || result.nextChangesToken.trim() === '') {
+    throw new Error('Native changes result is missing nextChangesToken')
+  }
+
+  return {
+    tokenExpired: false,
+    changes: result.changes.map((change) => makeHealthRecordChange(dataType, change)),
+    nextChangesToken: result.nextChangesToken,
+    hasMore: result.hasMore,
   }
 }
