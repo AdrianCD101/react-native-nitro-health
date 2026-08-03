@@ -180,6 +180,44 @@ open class HybridNitroHealthSpec_cxx {
   }
   
   @inline(__always)
+  public final func createChangesToken(dataType: std.string) -> bridge.Result_std__shared_ptr_Promise_std__string___ {
+    do {
+      let __result = try self.__implementation.createChangesToken(dataType: String(dataType))
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_std__string__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_std__string__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_std__string__(__promise)
+        __result
+          .then({ __result in __promiseHolder.resolve(std.string(__result)) })
+          .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
+        return __promise
+      }()
+      return bridge.create_Result_std__shared_ptr_Promise_std__string___(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_std__shared_ptr_Promise_std__string___(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func getChanges(dataType: std.string, changesToken: std.string) -> bridge.Result_std__shared_ptr_Promise_NativeHealthChangesResult___ {
+    do {
+      let __result = try self.__implementation.getChanges(dataType: String(dataType), changesToken: String(changesToken))
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_NativeHealthChangesResult__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_NativeHealthChangesResult__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_NativeHealthChangesResult__(__promise)
+        __result
+          .then({ __result in __promiseHolder.resolve(__result) })
+          .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
+        return __promise
+      }()
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthChangesResult___(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthChangesResult___(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
   public final func readSteps(query: NativeHealthDateRangeQuery) -> bridge.Result_std__shared_ptr_Promise_NativeStepSamplePage___ {
     do {
       let __result = try self.__implementation.readSteps(query: query)

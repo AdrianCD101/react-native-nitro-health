@@ -74,7 +74,9 @@ describe('NitroHealth permission contract', () => {
 
     await expect(
       NitroHealth.readSteps({ startDate, endDate, limit: 25, ascending: false })
-    ).resolves.toEqual({ samples: [{ uuid: 'uuid-1', startDate, endDate, count: 123 }] })
+    ).resolves.toEqual({
+      samples: [{ uuid: 'uuid-1', recordUuid: 'uuid-1', startDate, endDate, count: 123 }],
+    })
 
     expect(mockNitroHealth.readSteps).toHaveBeenCalledWith({
       startTimeMs: startDate.getTime(),
@@ -116,7 +118,9 @@ describe('NitroHealth permission contract', () => {
 
     await expect(
       NitroHealth.readDistance({ startDate, endDate, limit: 25, ascending: false })
-    ).resolves.toEqual({ samples: [{ uuid: 'uuid-1', startDate, endDate, distanceMeters: 1234 }] })
+    ).resolves.toEqual({
+      samples: [{ uuid: 'uuid-1', recordUuid: 'uuid-1', startDate, endDate, distanceMeters: 1234 }],
+    })
 
     expect(mockNitroHealth.readDistance).toHaveBeenCalledWith({
       startTimeMs: startDate.getTime(),
@@ -142,7 +146,9 @@ describe('NitroHealth permission contract', () => {
 
     await expect(
       NitroHealth.readActiveEnergyBurned({ startDate, endDate, limit: 25, ascending: false })
-    ).resolves.toEqual({ samples: [{ uuid: 'uuid-1', startDate, endDate, kilocalories: 321 }] })
+    ).resolves.toEqual({
+      samples: [{ uuid: 'uuid-1', recordUuid: 'uuid-1', startDate, endDate, kilocalories: 321 }],
+    })
 
     expect(mockNitroHealth.readActiveEnergyBurned).toHaveBeenCalledWith({
       startTimeMs: startDate.getTime(),
@@ -159,6 +165,7 @@ describe('NitroHealth permission contract', () => {
       samples: [
         {
           uuid: 'uuid-1',
+          recordUuid: 'uuid-1',
           timeMs: startDate.getTime(),
           bpm: 72,
           source: 'com.example.health',
@@ -170,7 +177,15 @@ describe('NitroHealth permission contract', () => {
     await expect(
       NitroHealth.readHeartRate({ startDate, endDate, limit: 25, ascending: false })
     ).resolves.toEqual({
-      samples: [{ uuid: 'uuid-1', date: startDate, bpm: 72, source: 'com.example.health' }],
+      samples: [
+        {
+          uuid: 'uuid-1',
+          recordUuid: 'uuid-1',
+          date: startDate,
+          bpm: 72,
+          source: 'com.example.health',
+        },
+      ],
     })
 
     expect(mockNitroHealth.readHeartRate).toHaveBeenCalledWith({
@@ -202,6 +217,7 @@ describe('NitroHealth permission contract', () => {
       samples: [
         {
           uuid: 'uuid-1',
+          recordUuid: 'uuid-1',
           startDate,
           endDate,
           kilograms: 72.5,
@@ -263,6 +279,7 @@ describe('NitroHealth permission contract', () => {
       samples: [
         {
           uuid: 'uuid-1',
+          recordUuid: 'uuid-1',
           startTimeMs: startDate.getTime(),
           endTimeMs: endDate.getTime(),
           stage: 'asleepREM',
@@ -277,6 +294,7 @@ describe('NitroHealth permission contract', () => {
       samples: [
         {
           uuid: 'uuid-1',
+          recordUuid: 'uuid-1',
           startDate,
           endDate,
           stage: 'asleepREM',

@@ -98,6 +98,7 @@ describe('NitroHealth pagination contract', () => {
       const result = await NitroHealth.readSteps({ startDate, endDate })
 
       expect(result.samples[0].uuid).toBe('uuid-1')
+      expect(result.samples[0].recordUuid).toBe('uuid-1')
     })
   })
 

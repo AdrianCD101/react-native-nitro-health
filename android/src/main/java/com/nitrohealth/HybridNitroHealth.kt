@@ -21,6 +21,7 @@ import androidx.health.connect.client.records.WeightRecord
 import androidx.health.connect.client.request.AggregateGroupByDurationRequest
 import androidx.health.connect.client.request.AggregateGroupByPeriodRequest
 import androidx.health.connect.client.request.AggregateRequest
+import androidx.health.connect.client.request.ChangesTokenRequest
 import androidx.health.connect.client.request.ReadRecordsRequest
 import androidx.health.connect.client.response.ReadRecordsResponse
 import androidx.health.connect.client.time.TimeRangeFilter
@@ -40,12 +41,12 @@ import com.margelo.nitro.nitrohealth.NativeDistanceSample
 import com.margelo.nitro.nitrohealth.NativeDistanceSampleInput
 import com.margelo.nitro.nitrohealth.NativeDistanceSamplePage
 import com.margelo.nitro.nitrohealth.NativeHealthAuthorizationResult
+import com.margelo.nitro.nitrohealth.NativeHealthChangesResult
 import com.margelo.nitro.nitrohealth.NativeHealthDateRangeQuery
 import com.margelo.nitro.nitrohealth.NativeHealthPermission
 import com.margelo.nitro.nitrohealth.NativeHealthStatistics
 import com.margelo.nitro.nitrohealth.NativeHealthStatisticsQuery
 import com.margelo.nitro.nitrohealth.NativeHealthTimeRangeQuery
-import com.margelo.nitro.nitrohealth.NativeHeartRateSample
 import com.margelo.nitro.nitrohealth.NativeHeartRateSampleInput
 import com.margelo.nitro.nitrohealth.NativeHeartRateSamplePage
 import com.margelo.nitro.nitrohealth.NativeHeartRateStatistics
@@ -60,7 +61,6 @@ import com.margelo.nitro.nitrohealth.NativeOxygenSaturationSamplePage
 import com.margelo.nitro.nitrohealth.NativeRestingHeartRateSample
 import com.margelo.nitro.nitrohealth.NativeRestingHeartRateSampleInput
 import com.margelo.nitro.nitrohealth.NativeRestingHeartRateSamplePage
-import com.margelo.nitro.nitrohealth.NativeSleepSample
 import com.margelo.nitro.nitrohealth.NativeSleepSamplePage
 import com.margelo.nitro.nitrohealth.NativeStepSample
 import com.margelo.nitro.nitrohealth.NativeStepSampleInput
@@ -130,6 +130,64 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                 false
             }
         )
+    }
+
+    override fun createChangesToken(dataType: String): Promise<String> {
+        return Promise.async {
+            val context = NitroModules.applicationContext
+                ?: throw IllegalStateException("Android application context is unavailable")
+
+            if (getAvailabilityStatus() != HealthAvailabilityStatus.AVAILABLE) {
+                throw IllegalStateException("Health Connect is not available")
+            }
+
+            val descriptor = healthDataTypeDescriptorFor(dataType)
+            val client = HealthConnectClient.getOrCreate(context)
+            requireReadPermission(client, dataType)
+            val nativeToken = client.getChangesToken(
+                ChangesTokenRequest(recordTypes = setOf(descriptor.recordType))
+            )
+
+            encodeChangesToken(dataType, nativeToken)
+        }
+    }
+
+    override fun getChanges(
+        dataType: String,
+        changesToken: String
+    ): Promise<NativeHealthChangesResult> {
+        return Promise.async {
+            val context = NitroModules.applicationContext
+                ?: throw IllegalStateException("Android application context is unavailable")
+
+            if (getAvailabilityStatus() != HealthAvailabilityStatus.AVAILABLE) {
+                throw IllegalStateException("Health Connect is not available")
+            }
+
+            val descriptor = healthDataTypeDescriptorFor(dataType)
+            val client = HealthConnectClient.getOrCreate(context)
+            requireReadPermission(client, dataType)
+            val nativeToken = decodeChangesToken(changesToken, dataType)
+            val response = client.getChanges(nativeToken)
+
+            if (response.changesTokenExpired) {
+                NativeHealthChangesResult(
+                    changes = emptyArray(),
+                    nextChangesToken = null,
+                    hasMore = false,
+                    tokenExpired = true
+                )
+            } else {
+                NativeHealthChangesResult(
+                    changes = response.changes.map { change ->
+                        makeNativeHealthChange(change, dataType, descriptor.recordType)
+                    }.toTypedArray(),
+                    nextChangesToken = encodeChangesToken(dataType, response.nextChangesToken),
+                    hasMore = response.hasMore,
+                    tokenExpired = false
+                )
+            }
+        }
     }
 
     override fun readSteps(query: NativeHealthDateRangeQuery): Promise<NativeStepSamplePage> {
@@ -277,14 +335,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             // flattened samples), so every reading of every returned record is kept — capping
             // in post would silently drop data between pages.
             val samples = response.records.flatMap { record ->
-                record.samples.mapIndexed { index, sample ->
-                    NativeHeartRateSample(
-                        uuid = "${record.metadata.id}#$index",
-                        timeMs = sample.time.toEpochMilli().toDouble(),
-                        bpm = sample.beatsPerMinute.toDouble(),
-                        source = record.metadata.dataOrigin.packageName
-                    )
-                }
+                makeNativeHeartRateSamples(record).asIterable()
             }
 
             val ordered = if (query.ascending) {
@@ -593,29 +644,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             // flattened stages), so every stage of every returned session is kept — capping
             // in post would silently drop data between pages.
             val samples = response.records.flatMap { record ->
-                val stages = record.stages
-
-                if (stages.isEmpty()) {
-                    listOf(
-                        NativeSleepSample(
-                            uuid = record.metadata.id,
-                            startTimeMs = record.startTime.toEpochMilli().toDouble(),
-                            endTimeMs = record.endTime.toEpochMilli().toDouble(),
-                            stage = "asleep",
-                            source = record.metadata.dataOrigin.packageName
-                        )
-                    )
-                } else {
-                    stages.mapIndexed { index, stage ->
-                        NativeSleepSample(
-                            uuid = "${record.metadata.id}#$index",
-                            startTimeMs = stage.startTime.toEpochMilli().toDouble(),
-                            endTimeMs = stage.endTime.toEpochMilli().toDouble(),
-                            stage = makeSleepStage(stage.stage),
-                            source = record.metadata.dataOrigin.packageName
-                        )
-                    }
-                }
+                makeNativeSleepSamples(record).asIterable()
             }
 
             val ordered = if (query.ascending) {
@@ -919,16 +948,4 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         }
     }
 
-    private fun makeSleepStage(stage: Int): String {
-        return when (stage) {
-            1 -> "awake"
-            2 -> "asleep"
-            3 -> "outOfBed"
-            4 -> "asleepCore"
-            5 -> "asleepDeep"
-            6 -> "asleepREM"
-            7 -> "awakeInBed"
-            else -> "unknown"
-        }
-    }
 }

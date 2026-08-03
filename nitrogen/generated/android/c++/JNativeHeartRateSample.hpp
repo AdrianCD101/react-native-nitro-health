@@ -34,6 +34,8 @@ namespace margelo::nitro::nitrohealth {
       static const auto clazz = javaClassStatic();
       static const auto fieldUuid = clazz->getField<jni::JString>("uuid");
       jni::local_ref<jni::JString> uuid = this->getFieldValue(fieldUuid);
+      static const auto fieldRecordUuid = clazz->getField<jni::JString>("recordUuid");
+      jni::local_ref<jni::JString> recordUuid = this->getFieldValue(fieldRecordUuid);
       static const auto fieldTimeMs = clazz->getField<double>("timeMs");
       double timeMs = this->getFieldValue(fieldTimeMs);
       static const auto fieldBpm = clazz->getField<double>("bpm");
@@ -42,6 +44,7 @@ namespace margelo::nitro::nitrohealth {
       jni::local_ref<jni::JString> source = this->getFieldValue(fieldSource);
       return NativeHeartRateSample(
         uuid->toStdString(),
+        recordUuid->toStdString(),
         timeMs,
         bpm,
         source != nullptr ? std::make_optional(source->toStdString()) : std::nullopt
@@ -54,12 +57,13 @@ namespace margelo::nitro::nitrohealth {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeHeartRateSample::javaobject> fromCpp(const NativeHeartRateSample& value) {
-      using JSignature = JNativeHeartRateSample(jni::alias_ref<jni::JString>, double, double, jni::alias_ref<jni::JString>);
+      using JSignature = JNativeHeartRateSample(jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, double, double, jni::alias_ref<jni::JString>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
         clazz,
         jni::make_jstring(value.uuid),
+        jni::make_jstring(value.recordUuid),
         value.timeMs,
         value.bpm,
         value.source.has_value() ? jni::make_jstring(value.source.value()) : nullptr

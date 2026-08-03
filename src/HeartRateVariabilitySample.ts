@@ -1,4 +1,5 @@
 import type { HeartRateVariabilityMethod } from './HeartRateVariabilityMethod'
+import type { HealthSampleIdentity } from './HealthSampleIdentity'
 
 /**
  * Heart rate variability sample returned by {@linkcode NitroHealth.readHeartRateVariability}.
@@ -7,9 +8,7 @@ import type { HeartRateVariabilityMethod } from './HeartRateVariabilityMethod'
  * HRV RMSSD metric (`method: 'rmssd'`). SDNN and RMSSD are non-comparable — never mix or chart
  * samples with different methods together.
  */
-export interface HeartRateVariabilitySample {
-  /** Stable sample identifier: the HealthKit sample UUID on iOS, the Health Connect record id on Android. */
-  uuid: string
+export interface HeartRateVariabilitySample extends HealthSampleIdentity {
   /** Instant the reading was taken. */
   date: Date
   /** Heart rate variability in milliseconds. */

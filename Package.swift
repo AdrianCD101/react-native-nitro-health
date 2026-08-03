@@ -16,6 +16,7 @@ let package = Package(
             exclude: ["Tests"],
             sources: [
                 "DailyBucketUtils.swift",
+                "HealthChangesToken.swift",
                 "SampleCursorUtils.swift",
                 "SampleUuidParsing.swift",
                 "StatisticsBucketUtils.swift",

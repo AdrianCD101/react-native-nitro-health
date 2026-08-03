@@ -7,6 +7,7 @@ import type { BodyMassSampleInput } from './BodyMassSampleInput'
 import type { DistanceSample } from './DistanceSample'
 import type { DistanceSampleInput } from './DistanceSampleInput'
 import type { HealthAuthorizationResult } from './HealthAuthorizationResult'
+import type { HealthChangesResult } from './HealthChangesResult'
 import type { HealthDataType } from './HealthDataType'
 import type { HealthDateRangeQuery } from './HealthDateRangeQuery'
 import type { HealthPermission } from './HealthPermission'
@@ -38,6 +39,7 @@ import {
   makeBodyMassSample,
   makeDistanceSample,
   makeHealthStatistics,
+  makeHealthChangesResult,
   makeHeartRateSample,
   makeHeartRateStatistics,
   makeHeartRateVariabilitySample,
@@ -59,6 +61,7 @@ import {
 } from './internal/sampleMapping'
 import {
   assertDeletableUuids,
+  assertChangesToken,
   assertNonEmptySamples,
   assertPermissions,
 } from './internal/validation'
@@ -73,11 +76,15 @@ export type { DistanceSampleInput } from './DistanceSampleInput'
 export type { HealthAuthorizationResult } from './HealthAuthorizationResult'
 export type { HealthAuthorizationStatus } from './HealthAuthorizationStatus'
 export type { HealthAvailabilityStatus } from './HealthAvailabilityStatus'
+export type { HealthChangesResult } from './HealthChangesResult'
 export type { HealthDataType } from './HealthDataType'
 export type { HealthDateRangeQuery } from './HealthDateRangeQuery'
 export type { HealthPermission } from './HealthPermission'
 export type { HealthPermissionAccessType } from './HealthPermissionAccessType'
+export type { HealthRecordChange } from './HealthRecordChange'
 export type { HealthSamplePage } from './HealthSamplePage'
+export type { HealthSampleByDataType } from './HealthSampleByDataType'
+export type { HealthSampleIdentity } from './HealthSampleIdentity'
 export type { HealthStatistics } from './HealthStatistics'
 export type { HealthStatisticsQuery } from './HealthStatisticsQuery'
 export type { HealthTimeRangeQuery } from './HealthTimeRangeQuery'
@@ -98,6 +105,8 @@ export type { NativeDistanceSample } from './NativeDistanceSample'
 export type { NativeDistanceSampleInput } from './NativeDistanceSampleInput'
 export type { NativeDistanceSamplePage } from './NativeDistanceSamplePage'
 export type { NativeHealthAuthorizationResult } from './NativeHealthAuthorizationResult'
+export type { NativeHealthChange } from './NativeHealthChange'
+export type { NativeHealthChangesResult } from './NativeHealthChangesResult'
 export type { NativeHealthDateRangeQuery } from './NativeHealthDateRangeQuery'
 export type { NativeHealthStatistics } from './NativeHealthStatistics'
 export type { NativeHealthStatisticsQuery } from './NativeHealthStatisticsQuery'
@@ -144,6 +153,8 @@ const NitroHealthNative = NitroModules.createHybridObject<NitroHealthSpec>('Nitr
 export type NitroHealth = Omit<
   NitroHealthSpec,
   | 'getRequestStatusForAuthorization'
+  | 'createChangesToken'
+  | 'getChanges'
   | 'readSteps'
   | 'readDistance'
   | 'readActiveEnergyBurned'
@@ -169,6 +180,13 @@ export type NitroHealth = Omit<
   | 'deleteSamplesByTimeRange'
   | 'requestAuthorization'
 > & {
+  /** Creates a durable checkpoint for future changes to one health data type. */
+  createChangesToken(dataType: HealthDataType): Promise<string>
+  /** Reads record changes after a checkpoint created for the same data type. */
+  getChanges<T extends HealthDataType>(
+    dataType: T,
+    changesToken: string
+  ): Promise<HealthChangesResult<T>>
   getRequestStatusForAuthorization(
     permissions: HealthPermission[]
   ): ReturnType<NitroHealthSpec['getRequestStatusForAuthorization']>
@@ -233,6 +251,15 @@ export const NitroHealth: NitroHealth = {
   },
   openHealthSettings() {
     return NitroHealthNative.openHealthSettings()
+  },
+  createChangesToken(dataType) {
+    return NitroHealthNative.createChangesToken(dataType)
+  },
+  async getChanges(dataType, changesToken) {
+    assertChangesToken(changesToken)
+    const result = await NitroHealthNative.getChanges(dataType, changesToken)
+
+    return makeHealthChangesResult(dataType, result)
   },
   async readSteps(query) {
     const page = await NitroHealthNative.readSteps(makeNativeSampleQuery(query))

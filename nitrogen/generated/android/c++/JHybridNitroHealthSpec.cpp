@@ -9,54 +9,58 @@
 
 // Forward declaration of `HealthAvailabilityStatus` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class HealthAvailabilityStatus; }
-// Forward declaration of `NativeStepSamplePage` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeStepSamplePage; }
+// Forward declaration of `NativeHealthChangesResult` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthChangesResult; }
+// Forward declaration of `NativeHealthChange` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthChange; }
 // Forward declaration of `NativeStepSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeStepSample; }
-// Forward declaration of `NativeDistanceSamplePage` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeDistanceSamplePage; }
-// Forward declaration of `NativeDistanceSample` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeDistanceSample; }
-// Forward declaration of `NativeActiveEnergyBurnedSamplePage` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeActiveEnergyBurnedSamplePage; }
-// Forward declaration of `NativeActiveEnergyBurnedSample` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeActiveEnergyBurnedSample; }
-// Forward declaration of `NativeBodyMassSamplePage` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeBodyMassSamplePage; }
-// Forward declaration of `NativeBodyMassSample` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeBodyMassSample; }
-// Forward declaration of `NativeHeartRateSamplePage` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeHeartRateSamplePage; }
 // Forward declaration of `NativeHeartRateSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHeartRateSample; }
+// Forward declaration of `NativeRestingHeartRateSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeRestingHeartRateSample; }
+// Forward declaration of `NativeHeartRateVariabilitySample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHeartRateVariabilitySample; }
+// Forward declaration of `NativeDistanceSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeDistanceSample; }
+// Forward declaration of `NativeActiveEnergyBurnedSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeActiveEnergyBurnedSample; }
+// Forward declaration of `NativeOxygenSaturationSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeOxygenSaturationSample; }
+// Forward declaration of `NativeHeightSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHeightSample; }
+// Forward declaration of `NativeSleepSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeSleepSample; }
+// Forward declaration of `NativeBodyMassSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeBodyMassSample; }
+// Forward declaration of `NativeWorkoutSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeWorkoutSample; }
+// Forward declaration of `NativeStepSamplePage` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeStepSamplePage; }
+// Forward declaration of `NativeDistanceSamplePage` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeDistanceSamplePage; }
+// Forward declaration of `NativeActiveEnergyBurnedSamplePage` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeActiveEnergyBurnedSamplePage; }
+// Forward declaration of `NativeBodyMassSamplePage` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeBodyMassSamplePage; }
+// Forward declaration of `NativeHeartRateSamplePage` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHeartRateSamplePage; }
 // Forward declaration of `NativeHeartRateStatistics` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHeartRateStatistics; }
 // Forward declaration of `NativeRestingHeartRateSamplePage` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeRestingHeartRateSamplePage; }
-// Forward declaration of `NativeRestingHeartRateSample` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeRestingHeartRateSample; }
 // Forward declaration of `NativeHeartRateVariabilitySamplePage` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHeartRateVariabilitySamplePage; }
-// Forward declaration of `NativeHeartRateVariabilitySample` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeHeartRateVariabilitySample; }
 // Forward declaration of `NativeOxygenSaturationSamplePage` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeOxygenSaturationSamplePage; }
-// Forward declaration of `NativeOxygenSaturationSample` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeOxygenSaturationSample; }
 // Forward declaration of `NativeHeightSamplePage` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHeightSamplePage; }
-// Forward declaration of `NativeHeightSample` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeHeightSample; }
 // Forward declaration of `NativeHealthStatistics` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthStatistics; }
 // Forward declaration of `NativeSleepSamplePage` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeSleepSamplePage; }
-// Forward declaration of `NativeSleepSample` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeSleepSample; }
 // Forward declaration of `NativeWorkoutSamplePage` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeWorkoutSamplePage; }
-// Forward declaration of `NativeWorkoutSample` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeWorkoutSample; }
 // Forward declaration of `AuthorizationRequestStatus` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class AuthorizationRequestStatus; }
 // Forward declaration of `NativeHealthAuthorizationResult` to properly resolve imports.
@@ -92,57 +96,64 @@ namespace margelo::nitro::nitrohealth { struct NativeHeightSampleInput; }
 #include "JHealthAvailabilityStatus.hpp"
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/JPromise.hpp>
-#include "NativeStepSamplePage.hpp"
-#include "JNativeStepSamplePage.hpp"
-#include "NativeStepSample.hpp"
-#include <vector>
-#include "JNativeStepSample.hpp"
 #include <string>
+#include "NativeHealthChangesResult.hpp"
+#include "JNativeHealthChangesResult.hpp"
+#include "NativeHealthChange.hpp"
+#include <vector>
+#include "JNativeHealthChange.hpp"
+#include "NativeStepSample.hpp"
 #include <optional>
-#include "NativeDistanceSamplePage.hpp"
-#include "JNativeDistanceSamplePage.hpp"
-#include "NativeDistanceSample.hpp"
-#include "JNativeDistanceSample.hpp"
-#include "NativeActiveEnergyBurnedSamplePage.hpp"
-#include "JNativeActiveEnergyBurnedSamplePage.hpp"
-#include "NativeActiveEnergyBurnedSample.hpp"
-#include "JNativeActiveEnergyBurnedSample.hpp"
-#include "NativeBodyMassSamplePage.hpp"
-#include "JNativeBodyMassSamplePage.hpp"
-#include "NativeBodyMassSample.hpp"
-#include "JNativeBodyMassSample.hpp"
-#include "NativeHeartRateSamplePage.hpp"
-#include "JNativeHeartRateSamplePage.hpp"
+#include "JNativeStepSample.hpp"
 #include "NativeHeartRateSample.hpp"
 #include "JNativeHeartRateSample.hpp"
+#include "NativeRestingHeartRateSample.hpp"
+#include "JNativeRestingHeartRateSample.hpp"
+#include "NativeHeartRateVariabilitySample.hpp"
+#include "JNativeHeartRateVariabilitySample.hpp"
+#include "NativeDistanceSample.hpp"
+#include "JNativeDistanceSample.hpp"
+#include "NativeActiveEnergyBurnedSample.hpp"
+#include "JNativeActiveEnergyBurnedSample.hpp"
+#include "NativeOxygenSaturationSample.hpp"
+#include "JNativeOxygenSaturationSample.hpp"
+#include "NativeHeightSample.hpp"
+#include "JNativeHeightSample.hpp"
+#include "NativeSleepSample.hpp"
+#include "JNativeSleepSample.hpp"
+#include "NativeBodyMassSample.hpp"
+#include "JNativeBodyMassSample.hpp"
+#include "NativeWorkoutSample.hpp"
+#include "JNativeWorkoutSample.hpp"
+#include <functional>
+#include "JFunc_void.hpp"
+#include <NitroModules/JNICallable.hpp>
+#include "NativeStepSamplePage.hpp"
+#include "JNativeStepSamplePage.hpp"
+#include "NativeDistanceSamplePage.hpp"
+#include "JNativeDistanceSamplePage.hpp"
+#include "NativeActiveEnergyBurnedSamplePage.hpp"
+#include "JNativeActiveEnergyBurnedSamplePage.hpp"
+#include "NativeBodyMassSamplePage.hpp"
+#include "JNativeBodyMassSamplePage.hpp"
+#include "NativeHeartRateSamplePage.hpp"
+#include "JNativeHeartRateSamplePage.hpp"
 #include "NativeHeartRateStatistics.hpp"
 #include "JNativeHeartRateStatistics.hpp"
 #include "NativeRestingHeartRateSamplePage.hpp"
 #include "JNativeRestingHeartRateSamplePage.hpp"
-#include "NativeRestingHeartRateSample.hpp"
-#include "JNativeRestingHeartRateSample.hpp"
 #include "NativeHeartRateVariabilitySamplePage.hpp"
 #include "JNativeHeartRateVariabilitySamplePage.hpp"
-#include "NativeHeartRateVariabilitySample.hpp"
-#include "JNativeHeartRateVariabilitySample.hpp"
 #include "NativeOxygenSaturationSamplePage.hpp"
 #include "JNativeOxygenSaturationSamplePage.hpp"
-#include "NativeOxygenSaturationSample.hpp"
-#include "JNativeOxygenSaturationSample.hpp"
 #include "NativeHeightSamplePage.hpp"
 #include "JNativeHeightSamplePage.hpp"
-#include "NativeHeightSample.hpp"
-#include "JNativeHeightSample.hpp"
 #include "NativeHealthStatistics.hpp"
 #include "JNativeHealthStatistics.hpp"
 #include "NativeSleepSamplePage.hpp"
 #include "JNativeSleepSamplePage.hpp"
-#include "NativeSleepSample.hpp"
-#include "JNativeSleepSample.hpp"
 #include "NativeWorkoutSamplePage.hpp"
 #include "JNativeWorkoutSamplePage.hpp"
-#include "NativeWorkoutSample.hpp"
-#include "JNativeWorkoutSample.hpp"
 #include <NitroModules/JUnit.hpp>
 #include "AuthorizationRequestStatus.hpp"
 #include "JAuthorizationRequestStatus.hpp"
@@ -231,6 +242,38 @@ namespace margelo::nitro::nitrohealth {
       __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {
         auto __result = jni::static_ref_cast<jni::JBoolean>(__boxedResult);
         __promise->resolve(static_cast<bool>(__result->value()));
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
+  }
+  std::shared_ptr<Promise<std::string>> JHybridNitroHealthSpec::createChangesToken(const std::string& dataType) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<jni::JString> /* dataType */)>("createChangesToken");
+    auto __result = method(_javaPart, jni::make_jstring(dataType));
+    return [&]() {
+      auto __promise = Promise<std::string>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {
+        auto __result = jni::static_ref_cast<jni::JString>(__boxedResult);
+        __promise->resolve(__result->toStdString());
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
+  }
+  std::shared_ptr<Promise<NativeHealthChangesResult>> JHybridNitroHealthSpec::getChanges(const std::string& dataType, const std::string& changesToken) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<jni::JString> /* dataType */, jni::alias_ref<jni::JString> /* changesToken */)>("getChanges");
+    auto __result = method(_javaPart, jni::make_jstring(dataType), jni::make_jstring(changesToken));
+    return [&]() {
+      auto __promise = Promise<NativeHealthChangesResult>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {
+        auto __result = jni::static_ref_cast<JNativeHealthChangesResult>(__boxedResult);
+        __promise->resolve(__result->toCpp());
       });
       __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
         jni::JniException __jniError(__throwable);

@@ -10,7 +10,7 @@ import HealthKit
 import NitroModules
 import UIKit
 
-private let healthStore = HKHealthStore()
+let healthStore = HKHealthStore()
 
 func permissionError(_ message: String) -> NSError {
     return NSError(domain: "NitroHealth", code: 1, userInfo: [NSLocalizedDescriptionKey: message])
@@ -165,6 +165,7 @@ class HybridNitroHealth: HybridNitroHealthSpec {
 
                 return NativeHeartRateSample(
                     uuid: quantitySample.uuid.uuidString,
+                    recordUuid: quantitySample.uuid.uuidString,
                     timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
                     bpm: quantitySample.quantity.doubleValue(for: bpmUnit),
                     source: quantitySample.sourceRevision.source.name
@@ -311,6 +312,7 @@ class HybridNitroHealth: HybridNitroHealthSpec {
 
                 return NativeSleepSample(
                     uuid: categorySample.uuid.uuidString,
+                    recordUuid: categorySample.uuid.uuidString,
                     startTimeMs: categorySample.startDate.timeIntervalSince1970 * 1000,
                     endTimeMs: categorySample.endDate.timeIntervalSince1970 * 1000,
                     stage: self.makeSleepStage(value: categorySample.value),
@@ -501,11 +503,10 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         }
     }
 
-    // Internal (not private) so HybridNitroHealth+Deletes.swift can reuse it — healthStore is
-    // file-private, so the deleteObjects bridge has to live here. Apple leaves the no-match
-    // behavior of deleteObjects undefined; errorNoData is normalized to success so a delete
-    // that matches nothing resolves (mirroring the statistics queries below). The completion
-    // Bool is ignored in favor of `error`, matching saveHealthKitSamples above.
+    // Internal (not private) so HybridNitroHealth+Deletes.swift can reuse it. Apple leaves the
+    // no-match behavior of deleteObjects undefined; errorNoData is normalized to success so a
+    // delete that matches nothing resolves (mirroring the statistics queries below). The
+    // completion Bool is ignored in favor of `error`, matching saveHealthKitSamples above.
     func deleteHealthKitObjects(of objectType: HKObjectType, predicate: NSPredicate) async throws {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             healthStore.deleteObjects(of: objectType, predicate: predicate) { _, _, error in
@@ -724,7 +725,7 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         return try makeHealthKitQuantityType(dataType: dataType)
     }
 
-    private func makeSleepStage(value: Int) -> String {
+    func makeSleepStage(value: Int) -> String {
         switch value {
         case 0:
             return "inBed"

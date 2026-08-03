@@ -5,6 +5,8 @@ export interface NativeSleepSample {
    * session record id plus a `#index` suffix for each stage within the session.
    */
   uuid: string
+  /** Parent Health Connect session id on Android; equal to `uuid` on iOS. */
+  recordUuid: string
   startTimeMs: number
   endTimeMs: number
   stage: string

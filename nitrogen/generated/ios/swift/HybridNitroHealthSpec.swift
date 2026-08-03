@@ -17,6 +17,8 @@ public protocol HybridNitroHealthSpec_protocol: HybridObject {
   func getAvailabilityStatus() throws -> HealthAvailabilityStatus
   func openHealthConnectInstall() throws -> Bool
   func openHealthSettings() throws -> Promise<Bool>
+  func createChangesToken(dataType: String) throws -> Promise<String>
+  func getChanges(dataType: String, changesToken: String) throws -> Promise<NativeHealthChangesResult>
   func readSteps(query: NativeHealthDateRangeQuery) throws -> Promise<NativeStepSamplePage>
   func readDistance(query: NativeHealthDateRangeQuery) throws -> Promise<NativeDistanceSamplePage>
   func readActiveEnergyBurned(query: NativeHealthDateRangeQuery) throws -> Promise<NativeActiveEnergyBurnedSamplePage>

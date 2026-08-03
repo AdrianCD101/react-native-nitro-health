@@ -15,6 +15,8 @@
 
 // Forward declaration of `HealthAvailabilityStatus` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class HealthAvailabilityStatus; }
+// Forward declaration of `NativeHealthChangesResult` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthChangesResult; }
 // Forward declaration of `NativeStepSamplePage` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeStepSamplePage; }
 // Forward declaration of `NativeHealthDateRangeQuery` to properly resolve imports.
@@ -72,6 +74,8 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthAuthorizationResult; 
 
 #include "HealthAvailabilityStatus.hpp"
 #include <NitroModules/Promise.hpp>
+#include <string>
+#include "NativeHealthChangesResult.hpp"
 #include "NativeStepSamplePage.hpp"
 #include "NativeHealthDateRangeQuery.hpp"
 #include "NativeDistanceSamplePage.hpp"
@@ -86,7 +90,6 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthAuthorizationResult; 
 #include "NativeHeightSamplePage.hpp"
 #include "NativeHealthStatistics.hpp"
 #include <vector>
-#include <string>
 #include "NativeHealthStatisticsQuery.hpp"
 #include "NativeSleepSamplePage.hpp"
 #include "NativeWorkoutSamplePage.hpp"
@@ -137,6 +140,8 @@ namespace margelo::nitro::nitrohealth {
       virtual HealthAvailabilityStatus getAvailabilityStatus() = 0;
       virtual bool openHealthConnectInstall() = 0;
       virtual std::shared_ptr<Promise<bool>> openHealthSettings() = 0;
+      virtual std::shared_ptr<Promise<std::string>> createChangesToken(const std::string& dataType) = 0;
+      virtual std::shared_ptr<Promise<NativeHealthChangesResult>> getChanges(const std::string& dataType, const std::string& changesToken) = 0;
       virtual std::shared_ptr<Promise<NativeStepSamplePage>> readSteps(const NativeHealthDateRangeQuery& query) = 0;
       virtual std::shared_ptr<Promise<NativeDistanceSamplePage>> readDistance(const NativeHealthDateRangeQuery& query) = 0;
       virtual std::shared_ptr<Promise<NativeActiveEnergyBurnedSamplePage>> readActiveEnergyBurned(const NativeHealthDateRangeQuery& query) = 0;

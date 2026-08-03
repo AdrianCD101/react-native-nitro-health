@@ -17,7 +17,7 @@ import NitroModules
 // (distanceWalkingRunning vs distanceCycling vs ...) and Apple still populates the legacy
 // accessors. Matching the deprecation on these wrappers silences the warning at the call
 // site; migrating to statistics(for:) is a tracked follow-up.
-private extension HKWorkout {
+extension HKWorkout {
     @available(iOS, deprecated: 18.0, message: "Wraps the deprecated totalDistance accessor")
     var legacyTotalDistanceMeters: Double? {
         totalDistance?.doubleValue(for: .meter())

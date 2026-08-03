@@ -1,7 +1,7 @@
+import type { HealthSampleIdentity } from './HealthSampleIdentity'
+
 /** Height sample returned by {@linkcode NitroHealth.readHeight}. */
-export interface HeightSample {
-  /** Stable sample identifier: the HealthKit sample UUID on iOS, the Health Connect record id on Android. */
-  uuid: string
+export interface HeightSample extends HealthSampleIdentity {
   /** Instant the measurement was taken. */
   date: Date
   /** Height in meters. */

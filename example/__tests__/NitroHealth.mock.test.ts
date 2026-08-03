@@ -16,6 +16,13 @@ describe('NitroHealth Jest mock', () => {
     expect(NitroHealth.isAvailable()).toBe(true)
     expect(NitroHealth.getAvailabilityStatus()).toBe('available')
     await expect(NitroHealth.openHealthSettings()).resolves.toBe(true)
+    await expect(NitroHealth.createChangesToken('steps')).resolves.toBe('mock-changes-token')
+    await expect(NitroHealth.getChanges('steps', 'mock-changes-token')).resolves.toEqual({
+      tokenExpired: false,
+      changes: [],
+      nextChangesToken: 'mock-changes-token',
+      hasMore: false,
+    })
     await expect(NitroHealth.readActiveEnergyBurned(range)).resolves.toEqual({ samples: [] })
     await expect(NitroHealth.readSteps(range)).resolves.toEqual({ samples: [] })
     await expect(NitroHealth.readDistance(range)).resolves.toEqual({ samples: [] })

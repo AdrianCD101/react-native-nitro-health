@@ -47,6 +47,14 @@ abstract class HybridNitroHealthSpec: HybridObject() {
   
   @DoNotStrip
   @Keep
+  abstract fun createChangesToken(dataType: String): Promise<String>
+  
+  @DoNotStrip
+  @Keep
+  abstract fun getChanges(dataType: String, changesToken: String): Promise<NativeHealthChangesResult>
+  
+  @DoNotStrip
+  @Keep
   abstract fun readSteps(query: NativeHealthDateRangeQuery): Promise<NativeStepSamplePage>
   
   @DoNotStrip
