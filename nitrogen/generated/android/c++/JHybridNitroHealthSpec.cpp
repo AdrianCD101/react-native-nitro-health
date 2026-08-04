@@ -95,6 +95,10 @@ namespace margelo::nitro::nitrohealth { struct NativeRestingHeartRateSampleInput
 namespace margelo::nitro::nitrohealth { struct NativeOxygenSaturationSampleInput; }
 // Forward declaration of `NativeHeightSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHeightSampleInput; }
+// Forward declaration of `NativeSleepSessionInput` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeSleepSessionInput; }
+// Forward declaration of `NativeSleepSessionStageInput` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeSleepSessionStageInput; }
 
 #include "HealthAvailabilityStatus.hpp"
 #include "JHealthAvailabilityStatus.hpp"
@@ -194,6 +198,10 @@ namespace margelo::nitro::nitrohealth { struct NativeHeightSampleInput; }
 #include "JNativeOxygenSaturationSampleInput.hpp"
 #include "NativeHeightSampleInput.hpp"
 #include "JNativeHeightSampleInput.hpp"
+#include "NativeSleepSessionInput.hpp"
+#include "JNativeSleepSessionInput.hpp"
+#include "NativeSleepSessionStageInput.hpp"
+#include "JNativeSleepSessionStageInput.hpp"
 
 namespace margelo::nitro::nitrohealth {
 
@@ -773,6 +781,30 @@ namespace margelo::nitro::nitrohealth {
       }
       return __array;
     }(samples));
+    return [&]() {
+      auto __promise = Promise<void>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& /* unit */) {
+        __promise->resolve();
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
+  }
+  std::shared_ptr<Promise<void>> JHybridNitroHealthSpec::saveSleepSessions(const std::vector<NativeSleepSessionInput>& sessions) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<jni::JArrayClass<JNativeSleepSessionInput>> /* sessions */)>("saveSleepSessions");
+    auto __result = method(_javaPart, [&](auto&& __input) {
+      size_t __size = __input.size();
+      jni::local_ref<jni::JArrayClass<JNativeSleepSessionInput>> __array = jni::JArrayClass<JNativeSleepSessionInput>::newArray(__size);
+      for (size_t __i = 0; __i < __size; __i++) {
+        const auto& __element = __input[__i];
+        auto __elementJni = JNativeSleepSessionInput::fromCpp(__element);
+        __array->setElement(__i, *__elementJni);
+      }
+      return __array;
+    }(sessions));
     return [&]() {
       auto __promise = Promise<void>::create();
       __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& /* unit */) {

@@ -10,6 +10,7 @@ react-native-nitro-health is a react native package built with Nitro
 
 - React Native v0.76.0 or higher
 - Node 18.0.0 or higher
+- iOS 16.0 or higher
 
 > [!IMPORTANT]  
 > To Support `Nitro Views` you need to install React Native version v0.78.0 or higher.
@@ -93,7 +94,7 @@ Android consumer apps must declare the matching Health Connect permissions in th
 | `heartRateVariability` | `android.permission.health.READ_HEART_RATE_VARIABILITY` | n/a (writes not supported yet)                           |
 | `oxygenSaturation`     | `android.permission.health.READ_OXYGEN_SATURATION`      | `android.permission.health.WRITE_OXYGEN_SATURATION`      |
 | `height`               | `android.permission.health.READ_HEIGHT`                 | `android.permission.health.WRITE_HEIGHT`                 |
-| `sleep`                | `android.permission.health.READ_SLEEP`                  | n/a (writes not supported yet)                           |
+| `sleep`                | `android.permission.health.READ_SLEEP`                  | `android.permission.health.WRITE_SLEEP`                  |
 | `bodyMass`             | `android.permission.health.READ_WEIGHT`                 | `android.permission.health.WRITE_WEIGHT`                 |
 | `workout`              | `android.permission.health.READ_EXERCISE`               | n/a (writes not supported yet)                           |
 
@@ -483,7 +484,7 @@ Platform differences: `totalDistanceMeters` and `totalEnergyBurnedKcal` are iOS-
 
 ## Write Samples
 
-Batch save methods are available for `steps`, `distance`, `activeEnergyBurned`, `heartRate`, `restingHeartRate`, `oxygenSaturation`, `height`, and `bodyMass` (sleep and heart rate variability writes are not supported yet — see [Read Heart Rate Variability](#read-heart-rate-variability) for why HRV has no save method). Request write authorization first, then save:
+Batch save methods are available for `steps`, `distance`, `activeEnergyBurned`, `heartRate`, `restingHeartRate`, `oxygenSaturation`, `height`, `bodyMass`, and sleep sessions. Heart rate variability remains read-only by design; see [Read Heart Rate Variability](#read-heart-rate-variability). Request write authorization first, then save:
 
 ```ts
 import { NitroHealth } from 'react-native-nitro-health'
@@ -516,15 +517,49 @@ Point-in-time samples take a single `date`:
 - `saveHeight(samples)` — `{ date, meters }`, `meters` must be greater than 0, up to 3.
 - `saveBodyMass(samples)` — `{ date, kilograms }`, `kilograms` must be greater than 0, up to 1,000.
 
-Every input may include `sync: { id, version }` for retry-safe, versioned writes. Without `sync`, the write has no application-controlled identity and retries are not portably idempotent. With `sync`, an exact retry of the same id, version, and payload is idempotent in stored state; a strictly higher version replaces the logical record, and a lower version is ignored. Native change tracking may still emit a current-state upsert for a retry. Reusing an id and version with a changed payload is unsupported — increment `version` whenever the payload changes. IDs must be nonblank, versions must be non-negative safe integers, and duplicate IDs within one save call reject. IDs are case-sensitive and scoped to the writing app and `HealthDataType`, so one id must identify only one logical record of that type.
+Every non-sleep sample input may include `sync: { id, version }` for retry-safe, versioned writes. Without `sync`, the write has no application-controlled identity and retries are not portably idempotent. With `sync`, an exact retry of the same id, version, and payload is idempotent in stored state; a strictly higher version replaces the logical record, and a lower version is ignored. Native change tracking may still emit a current-state upsert for a retry. Reusing an id and version with a changed payload is unsupported — increment `version` whenever the payload changes. IDs must be nonblank, versions must be non-negative safe integers, and duplicate IDs within one save call reject. IDs are case-sensitive and scoped to the writing app and `HealthDataType`, so one id must identify only one logical record of that type.
 
 All save methods take a non-empty array, resolve to `void` after the atomic call succeeds, and do not report whether an input was inserted, retried, replaced, or ignored. They reject before crossing the native boundary when validation fails — error messages include the failing index, for example `samples[2]: bpm must be between 1 and 300`.
 
 The value ranges mirror what Health Connect enforces at insert time, applied on both platforms so a sample that saves on iOS also saves on Android.
 
+### Write Sleep Sessions
+
+`saveSleepSessions(sessions)` writes complete session bounds with optional detailed stages:
+
+```ts
+await NitroHealth.saveSleepSessions([
+  {
+    startDate: new Date('2026-01-11T03:00:00.000Z'),
+    endDate: new Date('2026-01-11T11:30:00.000Z'),
+    timeZone: 'America/New_York',
+    stages: [
+      {
+        startDate: new Date('2026-01-11T03:15:00.000Z'),
+        endDate: new Date('2026-01-11T06:30:00.000Z'),
+        stage: 'asleepCore',
+      },
+      {
+        startDate: new Date('2026-01-11T06:30:00.000Z'),
+        endDate: new Date('2026-01-11T08:00:00.000Z'),
+        stage: 'asleepDeep',
+      },
+    ],
+  },
+])
+```
+
+Writable stages are `awake`, `asleep`, `asleepCore`, `asleepDeep`, and `asleepREM`. The read-only values `inBed`, `awakeInBed`, `outOfBed`, and `unknown` are rejected because they do not have the same meaning on both platforms. Stage intervals must have positive duration, remain inside the session, and not overlap; adjacency and gaps are allowed. Input stages are saved in chronological order without mutating the caller's array.
+
+`timeZone` is an optional IANA identifier such as `America/New_York`. When omitted, the device's current time zone is used. Android derives separate start and end offsets so sessions crossing a daylight-saving transition retain the correct civil time. iOS stores the time zone as HealthKit metadata on every written interval.
+
+Android writes one `SleepSessionRecord` with nested stages. iOS writes one `inBed` interval for the session envelope plus one interval per stage, all in one HealthKit save call. Consequently, `readSleepSamples()` returns only flattened stages for a staged Android session but returns the overlapping `inBed` envelope and stages on iOS. A stage-less session reads as `asleep` on Android under the existing read normalization and `inBed` on iOS.
+
+Sleep sessions intentionally do not accept `sync`: one logical session maps to one Android record but several independent HealthKit samples, so HealthKit cannot provide the same atomic whole-session replacement semantics. Each call is atomic, but retrying a successful sleep write can create duplicates.
+
 Unlike reads, missing write permission is detectable on both platforms: save methods reject with a missing-permission error on Android and iOS alike (on iOS this includes the not-yet-requested state, so request write authorization first). Saved samples are attributed to your app as the source.
 
-Avoid writing samples with overlapping time intervals. The platforms aggregate overlapping records differently: Health Connect deduplicates overlapping intervals when computing totals (writing 250 steps twice over the same 30-minute window still totals roughly 250), while HealthKit cumulative sums count every sample (the same two writes total 500). Raw reads return every stored record on both platforms — only aggregates differ. Writing non-overlapping intervals produces consistent totals everywhere.
+Avoid writing cumulative samples with overlapping time intervals. The platforms aggregate overlapping records differently: Health Connect deduplicates overlapping intervals when computing totals (writing 250 steps twice over the same 30-minute window still totals roughly 250), while HealthKit cumulative sums count every sample (the same two writes total 500). Raw reads for those cumulative types return every stored record on both platforms — only aggregates differ. Writing non-overlapping intervals produces consistent totals everywhere.
 
 ## Delete Samples
 

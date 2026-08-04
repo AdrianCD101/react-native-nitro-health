@@ -172,6 +172,10 @@ abstract class HybridNitroHealthSpec: HybridObject() {
   
   @DoNotStrip
   @Keep
+  abstract fun saveSleepSessions(sessions: Array<NativeSleepSessionInput>): Promise<Unit>
+  
+  @DoNotStrip
+  @Keep
   abstract fun deleteSamplesByUuids(dataType: String, uuids: Array<String>): Promise<Unit>
   
   @DoNotStrip

@@ -36,6 +36,8 @@ import type { NativeOxygenSaturationSample } from '../NativeOxygenSaturationSamp
 import type { NativeOxygenSaturationSampleInput } from '../NativeOxygenSaturationSampleInput'
 import type { NativeRestingHeartRateSample } from '../NativeRestingHeartRateSample'
 import type { NativeRestingHeartRateSampleInput } from '../NativeRestingHeartRateSampleInput'
+import type { NativeSleepSessionInput } from '../NativeSleepSessionInput'
+import type { NativeSleepSessionStageInput } from '../NativeSleepSessionStageInput'
 import type { NativeSleepSample } from '../NativeSleepSample'
 import type { NativeStepSample } from '../NativeStepSample'
 import type { NativeStepSampleInput } from '../NativeStepSampleInput'
@@ -45,6 +47,8 @@ import type { OxygenSaturationSampleInput } from '../OxygenSaturationSampleInput
 import type { RestingHeartRateSample } from '../RestingHeartRateSample'
 import type { RestingHeartRateSampleInput } from '../RestingHeartRateSampleInput'
 import type { SleepSample } from '../SleepSample'
+import type { SleepSessionInput } from '../SleepSessionInput'
+import type { WritableSleepStage } from '../SleepSessionStageInput'
 import type { StepSample } from '../StepSample'
 import type { StepSampleInput } from '../StepSampleInput'
 import type { WorkoutSample } from '../WorkoutSample'
@@ -55,6 +59,8 @@ import {
   assertSampleMaxValue,
   assertSampleNonNegativeNumber,
   assertSamplePositiveInteger,
+  assertStartBeforeEnd,
+  dateToTimeMs,
   assertValidSampleDate,
 } from './validation'
 
@@ -68,6 +74,13 @@ const MIN_BPM = 1
 const MAX_BPM = 300
 const MAX_KILOGRAMS = 1_000
 const MAX_HEIGHT_METERS = 3
+const WRITABLE_SLEEP_STAGES = new Set<WritableSleepStage>([
+  'awake',
+  'asleep',
+  'asleepCore',
+  'asleepDeep',
+  'asleepREM',
+])
 
 function makeSampleInterval(
   sample: { startDate: Date; endDate: Date },
@@ -231,6 +244,81 @@ export function makeNativeHeightSampleInput(
     timeMs,
     meters: sample.meters,
     ...makeNativeSync(sample.sync, index),
+  }
+}
+
+export function makeNativeSleepSessionInput(
+  session: SleepSessionInput,
+  sessionIndex: number
+): NativeSleepSessionInput {
+  const prefix = `sessions[${sessionIndex}]: `
+  const startTimeMs = dateToTimeMs(session.startDate, `${prefix}a valid startDate is required`)
+  const endTimeMs = dateToTimeMs(session.endDate, `${prefix}a valid endDate is required`)
+  assertStartBeforeEnd(startTimeMs, endTimeMs, prefix)
+
+  if (session.timeZone !== undefined) {
+    if (typeof session.timeZone !== 'string' || session.timeZone.trim() === '') {
+      throw new Error(`${prefix}timeZone must be a non-empty IANA time-zone identifier`)
+    }
+  }
+
+  if (session.stages !== undefined && !Array.isArray(session.stages)) {
+    throw new Error(`${prefix}stages must be an array when provided`)
+  }
+
+  const indexedStages = (session.stages ?? []).map((stage, stageIndex) => {
+    const stagePrefix = `sessions[${sessionIndex}].stages[${stageIndex}]: `
+    const stageStartTimeMs = dateToTimeMs(
+      stage.startDate,
+      `${stagePrefix}a valid startDate is required`
+    )
+    const stageEndTimeMs = dateToTimeMs(stage.endDate, `${stagePrefix}a valid endDate is required`)
+    assertStartBeforeEnd(stageStartTimeMs, stageEndTimeMs, stagePrefix)
+
+    if (stageStartTimeMs < startTimeMs || stageEndTimeMs > endTimeMs) {
+      throw new Error(`${stagePrefix}interval must be contained within its sleep session`)
+    }
+
+    if (typeof stage.stage !== 'string' || !WRITABLE_SLEEP_STAGES.has(stage.stage)) {
+      throw new Error(
+        `${stagePrefix}stage must be awake, asleep, asleepCore, asleepDeep, or asleepREM`
+      )
+    }
+
+    const nativeStage: NativeSleepSessionStageInput = {
+      startTimeMs: stageStartTimeMs,
+      endTimeMs: stageEndTimeMs,
+      stage: stage.stage,
+    }
+    return { nativeStage, originalIndex: stageIndex }
+  })
+
+  indexedStages.sort((left, right) => {
+    return (
+      left.nativeStage.startTimeMs - right.nativeStage.startTimeMs ||
+      left.nativeStage.endTimeMs - right.nativeStage.endTimeMs ||
+      left.originalIndex - right.originalIndex
+    )
+  })
+
+  for (let index = 1; index < indexedStages.length; index += 1) {
+    const previous = indexedStages[index - 1]
+    const current = indexedStages[index]
+    if (previous === undefined || current === undefined) continue
+
+    if (current.nativeStage.startTimeMs < previous.nativeStage.endTimeMs) {
+      throw new Error(
+        `sessions[${sessionIndex}].stages[${current.originalIndex}]: interval overlaps ` +
+          `sessions[${sessionIndex}].stages[${previous.originalIndex}]`
+      )
+    }
+  }
+
+  return {
+    startTimeMs,
+    endTimeMs,
+    stages: indexedStages.map(({ nativeStage }) => nativeStage),
+    timeZone: session.timeZone,
   }
 }
 

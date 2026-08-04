@@ -92,6 +92,10 @@ namespace margelo::nitro::nitrohealth { struct NativeRestingHeartRateSampleInput
 namespace margelo::nitro::nitrohealth { struct NativeOxygenSaturationSampleInput; }
 // Forward declaration of `NativeHeightSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHeightSampleInput; }
+// Forward declaration of `NativeSleepSessionInput` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeSleepSessionInput; }
+// Forward declaration of `NativeSleepSessionStageInput` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeSleepSessionStageInput; }
 // Forward declaration of `AuthorizationRequestStatus` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class AuthorizationRequestStatus; }
 // Forward declaration of `NativeHealthPermission` to properly resolve imports.
@@ -146,6 +150,8 @@ namespace margelo::nitro::nitrohealth { enum class HealthAuthorizationStatus; }
 #include "NativeRestingHeartRateSampleInput.hpp"
 #include "NativeOxygenSaturationSampleInput.hpp"
 #include "NativeHeightSampleInput.hpp"
+#include "NativeSleepSessionInput.hpp"
+#include "NativeSleepSessionStageInput.hpp"
 #include "AuthorizationRequestStatus.hpp"
 #include "NativeHealthPermission.hpp"
 #include "NativeHealthAuthorizationResult.hpp"
@@ -463,6 +469,14 @@ namespace margelo::nitro::nitrohealth {
     }
     inline std::shared_ptr<Promise<void>> saveHeight(const std::vector<NativeHeightSampleInput>& samples) override {
       auto __result = _swiftPart.saveHeight(samples);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline std::shared_ptr<Promise<void>> saveSleepSessions(const std::vector<NativeSleepSessionInput>& sessions) override {
+      auto __result = _swiftPart.saveSleepSessions(sessions);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }

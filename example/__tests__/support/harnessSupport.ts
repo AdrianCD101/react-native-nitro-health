@@ -20,6 +20,7 @@ export const heartRateReadPermission: HealthPermission[] = [
   { accessType: 'read', dataType: 'heartRate' },
 ]
 export const sleepReadPermission: HealthPermission[] = [{ accessType: 'read', dataType: 'sleep' }]
+export const sleepWritePermission: HealthPermission[] = [{ accessType: 'write', dataType: 'sleep' }]
 export const bodyMassReadPermission: HealthPermission[] = [
   { accessType: 'read', dataType: 'bodyMass' },
 ]

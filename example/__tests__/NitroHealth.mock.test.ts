@@ -62,6 +62,9 @@ describe('NitroHealth Jest mock', () => {
         sync: { id: 'mock-step-record', version: 0 },
       },
     ])
+    await expect(
+      NitroHealth.saveSleepSessions([{ ...range, timeZone: 'UTC' }])
+    ).resolves.toBeUndefined()
     await expect(NitroHealth.getRequestStatusForAuthorization([])).resolves.toBe('unknown')
   })
 

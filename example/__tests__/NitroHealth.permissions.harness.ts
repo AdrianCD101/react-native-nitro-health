@@ -8,6 +8,7 @@ import {
   distanceReadPermission,
   heartRateReadPermission,
   sleepReadPermission,
+  sleepWritePermission,
   stepsReadPermission,
 } from './support/harnessSupport'
 
@@ -65,6 +66,12 @@ describe('NitroHealth permissions (native)', () => {
 
   it('gets request status for sleep read permission from native code', async () => {
     const status = await NitroHealth.getRequestStatusForAuthorization(sleepReadPermission)
+
+    expect(authorizationRequestStatuses).toContain(status)
+  })
+
+  it('gets request status for sleep write permission from native code', async () => {
+    const status = await NitroHealth.getRequestStatusForAuthorization(sleepWritePermission)
 
     expect(authorizationRequestStatuses).toContain(status)
   })

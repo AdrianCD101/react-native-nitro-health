@@ -342,6 +342,41 @@ describe('App', () => {
     expect(mockNitroHealth.saveSteps).not.toHaveBeenCalled()
   })
 
+  it('saves a sleep session after requesting write permission on demand', async () => {
+    mockNitroHealth.getAvailabilityStatus.mockReturnValue('available')
+    mockNitroHealth.requestAuthorization.mockResolvedValue({
+      status: 'granted',
+      availabilityStatus: 'available',
+      requestStatus: 'unnecessary',
+      grantedPermissions: [{ accessType: 'write', dataType: 'sleep' }],
+      deniedPermissions: [],
+      unverifiablePermissions: [],
+    })
+    mockNitroHealth.saveSleepSessions.mockResolvedValue(undefined)
+
+    render(<App />)
+
+    fireEvent.press(screen.getByText('Save sample sleep'))
+
+    expect(await screen.findByText('Saved a one-minute asleep session')).toBeTruthy()
+    expect(mockNitroHealth.requestAuthorization).toHaveBeenCalledWith([
+      { accessType: 'write', dataType: 'sleep' },
+    ])
+    expect(mockNitroHealth.saveSleepSessions).toHaveBeenCalledWith([
+      {
+        startDate: expect.any(Date),
+        endDate: expect.any(Date),
+        stages: [
+          {
+            startDate: expect.any(Date),
+            endDate: expect.any(Date),
+            stage: 'asleep',
+          },
+        ],
+      },
+    ])
+  })
+
   it('reads heart rate statistics from the app UI after heart rate permission is granted', async () => {
     mockNitroHealth.getAvailabilityStatus.mockReturnValue('available')
     mockNitroHealth.requestAuthorization.mockResolvedValue(grantedHeartRateResult)

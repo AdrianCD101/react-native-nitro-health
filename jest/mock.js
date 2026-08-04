@@ -54,6 +54,7 @@ function createNitroHealthMock(overrides = {}) {
     saveRestingHeartRate: createMockFunction(() => Promise.resolve(undefined)),
     saveOxygenSaturation: createMockFunction(() => Promise.resolve(undefined)),
     saveHeight: createMockFunction(() => Promise.resolve(undefined)),
+    saveSleepSessions: createMockFunction(() => Promise.resolve(undefined)),
     deleteSamplesByUuids: createMockFunction(() => Promise.resolve(undefined)),
     deleteSamplesByTimeRange: createMockFunction(() => Promise.resolve(undefined)),
     getRequestStatusForAuthorization: createMockFunction(() => Promise.resolve('unknown')),

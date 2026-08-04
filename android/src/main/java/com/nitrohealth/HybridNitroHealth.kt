@@ -63,6 +63,7 @@ import com.margelo.nitro.nitrohealth.NativeOxygenSaturationSamplePage
 import com.margelo.nitro.nitrohealth.NativeRestingHeartRateSample
 import com.margelo.nitro.nitrohealth.NativeRestingHeartRateSampleInput
 import com.margelo.nitro.nitrohealth.NativeRestingHeartRateSamplePage
+import com.margelo.nitro.nitrohealth.NativeSleepSessionInput
 import com.margelo.nitro.nitrohealth.NativeSleepSamplePage
 import com.margelo.nitro.nitrohealth.NativeStepSample
 import com.margelo.nitro.nitrohealth.NativeStepSampleInput
@@ -844,6 +845,14 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         return Promise.async {
             val client = requireWritableClient("height")
             client.insertRecords(toHeightRecords(samples))
+            Unit
+        }
+    }
+
+    override fun saveSleepSessions(sessions: Array<NativeSleepSessionInput>): Promise<Unit> {
+        return Promise.async {
+            val client = requireWritableClient("sleep")
+            client.insertRecords(toSleepSessionRecords(sessions))
             Unit
         }
     }
