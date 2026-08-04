@@ -22,6 +22,7 @@ let package = Package(
                 "SleepStageMapping.swift",
                 "StatisticsBucketUtils.swift",
                 "SyncMetadataNormalization.swift",
+                "TimeZoneMapping.swift",
                 "WorkoutActivityTypeMapping.swift",
             ]
         ),

@@ -32,6 +32,7 @@ import type { NativeSleepSamplePage } from '../NativeSleepSamplePage'
 import type { NativeStepSampleInput } from '../NativeStepSampleInput'
 import type { NativeStepSamplePage } from '../NativeStepSamplePage'
 import type { NativeWorkoutSamplePage } from '../NativeWorkoutSamplePage'
+import type { NativeWorkoutSampleInput } from '../NativeWorkoutSampleInput'
 
 export interface NitroHealth extends HybridObject<{ ios: 'swift'; android: 'kotlin' }> {
   isAvailable(): boolean
@@ -78,6 +79,7 @@ export interface NitroHealth extends HybridObject<{ ios: 'swift'; android: 'kotl
   saveOxygenSaturation(samples: NativeOxygenSaturationSampleInput[]): Promise<void>
   saveHeight(samples: NativeHeightSampleInput[]): Promise<void>
   saveSleepSessions(sessions: NativeSleepSessionInput[]): Promise<void>
+  saveWorkout(workout: NativeWorkoutSampleInput): Promise<void>
   deleteSamplesByUuids(dataType: string, uuids: string[]): Promise<void>
   deleteSamplesByTimeRange(dataType: string, query: NativeHealthTimeRangeQuery): Promise<void>
   getPermissionStatuses(

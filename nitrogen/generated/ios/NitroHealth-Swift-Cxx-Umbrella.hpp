@@ -104,6 +104,8 @@ namespace margelo::nitro::nitrohealth { struct NativeStepSampleInput; }
 namespace margelo::nitro::nitrohealth { struct NativeStepSamplePage; }
 // Forward declaration of `NativeStepSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeStepSample; }
+// Forward declaration of `NativeWorkoutSampleInput` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeWorkoutSampleInput; }
 // Forward declaration of `NativeWorkoutSamplePage` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeWorkoutSamplePage; }
 // Forward declaration of `NativeWorkoutSample` to properly resolve imports.
@@ -159,6 +161,7 @@ namespace margelo::nitro::nitrohealth { struct NativeWorkoutSample; }
 #include "NativeStepSampleInput.hpp"
 #include "NativeStepSamplePage.hpp"
 #include "NativeWorkoutSample.hpp"
+#include "NativeWorkoutSampleInput.hpp"
 #include "NativeWorkoutSamplePage.hpp"
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/Result.hpp>

@@ -242,6 +242,7 @@ Reference: `example/ios/NitroHealthExample/NitroHealthExample.entitlements`, `ex
     <uses-permission android:name="android.permission.health.READ_HEART_RATE" />
      <uses-permission android:name="android.permission.health.READ_SLEEP" />
      <uses-permission android:name="android.permission.health.WRITE_SLEEP" />
+     <uses-permission android:name="android.permission.health.WRITE_EXERCISE" />
     <uses-permission android:name="android.permission.health.READ_WEIGHT" />
     <!-- declare only the data types your app reads or writes -->
    ```

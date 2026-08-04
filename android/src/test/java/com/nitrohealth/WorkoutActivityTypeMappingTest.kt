@@ -5,6 +5,17 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class WorkoutActivityTypeMappingTest {
+    private val writableActivityTypes = listOf(
+        "americanFootball", "australianFootball", "badminton", "baseball", "basketball",
+        "boxing", "climbing", "cricket", "crossTraining", "cycling", "dance", "discSports",
+        "elliptical", "fencing", "flexibility", "golf", "gymnastics", "handball",
+        "highIntensityIntervalTraining", "hiking", "hockey", "martialArts", "mindAndBody",
+        "other", "paddleSports", "pilates", "racquetball", "rowing", "rugby", "running",
+        "sailing", "skating", "skiing", "snowboarding", "snowSports", "soccer", "softball",
+        "squash", "stairClimbing", "strengthTraining", "surfing", "swimming", "tableTennis",
+        "tennis", "volleyball", "walking", "waterPolo", "wheelchair", "yoga"
+    )
+
     // Every ExerciseSessionRecord exercise type value and its normalized mapping. Int literals
     // are legacy values that connect-client 1.1.0 no longer exposes as constants (see
     // WorkoutActivityTypeMapping.kt).
@@ -139,5 +150,25 @@ class WorkoutActivityTypeMappingTest {
         assertEquals("other", makeWorkoutActivityType(45)) // gap in the constant range
         assertEquals("other", makeWorkoutActivityType(-1))
         assertEquals("other", makeWorkoutActivityType(9999))
+    }
+
+    @Test
+    fun writableActivitiesRoundTripThroughCanonicalNativeTypes() {
+        assertEquals(49, writableActivityTypes.size)
+        for (activityType in writableActivityTypes) {
+            assertEquals(
+                activityType,
+                makeWorkoutActivityType(toHealthConnectWorkoutActivityType(activityType))
+            )
+        }
+    }
+
+    @Test
+    fun rejectsNonPortableWritableActivities() {
+        for (activityType in listOf("archery", "calisthenics", "jumpRope", "underwaterDiving")) {
+            org.junit.Assert.assertThrows(IllegalArgumentException::class.java) {
+                toHealthConnectWorkoutActivityType(activityType)
+            }
+        }
     }
 }

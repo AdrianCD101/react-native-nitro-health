@@ -70,6 +70,9 @@ describe('NitroHealth Jest mock', () => {
       availabilityStatus: 'available',
       statuses: [{ permission, status: 'unverifiable' }],
     })
+    await expect(
+      NitroHealth.saveWorkout({ ...range, activityType: 'running' })
+    ).resolves.toBeUndefined()
     await expect(NitroHealth.getRequestStatusForAuthorization([])).resolves.toBe('unknown')
   })
 

@@ -51,6 +51,7 @@ export const mockNitroHealth = {
   saveOxygenSaturation: jest.fn(),
   saveHeight: jest.fn(),
   saveSleepSessions: jest.fn(),
+  saveWorkout: jest.fn(),
   deleteSamplesByUuids: jest.fn(),
   deleteSamplesByTimeRange: jest.fn(),
 }

@@ -377,6 +377,34 @@ describe('App', () => {
     ])
   })
 
+  it('saves a workout after requesting write permission on demand', async () => {
+    mockNitroHealth.getAvailabilityStatus.mockReturnValue('available')
+    mockNitroHealth.requestAuthorization.mockResolvedValue({
+      status: 'granted',
+      availabilityStatus: 'available',
+      requestStatus: 'unnecessary',
+      grantedPermissions: [{ accessType: 'write', dataType: 'workout' }],
+      deniedPermissions: [],
+      unverifiablePermissions: [],
+    })
+    mockNitroHealth.saveWorkout.mockResolvedValue(undefined)
+
+    render(<App />)
+
+    fireEvent.press(screen.getByText('Save sample workouts'))
+
+    expect(await screen.findByText('Saved a one-minute running workout')).toBeTruthy()
+    expect(mockNitroHealth.requestAuthorization).toHaveBeenCalledWith([
+      { accessType: 'write', dataType: 'workout' },
+    ])
+    expect(mockNitroHealth.saveWorkout).toHaveBeenCalledWith({
+      startDate: expect.any(Date),
+      endDate: expect.any(Date),
+      activityType: 'running',
+      title: 'Example run',
+    })
+  })
+
   it('reads heart rate statistics from the app UI after heart rate permission is granted', async () => {
     mockNitroHealth.getAvailabilityStatus.mockReturnValue('available')
     mockNitroHealth.requestAuthorization.mockResolvedValue(grantedHeartRateResult)

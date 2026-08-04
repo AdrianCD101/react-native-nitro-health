@@ -37,6 +37,9 @@ export const heightReadPermission: HealthPermission[] = [{ accessType: 'read', d
 export const workoutReadPermission: HealthPermission[] = [
   { accessType: 'read', dataType: 'workout' },
 ]
+export const workoutWritePermission: HealthPermission[] = [
+  { accessType: 'write', dataType: 'workout' },
+]
 
 export const emptyRange = {
   startDate: new Date('2000-01-01T00:00:00.000Z'),

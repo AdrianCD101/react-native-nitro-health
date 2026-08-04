@@ -133,6 +133,10 @@ class HealthConnectPermissionUtilsTest {
             HealthPermission.getWritePermission(HeightRecord::class),
             toHealthConnectPermission("height", "write")
         )
+        assertEquals(
+            HealthPermission.getWritePermission(ExerciseSessionRecord::class),
+            toHealthConnectPermission("workout", "write")
+        )
     }
 
     @Test

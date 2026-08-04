@@ -26,7 +26,7 @@ import com.margelo.nitro.core.HybridObject
 )
 abstract class HybridNitroHealthSpec: HybridObject() {
   // Properties
-  
+
 
   // Methods
   @DoNotStrip
@@ -174,6 +174,10 @@ abstract class HybridNitroHealthSpec: HybridObject() {
   @Keep
   abstract fun saveSleepSessions(sessions: Array<NativeSleepSessionInput>): Promise<Unit>
   
+  @DoNotStrip
+  @Keep
+  abstract fun saveWorkout(workout: NativeWorkoutSampleInput): Promise<Unit>
+
   @DoNotStrip
   @Keep
   abstract fun deleteSamplesByUuids(dataType: String, uuids: Array<String>): Promise<Unit>

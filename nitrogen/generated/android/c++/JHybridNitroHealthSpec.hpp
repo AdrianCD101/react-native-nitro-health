@@ -89,6 +89,7 @@ namespace margelo::nitro::nitrohealth {
     std::shared_ptr<Promise<void>> saveOxygenSaturation(const std::vector<NativeOxygenSaturationSampleInput>& samples) override;
     std::shared_ptr<Promise<void>> saveHeight(const std::vector<NativeHeightSampleInput>& samples) override;
     std::shared_ptr<Promise<void>> saveSleepSessions(const std::vector<NativeSleepSessionInput>& sessions) override;
+    std::shared_ptr<Promise<void>> saveWorkout(const NativeWorkoutSampleInput& workout) override;
     std::shared_ptr<Promise<void>> deleteSamplesByUuids(const std::string& dataType, const std::vector<std::string>& uuids) override;
     std::shared_ptr<Promise<void>> deleteSamplesByTimeRange(const std::string& dataType, const NativeHealthTimeRangeQuery& query) override;
     std::shared_ptr<Promise<NativeHealthPermissionStatusResult>> getPermissionStatuses(const std::vector<NativeHealthPermission>& permissions) override;

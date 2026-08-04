@@ -72,6 +72,7 @@ import com.margelo.nitro.nitrohealth.NativeStepSample
 import com.margelo.nitro.nitrohealth.NativeStepSampleInput
 import com.margelo.nitro.nitrohealth.NativeStepSamplePage
 import com.margelo.nitro.nitrohealth.NativeWorkoutSample
+import com.margelo.nitro.nitrohealth.NativeWorkoutSampleInput
 import com.margelo.nitro.nitrohealth.NativeWorkoutSamplePage
 import java.time.Instant
 import java.time.Period
@@ -856,6 +857,14 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         return Promise.async {
             val client = requireWritableClient("sleep")
             client.insertRecords(toSleepSessionRecords(sessions))
+            Unit
+        }
+    }
+
+    override fun saveWorkout(workout: NativeWorkoutSampleInput): Promise<Unit> {
+        return Promise.async {
+            val client = requireWritableClient("workout")
+            client.insertRecords(listOf(toExerciseSessionRecord(workout)))
             Unit
         }
     }
