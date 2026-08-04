@@ -100,3 +100,59 @@ internal fun makeWorkoutActivityType(exerciseType: Int): String {
         else -> "other"
     }
 }
+
+internal fun toHealthConnectWorkoutActivityType(activityType: String): Int {
+    return when (activityType) {
+        "americanFootball" -> ExerciseSessionRecord.EXERCISE_TYPE_FOOTBALL_AMERICAN
+        "australianFootball" -> ExerciseSessionRecord.EXERCISE_TYPE_FOOTBALL_AUSTRALIAN
+        "badminton" -> ExerciseSessionRecord.EXERCISE_TYPE_BADMINTON
+        "baseball" -> ExerciseSessionRecord.EXERCISE_TYPE_BASEBALL
+        "basketball" -> ExerciseSessionRecord.EXERCISE_TYPE_BASKETBALL
+        "boxing" -> ExerciseSessionRecord.EXERCISE_TYPE_BOXING
+        "climbing" -> ExerciseSessionRecord.EXERCISE_TYPE_ROCK_CLIMBING
+        "cricket" -> ExerciseSessionRecord.EXERCISE_TYPE_CRICKET
+        "crossTraining" -> ExerciseSessionRecord.EXERCISE_TYPE_BOOT_CAMP
+        "cycling" -> ExerciseSessionRecord.EXERCISE_TYPE_BIKING
+        "dance" -> ExerciseSessionRecord.EXERCISE_TYPE_DANCING
+        "discSports" -> ExerciseSessionRecord.EXERCISE_TYPE_FRISBEE_DISC
+        "elliptical" -> ExerciseSessionRecord.EXERCISE_TYPE_ELLIPTICAL
+        "fencing" -> ExerciseSessionRecord.EXERCISE_TYPE_FENCING
+        "flexibility" -> ExerciseSessionRecord.EXERCISE_TYPE_STRETCHING
+        "golf" -> ExerciseSessionRecord.EXERCISE_TYPE_GOLF
+        "gymnastics" -> ExerciseSessionRecord.EXERCISE_TYPE_GYMNASTICS
+        "handball" -> ExerciseSessionRecord.EXERCISE_TYPE_HANDBALL
+        "highIntensityIntervalTraining" ->
+            ExerciseSessionRecord.EXERCISE_TYPE_HIGH_INTENSITY_INTERVAL_TRAINING
+        "hiking" -> ExerciseSessionRecord.EXERCISE_TYPE_HIKING
+        "hockey" -> ExerciseSessionRecord.EXERCISE_TYPE_ICE_HOCKEY
+        "martialArts" -> ExerciseSessionRecord.EXERCISE_TYPE_MARTIAL_ARTS
+        "mindAndBody" -> ExerciseSessionRecord.EXERCISE_TYPE_GUIDED_BREATHING
+        "other" -> ExerciseSessionRecord.EXERCISE_TYPE_OTHER_WORKOUT
+        "paddleSports" -> ExerciseSessionRecord.EXERCISE_TYPE_PADDLING
+        "pilates" -> ExerciseSessionRecord.EXERCISE_TYPE_PILATES
+        "racquetball" -> ExerciseSessionRecord.EXERCISE_TYPE_RACQUETBALL
+        "rowing" -> ExerciseSessionRecord.EXERCISE_TYPE_ROWING
+        "rugby" -> ExerciseSessionRecord.EXERCISE_TYPE_RUGBY
+        "running" -> ExerciseSessionRecord.EXERCISE_TYPE_RUNNING
+        "sailing" -> ExerciseSessionRecord.EXERCISE_TYPE_SAILING
+        "skating" -> ExerciseSessionRecord.EXERCISE_TYPE_SKATING
+        "skiing" -> ExerciseSessionRecord.EXERCISE_TYPE_SKIING
+        "snowboarding" -> ExerciseSessionRecord.EXERCISE_TYPE_SNOWBOARDING
+        "snowSports" -> ExerciseSessionRecord.EXERCISE_TYPE_SNOWSHOEING
+        "soccer" -> ExerciseSessionRecord.EXERCISE_TYPE_SOCCER
+        "softball" -> ExerciseSessionRecord.EXERCISE_TYPE_SOFTBALL
+        "squash" -> ExerciseSessionRecord.EXERCISE_TYPE_SQUASH
+        "stairClimbing" -> ExerciseSessionRecord.EXERCISE_TYPE_STAIR_CLIMBING
+        "strengthTraining" -> ExerciseSessionRecord.EXERCISE_TYPE_STRENGTH_TRAINING
+        "surfing" -> ExerciseSessionRecord.EXERCISE_TYPE_SURFING
+        "swimming" -> ExerciseSessionRecord.EXERCISE_TYPE_SWIMMING_POOL
+        "tableTennis" -> ExerciseSessionRecord.EXERCISE_TYPE_TABLE_TENNIS
+        "tennis" -> ExerciseSessionRecord.EXERCISE_TYPE_TENNIS
+        "volleyball" -> ExerciseSessionRecord.EXERCISE_TYPE_VOLLEYBALL
+        "walking" -> ExerciseSessionRecord.EXERCISE_TYPE_WALKING
+        "waterPolo" -> ExerciseSessionRecord.EXERCISE_TYPE_WATER_POLO
+        "wheelchair" -> ExerciseSessionRecord.EXERCISE_TYPE_WHEELCHAIR
+        "yoga" -> ExerciseSessionRecord.EXERCISE_TYPE_YOGA
+        else -> throw IllegalArgumentException("Unsupported writable workout activity type: $activityType")
+    }
+}

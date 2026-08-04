@@ -2,6 +2,17 @@ import XCTest
 @testable import NitroHealthHelpers
 
 final class WorkoutActivityTypeMappingTests: XCTestCase {
+    private let writableActivityTypes = [
+        "americanFootball", "australianFootball", "badminton", "baseball", "basketball",
+        "boxing", "climbing", "cricket", "crossTraining", "cycling", "dance", "discSports",
+        "elliptical", "fencing", "flexibility", "golf", "gymnastics", "handball",
+        "highIntensityIntervalTraining", "hiking", "hockey", "martialArts", "mindAndBody",
+        "other", "paddleSports", "pilates", "racquetball", "rowing", "rugby", "running",
+        "sailing", "skating", "skiing", "snowboarding", "snowSports", "soccer", "softball",
+        "squash", "stairClimbing", "strengthTraining", "surfing", "swimming", "tableTennis",
+        "tennis", "volleyball", "walking", "waterPolo", "wheelchair", "yoga",
+    ]
+
     // Every defined HKWorkoutActivityType raw value and its normalized mapping.
     private let expectedMappings: [UInt: String] = [
         1: "americanFootball",
@@ -122,5 +133,23 @@ final class WorkoutActivityTypeMappingTests: XCTestCase {
         XCTAssertEqual(makeWorkoutActivityType(rawValue: 0), "other")
         XCTAssertEqual(makeWorkoutActivityType(rawValue: 81), "other") // gap in HK raw values
         XCTAssertEqual(makeWorkoutActivityType(rawValue: 99999), "other")
+    }
+
+    func testWritableActivitiesRoundTripThroughCanonicalNativeTypes() throws {
+        XCTAssertEqual(writableActivityTypes.count, 49)
+        for activityType in writableActivityTypes {
+            XCTAssertEqual(
+                makeWorkoutActivityType(
+                    rawValue: try healthKitWorkoutActivityRawValue(activityType)
+                ),
+                activityType
+            )
+        }
+    }
+
+    func testRejectsNonPortableWritableActivities() {
+        for activityType in ["archery", "calisthenics", "jumpRope", "underwaterDiving"] {
+            XCTAssertThrowsError(try healthKitWorkoutActivityRawValue(activityType))
+        }
     }
 }

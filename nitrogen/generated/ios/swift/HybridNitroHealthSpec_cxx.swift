@@ -84,7 +84,7 @@ open class HybridNitroHealthSpec_cxx {
     }
   }
 
-  
+
 
   /**
    * Get the memory size of the Swift class (plus size of any other allocations)
@@ -197,7 +197,7 @@ open class HybridNitroHealthSpec_cxx {
       return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
     }
   }
-  
+
   @inline(__always)
   public final func disableBackgroundDelivery(dataType: std.string) -> bridge.Result_std__shared_ptr_Promise_void___ {
     do {
@@ -776,6 +776,25 @@ open class HybridNitroHealthSpec_cxx {
     }
   }
   
+  @inline(__always)
+  public final func saveWorkout(workout: NativeWorkoutSampleInput) -> bridge.Result_std__shared_ptr_Promise_void___ {
+    do {
+      let __result = try self.__implementation.saveWorkout(workout: workout)
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_void__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_void__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_void__(__promise)
+        __result
+          .then({ __result in __promiseHolder.resolve() })
+          .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
+        return __promise
+      }()
+      return bridge.create_Result_std__shared_ptr_Promise_void___(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
+    }
+  }
+
   @inline(__always)
   public final func deleteSamplesByUuids(dataType: std.string, uuids: bridge.std__vector_std__string_) -> bridge.Result_std__shared_ptr_Promise_void___ {
     do {

@@ -42,6 +42,7 @@ import type { NativeSleepSample } from '../NativeSleepSample'
 import type { NativeStepSample } from '../NativeStepSample'
 import type { NativeStepSampleInput } from '../NativeStepSampleInput'
 import type { NativeWorkoutSample } from '../NativeWorkoutSample'
+import type { NativeWorkoutSampleInput } from '../NativeWorkoutSampleInput'
 import type { OxygenSaturationSample } from '../OxygenSaturationSample'
 import type { OxygenSaturationSampleInput } from '../OxygenSaturationSampleInput'
 import type { RestingHeartRateSample } from '../RestingHeartRateSample'
@@ -52,6 +53,8 @@ import type { WritableSleepStage } from '../SleepSessionStageInput'
 import type { StepSample } from '../StepSample'
 import type { StepSampleInput } from '../StepSampleInput'
 import type { WorkoutSample } from '../WorkoutSample'
+import type { WorkoutSampleInput } from '../WorkoutSampleInput'
+import type { WritableWorkoutActivityType } from '../WritableWorkoutActivityType'
 import {
   assertSampleBetween,
   assertSampleGreaterThanZero,
@@ -81,6 +84,57 @@ const WRITABLE_SLEEP_STAGES = new Set<WritableSleepStage>([
   'asleepDeep',
   'asleepREM',
 ])
+const WRITABLE_WORKOUT_ACTIVITY_TYPES = new Set<WritableWorkoutActivityType>([
+  'americanFootball',
+  'australianFootball',
+  'badminton',
+  'baseball',
+  'basketball',
+  'boxing',
+  'climbing',
+  'cricket',
+  'crossTraining',
+  'cycling',
+  'dance',
+  'discSports',
+  'elliptical',
+  'fencing',
+  'flexibility',
+  'golf',
+  'gymnastics',
+  'handball',
+  'highIntensityIntervalTraining',
+  'hiking',
+  'hockey',
+  'martialArts',
+  'mindAndBody',
+  'other',
+  'paddleSports',
+  'pilates',
+  'racquetball',
+  'rowing',
+  'rugby',
+  'running',
+  'sailing',
+  'skating',
+  'skiing',
+  'snowboarding',
+  'snowSports',
+  'soccer',
+  'softball',
+  'squash',
+  'stairClimbing',
+  'strengthTraining',
+  'surfing',
+  'swimming',
+  'tableTennis',
+  'tennis',
+  'volleyball',
+  'walking',
+  'waterPolo',
+  'wheelchair',
+  'yoga',
+])
 
 function makeSampleInterval(
   sample: { startDate: Date; endDate: Date },
@@ -100,20 +154,22 @@ function makeSampleInstant(sample: { date: Date }, index: number): number {
 
 function makeNativeSync(
   sync: HealthRecordSync | undefined,
-  index: number
+  indexOrPrefix: number | string
 ): { syncId?: string; syncVersion?: number } {
   if (sync === undefined) return {}
 
+  const prefix = typeof indexOrPrefix === 'number' ? `samples[${indexOrPrefix}]` : indexOrPrefix
+
   if (typeof sync !== 'object' || sync === null) {
-    throw new Error(`samples[${index}]: sync must contain an id and version`)
+    throw new Error(`${prefix}: sync must contain an id and version`)
   }
 
   if (typeof sync.id !== 'string' || sync.id.trim() === '') {
-    throw new Error(`samples[${index}]: sync.id must be a non-empty string`)
+    throw new Error(`${prefix}: sync.id must be a non-empty string`)
   }
 
   if (!Number.isSafeInteger(sync.version) || sync.version < 0) {
-    throw new Error(`samples[${index}]: sync.version must be a non-negative safe integer`)
+    throw new Error(`${prefix}: sync.version must be a non-negative safe integer`)
   }
 
   return { syncId: sync.id, syncVersion: sync.version }
@@ -319,6 +375,43 @@ export function makeNativeSleepSessionInput(
     endTimeMs,
     stages: indexedStages.map(({ nativeStage }) => nativeStage),
     timeZone: session.timeZone,
+  }
+}
+
+export function makeNativeWorkoutSampleInput(
+  workout: WorkoutSampleInput
+): NativeWorkoutSampleInput {
+  const prefix = 'workout: '
+  const startTimeMs = dateToTimeMs(workout.startDate, `${prefix}a valid startDate is required`)
+  const endTimeMs = dateToTimeMs(workout.endDate, `${prefix}a valid endDate is required`)
+  assertStartBeforeEnd(startTimeMs, endTimeMs, prefix)
+
+  if (
+    typeof workout.activityType !== 'string' ||
+    !WRITABLE_WORKOUT_ACTIVITY_TYPES.has(workout.activityType)
+  ) {
+    throw new Error('workout: activityType is not supported for cross-platform writes')
+  }
+
+  if (workout.title !== undefined) {
+    if (typeof workout.title !== 'string' || workout.title.trim() === '') {
+      throw new Error('workout: title must be a non-empty string when provided')
+    }
+  }
+
+  if (workout.timeZone !== undefined) {
+    if (typeof workout.timeZone !== 'string' || workout.timeZone.trim() === '') {
+      throw new Error('workout: timeZone must be a non-empty IANA time-zone identifier')
+    }
+  }
+
+  return {
+    startTimeMs,
+    endTimeMs,
+    activityType: workout.activityType,
+    title: workout.title,
+    timeZone: workout.timeZone,
+    ...makeNativeSync(workout.sync, 'workout'),
   }
 }
 

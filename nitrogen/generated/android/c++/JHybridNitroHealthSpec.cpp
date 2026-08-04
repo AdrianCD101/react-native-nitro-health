@@ -99,6 +99,8 @@ namespace margelo::nitro::nitrohealth { struct NativeHeightSampleInput; }
 namespace margelo::nitro::nitrohealth { struct NativeSleepSessionInput; }
 // Forward declaration of `NativeSleepSessionStageInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeSleepSessionStageInput; }
+// Forward declaration of `NativeWorkoutSampleInput` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeWorkoutSampleInput; }
 
 #include "HealthAvailabilityStatus.hpp"
 #include "JHealthAvailabilityStatus.hpp"
@@ -202,6 +204,8 @@ namespace margelo::nitro::nitrohealth { struct NativeSleepSessionStageInput; }
 #include "JNativeSleepSessionInput.hpp"
 #include "NativeSleepSessionStageInput.hpp"
 #include "JNativeSleepSessionStageInput.hpp"
+#include "NativeWorkoutSampleInput.hpp"
+#include "JNativeWorkoutSampleInput.hpp"
 
 namespace margelo::nitro::nitrohealth {
 
@@ -805,6 +809,21 @@ namespace margelo::nitro::nitrohealth {
       }
       return __array;
     }(sessions));
+    return [&]() {
+      auto __promise = Promise<void>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& /* unit */) {
+        __promise->resolve();
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
+  }
+  std::shared_ptr<Promise<void>> JHybridNitroHealthSpec::saveWorkout(const NativeWorkoutSampleInput& workout) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<JNativeWorkoutSampleInput> /* workout */)>("saveWorkout");
+    auto __result = method(_javaPart, JNativeWorkoutSampleInput::fromCpp(workout));
     return [&]() {
       auto __promise = Promise<void>::create();
       __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& /* unit */) {

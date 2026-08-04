@@ -96,6 +96,8 @@ namespace margelo::nitro::nitrohealth { struct NativeHeightSampleInput; }
 namespace margelo::nitro::nitrohealth { struct NativeSleepSessionInput; }
 // Forward declaration of `NativeSleepSessionStageInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeSleepSessionStageInput; }
+// Forward declaration of `NativeWorkoutSampleInput` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeWorkoutSampleInput; }
 // Forward declaration of `AuthorizationRequestStatus` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class AuthorizationRequestStatus; }
 // Forward declaration of `NativeHealthPermission` to properly resolve imports.
@@ -152,6 +154,7 @@ namespace margelo::nitro::nitrohealth { enum class HealthAuthorizationStatus; }
 #include "NativeHeightSampleInput.hpp"
 #include "NativeSleepSessionInput.hpp"
 #include "NativeSleepSessionStageInput.hpp"
+#include "NativeWorkoutSampleInput.hpp"
 #include "AuthorizationRequestStatus.hpp"
 #include "NativeHealthPermission.hpp"
 #include "NativeHealthAuthorizationResult.hpp"
@@ -477,6 +480,14 @@ namespace margelo::nitro::nitrohealth {
     }
     inline std::shared_ptr<Promise<void>> saveSleepSessions(const std::vector<NativeSleepSessionInput>& sessions) override {
       auto __result = _swiftPart.saveSleepSessions(sessions);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline std::shared_ptr<Promise<void>> saveWorkout(const NativeWorkoutSampleInput& workout) override {
+      auto __result = _swiftPart.saveWorkout(std::forward<decltype(workout)>(workout));
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }

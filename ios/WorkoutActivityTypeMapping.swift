@@ -1,5 +1,16 @@
 import Foundation
 
+enum WorkoutActivityTypeMappingError: LocalizedError {
+    case unsupportedWritableType(String)
+
+    var errorDescription: String? {
+        switch self {
+        case .unsupportedWritableType(let activityType):
+            return "Unsupported writable workout activity type: \(activityType)"
+        }
+    }
+}
+
 // Maps HKWorkoutActivityType.rawValue to the normalized cross-platform activity type
 // string (mirrors makeWorkoutActivityType on Android). Switches on the raw value rather
 // than HKWorkoutActivityType cases so this file stays pure Foundation and can be unit
@@ -92,5 +103,60 @@ func makeWorkoutActivityType(rawValue: UInt) -> String {
     case 84: return "underwaterDiving" // .underwaterDiving
     case 3000: return "other" // .other
     default: return "other" // unknown/future HKWorkoutActivityType values
+    }
+}
+
+func healthKitWorkoutActivityRawValue(_ activityType: String) throws -> UInt {
+    switch activityType {
+    case "americanFootball": return 1
+    case "australianFootball": return 3
+    case "badminton": return 4
+    case "baseball": return 5
+    case "basketball": return 6
+    case "boxing": return 8
+    case "climbing": return 9
+    case "cricket": return 10
+    case "crossTraining": return 11
+    case "cycling": return 13
+    case "dance": return 77 // .cardioDance
+    case "discSports": return 75
+    case "elliptical": return 16
+    case "fencing": return 18
+    case "flexibility": return 62
+    case "golf": return 21
+    case "gymnastics": return 22
+    case "handball": return 23
+    case "highIntensityIntervalTraining": return 63
+    case "hiking": return 24
+    case "hockey": return 25
+    case "martialArts": return 28
+    case "mindAndBody": return 29
+    case "other": return 3000
+    case "paddleSports": return 31
+    case "pilates": return 66
+    case "racquetball": return 34
+    case "rowing": return 35
+    case "rugby": return 36
+    case "running": return 37
+    case "sailing": return 38
+    case "skating": return 39
+    case "skiing": return 60 // .crossCountrySkiing
+    case "snowboarding": return 67
+    case "snowSports": return 40
+    case "soccer": return 41
+    case "softball": return 42
+    case "squash": return 43
+    case "stairClimbing": return 44
+    case "strengthTraining": return 20 // .functionalStrengthTraining
+    case "surfing": return 45
+    case "swimming": return 46
+    case "tableTennis": return 47
+    case "tennis": return 48
+    case "volleyball": return 51
+    case "walking": return 52
+    case "waterPolo": return 54
+    case "wheelchair": return 70 // .wheelchairWalkPace
+    case "yoga": return 57
+    default: throw WorkoutActivityTypeMappingError.unsupportedWritableType(activityType)
     }
 }
