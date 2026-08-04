@@ -157,6 +157,7 @@ const writableDataTypes: HealthDataType[] = [
   'heartRate',
   'bodyMass',
   'sleep',
+  'workout',
 ]
 
 // Each card runs one operation at a time, so in-flight work is a single finite activity
@@ -398,6 +399,15 @@ function App(): React.JSX.Element {
             },
           ])
           message = 'Saved a one-minute asleep session'
+          break
+        case 'workout':
+          await NitroHealth.saveWorkout({
+            startDate,
+            endDate,
+            activityType: 'running',
+            title: 'Example run',
+          })
+          message = 'Saved a one-minute running workout'
           break
         default:
           updateCard(dataType, { activity: undefined })

@@ -10,6 +10,7 @@ import {
   sleepReadPermission,
   sleepWritePermission,
   stepsReadPermission,
+  workoutWritePermission,
 } from './support/harnessSupport'
 
 const availabilityStatuses = ['available', 'unavailable', 'providerUpdateRequired']
@@ -72,6 +73,12 @@ describe('NitroHealth permissions (native)', () => {
 
   it('gets request status for sleep write permission from native code', async () => {
     const status = await NitroHealth.getRequestStatusForAuthorization(sleepWritePermission)
+
+    expect(authorizationRequestStatuses).toContain(status)
+  })
+
+  it('gets request status for workout write permission from native code', async () => {
+    const status = await NitroHealth.getRequestStatusForAuthorization(workoutWritePermission)
 
     expect(authorizationRequestStatuses).toContain(status)
   })
