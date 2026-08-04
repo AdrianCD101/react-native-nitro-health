@@ -491,7 +491,8 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         }
     }
 
-    private func saveHealthKitSamples(_ samples: [HKSample]) async throws {
+    // Internal so sleep writes can save their envelope and stages in the same atomic call.
+    func saveHealthKitSamples(_ samples: [HKSample]) async throws {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             healthStore.save(samples) { _, error in
                 if let error = error {
@@ -710,21 +711,6 @@ class HybridNitroHealth: HybridNitroHealthSpec {
     }
 
     func makeSleepStage(value: Int) -> String {
-        switch value {
-        case 0:
-            return "inBed"
-        case 1:
-            return "asleep"
-        case 2:
-            return "awake"
-        case 3:
-            return "asleepCore"
-        case 4:
-            return "asleepDeep"
-        case 5:
-            return "asleepREM"
-        default:
-            return "unknown"
-        }
+        return normalizedSleepStage(value: value)
     }
 }

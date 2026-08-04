@@ -26,6 +26,7 @@ import type { NativeOxygenSaturationSampleInput } from '../NativeOxygenSaturatio
 import type { NativeOxygenSaturationSamplePage } from '../NativeOxygenSaturationSamplePage'
 import type { NativeRestingHeartRateSampleInput } from '../NativeRestingHeartRateSampleInput'
 import type { NativeRestingHeartRateSamplePage } from '../NativeRestingHeartRateSamplePage'
+import type { NativeSleepSessionInput } from '../NativeSleepSessionInput'
 import type { NativeSleepSamplePage } from '../NativeSleepSamplePage'
 import type { NativeStepSampleInput } from '../NativeStepSampleInput'
 import type { NativeStepSamplePage } from '../NativeStepSamplePage'
@@ -75,6 +76,7 @@ export interface NitroHealth extends HybridObject<{ ios: 'swift'; android: 'kotl
   saveRestingHeartRate(samples: NativeRestingHeartRateSampleInput[]): Promise<void>
   saveOxygenSaturation(samples: NativeOxygenSaturationSampleInput[]): Promise<void>
   saveHeight(samples: NativeHeightSampleInput[]): Promise<void>
+  saveSleepSessions(sessions: NativeSleepSessionInput[]): Promise<void>
   deleteSamplesByUuids(dataType: string, uuids: string[]): Promise<void>
   deleteSamplesByTimeRange(dataType: string, query: NativeHealthTimeRangeQuery): Promise<void>
   getRequestStatusForAuthorization(

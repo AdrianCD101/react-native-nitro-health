@@ -30,6 +30,7 @@ import type { OxygenSaturationSampleInput } from './OxygenSaturationSampleInput'
 import type { RestingHeartRateSample } from './RestingHeartRateSample'
 import type { RestingHeartRateSampleInput } from './RestingHeartRateSampleInput'
 import type { SleepSample } from './SleepSample'
+import type { SleepSessionInput } from './SleepSessionInput'
 import type { StepSample } from './StepSample'
 import type { StepSampleInput } from './StepSampleInput'
 import type { WorkoutSample } from './WorkoutSample'
@@ -55,6 +56,7 @@ import {
   makeNativeHeightSampleInput,
   makeNativeOxygenSaturationSampleInput,
   makeNativeRestingHeartRateSampleInput,
+  makeNativeSleepSessionInput,
   makeNativeStepSampleInput,
   makeOxygenSaturationSample,
   makeRestingHeartRateSample,
@@ -67,6 +69,7 @@ import {
   assertDeletableUuids,
   assertChangesToken,
   assertNonEmptySamples,
+  assertNonEmptySessions,
   assertPermissions,
   assertUniqueSampleSyncIds,
 } from './internal/validation'
@@ -137,6 +140,8 @@ export type { NativeOxygenSaturationSamplePage } from './NativeOxygenSaturationS
 export type { NativeRestingHeartRateSample } from './NativeRestingHeartRateSample'
 export type { NativeRestingHeartRateSampleInput } from './NativeRestingHeartRateSampleInput'
 export type { NativeRestingHeartRateSamplePage } from './NativeRestingHeartRateSamplePage'
+export type { NativeSleepSessionInput } from './NativeSleepSessionInput'
+export type { NativeSleepSessionStageInput } from './NativeSleepSessionStageInput'
 export type { NativeSleepSample } from './NativeSleepSample'
 export type { NativeSleepSamplePage } from './NativeSleepSamplePage'
 export type { NativeStepSample } from './NativeStepSample'
@@ -150,6 +155,8 @@ export type { OxygenSaturationSampleInput } from './OxygenSaturationSampleInput'
 export type { RestingHeartRateSample } from './RestingHeartRateSample'
 export type { RestingHeartRateSampleInput } from './RestingHeartRateSampleInput'
 export type { SleepSample } from './SleepSample'
+export type { SleepSessionInput } from './SleepSessionInput'
+export type { SleepSessionStageInput, WritableSleepStage } from './SleepSessionStageInput'
 export type { SleepStage } from './SleepStage'
 export type { StatisticsBucket } from './StatisticsBucket'
 export type { StatisticsMetric } from './StatisticsMetric'
@@ -239,6 +246,7 @@ export type NitroHealth = Omit<
   | 'saveRestingHeartRate'
   | 'saveOxygenSaturation'
   | 'saveHeight'
+  | 'saveSleepSessions'
   | 'deleteSamplesByUuids'
   | 'deleteSamplesByTimeRange'
   | 'requestAuthorization'
@@ -316,6 +324,8 @@ export type NitroHealth = Omit<
   saveRestingHeartRate(samples: RestingHeartRateSampleInput[]): Promise<void>
   saveOxygenSaturation(samples: OxygenSaturationSampleInput[]): Promise<void>
   saveHeight(samples: HeightSampleInput[]): Promise<void>
+  /** Saves complete sleep sessions. Retries are not idempotent and may create duplicates. */
+  saveSleepSessions(sessions: SleepSessionInput[]): Promise<void>
   deleteSamplesByUuids(dataType: HealthDataType, uuids: string[]): Promise<void>
   deleteSamplesByTimeRange(dataType: HealthDataType, query: HealthTimeRangeQuery): Promise<void>
   requestAuthorization(permissions: HealthPermission[]): Promise<HealthAuthorizationResult>
@@ -517,6 +527,11 @@ export const NitroHealth: NitroHealth = {
     const nativeSamples = samples.map(makeNativeHeightSampleInput)
     assertUniqueSampleSyncIds(samples)
     return NitroHealthNative.saveHeight(nativeSamples)
+  },
+  async saveSleepSessions(sessions) {
+    assertNonEmptySessions(sessions)
+    const nativeSessions = sessions.map(makeNativeSleepSessionInput)
+    return NitroHealthNative.saveSleepSessions(nativeSessions)
   },
   async deleteSamplesByUuids(dataType, uuids) {
     assertDeletableUuids(uuids)

@@ -19,6 +19,7 @@ let package = Package(
                 "HealthChangesToken.swift",
                 "SampleCursorUtils.swift",
                 "SampleUuidParsing.swift",
+                "SleepStageMapping.swift",
                 "StatisticsBucketUtils.swift",
                 "SyncMetadataNormalization.swift",
                 "WorkoutActivityTypeMapping.swift",

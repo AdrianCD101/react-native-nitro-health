@@ -38,6 +38,12 @@ export function assertNonEmptySamples(samples: readonly unknown[]): void {
   }
 }
 
+export function assertNonEmptySessions(sessions: readonly unknown[]): void {
+  if (sessions.length === 0) {
+    throw new Error('At least one sleep session is required')
+  }
+}
+
 export function assertUniqueSampleSyncIds(samples: readonly { sync?: { id: string } }[]): void {
   const firstIndexById = new Map<string, number>()
 

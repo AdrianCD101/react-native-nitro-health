@@ -80,6 +80,10 @@ namespace margelo::nitro::nitrohealth { struct NativeRestingHeartRateSample; }
 namespace margelo::nitro::nitrohealth { struct NativeSleepSamplePage; }
 // Forward declaration of `NativeSleepSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeSleepSample; }
+// Forward declaration of `NativeSleepSessionInput` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeSleepSessionInput; }
+// Forward declaration of `NativeSleepSessionStageInput` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeSleepSessionStageInput; }
 // Forward declaration of `NativeStepSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeStepSampleInput; }
 // Forward declaration of `NativeStepSamplePage` to properly resolve imports.
@@ -132,6 +136,8 @@ namespace NitroHealth { class HybridNitroHealthSpec_cxx; }
 #include "NativeRestingHeartRateSamplePage.hpp"
 #include "NativeSleepSample.hpp"
 #include "NativeSleepSamplePage.hpp"
+#include "NativeSleepSessionInput.hpp"
+#include "NativeSleepSessionStageInput.hpp"
 #include "NativeStepSample.hpp"
 #include "NativeStepSampleInput.hpp"
 #include "NativeStepSamplePage.hpp"
@@ -1272,6 +1278,28 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
   using std__vector_NativeHeightSampleInput_ = std::vector<NativeHeightSampleInput>;
   inline std::vector<NativeHeightSampleInput> create_std__vector_NativeHeightSampleInput_(size_t size) noexcept {
     std::vector<NativeHeightSampleInput> vector;
+    vector.reserve(size);
+    return vector;
+  }
+  
+  // pragma MARK: std::vector<NativeSleepSessionStageInput>
+  /**
+   * Specialized version of `std::vector<NativeSleepSessionStageInput>`.
+   */
+  using std__vector_NativeSleepSessionStageInput_ = std::vector<NativeSleepSessionStageInput>;
+  inline std::vector<NativeSleepSessionStageInput> create_std__vector_NativeSleepSessionStageInput_(size_t size) noexcept {
+    std::vector<NativeSleepSessionStageInput> vector;
+    vector.reserve(size);
+    return vector;
+  }
+  
+  // pragma MARK: std::vector<NativeSleepSessionInput>
+  /**
+   * Specialized version of `std::vector<NativeSleepSessionInput>`.
+   */
+  using std__vector_NativeSleepSessionInput_ = std::vector<NativeSleepSessionInput>;
+  inline std::vector<NativeSleepSessionInput> create_std__vector_NativeSleepSessionInput_(size_t size) noexcept {
+    std::vector<NativeSleepSessionInput> vector;
     vector.reserve(size);
     return vector;
   }

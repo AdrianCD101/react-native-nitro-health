@@ -17,6 +17,9 @@ describe('NitroHealth saves (native)', () => {
     )
     await expect(NitroHealth.saveHeartRate([])).rejects.toThrow('At least one sample is required')
     await expect(NitroHealth.saveBodyMass([])).rejects.toThrow('At least one sample is required')
+    await expect(NitroHealth.saveSleepSessions([])).rejects.toThrow(
+      'At least one sleep session is required'
+    )
   })
 
   it('rejects invalid save sample values before crossing the native boundary', async () => {
@@ -43,6 +46,28 @@ describe('NitroHealth saves (native)', () => {
         { startDate: saveInterval.endDate, endDate: saveInterval.startDate, count: 100 },
       ])
     ).rejects.toThrow('samples[0]: startDate must be before endDate')
+  })
+
+  it('rejects overlapping sleep stages before crossing the native boundary', async () => {
+    await expect(
+      NitroHealth.saveSleepSessions([
+        {
+          ...saveInterval,
+          stages: [
+            {
+              startDate: saveInterval.startDate,
+              endDate: new Date(saveInterval.startDate.getTime() + 20 * 60 * 1000),
+              stage: 'asleepCore',
+            },
+            {
+              startDate: new Date(saveInterval.startDate.getTime() + 10 * 60 * 1000),
+              endDate: saveInterval.endDate,
+              stage: 'asleepDeep',
+            },
+          ],
+        },
+      ])
+    ).rejects.toThrow(/interval overlaps/)
   })
 
   it('rejects saving steps when write permission is not granted', async () => {
@@ -92,6 +117,16 @@ describe('NitroHealth saves (native)', () => {
 
     await expect(
       NitroHealth.saveBodyMass([{ date: saveInterval.startDate, kilograms: 72.5 }])
+    ).rejects.toThrow(/permission/i)
+  })
+
+  it('rejects saving sleep when write permission is not granted', async () => {
+    if (await hasVerifiedPermissions([{ accessType: 'write', dataType: 'sleep' }])) {
+      return
+    }
+
+    await expect(
+      NitroHealth.saveSleepSessions([{ ...saveInterval, timeZone: 'UTC' }])
     ).rejects.toThrow(/permission/i)
   })
 
@@ -156,6 +191,68 @@ describe('NitroHealth saves (native)', () => {
     }
 
     expect(page.samples.some((sample) => sample.bpm === 123)).toBe(true)
+  })
+
+  it('round-trips portable sleep stages through native code when authorized', async () => {
+    const authorized = await hasVerifiedPermissions([
+      { accessType: 'write', dataType: 'sleep' },
+      { accessType: 'read', dataType: 'sleep' },
+    ])
+
+    if (!authorized) {
+      return
+    }
+
+    const middleDate = new Date(
+      saveInterval.startDate.getTime() +
+        (saveInterval.endDate.getTime() - saveInterval.startDate.getTime()) / 2
+    )
+
+    await NitroHealth.deleteSamplesByTimeRange('sleep', saveReadRange)
+    try {
+      await NitroHealth.saveSleepSessions([
+        {
+          ...saveInterval,
+          timeZone: 'UTC',
+          stages: [
+            {
+              startDate: saveInterval.startDate,
+              endDate: middleDate,
+              stage: 'asleepCore',
+            },
+            {
+              startDate: middleDate,
+              endDate: saveInterval.endDate,
+              stage: 'asleepDeep',
+            },
+          ],
+        },
+      ])
+
+      const page = await NitroHealth.readSleepSamples(saveReadRange)
+      if (isInconclusiveRead(page.samples)) {
+        return
+      }
+
+      expect(
+        page.samples.some(
+          (sample) =>
+            sample.stage === 'asleepCore' &&
+            sample.startDate.getTime() === saveInterval.startDate.getTime() &&
+            sample.endDate.getTime() === middleDate.getTime()
+        )
+      ).toBe(true)
+      expect(
+        page.samples.some(
+          (sample) =>
+            sample.stage === 'asleepDeep' &&
+            sample.startDate.getTime() === middleDate.getTime() &&
+            sample.endDate.getTime() === saveInterval.endDate.getTime()
+        )
+      ).toBe(true)
+    } finally {
+      await NitroHealth.deleteSamplesByTimeRange('sleep', saveReadRange)
+    }
   })
 
   describe('resting heart rate', () => {

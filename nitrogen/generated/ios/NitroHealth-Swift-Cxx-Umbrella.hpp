@@ -88,6 +88,10 @@ namespace margelo::nitro::nitrohealth { struct NativeRestingHeartRateSample; }
 namespace margelo::nitro::nitrohealth { struct NativeSleepSamplePage; }
 // Forward declaration of `NativeSleepSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeSleepSample; }
+// Forward declaration of `NativeSleepSessionInput` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeSleepSessionInput; }
+// Forward declaration of `NativeSleepSessionStageInput` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeSleepSessionStageInput; }
 // Forward declaration of `NativeStepSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeStepSampleInput; }
 // Forward declaration of `NativeStepSamplePage` to properly resolve imports.
@@ -140,6 +144,8 @@ namespace margelo::nitro::nitrohealth { struct NativeWorkoutSample; }
 #include "NativeRestingHeartRateSamplePage.hpp"
 #include "NativeSleepSample.hpp"
 #include "NativeSleepSamplePage.hpp"
+#include "NativeSleepSessionInput.hpp"
+#include "NativeSleepSessionStageInput.hpp"
 #include "NativeStepSample.hpp"
 #include "NativeStepSampleInput.hpp"
 #include "NativeStepSamplePage.hpp"

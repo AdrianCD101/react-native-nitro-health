@@ -46,6 +46,7 @@ export type NitroHealthMock = Omit<
   | 'saveRestingHeartRate'
   | 'saveOxygenSaturation'
   | 'saveHeight'
+  | 'saveSleepSessions'
   | 'deleteSamplesByUuids'
   | 'deleteSamplesByTimeRange'
   | 'getRequestStatusForAuthorization'
@@ -91,6 +92,7 @@ export type NitroHealthMock = Omit<
   saveRestingHeartRate: MockFunction<NitroHealth['saveRestingHeartRate']>
   saveOxygenSaturation: MockFunction<NitroHealth['saveOxygenSaturation']>
   saveHeight: MockFunction<NitroHealth['saveHeight']>
+  saveSleepSessions: MockFunction<NitroHealth['saveSleepSessions']>
   deleteSamplesByUuids: MockFunction<NitroHealth['deleteSamplesByUuids']>
   deleteSamplesByTimeRange: MockFunction<NitroHealth['deleteSamplesByTimeRange']>
   getRequestStatusForAuthorization: MockFunction<NitroHealth['getRequestStatusForAuthorization']>

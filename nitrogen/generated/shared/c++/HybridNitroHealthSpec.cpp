@@ -48,6 +48,7 @@ namespace margelo::nitro::nitrohealth {
       prototype.registerHybridMethod("saveRestingHeartRate", &HybridNitroHealthSpec::saveRestingHeartRate);
       prototype.registerHybridMethod("saveOxygenSaturation", &HybridNitroHealthSpec::saveOxygenSaturation);
       prototype.registerHybridMethod("saveHeight", &HybridNitroHealthSpec::saveHeight);
+      prototype.registerHybridMethod("saveSleepSessions", &HybridNitroHealthSpec::saveSleepSessions);
       prototype.registerHybridMethod("deleteSamplesByUuids", &HybridNitroHealthSpec::deleteSamplesByUuids);
       prototype.registerHybridMethod("deleteSamplesByTimeRange", &HybridNitroHealthSpec::deleteSamplesByTimeRange);
       prototype.registerHybridMethod("getRequestStatusForAuthorization", &HybridNitroHealthSpec::getRequestStatusForAuthorization);
