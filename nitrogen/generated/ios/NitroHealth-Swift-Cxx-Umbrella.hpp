@@ -10,6 +10,10 @@
 // Forward declarations of C++ defined types
 // Forward declaration of `AuthorizationRequestStatus` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class AuthorizationRequestStatus; }
+// Forward declaration of `BackgroundDeliveryFrequency` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class BackgroundDeliveryFrequency; }
+// Forward declaration of `BackgroundReadAuthorizationStatus` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class BackgroundReadAuthorizationStatus; }
 // Forward declaration of `HealthAuthorizationStatus` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class HealthAuthorizationStatus; }
 // Forward declaration of `HealthAvailabilityStatus` to properly resolve imports.
@@ -97,6 +101,8 @@ namespace margelo::nitro::nitrohealth { struct NativeWorkoutSample; }
 
 // Include C++ defined types
 #include "AuthorizationRequestStatus.hpp"
+#include "BackgroundDeliveryFrequency.hpp"
+#include "BackgroundReadAuthorizationStatus.hpp"
 #include "HealthAuthorizationStatus.hpp"
 #include "HealthAvailabilityStatus.hpp"
 #include "HybridNitroHealthSpec.hpp"

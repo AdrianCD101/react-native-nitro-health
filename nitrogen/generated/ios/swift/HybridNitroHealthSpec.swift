@@ -17,6 +17,13 @@ public protocol HybridNitroHealthSpec_protocol: HybridObject {
   func getAvailabilityStatus() throws -> HealthAvailabilityStatus
   func openHealthConnectInstall() throws -> Bool
   func openHealthSettings() throws -> Promise<Bool>
+  func enableBackgroundDelivery(dataType: String, frequency: BackgroundDeliveryFrequency) throws -> Promise<Void>
+  func disableBackgroundDelivery(dataType: String) throws -> Promise<Void>
+  func disableAllBackgroundDelivery() throws -> Promise<Void>
+  func setOnChangeNotificationListener(listener: ((_ dataTypes: [String], _ deliveryId: String) -> Void)?) throws -> Void
+  func acknowledgeChangeNotification(deliveryId: String) throws -> Void
+  func getBackgroundReadAuthorizationStatus() throws -> Promise<BackgroundReadAuthorizationStatus>
+  func requestBackgroundReadAuthorization() throws -> Promise<BackgroundReadAuthorizationStatus>
   func createChangesToken(dataType: String) throws -> Promise<String>
   func getChanges(dataType: String, changesToken: String) throws -> Promise<NativeHealthChangesResult>
   func readSteps(query: NativeHealthDateRangeQuery) throws -> Promise<NativeStepSamplePage>

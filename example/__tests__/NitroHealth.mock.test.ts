@@ -16,6 +16,14 @@ describe('NitroHealth Jest mock', () => {
     expect(NitroHealth.isAvailable()).toBe(true)
     expect(NitroHealth.getAvailabilityStatus()).toBe('available')
     await expect(NitroHealth.openHealthSettings()).resolves.toBe(true)
+    await expect(NitroHealth.enableBackgroundDelivery('steps', 'hourly')).resolves.toBeUndefined()
+    await expect(NitroHealth.disableBackgroundDelivery('steps')).resolves.toBeUndefined()
+    await expect(NitroHealth.disableAllBackgroundDelivery()).resolves.toBeUndefined()
+    await expect(NitroHealth.getBackgroundReadAuthorizationStatus()).resolves.toBe('unavailable')
+    await expect(NitroHealth.requestBackgroundReadAuthorization()).resolves.toBe('unavailable')
+    const subscription = NitroHealth.addOnChangeNotificationListener(() => undefined)
+    expect(subscription.remove).toEqual(expect.any(Function))
+    subscription.remove()
     await expect(NitroHealth.createChangesToken('steps')).resolves.toBe('mock-changes-token')
     await expect(NitroHealth.getChanges('steps', 'mock-changes-token')).resolves.toEqual({
       tokenExpired: false,

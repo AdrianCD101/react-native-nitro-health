@@ -16,6 +16,14 @@ function createNitroHealthMock(overrides = {}) {
     getAvailabilityStatus: createMockFunction(() => 'available'),
     openHealthConnectInstall: createMockFunction(() => false),
     openHealthSettings: createMockFunction(() => Promise.resolve(true)),
+    enableBackgroundDelivery: createMockFunction(() => Promise.resolve(undefined)),
+    disableBackgroundDelivery: createMockFunction(() => Promise.resolve(undefined)),
+    disableAllBackgroundDelivery: createMockFunction(() => Promise.resolve(undefined)),
+    addOnChangeNotificationListener: createMockFunction(() => ({
+      remove: createMockFunction(() => undefined),
+    })),
+    getBackgroundReadAuthorizationStatus: createMockFunction(() => Promise.resolve('unavailable')),
+    requestBackgroundReadAuthorization: createMockFunction(() => Promise.resolve('unavailable')),
     createChangesToken: createMockFunction(() => Promise.resolve('mock-changes-token')),
     getChanges: createMockFunction(() =>
       Promise.resolve({

@@ -30,19 +30,35 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     };
   }
   
-  // pragma MARK: std::function<void(const std::string& /* result */)>
-  Func_void_std__string create_Func_void_std__string(void* NON_NULL swiftClosureWrapper) noexcept {
-    auto swiftClosure = NitroHealth::Func_void_std__string::fromUnsafe(swiftClosureWrapper);
-    return [swiftClosure = std::move(swiftClosure)](const std::string& result) mutable -> void {
-      swiftClosure.call(result);
-    };
-  }
-  
   // pragma MARK: std::function<void()>
   Func_void create_Func_void(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = NitroHealth::Func_void::fromUnsafe(swiftClosureWrapper);
     return [swiftClosure = std::move(swiftClosure)]() mutable -> void {
       swiftClosure.call();
+    };
+  }
+  
+  // pragma MARK: std::function<void(const std::vector<std::string>& /* dataTypes */, const std::string& /* deliveryId */)>
+  Func_void_std__vector_std__string__std__string create_Func_void_std__vector_std__string__std__string(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroHealth::Func_void_std__vector_std__string__std__string::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const std::vector<std::string>& dataTypes, const std::string& deliveryId) mutable -> void {
+      swiftClosure.call(dataTypes, deliveryId);
+    };
+  }
+  
+  // pragma MARK: std::function<void(BackgroundReadAuthorizationStatus /* result */)>
+  Func_void_BackgroundReadAuthorizationStatus create_Func_void_BackgroundReadAuthorizationStatus(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroHealth::Func_void_BackgroundReadAuthorizationStatus::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](BackgroundReadAuthorizationStatus result) mutable -> void {
+      swiftClosure.call(static_cast<int>(result));
+    };
+  }
+  
+  // pragma MARK: std::function<void(const std::string& /* result */)>
+  Func_void_std__string create_Func_void_std__string(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroHealth::Func_void_std__string::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const std::string& result) mutable -> void {
+      swiftClosure.call(result);
     };
   }
   

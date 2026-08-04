@@ -3,6 +3,7 @@
  *
  * @see {@linkcode NitroHealth.requestAuthorization}
  * @see {@linkcode NitroHealth.createChangesToken}
+ * @see {@linkcode NitroHealth.enableBackgroundDelivery}
  */
 export type HealthDataType =
   | 'steps'

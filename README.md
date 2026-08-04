@@ -97,6 +97,8 @@ Android consumer apps must declare the matching Health Connect permissions in th
 | `bodyMass`             | `android.permission.health.READ_WEIGHT`                 | `android.permission.health.WRITE_WEIGHT`                 |
 | `workout`              | `android.permission.health.READ_EXERCISE`               | n/a (writes not supported yet)                           |
 
+Background Health Connect reads additionally require `android.permission.health.READ_HEALTH_DATA_IN_BACKGROUND`; see [Background Synchronization](#background-synchronization). This permission does not replace any data-type read permission.
+
 On iOS, apps must add `NSHealthShareUsageDescription` (reads) and `NSHealthUpdateUsageDescription` (writes) to `Info.plist`, plus the HealthKit capability.
 
 Read methods behave differently per platform when permission is missing. On Android, reads reject with a missing-permission error until the permission is granted. On iOS, reads reject with an "Authorization not determined" error until the app has requested authorization at least once; after the user responds to the prompt, HealthKit never discloses a read denial — denied reads resolve with empty results, indistinguishable from having no data.
@@ -193,6 +195,93 @@ For versioned writes, `sync.id` is the logical application identity; `uuid` and 
 Changes tokens are opaque, platform-specific, data-type-specific, and device/store-specific. Never parse, modify, or transfer them between devices. Invalid, foreign-platform, pagination, or wrong-data-type tokens reject. Health Connect tokens expire after approximately 30 days; an expired token returns `{ tokenExpired: true }` and requires the token-before-snapshot sequence again. HealthKit does not expose token expiration, but native query failures still reject. Creating the first iOS token drains existing HealthKit history internally to establish the current checkpoint, so it can take longer for data types with substantial history.
 
 Change tracking uses the same read authorization as raw reads. HealthKit cannot reveal a denied read permission after the authorization prompt, so denial can still appear as an empty result on iOS. Request authorization before creating tokens, and perform a full resync after material permission changes.
+
+## Background Synchronization
+
+Background support differs by platform. HealthKit can wake an iOS app with an observer notification. Health Connect does not expose change notifications to applications; Android apps schedule their own polling and use a separate permission to read while backgrounded. In both cases, your app owns changes-token persistence, serialized drains, database transactions, retries, network policy, and scheduling.
+
+### iOS change notifications
+
+After one native setup step, consumers choose every observed data type and frequency from JavaScript with `enableBackgroundDelivery()`. The native setup does not register any data type by itself; it only restores the choices previously persisted by those JavaScript calls when HealthKit launches the app before JavaScript is ready.
+
+Autolinking alone is not sufficient for terminated-app delivery. Apple requires observer queries to be restored during `application(_:didFinishLaunchingWithOptions:)`. This release intentionally does not use AppDelegate swizzling, Objective-C `+load` side effects, or another hidden startup hook. It also does not ship an Expo config plugin. Bare React Native apps perform the setup below once; Expo prebuild apps must apply the same entitlement, bridging-header import, and AppDelegate call through their own config plugin until first-party Expo support is added.
+
+Add the HealthKit background-delivery entitlement to the app target:
+
+```xml
+<key>com.apple.developer.healthkit.background-delivery</key>
+<true/>
+```
+
+Import the library's narrow C bootstrap header from the app target's Objective-C bridging header. If the target does not have one, create it and set `SWIFT_OBJC_BRIDGING_HEADER` to its project-relative path:
+
+```objc
+#import <NitroHealth/NitroHealthBackgroundDelivery.h>
+```
+
+Then register persisted observers near the beginning of `application(_:didFinishLaunchingWithOptions:)`, before React Native starts:
+
+```swift
+func application(
+  _ application: UIApplication,
+  didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
+) -> Bool {
+  NitroHealthRegisterPersistedObservers()
+
+  // Start React Native after restoring observers.
+  return true
+}
+```
+
+Objective-C and Objective-C++ AppDelegates can import `NitroHealthBackgroundDelivery.h` directly and call `NitroHealthRegisterPersistedObservers()` without a bridging header.
+
+After requesting the normal read permission, enable each data type independently and register one or more listeners during application startup:
+
+```ts
+const subscription = NitroHealth.addOnChangeNotificationListener(({ dataTypes }) => {
+  for (const dataType of dataTypes) {
+    scheduleSerializedChangesDrain(dataType)
+  }
+})
+
+await NitroHealth.enableBackgroundDelivery('steps', 'hourly')
+
+// Later:
+subscription.remove()
+await NitroHealth.disableBackgroundDelivery('steps')
+```
+
+Listeners and delivery configuration have separate lifetimes: removing a listener does not disable HealthKit delivery. Configured types and frequencies persist across launches. A notification received before JavaScript attaches is coalesced by data type and handed to the first listener. Notifications contain no records and can be delayed, duplicated, or coalesced; always call `getChanges()` with the last committed token to discover the actual upserts and deletions.
+
+`immediate`, `hourly`, `daily`, and `weekly` are HealthKit scheduling hints, not delivery guarantees. HealthKit enforces slower minimum frequencies for some types (step count is commonly hourly), protected health data can be inaccessible while the device is locked, and a user force-quit can prevent relaunch. Drain every configured token on normal app launch and foreground activation even when no notification was received. True background relaunch must be validated on a signed physical device; HealthKit background server delivery is not supported on Simulator.
+
+The background delivery methods and change-notification listener are iOS-only. Background-delivery promises reject on Android, while listener registration throws synchronously with guidance to use app-owned polling.
+
+### Android background reads
+
+Declare the permission in the consumer app, not the library manifest:
+
+```xml
+<uses-permission android:name="android.permission.health.READ_HEALTH_DATA_IN_BACKGROUND" />
+```
+
+Check runtime feature support and manifest/grant state before scheduling work:
+
+```ts
+let status = await NitroHealth.getBackgroundReadAuthorizationStatus()
+
+if (status === 'notGranted') {
+  status = await NitroHealth.requestBackgroundReadAuthorization()
+}
+
+if (status === 'granted') {
+  scheduleHealthSyncWork()
+}
+```
+
+The returned status is `unavailable`, `notDeclared`, `notGranted`, or `granted`. Availability is checked through Health Connect's background-read feature flag rather than Android API level alone. The request method opens the Health Connect permission flow only from `notGranted`; all other states return without prompting. On iOS both methods resolve to `unavailable` because HealthKit uses background delivery instead of a separate background-read permission.
+
+Background authorization does not wake or schedule the Android app. Use application-owned WorkManager, an Expo background-task integration, or another scheduler. Each run should recheck Health Connect availability, background authorization, and the relevant data-type read permissions, then transactionally drain `getChanges()` until `hasMore` is false. Handle `tokenExpired` with the token-before-snapshot resynchronization sequence above.
 
 ## Read Activity Quantities
 

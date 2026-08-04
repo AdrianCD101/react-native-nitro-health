@@ -17,6 +17,12 @@ export type NitroHealthMock = Omit<
   | 'getAvailabilityStatus'
   | 'openHealthConnectInstall'
   | 'openHealthSettings'
+  | 'enableBackgroundDelivery'
+  | 'disableBackgroundDelivery'
+  | 'disableAllBackgroundDelivery'
+  | 'addOnChangeNotificationListener'
+  | 'getBackgroundReadAuthorizationStatus'
+  | 'requestBackgroundReadAuthorization'
   | 'createChangesToken'
   | 'getChanges'
   | 'readActiveEnergyBurned'
@@ -52,6 +58,16 @@ export type NitroHealthMock = Omit<
   getAvailabilityStatus: MockFunction<NitroHealth['getAvailabilityStatus']>
   openHealthConnectInstall: MockFunction<NitroHealth['openHealthConnectInstall']>
   openHealthSettings: MockFunction<NitroHealth['openHealthSettings']>
+  enableBackgroundDelivery: MockFunction<NitroHealth['enableBackgroundDelivery']>
+  disableBackgroundDelivery: MockFunction<NitroHealth['disableBackgroundDelivery']>
+  disableAllBackgroundDelivery: MockFunction<NitroHealth['disableAllBackgroundDelivery']>
+  addOnChangeNotificationListener: MockFunction<NitroHealth['addOnChangeNotificationListener']>
+  getBackgroundReadAuthorizationStatus: MockFunction<
+    NitroHealth['getBackgroundReadAuthorizationStatus']
+  >
+  requestBackgroundReadAuthorization: MockFunction<
+    NitroHealth['requestBackgroundReadAuthorization']
+  >
   createChangesToken: MockFunction<NitroHealth['createChangesToken']>
   getChanges: MockFunction<NitroHealth['getChanges']>
   readActiveEnergyBurned: MockFunction<NitroHealth['readActiveEnergyBurned']>

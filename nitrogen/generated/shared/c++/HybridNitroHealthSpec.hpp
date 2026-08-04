@@ -15,6 +15,10 @@
 
 // Forward declaration of `HealthAvailabilityStatus` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class HealthAvailabilityStatus; }
+// Forward declaration of `BackgroundDeliveryFrequency` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class BackgroundDeliveryFrequency; }
+// Forward declaration of `BackgroundReadAuthorizationStatus` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class BackgroundReadAuthorizationStatus; }
 // Forward declaration of `NativeHealthChangesResult` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthChangesResult; }
 // Forward declaration of `NativeStepSamplePage` to properly resolve imports.
@@ -75,6 +79,11 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthAuthorizationResult; 
 #include "HealthAvailabilityStatus.hpp"
 #include <NitroModules/Promise.hpp>
 #include <string>
+#include "BackgroundDeliveryFrequency.hpp"
+#include <vector>
+#include <functional>
+#include <optional>
+#include "BackgroundReadAuthorizationStatus.hpp"
 #include "NativeHealthChangesResult.hpp"
 #include "NativeStepSamplePage.hpp"
 #include "NativeHealthDateRangeQuery.hpp"
@@ -89,7 +98,6 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthAuthorizationResult; 
 #include "NativeOxygenSaturationSamplePage.hpp"
 #include "NativeHeightSamplePage.hpp"
 #include "NativeHealthStatistics.hpp"
-#include <vector>
 #include "NativeHealthStatisticsQuery.hpp"
 #include "NativeSleepSamplePage.hpp"
 #include "NativeWorkoutSamplePage.hpp"
@@ -140,6 +148,13 @@ namespace margelo::nitro::nitrohealth {
       virtual HealthAvailabilityStatus getAvailabilityStatus() = 0;
       virtual bool openHealthConnectInstall() = 0;
       virtual std::shared_ptr<Promise<bool>> openHealthSettings() = 0;
+      virtual std::shared_ptr<Promise<void>> enableBackgroundDelivery(const std::string& dataType, BackgroundDeliveryFrequency frequency) = 0;
+      virtual std::shared_ptr<Promise<void>> disableBackgroundDelivery(const std::string& dataType) = 0;
+      virtual std::shared_ptr<Promise<void>> disableAllBackgroundDelivery() = 0;
+      virtual void setOnChangeNotificationListener(const std::optional<std::function<void(const std::vector<std::string>& /* dataTypes */, const std::string& /* deliveryId */)>>& listener) = 0;
+      virtual void acknowledgeChangeNotification(const std::string& deliveryId) = 0;
+      virtual std::shared_ptr<Promise<BackgroundReadAuthorizationStatus>> getBackgroundReadAuthorizationStatus() = 0;
+      virtual std::shared_ptr<Promise<BackgroundReadAuthorizationStatus>> requestBackgroundReadAuthorization() = 0;
       virtual std::shared_ptr<Promise<std::string>> createChangesToken(const std::string& dataType) = 0;
       virtual std::shared_ptr<Promise<NativeHealthChangesResult>> getChanges(const std::string& dataType, const std::string& changesToken) = 0;
       virtual std::shared_ptr<Promise<NativeStepSamplePage>> readSteps(const NativeHealthDateRangeQuery& query) = 0;

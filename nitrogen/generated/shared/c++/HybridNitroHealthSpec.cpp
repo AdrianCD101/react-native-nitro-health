@@ -18,6 +18,13 @@ namespace margelo::nitro::nitrohealth {
       prototype.registerHybridMethod("getAvailabilityStatus", &HybridNitroHealthSpec::getAvailabilityStatus);
       prototype.registerHybridMethod("openHealthConnectInstall", &HybridNitroHealthSpec::openHealthConnectInstall);
       prototype.registerHybridMethod("openHealthSettings", &HybridNitroHealthSpec::openHealthSettings);
+      prototype.registerHybridMethod("enableBackgroundDelivery", &HybridNitroHealthSpec::enableBackgroundDelivery);
+      prototype.registerHybridMethod("disableBackgroundDelivery", &HybridNitroHealthSpec::disableBackgroundDelivery);
+      prototype.registerHybridMethod("disableAllBackgroundDelivery", &HybridNitroHealthSpec::disableAllBackgroundDelivery);
+      prototype.registerHybridMethod("setOnChangeNotificationListener", &HybridNitroHealthSpec::setOnChangeNotificationListener);
+      prototype.registerHybridMethod("acknowledgeChangeNotification", &HybridNitroHealthSpec::acknowledgeChangeNotification);
+      prototype.registerHybridMethod("getBackgroundReadAuthorizationStatus", &HybridNitroHealthSpec::getBackgroundReadAuthorizationStatus);
+      prototype.registerHybridMethod("requestBackgroundReadAuthorization", &HybridNitroHealthSpec::requestBackgroundReadAuthorization);
       prototype.registerHybridMethod("createChangesToken", &HybridNitroHealthSpec::createChangesToken);
       prototype.registerHybridMethod("getChanges", &HybridNitroHealthSpec::getChanges);
       prototype.registerHybridMethod("readSteps", &HybridNitroHealthSpec::readSteps);

@@ -28,6 +28,8 @@ import androidx.health.connect.client.time.TimeRangeFilter
 import com.margelo.nitro.NitroModules
 import com.margelo.nitro.core.Promise
 import com.margelo.nitro.nitrohealth.AuthorizationRequestStatus
+import com.margelo.nitro.nitrohealth.BackgroundDeliveryFrequency
+import com.margelo.nitro.nitrohealth.BackgroundReadAuthorizationStatus
 import com.margelo.nitro.nitrohealth.HealthAuthorizationStatus
 import com.margelo.nitro.nitrohealth.HealthAvailabilityStatus
 import com.margelo.nitro.nitrohealth.HybridNitroHealthSpec
@@ -130,6 +132,79 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                 false
             }
         )
+    }
+
+    override fun enableBackgroundDelivery(
+        dataType: String,
+        frequency: BackgroundDeliveryFrequency
+    ): Promise<Unit> {
+        return Promise.rejected(
+            UnsupportedOperationException(
+                "Background change notifications are unavailable on Android; request background read authorization and schedule app-owned WorkManager polling instead"
+            )
+        )
+    }
+
+    override fun disableBackgroundDelivery(dataType: String): Promise<Unit> {
+        return Promise.rejected(
+            UnsupportedOperationException("Background change notifications are unavailable on Android")
+        )
+    }
+
+    override fun disableAllBackgroundDelivery(): Promise<Unit> {
+        return Promise.rejected(
+            UnsupportedOperationException("Background change notifications are unavailable on Android")
+        )
+    }
+
+    override fun setOnChangeNotificationListener(
+        listener: ((Array<String>, String) -> Unit)?
+    ) {
+        throw UnsupportedOperationException(
+            "Background change notifications are unavailable on Android; use app-owned WorkManager polling"
+        )
+    }
+
+    override fun acknowledgeChangeNotification(deliveryId: String) {
+        // Android cannot create change notifications, so there is nothing to acknowledge.
+    }
+
+    override fun getBackgroundReadAuthorizationStatus(): Promise<BackgroundReadAuthorizationStatus> {
+        val context = NitroModules.applicationContext
+            ?: return Promise.resolved(BackgroundReadAuthorizationStatus.UNAVAILABLE)
+
+        if (getAvailabilityStatus() != HealthAvailabilityStatus.AVAILABLE) {
+            return Promise.resolved(BackgroundReadAuthorizationStatus.UNAVAILABLE)
+        }
+
+        return Promise.async {
+            val client = HealthConnectClient.getOrCreate(context)
+            getBackgroundReadAuthorizationStatus(context, client)
+        }
+    }
+
+    override fun requestBackgroundReadAuthorization(): Promise<BackgroundReadAuthorizationStatus> {
+        val context = NitroModules.applicationContext
+            ?: return Promise.resolved(BackgroundReadAuthorizationStatus.UNAVAILABLE)
+
+        if (getAvailabilityStatus() != HealthAvailabilityStatus.AVAILABLE) {
+            return Promise.resolved(BackgroundReadAuthorizationStatus.UNAVAILABLE)
+        }
+
+        return Promise.async {
+            val client = HealthConnectClient.getOrCreate(context)
+            val currentStatus = getBackgroundReadAuthorizationStatus(context, client)
+
+            if (currentStatus != BackgroundReadAuthorizationStatus.NOTGRANTED) {
+                return@async currentStatus
+            }
+
+            NitroHealthPermissionActivity.requestPermissions(
+                context,
+                setOf(backgroundReadPermission)
+            )
+            getBackgroundReadAuthorizationStatus(context, client)
+        }
     }
 
     override fun createChangesToken(dataType: String): Promise<String> {

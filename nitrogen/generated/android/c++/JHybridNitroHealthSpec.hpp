@@ -58,6 +58,13 @@ namespace margelo::nitro::nitrohealth {
     HealthAvailabilityStatus getAvailabilityStatus() override;
     bool openHealthConnectInstall() override;
     std::shared_ptr<Promise<bool>> openHealthSettings() override;
+    std::shared_ptr<Promise<void>> enableBackgroundDelivery(const std::string& dataType, BackgroundDeliveryFrequency frequency) override;
+    std::shared_ptr<Promise<void>> disableBackgroundDelivery(const std::string& dataType) override;
+    std::shared_ptr<Promise<void>> disableAllBackgroundDelivery() override;
+    void setOnChangeNotificationListener(const std::optional<std::function<void(const std::vector<std::string>& /* dataTypes */, const std::string& /* deliveryId */)>>& listener) override;
+    void acknowledgeChangeNotification(const std::string& deliveryId) override;
+    std::shared_ptr<Promise<BackgroundReadAuthorizationStatus>> getBackgroundReadAuthorizationStatus() override;
+    std::shared_ptr<Promise<BackgroundReadAuthorizationStatus>> requestBackgroundReadAuthorization() override;
     std::shared_ptr<Promise<std::string>> createChangesToken(const std::string& dataType) override;
     std::shared_ptr<Promise<NativeHealthChangesResult>> getChanges(const std::string& dataType, const std::string& changesToken) override;
     std::shared_ptr<Promise<NativeStepSamplePage>> readSteps(const NativeHealthDateRangeQuery& query) override;
