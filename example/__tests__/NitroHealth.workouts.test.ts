@@ -123,4 +123,78 @@ describe('NitroHealth workouts contract', () => {
       expect(mockNitroHealth.readStatistics).not.toHaveBeenCalled()
     })
   })
+
+  describe('saveWorkout', () => {
+    const startDate = new Date('2026-01-02T07:00:00.000Z')
+    const endDate = new Date('2026-01-02T07:45:00.000Z')
+
+    it('maps a portable workout through the Nitro hybrid object', async () => {
+      mockNitroHealth.saveWorkout.mockResolvedValue(undefined)
+
+      await expect(
+        NitroHealth.saveWorkout({
+          startDate,
+          endDate,
+          activityType: 'running',
+          title: 'Morning Run',
+          timeZone: 'America/New_York',
+          sync: { id: 'workout-1', version: 2 },
+        })
+      ).resolves.toBeUndefined()
+
+      expect(mockNitroHealth.saveWorkout).toHaveBeenCalledWith({
+        startTimeMs: startDate.getTime(),
+        endTimeMs: endDate.getTime(),
+        activityType: 'running',
+        title: 'Morning Run',
+        timeZone: 'America/New_York',
+        syncId: 'workout-1',
+        syncVersion: 2,
+      })
+    })
+
+    it('rejects invalid dates and intervals before crossing native', async () => {
+      await expect(
+        NitroHealth.saveWorkout({
+          startDate: new Date(Number.NaN),
+          endDate,
+          activityType: 'running',
+        })
+      ).rejects.toThrow('workout: a valid startDate is required')
+      await expect(
+        NitroHealth.saveWorkout({ startDate: endDate, endDate: startDate, activityType: 'running' })
+      ).rejects.toThrow('workout: startDate must be before endDate')
+
+      expect(mockNitroHealth.saveWorkout).not.toHaveBeenCalled()
+    })
+
+    it('rejects activities that cannot round-trip cross-platform', async () => {
+      for (const activityType of ['archery', 'calisthenics', 'underwaterDiving']) {
+        await expect(
+          NitroHealth.saveWorkout({ startDate, endDate, activityType } as never)
+        ).rejects.toThrow('activityType is not supported for cross-platform writes')
+      }
+
+      expect(mockNitroHealth.saveWorkout).not.toHaveBeenCalled()
+    })
+
+    it('rejects invalid optional strings and sync metadata', async () => {
+      await expect(
+        NitroHealth.saveWorkout({ startDate, endDate, activityType: 'running', title: '  ' })
+      ).rejects.toThrow('workout: title must be a non-empty string when provided')
+      await expect(
+        NitroHealth.saveWorkout({ startDate, endDate, activityType: 'running', timeZone: '' })
+      ).rejects.toThrow('workout: timeZone must be a non-empty IANA time-zone identifier')
+      await expect(
+        NitroHealth.saveWorkout({
+          startDate,
+          endDate,
+          activityType: 'running',
+          sync: { id: 'workout-1', version: -1 },
+        })
+      ).rejects.toThrow('workout: sync.version must be a non-negative safe integer')
+
+      expect(mockNitroHealth.saveWorkout).not.toHaveBeenCalled()
+    })
+  })
 })

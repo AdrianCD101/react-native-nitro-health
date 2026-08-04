@@ -46,6 +46,13 @@ describe('NitroHealth saves (native)', () => {
         { startDate: saveInterval.endDate, endDate: saveInterval.startDate, count: 100 },
       ])
     ).rejects.toThrow('samples[0]: startDate must be before endDate')
+    await expect(
+      NitroHealth.saveWorkout({
+        startDate: saveInterval.endDate,
+        endDate: saveInterval.startDate,
+        activityType: 'running',
+      })
+    ).rejects.toThrow('workout: startDate must be before endDate')
   })
 
   it('rejects overlapping sleep stages before crossing the native boundary', async () => {
@@ -127,6 +134,16 @@ describe('NitroHealth saves (native)', () => {
 
     await expect(
       NitroHealth.saveSleepSessions([{ ...saveInterval, timeZone: 'UTC' }])
+    ).rejects.toThrow(/permission/i)
+  })
+
+  it('rejects saving a workout when write permission is not granted', async () => {
+    if (await hasVerifiedPermissions([{ accessType: 'write', dataType: 'workout' }])) {
+      return
+    }
+
+    await expect(
+      NitroHealth.saveWorkout({ ...saveInterval, activityType: 'running', timeZone: 'UTC' })
     ).rejects.toThrow(/permission/i)
   })
 
@@ -252,6 +269,44 @@ describe('NitroHealth saves (native)', () => {
       ).toBe(true)
     } finally {
       await NitroHealth.deleteSamplesByTimeRange('sleep', saveReadRange)
+    }
+  })
+
+  it('round-trips a portable workout through native code when authorized', async () => {
+    const authorized = await hasVerifiedPermissions([
+      { accessType: 'write', dataType: 'workout' },
+      { accessType: 'read', dataType: 'workout' },
+    ])
+
+    if (!authorized) {
+      return
+    }
+
+    await NitroHealth.deleteSamplesByTimeRange('workout', saveReadRange)
+    try {
+      await NitroHealth.saveWorkout({
+        ...saveInterval,
+        activityType: 'running',
+        title: 'Nitro Health Harness Run',
+        timeZone: 'UTC',
+      })
+
+      const page = await NitroHealth.readWorkouts(saveReadRange)
+      if (isInconclusiveRead(page.samples)) {
+        return
+      }
+
+      expect(
+        page.samples.some(
+          (sample) =>
+            sample.activityType === 'running' &&
+            sample.title === 'Nitro Health Harness Run' &&
+            sample.startDate.getTime() === saveInterval.startDate.getTime() &&
+            sample.endDate.getTime() === saveInterval.endDate.getTime()
+        )
+      ).toBe(true)
+    } finally {
+      await NitroHealth.deleteSamplesByTimeRange('workout', saveReadRange)
     }
   })
 

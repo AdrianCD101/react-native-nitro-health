@@ -8,7 +8,7 @@
 import Foundation
 import HealthKit
 
-private func makeHealthKitSyncMetadata(
+func makeHealthKitSyncMetadata(
     syncId: String?,
     syncVersion: Double?
 ) throws -> [String: Any]? {

@@ -96,7 +96,7 @@ Android consumer apps must declare the matching Health Connect permissions in th
 | `height`               | `android.permission.health.READ_HEIGHT`                 | `android.permission.health.WRITE_HEIGHT`                 |
 | `sleep`                | `android.permission.health.READ_SLEEP`                  | `android.permission.health.WRITE_SLEEP`                  |
 | `bodyMass`             | `android.permission.health.READ_WEIGHT`                 | `android.permission.health.WRITE_WEIGHT`                 |
-| `workout`              | `android.permission.health.READ_EXERCISE`               | n/a (writes not supported yet)                           |
+| `workout`              | `android.permission.health.READ_EXERCISE`               | `android.permission.health.WRITE_EXERCISE`               |
 
 Background Health Connect reads additionally require `android.permission.health.READ_HEALTH_DATA_IN_BACKGROUND`; see [Background Synchronization](#background-synchronization). This permission does not replace any data-type read permission.
 
@@ -484,7 +484,7 @@ Platform differences: `totalDistanceMeters` and `totalEnergyBurnedKcal` are iOS-
 
 ## Write Samples
 
-Batch save methods are available for `steps`, `distance`, `activeEnergyBurned`, `heartRate`, `restingHeartRate`, `oxygenSaturation`, `height`, `bodyMass`, and sleep sessions. Heart rate variability remains read-only by design; see [Read Heart Rate Variability](#read-heart-rate-variability). Request write authorization first, then save:
+Save methods are available for `steps`, `distance`, `activeEnergyBurned`, `heartRate`, `restingHeartRate`, `oxygenSaturation`, `height`, `bodyMass`, sleep sessions, and completed workouts. Heart rate variability remains read-only by design; see [Read Heart Rate Variability](#read-heart-rate-variability). Request write authorization first, then save:
 
 ```ts
 import { NitroHealth } from 'react-native-nitro-health'
@@ -517,9 +517,9 @@ Point-in-time samples take a single `date`:
 - `saveHeight(samples)` — `{ date, meters }`, `meters` must be greater than 0, up to 3.
 - `saveBodyMass(samples)` — `{ date, kilograms }`, `kilograms` must be greater than 0, up to 1,000.
 
-Every non-sleep sample input may include `sync: { id, version }` for retry-safe, versioned writes. Without `sync`, the write has no application-controlled identity and retries are not portably idempotent. With `sync`, an exact retry of the same id, version, and payload is idempotent in stored state; a strictly higher version replaces the logical record, and a lower version is ignored. Native change tracking may still emit a current-state upsert for a retry. Reusing an id and version with a changed payload is unsupported — increment `version` whenever the payload changes. IDs must be nonblank, versions must be non-negative safe integers, and duplicate IDs within one save call reject. IDs are case-sensitive and scoped to the writing app and `HealthDataType`, so one id must identify only one logical record of that type.
+Every non-sleep sample input may include `sync: { id, version }` for retry-safe, versioned writes. Without `sync`, the write has no application-controlled identity and retries are not portably idempotent. With `sync`, an exact retry of the same id, version, and payload is idempotent in stored state; a strictly higher version replaces the logical record, and a lower version is ignored. Native change tracking may still emit a current-state upsert for a retry. Reusing an id and version with a changed payload is unsupported — increment `version` whenever the payload changes. IDs must be nonblank, versions must be non-negative safe integers, and IDs are case-sensitive and scoped to the writing app and `HealthDataType`. Batch sample saves additionally reject duplicate IDs within one call.
 
-All save methods take a non-empty array, resolve to `void` after the atomic call succeeds, and do not report whether an input was inserted, retried, replaced, or ignored. They reject before crossing the native boundary when validation fails — error messages include the failing index, for example `samples[2]: bpm must be between 1 and 300`.
+Batch sample and sleep save methods take non-empty arrays; `saveWorkout` takes one completed workout because modern HealthKit uses one builder per workout. Save methods resolve to `void` and do not report whether an input was inserted, retried, replaced, or ignored. They reject before crossing the native boundary when JavaScript validation fails — errors identify the input, for example `samples[2]: bpm must be between 1 and 300` or `workout: startDate must be before endDate`.
 
 The value ranges mirror what Health Connect enforces at insert time, applied on both platforms so a sample that saves on iOS also saves on Android.
 
@@ -556,6 +556,29 @@ Writable stages are `awake`, `asleep`, `asleepCore`, `asleepDeep`, and `asleepRE
 Android writes one `SleepSessionRecord` with nested stages. iOS writes one `inBed` interval for the session envelope plus one interval per stage, all in one HealthKit save call. Consequently, `readSleepSamples()` returns only flattened stages for a staged Android session but returns the overlapping `inBed` envelope and stages on iOS. A stage-less session reads as `asleep` on Android under the existing read normalization and `inBed` on iOS.
 
 Sleep sessions intentionally do not accept `sync`: one logical session maps to one Android record but several independent HealthKit samples, so HealthKit cannot provide the same atomic whole-session replacement semantics. Each call is atomic, but retrying a successful sleep write can create duplicates.
+
+### Write Workouts
+
+`saveWorkout(workout)` saves one completed workout using a modern `HKWorkoutBuilder` on iOS and one `ExerciseSessionRecord` on Android:
+
+```ts
+await NitroHealth.saveWorkout({
+  startDate: new Date('2026-08-04T10:00:00.000Z'),
+  endDate: new Date('2026-08-04T10:45:00.000Z'),
+  activityType: 'running',
+  title: 'Morning run',
+  timeZone: 'America/New_York',
+  sync: { id: 'workout-2026-08-04-morning', version: 1 },
+})
+```
+
+Writable activities are the 49 values in `WritableWorkoutActivityType` that can be read back with the same normalized value on Android and throughout the package's iOS 16+ range. Platform-only values are read-compatible but not writable: examples include `archery` (iOS-only), `calisthenics` (Android-only), the Android legacy values `coreTraining` and `jumpRope`, and `underwaterDiving` (requires iOS 17). Unsupported values reject rather than silently changing to `other`.
+
+Canonical writes intentionally choose one native subtype where reads already fold several variants together: `running` writes a non-treadmill run, `cycling` writes general biking, `swimming` writes pool swimming on Android, and `strengthTraining` writes functional strength training on iOS. Reading the saved workout returns the same normalized activity type, but does not recover an equipment or location subtype that the public input did not express.
+
+The workout interval determines duration because v1 writes no pause/resume events. `title` maps to the native Android title and HealthKit workout-brand metadata. `timeZone` follows the sleep-write convention: Android stores endpoint offsets and iOS stores time-zone metadata. `sync` maps to the same versioned native identity used by other single-record saves, so exact retries are idempotent and higher versions replace the logical workout.
+
+Workout routes, distance/energy totals, segments, laps, notes, pause events, and planned workouts are not part of this method. Routes require separate native objects and Android's additional `WRITE_EXERCISE_ROUTE` permission; they remain a separate roadmap feature.
 
 Unlike reads, missing write permission is detectable on both platforms: save methods reject with a missing-permission error on Android and iOS alike (on iOS this includes the not-yet-requested state, so request write authorization first). Saved samples are attributed to your app as the source.
 

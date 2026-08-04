@@ -12,7 +12,10 @@ func makeSleepCategorySamples(
             throw sleepSessionInputError("sessions[\(sessionIndex)]: startDate must be before endDate")
         }
 
-        let timeZone = try resolveSleepTimeZone(session.timeZone, sessionIndex: sessionIndex)
+        let timeZone = try resolveIanaTimeZone(
+            session.timeZone,
+            errorPrefix: "sessions[\(sessionIndex)]"
+        )
         let metadata: [String: Any] = [HKMetadataKeyTimeZone: timeZone.identifier]
         let indexedStages = session.stages.enumerated().map { stageIndex, stage in
             (
@@ -70,20 +73,6 @@ func makeSleepCategorySamples(
 
         return samples
     }
-}
-
-private func resolveSleepTimeZone(_ identifier: String?, sessionIndex: Int) throws -> TimeZone {
-    if let identifier {
-        let isKnownIdentifier = identifier == "UTC" || TimeZone.knownTimeZoneIdentifiers.contains(identifier)
-        guard isKnownIdentifier, let timeZone = TimeZone(identifier: identifier) else {
-            throw sleepSessionInputError(
-                "sessions[\(sessionIndex)]: timeZone is not a valid IANA time-zone identifier: \(identifier)"
-            )
-        }
-        return timeZone
-    }
-
-    return .current
 }
 
 private func sleepSessionInputError(_ message: String) -> NSError {

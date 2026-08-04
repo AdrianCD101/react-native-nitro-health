@@ -34,6 +34,7 @@ import type { SleepSessionInput } from './SleepSessionInput'
 import type { StepSample } from './StepSample'
 import type { StepSampleInput } from './StepSampleInput'
 import type { WorkoutSample } from './WorkoutSample'
+import type { WorkoutSampleInput } from './WorkoutSampleInput'
 import {
   makeNativeSampleQuery,
   makeNativeStatisticsQuery,
@@ -58,6 +59,7 @@ import {
   makeNativeRestingHeartRateSampleInput,
   makeNativeSleepSessionInput,
   makeNativeStepSampleInput,
+  makeNativeWorkoutSampleInput,
   makeOxygenSaturationSample,
   makeRestingHeartRateSample,
   makeSamplePage,
@@ -148,6 +150,7 @@ export type { NativeStepSample } from './NativeStepSample'
 export type { NativeStepSampleInput } from './NativeStepSampleInput'
 export type { NativeStepSamplePage } from './NativeStepSamplePage'
 export type { NativeWorkoutSample } from './NativeWorkoutSample'
+export type { NativeWorkoutSampleInput } from './NativeWorkoutSampleInput'
 export type { NativeWorkoutSamplePage } from './NativeWorkoutSamplePage'
 export type { NitroHealth as NitroHealthSpec } from './specs/nitro-health.nitro'
 export type { OxygenSaturationSample } from './OxygenSaturationSample'
@@ -164,6 +167,8 @@ export type { StepSample } from './StepSample'
 export type { StepSampleInput } from './StepSampleInput'
 export type { WorkoutActivityType } from './WorkoutActivityType'
 export type { WorkoutSample } from './WorkoutSample'
+export type { WorkoutSampleInput } from './WorkoutSampleInput'
+export type { WritableWorkoutActivityType } from './WritableWorkoutActivityType'
 
 const NitroHealthNative = NitroModules.createHybridObject<NitroHealthSpec>('NitroHealth')
 
@@ -247,6 +252,7 @@ export type NitroHealth = Omit<
   | 'saveOxygenSaturation'
   | 'saveHeight'
   | 'saveSleepSessions'
+  | 'saveWorkout'
   | 'deleteSamplesByUuids'
   | 'deleteSamplesByTimeRange'
   | 'requestAuthorization'
@@ -326,6 +332,8 @@ export type NitroHealth = Omit<
   saveHeight(samples: HeightSampleInput[]): Promise<void>
   /** Saves complete sleep sessions. Retries are not idempotent and may create duplicates. */
   saveSleepSessions(sessions: SleepSessionInput[]): Promise<void>
+  /** Saves one completed workout with portable activity semantics. */
+  saveWorkout(workout: WorkoutSampleInput): Promise<void>
   deleteSamplesByUuids(dataType: HealthDataType, uuids: string[]): Promise<void>
   deleteSamplesByTimeRange(dataType: HealthDataType, query: HealthTimeRangeQuery): Promise<void>
   requestAuthorization(permissions: HealthPermission[]): Promise<HealthAuthorizationResult>
@@ -532,6 +540,9 @@ export const NitroHealth: NitroHealth = {
     assertNonEmptySessions(sessions)
     const nativeSessions = sessions.map(makeNativeSleepSessionInput)
     return NitroHealthNative.saveSleepSessions(nativeSessions)
+  },
+  async saveWorkout(workout) {
+    return NitroHealthNative.saveWorkout(makeNativeWorkoutSampleInput(workout))
   },
   async deleteSamplesByUuids(dataType, uuids) {
     assertDeletableUuids(uuids)

@@ -65,6 +65,9 @@ describe('NitroHealth Jest mock', () => {
     await expect(
       NitroHealth.saveSleepSessions([{ ...range, timeZone: 'UTC' }])
     ).resolves.toBeUndefined()
+    await expect(
+      NitroHealth.saveWorkout({ ...range, activityType: 'running' })
+    ).resolves.toBeUndefined()
     await expect(NitroHealth.getRequestStatusForAuthorization([])).resolves.toBe('unknown')
   })
 

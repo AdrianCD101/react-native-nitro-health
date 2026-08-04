@@ -2,7 +2,7 @@
 //  HybridNitroHealth+Workouts.swift
 //  Pods
 //
-//  Workout session reads (HKWorkout). This file is HealthKit-only, so it must NOT be
+//  Workout session reads and writes (HKWorkout). This file is HealthKit-only, so it must NOT be
 //  added to Package.swift's pure-Foundation SPM test target; the podspec globs
 //  ios/**/*.swift and picks it up automatically. Kept separate from
 //  HybridNitroHealth.swift to stay under that file's line budget.
@@ -64,6 +64,34 @@ extension HybridNitroHealth {
             }
 
             return NativeWorkoutSamplePage(samples: page.samples, nextCursor: page.nextCursor)
+        }
+    }
+
+    func saveWorkout(workout: NativeWorkoutSampleInput) throws -> Promise<Void> {
+        if !HKHealthStore.isHealthDataAvailable() {
+            throw permissionError("Health data is not available")
+        }
+
+        return Promise<Void>.async {
+            let workoutType = HKObjectType.workoutType()
+            try self.requireWriteAuthorization(for: workoutType, label: "workouts")
+            let input = try makeWorkoutBuilderInput(workout: workout)
+            let builder = HKWorkoutBuilder(
+                healthStore: healthStore,
+                configuration: input.configuration,
+                device: nil
+            )
+
+            do {
+                try await builder.beginCollection(at: input.startDate)
+                try await builder.addMetadata(input.metadata)
+                try await builder.endCollection(at: input.endDate)
+            } catch {
+                builder.discardWorkout()
+                throw error
+            }
+
+            _ = try await builder.finishWorkout()
         }
     }
 }

@@ -71,6 +71,8 @@ namespace margelo::nitro::nitrohealth { struct NativeOxygenSaturationSampleInput
 namespace margelo::nitro::nitrohealth { struct NativeHeightSampleInput; }
 // Forward declaration of `NativeSleepSessionInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeSleepSessionInput; }
+// Forward declaration of `NativeWorkoutSampleInput` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeWorkoutSampleInput; }
 // Forward declaration of `AuthorizationRequestStatus` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class AuthorizationRequestStatus; }
 // Forward declaration of `NativeHealthPermission` to properly resolve imports.
@@ -112,6 +114,7 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthAuthorizationResult; 
 #include "NativeOxygenSaturationSampleInput.hpp"
 #include "NativeHeightSampleInput.hpp"
 #include "NativeSleepSessionInput.hpp"
+#include "NativeWorkoutSampleInput.hpp"
 #include "AuthorizationRequestStatus.hpp"
 #include "NativeHealthPermission.hpp"
 #include "NativeHealthAuthorizationResult.hpp"
@@ -182,6 +185,7 @@ namespace margelo::nitro::nitrohealth {
       virtual std::shared_ptr<Promise<void>> saveOxygenSaturation(const std::vector<NativeOxygenSaturationSampleInput>& samples) = 0;
       virtual std::shared_ptr<Promise<void>> saveHeight(const std::vector<NativeHeightSampleInput>& samples) = 0;
       virtual std::shared_ptr<Promise<void>> saveSleepSessions(const std::vector<NativeSleepSessionInput>& sessions) = 0;
+      virtual std::shared_ptr<Promise<void>> saveWorkout(const NativeWorkoutSampleInput& workout) = 0;
       virtual std::shared_ptr<Promise<void>> deleteSamplesByUuids(const std::string& dataType, const std::vector<std::string>& uuids) = 0;
       virtual std::shared_ptr<Promise<void>> deleteSamplesByTimeRange(const std::string& dataType, const NativeHealthTimeRangeQuery& query) = 0;
       virtual std::shared_ptr<Promise<AuthorizationRequestStatus>> getRequestStatusForAuthorization(const std::vector<NativeHealthPermission>& permissions) = 0;
