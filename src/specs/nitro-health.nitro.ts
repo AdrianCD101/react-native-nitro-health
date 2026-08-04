@@ -16,6 +16,7 @@ import type { NativeHealthStatistics } from '../NativeHealthStatistics'
 import type { NativeHealthStatisticsQuery } from '../NativeHealthStatisticsQuery'
 import type { NativeHealthTimeRangeQuery } from '../NativeHealthTimeRangeQuery'
 import type { NativeHealthPermission } from '../NativeHealthPermission'
+import type { NativeHealthPermissionStatusResult } from '../NativeHealthPermissionStatusResult'
 import type { NativeHeartRateSampleInput } from '../NativeHeartRateSampleInput'
 import type { NativeHeartRateSamplePage } from '../NativeHeartRateSamplePage'
 import type { NativeHeartRateStatistics } from '../NativeHeartRateStatistics'
@@ -79,6 +80,9 @@ export interface NitroHealth extends HybridObject<{ ios: 'swift'; android: 'kotl
   saveSleepSessions(sessions: NativeSleepSessionInput[]): Promise<void>
   deleteSamplesByUuids(dataType: string, uuids: string[]): Promise<void>
   deleteSamplesByTimeRange(dataType: string, query: NativeHealthTimeRangeQuery): Promise<void>
+  getPermissionStatuses(
+    permissions: NativeHealthPermission[]
+  ): Promise<NativeHealthPermissionStatusResult>
   getRequestStatusForAuthorization(
     permissions: NativeHealthPermission[]
   ): Promise<AuthorizationRequestStatus>

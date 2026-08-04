@@ -15,6 +15,7 @@ import {
 const availabilityStatuses = ['available', 'unavailable', 'providerUpdateRequired']
 const authorizationRequestStatuses = ['unknown', 'shouldRequest', 'unnecessary']
 const authorizationResultStatuses = ['granted', 'partial', 'denied', 'completed', 'unavailable']
+const permissionStatuses = ['granted', 'notGranted', 'notDetermined', 'unverifiable']
 
 describe('NitroHealth permissions (native)', () => {
   it('returns a platform availability status from native code', () => {
@@ -44,6 +45,27 @@ describe('NitroHealth permissions (native)', () => {
     const status = await NitroHealth.getRequestStatusForAuthorization(stepsReadPermission)
 
     expect(authorizationRequestStatuses).toContain(status)
+  })
+
+  it('queries current permission states without requesting authorization', async () => {
+    const permissions = [...stepsReadPermission, ...sleepWritePermission, ...stepsReadPermission]
+    const result = await NitroHealth.getPermissionStatuses(permissions)
+
+    expect(availabilityStatuses).toContain(result.availabilityStatus)
+    expect(result.statuses).toHaveLength(permissions.length)
+    expect(result.statuses.map((entry) => entry.permission)).toEqual(permissions)
+    expect(result.statuses.every((entry) => permissionStatuses.includes(entry.status))).toBe(true)
+
+    if (result.availabilityStatus !== 'available') {
+      expect(result.statuses.every((entry) => entry.status === 'unverifiable')).toBe(true)
+    } else if (Platform.OS === 'ios') {
+      expect(result.statuses[0]?.status).toBe('unverifiable')
+      expect(['granted', 'notGranted', 'notDetermined']).toContain(result.statuses[1]?.status)
+    } else {
+      expect(
+        result.statuses.every((entry) => ['granted', 'notGranted'].includes(entry.status))
+      ).toBe(true)
+    }
   })
 
   it('gets request status for Heart Rate read permission from native code', async () => {
@@ -90,6 +112,12 @@ describe('NitroHealth permissions (native)', () => {
 
   it('rejects an empty authorization request before crossing the native boundary', async () => {
     await expect(NitroHealth.requestAuthorization([])).rejects.toThrow(
+      'At least one health permission is required'
+    )
+  })
+
+  it('rejects an empty permission status query before crossing the native boundary', async () => {
+    await expect(NitroHealth.getPermissionStatuses([])).rejects.toThrow(
       'At least one health permission is required'
     )
   })

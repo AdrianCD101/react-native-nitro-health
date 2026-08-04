@@ -64,6 +64,7 @@ const permissions: HealthPermission[] = [
   { accessType: 'read', dataType: 'bodyMass' },
 ]
 
+const current = await NitroHealth.getPermissionStatuses(permissions)
 const status = await NitroHealth.getRequestStatusForAuthorization(permissions)
 
 if (status === 'shouldRequest') {
@@ -75,6 +76,8 @@ if (status === 'shouldRequest') {
   }
 }
 ```
+
+`getPermissionStatuses()` reports one current state per requested permission without opening system authorization UI. States are `granted`, `notGranted`, `notDetermined`, or `unverifiable`. Android reports `granted` or `notGranted` because Health Connect does not distinguish denial from a permission that has never been requested. HealthKit reports all read permissions as `unverifiable`; write permissions can be `granted`, `notGranted`, or `notDetermined`. When the health API is unavailable, every requested permission is `unverifiable` and `availabilityStatus` explains why.
 
 `getRequestStatusForAuthorization()` returns `unknown`, `shouldRequest`, or `unnecessary`.
 

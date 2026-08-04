@@ -18,6 +18,8 @@ namespace margelo::nitro::nitrohealth { enum class BackgroundReadAuthorizationSt
 namespace margelo::nitro::nitrohealth { enum class HealthAuthorizationStatus; }
 // Forward declaration of `HealthAvailabilityStatus` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class HealthAvailabilityStatus; }
+// Forward declaration of `HealthPermissionStatus` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class HealthPermissionStatus; }
 // Forward declaration of `HybridNitroHealthSpec` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { class HybridNitroHealthSpec; }
 // Forward declaration of `NativeActiveEnergyBurnedSampleInput` to properly resolve imports.
@@ -46,6 +48,10 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthChange; }
 namespace margelo::nitro::nitrohealth { struct NativeHealthChangesResult; }
 // Forward declaration of `NativeHealthDateRangeQuery` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthDateRangeQuery; }
+// Forward declaration of `NativeHealthPermissionStatusEntry` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthPermissionStatusEntry; }
+// Forward declaration of `NativeHealthPermissionStatusResult` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthPermissionStatusResult; }
 // Forward declaration of `NativeHealthPermission` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthPermission; }
 // Forward declaration of `NativeHealthStatisticsQuery` to properly resolve imports.
@@ -109,6 +115,7 @@ namespace margelo::nitro::nitrohealth { struct NativeWorkoutSample; }
 #include "BackgroundReadAuthorizationStatus.hpp"
 #include "HealthAuthorizationStatus.hpp"
 #include "HealthAvailabilityStatus.hpp"
+#include "HealthPermissionStatus.hpp"
 #include "HybridNitroHealthSpec.hpp"
 #include "NativeActiveEnergyBurnedSample.hpp"
 #include "NativeActiveEnergyBurnedSampleInput.hpp"
@@ -124,6 +131,8 @@ namespace margelo::nitro::nitrohealth { struct NativeWorkoutSample; }
 #include "NativeHealthChangesResult.hpp"
 #include "NativeHealthDateRangeQuery.hpp"
 #include "NativeHealthPermission.hpp"
+#include "NativeHealthPermissionStatusEntry.hpp"
+#include "NativeHealthPermissionStatusResult.hpp"
 #include "NativeHealthStatistics.hpp"
 #include "NativeHealthStatisticsQuery.hpp"
 #include "NativeHealthTimeRangeQuery.hpp"

@@ -57,6 +57,16 @@ function createNitroHealthMock(overrides = {}) {
     saveSleepSessions: createMockFunction(() => Promise.resolve(undefined)),
     deleteSamplesByUuids: createMockFunction(() => Promise.resolve(undefined)),
     deleteSamplesByTimeRange: createMockFunction(() => Promise.resolve(undefined)),
+    getPermissionStatuses: createMockFunction((permissions) => {
+      if (permissions.length === 0) {
+        return Promise.reject(new Error('At least one health permission is required'))
+      }
+
+      return Promise.resolve({
+        availabilityStatus: 'available',
+        statuses: permissions.map((permission) => ({ permission, status: 'unverifiable' })),
+      })
+    }),
     getRequestStatusForAuthorization: createMockFunction(() => Promise.resolve('unknown')),
     requestAuthorization: createMockFunction(() =>
       Promise.resolve({

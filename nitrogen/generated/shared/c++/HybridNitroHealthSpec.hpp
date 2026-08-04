@@ -71,10 +71,12 @@ namespace margelo::nitro::nitrohealth { struct NativeOxygenSaturationSampleInput
 namespace margelo::nitro::nitrohealth { struct NativeHeightSampleInput; }
 // Forward declaration of `NativeSleepSessionInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeSleepSessionInput; }
-// Forward declaration of `AuthorizationRequestStatus` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { enum class AuthorizationRequestStatus; }
+// Forward declaration of `NativeHealthPermissionStatusResult` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthPermissionStatusResult; }
 // Forward declaration of `NativeHealthPermission` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthPermission; }
+// Forward declaration of `AuthorizationRequestStatus` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class AuthorizationRequestStatus; }
 // Forward declaration of `NativeHealthAuthorizationResult` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthAuthorizationResult; }
 
@@ -112,8 +114,9 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthAuthorizationResult; 
 #include "NativeOxygenSaturationSampleInput.hpp"
 #include "NativeHeightSampleInput.hpp"
 #include "NativeSleepSessionInput.hpp"
-#include "AuthorizationRequestStatus.hpp"
+#include "NativeHealthPermissionStatusResult.hpp"
 #include "NativeHealthPermission.hpp"
+#include "AuthorizationRequestStatus.hpp"
 #include "NativeHealthAuthorizationResult.hpp"
 
 namespace margelo::nitro::nitrohealth {
@@ -184,6 +187,7 @@ namespace margelo::nitro::nitrohealth {
       virtual std::shared_ptr<Promise<void>> saveSleepSessions(const std::vector<NativeSleepSessionInput>& sessions) = 0;
       virtual std::shared_ptr<Promise<void>> deleteSamplesByUuids(const std::string& dataType, const std::vector<std::string>& uuids) = 0;
       virtual std::shared_ptr<Promise<void>> deleteSamplesByTimeRange(const std::string& dataType, const NativeHealthTimeRangeQuery& query) = 0;
+      virtual std::shared_ptr<Promise<NativeHealthPermissionStatusResult>> getPermissionStatuses(const std::vector<NativeHealthPermission>& permissions) = 0;
       virtual std::shared_ptr<Promise<AuthorizationRequestStatus>> getRequestStatusForAuthorization(const std::vector<NativeHealthPermission>& permissions) = 0;
       virtual std::shared_ptr<Promise<NativeHealthAuthorizationResult>> requestAuthorization(const std::vector<NativeHealthPermission>& permissions) = 0;
 

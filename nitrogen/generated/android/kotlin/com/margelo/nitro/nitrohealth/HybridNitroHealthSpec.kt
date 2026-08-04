@@ -184,6 +184,10 @@ abstract class HybridNitroHealthSpec: HybridObject() {
   
   @DoNotStrip
   @Keep
+  abstract fun getPermissionStatuses(permissions: Array<NativeHealthPermission>): Promise<NativeHealthPermissionStatusResult>
+
+  @DoNotStrip
+  @Keep
   abstract fun getRequestStatusForAuthorization(permissions: Array<NativeHealthPermission>): Promise<AuthorizationRequestStatus>
   
   @DoNotStrip
