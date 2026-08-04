@@ -61,11 +61,23 @@ final class NitroHealthBackgroundDelivery: NSObject {
                     }
                 }
             } catch {
+                // The data type no longer maps to a HealthKit sample type (for
+                // example after a library downgrade). Keeping the entry would make
+                // disableAll() fail forever and replay unusable notifications.
                 NSLog(
-                    "[NitroHealth] Failed to restore observer for %@: %@",
+                    "[NitroHealth] Removing unrestorable background delivery for %@: %@",
                     dataType,
                     error.localizedDescription
                 )
+                stateQueue.sync {
+                    var updatedConfiguration = loadConfiguration()
+                    updatedConfiguration.removeValue(forKey: dataType)
+                    saveConfiguration(updatedConfiguration)
+
+                    var pendingNotifications = loadPendingNotifications()
+                    pendingNotifications.removeValue(forKey: dataType)
+                    savePendingNotifications(pendingNotifications)
+                }
             }
         }
     }
@@ -124,8 +136,14 @@ final class NitroHealthBackgroundDelivery: NSObject {
             let dataTypes = stateQueue.sync { Array(loadConfiguration().keys).sorted() }
 
             for dataType in dataTypes {
-                let sampleType = try makeHealthKitSampleType(dataType: dataType)
-                try await healthStore.disableBackgroundDeliveryOrThrow(for: sampleType)
+                // An unknown persisted type has no HealthKit delivery to disable;
+                // remove its state instead of letting one stale entry fail the loop.
+                if let sampleType = try? makeHealthKitSampleType(dataType: dataType) {
+                    try await healthStore.disableBackgroundDeliveryOrThrow(for: sampleType)
+                } else {
+                    NSLog("[NitroHealth] Removing unknown background delivery type %@", dataType)
+                }
+
                 removeObserver(dataType: dataType, clearPending: true)
 
                 stateQueue.sync {
@@ -262,8 +280,13 @@ final class NitroHealthBackgroundDelivery: NSObject {
         var listener: (([String], String) -> Void)?
 
         stateQueue.sync {
-            deliveredNotifications = loadPendingNotifications()
             isEmissionScheduled = false
+
+            // A listener detach/reattach can queue a second emission block; never
+            // start a new delivery while one is awaiting acknowledgement.
+            guard inFlightDelivery == nil else { return }
+
+            deliveredNotifications = loadPendingNotifications()
             listener = self.listener
 
             if listener != nil, !deliveredNotifications.isEmpty {

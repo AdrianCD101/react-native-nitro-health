@@ -165,6 +165,7 @@ const changeNotificationListeners = new Map<
   (notification: HealthChangeNotification) => void
 >()
 let nextChangeNotificationListenerId = 1
+let isDispatchingChangeNotification = false
 
 function notifyChangeNotificationListeners(dataTypes: string[], deliveryId: string): void {
   const notification: HealthChangeNotification = {
@@ -176,23 +177,34 @@ function notifyChangeNotificationListeners(dataTypes: string[], deliveryId: stri
   let hasError = false
   let firstError: unknown
 
-  for (const listener of listeners) {
-    try {
-      listener(notification)
-    } catch (error) {
-      if (!hasError) {
-        hasError = true
-        firstError = error
+  isDispatchingChangeNotification = true
+  try {
+    for (const listener of listeners) {
+      try {
+        listener(notification)
+      } catch (error) {
+        if (!hasError) {
+          hasError = true
+          firstError = error
+        }
       }
     }
+
+    NitroHealthNative.acknowledgeChangeNotification(deliveryId)
+  } finally {
+    isDispatchingChangeNotification = false
   }
 
-  NitroHealthNative.acknowledgeChangeNotification(deliveryId)
+  // Detaching before the acknowledgement would clear the in-flight delivery and
+  // orphan the pending notification, so a remove() during dispatch defers to here.
+  if (changeNotificationListeners.size === 0) {
+    NitroHealthNative.setOnChangeNotificationListener(undefined)
+  }
 
   if (hasError) {
-    void Promise.resolve().then(() => {
+    setTimeout(() => {
       throw firstError
-    })
+    }, 0)
   }
 }
 
@@ -367,7 +379,7 @@ export const NitroHealth: NitroHealth = {
         isRemoved = true
         changeNotificationListeners.delete(listenerId)
 
-        if (changeNotificationListeners.size === 0) {
+        if (changeNotificationListeners.size === 0 && !isDispatchingChangeNotification) {
           NitroHealthNative.setOnChangeNotificationListener(undefined)
         }
       },

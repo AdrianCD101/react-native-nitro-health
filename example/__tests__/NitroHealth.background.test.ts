@@ -7,6 +7,7 @@ jest.mock('react-native-nitro-modules', () => ({
 }))
 
 import { NitroHealth } from 'react-native-nitro-health'
+import type { ListenerSubscription } from 'react-native-nitro-health'
 
 describe('NitroHealth background contract', () => {
   beforeEach(() => {
@@ -83,5 +84,52 @@ describe('NitroHealth background contract', () => {
       'A change notification listener function is required'
     )
     expect(mockNitroHealth.setOnChangeNotificationListener).not.toHaveBeenCalled()
+  })
+
+  it('acknowledges before detaching when the last listener removes itself during dispatch', () => {
+    let subscription: ListenerSubscription | undefined
+    const listener = jest.fn(() => subscription?.remove())
+    subscription = NitroHealth.addOnChangeNotificationListener(listener)
+    const nativeListener = mockNitroHealth.setOnChangeNotificationListener.mock.calls[0]?.[0] as
+      | ((dataTypes: string[], deliveryId: string) => void)
+      | undefined
+
+    nativeListener?.(['steps'], 'delivery-3')
+
+    expect(listener).toHaveBeenCalledWith({ dataTypes: ['steps'] })
+    expect(mockNitroHealth.acknowledgeChangeNotification).toHaveBeenCalledWith('delivery-3')
+    expect(mockNitroHealth.setOnChangeNotificationListener).toHaveBeenLastCalledWith(undefined)
+
+    const acknowledgeOrder =
+      mockNitroHealth.acknowledgeChangeNotification.mock.invocationCallOrder[0] ?? 0
+    const detachOrder =
+      mockNitroHealth.setOnChangeNotificationListener.mock.invocationCallOrder[1] ?? 0
+    expect(acknowledgeOrder).toBeLessThan(detachOrder)
+  })
+
+  it('acknowledges the delivery and rethrows the first listener error asynchronously', () => {
+    jest.useFakeTimers()
+    try {
+      const failingListener = jest.fn(() => {
+        throw new Error('listener failure')
+      })
+      const healthyListener = jest.fn()
+      const firstSubscription = NitroHealth.addOnChangeNotificationListener(failingListener)
+      const secondSubscription = NitroHealth.addOnChangeNotificationListener(healthyListener)
+      const nativeListener = mockNitroHealth.setOnChangeNotificationListener.mock.calls[0]?.[0] as
+        | ((dataTypes: string[], deliveryId: string) => void)
+        | undefined
+
+      nativeListener?.(['steps'], 'delivery-4')
+
+      expect(healthyListener).toHaveBeenCalledWith({ dataTypes: ['steps'] })
+      expect(mockNitroHealth.acknowledgeChangeNotification).toHaveBeenCalledWith('delivery-4')
+      expect(() => jest.runAllTimers()).toThrow('listener failure')
+
+      firstSubscription.remove()
+      secondSubscription.remove()
+    } finally {
+      jest.useRealTimers()
+    }
   })
 })
