@@ -390,6 +390,29 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         }
     }
 
+    func getPermissionStatuses(permissions: [NativeHealthPermission]) throws -> Promise<NativeHealthPermissionStatusResult> {
+        if !HKHealthStore.isHealthDataAvailable() {
+            return Promise<NativeHealthPermissionStatusResult>.resolved(
+                withResult: NativeHealthPermissionStatusResult(
+                    availabilityStatus: .unavailable,
+                    statuses: permissions.map { permission in
+                        NativeHealthPermissionStatusEntry(
+                            permission: permission,
+                            status: .unverifiable
+                        )
+                    }
+                )
+            )
+        }
+
+        return Promise<NativeHealthPermissionStatusResult>.resolved(
+            withResult: NativeHealthPermissionStatusResult(
+                availabilityStatus: .available,
+                statuses: try permissions.map(makeHealthKitPermissionStatusEntry)
+            )
+        )
+    }
+
     func requestAuthorization(permissions: [NativeHealthPermission]) throws -> Promise<NativeHealthAuthorizationResult> {
         if !HKHealthStore.isHealthDataAvailable() {
             return Promise<NativeHealthAuthorizationResult>.resolved(
@@ -653,6 +676,33 @@ class HybridNitroHealth: HybridNitroHealthSpec {
             deniedPermissions: deniedPermissions,
             unverifiablePermissions: unverifiablePermissions
         )
+    }
+
+    private func makeHealthKitPermissionStatusEntry(
+        permission: NativeHealthPermission
+    ) throws -> NativeHealthPermissionStatusEntry {
+        let status: HealthPermissionStatus
+
+        switch permission.accessType {
+        case "read":
+            status = .unverifiable
+        case "write":
+            let sampleType = try makeHealthKitSampleType(dataType: permission.dataType)
+            switch healthStore.authorizationStatus(for: sampleType) {
+            case .notDetermined:
+                status = .notdetermined
+            case .sharingDenied:
+                status = .notgranted
+            case .sharingAuthorized:
+                status = .granted
+            @unknown default:
+                status = .unverifiable
+            }
+        default:
+            throw permissionError("Unsupported health permission access type: \(permission.accessType)")
+        }
+
+        return NativeHealthPermissionStatusEntry(permission: permission, status: status)
     }
 
     private func makeAuthorizationResult(

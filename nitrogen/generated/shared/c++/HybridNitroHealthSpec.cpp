@@ -52,6 +52,7 @@ namespace margelo::nitro::nitrohealth {
       prototype.registerHybridMethod("saveWorkout", &HybridNitroHealthSpec::saveWorkout);
       prototype.registerHybridMethod("deleteSamplesByUuids", &HybridNitroHealthSpec::deleteSamplesByUuids);
       prototype.registerHybridMethod("deleteSamplesByTimeRange", &HybridNitroHealthSpec::deleteSamplesByTimeRange);
+      prototype.registerHybridMethod("getPermissionStatuses", &HybridNitroHealthSpec::getPermissionStatuses);
       prototype.registerHybridMethod("getRequestStatusForAuthorization", &HybridNitroHealthSpec::getRequestStatusForAuthorization);
       prototype.registerHybridMethod("requestAuthorization", &HybridNitroHealthSpec::requestAuthorization);
     });

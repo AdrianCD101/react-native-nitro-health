@@ -98,10 +98,16 @@ namespace margelo::nitro::nitrohealth { struct NativeSleepSessionInput; }
 namespace margelo::nitro::nitrohealth { struct NativeSleepSessionStageInput; }
 // Forward declaration of `NativeWorkoutSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeWorkoutSampleInput; }
-// Forward declaration of `AuthorizationRequestStatus` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { enum class AuthorizationRequestStatus; }
+// Forward declaration of `NativeHealthPermissionStatusResult` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthPermissionStatusResult; }
+// Forward declaration of `NativeHealthPermissionStatusEntry` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthPermissionStatusEntry; }
 // Forward declaration of `NativeHealthPermission` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthPermission; }
+// Forward declaration of `HealthPermissionStatus` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class HealthPermissionStatus; }
+// Forward declaration of `AuthorizationRequestStatus` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class AuthorizationRequestStatus; }
 // Forward declaration of `NativeHealthAuthorizationResult` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthAuthorizationResult; }
 // Forward declaration of `HealthAuthorizationStatus` to properly resolve imports.
@@ -155,8 +161,11 @@ namespace margelo::nitro::nitrohealth { enum class HealthAuthorizationStatus; }
 #include "NativeSleepSessionInput.hpp"
 #include "NativeSleepSessionStageInput.hpp"
 #include "NativeWorkoutSampleInput.hpp"
-#include "AuthorizationRequestStatus.hpp"
+#include "NativeHealthPermissionStatusResult.hpp"
+#include "NativeHealthPermissionStatusEntry.hpp"
 #include "NativeHealthPermission.hpp"
+#include "HealthPermissionStatus.hpp"
+#include "AuthorizationRequestStatus.hpp"
 #include "NativeHealthAuthorizationResult.hpp"
 #include "HealthAuthorizationStatus.hpp"
 
@@ -504,6 +513,14 @@ namespace margelo::nitro::nitrohealth {
     }
     inline std::shared_ptr<Promise<void>> deleteSamplesByTimeRange(const std::string& dataType, const NativeHealthTimeRangeQuery& query) override {
       auto __result = _swiftPart.deleteSamplesByTimeRange(dataType, std::forward<decltype(query)>(query));
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline std::shared_ptr<Promise<NativeHealthPermissionStatusResult>> getPermissionStatuses(const std::vector<NativeHealthPermission>& permissions) override {
+      auto __result = _swiftPart.getPermissionStatuses(permissions);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }

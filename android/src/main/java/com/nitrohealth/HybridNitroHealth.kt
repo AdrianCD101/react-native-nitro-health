@@ -32,6 +32,7 @@ import com.margelo.nitro.nitrohealth.BackgroundDeliveryFrequency
 import com.margelo.nitro.nitrohealth.BackgroundReadAuthorizationStatus
 import com.margelo.nitro.nitrohealth.HealthAuthorizationStatus
 import com.margelo.nitro.nitrohealth.HealthAvailabilityStatus
+import com.margelo.nitro.nitrohealth.HealthPermissionStatus
 import com.margelo.nitro.nitrohealth.HybridNitroHealthSpec
 import com.margelo.nitro.nitrohealth.NativeActiveEnergyBurnedSample
 import com.margelo.nitro.nitrohealth.NativeActiveEnergyBurnedSampleInput
@@ -46,6 +47,8 @@ import com.margelo.nitro.nitrohealth.NativeHealthAuthorizationResult
 import com.margelo.nitro.nitrohealth.NativeHealthChangesResult
 import com.margelo.nitro.nitrohealth.NativeHealthDateRangeQuery
 import com.margelo.nitro.nitrohealth.NativeHealthPermission
+import com.margelo.nitro.nitrohealth.NativeHealthPermissionStatusEntry
+import com.margelo.nitro.nitrohealth.NativeHealthPermissionStatusResult
 import com.margelo.nitro.nitrohealth.NativeHealthStatistics
 import com.margelo.nitro.nitrohealth.NativeHealthStatisticsQuery
 import com.margelo.nitro.nitrohealth.NativeHealthTimeRangeQuery
@@ -923,6 +926,37 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         }
     }
 
+    override fun getPermissionStatuses(
+        permissions: Array<NativeHealthPermission>
+    ): Promise<NativeHealthPermissionStatusResult> {
+        val context = NitroModules.applicationContext
+            ?: return Promise.resolved(
+                makePermissionStatusResult(
+                    permissions = permissions,
+                    availabilityStatus = HealthAvailabilityStatus.UNAVAILABLE
+                )
+            )
+
+        val availabilityStatus = getAvailabilityStatus()
+        if (availabilityStatus != HealthAvailabilityStatus.AVAILABLE) {
+            return Promise.resolved(
+                makePermissionStatusResult(
+                    permissions = permissions,
+                    availabilityStatus = availabilityStatus
+                )
+            )
+        }
+
+        return Promise.async {
+            val client = HealthConnectClient.getOrCreate(context)
+            makePermissionStatusResult(
+                permissions = permissions,
+                availabilityStatus = availabilityStatus,
+                grantedHealthConnectPermissions = client.permissionController.getGrantedPermissions()
+            )
+        }
+    }
+
     override fun requestAuthorization(
         permissions: Array<NativeHealthPermission>
     ): Promise<NativeHealthAuthorizationResult> {
@@ -950,10 +984,10 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         return Promise.async {
             val client = HealthConnectClient.getOrCreate(context)
             val grantedPermissions = client.permissionController.getGrantedPermissions()
-            val requestedPermissions = permissions.associateWith {
-                toHealthConnectPermission(it.dataType, it.accessType)
+            val requestedPermissions = permissions.map { permission ->
+                permission to toHealthConnectPermission(permission.dataType, permission.accessType)
             }
-            val requestedPermissionSet = requestedPermissions.values.toSet()
+            val requestedPermissionSet = requestedPermissions.map { it.second }.toSet()
 
             val updatedGrantedPermissions = if (grantedPermissions.containsAll(requestedPermissionSet)) {
                 grantedPermissions
@@ -965,11 +999,11 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             }
 
             val grantedNativePermissions = requestedPermissions.filter { entry ->
-                updatedGrantedPermissions.contains(entry.value)
-            }.keys.toTypedArray()
+                updatedGrantedPermissions.contains(entry.second)
+            }.map { it.first }.toTypedArray()
             val deniedNativePermissions = requestedPermissions.filterNot { entry ->
-                updatedGrantedPermissions.contains(entry.value)
-            }.keys.toTypedArray()
+                updatedGrantedPermissions.contains(entry.second)
+            }.map { it.first }.toTypedArray()
             val requestStatus = if (deniedNativePermissions.isEmpty()) {
                 AuthorizationRequestStatus.UNNECESSARY
             } else {
@@ -984,6 +1018,33 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                 deniedPermissions = deniedNativePermissions
             )
         }
+    }
+
+    private fun makePermissionStatusResult(
+        permissions: Array<NativeHealthPermission>,
+        availabilityStatus: HealthAvailabilityStatus,
+        grantedHealthConnectPermissions: Set<String>? = null
+    ): NativeHealthPermissionStatusResult {
+        val statuses = permissions.map { permission ->
+            val status = if (grantedHealthConnectPermissions == null) {
+                HealthPermissionStatus.UNVERIFIABLE
+            } else if (
+                grantedHealthConnectPermissions.contains(
+                    toHealthConnectPermission(permission.dataType, permission.accessType)
+                )
+            ) {
+                HealthPermissionStatus.GRANTED
+            } else {
+                HealthPermissionStatus.NOTGRANTED
+            }
+
+            NativeHealthPermissionStatusEntry(permission = permission, status = status)
+        }.toTypedArray()
+
+        return NativeHealthPermissionStatusResult(
+            availabilityStatus = availabilityStatus,
+            statuses = statuses
+        )
     }
 
     private fun makeAuthorizationResult(

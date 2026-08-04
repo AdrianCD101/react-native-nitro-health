@@ -50,17 +50,17 @@ public extension NativeWorkoutSampleInput {
   var startTimeMs: Double {
     return self.__startTimeMs
   }
-  
+
   @inline(__always)
   var endTimeMs: Double {
     return self.__endTimeMs
   }
-  
+
   @inline(__always)
   var activityType: String {
     return String(self.__activityType)
   }
-  
+
   @inline(__always)
   var title: String? {
     return { () -> String? in
@@ -72,7 +72,7 @@ public extension NativeWorkoutSampleInput {
       }
     }()
   }
-  
+
   @inline(__always)
   var timeZone: String? {
     return { () -> String? in
@@ -84,7 +84,7 @@ public extension NativeWorkoutSampleInput {
       }
     }()
   }
-  
+
   @inline(__always)
   var syncId: String? {
     return { () -> String? in
@@ -96,7 +96,7 @@ public extension NativeWorkoutSampleInput {
       }
     }()
   }
-  
+
   @inline(__always)
   var syncVersion: Double? {
     return { () -> Double? in

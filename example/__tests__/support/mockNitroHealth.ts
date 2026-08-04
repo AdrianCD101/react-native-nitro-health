@@ -27,6 +27,7 @@ export const mockNitroHealth = {
   createChangesToken: jest.fn(),
   getChanges: jest.fn(),
   requestAuthorization: jest.fn(),
+  getPermissionStatuses: jest.fn(),
   getRequestStatusForAuthorization: jest.fn(),
   readSteps: jest.fn(),
   readDistance: jest.fn(),

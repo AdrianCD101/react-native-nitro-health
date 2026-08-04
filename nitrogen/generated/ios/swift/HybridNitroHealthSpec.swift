@@ -51,6 +51,7 @@ public protocol HybridNitroHealthSpec_protocol: HybridObject {
   func saveWorkout(workout: NativeWorkoutSampleInput) throws -> Promise<Void>
   func deleteSamplesByUuids(dataType: String, uuids: [String]) throws -> Promise<Void>
   func deleteSamplesByTimeRange(dataType: String, query: NativeHealthTimeRangeQuery) throws -> Promise<Void>
+  func getPermissionStatuses(permissions: [NativeHealthPermission]) throws -> Promise<NativeHealthPermissionStatusResult>
   func getRequestStatusForAuthorization(permissions: [NativeHealthPermission]) throws -> Promise<AuthorizationRequestStatus>
   func requestAuthorization(permissions: [NativeHealthPermission]) throws -> Promise<NativeHealthAuthorizationResult>
 }

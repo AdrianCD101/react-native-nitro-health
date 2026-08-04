@@ -63,14 +63,20 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthStatistics; }
 namespace margelo::nitro::nitrohealth { struct NativeSleepSamplePage; }
 // Forward declaration of `NativeWorkoutSamplePage` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeWorkoutSamplePage; }
+// Forward declaration of `NativeHealthPermissionStatusResult` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthPermissionStatusResult; }
+// Forward declaration of `NativeHealthPermissionStatusEntry` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthPermissionStatusEntry; }
+// Forward declaration of `NativeHealthPermission` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthPermission; }
+// Forward declaration of `HealthPermissionStatus` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class HealthPermissionStatus; }
 // Forward declaration of `AuthorizationRequestStatus` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class AuthorizationRequestStatus; }
 // Forward declaration of `NativeHealthAuthorizationResult` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthAuthorizationResult; }
 // Forward declaration of `HealthAuthorizationStatus` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class HealthAuthorizationStatus; }
-// Forward declaration of `NativeHealthPermission` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeHealthPermission; }
 // Forward declaration of `BackgroundDeliveryFrequency` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class BackgroundDeliveryFrequency; }
 // Forward declaration of `NativeHealthDateRangeQuery` to properly resolve imports.
@@ -167,14 +173,20 @@ namespace margelo::nitro::nitrohealth { struct NativeWorkoutSampleInput; }
 #include "JNativeSleepSamplePage.hpp"
 #include "NativeWorkoutSamplePage.hpp"
 #include "JNativeWorkoutSamplePage.hpp"
+#include "NativeHealthPermissionStatusResult.hpp"
+#include "JNativeHealthPermissionStatusResult.hpp"
+#include "NativeHealthPermissionStatusEntry.hpp"
+#include "JNativeHealthPermissionStatusEntry.hpp"
+#include "NativeHealthPermission.hpp"
+#include "JNativeHealthPermission.hpp"
+#include "HealthPermissionStatus.hpp"
+#include "JHealthPermissionStatus.hpp"
 #include "AuthorizationRequestStatus.hpp"
 #include "JAuthorizationRequestStatus.hpp"
 #include "NativeHealthAuthorizationResult.hpp"
 #include "JNativeHealthAuthorizationResult.hpp"
 #include "HealthAuthorizationStatus.hpp"
 #include "JHealthAuthorizationStatus.hpp"
-#include "NativeHealthPermission.hpp"
-#include "JNativeHealthPermission.hpp"
 #include "BackgroundDeliveryFrequency.hpp"
 #include "JBackgroundDeliveryFrequency.hpp"
 #include "JFunc_void_std__vector_std__string__std__string.hpp"
@@ -867,6 +879,31 @@ namespace margelo::nitro::nitrohealth {
       auto __promise = Promise<void>::create();
       __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& /* unit */) {
         __promise->resolve();
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
+  }
+  std::shared_ptr<Promise<NativeHealthPermissionStatusResult>> JHybridNitroHealthSpec::getPermissionStatuses(const std::vector<NativeHealthPermission>& permissions) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<jni::JArrayClass<JNativeHealthPermission>> /* permissions */)>("getPermissionStatuses");
+    auto __result = method(_javaPart, [&](auto&& __input) {
+      size_t __size = __input.size();
+      jni::local_ref<jni::JArrayClass<JNativeHealthPermission>> __array = jni::JArrayClass<JNativeHealthPermission>::newArray(__size);
+      for (size_t __i = 0; __i < __size; __i++) {
+        const auto& __element = __input[__i];
+        auto __elementJni = JNativeHealthPermission::fromCpp(__element);
+        __array->setElement(__i, *__elementJni);
+      }
+      return __array;
+    }(permissions));
+    return [&]() {
+      auto __promise = Promise<NativeHealthPermissionStatusResult>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {
+        auto __result = jni::static_ref_cast<JNativeHealthPermissionStatusResult>(__boxedResult);
+        __promise->resolve(__result->toCpp());
       });
       __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
         jni::JniException __jniError(__throwable);

@@ -24,6 +24,25 @@ describe('NitroHealth permission contract', () => {
     expect(mockNitroHealth.getRequestStatusForAuthorization).toHaveBeenCalledWith(permissions)
   })
 
+  it('gets current permission statuses without requesting permissions', async () => {
+    const stepsReadPermission: HealthPermission = { accessType: 'read', dataType: 'steps' }
+    const sleepWritePermission: HealthPermission = { accessType: 'write', dataType: 'sleep' }
+    const permissions = [stepsReadPermission, sleepWritePermission]
+    const result = {
+      availabilityStatus: 'available',
+      statuses: [
+        { permission: stepsReadPermission, status: 'unverifiable' },
+        { permission: sleepWritePermission, status: 'granted' },
+      ],
+    }
+    mockNitroHealth.getPermissionStatuses.mockResolvedValue(result)
+
+    await expect(NitroHealth.getPermissionStatuses(permissions)).resolves.toEqual(result)
+
+    expect(mockNitroHealth.getPermissionStatuses).toHaveBeenCalledWith(permissions)
+    expect(mockNitroHealth.requestAuthorization).not.toHaveBeenCalled()
+  })
+
   it('requests authorization through the Nitro hybrid object', async () => {
     const permissions: HealthPermission[] = [{ accessType: 'read', dataType: 'steps' }]
     const result = {
@@ -55,6 +74,14 @@ describe('NitroHealth permission contract', () => {
     )
 
     expect(mockNitroHealth.requestAuthorization).not.toHaveBeenCalled()
+  })
+
+  it('rejects an empty permission status query before crossing the native boundary', async () => {
+    await expect(NitroHealth.getPermissionStatuses([])).rejects.toThrow(
+      'At least one health permission is required'
+    )
+
+    expect(mockNitroHealth.getPermissionStatuses).not.toHaveBeenCalled()
   })
 
   it('reads steps through the Nitro hybrid object', async () => {

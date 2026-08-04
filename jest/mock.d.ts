@@ -50,6 +50,7 @@ export type NitroHealthMock = Omit<
   | 'saveWorkout'
   | 'deleteSamplesByUuids'
   | 'deleteSamplesByTimeRange'
+  | 'getPermissionStatuses'
   | 'getRequestStatusForAuthorization'
   | 'requestAuthorization'
 > & {
@@ -97,6 +98,7 @@ export type NitroHealthMock = Omit<
   saveWorkout: MockFunction<NitroHealth['saveWorkout']>
   deleteSamplesByUuids: MockFunction<NitroHealth['deleteSamplesByUuids']>
   deleteSamplesByTimeRange: MockFunction<NitroHealth['deleteSamplesByTimeRange']>
+  getPermissionStatuses: MockFunction<NitroHealth['getPermissionStatuses']>
   getRequestStatusForAuthorization: MockFunction<NitroHealth['getRequestStatusForAuthorization']>
   requestAuthorization: MockFunction<NitroHealth['requestAuthorization']>
 }

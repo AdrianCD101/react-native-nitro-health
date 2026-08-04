@@ -14,6 +14,7 @@ import type { HealthChangeNotification } from './HealthChangeNotification'
 import type { HealthDataType } from './HealthDataType'
 import type { HealthDateRangeQuery } from './HealthDateRangeQuery'
 import type { HealthPermission } from './HealthPermission'
+import type { HealthPermissionStatusResult } from './HealthPermissionStatusResult'
 import type { HealthSamplePage } from './HealthSamplePage'
 import type { HealthStatistics } from './HealthStatistics'
 import type { HealthStatisticsQuery } from './HealthStatisticsQuery'
@@ -94,6 +95,9 @@ export type { HealthDataType } from './HealthDataType'
 export type { HealthDateRangeQuery } from './HealthDateRangeQuery'
 export type { HealthPermission } from './HealthPermission'
 export type { HealthPermissionAccessType } from './HealthPermissionAccessType'
+export type { HealthPermissionStatus } from './HealthPermissionStatus'
+export type { HealthPermissionStatusEntry } from './HealthPermissionStatusEntry'
+export type { HealthPermissionStatusResult } from './HealthPermissionStatusResult'
 export type { HealthRecordChange } from './HealthRecordChange'
 export type { HealthRecordSync } from './HealthRecordSync'
 export type { HealthSamplePage } from './HealthSamplePage'
@@ -127,6 +131,8 @@ export type { NativeHealthStatistics } from './NativeHealthStatistics'
 export type { NativeHealthStatisticsQuery } from './NativeHealthStatisticsQuery'
 export type { NativeHealthTimeRangeQuery } from './NativeHealthTimeRangeQuery'
 export type { NativeHealthPermission } from './NativeHealthPermission'
+export type { NativeHealthPermissionStatusEntry } from './NativeHealthPermissionStatusEntry'
+export type { NativeHealthPermissionStatusResult } from './NativeHealthPermissionStatusResult'
 export type { NativeHeartRateSample } from './NativeHeartRateSample'
 export type { NativeHeartRateSampleInput } from './NativeHeartRateSampleInput'
 export type { NativeHeartRateSamplePage } from './NativeHeartRateSamplePage'
@@ -222,6 +228,7 @@ function notifyChangeNotificationListeners(dataTypes: string[], deliveryId: stri
 
 export type NitroHealth = Omit<
   NitroHealthSpec,
+  | 'getPermissionStatuses'
   | 'getRequestStatusForAuthorization'
   | 'enableBackgroundDelivery'
   | 'disableBackgroundDelivery'
@@ -295,6 +302,8 @@ export type NitroHealth = Omit<
     dataType: T,
     changesToken: string
   ): Promise<HealthChangesResult<T>>
+  /** Returns current permission states without opening system authorization UI. */
+  getPermissionStatuses(permissions: HealthPermission[]): Promise<HealthPermissionStatusResult>
   getRequestStatusForAuthorization(
     permissions: HealthPermission[]
   ): ReturnType<NitroHealthSpec['getRequestStatusForAuthorization']>
@@ -550,6 +559,12 @@ export const NitroHealth: NitroHealth = {
   },
   async deleteSamplesByTimeRange(dataType, query) {
     return NitroHealthNative.deleteSamplesByTimeRange(dataType, makeNativeTimeRangeQuery(query))
+  },
+  async getPermissionStatuses(permissions) {
+    assertPermissions(permissions)
+    return NitroHealthNative.getPermissionStatuses(
+      permissions
+    ) as Promise<HealthPermissionStatusResult>
   },
   async getRequestStatusForAuthorization(permissions) {
     assertPermissions(permissions)
