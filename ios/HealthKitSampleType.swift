@@ -5,6 +5,14 @@ func makeHealthKitSampleType(dataType: String) throws -> HKSampleType {
         return HKObjectType.workoutType()
     }
 
+    // Blood pressure records are stored as HKCorrelations, so anchored change queries and
+    // delete predicates target the correlation type. Authorization and observer/background
+    // delivery cannot use correlation types; those paths resolve the member quantity types
+    // via HealthKitBloodPressureSupport.swift instead.
+    if dataType == "bloodPressure" {
+        return try makeBloodPressureCorrelationType()
+    }
+
     if dataType == "sleep" {
         guard let categoryType = HKObjectType.categoryType(forIdentifier: .sleepAnalysis) else {
             throw permissionError("Health data type is not available on this device: sleep")

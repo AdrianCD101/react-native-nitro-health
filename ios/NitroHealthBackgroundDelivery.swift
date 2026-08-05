@@ -34,7 +34,7 @@ final class NitroHealthBackgroundDelivery: NSObject {
                     continue
                 }
 
-                let sampleType = try makeHealthKitSampleType(dataType: dataType)
+                let sampleType = try makeBackgroundDeliverySampleType(dataType: dataType)
                 _ = registerObserverIfNeeded(dataType: dataType, sampleType: sampleType)
 
                 Task { [weak self] in
@@ -126,7 +126,7 @@ final class NitroHealthBackgroundDelivery: NSObject {
         try await operationQueue.run { [self] in
             let uniqueDataTypes = Array(Set(dataTypes)).sorted()
             for dataType in uniqueDataTypes {
-                _ = try makeHealthKitSampleType(dataType: dataType)
+                _ = try makeBackgroundDeliverySampleType(dataType: dataType)
             }
             let previousConfiguration = stateQueue.sync { loadConfiguration() }
             let previousPendingNotifications = stateQueue.sync { loadPendingNotifications() }
@@ -177,7 +177,7 @@ final class NitroHealthBackgroundDelivery: NSObject {
     func disableAll() async throws {
         let configuration = stateQueue.sync { loadConfiguration() }
         let validDataTypes = configuration.keys.filter { dataType in
-            if (try? makeHealthKitSampleType(dataType: dataType)) != nil { return true }
+            if (try? makeBackgroundDeliverySampleType(dataType: dataType)) != nil { return true }
             NSLog("[NitroHealth] Removing unknown background delivery type %@", dataType)
             stateQueue.sync {
                 var updatedConfiguration = loadConfiguration()
@@ -196,7 +196,7 @@ final class NitroHealthBackgroundDelivery: NSObject {
         dataType: String,
         frequency: HKUpdateFrequency
     ) async throws {
-        let sampleType = try makeHealthKitSampleType(dataType: dataType)
+        let sampleType = try makeBackgroundDeliverySampleType(dataType: dataType)
         let previousFrequency = stateQueue.sync { loadConfiguration()[dataType] }
         let registeredObserver = registerObserverIfNeeded(
             dataType: dataType,
@@ -229,7 +229,7 @@ final class NitroHealthBackgroundDelivery: NSObject {
     }
 
     private func disableWithinOperation(dataType: String) async throws {
-        let sampleType = try makeHealthKitSampleType(dataType: dataType)
+        let sampleType = try makeBackgroundDeliverySampleType(dataType: dataType)
         try await healthStore.disableBackgroundDeliveryOrThrow(for: sampleType)
         removeObserver(dataType: dataType, clearPending: true)
 

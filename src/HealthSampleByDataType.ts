@@ -1,4 +1,5 @@
 import type { ActiveEnergyBurnedSample } from './ActiveEnergyBurnedSample'
+import type { BloodPressureSample } from './BloodPressureSample'
 import type { BodyMassSample } from './BodyMassSample'
 import type { DistanceSample } from './DistanceSample'
 import type { HeartRateSample } from './HeartRateSample'
@@ -16,6 +17,8 @@ export interface HealthSampleByDataType {
   steps: StepSample
   /** Individual heart-rate readings. */
   heartRate: HeartRateSample
+  /** Blood pressure readings. */
+  bloodPressure: BloodPressureSample
   /** Resting heart-rate readings. */
   restingHeartRate: RestingHeartRateSample
   /** Platform-specific heart-rate variability readings. */

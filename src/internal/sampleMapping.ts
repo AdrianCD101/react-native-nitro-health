@@ -27,6 +27,8 @@ import type { NativeActiveEnergyBurnedSampleInput } from '../NativeActiveEnergyB
 import type { NativeBodyMassSample } from '../NativeBodyMassSample'
 import type { NativeBodyMassSampleInput } from '../NativeBodyMassSampleInput'
 import type { NativeDistanceSample } from '../NativeDistanceSample'
+import type { NativeBloodPressureSample } from '../NativeBloodPressureSample'
+import type { NativeBloodPressureSampleInput } from '../NativeBloodPressureSampleInput'
 import type { NativeDistanceSampleInput } from '../NativeDistanceSampleInput'
 import type { NativeDistanceWriteResult } from '../NativeDistanceWriteResult'
 import type { NativeHealthDataOrigin } from '../NativeHealthDataOrigin'
@@ -53,6 +55,8 @@ import type { NativeStepSampleInput } from '../NativeStepSampleInput'
 import type { NativeWorkoutSample } from '../NativeWorkoutSample'
 import type { NativeWorkoutSampleInput } from '../NativeWorkoutSampleInput'
 import type { NativeWorkoutActivity } from '../NativeWorkoutActivity'
+import type { BloodPressureSample } from '../BloodPressureSample'
+import type { BloodPressureSampleInput } from '../BloodPressureSampleInput'
 import type { OxygenSaturationSample } from '../OxygenSaturationSample'
 import type { OxygenSaturationSampleInput } from '../OxygenSaturationSampleInput'
 import type { RestingHeartRateSample } from '../RestingHeartRateSample'
@@ -88,6 +92,10 @@ const MAX_DISTANCE_METERS = 1_000_000
 const MAX_KILOCALORIES = 1_000_000
 const MIN_BPM = 1
 const MAX_BPM = 300
+const MIN_SYSTOLIC_MMHG = 20
+const MAX_SYSTOLIC_MMHG = 200
+const MIN_DIASTOLIC_MMHG = 10
+const MAX_DIASTOLIC_MMHG = 180
 const MAX_KILOGRAMS = 1_000
 const MAX_HEIGHT_METERS = 3
 const WRITABLE_SLEEP_STAGES = new Set<WritableSleepStage>([
@@ -372,6 +380,23 @@ export function makeNativeRestingHeartRateSampleInput(
   return {
     timeMs,
     bpm: sample.bpm,
+    ...makeNativeSync(sample.sync, index),
+  }
+}
+
+export function makeNativeBloodPressureSampleInput(
+  sample: BloodPressureSampleInput,
+  index: number
+): NativeBloodPressureSampleInput {
+  const timeMs = makeSampleInstant(sample, index)
+
+  assertSampleBetween(sample.systolicMmHg, MIN_SYSTOLIC_MMHG, MAX_SYSTOLIC_MMHG, index, 'systolicMmHg')
+  assertSampleBetween(sample.diastolicMmHg, MIN_DIASTOLIC_MMHG, MAX_DIASTOLIC_MMHG, index, 'diastolicMmHg')
+
+  return {
+    timeMs,
+    systolicMmHg: sample.systolicMmHg,
+    diastolicMmHg: sample.diastolicMmHg,
     ...makeNativeSync(sample.sync, index),
   }
 }
@@ -708,6 +733,16 @@ export function makeHeartRateVariabilitySample(
   }
 }
 
+export function makeBloodPressureSample(sample: NativeBloodPressureSample): BloodPressureSample {
+  return {
+    identity: makeHealthSampleIdentity(sample.identity),
+    origin: makeHealthDataOrigin(sample.origin),
+    date: new Date(sample.timeMs),
+    systolicMmHg: sample.systolicMmHg,
+    diastolicMmHg: sample.diastolicMmHg,
+  }
+}
+
 export function makeOxygenSaturationSample(
   sample: NativeOxygenSaturationSample
 ): OxygenSaturationSample {
@@ -830,6 +865,7 @@ export function makeDistanceWriteResult(result: NativeDistanceWriteResult): Dist
 const CHANGE_SAMPLE_FIELDS = [
   'stepSamples',
   'heartRateSamples',
+  'bloodPressureSamples',
   'restingHeartRateSamples',
   'heartRateVariabilitySamples',
   'distanceSamples',
@@ -868,6 +904,11 @@ function makeUpsertSamples(
       if (change.heartRateSamples === undefined)
         throw new Error("Native 'heartRate' upsert is missing samples")
       samples = change.heartRateSamples.map(makeHeartRateSample)
+      break
+    case 'bloodPressure':
+      if (change.bloodPressureSamples === undefined)
+        throw new Error("Native 'bloodPressure' upsert is missing samples")
+      samples = change.bloodPressureSamples.map(makeBloodPressureSample)
       break
     case 'restingHeartRate':
       if (change.restingHeartRateSamples === undefined)

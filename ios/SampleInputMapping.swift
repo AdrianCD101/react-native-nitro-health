@@ -101,6 +101,51 @@ func makeHeartRateQuantitySamples(
     }
 }
 
+// Sync identity goes on the correlation AND both member samples (with derived member ids)
+// so a versioned re-save replaces all three objects in one call; correlation-only identity
+// would orphan the previous members as stray systolic/diastolic samples.
+func makeBloodPressureCorrelations(
+    samples: [NativeBloodPressureSampleInput],
+    correlationType: HKCorrelationType,
+    quantityTypes: (systolic: HKQuantityType, diastolic: HKQuantityType)
+) throws -> [HKCorrelation] {
+    return try samples.map { sample in
+        let date = Date(timeIntervalSince1970: sample.timeMs / 1000)
+
+        let systolic = HKQuantitySample(
+            type: quantityTypes.systolic,
+            quantity: HKQuantity(unit: bloodPressureMmHgUnit, doubleValue: sample.systolicMmHg),
+            start: date,
+            end: date,
+            metadata: try makeHealthKitSyncMetadata(
+                syncId: sample.syncId.map { "\($0)#systolic" },
+                syncVersion: sample.syncVersion
+            )
+        )
+        let diastolic = HKQuantitySample(
+            type: quantityTypes.diastolic,
+            quantity: HKQuantity(unit: bloodPressureMmHgUnit, doubleValue: sample.diastolicMmHg),
+            start: date,
+            end: date,
+            metadata: try makeHealthKitSyncMetadata(
+                syncId: sample.syncId.map { "\($0)#diastolic" },
+                syncVersion: sample.syncVersion
+            )
+        )
+
+        return HKCorrelation(
+            type: correlationType,
+            start: date,
+            end: date,
+            objects: [systolic, diastolic],
+            metadata: try makeHealthKitSyncMetadata(
+                syncId: sample.syncId,
+                syncVersion: sample.syncVersion
+            )
+        )
+    }
+}
+
 func makeBodyMassQuantitySamples(
     samples: [NativeBodyMassSampleInput],
     quantityType: HKQuantityType

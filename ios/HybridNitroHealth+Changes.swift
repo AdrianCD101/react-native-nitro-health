@@ -20,10 +20,11 @@ extension HybridNitroHealth {
         }
 
         let sampleType = try makeHealthKitSampleType(dataType: dataType)
+        let authorizationTypes = try makeReadAuthorizationObjectTypes(dataType: dataType)
         let label = makeHealthDataTypeLabel(dataType: dataType)
 
         return Promise<String>.async {
-            try await self.requireDeterminedReadAuthorization(for: sampleType, label: label)
+            try await self.requireDeterminedReadAuthorization(for: authorizationTypes, label: label)
 
             var anchor: HKQueryAnchor?
             while true {
@@ -46,11 +47,12 @@ extension HybridNitroHealth {
         }
 
         let sampleType = try makeHealthKitSampleType(dataType: dataType)
+        let authorizationTypes = try makeReadAuthorizationObjectTypes(dataType: dataType)
         let label = makeHealthDataTypeLabel(dataType: dataType)
         let anchor = try decodeChangesAnchor(changesToken, dataType: dataType)
 
         return Promise<NativeHealthChangesResult>.async {
-            try await self.requireDeterminedReadAuthorization(for: sampleType, label: label)
+            try await self.requireDeterminedReadAuthorization(for: authorizationTypes, label: label)
 
             let page = try await self.queryHealthKitChanges(
                 sampleType: sampleType,
@@ -173,6 +175,24 @@ extension HybridNitroHealth {
                     bpm: quantitySample.quantity.doubleValue(
                         for: HKUnit.count().unitDivided(by: HKUnit.minute())
                     )
+                )]
+            )
+        case "bloodPressure":
+            guard let correlation = sample as? HKCorrelation else {
+                throw unexpectedChangesSampleError(
+                    sample: sample,
+                    dataType: dataType,
+                    expectedType: "HKCorrelation"
+                )
+            }
+
+            let quantityTypes = try makeBloodPressureQuantityTypes()
+            return makeNativeHealthChange(
+                type: "upsert",
+                recordId: uuid,
+                bloodPressureSamples: [try correlation.nativeBloodPressureSample(
+                    systolicType: quantityTypes.systolic,
+                    diastolicType: quantityTypes.diastolic
                 )]
             )
         case "restingHeartRate":
@@ -332,6 +352,7 @@ extension HybridNitroHealth {
         recordId: String,
         stepSamples: [NativeStepSample]? = nil,
         heartRateSamples: [NativeHeartRateSample]? = nil,
+        bloodPressureSamples: [NativeBloodPressureSample]? = nil,
         restingHeartRateSamples: [NativeRestingHeartRateSample]? = nil,
         heartRateVariabilitySamples: [NativeHeartRateVariabilitySample]? = nil,
         distanceSamples: [NativeDistanceSample]? = nil,
@@ -347,6 +368,7 @@ extension HybridNitroHealth {
             recordId: recordId,
             stepSamples: stepSamples,
             heartRateSamples: heartRateSamples,
+            bloodPressureSamples: bloodPressureSamples,
             restingHeartRateSamples: restingHeartRateSamples,
             heartRateVariabilitySamples: heartRateVariabilitySamples,
             distanceSamples: distanceSamples,

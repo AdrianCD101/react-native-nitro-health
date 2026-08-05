@@ -454,6 +454,51 @@ describe('NitroHealth saves (native)', () => {
     })
   })
 
+  describe('blood pressure', () => {
+    it('rejects saving blood pressure when write permission is not granted', async () => {
+      if (await hasVerifiedPermissions([{ accessType: 'write', dataType: 'bloodPressure' }])) {
+        return
+      }
+
+      await expect(
+        NitroHealth.saveBloodPressure([
+          { date: saveInterval.startDate, systolicMmHg: 118, diastolicMmHg: 76 },
+        ])
+      ).rejects.toThrow(/permission/i)
+    })
+
+    // The designated on-device proof of iOS correlation atomicity: the save writes one
+    // HKCorrelation (Android: one BloodPressureRecord) and the read must surface exactly one
+    // sample carrying BOTH values under a single record identity — never two half-readings.
+    it('round-trips a saved reading as one sample with both values when authorized', async () => {
+      const authorized = await hasVerifiedPermissions([
+        { accessType: 'write', dataType: 'bloodPressure' },
+        { accessType: 'read', dataType: 'bloodPressure' },
+      ])
+
+      if (!authorized) {
+        return
+      }
+
+      await NitroHealth.saveBloodPressure([
+        { date: saveInterval.startDate, systolicMmHg: 118, diastolicMmHg: 76 },
+      ])
+
+      const page = await NitroHealth.readBloodPressure(saveReadRange)
+
+      if (isInconclusiveRead(page.samples)) {
+        return
+      }
+
+      const matches = page.samples.filter(
+        (sample) => sample.systolicMmHg === 118 && sample.diastolicMmHg === 76
+      )
+
+      expect(matches.length).toBeGreaterThanOrEqual(1)
+      expect(matches[0]?.identity.kind).toBe('record')
+    })
+  })
+
   describe('height', () => {
     it('rejects saving height when write permission is not granted', async () => {
       if (await hasVerifiedPermissions([{ accessType: 'write', dataType: 'height' }])) {

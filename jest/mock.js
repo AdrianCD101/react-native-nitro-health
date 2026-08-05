@@ -8,6 +8,7 @@ function createMockFunction(implementation) {
 const healthDataTypes = new Set([
   'steps',
   'heartRate',
+  'bloodPressure',
   'restingHeartRate',
   'heartRateVariability',
   'distance',
@@ -250,6 +251,7 @@ function createNitroHealthMock(options = {}) {
     readDistance: createMockFunction(() => rejectWhenUnavailable({ samples: [] })),
     readBodyMass: createMockFunction(() => rejectWhenUnavailable({ samples: [] })),
     readHeartRate: createMockFunction(() => rejectWhenUnavailable({ samples: [] })),
+    readBloodPressure: createMockFunction(() => rejectWhenUnavailable({ samples: [] })),
     readHeartRateStatistics: createMockFunction(() => rejectWhenUnavailable({})),
     readRestingHeartRate: createMockFunction(() => rejectWhenUnavailable({ samples: [] })),
     readHeartRateVariability: createMockFunction(() => rejectWhenUnavailable({ samples: [] })),
@@ -267,6 +269,7 @@ function createNitroHealthMock(options = {}) {
     ),
     saveActiveEnergyBurned: createMockFunction((samples) => saveSamples(samples, undefined)),
     saveHeartRate: createMockFunction((samples) => saveSamples(samples, undefined)),
+    saveBloodPressure: createMockFunction((samples) => saveSamples(samples, undefined)),
     saveBodyMass: createMockFunction((samples) => saveSamples(samples, undefined)),
     saveRestingHeartRate: createMockFunction((samples) => saveSamples(samples, undefined)),
     saveOxygenSaturation: createMockFunction((samples) => saveSamples(samples, undefined)),

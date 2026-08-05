@@ -17,19 +17,21 @@ import NitroModules
 
 extension HybridNitroHealth {
     // Unmappable samples (unexpected HKSample subclass) are dropped before
-    // pagination so skip/limit decisions stay in sync with what is returned.
+    // pagination so skip/limit decisions stay in sync with what is returned; a
+    // throwing map lets malformed samples (e.g. a blood pressure correlation
+    // missing a member) fail the read instead of being silently coerced.
     func queryPagedSamples<T>(
         sampleType: HKSampleType,
         dataType: String,
         query: NativeHealthDateRangeQuery,
         authorizationLabel: String,
-        map: (HKSample) -> T?
+        map: (HKSample) throws -> T?
     ) async throws -> (samples: [T], nextCursor: String?) {
         let cursor = try query.cursor.map {
             try decodeSampleCursor($0, dataType: dataType, ascending: query.ascending)
         }
         try await requireDeterminedReadAuthorization(
-            for: sampleType,
+            for: makeReadAuthorizationObjectTypes(dataType: dataType),
             label: authorizationLabel
         )
         let sortDescriptors = [
@@ -47,7 +49,7 @@ extension HybridNitroHealth {
         var mapped = [T]()
 
         for sample in fetched {
-            guard let value = map(sample) else {
+            guard let value = try map(sample) else {
                 continue
             }
 

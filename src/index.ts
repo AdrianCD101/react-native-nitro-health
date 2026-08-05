@@ -6,6 +6,8 @@ export type {
   BackgroundChangesSubscriptionResult,
 } from './BackgroundChangesResult'
 export type { BackgroundDeliveryFrequency } from './BackgroundDeliveryFrequency'
+export type { BloodPressureSample } from './BloodPressureSample'
+export type { BloodPressureSampleInput } from './BloodPressureSampleInput'
 export type { BodyMassSample } from './BodyMassSample'
 export type { BodyMassSampleInput } from './BodyMassSampleInput'
 export type { DistanceSample } from './DistanceSample'

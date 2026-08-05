@@ -128,6 +128,36 @@ describe('NitroHealth deletes (native)', () => {
     expect(afterDelete.samples.some((sample) => sample.count === 4322)).toBe(false)
   })
 
+  // The acceptance gate for correlation deletion (plan risk R2): the delete must remove the
+  // HKCorrelation AND its member quantity samples on iOS, so the re-read finds nothing.
+  it('round-trips save, delete by record identity, and re-read for blood pressure', async () => {
+    const authorized = await hasVerifiedPermissions([
+      { accessType: 'write', dataType: 'bloodPressure' },
+      { accessType: 'read', dataType: 'bloodPressure' },
+    ])
+    if (!authorized) return
+
+    await NitroHealth.saveBloodPressure([
+      { date: deleteInterval.startDate, systolicMmHg: 133, diastolicMmHg: 87 },
+    ])
+    const page = await NitroHealth.readBloodPressure(deleteReadRange)
+    if (isInconclusiveRead(page.samples)) return
+
+    const saved = page.samples.find(
+      (sample) => sample.systolicMmHg === 133 && sample.diastolicMmHg === 87
+    )
+    expect(saved).toBeDefined()
+    if (saved === undefined || saved.identity.kind !== 'record') return
+
+    const result = await NitroHealth.deleteRecordsByIds('bloodPressure', [saved.identity])
+    assertCompletedIdentityDelete(result)
+
+    const afterDelete = await NitroHealth.readBloodPressure(deleteReadRange)
+    expect(afterDelete.samples.some((sample) => sample.identity.id === saved.identity.id)).toBe(
+      false
+    )
+  })
+
   it('deletes a heart-rate record and explicitly selects a parent for record children', async () => {
     const authorized = await hasVerifiedPermissions([
       { accessType: 'write', dataType: 'heartRate' },
