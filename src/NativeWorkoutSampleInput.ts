@@ -3,7 +3,7 @@ export interface NativeWorkoutSampleInput {
   startTimeMs: number
   endTimeMs: number
   activityType: string
-  title?: string
+  displayName?: string
   timeZone?: string
   syncId?: string
   syncVersion?: number

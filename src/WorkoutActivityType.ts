@@ -6,8 +6,8 @@
  * sub-variants fold into the parent activity (treadmill → `running`,
  * stationary bike → `cycling`, pool/open water → `swimming`, individual
  * dumbbell/barbell exercises → `strengthTraining`). Platform values with no
- * cross-platform equivalent map to `'other'`, as do unknown values from
- * future OS versions. Some members are only ever emitted by one platform
+ * cross-platform equivalent map to `'other'`; unknown future values are
+ * reported separately through `WorkoutActivity.status`. Some members are only ever emitted by one platform
  * (for example `archery` on iOS, `paragliding` on Android).
  */
 export type WorkoutActivityType =

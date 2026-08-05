@@ -1,67 +1,67 @@
-import { describe, expect, it } from 'react-native-harness'
 import { Platform } from 'react-native'
+import { describe, expect, it } from 'react-native-harness'
 import { NitroHealth } from 'react-native-nitro-health'
 
 import {
-  activeEnergyReadPermission,
-  bodyMassReadPermission,
-  distanceReadPermission,
-  heartRateReadPermission,
-  sleepReadPermission,
   sleepWritePermission,
   stepsReadPermission,
   workoutWritePermission,
 } from './support/harnessSupport'
 
-const availabilityStatuses = ['available', 'unavailable', 'providerUpdateRequired']
-const authorizationRequestStatuses = ['unknown', 'shouldRequest', 'unnecessary']
-const authorizationResultStatuses = ['granted', 'partial', 'denied', 'completed', 'unavailable']
 const permissionStatuses = ['granted', 'notGranted', 'notDetermined', 'unverifiable']
 
 describe('NitroHealth permissions (native)', () => {
-  it('returns a platform availability status from native code', () => {
-    const status = NitroHealth.getAvailabilityStatus()
+  it('returns one exact typed availability variant', () => {
+    const availability = NitroHealth.getAvailability()
 
-    expect(availabilityStatuses).toContain(status)
-    expect(NitroHealth.isAvailable()).toBe(status === 'available')
+    if (availability.status === 'available') {
+      expect(availability).toEqual({ status: 'available' })
+      return
+    }
+
+    if (availability.reason === 'provider-install-or-update-required') {
+      expect(availability).toEqual({
+        status: 'unavailable',
+        reason: 'provider-install-or-update-required',
+        recovery: { kind: 'install-or-update-provider' },
+      })
+      return
+    }
+
+    expect(['not-supported', 'service-unavailable']).toContain(availability.reason)
+    expect(availability).toEqual({ status: 'unavailable', reason: availability.reason })
   })
 
-  it('only reports providerUpdateRequired as an Android status', () => {
-    const status = NitroHealth.getAvailabilityStatus()
+  it('only exposes provider installation recovery on Android', () => {
+    const availability = NitroHealth.getAvailability()
 
-    if (Platform.OS === 'ios') {
-      expect(status).not.toBe('providerUpdateRequired')
+    if (
+      Platform.OS === 'ios' &&
+      availability.status === 'unavailable'
+    ) {
+      expect(availability.reason).not.toBe('provider-install-or-update-required')
     }
   })
 
-  it('does not open the Android install flow when it is not required', () => {
-    const status = NitroHealth.getAvailabilityStatus()
-
-    if (status !== 'providerUpdateRequired') {
-      expect(NitroHealth.openHealthConnectInstall()).toBe(false)
-    }
-  })
-
-  it('gets request status for steps read permission from native code', async () => {
-    const status = await NitroHealth.getRequestStatusForAuthorization(stepsReadPermission)
-
-    expect(authorizationRequestStatuses).toContain(status)
-  })
-
-  it('queries current permission states without requesting authorization', async () => {
+  it('queries ordered per-entry permission states without requesting authorization', async () => {
     const permissions = [...stepsReadPermission, ...sleepWritePermission, ...stepsReadPermission]
     const result = await NitroHealth.getPermissionStatuses(permissions)
 
-    expect(availabilityStatuses).toContain(result.availabilityStatus)
     expect(result.statuses).toHaveLength(permissions.length)
     expect(result.statuses.map((entry) => entry.permission)).toEqual(permissions)
     expect(result.statuses.every((entry) => permissionStatuses.includes(entry.status))).toBe(true)
 
-    if (result.availabilityStatus !== 'available') {
+    if (result.status === 'unavailable') {
+      expect(result.availability.status).toBe('unavailable')
       expect(result.statuses.every((entry) => entry.status === 'unverifiable')).toBe(true)
-    } else if (Platform.OS === 'ios') {
+      return
+    }
+
+    if (Platform.OS === 'ios') {
       expect(result.statuses[0]?.status).toBe('unverifiable')
-      expect(['granted', 'notGranted', 'notDetermined']).toContain(result.statuses[1]?.status)
+      expect(['granted', 'notGranted', 'notDetermined', 'unverifiable']).toContain(
+        result.statuses[1]?.status
+      )
     } else {
       expect(
         result.statuses.every((entry) => ['granted', 'notGranted'].includes(entry.status))
@@ -69,89 +69,44 @@ describe('NitroHealth permissions (native)', () => {
     }
   })
 
-  it('gets request status for Heart Rate read permission from native code', async () => {
-    const status = await NitroHealth.getRequestStatusForAuthorization(heartRateReadPermission)
+  it('returns unavailable authorization with one unverifiable entry per permission', async () => {
+    const availability = NitroHealth.getAvailability()
+    if (availability.status === 'available') return
 
-    expect(authorizationRequestStatuses).toContain(status)
+    const permissions = [...stepsReadPermission, ...workoutWritePermission]
+    const result = await NitroHealth.requestAuthorization(permissions)
+
+    expect(result.status).toBe('unavailable')
+    expect(result.statuses.map((entry) => entry.permission)).toEqual(permissions)
+    expect(result.statuses.every((entry) => entry.status === 'unverifiable')).toBe(true)
+    if (result.status === 'unavailable') {
+      expect(result.availability).toEqual(availability)
+    }
   })
 
-  it('gets request status for distance read permission from native code', async () => {
-    const status = await NitroHealth.getRequestStatusForAuthorization(distanceReadPermission)
-
-    expect(authorizationRequestStatuses).toContain(status)
-  })
-
-  it('gets request status for active energy read permission from native code', async () => {
-    const status = await NitroHealth.getRequestStatusForAuthorization(activeEnergyReadPermission)
-
-    expect(authorizationRequestStatuses).toContain(status)
-  })
-
-  it('gets request status for sleep read permission from native code', async () => {
-    const status = await NitroHealth.getRequestStatusForAuthorization(sleepReadPermission)
-
-    expect(authorizationRequestStatuses).toContain(status)
-  })
-
-  it('gets request status for sleep write permission from native code', async () => {
-    const status = await NitroHealth.getRequestStatusForAuthorization(sleepWritePermission)
-
-    expect(authorizationRequestStatuses).toContain(status)
-  })
-
-  it('gets request status for workout write permission from native code', async () => {
-    const status = await NitroHealth.getRequestStatusForAuthorization(workoutWritePermission)
-
-    expect(authorizationRequestStatuses).toContain(status)
-  })
-
-  it('gets request status for body mass read permission from native code', async () => {
-    const status = await NitroHealth.getRequestStatusForAuthorization(bodyMassReadPermission)
-
-    expect(authorizationRequestStatuses).toContain(status)
-  })
-
-  it('rejects an empty request status check before crossing the native boundary', async () => {
-    await expect(NitroHealth.getRequestStatusForAuthorization([])).rejects.toThrow(
-      'At least one health permission is required'
-    )
-  })
-
-  it('rejects an empty authorization request before crossing the native boundary', async () => {
-    await expect(NitroHealth.requestAuthorization([])).rejects.toThrow(
-      'At least one health permission is required'
-    )
-  })
-
-  it('rejects an empty permission status query before crossing the native boundary', async () => {
-    await expect(NitroHealth.getPermissionStatuses([])).rejects.toThrow(
-      'At least one health permission is required'
-    )
-  })
-
-  it('returns a resolved result for already-authorized steps permissions without opening a prompt', async () => {
-    const status = await NitroHealth.getRequestStatusForAuthorization(stepsReadPermission)
-
-    if (status !== 'unnecessary') {
+  it('returns one post-request status per entry when authorization is already observable', async () => {
+    const before = await NitroHealth.getPermissionStatuses(stepsReadPermission)
+    if (
+      before.status === 'unavailable' ||
+      before.statuses.some(({ status }) => status !== 'granted')
+    ) {
       return
     }
 
     const result = await NitroHealth.requestAuthorization(stepsReadPermission)
 
-    expect(authorizationResultStatuses).toContain(result.status)
-    expect(['granted', 'completed']).toContain(result.status)
+    expect(result.status).toBe('completed')
+    expect(result.statuses).toHaveLength(stepsReadPermission.length)
+    expect(result.statuses.map((entry) => entry.permission)).toEqual(stepsReadPermission)
+    expect(result.statuses.every((entry) => permissionStatuses.includes(entry.status))).toBe(true)
   })
 
-  it('returns a resolved result for already-authorized Heart Rate permissions without opening a prompt', async () => {
-    const status = await NitroHealth.getRequestStatusForAuthorization(heartRateReadPermission)
-
-    if (status !== 'unnecessary') {
-      return
-    }
-
-    const result = await NitroHealth.requestAuthorization(heartRateReadPermission)
-
-    expect(authorizationResultStatuses).toContain(result.status)
-    expect(['granted', 'completed']).toContain(result.status)
+  it('rejects empty permission operations before crossing the native boundary', async () => {
+    await expect(NitroHealth.getPermissionStatuses([])).rejects.toThrow(
+      'At least one health permission is required'
+    )
+    await expect(NitroHealth.requestAuthorization([])).rejects.toThrow(
+      'At least one health permission is required'
+    )
   })
 })

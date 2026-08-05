@@ -26,57 +26,57 @@ import com.margelo.nitro.core.HybridObject
 )
 abstract class HybridNitroHealthSpec: HybridObject() {
   // Properties
-
+  
 
   // Methods
   @DoNotStrip
   @Keep
-  abstract fun isAvailable(): Boolean
+  abstract fun getAvailability(): NativeHealthAvailability
   
   @DoNotStrip
   @Keep
-  abstract fun getAvailabilityStatus(): HealthAvailabilityStatus
+  abstract fun performAvailabilityRecovery(): Promise<NativeHealthAvailabilityRecoveryResult>
   
   @DoNotStrip
   @Keep
-  abstract fun openHealthConnectInstall(): Boolean
+  abstract fun getCapabilities(): Promise<NativeHealthCapabilities>
   
   @DoNotStrip
   @Keep
-  abstract fun openHealthSettings(): Promise<Boolean>
+  abstract fun requestAdditionalAccess(access: String): Promise<NativeHealthAdditionalAccessStatus>
   
   @DoNotStrip
   @Keep
-  abstract fun enableBackgroundDelivery(dataType: String, frequency: BackgroundDeliveryFrequency): Promise<Unit>
+  abstract fun managePermissions(): Promise<NativePermissionWorkflowResult>
   
   @DoNotStrip
   @Keep
-  abstract fun disableBackgroundDelivery(dataType: String): Promise<Unit>
+  abstract fun revokeAllPermissions(): Promise<NativePermissionWorkflowResult>
   
   @DoNotStrip
   @Keep
-  abstract fun disableAllBackgroundDelivery(): Promise<Unit>
-  
-  abstract fun setOnChangeNotificationListener(listener: ((dataTypes: Array<String>, deliveryId: String) -> Unit)?): Unit
+  abstract fun getBackgroundChangesMode(): NativeBackgroundChangesMode
   
   @DoNotStrip
   @Keep
-  private fun setOnChangeNotificationListener_cxx(listener: Func_void_std__vector_std__string__std__string?): Unit {
-    val __result = setOnChangeNotificationListener(listener?.let { it })
+  abstract fun configureBackgroundChanges(dataTypes: Array<String>, frequency: BackgroundDeliveryFrequency): Promise<NativeBackgroundChangesResult>
+  
+  @DoNotStrip
+  @Keep
+  abstract fun disableBackgroundChanges(dataTypes: Array<String>?): Promise<NativeBackgroundChangesResult>
+  
+  abstract fun setOnBackgroundChangeListener(listener: ((dataTypes: Array<String>, deliveryId: String) -> Unit)?): Boolean
+  
+  @DoNotStrip
+  @Keep
+  private fun setOnBackgroundChangeListener_cxx(listener: Func_void_std__vector_std__string__std__string?): Boolean {
+    val __result = setOnBackgroundChangeListener(listener?.let { it })
     return __result
   }
   
   @DoNotStrip
   @Keep
-  abstract fun acknowledgeChangeNotification(deliveryId: String): Unit
-  
-  @DoNotStrip
-  @Keep
-  abstract fun getBackgroundReadAuthorizationStatus(): Promise<BackgroundReadAuthorizationStatus>
-  
-  @DoNotStrip
-  @Keep
-  abstract fun requestBackgroundReadAuthorization(): Promise<BackgroundReadAuthorizationStatus>
+  abstract fun acknowledgeBackgroundChange(deliveryId: String): Boolean
   
   @DoNotStrip
   @Keep
@@ -144,7 +144,7 @@ abstract class HybridNitroHealthSpec: HybridObject() {
   
   @DoNotStrip
   @Keep
-  abstract fun saveDistance(samples: Array<NativeDistanceSampleInput>): Promise<Unit>
+  abstract fun saveDistance(samples: Array<NativeDistanceSampleInput>): Promise<NativeDistanceWriteResult>
   
   @DoNotStrip
   @Keep
@@ -177,22 +177,18 @@ abstract class HybridNitroHealthSpec: HybridObject() {
   @DoNotStrip
   @Keep
   abstract fun saveWorkout(workout: NativeWorkoutSampleInput): Promise<Unit>
-
-  @DoNotStrip
-  @Keep
-  abstract fun deleteSamplesByUuids(dataType: String, uuids: Array<String>): Promise<Unit>
   
   @DoNotStrip
   @Keep
-  abstract fun deleteSamplesByTimeRange(dataType: String, query: NativeHealthTimeRangeQuery): Promise<Unit>
+  abstract fun deleteRecordsByIds(dataType: String, recordIds: Array<String>): Promise<NativeHealthDeleteResult>
+  
+  @DoNotStrip
+  @Keep
+  abstract fun deleteRecordsByTimeRange(dataType: String, query: NativeHealthTimeRangeQuery): Promise<NativeHealthDeleteResult>
   
   @DoNotStrip
   @Keep
   abstract fun getPermissionStatuses(permissions: Array<NativeHealthPermission>): Promise<NativeHealthPermissionStatusResult>
-
-  @DoNotStrip
-  @Keep
-  abstract fun getRequestStatusForAuthorization(permissions: Array<NativeHealthPermission>): Promise<AuthorizationRequestStatus>
   
   @DoNotStrip
   @Keep

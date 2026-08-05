@@ -8,7 +8,6 @@
 import Foundation
 import HealthKit
 import NitroModules
-import UIKit
 
 let healthStore = HKHealthStore()
 
@@ -17,35 +16,6 @@ func permissionError(_ message: String) -> NSError {
 }
 
 class HybridNitroHealth: HybridNitroHealthSpec {
-    func isAvailable() throws -> Bool {
-        return try getAvailabilityStatus() == .available
-    }
-
-    func getAvailabilityStatus() throws -> HealthAvailabilityStatus {
-        return HKHealthStore.isHealthDataAvailable() ? .available : .unavailable
-    }
-
-    func openHealthConnectInstall() throws -> Bool {
-        return false
-    }
-
-    func openHealthSettings() throws -> Promise<Bool> {
-        return Promise<Bool>.async {
-            return await withCheckedContinuation { (continuation: CheckedContinuation<Bool, Never>) in
-                DispatchQueue.main.async {
-                    guard let url = URL(string: UIApplication.openSettingsURLString) else {
-                        continuation.resume(returning: false)
-                        return
-                    }
-
-                    UIApplication.shared.open(url) { success in
-                        continuation.resume(returning: success)
-                    }
-                }
-            }
-        }
-    }
-
     // Note: reads reject with a "not determined" error until authorization has been requested
     // once. After the user responds, HealthKit cannot report read-permission denial (a privacy
     // limitation), so a query without read access resolves to an empty array rather than
@@ -58,18 +28,19 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         let quantityType = try makeHealthKitQuantityType(dataType: "steps")
 
         return Promise<NativeStepSamplePage>.async {
-            try await self.requireDeterminedReadAuthorization(for: quantityType, label: "steps")
             let page = try await self.queryPagedSamples(
                 sampleType: quantityType,
                 dataType: "steps",
-                query: query
+                query: query,
+                authorizationLabel: "steps"
             ) { sample -> NativeStepSample? in
                 guard let quantitySample = sample as? HKQuantitySample else {
                     return nil
                 }
 
                 return NativeStepSample(
-                    uuid: quantitySample.uuid.uuidString,
+                    identity: quantitySample.nativeHealthSampleIdentity,
+                    origin: quantitySample.nativeHealthDataOrigin,
                     startTimeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
                     endTimeMs: quantitySample.endDate.timeIntervalSince1970 * 1000,
                     count: quantitySample.quantity.doubleValue(for: HKUnit.count())
@@ -89,21 +60,23 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         let quantityType = try makeHealthKitQuantityType(dataType: "distance")
 
         return Promise<NativeDistanceSamplePage>.async {
-            try await self.requireDeterminedReadAuthorization(for: quantityType, label: "distance")
             let page = try await self.queryPagedSamples(
                 sampleType: quantityType,
                 dataType: "distance",
-                query: query
+                query: query,
+                authorizationLabel: "distance"
             ) { sample -> NativeDistanceSample? in
                 guard let quantitySample = sample as? HKQuantitySample else {
                     return nil
                 }
 
                 return NativeDistanceSample(
-                    uuid: quantitySample.uuid.uuidString,
+                    identity: quantitySample.nativeHealthSampleIdentity,
+                    origin: quantitySample.nativeHealthDataOrigin,
                     startTimeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
                     endTimeMs: quantitySample.endDate.timeIntervalSince1970 * 1000,
-                    distanceMeters: quantitySample.quantity.doubleValue(for: HKUnit.meter())
+                    distanceMeters: quantitySample.quantity.doubleValue(for: HKUnit.meter()),
+                    scope: .walkingrunning
                 )
             }
 
@@ -120,18 +93,19 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         let quantityType = try makeHealthKitQuantityType(dataType: "activeEnergyBurned")
 
         return Promise<NativeActiveEnergyBurnedSamplePage>.async {
-            try await self.requireDeterminedReadAuthorization(for: quantityType, label: "active energy burned")
             let page = try await self.queryPagedSamples(
                 sampleType: quantityType,
                 dataType: "activeEnergyBurned",
-                query: query
+                query: query,
+                authorizationLabel: "active energy burned"
             ) { sample -> NativeActiveEnergyBurnedSample? in
                 guard let quantitySample = sample as? HKQuantitySample else {
                     return nil
                 }
 
                 return NativeActiveEnergyBurnedSample(
-                    uuid: quantitySample.uuid.uuidString,
+                    identity: quantitySample.nativeHealthSampleIdentity,
+                    origin: quantitySample.nativeHealthDataOrigin,
                     startTimeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
                     endTimeMs: quantitySample.endDate.timeIntervalSince1970 * 1000,
                     kilocalories: quantitySample.quantity.doubleValue(for: HKUnit.kilocalorie())
@@ -153,22 +127,21 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         let bpmUnit = HKUnit.count().unitDivided(by: HKUnit.minute())
 
         return Promise<NativeHeartRateSamplePage>.async {
-            try await self.requireDeterminedReadAuthorization(for: quantityType, label: "heart rate")
             let page = try await self.queryPagedSamples(
                 sampleType: quantityType,
                 dataType: "heartRate",
-                query: query
+                query: query,
+                authorizationLabel: "heart rate"
             ) { sample -> NativeHeartRateSample? in
                 guard let quantitySample = sample as? HKQuantitySample else {
                     return nil
                 }
 
                 return NativeHeartRateSample(
-                    uuid: quantitySample.uuid.uuidString,
-                    recordUuid: quantitySample.uuid.uuidString,
+                    identity: quantitySample.nativeHealthSampleIdentity,
+                    origin: quantitySample.nativeHealthDataOrigin,
                     timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
-                    bpm: quantitySample.quantity.doubleValue(for: bpmUnit),
-                    source: quantitySample.sourceRevision.source.name
+                    bpm: quantitySample.quantity.doubleValue(for: bpmUnit)
                 )
             }
 
@@ -185,11 +158,11 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         return Promise<NativeBodyMassSamplePage>.async {
             let page = try await self.readInstantQuantitySamplePage(dataType: "bodyMass", query: query) { quantitySample, unit in
                 NativeBodyMassSample(
-                    uuid: quantitySample.uuid.uuidString,
+                    identity: quantitySample.nativeHealthSampleIdentity,
+                    origin: quantitySample.nativeHealthDataOrigin,
                     startTimeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
                     endTimeMs: quantitySample.endDate.timeIntervalSince1970 * 1000,
-                    kilograms: quantitySample.quantity.doubleValue(for: unit),
-                    source: quantitySample.sourceRevision.source.name
+                    kilograms: quantitySample.quantity.doubleValue(for: unit)
                 )
             }
 
@@ -282,7 +255,8 @@ class HybridNitroHealth: HybridNitroHealthSpec {
                     sum: sum,
                     avg: avg,
                     min: min,
-                    max: max
+                    max: max,
+                    scope: dataType == "distance" ? .walkingrunning : nil
                 )
             }
         }
@@ -300,24 +274,17 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         }
 
         return Promise<NativeSleepSamplePage>.async {
-            try await self.requireDeterminedReadAuthorization(for: categoryType, label: "sleep")
             let page = try await self.queryPagedSamples(
                 sampleType: categoryType,
                 dataType: "sleep",
-                query: query
+                query: query,
+                authorizationLabel: "sleep"
             ) { sample -> NativeSleepSample? in
                 guard let categorySample = sample as? HKCategorySample else {
                     return nil
                 }
 
-                return NativeSleepSample(
-                    uuid: categorySample.uuid.uuidString,
-                    recordUuid: categorySample.uuid.uuidString,
-                    startTimeMs: categorySample.startDate.timeIntervalSince1970 * 1000,
-                    endTimeMs: categorySample.endDate.timeIntervalSince1970 * 1000,
-                    stage: self.makeSleepStage(value: categorySample.value),
-                    source: categorySample.sourceRevision.source.name
-                )
+                return categorySample.nativeSleepSample
             }
 
             return NativeSleepSamplePage(samples: page.samples, nextCursor: page.nextCursor)
@@ -332,9 +299,27 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         }
     }
 
-    func saveDistance(samples: [NativeDistanceSampleInput]) throws -> Promise<Void> {
-        return try saveQuantitySamples(dataType: "distance", label: "distance") { quantityType in
-            try makeDistanceQuantitySamples(samples: samples, quantityType: quantityType)
+    func saveDistance(samples: [NativeDistanceSampleInput]) throws -> Promise<NativeDistanceWriteResult> {
+        if !HKHealthStore.isHealthDataAvailable() {
+            throw permissionError("Health data is not available")
+        }
+
+        return Promise<NativeDistanceWriteResult>.async {
+            let quantityType = try makeHealthKitQuantityType(dataType: "distance")
+            try self.requireWriteAuthorization(for: quantityType, label: "distance")
+
+            for (index, sample) in samples.enumerated() where sample.scope != .walkingrunning {
+                throw permissionError(
+                    "samples[\(index)].scope must be walkingRunning when saving distance on iOS"
+                )
+            }
+
+            let healthKitSamples = try makeDistanceQuantitySamples(
+                samples: samples,
+                quantityType: quantityType
+            )
+            try await self.saveHealthKitSamples(healthKitSamples)
+            return NativeDistanceWriteResult(storedScope: .walkingrunning)
         }
     }
 
@@ -378,23 +363,12 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         }
     }
 
-    func getRequestStatusForAuthorization(permissions: [NativeHealthPermission]) throws -> Promise<AuthorizationRequestStatus> {
-        if !HKHealthStore.isHealthDataAvailable() {
-            return Promise<AuthorizationRequestStatus>.resolved(withResult: AuthorizationRequestStatus.unknown)
-        }
-
-        let healthKitTypes = try makeHealthKitTypeSets(permissions: permissions)
-
-        return Promise<AuthorizationRequestStatus>.async {
-            return try await self.getAuthorizationRequestStatus(healthKitTypes: healthKitTypes)
-        }
-    }
-
     func getPermissionStatuses(permissions: [NativeHealthPermission]) throws -> Promise<NativeHealthPermissionStatusResult> {
-        if !HKHealthStore.isHealthDataAvailable() {
+        let availability = makeNativeHealthAvailability()
+        if availability.status == .unavailable {
             return Promise<NativeHealthPermissionStatusResult>.resolved(
                 withResult: NativeHealthPermissionStatusResult(
-                    availabilityStatus: .unavailable,
+                    availability: availability,
                     statuses: permissions.map { permission in
                         NativeHealthPermissionStatusEntry(
                             permission: permission,
@@ -407,20 +381,25 @@ class HybridNitroHealth: HybridNitroHealthSpec {
 
         return Promise<NativeHealthPermissionStatusResult>.resolved(
             withResult: NativeHealthPermissionStatusResult(
-                availabilityStatus: .available,
+                availability: availability,
                 statuses: try permissions.map(makeHealthKitPermissionStatusEntry)
             )
         )
     }
 
     func requestAuthorization(permissions: [NativeHealthPermission]) throws -> Promise<NativeHealthAuthorizationResult> {
-        if !HKHealthStore.isHealthDataAvailable() {
+        let availability = makeNativeHealthAvailability()
+        if availability.status == .unavailable {
             return Promise<NativeHealthAuthorizationResult>.resolved(
-                withResult: makeAuthorizationResult(
-                    permissions: permissions,
-                    availabilityStatus: .unavailable,
-                    requestStatus: .unknown,
-                    deniedPermissions: permissions
+                withResult: NativeHealthAuthorizationResult(
+                    status: .unavailable,
+                    availability: availability,
+                    statuses: permissions.map { permission in
+                        NativeHealthPermissionStatusEntry(
+                            permission: permission,
+                            status: .unverifiable
+                        )
+                    }
                 )
             )
         }
@@ -429,20 +408,14 @@ class HybridNitroHealth: HybridNitroHealthSpec {
 
         return Promise<NativeHealthAuthorizationResult>.async {
             let success = try await self.requestHealthKitAuthorization(healthKitTypes: healthKitTypes)
-
-            if !success {
-                return self.makeAuthorizationResult(
-                    permissions: permissions,
-                    availabilityStatus: .available,
-                    requestStatus: .unknown,
-                    deniedPermissions: permissions
-                )
+            guard success else {
+                throw permissionError("HealthKit did not complete the authorization request")
             }
 
-            let requestStatus = try await self.getAuthorizationRequestStatus(healthKitTypes: healthKitTypes)
-            return try self.makeHealthKitAuthorizationResult(
-                permissions: permissions,
-                requestStatus: requestStatus
+            return NativeHealthAuthorizationResult(
+                status: .completed,
+                availability: availability,
+                statuses: try permissions.map(self.makeHealthKitPermissionStatusEntry)
             )
         }
     }
@@ -469,8 +442,8 @@ class HybridNitroHealth: HybridNitroHealthSpec {
     private func getAuthorizationRequestStatus(healthKitTypes: (
         toShare: Set<HKSampleType>,
         toRead: Set<HKObjectType>
-    )) async throws -> AuthorizationRequestStatus {
-        return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<AuthorizationRequestStatus, Error>) in
+    )) async throws -> HKAuthorizationRequestStatus {
+        return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<HKAuthorizationRequestStatus, Error>) in
             healthStore.getRequestStatusForAuthorization(
                 toShare: healthKitTypes.toShare,
                 read: healthKitTypes.toRead
@@ -480,16 +453,7 @@ class HybridNitroHealth: HybridNitroHealthSpec {
                     return
                 }
 
-                switch status {
-                case .unknown:
-                    continuation.resume(returning: AuthorizationRequestStatus.unknown)
-                case .shouldRequest:
-                    continuation.resume(returning: AuthorizationRequestStatus.shouldrequest)
-                case .unnecessary:
-                    continuation.resume(returning: AuthorizationRequestStatus.unnecessary)
-                @unknown default:
-                    continuation.resume(returning: AuthorizationRequestStatus.unknown)
-                }
+                continuation.resume(returning: status)
             }
         }
     }
@@ -502,7 +466,7 @@ class HybridNitroHealth: HybridNitroHealthSpec {
     func requireDeterminedReadAuthorization(for objectType: HKObjectType, label: String) async throws {
         let status = try await getAuthorizationRequestStatus(healthKitTypes: (toShare: [], toRead: [objectType]))
 
-        if status == .shouldrequest {
+        if status == .shouldRequest {
             throw permissionError("Read authorization is not determined for \(label). Request authorization first.")
         }
     }
@@ -528,16 +492,13 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         }
     }
 
-    // Internal (not private) so HybridNitroHealth+Deletes.swift can reuse it. Apple leaves the
-    // no-match behavior of deleteObjects undefined; errorNoData is normalized to success so a
-    // delete that matches nothing resolves (mirroring the statistics queries below). The
-    // completion Bool is ignored in favor of `error`, matching saveHealthKitSamples above.
-    func deleteHealthKitObjects(of objectType: HKObjectType, predicate: NSPredicate) async throws {
-        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-            healthStore.deleteObjects(of: objectType, predicate: predicate) { _, _, error in
+    // Internal (not private) so HybridNitroHealth+Deletes.swift can return HealthKit's count.
+    func deleteHealthKitObjects(of objectType: HKObjectType, predicate: NSPredicate) async throws -> Int {
+        return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Int, Error>) in
+            healthStore.deleteObjects(of: objectType, predicate: predicate) { success, deletedCount, error in
                 if let error = error {
                     if let hkError = error as? HKError, hkError.code == .errorNoData {
-                        continuation.resume(returning: ())
+                        continuation.resume(returning: 0)
                         return
                     }
 
@@ -545,7 +506,14 @@ class HybridNitroHealth: HybridNitroHealthSpec {
                     return
                 }
 
-                continuation.resume(returning: ())
+                guard success else {
+                    continuation.resume(
+                        throwing: permissionError("HealthKit did not complete the deletion")
+                    )
+                    return
+                }
+
+                continuation.resume(returning: deletedCount)
             }
         }
     }
@@ -644,40 +612,6 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         }
     }
 
-    private func makeHealthKitAuthorizationResult(
-        permissions: [NativeHealthPermission],
-        requestStatus: AuthorizationRequestStatus
-    ) throws -> NativeHealthAuthorizationResult {
-        var grantedPermissions = [NativeHealthPermission]()
-        var deniedPermissions = [NativeHealthPermission]()
-        var unverifiablePermissions = [NativeHealthPermission]()
-
-        for permission in permissions {
-            switch permission.accessType {
-            case "read":
-                unverifiablePermissions.append(permission)
-            case "write":
-                let sampleType = try makeHealthKitSampleType(dataType: permission.dataType)
-                if healthStore.authorizationStatus(for: sampleType) == .sharingAuthorized {
-                    grantedPermissions.append(permission)
-                } else {
-                    deniedPermissions.append(permission)
-                }
-            default:
-                throw permissionError("Unsupported health permission access type: \(permission.accessType)")
-            }
-        }
-
-        return makeAuthorizationResult(
-            permissions: permissions,
-            availabilityStatus: .available,
-            requestStatus: requestStatus,
-            grantedPermissions: grantedPermissions,
-            deniedPermissions: deniedPermissions,
-            unverifiablePermissions: unverifiablePermissions
-        )
-    }
-
     private func makeHealthKitPermissionStatusEntry(
         permission: NativeHealthPermission
     ) throws -> NativeHealthPermissionStatusEntry {
@@ -705,38 +639,6 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         return NativeHealthPermissionStatusEntry(permission: permission, status: status)
     }
 
-    private func makeAuthorizationResult(
-        permissions: [NativeHealthPermission],
-        availabilityStatus: HealthAvailabilityStatus,
-        requestStatus: AuthorizationRequestStatus,
-        grantedPermissions: [NativeHealthPermission] = [],
-        deniedPermissions: [NativeHealthPermission] = [],
-        unverifiablePermissions: [NativeHealthPermission] = []
-    ) -> NativeHealthAuthorizationResult {
-        let status: HealthAuthorizationStatus
-
-        if availabilityStatus != .available {
-            status = .unavailable
-        } else if !unverifiablePermissions.isEmpty && deniedPermissions.isEmpty {
-            status = .completed
-        } else if deniedPermissions.isEmpty {
-            status = .granted
-        } else if !grantedPermissions.isEmpty || !unverifiablePermissions.isEmpty {
-            status = .partial
-        } else {
-            status = .denied
-        }
-
-        return NativeHealthAuthorizationResult(
-            status: status,
-            availabilityStatus: availabilityStatus,
-            requestStatus: requestStatus,
-            grantedPermissions: grantedPermissions,
-            deniedPermissions: deniedPermissions,
-            unverifiablePermissions: unverifiablePermissions
-        )
-    }
-
     private func makeHealthKitTypeSets(permissions: [NativeHealthPermission]) throws -> (
         toShare: Set<HKSampleType>,
         toRead: Set<HKObjectType>
@@ -758,9 +660,5 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         }
 
         return (toShare, toRead)
-    }
-
-    func makeSleepStage(value: Int) -> String {
-        return normalizedSleepStage(value: value)
     }
 }

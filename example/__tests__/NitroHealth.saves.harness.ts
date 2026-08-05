@@ -1,5 +1,7 @@
+import { Platform } from 'react-native'
 import { describe, expect, it } from 'react-native-harness'
 import { NitroHealth } from 'react-native-nitro-health'
+import type { HealthSample, WorkoutSample } from 'react-native-nitro-health'
 
 import {
   hasVerifiedPermissions,
@@ -7,6 +9,16 @@ import {
   saveInterval,
   saveReadRange,
 } from './support/harnessSupport'
+
+function assertOrigin(sample: HealthSample): void {
+  expect(typeof sample.origin.identifier).toBe('string')
+  expect(sample.origin.identifier.length).toBeGreaterThan(0)
+  expect(['string', 'undefined']).toContain(typeof sample.origin.displayName)
+}
+
+function getWorkoutDisplayName(workout: WorkoutSample): string | undefined {
+  return workout.title ?? workout.brandName
+}
 
 describe('NitroHealth saves (native)', () => {
   it('rejects empty save sample arrays before crossing the native boundary', async () => {
@@ -27,7 +39,9 @@ describe('NitroHealth saves (native)', () => {
       'samples[0]: count must be a positive integer'
     )
     await expect(
-      NitroHealth.saveDistance([{ ...saveInterval, distanceMeters: -1 }])
+      NitroHealth.saveDistance([
+        { ...saveInterval, scope: 'walking-running', distanceMeters: -1 },
+      ])
     ).rejects.toThrow('samples[0]: distanceMeters must be a non-negative number')
     await expect(
       NitroHealth.saveActiveEnergyBurned([{ ...saveInterval, kilocalories: -1 }])
@@ -93,7 +107,9 @@ describe('NitroHealth saves (native)', () => {
     }
 
     await expect(
-      NitroHealth.saveDistance([{ ...saveInterval, distanceMeters: 1000 }])
+      NitroHealth.saveDistance([
+        { ...saveInterval, scope: 'walking-running', distanceMeters: 1000 },
+      ])
     ).rejects.toThrow(/permission/i)
   })
 
@@ -168,6 +184,30 @@ describe('NitroHealth saves (native)', () => {
     expect(page.samples.some((sample) => sample.count === 321)).toBe(true)
   })
 
+  it('round-trips walking/running distance and reports its storage scope', async () => {
+    const authorized = await hasVerifiedPermissions([
+      { accessType: 'write', dataType: 'distance' },
+      { accessType: 'read', dataType: 'distance' },
+    ])
+    if (!authorized) return
+
+    const result = await NitroHealth.saveDistance([
+      { ...saveInterval, scope: 'walking-running', distanceMeters: 1234 },
+    ])
+
+    const expectedStoredScope =
+      Platform.OS === 'ios' ? 'walking-running' : 'activity-unspecified'
+    expect(result).toEqual({ status: 'completed', storedScope: expectedStoredScope })
+    const page = await NitroHealth.readDistance(saveReadRange)
+    if (isInconclusiveRead(page.samples)) return
+
+    const saved = page.samples.find(
+      (sample) => sample.distanceMeters === 1234 && sample.scope === expectedStoredScope
+    )
+    expect(saved).toBeDefined()
+    if (saved !== undefined) assertOrigin(saved)
+  })
+
   it('round-trips saved body mass through native code when authorized', async () => {
     const authorized = await hasVerifiedPermissions([
       { accessType: 'write', dataType: 'bodyMass' },
@@ -225,7 +265,7 @@ describe('NitroHealth saves (native)', () => {
         (saveInterval.endDate.getTime() - saveInterval.startDate.getTime()) / 2
     )
 
-    await NitroHealth.deleteSamplesByTimeRange('sleep', saveReadRange)
+    await NitroHealth.deleteRecordsByTimeRange('sleep', saveReadRange)
     try {
       await NitroHealth.saveSleepSessions([
         {
@@ -251,9 +291,25 @@ describe('NitroHealth saves (native)', () => {
         return
       }
 
+      const envelope = page.samples.find(
+        (sample) =>
+          (sample.kind === 'session-envelope' ||
+            (sample.kind === 'stage' && sample.stage === 'inBed')) &&
+          sample.startDate.getTime() === saveInterval.startDate.getTime() &&
+          sample.endDate.getTime() === saveInterval.endDate.getTime()
+      )
+      expect(envelope).toBeDefined()
+      if (envelope?.kind === 'session-envelope') {
+        expect(envelope.stageData).toBe('reported')
+        expect('stage' in envelope).toBe(false)
+      } else if (envelope) {
+        expect(envelope.stage).toBe('inBed')
+      }
+
       expect(
         page.samples.some(
           (sample) =>
+            sample.kind === 'stage' &&
             sample.stage === 'asleepCore' &&
             sample.startDate.getTime() === saveInterval.startDate.getTime() &&
             sample.endDate.getTime() === middleDate.getTime()
@@ -262,13 +318,14 @@ describe('NitroHealth saves (native)', () => {
       expect(
         page.samples.some(
           (sample) =>
+            sample.kind === 'stage' &&
             sample.stage === 'asleepDeep' &&
             sample.startDate.getTime() === middleDate.getTime() &&
             sample.endDate.getTime() === saveInterval.endDate.getTime()
         )
       ).toBe(true)
     } finally {
-      await NitroHealth.deleteSamplesByTimeRange('sleep', saveReadRange)
+      await NitroHealth.deleteRecordsByTimeRange('sleep', saveReadRange)
     }
   })
 
@@ -282,12 +339,12 @@ describe('NitroHealth saves (native)', () => {
       return
     }
 
-    await NitroHealth.deleteSamplesByTimeRange('workout', saveReadRange)
+    await NitroHealth.deleteRecordsByTimeRange('workout', saveReadRange)
     try {
       await NitroHealth.saveWorkout({
         ...saveInterval,
         activityType: 'running',
-        title: 'Nitro Health Harness Run',
+        displayName: 'Nitro Health Harness Run',
         timeZone: 'UTC',
       })
 
@@ -296,17 +353,28 @@ describe('NitroHealth saves (native)', () => {
         return
       }
 
-      expect(
-        page.samples.some(
-          (sample) =>
-            sample.activityType === 'running' &&
-            sample.title === 'Nitro Health Harness Run' &&
-            sample.startDate.getTime() === saveInterval.startDate.getTime() &&
-            sample.endDate.getTime() === saveInterval.endDate.getTime()
-        )
-      ).toBe(true)
+      const saved = page.samples.find(
+        (sample) =>
+          sample.activity.status === 'known' &&
+          sample.activity.type === 'running' &&
+          sample.activity.portability === 'portable' &&
+          getWorkoutDisplayName(sample) === 'Nitro Health Harness Run' &&
+          sample.startDate.getTime() === saveInterval.startDate.getTime() &&
+          sample.endDate.getTime() === saveInterval.endDate.getTime()
+      )
+      expect(saved).toBeDefined()
+      if (saved !== undefined) {
+        assertOrigin(saved)
+        if (Platform.OS === 'ios') {
+          expect(saved.title).toBeUndefined()
+          expect(saved.brandName).toBe('Nitro Health Harness Run')
+        } else {
+          expect(saved.title).toBe('Nitro Health Harness Run')
+          expect(saved.brandName).toBeUndefined()
+        }
+      }
     } finally {
-      await NitroHealth.deleteSamplesByTimeRange('workout', saveReadRange)
+      await NitroHealth.deleteRecordsByTimeRange('workout', saveReadRange)
     }
   })
 

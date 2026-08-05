@@ -1,11 +1,17 @@
-import type { HealthDataType } from './HealthDataType'
+import type { HealthDataType, WritableHealthDataType } from './HealthDataType'
 import type { HealthPermissionAccessType } from './HealthPermissionAccessType'
-import type { NativeHealthPermission } from './NativeHealthPermission'
 
 /** Permission requested through {@linkcode NitroHealth.requestAuthorization}. */
-export interface HealthPermission extends NativeHealthPermission {
-  /** Whether the app wants to read or write the health data type. */
-  accessType: HealthPermissionAccessType
-  /** Health data type to authorize. */
-  dataType: HealthDataType
-}
+export type HealthPermission =
+  | {
+      /** Requests read access. */
+      accessType: Extract<HealthPermissionAccessType, 'read'>
+      /** Health data type to read. */
+      dataType: HealthDataType
+    }
+  | {
+      /** Requests write access. */
+      accessType: Extract<HealthPermissionAccessType, 'write'>
+      /** Writable health data type. HRV is read-only because platform metrics differ. */
+      dataType: WritableHealthDataType
+    }

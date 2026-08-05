@@ -12,40 +12,131 @@ import type { ListenerSubscription } from 'react-native-nitro-health'
 describe('NitroHealth background contract', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockNitroHealth.getAvailability.mockReturnValue({ status: 'available' })
   })
 
-  it('delegates background delivery configuration to native', async () => {
-    mockNitroHealth.enableBackgroundDelivery.mockResolvedValue(undefined)
-    mockNitroHealth.disableBackgroundDelivery.mockResolvedValue(undefined)
-    mockNitroHealth.disableAllBackgroundDelivery.mockResolvedValue(undefined)
-
-    await expect(NitroHealth.enableBackgroundDelivery('steps', 'hourly')).resolves.toBeUndefined()
-    await expect(NitroHealth.disableBackgroundDelivery('steps')).resolves.toBeUndefined()
-    await expect(NitroHealth.disableAllBackgroundDelivery()).resolves.toBeUndefined()
-
-    expect(mockNitroHealth.enableBackgroundDelivery).toHaveBeenCalledWith('steps', 'hourly')
-    expect(mockNitroHealth.disableBackgroundDelivery).toHaveBeenCalledWith('steps')
-    expect(mockNitroHealth.disableAllBackgroundDelivery).toHaveBeenCalledWith()
+  afterEach(() => {
+    jest.useRealTimers()
   })
 
-  it('delegates Android background-read status and authorization to native', async () => {
-    mockNitroHealth.getBackgroundReadAuthorizationStatus.mockResolvedValue('notGranted')
-    mockNitroHealth.requestBackgroundReadAuthorization.mockResolvedValue('granted')
+  it('configures observer delivery and deduplicates data types', async () => {
+    mockNitroHealth.configureBackgroundChanges.mockResolvedValue({
+      status: 'completed',
+      mode: 'observer',
+      backgroundRead: 'included',
+    })
 
-    await expect(NitroHealth.getBackgroundReadAuthorizationStatus()).resolves.toBe('notGranted')
-    await expect(NitroHealth.requestBackgroundReadAuthorization()).resolves.toBe('granted')
+    await expect(
+      NitroHealth.configureBackgroundChanges({
+        dataTypes: ['steps', 'steps', 'sleep'],
+        frequency: 'hourly',
+      })
+    ).resolves.toEqual({ status: 'completed', mode: 'observer' })
+
+    expect(mockNitroHealth.configureBackgroundChanges).toHaveBeenCalledWith(
+      ['steps', 'sleep'],
+      'hourly'
+    )
   })
 
-  it('multiplexes public listeners through one native callback', () => {
+  it('maps app-owned polling configuration and targeted disable results', async () => {
+    mockNitroHealth.configureBackgroundChanges.mockResolvedValue({
+      status: 'userActionRequired',
+      mode: 'polling',
+      backgroundRead: 'notGranted',
+    })
+    mockNitroHealth.disableBackgroundChanges.mockResolvedValue({
+      status: 'userActionRequired',
+      mode: 'polling',
+      backgroundRead: 'notDeclared',
+    })
+
+    await expect(
+      NitroHealth.configureBackgroundChanges({ dataTypes: ['steps'], frequency: 'daily' })
+    ).resolves.toEqual({
+      status: 'user-action-required',
+      mode: 'polling',
+      scheduling: 'app-owned',
+      backgroundRead: 'not-granted',
+    })
+    await expect(
+      NitroHealth.disableBackgroundChanges(['steps', 'steps', 'distance'])
+    ).resolves.toEqual({
+      status: 'user-action-required',
+      mode: 'polling',
+      scheduling: 'app-owned',
+      backgroundRead: 'not-declared',
+    })
+
+    expect(mockNitroHealth.disableBackgroundChanges).toHaveBeenCalledWith([
+      'steps',
+      'distance',
+    ])
+  })
+
+  it('disables every configured data type when no list is supplied', async () => {
+    mockNitroHealth.disableBackgroundChanges.mockResolvedValue({
+      status: 'completed',
+      mode: 'observer',
+      backgroundRead: 'included',
+    })
+
+    await expect(NitroHealth.disableBackgroundChanges()).resolves.toEqual({
+      status: 'completed',
+      mode: 'observer',
+    })
+    expect(mockNitroHealth.disableBackgroundChanges).toHaveBeenCalledWith(undefined)
+  })
+
+  it('surfaces unavailable background configuration', async () => {
+    mockNitroHealth.configureBackgroundChanges.mockResolvedValue({
+      status: 'unavailable',
+      mode: 'polling',
+      backgroundRead: 'unsupported',
+    })
+
+    await expect(
+      NitroHealth.configureBackgroundChanges({ dataTypes: ['steps'], frequency: 'weekly' })
+    ).resolves.toEqual({ status: 'unavailable' })
+  })
+
+  it('validates background configuration before crossing native', async () => {
+    await expect(
+      NitroHealth.configureBackgroundChanges({ dataTypes: [], frequency: 'immediate' })
+    ).rejects.toThrow('At least one background change data type is required')
+    await expect(NitroHealth.disableBackgroundChanges([])).rejects.toThrow(
+      'dataTypes must be omitted or contain at least one health data type'
+    )
+
+    expect(mockNitroHealth.configureBackgroundChanges).not.toHaveBeenCalled()
+    expect(mockNitroHealth.disableBackgroundChanges).not.toHaveBeenCalled()
+  })
+
+  it('returns app-owned polling without installing a native listener', () => {
+    mockNitroHealth.getBackgroundChangesMode.mockReturnValue('polling')
+
+    expect(NitroHealth.subscribeToBackgroundChanges(jest.fn())).toEqual({
+      mode: 'polling',
+      scheduling: 'app-owned',
+    })
+    expect(mockNitroHealth.setOnBackgroundChangeListener).not.toHaveBeenCalled()
+  })
+
+  it('multiplexes observer listeners through one acknowledged native callback', () => {
+    mockNitroHealth.getBackgroundChangesMode.mockReturnValue('observer')
+    mockNitroHealth.setOnBackgroundChangeListener.mockReturnValue(true)
+    mockNitroHealth.acknowledgeBackgroundChange.mockReturnValue(true)
     const firstListener = jest.fn()
     const secondListener = jest.fn()
-    const firstSubscription = NitroHealth.addOnChangeNotificationListener(firstListener)
-    const secondSubscription = NitroHealth.addOnChangeNotificationListener(secondListener)
+    const firstResult = NitroHealth.subscribeToBackgroundChanges(firstListener)
+    const secondResult = NitroHealth.subscribeToBackgroundChanges(secondListener)
 
-    expect(mockNitroHealth.setOnChangeNotificationListener).toHaveBeenCalledTimes(1)
-    const nativeListener = mockNitroHealth.setOnChangeNotificationListener.mock.calls[0]?.[0] as
-      | ((dataTypes: string[], deliveryId: string) => void)
-      | undefined
+    if (firstResult.mode !== 'observer' || secondResult.mode !== 'observer') {
+      throw new Error('Expected observer subscriptions')
+    }
+
+    expect(mockNitroHealth.setOnBackgroundChangeListener).toHaveBeenCalledTimes(1)
+    const nativeListener = mockNitroHealth.setOnBackgroundChangeListener.mock.calls[0]?.[0]
     expect(nativeListener).toEqual(expect.any(Function))
 
     nativeListener?.(['steps', 'steps', 'sleep'], 'delivery-1')
@@ -53,83 +144,87 @@ describe('NitroHealth background contract', () => {
     const expectedNotification = { dataTypes: ['steps', 'sleep'] }
     expect(firstListener).toHaveBeenCalledWith(expectedNotification)
     expect(secondListener).toHaveBeenCalledWith(expectedNotification)
-    expect(mockNitroHealth.acknowledgeChangeNotification).toHaveBeenCalledWith('delivery-1')
+    expect(mockNitroHealth.acknowledgeBackgroundChange).toHaveBeenCalledWith('delivery-1')
 
-    firstSubscription.remove()
-    expect(mockNitroHealth.setOnChangeNotificationListener).toHaveBeenCalledTimes(1)
-
-    secondSubscription.remove()
-    secondSubscription.remove()
-    expect(mockNitroHealth.setOnChangeNotificationListener).toHaveBeenLastCalledWith(undefined)
-    expect(mockNitroHealth.setOnChangeNotificationListener).toHaveBeenCalledTimes(2)
+    firstResult.subscription.remove()
+    expect(mockNitroHealth.setOnBackgroundChangeListener).toHaveBeenCalledTimes(1)
+    secondResult.subscription.remove()
+    secondResult.subscription.remove()
+    expect(mockNitroHealth.setOnBackgroundChangeListener).toHaveBeenLastCalledWith(undefined)
   })
 
-  it('supports registering the same listener function more than once', () => {
-    const listener = jest.fn()
-    const firstSubscription = NitroHealth.addOnChangeNotificationListener(listener)
-    const secondSubscription = NitroHealth.addOnChangeNotificationListener(listener)
-    const nativeListener = mockNitroHealth.setOnChangeNotificationListener.mock.calls[0]?.[0] as
-      | ((dataTypes: string[], deliveryId: string) => void)
-      | undefined
-
-    firstSubscription.remove()
-    nativeListener?.(['steps'], 'delivery-2')
-    expect(listener).toHaveBeenCalledTimes(1)
-
-    secondSubscription.remove()
-  })
-
-  it('rejects a missing listener before crossing the native boundary', () => {
-    expect(() => NitroHealth.addOnChangeNotificationListener(undefined as never)).toThrow(
-      'A change notification listener function is required'
-    )
-    expect(mockNitroHealth.setOnChangeNotificationListener).not.toHaveBeenCalled()
-  })
-
-  it('acknowledges before detaching when the last listener removes itself during dispatch', () => {
+  it('acknowledges before detaching a self-removing final observer listener', () => {
+    mockNitroHealth.getBackgroundChangesMode.mockReturnValue('observer')
+    mockNitroHealth.setOnBackgroundChangeListener.mockReturnValue(true)
+    mockNitroHealth.acknowledgeBackgroundChange.mockReturnValue(true)
     let subscription: ListenerSubscription | undefined
     const listener = jest.fn(() => subscription?.remove())
-    subscription = NitroHealth.addOnChangeNotificationListener(listener)
-    const nativeListener = mockNitroHealth.setOnChangeNotificationListener.mock.calls[0]?.[0] as
-      | ((dataTypes: string[], deliveryId: string) => void)
-      | undefined
+    const result = NitroHealth.subscribeToBackgroundChanges(listener)
+    if (result.mode !== 'observer') throw new Error('Expected an observer subscription')
+    subscription = result.subscription
+    const nativeListener = mockNitroHealth.setOnBackgroundChangeListener.mock.calls[0]?.[0]
 
-    nativeListener?.(['steps'], 'delivery-3')
+    nativeListener?.(['steps'], 'delivery-2')
 
-    expect(listener).toHaveBeenCalledWith({ dataTypes: ['steps'] })
-    expect(mockNitroHealth.acknowledgeChangeNotification).toHaveBeenCalledWith('delivery-3')
-    expect(mockNitroHealth.setOnChangeNotificationListener).toHaveBeenLastCalledWith(undefined)
-
+    expect(mockNitroHealth.acknowledgeBackgroundChange).toHaveBeenCalledWith('delivery-2')
+    expect(mockNitroHealth.setOnBackgroundChangeListener).toHaveBeenLastCalledWith(undefined)
     const acknowledgeOrder =
-      mockNitroHealth.acknowledgeChangeNotification.mock.invocationCallOrder[0] ?? 0
+      mockNitroHealth.acknowledgeBackgroundChange.mock.invocationCallOrder[0] ?? 0
     const detachOrder =
-      mockNitroHealth.setOnChangeNotificationListener.mock.invocationCallOrder[1] ?? 0
+      mockNitroHealth.setOnBackgroundChangeListener.mock.invocationCallOrder[1] ?? 0
     expect(acknowledgeOrder).toBeLessThan(detachOrder)
   })
 
-  it('acknowledges the delivery and rethrows the first listener error asynchronously', () => {
+  it('surfaces a failed native delivery acknowledgement', () => {
+    mockNitroHealth.getBackgroundChangesMode.mockReturnValue('observer')
+    mockNitroHealth.setOnBackgroundChangeListener.mockReturnValue(true)
+    mockNitroHealth.acknowledgeBackgroundChange.mockReturnValue(false)
+    const listener = jest.fn()
+    const result = NitroHealth.subscribeToBackgroundChanges(listener)
+    if (result.mode !== 'observer') throw new Error('Expected an observer subscription')
+    const nativeListener = mockNitroHealth.setOnBackgroundChangeListener.mock.calls[0]?.[0]
+
+    expect(() => nativeListener?.(['steps'], 'delivery-unacknowledged')).toThrow(
+      'Native observer did not acknowledge its background change delivery'
+    )
+    expect(listener).toHaveBeenCalledWith({ dataTypes: ['steps'] })
+    expect(mockNitroHealth.acknowledgeBackgroundChange).toHaveBeenCalledWith(
+      'delivery-unacknowledged'
+    )
+
+    result.subscription.remove()
+  })
+
+  it('acknowledges delivery before surfacing a listener error asynchronously', () => {
     jest.useFakeTimers()
-    try {
-      const failingListener = jest.fn(() => {
-        throw new Error('listener failure')
-      })
-      const healthyListener = jest.fn()
-      const firstSubscription = NitroHealth.addOnChangeNotificationListener(failingListener)
-      const secondSubscription = NitroHealth.addOnChangeNotificationListener(healthyListener)
-      const nativeListener = mockNitroHealth.setOnChangeNotificationListener.mock.calls[0]?.[0] as
-        | ((dataTypes: string[], deliveryId: string) => void)
-        | undefined
+    mockNitroHealth.getBackgroundChangesMode.mockReturnValue('observer')
+    mockNitroHealth.setOnBackgroundChangeListener.mockReturnValue(true)
+    mockNitroHealth.acknowledgeBackgroundChange.mockReturnValue(true)
+    const listenerError = new Error('listener failed')
+    const result = NitroHealth.subscribeToBackgroundChanges(() => {
+      throw listenerError
+    })
+    if (result.mode !== 'observer') throw new Error('Expected an observer subscription')
+    const nativeListener = mockNitroHealth.setOnBackgroundChangeListener.mock.calls[0]?.[0]
 
-      nativeListener?.(['steps'], 'delivery-4')
+    nativeListener?.(['steps'], 'delivery-listener-error')
 
-      expect(healthyListener).toHaveBeenCalledWith({ dataTypes: ['steps'] })
-      expect(mockNitroHealth.acknowledgeChangeNotification).toHaveBeenCalledWith('delivery-4')
-      expect(() => jest.runAllTimers()).toThrow('listener failure')
+    expect(mockNitroHealth.acknowledgeBackgroundChange).toHaveBeenCalledWith(
+      'delivery-listener-error'
+    )
+    expect(() => jest.runOnlyPendingTimers()).toThrow(listenerError)
+    result.subscription.remove()
+  })
 
-      firstSubscription.remove()
-      secondSubscription.remove()
-    } finally {
-      jest.useRealTimers()
-    }
+  it('rejects invalid or unavailable observer listener registration', () => {
+    mockNitroHealth.getBackgroundChangesMode.mockReturnValue('observer')
+    mockNitroHealth.setOnBackgroundChangeListener.mockReturnValue(false)
+
+    expect(() => NitroHealth.subscribeToBackgroundChanges(undefined as never)).toThrow(
+      'A background change listener function is required'
+    )
+    expect(() => NitroHealth.subscribeToBackgroundChanges(jest.fn())).toThrow(
+      'Native observer listener registration is unavailable'
+    )
   })
 })

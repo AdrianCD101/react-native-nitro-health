@@ -20,10 +20,13 @@ import java.util.Objects
 data class NativeSleepSample(
   @DoNotStrip
   @Keep
-  val uuid: String,
+  val identity: NativeHealthSampleIdentity,
   @DoNotStrip
   @Keep
-  val recordUuid: String,
+  val origin: NativeHealthDataOrigin,
+  @DoNotStrip
+  @Keep
+  val kind: NativeSleepSampleKind,
   @DoNotStrip
   @Keep
   val startTimeMs: Double,
@@ -32,32 +35,34 @@ data class NativeSleepSample(
   val endTimeMs: Double,
   @DoNotStrip
   @Keep
-  val stage: String,
+  val stage: String?,
   @DoNotStrip
   @Keep
-  val source: String?
+  val stageData: NativeSleepStageData?
 ) {
   /* primary constructor */
 
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other !is NativeSleepSample) return false
-    return Objects.deepEquals(this.uuid, other.uuid)
-      && Objects.deepEquals(this.recordUuid, other.recordUuid)
+    return Objects.deepEquals(this.identity, other.identity)
+      && Objects.deepEquals(this.origin, other.origin)
+      && Objects.deepEquals(this.kind, other.kind)
       && Objects.deepEquals(this.startTimeMs, other.startTimeMs)
       && Objects.deepEquals(this.endTimeMs, other.endTimeMs)
       && Objects.deepEquals(this.stage, other.stage)
-      && Objects.deepEquals(this.source, other.source)
+      && Objects.deepEquals(this.stageData, other.stageData)
   }
 
   override fun hashCode(): Int {
     return arrayOf<Any?>(
-      uuid,
-      recordUuid,
+      identity,
+      origin,
+      kind,
       startTimeMs,
       endTimeMs,
       stage,
-      source
+      stageData
     ).contentDeepHashCode()
   }
 
@@ -69,8 +74,8 @@ data class NativeSleepSample(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(uuid: String, recordUuid: String, startTimeMs: Double, endTimeMs: Double, stage: String, source: String?): NativeSleepSample {
-      return NativeSleepSample(uuid, recordUuid, startTimeMs, endTimeMs, stage, source)
+    private fun fromCpp(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, kind: NativeSleepSampleKind, startTimeMs: Double, endTimeMs: Double, stage: String?, stageData: NativeSleepStageData?): NativeSleepSample {
+      return NativeSleepSample(identity, origin, kind, startTimeMs, endTimeMs, stage, stageData)
     }
   }
 }

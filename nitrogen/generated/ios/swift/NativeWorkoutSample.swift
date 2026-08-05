@@ -18,37 +18,30 @@ public extension NativeWorkoutSample {
   /**
    * Create a new instance of `NativeWorkoutSample`.
    */
-  init(uuid: String, startTimeMs: Double, endTimeMs: Double, durationSeconds: Double, activityType: String, title: String?, source: String?, totalDistanceMeters: Double?, totalEnergyBurnedKcal: Double?) {
-    self.init(std.string(uuid), startTimeMs, endTimeMs, durationSeconds, std.string(activityType), { () -> bridge.std__optional_std__string_ in
+  init(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, startTimeMs: Double, endTimeMs: Double, elapsedDurationSeconds: Double, activeDuration: NativeHealthMetricValue, activity: NativeWorkoutActivity, title: String?, brandName: String?, totalDistance: NativeHealthMetricValue, totalActiveEnergyBurned: NativeHealthMetricValue) {
+    self.init(identity, origin, startTimeMs, endTimeMs, elapsedDurationSeconds, activeDuration, activity, { () -> bridge.std__optional_std__string_ in
       if let __unwrappedValue = title {
         return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
       } else {
         return .init()
       }
     }(), { () -> bridge.std__optional_std__string_ in
-      if let __unwrappedValue = source {
+      if let __unwrappedValue = brandName {
         return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
       } else {
         return .init()
       }
-    }(), { () -> bridge.std__optional_double_ in
-      if let __unwrappedValue = totalDistanceMeters {
-        return bridge.create_std__optional_double_(__unwrappedValue)
-      } else {
-        return .init()
-      }
-    }(), { () -> bridge.std__optional_double_ in
-      if let __unwrappedValue = totalEnergyBurnedKcal {
-        return bridge.create_std__optional_double_(__unwrappedValue)
-      } else {
-        return .init()
-      }
-    }())
+    }(), totalDistance, totalActiveEnergyBurned)
   }
 
   @inline(__always)
-  var uuid: String {
-    return String(self.__uuid)
+  var identity: NativeHealthSampleIdentity {
+    return self.__identity
+  }
+  
+  @inline(__always)
+  var origin: NativeHealthDataOrigin {
+    return self.__origin
   }
   
   @inline(__always)
@@ -62,13 +55,18 @@ public extension NativeWorkoutSample {
   }
   
   @inline(__always)
-  var durationSeconds: Double {
-    return self.__durationSeconds
+  var elapsedDurationSeconds: Double {
+    return self.__elapsedDurationSeconds
   }
   
   @inline(__always)
-  var activityType: String {
-    return String(self.__activityType)
+  var activeDuration: NativeHealthMetricValue {
+    return self.__activeDuration
+  }
+  
+  @inline(__always)
+  var activity: NativeWorkoutActivity {
+    return self.__activity
   }
   
   @inline(__always)
@@ -84,10 +82,10 @@ public extension NativeWorkoutSample {
   }
   
   @inline(__always)
-  var source: String? {
+  var brandName: String? {
     return { () -> String? in
-      if bridge.has_value_std__optional_std__string_(self.__source) {
-        let __unwrapped = bridge.get_std__optional_std__string_(self.__source)
+      if bridge.has_value_std__optional_std__string_(self.__brandName) {
+        let __unwrapped = bridge.get_std__optional_std__string_(self.__brandName)
         return String(__unwrapped)
       } else {
         return nil
@@ -96,26 +94,12 @@ public extension NativeWorkoutSample {
   }
   
   @inline(__always)
-  var totalDistanceMeters: Double? {
-    return { () -> Double? in
-      if bridge.has_value_std__optional_double_(self.__totalDistanceMeters) {
-        let __unwrapped = bridge.get_std__optional_double_(self.__totalDistanceMeters)
-        return __unwrapped
-      } else {
-        return nil
-      }
-    }()
+  var totalDistance: NativeHealthMetricValue {
+    return self.__totalDistance
   }
   
   @inline(__always)
-  var totalEnergyBurnedKcal: Double? {
-    return { () -> Double? in
-      if bridge.has_value_std__optional_double_(self.__totalEnergyBurnedKcal) {
-        let __unwrapped = bridge.get_std__optional_double_(self.__totalEnergyBurnedKcal)
-        return __unwrapped
-      } else {
-        return nil
-      }
-    }()
+  var totalActiveEnergyBurned: NativeHealthMetricValue {
+    return self.__totalActiveEnergyBurned
   }
 }

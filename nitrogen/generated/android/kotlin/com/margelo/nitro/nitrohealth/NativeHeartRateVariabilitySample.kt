@@ -20,7 +20,10 @@ import java.util.Objects
 data class NativeHeartRateVariabilitySample(
   @DoNotStrip
   @Keep
-  val uuid: String,
+  val identity: NativeHealthSampleIdentity,
+  @DoNotStrip
+  @Keep
+  val origin: NativeHealthDataOrigin,
   @DoNotStrip
   @Keep
   val timeMs: Double,
@@ -29,30 +32,27 @@ data class NativeHeartRateVariabilitySample(
   val milliseconds: Double,
   @DoNotStrip
   @Keep
-  val method: String,
-  @DoNotStrip
-  @Keep
-  val source: String?
+  val method: String
 ) {
   /* primary constructor */
 
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other !is NativeHeartRateVariabilitySample) return false
-    return Objects.deepEquals(this.uuid, other.uuid)
+    return Objects.deepEquals(this.identity, other.identity)
+      && Objects.deepEquals(this.origin, other.origin)
       && Objects.deepEquals(this.timeMs, other.timeMs)
       && Objects.deepEquals(this.milliseconds, other.milliseconds)
       && Objects.deepEquals(this.method, other.method)
-      && Objects.deepEquals(this.source, other.source)
   }
 
   override fun hashCode(): Int {
     return arrayOf<Any?>(
-      uuid,
+      identity,
+      origin,
       timeMs,
       milliseconds,
-      method,
-      source
+      method
     ).contentDeepHashCode()
   }
 
@@ -64,8 +64,8 @@ data class NativeHeartRateVariabilitySample(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(uuid: String, timeMs: Double, milliseconds: Double, method: String, source: String?): NativeHeartRateVariabilitySample {
-      return NativeHeartRateVariabilitySample(uuid, timeMs, milliseconds, method, source)
+    private fun fromCpp(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, timeMs: Double, milliseconds: Double, method: String): NativeHeartRateVariabilitySample {
+      return NativeHeartRateVariabilitySample(identity, origin, timeMs, milliseconds, method)
     }
   }
 }

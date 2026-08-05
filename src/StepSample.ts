@@ -1,7 +1,7 @@
-import type { HealthSampleIdentity } from './HealthSampleIdentity'
+import type { HealthSample } from './HealthSample'
 
 /** Step count sample returned by {@linkcode NitroHealth.readSteps}. */
-export interface StepSample extends HealthSampleIdentity {
+export interface StepSample extends HealthSample {
   /** Sample start time. */
   startDate: Date
   /** Sample end time. */

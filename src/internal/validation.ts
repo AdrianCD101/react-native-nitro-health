@@ -1,9 +1,49 @@
+import type { HealthDataType } from '../HealthDataType'
 import type { HealthPermission } from '../HealthPermission'
+import type { HealthRecordIdentity } from '../HealthSampleIdentity'
+
+const HEALTH_DATA_TYPES = new Set<HealthDataType>([
+  'steps',
+  'heartRate',
+  'restingHeartRate',
+  'heartRateVariability',
+  'distance',
+  'activeEnergyBurned',
+  'oxygenSaturation',
+  'height',
+  'sleep',
+  'bodyMass',
+  'workout',
+])
 
 export function assertPermissions(permissions: HealthPermission[]): void {
   if (permissions.length === 0) {
     throw new Error('At least one health permission is required')
   }
+  permissions.forEach((permission, index) => {
+    const candidate = permission as { accessType?: unknown; dataType?: unknown }
+    if (
+      typeof permission !== 'object' ||
+      permission === null ||
+      (candidate.accessType !== 'read' && candidate.accessType !== 'write') ||
+      typeof candidate.dataType !== 'string' ||
+      !HEALTH_DATA_TYPES.has(candidate.dataType as HealthDataType)
+    ) {
+      throw new Error(`permissions[${index}]: a supported read or write permission is required`)
+    }
+    if (candidate.accessType === 'write' && candidate.dataType === 'heartRateVariability') {
+      throw new Error('permissions[' + index + ']: heartRateVariability is read-only')
+    }
+  })
+}
+
+export function parseHealthDataTypes(values: readonly string[], label: string): HealthDataType[] {
+  return values.map((value, index) => {
+    if (!HEALTH_DATA_TYPES.has(value as HealthDataType)) {
+      throw new Error(`${label}[${index}]: unsupported health data type '${value}'`)
+    }
+    return value as HealthDataType
+  })
 }
 
 export function dateToTimeMs(value: Date, message: string): number {
@@ -61,25 +101,27 @@ export function assertUniqueSampleSyncIds(samples: readonly { sync?: { id: strin
   })
 }
 
-export function assertDeletableUuids(uuids: readonly string[]): void {
-  if (uuids.length === 0) {
-    throw new Error('At least one uuid is required')
+export function assertRecordIdentities(records: readonly HealthRecordIdentity[]): void {
+  if (records.length === 0) {
+    throw new Error('At least one record identity is required')
   }
 
-  uuids.forEach((uuid, index) => {
-    if (typeof uuid !== 'string' || uuid.trim() === '') {
-      throw new Error(`uuids[${index}]: a non-empty uuid string is required`)
+  const ids = new Set<string>()
+  records.forEach((record, index) => {
+    if (
+      typeof record !== 'object' ||
+      record === null ||
+      record.kind !== 'record' ||
+      typeof record.id !== 'string' ||
+      record.id.trim() === ''
+    ) {
+      throw new Error(`records[${index}]: an independently deletable record identity is required`)
     }
 
-    // Android reads flatten heart-rate readings and sleep stages out of parent Health Connect
-    // records under synthetic "<recordId>#<index>" ids; Health Connect can only delete whole
-    // records, so deleting by such an id would silently remove sibling readings. Mirrors
-    // ensureDeletableRecordIds in android/.../DeleteRecordIdValidation.kt — keep messages in sync.
-    if (uuid.includes('#')) {
-      throw new Error(
-        `uuids[${index}]: synthetic reading ids (record id + '#index') cannot be deleted individually; use deleteSamplesByTimeRange instead`
-      )
+    if (ids.has(record.id)) {
+      throw new Error(`records[${index}]: duplicate record identity '${record.id}'`)
     }
+    ids.add(record.id)
   })
 }
 

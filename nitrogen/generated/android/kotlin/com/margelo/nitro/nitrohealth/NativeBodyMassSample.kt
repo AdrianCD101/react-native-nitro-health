@@ -20,7 +20,10 @@ import java.util.Objects
 data class NativeBodyMassSample(
   @DoNotStrip
   @Keep
-  val uuid: String,
+  val identity: NativeHealthSampleIdentity,
+  @DoNotStrip
+  @Keep
+  val origin: NativeHealthDataOrigin,
   @DoNotStrip
   @Keep
   val startTimeMs: Double,
@@ -29,30 +32,27 @@ data class NativeBodyMassSample(
   val endTimeMs: Double,
   @DoNotStrip
   @Keep
-  val kilograms: Double,
-  @DoNotStrip
-  @Keep
-  val source: String?
+  val kilograms: Double
 ) {
   /* primary constructor */
 
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other !is NativeBodyMassSample) return false
-    return Objects.deepEquals(this.uuid, other.uuid)
+    return Objects.deepEquals(this.identity, other.identity)
+      && Objects.deepEquals(this.origin, other.origin)
       && Objects.deepEquals(this.startTimeMs, other.startTimeMs)
       && Objects.deepEquals(this.endTimeMs, other.endTimeMs)
       && Objects.deepEquals(this.kilograms, other.kilograms)
-      && Objects.deepEquals(this.source, other.source)
   }
 
   override fun hashCode(): Int {
     return arrayOf<Any?>(
-      uuid,
+      identity,
+      origin,
       startTimeMs,
       endTimeMs,
-      kilograms,
-      source
+      kilograms
     ).contentDeepHashCode()
   }
 
@@ -64,8 +64,8 @@ data class NativeBodyMassSample(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(uuid: String, startTimeMs: Double, endTimeMs: Double, kilograms: Double, source: String?): NativeBodyMassSample {
-      return NativeBodyMassSample(uuid, startTimeMs, endTimeMs, kilograms, source)
+    private fun fromCpp(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, startTimeMs: Double, endTimeMs: Double, kilograms: Double): NativeBodyMassSample {
+      return NativeBodyMassSample(identity, origin, startTimeMs, endTimeMs, kilograms)
     }
   }
 }

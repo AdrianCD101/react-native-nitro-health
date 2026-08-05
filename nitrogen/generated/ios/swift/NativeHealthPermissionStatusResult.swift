@@ -18,8 +18,8 @@ public extension NativeHealthPermissionStatusResult {
   /**
    * Create a new instance of `NativeHealthPermissionStatusResult`.
    */
-  init(availabilityStatus: HealthAvailabilityStatus, statuses: [NativeHealthPermissionStatusEntry]) {
-    self.init(availabilityStatus, { () -> bridge.std__vector_NativeHealthPermissionStatusEntry_ in
+  init(availability: NativeHealthAvailability, statuses: [NativeHealthPermissionStatusEntry]) {
+    self.init(availability, { () -> bridge.std__vector_NativeHealthPermissionStatusEntry_ in
       var __vector = bridge.create_std__vector_NativeHealthPermissionStatusEntry_(statuses.count)
       for __item in statuses {
         __vector.push_back(__item)
@@ -29,8 +29,8 @@ public extension NativeHealthPermissionStatusResult {
   }
 
   @inline(__always)
-  var availabilityStatus: HealthAvailabilityStatus {
-    return self.__availabilityStatus
+  var availability: NativeHealthAvailability {
+    return self.__availability
   }
   
   @inline(__always)

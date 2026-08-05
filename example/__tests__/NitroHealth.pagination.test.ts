@@ -1,4 +1,4 @@
-import { mockNitroHealth } from './support/mockNitroHealth'
+import { mockNitroHealth, nativeRecordMetadata } from './support/mockNitroHealth'
 
 jest.mock('react-native-nitro-modules', () => ({
   NitroModules: {
@@ -54,7 +54,7 @@ describe('NitroHealth pagination contract', () => {
       mockNitroHealth.readSteps.mockResolvedValue({
         samples: [
           {
-            uuid: 'uuid-1',
+            ...nativeRecordMetadata('record-1'),
             startTimeMs: startDate.getTime(),
             endTimeMs: endDate.getTime(),
             count: 123,
@@ -69,25 +69,29 @@ describe('NitroHealth pagination contract', () => {
       expect(result.samples).toHaveLength(1)
     })
 
-    it('leaves nextCursor undefined when the native side omits it', async () => {
+    it('omits nextCursor when the native side omits it', async () => {
       const startDate = new Date('2026-01-01T00:00:00.000Z')
       const endDate = new Date('2026-01-08T00:00:00.000Z')
       mockNitroHealth.readSteps.mockResolvedValue({ samples: [] })
 
       const result = await NitroHealth.readSteps({ startDate, endDate })
 
-      expect(result.nextCursor).toBeUndefined()
+      expect(result).not.toHaveProperty('nextCursor')
     })
   })
 
-  describe('uuid mapping', () => {
-    it('maps the native uuid through onto public samples', async () => {
+  describe('identity mapping', () => {
+    it('maps native record identity and origin onto public samples', async () => {
       const startDate = new Date('2026-01-01T00:00:00.000Z')
       const endDate = new Date('2026-01-08T00:00:00.000Z')
       mockNitroHealth.readSteps.mockResolvedValue({
         samples: [
           {
-            uuid: 'uuid-1',
+            ...nativeRecordMetadata(
+              'record-1',
+              'com.example.health',
+              'Example Health'
+            ),
             startTimeMs: startDate.getTime(),
             endTimeMs: endDate.getTime(),
             count: 123,
@@ -97,8 +101,11 @@ describe('NitroHealth pagination contract', () => {
 
       const result = await NitroHealth.readSteps({ startDate, endDate })
 
-      expect(result.samples[0].uuid).toBe('uuid-1')
-      expect(result.samples[0].recordUuid).toBe('uuid-1')
+      expect(result.samples[0].identity).toEqual({ kind: 'record', id: 'record-1' })
+      expect(result.samples[0].origin).toEqual({
+        identifier: 'com.example.health',
+        displayName: 'Example Health',
+      })
     })
   })
 

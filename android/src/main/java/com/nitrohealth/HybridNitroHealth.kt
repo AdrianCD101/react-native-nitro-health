@@ -3,6 +3,7 @@ package com.nitrohealth
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.aggregate.AggregationResult
 import androidx.health.connect.client.permission.HealthPermission
@@ -27,12 +28,7 @@ import androidx.health.connect.client.response.ReadRecordsResponse
 import androidx.health.connect.client.time.TimeRangeFilter
 import com.margelo.nitro.NitroModules
 import com.margelo.nitro.core.Promise
-import com.margelo.nitro.nitrohealth.AuthorizationRequestStatus
 import com.margelo.nitro.nitrohealth.BackgroundDeliveryFrequency
-import com.margelo.nitro.nitrohealth.BackgroundReadAuthorizationStatus
-import com.margelo.nitro.nitrohealth.HealthAuthorizationStatus
-import com.margelo.nitro.nitrohealth.HealthAvailabilityStatus
-import com.margelo.nitro.nitrohealth.HealthPermissionStatus
 import com.margelo.nitro.nitrohealth.HybridNitroHealthSpec
 import com.margelo.nitro.nitrohealth.NativeActiveEnergyBurnedSample
 import com.margelo.nitro.nitrohealth.NativeActiveEnergyBurnedSampleInput
@@ -43,11 +39,22 @@ import com.margelo.nitro.nitrohealth.NativeBodyMassSamplePage
 import com.margelo.nitro.nitrohealth.NativeDistanceSample
 import com.margelo.nitro.nitrohealth.NativeDistanceSampleInput
 import com.margelo.nitro.nitrohealth.NativeDistanceSamplePage
+import com.margelo.nitro.nitrohealth.NativeDistanceScope
+import com.margelo.nitro.nitrohealth.NativeDistanceWriteResult
+import com.margelo.nitro.nitrohealth.NativeBackgroundChangesMode
+import com.margelo.nitro.nitrohealth.NativeBackgroundChangesResult
+import com.margelo.nitro.nitrohealth.NativeBackgroundChangesResultStatus
+import com.margelo.nitro.nitrohealth.NativeHealthAdditionalAccessStatus
 import com.margelo.nitro.nitrohealth.NativeHealthAuthorizationResult
+import com.margelo.nitro.nitrohealth.NativeHealthAuthorizationStatus
+import com.margelo.nitro.nitrohealth.NativeHealthAvailability
+import com.margelo.nitro.nitrohealth.NativeHealthAvailabilityRecoveryResult
+import com.margelo.nitro.nitrohealth.NativeHealthAvailabilityStatus
+import com.margelo.nitro.nitrohealth.NativeHealthCapabilities
 import com.margelo.nitro.nitrohealth.NativeHealthChangesResult
 import com.margelo.nitro.nitrohealth.NativeHealthDateRangeQuery
+import com.margelo.nitro.nitrohealth.NativeHealthDeleteResult
 import com.margelo.nitro.nitrohealth.NativeHealthPermission
-import com.margelo.nitro.nitrohealth.NativeHealthPermissionStatusEntry
 import com.margelo.nitro.nitrohealth.NativeHealthPermissionStatusResult
 import com.margelo.nitro.nitrohealth.NativeHealthStatistics
 import com.margelo.nitro.nitrohealth.NativeHealthStatisticsQuery
@@ -63,43 +70,40 @@ import com.margelo.nitro.nitrohealth.NativeHeightSamplePage
 import com.margelo.nitro.nitrohealth.NativeOxygenSaturationSample
 import com.margelo.nitro.nitrohealth.NativeOxygenSaturationSampleInput
 import com.margelo.nitro.nitrohealth.NativeOxygenSaturationSamplePage
+import com.margelo.nitro.nitrohealth.NativePermissionActionKind
+import com.margelo.nitro.nitrohealth.NativePermissionDestination
+import com.margelo.nitro.nitrohealth.NativePermissionWorkflowResult
+import com.margelo.nitro.nitrohealth.NativePermissionWorkflowStatus
 import com.margelo.nitro.nitrohealth.NativeRestingHeartRateSample
 import com.margelo.nitro.nitrohealth.NativeRestingHeartRateSampleInput
 import com.margelo.nitro.nitrohealth.NativeRestingHeartRateSamplePage
 import com.margelo.nitro.nitrohealth.NativeSleepSessionInput
+import com.margelo.nitro.nitrohealth.NativeSleepSample
 import com.margelo.nitro.nitrohealth.NativeSleepSamplePage
 import com.margelo.nitro.nitrohealth.NativeStepSample
 import com.margelo.nitro.nitrohealth.NativeStepSampleInput
 import com.margelo.nitro.nitrohealth.NativeStepSamplePage
-import com.margelo.nitro.nitrohealth.NativeWorkoutSample
 import com.margelo.nitro.nitrohealth.NativeWorkoutSampleInput
 import com.margelo.nitro.nitrohealth.NativeWorkoutSamplePage
 import java.time.Instant
-import java.time.Period
 import java.time.ZoneId
 import kotlin.reflect.KClass
 
 class HybridNitroHealth: HybridNitroHealthSpec() {
-    override fun isAvailable(): Boolean {
-        return getAvailabilityStatus() == HealthAvailabilityStatus.AVAILABLE
+    override fun getAvailability(): NativeHealthAvailability {
+        val context = NitroModules.applicationContext
+            ?: return makeUnavailableHealthConnectAvailability()
+        return makeHealthConnectAvailability(
+            sdkStatus = HealthConnectClient.getSdkStatus(context),
+            isPlatformSupported = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
+        )
     }
 
-    override fun getAvailabilityStatus(): HealthAvailabilityStatus {
-        val context = NitroModules.applicationContext ?: return HealthAvailabilityStatus.UNAVAILABLE
-
-        return when (HealthConnectClient.getSdkStatus(context)) {
-            HealthConnectClient.SDK_AVAILABLE -> HealthAvailabilityStatus.AVAILABLE
-            HealthConnectClient.SDK_UNAVAILABLE_PROVIDER_UPDATE_REQUIRED ->
-                HealthAvailabilityStatus.PROVIDERUPDATEREQUIRED
-            else -> HealthAvailabilityStatus.UNAVAILABLE
-        }
-    }
-
-    override fun openHealthConnectInstall(): Boolean {
-        val context = NitroModules.applicationContext ?: return false
-
-        if (getAvailabilityStatus() != HealthAvailabilityStatus.PROVIDERUPDATEREQUIRED) {
-            return false
+    override fun performAvailabilityRecovery(): Promise<NativeHealthAvailabilityRecoveryResult> {
+        val context = NitroModules.applicationContext
+            ?: return Promise.resolved(NativeHealthAvailabilityRecoveryResult.NORECOVERYACTION)
+        if (getAvailability().recovery != installOrUpdateProviderRecovery) {
+            return Promise.resolved(NativeHealthAvailabilityRecoveryResult.NORECOVERYACTION)
         }
 
         val providerPackageName = "com.google.android.apps.healthdata"
@@ -114,102 +118,162 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
 
-        return try {
+        val result = try {
             context.startActivity(intent)
-            true
+            NativeHealthAvailabilityRecoveryResult.OPENED
         } catch (_: ActivityNotFoundException) {
-            false
+            NativeHealthAvailabilityRecoveryResult.DESTINATIONUNAVAILABLE
+        } catch (_: SecurityException) {
+            NativeHealthAvailabilityRecoveryResult.DESTINATIONUNAVAILABLE
+        }
+        return Promise.resolved(result)
+    }
+
+    override fun getCapabilities(): Promise<NativeHealthCapabilities> {
+        val context = NitroModules.applicationContext
+            ?: return Promise.resolved(
+                NativeHealthCapabilities(
+                    backgroundChangesMode = NativeBackgroundChangesMode.POLLING,
+                    backgroundRead = NativeHealthAdditionalAccessStatus.UNSUPPORTED,
+                    historyRead = NativeHealthAdditionalAccessStatus.UNSUPPORTED
+                )
+            )
+        if (getAvailability().status != NativeHealthAvailabilityStatus.AVAILABLE) {
+            return Promise.resolved(
+                NativeHealthCapabilities(
+                    backgroundChangesMode = NativeBackgroundChangesMode.POLLING,
+                    backgroundRead = NativeHealthAdditionalAccessStatus.UNSUPPORTED,
+                    historyRead = NativeHealthAdditionalAccessStatus.UNSUPPORTED
+                )
+            )
+        }
+
+        return Promise.async {
+            val client = HealthConnectClient.getOrCreate(context)
+            NativeHealthCapabilities(
+                backgroundChangesMode = NativeBackgroundChangesMode.POLLING,
+                backgroundRead = getBackgroundReadAccessStatus(context, client),
+                historyRead = getHistoryReadAccessStatus(context, client)
+            )
         }
     }
 
-    override fun openHealthSettings(): Promise<Boolean> {
+    override fun requestAdditionalAccess(
+        access: String
+    ): Promise<NativeHealthAdditionalAccessStatus> {
+        val permission = when (access) {
+            "background-read" -> backgroundReadPermission
+            "history-read" -> historyReadPermission
+            else -> throw IllegalArgumentException(
+                "Unsupported additional health access '$access'; expected 'background-read' or 'history-read'"
+            )
+        }
         val context = NitroModules.applicationContext
-            ?: return Promise.resolved(false)
+            ?: return Promise.resolved(NativeHealthAdditionalAccessStatus.UNSUPPORTED)
+        if (getAvailability().status != NativeHealthAvailabilityStatus.AVAILABLE) {
+            return Promise.resolved(NativeHealthAdditionalAccessStatus.UNSUPPORTED)
+        }
 
-        return Promise.resolved(
-            try {
-                val intent = Intent(HealthConnectClient.ACTION_HEALTH_CONNECT_SETTINGS).apply {
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                }
-                context.startActivity(intent)
-                true
-            } catch (_: ActivityNotFoundException) {
-                false
+        return Promise.async {
+            val client = HealthConnectClient.getOrCreate(context)
+            val currentStatus = getAdditionalAccessStatus(access, context, client)
+            if (currentStatus == NativeHealthAdditionalAccessStatus.NOTGRANTED) {
+                NitroHealthPermissionActivity.requestPermissions(context, setOf(permission))
+                getAdditionalAccessStatus(access, context, client)
+            } else {
+                currentStatus
             }
-        )
+        }
     }
 
-    override fun enableBackgroundDelivery(
-        dataType: String,
+    override fun managePermissions(): Promise<NativePermissionWorkflowResult> {
+        val availability = getAvailability()
+        if (availability.status != NativeHealthAvailabilityStatus.AVAILABLE) {
+            return Promise.resolved(
+                NativePermissionWorkflowResult(
+                    status = NativePermissionWorkflowStatus.UNAVAILABLE,
+                    actionKind = null,
+                    destination = null,
+                    availability = availability
+                )
+            )
+        }
+        val context = NitroModules.applicationContext
+            ?: return Promise.resolved(
+                NativePermissionWorkflowResult(
+                    status = NativePermissionWorkflowStatus.UNAVAILABLE,
+                    actionKind = null,
+                    destination = null,
+                    availability = makeUnavailableHealthConnectAvailability()
+                )
+            )
+        val intent = Intent(HealthConnectClient.ACTION_HEALTH_CONNECT_SETTINGS).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        return Promise.async {
+            context.startActivity(intent)
+            NativePermissionWorkflowResult(
+                status = NativePermissionWorkflowStatus.USERACTIONREQUIRED,
+                actionKind = NativePermissionActionKind.OPENED,
+                destination = NativePermissionDestination.HEALTHCONNECTSETTINGS,
+                availability = null
+            )
+        }
+    }
+
+    override fun revokeAllPermissions(): Promise<NativePermissionWorkflowResult> {
+        val availability = getAvailability()
+        val context = NitroModules.applicationContext
+        if (availability.status != NativeHealthAvailabilityStatus.AVAILABLE || context == null) {
+            return Promise.resolved(
+                NativePermissionWorkflowResult(
+                    status = NativePermissionWorkflowStatus.UNAVAILABLE,
+                    actionKind = null,
+                    destination = null,
+                    availability = availability
+                )
+            )
+        }
+
+        return Promise.async {
+            HealthConnectClient.getOrCreate(context).permissionController.revokeAllPermissions()
+            NativePermissionWorkflowResult(
+                status = NativePermissionWorkflowStatus.COMPLETED,
+                actionKind = null,
+                destination = null,
+                availability = null
+            )
+        }
+    }
+
+    override fun getBackgroundChangesMode(): NativeBackgroundChangesMode {
+        return NativeBackgroundChangesMode.POLLING
+    }
+
+    override fun configureBackgroundChanges(
+        dataTypes: Array<String>,
         frequency: BackgroundDeliveryFrequency
-    ): Promise<Unit> {
-        return Promise.rejected(
-            UnsupportedOperationException(
-                "Background change notifications are unavailable on Android; request background read authorization and schedule app-owned WorkManager polling instead"
-            )
-        )
+    ): Promise<NativeBackgroundChangesResult> {
+        require(dataTypes.isNotEmpty()) { "At least one background change data type is required" }
+        dataTypes.forEach(::healthDataTypeDescriptorFor)
+        return makePollingBackgroundChangesResult()
     }
 
-    override fun disableBackgroundDelivery(dataType: String): Promise<Unit> {
-        return Promise.rejected(
-            UnsupportedOperationException("Background change notifications are unavailable on Android")
-        )
+    override fun disableBackgroundChanges(
+        dataTypes: Array<String>?
+    ): Promise<NativeBackgroundChangesResult> {
+        dataTypes?.forEach(::healthDataTypeDescriptorFor)
+        return makePollingBackgroundChangesResult()
     }
 
-    override fun disableAllBackgroundDelivery(): Promise<Unit> {
-        return Promise.rejected(
-            UnsupportedOperationException("Background change notifications are unavailable on Android")
-        )
-    }
-
-    override fun setOnChangeNotificationListener(
+    override fun setOnBackgroundChangeListener(
         listener: ((Array<String>, String) -> Unit)?
-    ) {
-        throw UnsupportedOperationException(
-            "Background change notifications are unavailable on Android; use app-owned WorkManager polling"
-        )
+    ): Boolean {
+        return false
     }
 
-    override fun acknowledgeChangeNotification(deliveryId: String) {
-        // Android cannot create change notifications, so there is nothing to acknowledge.
-    }
-
-    override fun getBackgroundReadAuthorizationStatus(): Promise<BackgroundReadAuthorizationStatus> {
-        val context = NitroModules.applicationContext
-            ?: return Promise.resolved(BackgroundReadAuthorizationStatus.UNAVAILABLE)
-
-        if (getAvailabilityStatus() != HealthAvailabilityStatus.AVAILABLE) {
-            return Promise.resolved(BackgroundReadAuthorizationStatus.UNAVAILABLE)
-        }
-
-        return Promise.async {
-            val client = HealthConnectClient.getOrCreate(context)
-            getBackgroundReadAuthorizationStatus(context, client)
-        }
-    }
-
-    override fun requestBackgroundReadAuthorization(): Promise<BackgroundReadAuthorizationStatus> {
-        val context = NitroModules.applicationContext
-            ?: return Promise.resolved(BackgroundReadAuthorizationStatus.UNAVAILABLE)
-
-        if (getAvailabilityStatus() != HealthAvailabilityStatus.AVAILABLE) {
-            return Promise.resolved(BackgroundReadAuthorizationStatus.UNAVAILABLE)
-        }
-
-        return Promise.async {
-            val client = HealthConnectClient.getOrCreate(context)
-            val currentStatus = getBackgroundReadAuthorizationStatus(context, client)
-
-            if (currentStatus != BackgroundReadAuthorizationStatus.NOTGRANTED) {
-                return@async currentStatus
-            }
-
-            NitroHealthPermissionActivity.requestPermissions(
-                context,
-                setOf(backgroundReadPermission)
-            )
-            getBackgroundReadAuthorizationStatus(context, client)
-        }
+    override fun acknowledgeBackgroundChange(deliveryId: String): Boolean {
+        return false
     }
 
     override fun createChangesToken(dataType: String): Promise<String> {
@@ -217,7 +281,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             val context = NitroModules.applicationContext
                 ?: throw IllegalStateException("Android application context is unavailable")
 
-            if (getAvailabilityStatus() != HealthAvailabilityStatus.AVAILABLE) {
+            if (getAvailability().status != NativeHealthAvailabilityStatus.AVAILABLE) {
                 throw IllegalStateException("Health Connect is not available")
             }
 
@@ -240,7 +304,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             val context = NitroModules.applicationContext
                 ?: throw IllegalStateException("Android application context is unavailable")
 
-            if (getAvailabilityStatus() != HealthAvailabilityStatus.AVAILABLE) {
+            if (getAvailability().status != NativeHealthAvailabilityStatus.AVAILABLE) {
                 throw IllegalStateException("Health Connect is not available")
             }
 
@@ -275,7 +339,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             val context = NitroModules.applicationContext
                 ?: throw IllegalStateException("Android application context is unavailable")
 
-            if (getAvailabilityStatus() != HealthAvailabilityStatus.AVAILABLE) {
+            if (getAvailability().status != NativeHealthAvailabilityStatus.AVAILABLE) {
                 throw IllegalStateException("Health Connect is not available")
             }
 
@@ -297,7 +361,8 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             NativeStepSamplePage(
                 samples = response.records.map { record ->
                     NativeStepSample(
-                        uuid = record.metadata.id,
+                        identity = makeRecordIdentity(record.metadata.id),
+                        origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
                         startTimeMs = record.startTime.toEpochMilli().toDouble(),
                         endTimeMs = record.endTime.toEpochMilli().toDouble(),
                         count = record.count.toDouble()
@@ -313,7 +378,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             val context = NitroModules.applicationContext
                 ?: throw IllegalStateException("Android application context is unavailable")
 
-            if (getAvailabilityStatus() != HealthAvailabilityStatus.AVAILABLE) {
+            if (getAvailability().status != NativeHealthAvailabilityStatus.AVAILABLE) {
                 throw IllegalStateException("Health Connect is not available")
             }
 
@@ -335,10 +400,12 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             NativeDistanceSamplePage(
                 samples = response.records.map { record ->
                     NativeDistanceSample(
-                        uuid = record.metadata.id,
+                        identity = makeRecordIdentity(record.metadata.id),
+                        origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
                         startTimeMs = record.startTime.toEpochMilli().toDouble(),
                         endTimeMs = record.endTime.toEpochMilli().toDouble(),
-                        distanceMeters = record.distance.inMeters
+                        distanceMeters = record.distance.inMeters,
+                        scope = NativeDistanceScope.ACTIVITYUNSPECIFIED
                     )
                 }.toTypedArray(),
                 nextCursor = response.pageToken?.let { encodeSampleCursor("distance", query.ascending, it) }
@@ -351,7 +418,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             val context = NitroModules.applicationContext
                 ?: throw IllegalStateException("Android application context is unavailable")
 
-            if (getAvailabilityStatus() != HealthAvailabilityStatus.AVAILABLE) {
+            if (getAvailability().status != NativeHealthAvailabilityStatus.AVAILABLE) {
                 throw IllegalStateException("Health Connect is not available")
             }
 
@@ -373,7 +440,8 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             NativeActiveEnergyBurnedSamplePage(
                 samples = response.records.map { record ->
                     NativeActiveEnergyBurnedSample(
-                        uuid = record.metadata.id,
+                        identity = makeRecordIdentity(record.metadata.id),
+                        origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
                         startTimeMs = record.startTime.toEpochMilli().toDouble(),
                         endTimeMs = record.endTime.toEpochMilli().toDouble(),
                         kilocalories = record.energy.inKilocalories
@@ -389,7 +457,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             val context = NitroModules.applicationContext
                 ?: throw IllegalStateException("Android application context is unavailable")
 
-            if (getAvailabilityStatus() != HealthAvailabilityStatus.AVAILABLE) {
+            if (getAvailability().status != NativeHealthAvailabilityStatus.AVAILABLE) {
                 throw IllegalStateException("Health Connect is not available")
             }
 
@@ -437,11 +505,11 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             NativeBodyMassSamplePage(
                 samples = response.records.map { record ->
                     NativeBodyMassSample(
-                        uuid = record.metadata.id,
+                        identity = makeRecordIdentity(record.metadata.id),
+                        origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
                         startTimeMs = record.time.toEpochMilli().toDouble(),
                         endTimeMs = record.time.toEpochMilli().toDouble(),
-                        kilograms = record.weight.inKilograms,
-                        source = record.metadata.dataOrigin.packageName
+                        kilograms = record.weight.inKilograms
                     )
                 }.toTypedArray(),
                 nextCursor = response.pageToken?.let { encodeSampleCursor("bodyMass", query.ascending, it) }
@@ -464,7 +532,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         val context = NitroModules.applicationContext
             ?: throw IllegalStateException("Android application context is unavailable")
 
-        if (getAvailabilityStatus() != HealthAvailabilityStatus.AVAILABLE) {
+        if (getAvailability().status != NativeHealthAvailabilityStatus.AVAILABLE) {
             throw IllegalStateException("Health Connect is not available")
         }
 
@@ -495,10 +563,10 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             NativeRestingHeartRateSamplePage(
                 samples = response.records.map { record ->
                     NativeRestingHeartRateSample(
-                        uuid = record.metadata.id,
+                        identity = makeRecordIdentity(record.metadata.id),
+                        origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
                         timeMs = record.time.toEpochMilli().toDouble(),
-                        bpm = record.beatsPerMinute.toDouble(),
-                        source = record.metadata.dataOrigin.packageName
+                        bpm = record.beatsPerMinute.toDouble()
                     )
                 }.toTypedArray(),
                 nextCursor = response.pageToken?.let { encodeSampleCursor("restingHeartRate", query.ascending, it) }
@@ -514,11 +582,11 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             NativeHeartRateVariabilitySamplePage(
                 samples = response.records.map { record ->
                     NativeHeartRateVariabilitySample(
-                        uuid = record.metadata.id,
+                        identity = makeRecordIdentity(record.metadata.id),
+                        origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
                         timeMs = record.time.toEpochMilli().toDouble(),
                         milliseconds = record.heartRateVariabilityMillis,
-                        method = "rmssd",
-                        source = record.metadata.dataOrigin.packageName
+                        method = "rmssd"
                     )
                 }.toTypedArray(),
                 nextCursor = response.pageToken?.let { encodeSampleCursor("heartRateVariability", query.ascending, it) }
@@ -534,10 +602,10 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             NativeOxygenSaturationSamplePage(
                 samples = response.records.map { record ->
                     NativeOxygenSaturationSample(
-                        uuid = record.metadata.id,
+                        identity = makeRecordIdentity(record.metadata.id),
+                        origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
                         timeMs = record.time.toEpochMilli().toDouble(),
-                        percentage = record.percentage.value,
-                        source = record.metadata.dataOrigin.packageName
+                        percentage = record.percentage.value
                     )
                 }.toTypedArray(),
                 nextCursor = response.pageToken?.let { encodeSampleCursor("oxygenSaturation", query.ascending, it) }
@@ -551,10 +619,10 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             NativeHeightSamplePage(
                 samples = response.records.map { record ->
                     NativeHeightSample(
-                        uuid = record.metadata.id,
+                        identity = makeRecordIdentity(record.metadata.id),
+                        origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
                         timeMs = record.time.toEpochMilli().toDouble(),
-                        meters = record.height.inMeters,
-                        source = record.metadata.dataOrigin.packageName
+                        meters = record.height.inMeters
                     )
                 }.toTypedArray(),
                 nextCursor = response.pageToken?.let { encodeSampleCursor("height", query.ascending, it) }
@@ -567,7 +635,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             val context = NitroModules.applicationContext
                 ?: throw IllegalStateException("Android application context is unavailable")
 
-            if (getAvailabilityStatus() != HealthAvailabilityStatus.AVAILABLE) {
+            if (getAvailability().status != NativeHealthAvailabilityStatus.AVAILABLE) {
                 throw IllegalStateException("Health Connect is not available")
             }
 
@@ -603,7 +671,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             val context = NitroModules.applicationContext
                 ?: throw IllegalStateException("Android application context is unavailable")
 
-            if (getAvailabilityStatus() != HealthAvailabilityStatus.AVAILABLE) {
+            if (getAvailability().status != NativeHealthAvailabilityStatus.AVAILABLE) {
                 throw IllegalStateException("Health Connect is not available")
             }
 
@@ -634,6 +702,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                     )
                     client.aggregateGroupByDuration(request).mapNotNull { group ->
                         makeStatistics(
+                            dataType = dataType,
                             requestedMetrics = requestedMetrics,
                             result = group.result,
                             bucketStartTimeMs = group.startTime.toEpochMilli().toDouble(),
@@ -654,6 +723,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                     )
                     client.aggregateGroupByPeriod(request).mapNotNull { group ->
                         makeStatistics(
+                            dataType = dataType,
                             requestedMetrics = requestedMetrics,
                             result = group.result,
                             bucketStartTimeMs = group.startTime.atZone(zoneId).toInstant().toEpochMilli().toDouble(),
@@ -669,6 +739,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
     }
 
     private fun makeStatistics(
+        dataType: String,
         requestedMetrics: Map<String, StatisticsMetricBinding>,
         result: AggregationResult,
         bucketStartTimeMs: Double,
@@ -693,7 +764,12 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             sum = values["sum"],
             avg = values["avg"],
             min = values["min"],
-            max = values["max"]
+            max = values["max"],
+            scope = if (dataType == "distance") {
+                NativeDistanceScope.ACTIVITYUNSPECIFIED
+            } else {
+                null
+            }
         )
     }
 
@@ -702,7 +778,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             val context = NitroModules.applicationContext
                 ?: throw IllegalStateException("Android application context is unavailable")
 
-            if (getAvailabilityStatus() != HealthAvailabilityStatus.AVAILABLE) {
+            if (getAvailability().status != NativeHealthAvailabilityStatus.AVAILABLE) {
                 throw IllegalStateException("Health Connect is not available")
             }
 
@@ -726,11 +802,12 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             val samples = response.records.flatMap { record ->
                 makeNativeSleepSamples(record).asIterable()
             }
-
             val ordered = if (query.ascending) {
-                samples.sortedBy { it.startTimeMs }
+                samples.sortedWith(compareBy({ it.startTimeMs }, { it.identity.id }))
             } else {
-                samples.sortedByDescending { it.startTimeMs }
+                samples.sortedWith(compareByDescending<NativeSleepSample> {
+                    it.startTimeMs
+                }.thenByDescending { it.identity.id })
             }
 
             NativeSleepSamplePage(
@@ -745,7 +822,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             val context = NitroModules.applicationContext
                 ?: throw IllegalStateException("Android application context is unavailable")
 
-            if (getAvailabilityStatus() != HealthAvailabilityStatus.AVAILABLE) {
+            if (getAvailability().status != NativeHealthAvailabilityStatus.AVAILABLE) {
                 throw IllegalStateException("Health Connect is not available")
             }
 
@@ -765,23 +842,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             val response = client.readRecords(request)
 
             NativeWorkoutSamplePage(
-                samples = response.records.map { record ->
-                    NativeWorkoutSample(
-                        uuid = record.metadata.id,
-                        startTimeMs = record.startTime.toEpochMilli().toDouble(),
-                        endTimeMs = record.endTime.toEpochMilli().toDouble(),
-                        // Wall-clock duration; ExerciseSessionRecord has no pause-aware duration
-                        // on the record itself (iOS uses the pause-aware HKWorkout.duration).
-                        durationSeconds = (record.endTime.toEpochMilli() - record.startTime.toEpochMilli()) / 1000.0,
-                        activityType = makeWorkoutActivityType(record.exerciseType),
-                        title = record.title,
-                        source = record.metadata.dataOrigin.packageName,
-                        // Health Connect sessions carry no totals; per-session aggregation is a
-                        // deliberate follow-up (one extra IPC call per session).
-                        totalDistanceMeters = null,
-                        totalEnergyBurnedKcal = null
-                    )
-                }.toTypedArray(),
+                samples = response.records.map(::makeNativeWorkoutSample).toTypedArray(),
                 nextCursor = response.pageToken?.let { encodeSampleCursor("workout", query.ascending, it) }
             )
         }
@@ -795,11 +856,14 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         }
     }
 
-    override fun saveDistance(samples: Array<NativeDistanceSampleInput>): Promise<Unit> {
+    override fun saveDistance(
+        samples: Array<NativeDistanceSampleInput>
+    ): Promise<NativeDistanceWriteResult> {
         return Promise.async {
+            val records = toDistanceRecords(samples)
             val client = requireWritableClient("distance")
-            client.insertRecords(toDistanceRecords(samples))
-            Unit
+            client.insertRecords(records)
+            NativeDistanceWriteResult(storedScope = NativeDistanceScope.ACTIVITYUNSPECIFIED)
         }
     }
 
@@ -869,25 +933,28 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         }
     }
 
-    override fun deleteSamplesByUuids(dataType: String, uuids: Array<String>): Promise<Unit> {
+    override fun deleteRecordsByIds(
+        dataType: String,
+        recordIds: Array<String>
+    ): Promise<NativeHealthDeleteResult> {
         return Promise.async {
-            val recordIds = ensureDeletableRecordIds(uuids)
+            val validatedRecordIds = ensureDeletableRecordIds(recordIds)
             val client = requireWritableClient(dataType)
-            // Health Connect only deletes records owned by the calling app, and delete-by-id is
-            // transactional: a nonexistent or foreign id fails the whole call (see README).
             client.deleteRecords(
                 recordType = healthDataTypeDescriptorFor(dataType).recordType,
-                recordIdsList = recordIds,
+                recordIdsList = validatedRecordIds,
                 clientRecordIdsList = emptyList()
             )
-            Unit
+            // Health Connect rejects invalid IDs and deletes the list transactionally, so a
+            // successful Unit result means every validated ID was deleted.
+            makeCompletedIdDeleteResult(validatedRecordIds.size)
         }
     }
 
-    override fun deleteSamplesByTimeRange(
+    override fun deleteRecordsByTimeRange(
         dataType: String,
         query: NativeHealthTimeRangeQuery
-    ): Promise<Unit> {
+    ): Promise<NativeHealthDeleteResult> {
         return Promise.async {
             val client = requireWritableClient(dataType)
             client.deleteRecords(
@@ -897,53 +964,18 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                     Instant.ofEpochMilli(query.endTimeMs.toLong())
                 )
             )
-            Unit
-        }
-    }
-
-    override fun getRequestStatusForAuthorization(
-        permissions: Array<NativeHealthPermission>
-    ): Promise<AuthorizationRequestStatus> {
-        val context = NitroModules.applicationContext
-            ?: return Promise.resolved(AuthorizationRequestStatus.UNKNOWN)
-
-        if (getAvailabilityStatus() != HealthAvailabilityStatus.AVAILABLE) {
-            return Promise.resolved(AuthorizationRequestStatus.UNKNOWN)
-        }
-
-        return Promise.async {
-            val client = HealthConnectClient.getOrCreate(context)
-            val grantedPermissions = client.permissionController.getGrantedPermissions()
-            val requestedPermissions = permissions.map {
-                toHealthConnectPermission(it.dataType, it.accessType)
-            }.toSet()
-
-            if (grantedPermissions.containsAll(requestedPermissions)) {
-                AuthorizationRequestStatus.UNNECESSARY
-            } else {
-                AuthorizationRequestStatus.SHOULDREQUEST
-            }
+            makeCompletedTimeRangeDeleteResult()
         }
     }
 
     override fun getPermissionStatuses(
         permissions: Array<NativeHealthPermission>
     ): Promise<NativeHealthPermissionStatusResult> {
+        val availability = getAvailability()
         val context = NitroModules.applicationContext
-            ?: return Promise.resolved(
-                makePermissionStatusResult(
-                    permissions = permissions,
-                    availabilityStatus = HealthAvailabilityStatus.UNAVAILABLE
-                )
-            )
-
-        val availabilityStatus = getAvailabilityStatus()
-        if (availabilityStatus != HealthAvailabilityStatus.AVAILABLE) {
+        if (availability.status != NativeHealthAvailabilityStatus.AVAILABLE || context == null) {
             return Promise.resolved(
-                makePermissionStatusResult(
-                    permissions = permissions,
-                    availabilityStatus = availabilityStatus
-                )
+                makePermissionStatusResult(permissions, availability)
             )
         }
 
@@ -951,7 +983,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             val client = HealthConnectClient.getOrCreate(context)
             makePermissionStatusResult(
                 permissions = permissions,
-                availabilityStatus = availabilityStatus,
+                availability = availability,
                 grantedHealthConnectPermissions = client.permissionController.getGrantedPermissions()
             )
         }
@@ -960,123 +992,101 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
     override fun requestAuthorization(
         permissions: Array<NativeHealthPermission>
     ): Promise<NativeHealthAuthorizationResult> {
+        val availability = getAvailability()
         val context = NitroModules.applicationContext
-            ?: return Promise.resolved(
-                makeAuthorizationResult(
-                    permissions = permissions,
-                    availabilityStatus = HealthAvailabilityStatus.UNAVAILABLE,
-                    requestStatus = AuthorizationRequestStatus.UNKNOWN
-                )
-            )
-
-        val availabilityStatus = getAvailabilityStatus()
-
-        if (availabilityStatus != HealthAvailabilityStatus.AVAILABLE) {
+        if (availability.status != NativeHealthAvailabilityStatus.AVAILABLE || context == null) {
             return Promise.resolved(
-                makeAuthorizationResult(
-                    permissions = permissions,
-                    availabilityStatus = availabilityStatus,
-                    requestStatus = AuthorizationRequestStatus.UNKNOWN
+                NativeHealthAuthorizationResult(
+                    status = NativeHealthAuthorizationStatus.UNAVAILABLE,
+                    availability = availability,
+                    statuses = makePermissionStatusEntries(permissions, null)
                 )
             )
         }
 
         return Promise.async {
             val client = HealthConnectClient.getOrCreate(context)
+            val requestedPermissionSet = permissions.map { permission ->
+                toHealthConnectPermission(permission.dataType, permission.accessType)
+            }.toSet()
             val grantedPermissions = client.permissionController.getGrantedPermissions()
-            val requestedPermissions = permissions.map { permission ->
-                permission to toHealthConnectPermission(permission.dataType, permission.accessType)
+            if (!grantedPermissions.containsAll(requestedPermissionSet)) {
+                NitroHealthPermissionActivity.requestPermissions(context, requestedPermissionSet)
             }
-            val requestedPermissionSet = requestedPermissions.map { it.second }.toSet()
 
-            val updatedGrantedPermissions = if (grantedPermissions.containsAll(requestedPermissionSet)) {
-                grantedPermissions
-            } else {
-                NitroHealthPermissionActivity.requestPermissions(
-                    context,
-                    requestedPermissionSet
+            NativeHealthAuthorizationResult(
+                status = NativeHealthAuthorizationStatus.COMPLETED,
+                availability = availability,
+                statuses = makePermissionStatusEntries(
+                    permissions = permissions,
+                    grantedHealthConnectPermissions =
+                        client.permissionController.getGrantedPermissions()
                 )
-            }
-
-            val grantedNativePermissions = requestedPermissions.filter { entry ->
-                updatedGrantedPermissions.contains(entry.second)
-            }.map { it.first }.toTypedArray()
-            val deniedNativePermissions = requestedPermissions.filterNot { entry ->
-                updatedGrantedPermissions.contains(entry.second)
-            }.map { it.first }.toTypedArray()
-            val requestStatus = if (deniedNativePermissions.isEmpty()) {
-                AuthorizationRequestStatus.UNNECESSARY
-            } else {
-                AuthorizationRequestStatus.SHOULDREQUEST
-            }
-
-            makeAuthorizationResult(
-                permissions = permissions,
-                availabilityStatus = availabilityStatus,
-                requestStatus = requestStatus,
-                grantedPermissions = grantedNativePermissions,
-                deniedPermissions = deniedNativePermissions
             )
         }
     }
 
     private fun makePermissionStatusResult(
         permissions: Array<NativeHealthPermission>,
-        availabilityStatus: HealthAvailabilityStatus,
+        availability: NativeHealthAvailability,
         grantedHealthConnectPermissions: Set<String>? = null
     ): NativeHealthPermissionStatusResult {
-        val statuses = permissions.map { permission ->
-            val status = if (grantedHealthConnectPermissions == null) {
-                HealthPermissionStatus.UNVERIFIABLE
-            } else if (
-                grantedHealthConnectPermissions.contains(
-                    toHealthConnectPermission(permission.dataType, permission.accessType)
-                )
-            ) {
-                HealthPermissionStatus.GRANTED
-            } else {
-                HealthPermissionStatus.NOTGRANTED
-            }
-
-            NativeHealthPermissionStatusEntry(permission = permission, status = status)
-        }.toTypedArray()
-
         return NativeHealthPermissionStatusResult(
-            availabilityStatus = availabilityStatus,
-            statuses = statuses
+            availability = availability,
+            statuses = makePermissionStatusEntries(
+                permissions = permissions,
+                grantedHealthConnectPermissions = grantedHealthConnectPermissions
+            )
         )
     }
 
-    private fun makeAuthorizationResult(
-        permissions: Array<NativeHealthPermission>,
-        availabilityStatus: HealthAvailabilityStatus,
-        requestStatus: AuthorizationRequestStatus,
-        grantedPermissions: Array<NativeHealthPermission> = emptyArray(),
-        deniedPermissions: Array<NativeHealthPermission> = permissions,
-        unverifiablePermissions: Array<NativeHealthPermission> = emptyArray()
-    ): NativeHealthAuthorizationResult {
-        val status = when {
-            availabilityStatus != HealthAvailabilityStatus.AVAILABLE -> HealthAuthorizationStatus.UNAVAILABLE
-            deniedPermissions.isEmpty() -> HealthAuthorizationStatus.GRANTED
-            grantedPermissions.isNotEmpty() || unverifiablePermissions.isNotEmpty() -> HealthAuthorizationStatus.PARTIAL
-            else -> HealthAuthorizationStatus.DENIED
+    private suspend fun getAdditionalAccessStatus(
+        access: String,
+        context: android.content.Context,
+        client: HealthConnectClient
+    ): NativeHealthAdditionalAccessStatus {
+        return when (access) {
+            "background-read" -> getBackgroundReadAccessStatus(context, client)
+            "history-read" -> getHistoryReadAccessStatus(context, client)
+            else -> throw IllegalArgumentException(
+                "Unsupported additional health access '$access'; expected 'background-read' or 'history-read'"
+            )
+        }
+    }
+
+    private fun makePollingBackgroundChangesResult(): Promise<NativeBackgroundChangesResult> {
+        val context = NitroModules.applicationContext
+        if (
+            context == null ||
+            getAvailability().status != NativeHealthAvailabilityStatus.AVAILABLE
+        ) {
+            return Promise.resolved(
+                NativeBackgroundChangesResult(
+                    status = NativeBackgroundChangesResultStatus.UNAVAILABLE,
+                    mode = NativeBackgroundChangesMode.POLLING,
+                    backgroundRead = NativeHealthAdditionalAccessStatus.UNSUPPORTED
+                )
+            )
         }
 
-        return NativeHealthAuthorizationResult(
-            status = status,
-            availabilityStatus = availabilityStatus,
-            requestStatus = requestStatus,
-            grantedPermissions = grantedPermissions,
-            deniedPermissions = deniedPermissions,
-            unverifiablePermissions = unverifiablePermissions
-        )
+        return Promise.async {
+            val backgroundRead = getBackgroundReadAccessStatus(
+                context,
+                HealthConnectClient.getOrCreate(context)
+            )
+            NativeBackgroundChangesResult(
+                status = NativeBackgroundChangesResultStatus.USERACTIONREQUIRED,
+                mode = NativeBackgroundChangesMode.POLLING,
+                backgroundRead = backgroundRead
+            )
+        }
     }
 
     private suspend fun requireWritableClient(dataType: String): HealthConnectClient {
         val context = NitroModules.applicationContext
             ?: throw IllegalStateException("Android application context is unavailable")
 
-        if (getAvailabilityStatus() != HealthAvailabilityStatus.AVAILABLE) {
+        if (getAvailability().status != NativeHealthAvailabilityStatus.AVAILABLE) {
             throw IllegalStateException("Health Connect is not available")
         }
 

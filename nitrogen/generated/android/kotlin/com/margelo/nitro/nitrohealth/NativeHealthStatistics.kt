@@ -35,7 +35,10 @@ data class NativeHealthStatistics(
   val min: Double?,
   @DoNotStrip
   @Keep
-  val max: Double?
+  val max: Double?,
+  @DoNotStrip
+  @Keep
+  val scope: NativeDistanceScope?
 ) {
   /* primary constructor */
 
@@ -48,6 +51,7 @@ data class NativeHealthStatistics(
       && Objects.deepEquals(this.avg, other.avg)
       && Objects.deepEquals(this.min, other.min)
       && Objects.deepEquals(this.max, other.max)
+      && Objects.deepEquals(this.scope, other.scope)
   }
 
   override fun hashCode(): Int {
@@ -57,7 +61,8 @@ data class NativeHealthStatistics(
       sum,
       avg,
       min,
-      max
+      max,
+      scope
     ).contentDeepHashCode()
   }
 
@@ -69,8 +74,8 @@ data class NativeHealthStatistics(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(startTimeMs: Double, endTimeMs: Double, sum: Double?, avg: Double?, min: Double?, max: Double?): NativeHealthStatistics {
-      return NativeHealthStatistics(startTimeMs, endTimeMs, sum, avg, min, max)
+    private fun fromCpp(startTimeMs: Double, endTimeMs: Double, sum: Double?, avg: Double?, min: Double?, max: Double?, scope: NativeDistanceScope?): NativeHealthStatistics {
+      return NativeHealthStatistics(startTimeMs, endTimeMs, sum, avg, min, max, scope)
     }
   }
 }

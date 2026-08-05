@@ -29,6 +29,9 @@ data class NativeDistanceSampleInput(
   val distanceMeters: Double,
   @DoNotStrip
   @Keep
+  val scope: NativeDistanceScope,
+  @DoNotStrip
+  @Keep
   val syncId: String?,
   @DoNotStrip
   @Keep
@@ -42,6 +45,7 @@ data class NativeDistanceSampleInput(
     return Objects.deepEquals(this.startTimeMs, other.startTimeMs)
       && Objects.deepEquals(this.endTimeMs, other.endTimeMs)
       && Objects.deepEquals(this.distanceMeters, other.distanceMeters)
+      && Objects.deepEquals(this.scope, other.scope)
       && Objects.deepEquals(this.syncId, other.syncId)
       && Objects.deepEquals(this.syncVersion, other.syncVersion)
   }
@@ -51,6 +55,7 @@ data class NativeDistanceSampleInput(
       startTimeMs,
       endTimeMs,
       distanceMeters,
+      scope,
       syncId,
       syncVersion
     ).contentDeepHashCode()
@@ -64,8 +69,8 @@ data class NativeDistanceSampleInput(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(startTimeMs: Double, endTimeMs: Double, distanceMeters: Double, syncId: String?, syncVersion: Double?): NativeDistanceSampleInput {
-      return NativeDistanceSampleInput(startTimeMs, endTimeMs, distanceMeters, syncId, syncVersion)
+    private fun fromCpp(startTimeMs: Double, endTimeMs: Double, distanceMeters: Double, scope: NativeDistanceScope, syncId: String?, syncVersion: Double?): NativeDistanceSampleInput {
+      return NativeDistanceSampleInput(startTimeMs, endTimeMs, distanceMeters, scope, syncId, syncVersion)
     }
   }
 }

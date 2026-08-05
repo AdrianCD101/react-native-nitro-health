@@ -4,13 +4,18 @@ import type { BodyMassSample } from '../BodyMassSample'
 import type { BodyMassSampleInput } from '../BodyMassSampleInput'
 import type { DistanceSample } from '../DistanceSample'
 import type { DistanceSampleInput } from '../DistanceSampleInput'
+import type { DistanceWriteResult } from '../DistanceScope'
+import type { HealthDataOrigin } from '../HealthDataOrigin'
+import type { HealthMetricValue } from '../HealthMetricValue'
 import type { HealthSamplePage } from '../HealthSamplePage'
 import type { HealthChangesResult } from '../HealthChangesResult'
 import type { HealthDataType } from '../HealthDataType'
 import type { HealthRecordChange } from '../HealthRecordChange'
 import type { HealthRecordSync } from '../HealthRecordSync'
 import type { HealthSampleByDataType } from '../HealthSampleByDataType'
+import type { HealthSampleIdentity, HealthRecordIdentity } from '../HealthSampleIdentity'
 import type { HealthStatistics } from '../HealthStatistics'
+import type { HealthStatisticsByDataType } from '../HealthStatisticsByDataType'
 import type { HeartRateSample } from '../HeartRateSample'
 import type { HeartRateSampleInput } from '../HeartRateSampleInput'
 import type { HeartRateStatistics } from '../HeartRateStatistics'
@@ -23,6 +28,10 @@ import type { NativeBodyMassSample } from '../NativeBodyMassSample'
 import type { NativeBodyMassSampleInput } from '../NativeBodyMassSampleInput'
 import type { NativeDistanceSample } from '../NativeDistanceSample'
 import type { NativeDistanceSampleInput } from '../NativeDistanceSampleInput'
+import type { NativeDistanceWriteResult } from '../NativeDistanceWriteResult'
+import type { NativeHealthDataOrigin } from '../NativeHealthDataOrigin'
+import type { NativeHealthMetricValue } from '../NativeHealthMetricValue'
+import type { NativeHealthSampleIdentity } from '../NativeHealthSampleIdentity'
 import type { NativeHealthStatistics } from '../NativeHealthStatistics'
 import type { NativeHealthChange } from '../NativeHealthChange'
 import type { NativeHealthChangesResult } from '../NativeHealthChangesResult'
@@ -43,17 +52,21 @@ import type { NativeStepSample } from '../NativeStepSample'
 import type { NativeStepSampleInput } from '../NativeStepSampleInput'
 import type { NativeWorkoutSample } from '../NativeWorkoutSample'
 import type { NativeWorkoutSampleInput } from '../NativeWorkoutSampleInput'
+import type { NativeWorkoutActivity } from '../NativeWorkoutActivity'
 import type { OxygenSaturationSample } from '../OxygenSaturationSample'
 import type { OxygenSaturationSampleInput } from '../OxygenSaturationSampleInput'
 import type { RestingHeartRateSample } from '../RestingHeartRateSample'
 import type { RestingHeartRateSampleInput } from '../RestingHeartRateSampleInput'
 import type { SleepSample } from '../SleepSample'
 import type { SleepSessionInput } from '../SleepSessionInput'
+import type { SleepStage } from '../SleepStage'
 import type { WritableSleepStage } from '../SleepSessionStageInput'
 import type { StepSample } from '../StepSample'
 import type { StepSampleInput } from '../StepSampleInput'
 import type { WorkoutSample } from '../WorkoutSample'
 import type { WorkoutSampleInput } from '../WorkoutSampleInput'
+import type { WorkoutActivity } from '../WorkoutActivity'
+import type { WorkoutActivityType } from '../WorkoutActivityType'
 import type { WritableWorkoutActivityType } from '../WritableWorkoutActivityType'
 import {
   assertSampleBetween,
@@ -135,6 +148,93 @@ const WRITABLE_WORKOUT_ACTIVITY_TYPES = new Set<WritableWorkoutActivityType>([
   'wheelchair',
   'yoga',
 ])
+const SLEEP_STAGES = new Set<SleepStage>([
+  'inBed',
+  'awake',
+  'awakeInBed',
+  'asleep',
+  'asleepCore',
+  'asleepDeep',
+  'asleepREM',
+  'outOfBed',
+  'unknown',
+])
+const WORKOUT_ACTIVITY_TYPES = new Set<WorkoutActivityType>([
+  'americanFootball',
+  'archery',
+  'australianFootball',
+  'badminton',
+  'barre',
+  'baseball',
+  'basketball',
+  'bowling',
+  'boxing',
+  'calisthenics',
+  'climbing',
+  'coreTraining',
+  'cricket',
+  'crossTraining',
+  'curling',
+  'cycling',
+  'dance',
+  'discSports',
+  'elliptical',
+  'equestrianSports',
+  'fencing',
+  'fishing',
+  'fitnessGaming',
+  'flexibility',
+  'golf',
+  'gymnastics',
+  'handball',
+  'handCycling',
+  'highIntensityIntervalTraining',
+  'hiking',
+  'hockey',
+  'hunting',
+  'jumpRope',
+  'kickboxing',
+  'lacrosse',
+  'martialArts',
+  'mindAndBody',
+  'mixedCardio',
+  'other',
+  'paddleSports',
+  'paragliding',
+  'pickleball',
+  'pilates',
+  'racquetball',
+  'rowing',
+  'rugby',
+  'running',
+  'sailing',
+  'skating',
+  'skiing',
+  'snowboarding',
+  'snowSports',
+  'soccer',
+  'softball',
+  'squash',
+  'stairClimbing',
+  'stepTraining',
+  'strengthTraining',
+  'surfing',
+  'swimBikeRun',
+  'swimming',
+  'tableTennis',
+  'taiChi',
+  'tennis',
+  'trackAndField',
+  'underwaterDiving',
+  'volleyball',
+  'walking',
+  'waterFitness',
+  'waterPolo',
+  'waterSports',
+  'wheelchair',
+  'wrestling',
+  'yoga',
+])
 
 function makeSampleInterval(
   sample: { startDate: Date; endDate: Date },
@@ -196,6 +296,9 @@ export function makeNativeDistanceSampleInput(
   sample: DistanceSampleInput,
   index: number
 ): NativeDistanceSampleInput {
+  if (sample.scope !== 'walking-running') {
+    throw new Error(`samples[${index}]: scope must be walking-running`)
+  }
   const { startTimeMs, endTimeMs } = makeSampleInterval(sample, index)
 
   assertSampleNonNegativeNumber(sample.distanceMeters, index, 'distanceMeters')
@@ -205,6 +308,7 @@ export function makeNativeDistanceSampleInput(
     startTimeMs,
     endTimeMs,
     distanceMeters: sample.distanceMeters,
+    scope: 'walkingRunning',
     ...makeNativeSync(sample.sync, index),
   }
 }
@@ -393,9 +497,9 @@ export function makeNativeWorkoutSampleInput(
     throw new Error('workout: activityType is not supported for cross-platform writes')
   }
 
-  if (workout.title !== undefined) {
-    if (typeof workout.title !== 'string' || workout.title.trim() === '') {
-      throw new Error('workout: title must be a non-empty string when provided')
+  if (workout.displayName !== undefined) {
+    if (typeof workout.displayName !== 'string' || workout.displayName.trim() === '') {
+      throw new Error('workout: displayName must be a non-empty string when provided')
     }
   }
 
@@ -409,7 +513,7 @@ export function makeNativeWorkoutSampleInput(
     startTimeMs,
     endTimeMs,
     activityType: workout.activityType,
-    title: workout.title,
+    displayName: workout.displayName,
     timeZone: workout.timeZone,
     ...makeNativeSync(workout.sync, 'workout'),
   }
@@ -421,14 +525,115 @@ export function makeSamplePage<TNative, TSample>(
 ): HealthSamplePage<TSample> {
   return {
     samples: page.samples.map(map),
-    nextCursor: page.nextCursor,
+    ...(page.nextCursor === undefined ? {} : { nextCursor: page.nextCursor }),
+  }
+}
+
+function makeDistanceScope(scope: NativeDistanceSample['scope']): DistanceSample['scope'] {
+  if (scope === 'walkingRunning') return 'walking-running'
+  if (scope === 'activityUnspecified') return 'activity-unspecified'
+  throw new Error(`Unsupported native distance scope: ${scope}`)
+}
+
+function makeHealthDataOrigin(origin: NativeHealthDataOrigin): HealthDataOrigin {
+  if (typeof origin.identifier !== 'string' || origin.identifier.trim() === '') {
+    throw new Error('Native health sample has an invalid origin identifier')
+  }
+
+  return {
+    identifier: origin.identifier,
+    displayName: origin.displayName,
+  }
+}
+
+function makeHealthSampleIdentity(identity: NativeHealthSampleIdentity): HealthSampleIdentity {
+  if (typeof identity.id !== 'string' || identity.id.trim() === '') {
+    throw new Error('Native health sample has an invalid identity id')
+  }
+  if (typeof identity.recordId !== 'string' || identity.recordId.trim() === '') {
+    throw new Error('Native health sample has an invalid record id')
+  }
+
+  if (identity.kind === 'record') {
+    if (identity.id !== identity.recordId) {
+      throw new Error('Native record identity id does not match its record id')
+    }
+    return { kind: 'record', id: identity.id }
+  }
+
+  if (identity.kind === 'recordChild') {
+    return {
+      kind: 'record-child',
+      id: identity.id,
+      record: { kind: 'record', id: identity.recordId },
+    }
+  }
+
+  throw new Error(`Unsupported native health identity kind: ${identity.kind}`)
+}
+
+function getRecordIdentity(identity: HealthSampleIdentity): HealthRecordIdentity {
+  return identity.kind === 'record' ? identity : identity.record
+}
+
+function makeHealthMetricValue(metric: NativeHealthMetricValue): HealthMetricValue {
+  if (metric.status === 'available') {
+    if (typeof metric.value !== 'number' || !Number.isFinite(metric.value)) {
+      throw new Error('Available native health metric is missing a finite value')
+    }
+    return { status: 'available', value: metric.value }
+  }
+
+  if (metric.value !== undefined) {
+    throw new Error('Unavailable native health metric contains a value')
+  }
+  if (metric.status === 'notReported') return { status: 'not-reported' }
+  if (metric.status === 'unsupported') return { status: 'unsupported' }
+  throw new Error(`Unsupported native health metric status: ${metric.status}`)
+}
+
+function makeWorkoutActivity(activity: NativeWorkoutActivity): WorkoutActivity {
+  if (activity.status === 'unknown') {
+    if (
+      activity.type !== undefined ||
+      activity.portability !== undefined ||
+      activity.mapping !== undefined
+    ) {
+      throw new Error('Unknown native workout activity contains known activity fields')
+    }
+    return { status: 'unknown' }
+  }
+
+  if (
+    activity.status !== 'known' ||
+    activity.type === undefined ||
+    activity.portability === undefined ||
+    activity.mapping === undefined
+  ) {
+    throw new Error('Known native workout activity is incomplete')
+  }
+  if (!WORKOUT_ACTIVITY_TYPES.has(activity.type as WorkoutActivityType)) {
+    throw new Error(`Unsupported normalized native workout activity: ${activity.type}`)
+  }
+  if (activity.portability !== 'portable' && activity.portability !== 'readOnly') {
+    throw new Error(`Unsupported native workout portability: ${activity.portability}`)
+  }
+  if (activity.mapping !== 'exact' && activity.mapping !== 'broadened') {
+    throw new Error(`Unsupported native workout mapping fidelity: ${activity.mapping}`)
+  }
+
+  return {
+    status: 'known',
+    type: activity.type as WorkoutActivityType,
+    portability: activity.portability === 'readOnly' ? 'read-only' : 'portable',
+    mapping: activity.mapping,
   }
 }
 
 export function makeStepSample(sample: NativeStepSample): StepSample {
   return {
-    uuid: sample.uuid,
-    recordUuid: sample.uuid,
+    identity: makeHealthSampleIdentity(sample.identity),
+    origin: makeHealthDataOrigin(sample.origin),
     startDate: new Date(sample.startTimeMs),
     endDate: new Date(sample.endTimeMs),
     count: sample.count,
@@ -437,11 +642,12 @@ export function makeStepSample(sample: NativeStepSample): StepSample {
 
 export function makeDistanceSample(sample: NativeDistanceSample): DistanceSample {
   return {
-    uuid: sample.uuid,
-    recordUuid: sample.uuid,
+    identity: makeHealthSampleIdentity(sample.identity),
+    origin: makeHealthDataOrigin(sample.origin),
     startDate: new Date(sample.startTimeMs),
     endDate: new Date(sample.endTimeMs),
     distanceMeters: sample.distanceMeters,
+    scope: makeDistanceScope(sample.scope),
   }
 }
 
@@ -449,8 +655,8 @@ export function makeActiveEnergyBurnedSample(
   sample: NativeActiveEnergyBurnedSample
 ): ActiveEnergyBurnedSample {
   return {
-    uuid: sample.uuid,
-    recordUuid: sample.uuid,
+    identity: makeHealthSampleIdentity(sample.identity),
+    origin: makeHealthDataOrigin(sample.origin),
     startDate: new Date(sample.startTimeMs),
     endDate: new Date(sample.endTimeMs),
     kilocalories: sample.kilocalories,
@@ -459,22 +665,20 @@ export function makeActiveEnergyBurnedSample(
 
 export function makeBodyMassSample(sample: NativeBodyMassSample): BodyMassSample {
   return {
-    uuid: sample.uuid,
-    recordUuid: sample.uuid,
+    identity: makeHealthSampleIdentity(sample.identity),
+    origin: makeHealthDataOrigin(sample.origin),
     startDate: new Date(sample.startTimeMs),
     endDate: new Date(sample.endTimeMs),
     kilograms: sample.kilograms,
-    source: sample.source,
   }
 }
 
 export function makeHeartRateSample(sample: NativeHeartRateSample): HeartRateSample {
   return {
-    uuid: sample.uuid,
-    recordUuid: sample.recordUuid,
+    identity: makeHealthSampleIdentity(sample.identity),
+    origin: makeHealthDataOrigin(sample.origin),
     date: new Date(sample.timeMs),
     bpm: sample.bpm,
-    source: sample.source,
   }
 }
 
@@ -482,24 +686,25 @@ export function makeRestingHeartRateSample(
   sample: NativeRestingHeartRateSample
 ): RestingHeartRateSample {
   return {
-    uuid: sample.uuid,
-    recordUuid: sample.uuid,
+    identity: makeHealthSampleIdentity(sample.identity),
+    origin: makeHealthDataOrigin(sample.origin),
     date: new Date(sample.timeMs),
     bpm: sample.bpm,
-    source: sample.source,
   }
 }
 
 export function makeHeartRateVariabilitySample(
   sample: NativeHeartRateVariabilitySample
 ): HeartRateVariabilitySample {
+  if (sample.method !== 'sdnn' && sample.method !== 'rmssd') {
+    throw new Error(`Unsupported native heart rate variability method: ${sample.method}`)
+  }
   return {
-    uuid: sample.uuid,
-    recordUuid: sample.uuid,
+    identity: makeHealthSampleIdentity(sample.identity),
+    origin: makeHealthDataOrigin(sample.origin),
     date: new Date(sample.timeMs),
     milliseconds: sample.milliseconds,
-    method: sample.method as HeartRateVariabilitySample['method'],
-    source: sample.source,
+    method: sample.method,
   }
 }
 
@@ -507,47 +712,75 @@ export function makeOxygenSaturationSample(
   sample: NativeOxygenSaturationSample
 ): OxygenSaturationSample {
   return {
-    uuid: sample.uuid,
-    recordUuid: sample.uuid,
+    identity: makeHealthSampleIdentity(sample.identity),
+    origin: makeHealthDataOrigin(sample.origin),
     date: new Date(sample.timeMs),
     percentage: sample.percentage,
-    source: sample.source,
   }
 }
 
 export function makeHeightSample(sample: NativeHeightSample): HeightSample {
   return {
-    uuid: sample.uuid,
-    recordUuid: sample.uuid,
+    identity: makeHealthSampleIdentity(sample.identity),
+    origin: makeHealthDataOrigin(sample.origin),
     date: new Date(sample.timeMs),
     meters: sample.meters,
-    source: sample.source,
   }
 }
 
 export function makeSleepSample(sample: NativeSleepSample): SleepSample {
-  return {
-    uuid: sample.uuid,
-    recordUuid: sample.recordUuid,
+  const identity = makeHealthSampleIdentity(sample.identity)
+  const base = {
+    identity,
+    origin: makeHealthDataOrigin(sample.origin),
     startDate: new Date(sample.startTimeMs),
     endDate: new Date(sample.endTimeMs),
-    stage: sample.stage as SleepSample['stage'],
-    source: sample.source,
   }
+
+  if (sample.kind === 'sessionEnvelope') {
+    if (sample.stage !== undefined || sample.stageData === undefined) {
+      throw new Error('Native sleep session envelope has invalid stage fields')
+    }
+    return {
+      ...base,
+      kind: 'session-envelope',
+      stageData:
+        sample.stageData === 'notReported'
+          ? 'not-reported'
+          : sample.stageData,
+    }
+  }
+
+  if (sample.kind === 'stage') {
+    if (sample.stage === undefined || sample.stageData !== undefined) {
+      throw new Error('Native sleep stage has invalid stage fields')
+    }
+    if (!SLEEP_STAGES.has(sample.stage as SleepStage)) {
+      throw new Error(`Unsupported native sleep stage: ${sample.stage}`)
+    }
+    return {
+      ...base,
+      kind: 'stage',
+      stage: sample.stage as SleepStage,
+    }
+  }
+
+  throw new Error(`Unsupported native sleep sample kind: ${sample.kind}`)
 }
 
 export function makeWorkoutSample(sample: NativeWorkoutSample): WorkoutSample {
   return {
-    uuid: sample.uuid,
-    recordUuid: sample.uuid,
+    identity: makeHealthSampleIdentity(sample.identity),
+    origin: makeHealthDataOrigin(sample.origin),
     startDate: new Date(sample.startTimeMs),
     endDate: new Date(sample.endTimeMs),
-    durationSeconds: sample.durationSeconds,
-    activityType: sample.activityType as WorkoutSample['activityType'],
+    elapsedDurationSeconds: sample.elapsedDurationSeconds,
+    activeDuration: makeHealthMetricValue(sample.activeDuration),
+    activity: makeWorkoutActivity(sample.activity),
     title: sample.title,
-    source: sample.source,
-    totalDistanceMeters: sample.totalDistanceMeters,
-    totalEnergyBurnedKcal: sample.totalEnergyBurnedKcal,
+    brandName: sample.brandName,
+    totalDistance: makeHealthMetricValue(sample.totalDistance),
+    totalActiveEnergyBurned: makeHealthMetricValue(sample.totalActiveEnergyBurned),
   }
 }
 
@@ -561,14 +794,39 @@ export function makeHeartRateStatistics(
   }
 }
 
-export function makeHealthStatistics(statistics: NativeHealthStatistics): HealthStatistics {
-  return {
+export function makeHealthStatistics<T extends HealthDataType>(
+  dataType: T,
+  statistics: NativeHealthStatistics
+): HealthStatisticsByDataType<T> {
+  const result: HealthStatistics = {
     startDate: new Date(statistics.startTimeMs),
     endDate: new Date(statistics.endTimeMs),
     sum: statistics.sum,
     avg: statistics.avg,
     min: statistics.min,
     max: statistics.max,
+  }
+
+  if (dataType === 'distance') {
+    if (statistics.scope === undefined) {
+      throw new Error('Native distance statistics are missing scope')
+    }
+    return {
+      ...result,
+      scope: makeDistanceScope(statistics.scope),
+    } as HealthStatisticsByDataType<T>
+  }
+
+  if (statistics.scope !== undefined) {
+    throw new Error(`Native '${dataType}' statistics unexpectedly contain distance scope`)
+  }
+  return result as HealthStatisticsByDataType<T>
+}
+
+export function makeDistanceWriteResult(result: NativeDistanceWriteResult): DistanceWriteResult {
+  return {
+    status: 'completed',
+    storedScope: makeDistanceScope(result.storedScope),
   }
 }
 
@@ -587,8 +845,8 @@ const CHANGE_SAMPLE_FIELDS = [
 ] as const
 
 function assertNativeChangeIdentity(change: NativeHealthChange): void {
-  if (typeof change.recordUuid !== 'string' || change.recordUuid.trim() === '') {
-    throw new Error('Native health change has an invalid recordUuid')
+  if (typeof change.recordId !== 'string' || change.recordId.trim() === '') {
+    throw new Error('Native health change has an invalid recordId')
   }
 }
 
@@ -661,13 +919,13 @@ function makeUpsertSamples(
       break
   }
 
-  if (samples.some((sample) => sample.recordUuid !== change.recordUuid)) {
-    throw new Error(`Native '${dataType}' upsert samples do not match recordUuid`)
+  if (samples.some((sample) => getRecordIdentity(sample.identity).id !== change.recordId)) {
+    throw new Error(`Native '${dataType}' upsert samples do not match recordId`)
   }
 
   return {
     type: 'upsert',
-    recordUuid: change.recordUuid,
+    record: { kind: 'record', id: change.recordId },
     samples,
   }
 }
@@ -685,7 +943,7 @@ function makeHealthRecordChange<T extends HealthDataType>(
 
     return {
       type: 'delete',
-      recordUuid: change.recordUuid,
+      record: { kind: 'record', id: change.recordId },
     }
   }
 

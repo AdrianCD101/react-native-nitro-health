@@ -10,8 +10,18 @@
 #include <fbjni/fbjni.h>
 #include "NativeSleepSamplePage.hpp"
 
+#include "JNativeHealthDataOrigin.hpp"
+#include "JNativeHealthSampleIdentity.hpp"
+#include "JNativeHealthSampleIdentityKind.hpp"
 #include "JNativeSleepSample.hpp"
+#include "JNativeSleepSampleKind.hpp"
+#include "JNativeSleepStageData.hpp"
+#include "NativeHealthDataOrigin.hpp"
+#include "NativeHealthSampleIdentity.hpp"
+#include "NativeHealthSampleIdentityKind.hpp"
 #include "NativeSleepSample.hpp"
+#include "NativeSleepSampleKind.hpp"
+#include "NativeSleepStageData.hpp"
 #include <optional>
 #include <string>
 #include <vector>

@@ -2,16 +2,17 @@ import { Platform } from 'react-native'
 import { describe, expect, it, waitUntil } from 'react-native-harness'
 import { NitroHealth } from 'react-native-nitro-health'
 import type {
-  BackgroundReadAuthorizationStatus,
+  HealthAdditionalAccessStatus,
   HealthRecordChange,
 } from 'react-native-nitro-health'
 
 import { hasVerifiedPermissions } from './support/harnessSupport'
 
-const backgroundReadStatuses: BackgroundReadAuthorizationStatus[] = [
-  'unavailable',
-  'notDeclared',
-  'notGranted',
+const additionalAccessStatuses: HealthAdditionalAccessStatus[] = [
+  'included',
+  'unsupported',
+  'not-declared',
+  'not-granted',
   'granted',
 ]
 const notificationInterval = {
@@ -40,24 +41,96 @@ async function drainStepChanges(changesToken: string): Promise<HealthRecordChang
 }
 
 describe('NitroHealth background access (native)', () => {
-  it('reports a platform-appropriate background-read authorization status', async () => {
-    const status = await NitroHealth.getBackgroundReadAuthorizationStatus()
+  it('reports an exact observer or app-owned polling capability', async () => {
+    const capabilities = await NitroHealth.getCapabilities()
+    if (capabilities.status === 'unavailable') {
+      expect(NitroHealth.getAvailability().status).toBe('unavailable')
+      return
+    }
+    const background = capabilities.backgroundChanges
 
-    expect(backgroundReadStatuses).toContain(status)
-    if (Platform.OS === 'ios') {
-      expect(status).toBe('unavailable')
+    expect(additionalAccessStatuses).toContain(capabilities.historyRead)
+    if (background.mode === 'observer') {
+      expect(background).toEqual({
+        mode: 'observer',
+        frequencies: ['immediate', 'hourly', 'daily', 'weekly'],
+        backgroundRead: 'included',
+      })
+    } else {
+      expect(background.scheduling).toBe('app-owned')
+      expect(additionalAccessStatuses).toContain(background.backgroundRead)
+    }
+
+    if (Platform.OS === 'android') {
+      expect(background.mode).toBe('polling')
+      expect(background.backgroundRead).not.toBe('not-declared')
+      expect(capabilities.historyRead).not.toBe('not-declared')
     }
   })
 
-  it('returns without a prompt when background read access is not requestable', async () => {
-    const currentStatus = await NitroHealth.getBackgroundReadAuthorizationStatus()
-    if (currentStatus === 'notGranted') return
+  it('returns the current background-read state without prompting when it is not requestable', async () => {
+    const capabilities = await NitroHealth.getCapabilities()
+    if (capabilities.status === 'unavailable') return
+    const currentStatus = capabilities.backgroundChanges.backgroundRead
+    if (currentStatus === 'not-granted') return
 
-    await expect(NitroHealth.requestBackgroundReadAuthorization()).resolves.toBe(currentStatus)
+    const result = await NitroHealth.requestAdditionalAccess('background-read')
+
+    expect(result).toEqual({ access: 'background-read', status: currentStatus })
   })
 
-  it('emits an iOS notification that leads to a durable step change', async () => {
-    if (Platform.OS !== 'ios') return
+  it('returns the current history-read state without prompting when it is not requestable', async () => {
+    const capabilities = await NitroHealth.getCapabilities()
+    if (capabilities.status === 'unavailable') return
+    if (capabilities.historyRead === 'not-granted') return
+
+    const result = await NitroHealth.requestAdditionalAccess('history-read')
+
+    expect(result).toEqual({ access: 'history-read', status: capabilities.historyRead })
+  })
+
+  it('configures and subscribes according to the reported background mode', async () => {
+    const capabilities = await NitroHealth.getCapabilities()
+    if (capabilities.status === 'unavailable') {
+      expect(NitroHealth.subscribeToBackgroundChanges(() => {}).mode).toBe('unavailable')
+      return
+    }
+    const result = await NitroHealth.configureBackgroundChanges({
+      dataTypes: ['steps'],
+      frequency: 'immediate',
+    })
+
+    if (NitroHealth.getAvailability().status === 'unavailable') {
+      expect(result.status).toBe('unavailable')
+      return
+    }
+
+    const subscription = NitroHealth.subscribeToBackgroundChanges(() => {})
+    if (capabilities.backgroundChanges.mode === 'observer') {
+      expect(result).toEqual({ status: 'completed', mode: 'observer' })
+      expect(subscription.mode).toBe('observer')
+      if (subscription.mode === 'observer') subscription.subscription.remove()
+    } else {
+      expect(result).toEqual({
+        status: 'user-action-required',
+        mode: 'polling',
+        scheduling: 'app-owned',
+        backgroundRead: capabilities.backgroundChanges.backgroundRead,
+      })
+      expect(subscription).toEqual({ mode: 'polling', scheduling: 'app-owned' })
+    }
+
+    const disabled = await NitroHealth.disableBackgroundChanges(['steps'])
+    expect(disabled.status).not.toBe('unavailable')
+    if (disabled.status !== 'unavailable') {
+      expect(disabled.mode).toBe(capabilities.backgroundChanges.mode)
+    }
+  })
+
+  it('emits an observer notification that leads to a durable step change', async () => {
+    const capabilities = await NitroHealth.getCapabilities()
+    if (capabilities.status === 'unavailable') return
+    if (capabilities.backgroundChanges.mode !== 'observer') return
 
     const authorized = await hasVerifiedPermissions([
       { accessType: 'read', dataType: 'steps' },
@@ -65,16 +138,23 @@ describe('NitroHealth background access (native)', () => {
     ])
     if (!authorized) return
 
-    await NitroHealth.deleteSamplesByTimeRange('steps', notificationRange)
-    await NitroHealth.disableBackgroundDelivery('steps')
+    await NitroHealth.deleteRecordsByTimeRange('steps', notificationRange)
+    await NitroHealth.disableBackgroundChanges(['steps'])
     let stepNotificationCount = 0
-    const subscription = NitroHealth.addOnChangeNotificationListener(({ dataTypes }) => {
+    const subscriptionResult = NitroHealth.subscribeToBackgroundChanges(({ dataTypes }) => {
       if (dataTypes.includes('steps')) stepNotificationCount += 1
     })
+    if (subscriptionResult.mode !== 'observer') {
+      throw new Error('Observer capability returned a polling subscription')
+    }
     let isDeliveryEnabled = false
 
     try {
-      await NitroHealth.enableBackgroundDelivery('steps', 'immediate')
+      const configured = await NitroHealth.configureBackgroundChanges({
+        dataTypes: ['steps'],
+        frequency: 'immediate',
+      })
+      expect(configured).toEqual({ status: 'completed', mode: 'observer' })
       isDeliveryEnabled = true
       const changesToken = await NitroHealth.createChangesToken('steps')
       const notificationsBeforeSave = stepNotificationCount
@@ -96,9 +176,9 @@ describe('NitroHealth background access (native)', () => {
         )
       ).toBe(true)
     } finally {
-      subscription.remove()
-      if (isDeliveryEnabled) await NitroHealth.disableBackgroundDelivery('steps')
-      await NitroHealth.deleteSamplesByTimeRange('steps', notificationRange)
+      subscriptionResult.subscription.remove()
+      if (isDeliveryEnabled) await NitroHealth.disableBackgroundChanges(['steps'])
+      await NitroHealth.deleteRecordsByTimeRange('steps', notificationRange)
     }
   })
 })

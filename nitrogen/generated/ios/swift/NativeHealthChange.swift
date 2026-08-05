@@ -18,8 +18,8 @@ public extension NativeHealthChange {
   /**
    * Create a new instance of `NativeHealthChange`.
    */
-  init(type: String, recordUuid: String, stepSamples: [NativeStepSample]?, heartRateSamples: [NativeHeartRateSample]?, restingHeartRateSamples: [NativeRestingHeartRateSample]?, heartRateVariabilitySamples: [NativeHeartRateVariabilitySample]?, distanceSamples: [NativeDistanceSample]?, activeEnergyBurnedSamples: [NativeActiveEnergyBurnedSample]?, oxygenSaturationSamples: [NativeOxygenSaturationSample]?, heightSamples: [NativeHeightSample]?, sleepSamples: [NativeSleepSample]?, bodyMassSamples: [NativeBodyMassSample]?, workoutSamples: [NativeWorkoutSample]?, dummyNonEquatable: (() -> Void)?) {
-    self.init(std.string(type), std.string(recordUuid), { () -> bridge.std__optional_std__vector_NativeStepSample__ in
+  init(type: String, recordId: String, stepSamples: [NativeStepSample]?, heartRateSamples: [NativeHeartRateSample]?, restingHeartRateSamples: [NativeRestingHeartRateSample]?, heartRateVariabilitySamples: [NativeHeartRateVariabilitySample]?, distanceSamples: [NativeDistanceSample]?, activeEnergyBurnedSamples: [NativeActiveEnergyBurnedSample]?, oxygenSaturationSamples: [NativeOxygenSaturationSample]?, heightSamples: [NativeHeightSample]?, sleepSamples: [NativeSleepSample]?, bodyMassSamples: [NativeBodyMassSample]?, workoutSamples: [NativeWorkoutSample]?, dummyNonEquatable: (() -> Void)?) {
+    self.init(std.string(type), std.string(recordId), { () -> bridge.std__optional_std__vector_NativeStepSample__ in
       if let __unwrappedValue = stepSamples {
         return bridge.create_std__optional_std__vector_NativeStepSample__({ () -> bridge.std__vector_NativeStepSample_ in
           var __vector = bridge.create_std__vector_NativeStepSample_(__unwrappedValue.count)
@@ -169,8 +169,8 @@ public extension NativeHealthChange {
   }
   
   @inline(__always)
-  var recordUuid: String {
-    return String(self.__recordUuid)
+  var recordId: String {
+    return String(self.__recordId)
   }
   
   @inline(__always)

@@ -1,17 +1,45 @@
 package com.nitrohealth
 
 import androidx.health.connect.client.records.ExerciseSessionRecord
+import com.margelo.nitro.nitrohealth.NativeWorkoutActivity
+import com.margelo.nitro.nitrohealth.NativeWorkoutActivityMapping
+import com.margelo.nitro.nitrohealth.NativeWorkoutActivityPortability
+import com.margelo.nitro.nitrohealth.NativeWorkoutActivityStatus
 
 /**
- * Maps [ExerciseSessionRecord] exercise type constants to the normalized cross-platform
- * activity type string (mirrors makeWorkoutActivityType in ios/WorkoutActivityTypeMapping.swift).
+ * Maps [ExerciseSessionRecord] exercise type constants to normalized cross-platform activities.
  *
  * The int literals cover exercise type values that connect-client 1.1.0 no longer exposes as
  * `EXERCISE_TYPE_*` constants (they survive only as segment types), but which may still appear
  * in session data written by apps against older schemas. Unknown or future values fall back
- * to "other".
+ * to an explicit unknown result.
  */
-internal fun makeWorkoutActivityType(exerciseType: Int): String {
+internal fun makeNativeWorkoutActivity(exerciseType: Int): NativeWorkoutActivity {
+    val activityType = normalizedWorkoutActivityType(exerciseType)
+        ?: return NativeWorkoutActivity(
+            status = NativeWorkoutActivityStatus.UNKNOWN,
+            type = null,
+            portability = null,
+            mapping = null
+        )
+
+    return NativeWorkoutActivity(
+        status = NativeWorkoutActivityStatus.KNOWN,
+        type = activityType,
+        portability = if (activityType in writableWorkoutActivityTypes) {
+            NativeWorkoutActivityPortability.PORTABLE
+        } else {
+            NativeWorkoutActivityPortability.READONLY
+        },
+        mapping = if (exerciseType in broadenedHealthConnectExerciseTypes) {
+            NativeWorkoutActivityMapping.BROADENED
+        } else {
+            NativeWorkoutActivityMapping.EXACT
+        }
+    )
+}
+
+private fun normalizedWorkoutActivityType(exerciseType: Int): String? {
     return when (exerciseType) {
         ExerciseSessionRecord.EXERCISE_TYPE_OTHER_WORKOUT -> "other"
         1 -> "coreTraining" // EXERCISE_TYPE_BACK_EXTENSION (legacy)
@@ -97,11 +125,42 @@ internal fun makeWorkoutActivityType(exerciseType: Int): String {
         ExerciseSessionRecord.EXERCISE_TYPE_WEIGHTLIFTING -> "strengthTraining"
         ExerciseSessionRecord.EXERCISE_TYPE_WHEELCHAIR -> "wheelchair"
         ExerciseSessionRecord.EXERCISE_TYPE_YOGA -> "yoga"
-        else -> "other"
+        else -> null
     }
 }
 
+private val broadenedHealthConnectExerciseTypes = setOf(
+    1, 3, 6, 7, 12, 15, 17, 18, 19, 20, 21, 22, 23, 24, 30, 40, 41, 42, 43, 49, 67, 77,
+    ExerciseSessionRecord.EXERCISE_TYPE_BIKING_STATIONARY,
+    ExerciseSessionRecord.EXERCISE_TYPE_BOOT_CAMP,
+    ExerciseSessionRecord.EXERCISE_TYPE_EXERCISE_CLASS,
+    ExerciseSessionRecord.EXERCISE_TYPE_GUIDED_BREATHING,
+    ExerciseSessionRecord.EXERCISE_TYPE_ICE_SKATING,
+    ExerciseSessionRecord.EXERCISE_TYPE_PADDLING,
+    ExerciseSessionRecord.EXERCISE_TYPE_ROLLER_HOCKEY,
+    ExerciseSessionRecord.EXERCISE_TYPE_ROWING_MACHINE,
+    ExerciseSessionRecord.EXERCISE_TYPE_RUNNING_TREADMILL,
+    ExerciseSessionRecord.EXERCISE_TYPE_STAIR_CLIMBING_MACHINE,
+    ExerciseSessionRecord.EXERCISE_TYPE_SWIMMING_OPEN_WATER,
+    ExerciseSessionRecord.EXERCISE_TYPE_SWIMMING_POOL,
+    ExerciseSessionRecord.EXERCISE_TYPE_WEIGHTLIFTING
+)
+
+private val writableWorkoutActivityTypes = setOf(
+    "americanFootball", "australianFootball", "badminton", "baseball", "basketball",
+    "boxing", "climbing", "cricket", "crossTraining", "cycling", "dance", "discSports",
+    "elliptical", "fencing", "flexibility", "golf", "gymnastics", "handball",
+    "highIntensityIntervalTraining", "hiking", "hockey", "martialArts", "mindAndBody",
+    "other", "paddleSports", "pilates", "racquetball", "rowing", "rugby", "running",
+    "sailing", "skating", "skiing", "snowboarding", "snowSports", "soccer", "softball",
+    "squash", "stairClimbing", "strengthTraining", "surfing", "swimming", "tableTennis",
+    "tennis", "volleyball", "walking", "waterPolo", "wheelchair", "yoga"
+)
+
 internal fun toHealthConnectWorkoutActivityType(activityType: String): Int {
+    require(activityType in writableWorkoutActivityTypes) {
+        "Unsupported writable workout activity type: $activityType"
+    }
     return when (activityType) {
         "americanFootball" -> ExerciseSessionRecord.EXERCISE_TYPE_FOOTBALL_AMERICAN
         "australianFootball" -> ExerciseSessionRecord.EXERCISE_TYPE_FOOTBALL_AUSTRALIAN
@@ -153,6 +212,6 @@ internal fun toHealthConnectWorkoutActivityType(activityType: String): Int {
         "waterPolo" -> ExerciseSessionRecord.EXERCISE_TYPE_WATER_POLO
         "wheelchair" -> ExerciseSessionRecord.EXERCISE_TYPE_WHEELCHAIR
         "yoga" -> ExerciseSessionRecord.EXERCISE_TYPE_YOGA
-        else -> throw IllegalArgumentException("Unsupported writable workout activity type: $activityType")
+        else -> error("Writable workout activity mapping is incomplete for: $activityType")
     }
 }

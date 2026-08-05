@@ -72,23 +72,20 @@ export const lastDayRange = {
   endDate: new Date(),
 }
 
-export async function isPermissionUnnecessary(permissions: HealthPermission[]): Promise<boolean> {
-  return (await NitroHealth.getRequestStatusForAuthorization(permissions)) === 'unnecessary'
+export async function hasReadablePermission(permissions: HealthPermission[]): Promise<boolean> {
+  const result = await NitroHealth.getPermissionStatuses(permissions)
+  if (result.status === 'unavailable') return false
+
+  return result.statuses.every(
+    ({ permission, status }) =>
+      status === 'granted' || (permission.accessType === 'read' && status === 'unverifiable')
+  )
 }
 
-// 'unnecessary' only means the user has already been asked (they may have denied on iOS).
-// For round-trip tests, resolve the grant silently via requestAuthorization — it never opens
-// a prompt once the request status is 'unnecessary'. Note this can only verify WRITE grants:
-// on iOS, read permissions always land in unverifiablePermissions (HealthKit hides read
-// denials by design), so a denied read still passes this check and simply yields empty reads.
+// HealthKit intentionally reports read permissions as unverifiable. Round-trip tests can still
+// prove writes when write access is granted; a denied HealthKit read safely returns no samples.
 export async function hasVerifiedPermissions(permissions: HealthPermission[]): Promise<boolean> {
-  if (!(await isPermissionUnnecessary(permissions))) {
-    return false
-  }
-
-  const result = await NitroHealth.requestAuthorization(permissions)
-
-  return result.deniedPermissions.length === 0
+  return hasReadablePermission(permissions)
 }
 
 // On iOS a denied read permission is indistinguishable from an empty store: HealthKit returns

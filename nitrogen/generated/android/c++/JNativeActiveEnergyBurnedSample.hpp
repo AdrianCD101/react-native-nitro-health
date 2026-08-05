@@ -10,6 +10,13 @@
 #include <fbjni/fbjni.h>
 #include "NativeActiveEnergyBurnedSample.hpp"
 
+#include "JNativeHealthDataOrigin.hpp"
+#include "JNativeHealthSampleIdentity.hpp"
+#include "JNativeHealthSampleIdentityKind.hpp"
+#include "NativeHealthDataOrigin.hpp"
+#include "NativeHealthSampleIdentity.hpp"
+#include "NativeHealthSampleIdentityKind.hpp"
+#include <optional>
 #include <string>
 
 namespace margelo::nitro::nitrohealth {
@@ -31,8 +38,10 @@ namespace margelo::nitro::nitrohealth {
     [[nodiscard]]
     NativeActiveEnergyBurnedSample toCpp() const {
       static const auto clazz = javaClassStatic();
-      static const auto fieldUuid = clazz->getField<jni::JString>("uuid");
-      jni::local_ref<jni::JString> uuid = this->getFieldValue(fieldUuid);
+      static const auto fieldIdentity = clazz->getField<JNativeHealthSampleIdentity>("identity");
+      jni::local_ref<JNativeHealthSampleIdentity> identity = this->getFieldValue(fieldIdentity);
+      static const auto fieldOrigin = clazz->getField<JNativeHealthDataOrigin>("origin");
+      jni::local_ref<JNativeHealthDataOrigin> origin = this->getFieldValue(fieldOrigin);
       static const auto fieldStartTimeMs = clazz->getField<double>("startTimeMs");
       double startTimeMs = this->getFieldValue(fieldStartTimeMs);
       static const auto fieldEndTimeMs = clazz->getField<double>("endTimeMs");
@@ -40,7 +49,8 @@ namespace margelo::nitro::nitrohealth {
       static const auto fieldKilocalories = clazz->getField<double>("kilocalories");
       double kilocalories = this->getFieldValue(fieldKilocalories);
       return NativeActiveEnergyBurnedSample(
-        uuid->toStdString(),
+        identity->toCpp(),
+        origin->toCpp(),
         startTimeMs,
         endTimeMs,
         kilocalories
@@ -53,12 +63,13 @@ namespace margelo::nitro::nitrohealth {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeActiveEnergyBurnedSample::javaobject> fromCpp(const NativeActiveEnergyBurnedSample& value) {
-      using JSignature = JNativeActiveEnergyBurnedSample(jni::alias_ref<jni::JString>, double, double, double);
+      using JSignature = JNativeActiveEnergyBurnedSample(jni::alias_ref<JNativeHealthSampleIdentity>, jni::alias_ref<JNativeHealthDataOrigin>, double, double, double);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
         clazz,
-        jni::make_jstring(value.uuid),
+        JNativeHealthSampleIdentity::fromCpp(value.identity),
+        JNativeHealthDataOrigin::fromCpp(value.origin),
         value.startTimeMs,
         value.endTimeMs,
         value.kilocalories

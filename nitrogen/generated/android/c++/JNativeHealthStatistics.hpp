@@ -10,6 +10,8 @@
 #include <fbjni/fbjni.h>
 #include "NativeHealthStatistics.hpp"
 
+#include "JNativeDistanceScope.hpp"
+#include "NativeDistanceScope.hpp"
 #include <optional>
 
 namespace margelo::nitro::nitrohealth {
@@ -43,13 +45,16 @@ namespace margelo::nitro::nitrohealth {
       jni::local_ref<jni::JDouble> min = this->getFieldValue(fieldMin);
       static const auto fieldMax = clazz->getField<jni::JDouble>("max");
       jni::local_ref<jni::JDouble> max = this->getFieldValue(fieldMax);
+      static const auto fieldScope = clazz->getField<JNativeDistanceScope>("scope");
+      jni::local_ref<JNativeDistanceScope> scope = this->getFieldValue(fieldScope);
       return NativeHealthStatistics(
         startTimeMs,
         endTimeMs,
         sum != nullptr ? std::make_optional(sum->value()) : std::nullopt,
         avg != nullptr ? std::make_optional(avg->value()) : std::nullopt,
         min != nullptr ? std::make_optional(min->value()) : std::nullopt,
-        max != nullptr ? std::make_optional(max->value()) : std::nullopt
+        max != nullptr ? std::make_optional(max->value()) : std::nullopt,
+        scope != nullptr ? std::make_optional(scope->toCpp()) : std::nullopt
       );
     }
 
@@ -59,7 +64,7 @@ namespace margelo::nitro::nitrohealth {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeHealthStatistics::javaobject> fromCpp(const NativeHealthStatistics& value) {
-      using JSignature = JNativeHealthStatistics(double, double, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>);
+      using JSignature = JNativeHealthStatistics(double, double, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<JNativeDistanceScope>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
@@ -69,7 +74,8 @@ namespace margelo::nitro::nitrohealth {
         value.sum.has_value() ? jni::JDouble::valueOf(value.sum.value()) : nullptr,
         value.avg.has_value() ? jni::JDouble::valueOf(value.avg.value()) : nullptr,
         value.min.has_value() ? jni::JDouble::valueOf(value.min.value()) : nullptr,
-        value.max.has_value() ? jni::JDouble::valueOf(value.max.value()) : nullptr
+        value.max.has_value() ? jni::JDouble::valueOf(value.max.value()) : nullptr,
+        value.scope.has_value() ? JNativeDistanceScope::fromCpp(value.scope.value()) : nullptr
       );
     }
   };

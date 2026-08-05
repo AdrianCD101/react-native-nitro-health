@@ -1,6 +1,6 @@
 # react-native-nitro-health
 
-react-native-nitro-health is a react native package built with Nitro
+Cross-platform HealthKit and Health Connect access for React Native, built with Nitro Modules.
 
 [![Version](https://img.shields.io/npm/v/react-native-nitro-health.svg)](https://www.npmjs.com/package/react-native-nitro-health)
 [![Downloads](https://img.shields.io/npm/dm/react-native-nitro-health.svg)](https://www.npmjs.com/package/react-native-nitro-health)
@@ -8,110 +8,317 @@ react-native-nitro-health is a react native package built with Nitro
 
 ## Requirements
 
-- React Native v0.76.0 or higher
-- Node 18.0.0 or higher
-- iOS 16.0 or higher
-
-> [!IMPORTANT]  
-> To Support `Nitro Views` you need to install React Native version v0.78.0 or higher.
+- React Native 0.76 or newer
+- Node.js 18 or newer
+- iOS 16 or newer
+- Android 9 (API 28) or newer with Health Connect available
 
 ## Installation
 
-```bash
+```sh
 bun add react-native-nitro-health react-native-nitro-modules
 ```
 
-## Availability
+Rebuild the native application after installation. Import the runtime and all public types from the package root:
+
+```ts
+import {
+  NitroHealth,
+  type HealthPermission,
+  type StepSample,
+} from 'react-native-nitro-health'
+```
+
+### Public package surface
+
+The package root exports `NitroHealth` and consumer-facing types only. Native transport types named `Native*`, the generated `NitroHealthSpec`, generated Nitro files, and internal mapping helpers are not public exports.
+
+Package entry points are intentionally restricted to:
+
+- `react-native-nitro-health`
+- `react-native-nitro-health/jest/mock`
+- `react-native-nitro-health/jest/setup`
+- `react-native-nitro-health/package.json`
+
+There are no iOS, Android, `src`, spec, or other platform subpath imports. Consumer workflows use capabilities and tagged results instead of importing a platform implementation.
+
+## Availability And Recovery
+
+`getAvailability()` is synchronous and returns a discriminated value. A recovery action exists only when the current unavailable state can be addressed by installing or updating the Android Health Connect provider.
 
 ```ts
 import { NitroHealth } from 'react-native-nitro-health'
 
-const status = NitroHealth.getAvailabilityStatus()
-const available = NitroHealth.isAvailable()
+const availability = NitroHealth.getAvailability()
 
-if (status === 'providerUpdateRequired') {
-  NitroHealth.openHealthConnectInstall()
+if (availability.status === 'unavailable') {
+  if (availability.reason === 'provider-install-or-update-required') {
+    const recovery = await NitroHealth.performAvailabilityRecovery(availability.recovery)
+
+    if (recovery.status === 'user-action-required') {
+      // The provider store opened. The user still needs to install or update it.
+    }
+  } else {
+    // reason is 'not-supported' or 'service-unavailable'.
+  }
 }
 ```
 
-`getAvailabilityStatus()` returns:
+The availability shapes are:
 
-| Status                   | Meaning                                                        |
-| ------------------------ | -------------------------------------------------------------- |
-| `available`              | HealthKit or Health Connect is available on this device.       |
-| `unavailable`            | Health APIs are not available on this device.                  |
-| `providerUpdateRequired` | Android only. Health Connect needs to be installed or updated. |
+```ts
+type HealthAvailability =
+  | { status: 'available' }
+  | {
+      status: 'unavailable'
+      reason: 'not-supported' | 'service-unavailable'
+    }
+  | {
+      status: 'unavailable'
+      reason: 'provider-install-or-update-required'
+      recovery: { kind: 'install-or-update-provider' }
+    }
+```
 
-`isAvailable()` is a convenience method equivalent to `getAvailabilityStatus() === 'available'`.
+`performAvailabilityRecovery()` returns either `{ status: 'user-action-required', destination: 'provider-store' }` or `{ status: 'unavailable', reason: 'no-recovery-action' | 'destination-unavailable' }`. Opening the store is not proof that the provider was installed; call `getAvailability()` again when the app resumes.
 
-`openHealthConnectInstall()` opens the Android Health Connect Play Store onboarding flow when `getAvailabilityStatus()` returns `providerUpdateRequired`. It returns `false` when the flow is not available, including on iOS.
+On iOS, unsupported devices return `not-supported` and there is no install recovery action.
 
-On iOS, apps still need the HealthKit capability and the relevant HealthKit usage descriptions before read/write APIs can request authorization.
+## Capabilities
+
+Use `getCapabilities()` for workflows whose implementation differs by platform. Do not branch on `Platform.OS`.
+
+```ts
+const capabilities = await NitroHealth.getCapabilities()
+
+if (capabilities.status === 'unavailable') {
+  console.log(capabilities.availability.reason)
+} else if (capabilities.backgroundChanges.mode === 'observer') {
+  // The system can wake the app and emit change hints.
+  console.log(capabilities.backgroundChanges.frequencies)
+  console.log(capabilities.historyRead)
+} else {
+  // mode is 'polling' and scheduling is always 'app-owned'.
+  console.log(capabilities.backgroundChanges.backgroundRead)
+  console.log(capabilities.historyRead)
+}
+```
+
+Background changes are one of:
+
+- `observer`: system observer hints, frequencies `immediate`, `hourly`, `daily`, and `weekly`, with normal read authorization covering background reads. iOS reports this capability whenever HealthKit is available; configuration rejects if the host lacks the required background-delivery entitlement.
+- `polling`: the consumer app owns scheduling and separately checks background-read access.
+
+`historyRead` and polling `backgroundRead` use these states:
+
+- `included`: included in normal read authorization.
+- `unsupported`: the health service cannot provide the access.
+- `not-declared`: the Android manifest permission is missing.
+- `not-granted`: the permission is declared but has not been granted.
+- `granted`: the additional Android permission is granted.
+
+Request optional access only when its capability is `not-granted`:
+
+```ts
+const capabilities = await NitroHealth.getCapabilities()
+
+if (
+  capabilities.status === 'available' &&
+  capabilities.backgroundChanges.mode === 'polling' &&
+  capabilities.backgroundChanges.backgroundRead === 'not-granted'
+) {
+  const result = await NitroHealth.requestAdditionalAccess('background-read')
+  console.log(result.access, result.status)
+}
+
+if (capabilities.status === 'available' && capabilities.historyRead === 'not-granted') {
+  const result = await NitroHealth.requestAdditionalAccess('history-read')
+  console.log(result.access, result.status)
+}
+```
+
+`requestAdditionalAccess()` returns `{ access, status }` after the request, or an `unavailable` result carrying health availability. Android opens permission UI only from `not-granted`; `not-declared`, `unsupported`, and already granted states return without prompting. Both access types return `included` on iOS.
 
 ## Permissions
 
-The supported unified permission data types are `steps`, `distance`, `activeEnergyBurned`, `heartRate`, `restingHeartRate`, `heartRateVariability`, `oxygenSaturation`, `height`, `sleep`, `bodyMass`, and `workout`.
+Supported data types are `steps`, `heartRate`, `restingHeartRate`, `heartRateVariability`, `distance`, `activeEnergyBurned`, `oxygenSaturation`, `height`, `sleep`, `bodyMass`, and `workout`.
+
+### Authorization
+
+Authorization results contain one status entry per requested permission, preserving input order. There is no aggregate granted, denied, partial, or prompt-status result.
 
 ```ts
 import { NitroHealth, type HealthPermission } from 'react-native-nitro-health'
 
 const permissions: HealthPermission[] = [
   { accessType: 'read', dataType: 'steps' },
-  { accessType: 'read', dataType: 'distance' },
-  { accessType: 'read', dataType: 'activeEnergyBurned' },
-  { accessType: 'read', dataType: 'heartRate' },
   { accessType: 'read', dataType: 'sleep' },
-  { accessType: 'read', dataType: 'bodyMass' },
+  { accessType: 'write', dataType: 'workout' },
 ]
 
-const current = await NitroHealth.getPermissionStatuses(permissions)
-const status = await NitroHealth.getRequestStatusForAuthorization(permissions)
+const before = await NitroHealth.getPermissionStatuses(permissions)
 
-if (status === 'shouldRequest') {
-  const result = await NitroHealth.requestAuthorization(permissions)
+if (before.status === 'unavailable') {
+  console.log(before.availability.reason)
+} else {
+  for (const entry of before.statuses) {
+    console.log(entry.permission.accessType, entry.permission.dataType, entry.status)
+  }
+}
 
-  if (result.status === 'denied' || result.status === 'partial') {
-    // Show your app-specific rationale or settings instructions.
-    await NitroHealth.openHealthSettings()
+const authorization = await NitroHealth.requestAuthorization(permissions)
+
+if (authorization.status === 'completed') {
+  for (const entry of authorization.statuses) {
+    if (entry.status === 'granted') {
+      continue
+    }
+
+    // Handle this specific permission's notGranted, notDetermined, or
+    // unverifiable state in app UI.
+    console.log(entry.permission, entry.status)
   }
 }
 ```
 
-`getPermissionStatuses()` reports one current state per requested permission without opening system authorization UI. States are `granted`, `notGranted`, `notDetermined`, or `unverifiable`. Android reports `granted` or `notGranted` because Health Connect does not distinguish denial from a permission that has never been requested. HealthKit reports all read permissions as `unverifiable`; write permissions can be `granted`, `notGranted`, or `notDetermined`. When the health API is unavailable, every requested permission is `unverifiable` and `availabilityStatus` explains why.
+Per-entry statuses are `granted`, `notGranted`, `notDetermined`, and `unverifiable`.
 
-`getRequestStatusForAuthorization()` returns `unknown`, `shouldRequest`, or `unnecessary`.
+- Android reports `granted` or `notGranted` when Health Connect is available. Health Connect does not distinguish a denial from access that was never requested.
+- HealthKit never discloses read authorization, so every iOS read entry is `unverifiable`, before and after authorization. iOS write entries can be `granted`, `notGranted`, or `notDetermined`.
+- When health data is unavailable, `getPermissionStatuses()` and `requestAuthorization()` return `status: 'unavailable'`, include the typed `availability`, and mark every requested entry `unverifiable`.
 
-`requestAuthorization()` returns a structured result with `status`, `requestStatus`, `grantedPermissions`, `deniedPermissions`, and `unverifiablePermissions`. Android Health Connect can report granted and denied permissions after the prompt. iOS HealthKit cannot verify read permissions after prompting, so read permissions are returned in `unverifiablePermissions` and the aggregate status can be `completed`.
+On Android, a missing read permission causes reads to reject. On iOS, reads reject until authorization has been requested at least once; after the user responds, a denied HealthKit read resolves with empty results because denial is indistinguishable from no data. Missing write permission is detectable and rejects on both platforms.
 
-`openHealthSettings()` opens Android Health Connect settings on Android and the app settings screen on iOS. It returns `false` when settings cannot be opened. Note that iOS has no deep link to an app's HealthKit permission screen — users manage access in the Health app under Sharing → Apps.
+### Manage And Revoke
 
-Android consumer apps must declare the matching Health Connect permissions in their own `AndroidManifest.xml` before requesting access. Health Connect silently refuses undeclared permissions: the permission screen never shows them and they are never granted, so the corresponding read or write calls keep failing with a missing-permission error.
-
-| Data type              | Android read permission                                 | Android write permission                                 |
-| ---------------------- | ------------------------------------------------------- | -------------------------------------------------------- |
-| `steps`                | `android.permission.health.READ_STEPS`                  | `android.permission.health.WRITE_STEPS`                  |
-| `distance`             | `android.permission.health.READ_DISTANCE`               | `android.permission.health.WRITE_DISTANCE`               |
-| `activeEnergyBurned`   | `android.permission.health.READ_ACTIVE_CALORIES_BURNED` | `android.permission.health.WRITE_ACTIVE_CALORIES_BURNED` |
-| `heartRate`            | `android.permission.health.READ_HEART_RATE`             | `android.permission.health.WRITE_HEART_RATE`             |
-| `restingHeartRate`     | `android.permission.health.READ_RESTING_HEART_RATE`     | `android.permission.health.WRITE_RESTING_HEART_RATE`     |
-| `heartRateVariability` | `android.permission.health.READ_HEART_RATE_VARIABILITY` | n/a (writes not supported yet)                           |
-| `oxygenSaturation`     | `android.permission.health.READ_OXYGEN_SATURATION`      | `android.permission.health.WRITE_OXYGEN_SATURATION`      |
-| `height`               | `android.permission.health.READ_HEIGHT`                 | `android.permission.health.WRITE_HEIGHT`                 |
-| `sleep`                | `android.permission.health.READ_SLEEP`                  | `android.permission.health.WRITE_SLEEP`                  |
-| `bodyMass`             | `android.permission.health.READ_WEIGHT`                 | `android.permission.health.WRITE_WEIGHT`                 |
-| `workout`              | `android.permission.health.READ_EXERCISE`               | `android.permission.health.WRITE_EXERCISE`               |
-
-Background Health Connect reads additionally require `android.permission.health.READ_HEALTH_DATA_IN_BACKGROUND`; see [Background Synchronization](#background-synchronization). This permission does not replace any data-type read permission.
-
-On iOS, apps must add `NSHealthShareUsageDescription` (reads) and `NSHealthUpdateUsageDescription` (writes) to `Info.plist`, plus the HealthKit capability.
-
-Read methods behave differently per platform when permission is missing. On Android, reads reject with a missing-permission error until the permission is granted. On iOS, reads reject with an "Authorization not determined" error until the app has requested authorization at least once; after the user responds to the prompt, HealthKit never discloses a read denial — denied reads resolve with empty results, indistinguishable from having no data.
-
-## Read Steps
+Permission-management methods report whether the operation completed or still requires the user. Their result shape provides the workflow; no platform check is needed.
 
 ```ts
-import { NitroHealth } from 'react-native-nitro-health'
+const management = await NitroHealth.managePermissions()
 
+if (management.status === 'user-action-required') {
+  if (management.action.kind === 'opened') {
+    // Android Health Connect settings opened.
+  } else {
+    // Explain how to open Health app > Sharing > Apps on iOS.
+  }
+}
+
+const revocation = await NitroHealth.revokeAllPermissions()
+
+if (revocation.status === 'completed') {
+  // Android revoked the app's Health Connect permissions directly.
+} else if (revocation.status === 'user-action-required') {
+  // iOS requires manual revocation in the Health app.
+}
+```
+
+Both methods can return `{ status: 'unavailable', availability }`. `managePermissions()` opens Health Connect settings on Android and returns a stable manual Health-app destination on iOS. `revokeAllPermissions()` completes directly on Android; HealthKit does not provide direct all-permission revocation, so iOS returns the manual action.
+
+Re-read permission statuses and perform a full data resync after a material permission change. Cached data and change tokens do not prove current authorization.
+
+### Consumer Configuration
+
+On iOS, enable the HealthKit capability and add usage descriptions to the consumer app's `Info.plist`:
+
+```xml
+<key>NSHealthShareUsageDescription</key>
+<string>Explain the user-visible feature that reads health data.</string>
+<key>NSHealthUpdateUsageDescription</key>
+<string>Explain the user-visible feature that writes health data.</string>
+```
+
+On Android, the consumer app must declare every Health Connect data permission it requests. The library deliberately does not add health data permissions to its own manifest.
+
+| Data type | Read permission | Write permission |
+| --- | --- | --- |
+| `steps` | `android.permission.health.READ_STEPS` | `android.permission.health.WRITE_STEPS` |
+| `distance` | `android.permission.health.READ_DISTANCE` | `android.permission.health.WRITE_DISTANCE` |
+| `activeEnergyBurned` | `android.permission.health.READ_ACTIVE_CALORIES_BURNED` | `android.permission.health.WRITE_ACTIVE_CALORIES_BURNED` |
+| `heartRate` | `android.permission.health.READ_HEART_RATE` | `android.permission.health.WRITE_HEART_RATE` |
+| `restingHeartRate` | `android.permission.health.READ_RESTING_HEART_RATE` | `android.permission.health.WRITE_RESTING_HEART_RATE` |
+| `heartRateVariability` | `android.permission.health.READ_HEART_RATE_VARIABILITY` | Not supported |
+| `oxygenSaturation` | `android.permission.health.READ_OXYGEN_SATURATION` | `android.permission.health.WRITE_OXYGEN_SATURATION` |
+| `height` | `android.permission.health.READ_HEIGHT` | `android.permission.health.WRITE_HEIGHT` |
+| `sleep` | `android.permission.health.READ_SLEEP` | `android.permission.health.WRITE_SLEEP` |
+| `bodyMass` | `android.permission.health.READ_WEIGHT` | `android.permission.health.WRITE_WEIGHT` |
+| `workout` | `android.permission.health.READ_EXERCISE` | `android.permission.health.WRITE_EXERCISE` |
+
+Undeclared Health Connect permissions do not appear in the system permission sheet and cannot be granted. The Android privacy-policy rationale activity and provider package query are also consumer-app responsibilities; see `example/android/app/src/main/AndroidManifest.xml` for a complete reference.
+
+Background and extended-history declarations are documented in [Background Synchronization](#background-synchronization).
+
+## Raw Sample Model
+
+Every raw sample returned by a `read*` method or a change upsert has `identity` and `origin`.
+
+### Data Origin
+
+```ts
+interface HealthDataOrigin {
+  identifier: string
+  displayName?: string
+}
+```
+
+`origin.identifier` is the stable application identifier supplied by the health service: an iOS bundle identifier or Android package name. `origin.displayName` is a human-readable app name when available. HealthKit supplies the source name; Health Connect currently supplies only the package name, so Android `displayName` is normally absent.
+
+Do not use a display name as a database key. Use `origin.identifier` for stable source grouping.
+
+### Record And Child Identity
+
+```ts
+type HealthSampleIdentity =
+  | { kind: 'record'; id: string }
+  | {
+      kind: 'record-child'
+      id: string
+      record: { kind: 'record'; id: string }
+    }
+```
+
+- `record` identifies an independently deletable native record.
+- `record-child` identifies one flattened reading or stage owned by a parent record. Its `id` can be synthetic and unstable; `record` is the parent record identity.
+- Android heart-rate readings and sleep stages are record children because Health Connect stores several readings or stages inside one record.
+- iOS HealthKit samples are independently deletable records.
+
+Use the identity tag rather than parsing an ID:
+
+```ts
+const { samples } = await NitroHealth.readHeartRate(query)
+
+for (const sample of samples) {
+  if (sample.identity.kind === 'record') {
+    console.log('deletable sample', sample.identity.id)
+  } else {
+    console.log('child', sample.identity.id, 'parent', sample.identity.record.id)
+  }
+
+  console.log('recorded by', sample.origin.identifier)
+}
+```
+
+Selecting a child sample's `identity.record` for deletion explicitly selects its whole parent. That removes every child reading or stage in the parent, not just the selected child.
+
+## Reading Data
+
+All raw reads return `{ samples, nextCursor? }`. Every listed sample also includes the common `identity` and `origin` fields.
+
+| Method | Data-specific sample fields |
+| --- | --- |
+| `readSteps` | `startDate`, `endDate`, `count` |
+| `readDistance` | `startDate`, `endDate`, `distanceMeters`, `scope` |
+| `readActiveEnergyBurned` | `startDate`, `endDate`, `kilocalories` |
+| `readBodyMass` | `startDate`, `endDate`, `kilograms` |
+| `readHeartRate` | `date`, `bpm` |
+| `readRestingHeartRate` | `date`, `bpm` |
+| `readHeartRateVariability` | `date`, `milliseconds`, `method` |
+| `readOxygenSaturation` | `date`, `percentage` |
+| `readHeight` | `date`, `meters` |
+| `readSleepSamples` | tagged session-envelope or stage fields |
+| `readWorkouts` | workout duration, activity, labels, and metric availability |
+
+```ts
 const page = await NitroHealth.readSteps({
   startDate: new Date('2026-01-01T00:00:00.000Z'),
   endDate: new Date('2026-01-02T00:00:00.000Z'),
@@ -119,48 +326,190 @@ const page = await NitroHealth.readSteps({
   ascending: true,
 })
 
-const steps = page.samples
+for (const sample of page.samples) {
+  console.log(sample.count, sample.identity, sample.origin)
+}
 ```
 
-`readSteps()` resolves with a page of step count samples with `uuid`, `startDate`, `endDate`, and `count`. `uuid` identifies the physical native sample — the HealthKit sample UUID on iOS, the Health Connect record id on Android. It remains valid for that physical sample, but a higher-version iOS write replaces the sample and creates a new UUID. When the platform query succeeds but no matching samples are available, `samples` is empty and `nextCursor` is absent; when more data exists beyond `limit`, the page carries a `nextCursor` (see [Pagination](#pagination)). Apps must request and receive steps read permission before relying on returned data.
+`startDate` is inclusive and `endDate` is exclusive. `limit` defaults to 1000 and `ascending` defaults to `true`. An empty successful query returns `samples: []` without `nextCursor`.
 
-## Pagination
+### Pagination
 
-All raw sample reads (`readSteps`, `readDistance`, `readActiveEnergyBurned`, `readBodyMass`, `readHeartRate`, `readRestingHeartRate`, `readHeartRateVariability`, `readOxygenSaturation`, `readHeight`, `readSleepSamples`, and `readWorkouts`) resolve with a page — `{ samples, nextCursor }`. `limit` (default 1000) caps the samples per page, and `nextCursor` is present if and only if more data exists. Pass it back as `cursor` to fetch the next page:
+Pass the opaque `nextCursor` back to the same read with the same range and sort direction:
 
 ```ts
 let cursor: string | undefined
+
 do {
-  const page = await NitroHealth.readSteps({ startDate, endDate, limit: 500, cursor })
-  handle(page.samples)
+  const page = await NitroHealth.readSteps({
+    startDate,
+    endDate,
+    limit: 500,
+    ascending: true,
+    cursor,
+  })
+
+  await store(page.samples)
   cursor = page.nextCursor
-} while (cursor)
+} while (cursor !== undefined)
 ```
 
-Cursors are opaque and platform-specific — never parse or construct one. A cursor is only valid for the read method and the same `startDate`, `endDate`, and `ascending` that produced it. Treat cursors as short-lived: use them to walk pages within one read loop, and do not persist them. Passing an invalid or foreign cursor (from the other platform, a different read method, a different `ascending`, or a malformed string) rejects with a descriptive `Invalid cursor…` error.
+Cursors are platform-specific, method-specific, query-specific, and short-lived. Do not parse, construct, transfer, or persist them. Invalid or foreign cursors reject.
 
-On Android, heart rate and sleep reads page by underlying Health Connect record, so a page may contain more samples than `limit` when a record holds multiple readings or stages; iOS honors `limit` exactly. Either way, nothing is silently truncated — whenever data remains, the page carries a `nextCursor`.
+Android heart-rate and sleep reads page by parent Health Connect record. One record can flatten to multiple returned samples, so a page can contain more samples than `limit`. iOS limits independent samples directly. In either case, `nextCursor` is present whenever another page remains.
+
+### Distance Scope
+
+Distance results state what activity coverage the native record represents:
+
+```ts
+type DistanceScope = 'walking-running' | 'activity-unspecified'
+```
+
+HealthKit uses the walking/running distance quantity, so iOS raw samples and statistics return `scope: 'walking-running'`. A Health Connect `DistanceRecord` does not preserve that distinction, so Android raw samples and statistics return `scope: 'activity-unspecified'`. Do not compare or merge cross-platform distance totals without considering the scope.
+
+### Heart Rate Variability
+
+`readHeartRateVariability()` returns `method: 'sdnn'` on iOS and `method: 'rmssd'` on Android. SDNN and RMSSD are different, non-comparable measures. Never mix samples with different `method` values in one average, chart, or trend. HRV is read-only because there is no portable value to write.
+
+### Sleep Records
+
+`readSleepSamples()` returns one flat tagged array. It preserves complete session envelopes separately from explicit stage intervals:
+
+```ts
+const { samples } = await NitroHealth.readSleepSamples({ startDate, endDate })
+
+for (const sample of samples) {
+  if (sample.kind === 'session-envelope') {
+    console.log(sample.startDate, sample.endDate, sample.stageData)
+    // stageData: 'reported' | 'not-reported' | 'unverifiable'
+  } else {
+    console.log(sample.startDate, sample.endDate, sample.stage)
+    if (sample.identity.kind === 'record-child') console.log(sample.identity.record)
+  }
+}
+```
+
+A session envelope has `kind: 'session-envelope'`, bounds, and `stageData`. It does not have a `stage`. A stage has `kind: 'stage'`, bounds, and `stage`; parent ownership is encoded by a `record-child` identity.
+
+- Android returns one record-identity envelope for every `SleepSessionRecord`, followed by its record-child stages. `stageData` is `reported` when explicit stages exist and `not-reported` when none exist.
+- iOS returns every HealthKit sleep category interval, including `inBed`, as an independent stage record because HealthKit does not expose native sleep-session ownership.
+- A session without stages remains only a session envelope. Nitro Health does not manufacture a synthetic `asleep` stage.
+
+Stages normalize to `inBed`, `awake`, `awakeInBed`, `asleep`, `asleepCore`, `asleepDeep`, `asleepREM`, `outOfBed`, or `unknown`.
+
+### Workouts
+
+Workout reads preserve availability and mapping fidelity instead of collapsing platform differences into optional numbers:
+
+```ts
+const { samples: workouts } = await NitroHealth.readWorkouts({
+  startDate,
+  endDate,
+  limit: 50,
+  ascending: false,
+})
+
+for (const workout of workouts) {
+  console.log(workout.elapsedDurationSeconds)
+
+  if (workout.activeDuration.status === 'available') {
+    console.log(workout.activeDuration.value)
+  }
+
+  if (workout.activity.status === 'known') {
+    console.log(
+      workout.activity.type,
+      workout.activity.portability,
+      workout.activity.mapping
+    )
+  } else {
+    console.log('unknown native activity')
+  }
+
+  console.log(workout.title, workout.brandName)
+  console.log(workout.totalDistance, workout.totalActiveEnergyBurned)
+}
+```
+
+`elapsedDurationSeconds` is always wall-clock `endDate - startDate`. `activeDuration` is pause-aware when reported. HealthKit returns it as `available`; the Health Connect exercise-session record does not expose it, so Android returns `unsupported`.
+
+`activity` is either `{ status: 'unknown' }` or a known activity with:
+
+- `type`: the normalized `WorkoutActivityType`.
+- `portability`: `portable` when the normalized value is also accepted for cross-platform writes, otherwise `read-only`.
+- `mapping`: `exact` when the normalized type preserves native meaning, or `broadened` when a more specific native activity was folded into a broader type such as treadmill running to `running`.
+
+Unknown or future native activity values remain explicitly `unknown`; they are not silently converted to `other`.
+
+`title` and `brandName` are separate fields. Android supplies the exercise-session title and currently has no brand field. HealthKit supplies workout brand metadata and currently has no native session title in this mapping.
+
+`activeDuration`, `totalDistance`, and `totalActiveEnergyBurned` are `HealthMetricValue` values:
+
+```ts
+type HealthMetricValue =
+  | { status: 'available'; value: number }
+  | { status: 'not-reported' }
+  | { status: 'unsupported' }
+```
+
+On iOS, total distance and active energy are `available` when the workout reports them and `not-reported` otherwise. Android currently returns `unsupported` for both exercise-session totals.
+
+## Aggregation
+
+Use native aggregation rather than summing raw samples. HealthKit and Health Connect can account for overlapping sources in ways a JavaScript sum cannot.
+
+```ts
+const dailySteps = await NitroHealth.readStatistics('steps', {
+  startDate: new Date('2026-01-01T00:00:00.000Z'),
+  endDate: new Date('2026-01-08T00:00:00.000Z'),
+  bucket: 'day',
+  metrics: ['sum'],
+})
+
+const heartRate = await NitroHealth.readStatistics('heartRate', {
+  startDate,
+  endDate,
+  bucket: 'hour',
+  metrics: ['avg', 'min', 'max'],
+})
+```
+
+| Data type | Metrics | Unit |
+| --- | --- | --- |
+| `steps` | `sum` | count |
+| `distance` | `sum` | meters, plus `scope` |
+| `activeEnergyBurned` | `sum` | kcal |
+| `heartRate` | `avg`, `min`, `max` | bpm |
+| `restingHeartRate` | `avg`, `min`, `max` | bpm |
+| `height` | `avg`, `min`, `max` | meters |
+| `bodyMass` | `avg`, `min`, `max` | kg |
+
+Sleep, HRV, oxygen saturation, and workout statistics are not supported by `readStatistics()`. Invalid data-type/metric combinations reject before crossing the native boundary.
+
+Buckets anchor at `startDate`. Use local midnight for calendar-day buckets. `week` is a rolling seven-day interval from that anchor. The final bucket is clamped to `endDate`, empty buckets are omitted, and results are ascending. Hour buckets are fixed 3600-second intervals; day, week, and month buckets follow the device calendar and local time zone.
+
+`readHeartRateStatistics({ startDate, endDate })` remains the whole-range heart-rate aggregate and returns `{ average?, min?, max? }`.
 
 ## Change Tracking
 
-Use change tracking to keep a local database or backend synchronized after an initial snapshot. Changes tokens are durable checkpoints and are separate from the short-lived pagination cursors above. Create and persist one token per `HealthDataType`.
+Change tokens are durable synchronization checkpoints. They are different from pagination cursors. Persist one token per `HealthDataType` and device/store.
 
-Create the token **before** reading the initial snapshot. That ordering ensures changes made while the snapshot is being paged are returned afterward:
+Create the token before the initial snapshot so changes that occur while paging the snapshot are not lost:
 
 ```ts
-import { NitroHealth } from 'react-native-nitro-health'
-import type { HealthRecordChange } from 'react-native-nitro-health'
+import {
+  NitroHealth,
+  type HealthRecordChange,
+} from 'react-native-nitro-health'
 
 let changesToken = await NitroHealth.createChangesToken('steps')
+await replaceInitialStepSnapshot()
 
-// Read and store the initial snapshot using readSteps() and its pagination cursor.
-await storeInitialStepSnapshot()
-
-do {
+for (;;) {
   const result = await NitroHealth.getChanges('steps', changesToken)
 
   if (result.tokenExpired) {
-    // Create a new token before replacing the local snapshot, then drain it.
     changesToken = await NitroHealth.createChangesToken('steps')
     await replaceInitialStepSnapshot()
     continue
@@ -168,62 +517,125 @@ do {
 
   await database.transaction(async () => {
     for (const change of result.changes) {
-      await applyRecordChange(change)
+      await applyStepChange(change)
     }
 
-    // Persist only after every change in the page was applied successfully.
+    // Commit the checkpoint only after every change in this page succeeds.
     await saveChangesToken(result.nextChangesToken)
   })
 
   changesToken = result.nextChangesToken
   if (!result.hasMore) break
-} while (true)
+}
 
-async function applyRecordChange(change: HealthRecordChange<'steps'>) {
+async function applyStepChange(change: HealthRecordChange<'steps'>) {
   if (change.type === 'delete') {
-    await removeSamplesByRecordUuid(change.recordUuid)
+    await removeSamplesForRecord(change.record.id)
     return
   }
 
-  // An upsert contains the complete current contents of its native record.
-  await replaceSamplesByRecordUuid(change.recordUuid, change.samples)
+  // An upsert is the complete current content of this parent record.
+  await replaceSamplesForRecord(change.record.id, change.samples)
 }
 ```
 
-Every public sample has both `uuid` and `recordUuid`. `uuid` identifies the returned sample. `recordUuid` identifies its native parent record and is the key used by change tracking. They are equal except for Android heart-rate readings and sleep stages, where one Health Connect record is flattened into several samples such as `recordUuid#0`, `recordUuid#1`, and so on. Those index-based sample identifiers can change when an updated parent record reorders its children. Always replace all cached samples sharing an upsert's `recordUuid`; never append an upsert blindly. An upsert may contain an empty `samples` array, which means the parent record currently has no child samples and any cached children must be removed.
+Change identity is always record-level: every change has `record: { kind: 'record', id }`. An upsert can contain one sample, multiple record-child samples, or an empty array. Replace all locally cached samples owned by `change.record`; never append an upsert blindly. A delete removes every cached child owned by that record.
 
-For versioned writes, `sync.id` is the logical application identity; `uuid` and `recordUuid` remain physical native identities. Current Health Connect implementations keep the same `recordUuid` when a higher version replaces a record. iOS creates a sample with a new UUID and deletes the previous sample, so change tracking reports an upsert under the new `recordUuid` and a deletion for the old one. Any previously cached iOS UUID is stale after that replacement.
+Process changes in returned order, but do not treat that order as a cross-platform event timeline. Persist `nextChangesToken` only after the page commits. Reusing the input token safely replays the page; committing the next token early can lose changes. Serialize drains per data type, or use compare-and-swap persistence, so foreground and background sync cannot commit out of order. Continue immediately while `hasMore` is true.
 
-`getChanges()` returns a sequence of `upsert` and `delete` changes. Process them in the returned order, but do not treat that order as a cross-platform event timeline. A successful page includes `nextChangesToken`; apply the page transactionally and persist that token only afterward. Reusing the previous token safely replays a page, while saving the next token before applying the page can permanently lose changes. Serialize drains for each data type, or use compare-and-swap persistence against the input token, so two foreground/background syncs cannot commit checkpoints out of order. Continue immediately while `hasMore` is true. iOS deliberately performs one terminal empty anchored query, so its final non-empty page may still report `hasMore: true`.
+Tokens are opaque, platform-specific, data-type-specific, and device/store-specific. Never parse, modify, or transfer them. Health Connect tokens expire after approximately 30 days and then return `{ tokenExpired: true }`; create a new token before rebuilding the snapshot. HealthKit does not expose token expiration, though native query failures can still reject. The first iOS token creation drains existing anchored-query history internally to establish a current checkpoint and can take longer on a large store.
 
-Changes tokens are opaque, platform-specific, data-type-specific, and device/store-specific. Never parse, modify, or transfer them between devices. Invalid, foreign-platform, pagination, or wrong-data-type tokens reject. Health Connect tokens expire after approximately 30 days; an expired token returns `{ tokenExpired: true }` and requires the token-before-snapshot sequence again. HealthKit does not expose token expiration, but native query failures still reject. Creating the first iOS token drains existing HealthKit history internally to establish the current checkpoint, so it can take longer for data types with substantial history.
-
-Change tracking uses the same read authorization as raw reads. HealthKit cannot reveal a denied read permission after the authorization prompt, so denial can still appear as an empty result on iOS. Request authorization before creating tokens, and perform a full resync after material permission changes.
+For versioned writes, `sync.id` is the app's logical identity while `identity` remains physical native identity. A replacement may keep or change its physical record ID depending on the health service. Synchronize from record changes rather than assuming IDs survive replacement.
 
 ## Background Synchronization
 
-Background support differs by platform. HealthKit can wake an iOS app with an observer notification. Health Connect does not expose change notifications to applications; Android apps schedule their own polling and use a separate permission to read while backgrounded. In both cases, your app owns changes-token persistence, serialized drains, database transactions, retries, network policy, and scheduling.
+Both background modes feed the same durable change-token drain described above:
 
-### iOS change notifications
+- Observer mode emits only a coalesced hint containing `dataTypes`; the app drains each type's last committed token.
+- Polling mode runs from an app-owned scheduler and drains those same tokens.
 
-After one native setup step, consumers choose every observed data type and frequency from JavaScript with `enableBackgroundDelivery()`. The native setup does not register any data type by itself; it only restores the choices previously persisted by those JavaScript calls when HealthKit launches the app before JavaScript is ready.
+The app always owns token persistence, serialized drains, database transactions, retry policy, network policy, and initial/expired-token snapshots.
 
-Autolinking alone is not sufficient for terminated-app delivery. Apple requires observer queries to be restored during `application(_:didFinishLaunchingWithOptions:)`. This release intentionally does not use AppDelegate swizzling, Objective-C `+load` side effects, or another hidden startup hook. It also does not ship an Expo config plugin. Bare React Native apps perform the setup below once; Expo prebuild apps must apply the same entitlement, bridging-header import, and AppDelegate call through their own config plugin until first-party Expo support is added.
+### Configure, Disable, And Subscribe
 
-Add the HealthKit background-delivery entitlement to the app target:
+The typed outcome tells the app whether native observer delivery completed or app-owned polling work remains:
+
+```ts
+const configured = await NitroHealth.configureBackgroundChanges({
+  dataTypes: ['steps', 'sleep'],
+  frequency: 'hourly',
+})
+
+if (configured.status === 'completed') {
+  // configured.mode is 'observer'. Native observer configuration is active.
+} else if (configured.status === 'user-action-required') {
+  // configured.mode is 'polling' and scheduling is 'app-owned'.
+  if (configured.backgroundRead === 'not-granted') {
+    await NitroHealth.requestAdditionalAccess('background-read')
+  }
+  await scheduleAppOwnedHealthPolling()
+} else {
+  // Health data is unavailable.
+}
+```
+
+Subscribe without checking the operating system:
+
+```ts
+const background = NitroHealth.subscribeToBackgroundChanges(({ dataTypes }) => {
+  for (const dataType of dataTypes) {
+    scheduleSerializedChangesDrain(dataType)
+  }
+})
+
+if (background.mode === 'observer') {
+  // Keep this cleanup handle for the listener lifetime.
+  background.subscription.remove()
+} else if (background.mode === 'polling') {
+  // No listener was installed. Maintain the app-owned polling schedule.
+  console.log(background.scheduling)
+} else {
+  console.log(`Health service unavailable: ${background.availability.reason}`)
+}
+```
+
+In real startup code, retain an observer subscription until teardown rather than removing it immediately. Multiple observer listeners are supported; each returned subscription owns its cleanup. Removing a listener does not disable configured delivery.
+
+Disable selected observer types, or omit the argument to disable all configured types:
+
+```ts
+const disabled = await NitroHealth.disableBackgroundChanges(['steps'])
+
+if (disabled.status === 'user-action-required') {
+  // Polling mode: cancel the corresponding app-owned scheduled work.
+  await cancelAppOwnedHealthPolling(['steps'])
+}
+
+await NitroHealth.disableBackgroundChanges()
+```
+
+In polling mode, configure and disable cannot create or cancel the consumer's scheduler, so both return `user-action-required`. Observer frequencies are HealthKit scheduling hints, not timing guarantees.
+
+### iOS Observer Bootstrap And Retention
+
+iOS observer configuration is persisted by the library. The native bootstrap restores configured observers before JavaScript starts, and pending data-type hints are retained and coalesced until a JavaScript listener receives them. The library acknowledges a native delivery after the current JavaScript listeners have run. Always drain the durable token because a hint contains no records and can be delayed, duplicated, or coalesced.
+
+HealthKit exposes observer delivery as an iOS capability, but does not provide an iOS API for inspecting the host app's signed background-delivery entitlement. A missing entitlement therefore causes `configureBackgroundChanges()` to reject rather than changing the reported capability to polling.
+
+Autolinking cannot restore observers early enough for terminated-app delivery. Add the HealthKit background-delivery entitlement to the consumer target:
 
 ```xml
 <key>com.apple.developer.healthkit.background-delivery</key>
 <true/>
 ```
 
-Import the library's narrow C bootstrap header from the app target's Objective-C bridging header. If the target does not have one, create it and set `SWIFT_OBJC_BRIDGING_HEADER` to its project-relative path:
+Import the library bootstrap header from the app target's Objective-C bridging header:
 
 ```objc
 #import <NitroHealth/NitroHealthBackgroundDelivery.h>
 ```
 
-Then register persisted observers near the beginning of `application(_:didFinishLaunchingWithOptions:)`, before React Native starts:
+Then call the bootstrap near the beginning of `application(_:didFinishLaunchingWithOptions:)`, before React Native starts:
 
 ```swift
 func application(
@@ -232,269 +644,45 @@ func application(
 ) -> Bool {
   NitroHealthRegisterPersistedObservers()
 
-  // Start React Native after restoring observers.
+  // Start React Native after persisted observers have been registered.
   return true
 }
 ```
 
-Objective-C and Objective-C++ AppDelegates can import `NitroHealthBackgroundDelivery.h` directly and call `NitroHealthRegisterPersistedObservers()` without a bridging header.
+Objective-C and Objective-C++ AppDelegates can import `NitroHealthBackgroundDelivery.h` directly. Bare React Native apps add this setup once. Expo prebuild apps must apply the entitlement, bridging import, and AppDelegate call through their own config plugin; this package does not currently ship one.
 
-After requesting the normal read permission, enable each data type independently and register one or more listeners during application startup:
+HealthKit can enforce slower minimum frequencies for some types, protected data can be unavailable while the device is locked, and force-quitting can prevent relaunch. Drain configured tokens on normal launch and foreground activation even when no hint was received. True server delivery and cold-launch behavior require a signed physical device; Simulator is insufficient.
 
-```ts
-const subscription = NitroHealth.addOnChangeNotificationListener(({ dataTypes }) => {
-  for (const dataType of dataTypes) {
-    scheduleSerializedChangesDrain(dataType)
-  }
-})
+### Android Polling And Additional Permissions
 
-await NitroHealth.enableBackgroundDelivery('steps', 'hourly')
+Android has no application-facing Health Connect change observer. The app schedules WorkManager, an Expo background task, or another scheduler and drains change tokens when that work runs.
 
-// Later:
-subscription.remove()
-await NitroHealth.disableBackgroundDelivery('steps')
-```
-
-Listeners and delivery configuration have separate lifetimes: removing a listener does not disable HealthKit delivery. Configured types and frequencies persist across launches. A notification received before JavaScript attaches is coalesced by data type and handed to the first listener. Notifications contain no records and can be delayed, duplicated, or coalesced; always call `getChanges()` with the last committed token to discover the actual upserts and deletions.
-
-`immediate`, `hourly`, `daily`, and `weekly` are HealthKit scheduling hints, not delivery guarantees. HealthKit enforces slower minimum frequencies for some types (step count is commonly hourly), protected health data can be inaccessible while the device is locked, and a user force-quit can prevent relaunch. Drain every configured token on normal app launch and foreground activation even when no notification was received. True background relaunch must be validated on a signed physical device; HealthKit background server delivery is not supported on Simulator.
-
-The background delivery methods and change-notification listener are iOS-only. Background-delivery promises reject on Android, while listener registration throws synchronously with guidance to use app-owned polling.
-
-### Android background reads
-
-Declare the permission in the consumer app, not the library manifest:
+Declare background and extended-history permissions in the consumer manifest only when those workflows are used:
 
 ```xml
 <uses-permission android:name="android.permission.health.READ_HEALTH_DATA_IN_BACKGROUND" />
+<uses-permission android:name="android.permission.health.READ_HEALTH_DATA_HISTORY" />
 ```
 
-Check runtime feature support and manifest/grant state before scheduling work:
+These permissions do not replace data-type read permissions. `getCapabilities()` distinguishes unsupported, undeclared, ungranted, and granted states through Health Connect feature checks and manifest/grant inspection. After adding a missing declaration, rebuild the app before requesting it.
+
+Each scheduled run should recheck availability, `getCapabilities()`, and relevant per-entry read permissions, then drain every token until `hasMore` is false. Handle token expiration with the token-before-snapshot sequence. Android configure/disable results never schedule or cancel work on the consumer's behalf.
+
+## Writing Data
+
+Request write authorization before saving. Save methods exist for steps, distance, active energy, heart rate, resting heart rate, oxygen saturation, height, body mass, sleep sessions, and completed workouts. HRV remains read-only.
 
 ```ts
-let status = await NitroHealth.getBackgroundReadAuthorizationStatus()
+const authorization = await NitroHealth.requestAuthorization([
+  { accessType: 'write', dataType: 'steps' },
+])
 
-if (status === 'notGranted') {
-  status = await NitroHealth.requestBackgroundReadAuthorization()
-}
+const stepsWrite = authorization.statuses.find(
+  ({ permission }) =>
+    permission.accessType === 'write' && permission.dataType === 'steps'
+)
 
-if (status === 'granted') {
-  scheduleHealthSyncWork()
-}
-```
-
-The returned status is `unavailable`, `notDeclared`, `notGranted`, or `granted`. Availability is checked through Health Connect's background-read feature flag rather than Android API level alone. The request method opens the Health Connect permission flow only from `notGranted`; all other states return without prompting. On iOS both methods resolve to `unavailable` because HealthKit uses background delivery instead of a separate background-read permission.
-
-Background authorization does not wake or schedule the Android app. Use application-owned WorkManager, an Expo background-task integration, or another scheduler. Each run should recheck Health Connect availability, background authorization, and the relevant data-type read permissions, then transactionally drain `getChanges()` until `hasMore` is false. Handle `tokenExpired` with the token-before-snapshot resynchronization sequence above.
-
-## Read Activity Quantities
-
-```ts
-import { NitroHealth } from 'react-native-nitro-health'
-
-const { samples: distance } = await NitroHealth.readDistance({
-  startDate: new Date('2026-01-01T00:00:00.000Z'),
-  endDate: new Date('2026-01-02T00:00:00.000Z'),
-  limit: 100,
-  ascending: true,
-})
-
-const { samples: activeEnergy } = await NitroHealth.readActiveEnergyBurned({
-  startDate: new Date('2026-01-01T00:00:00.000Z'),
-  endDate: new Date('2026-01-02T00:00:00.000Z'),
-  limit: 100,
-  ascending: true,
-})
-```
-
-`readDistance()` resolves with a page of distance samples with `uuid`, `startDate`, `endDate`, and `distanceMeters`. iOS reads HealthKit walking/running distance only — cycling, wheelchair, and swimming distance live under separate HealthKit identifiers and are not included. Android reads Health Connect distance records, which apps may write for any activity (including cycling), so totals for the same user can differ between platforms when non-pedestrian activity is present.
-
-`readActiveEnergyBurned()` resolves with a page of active-energy samples with `uuid`, `startDate`, `endDate`, and `kilocalories`.
-
-For both methods, `samples` is empty and `nextCursor` absent when the platform query succeeds but no matching samples are available. Apps must request and receive the matching read permission before relying on returned data.
-
-## Aggregation
-
-Use native aggregation when you need totals or statistics. HealthKit and Health Connect can aggregate across device and app sources without double-counting overlapping data, while summing raw samples in JavaScript can over-count data from a phone, watch, and other apps. `readStatistics()` is the primary way to do this: it returns bucketed totals and statistics for a single data type.
-
-```ts
-import { NitroHealth } from 'react-native-nitro-health'
-
-const dailySteps = await NitroHealth.readStatistics('steps', {
-  startDate: new Date('2026-01-01T00:00:00.000Z'), // local midnight anchors calendar-day buckets
-  endDate: new Date('2026-01-08T00:00:00.000Z'),
-  bucket: 'day',
-  metrics: ['sum'],
-})
-
-const hourlyHeartRate = await NitroHealth.readStatistics('heartRate', {
-  startDate: new Date('2026-01-01T00:00:00.000Z'),
-  endDate: new Date('2026-01-02T00:00:00.000Z'),
-  bucket: 'hour',
-  metrics: ['avg', 'min', 'max'],
-})
-```
-
-`readStatistics(dataType, query)` returns one bucket per interval, each with `startDate`, `endDate`, and the requested metric fields. A metric field is only present on the result when it was requested in `query.metrics` and is supported for `dataType`:
-
-| Data type              | Supported metrics   | Unit                                           |
-| ---------------------- | ------------------- | ---------------------------------------------- |
-| `steps`                | `sum`               | count                                          |
-| `distance`             | `sum`               | meters                                         |
-| `activeEnergyBurned`   | `sum`               | kcal                                           |
-| `heartRate`            | `avg`, `min`, `max` | bpm                                            |
-| `restingHeartRate`     | `avg`, `min`, `max` | bpm                                            |
-| `heartRateVariability` | —                   | not supported — use `readHeartRateVariability` |
-| `oxygenSaturation`     | —                   | not supported — use `readOxygenSaturation`     |
-| `height`               | `avg`, `min`, `max` | meters                                         |
-| `bodyMass`             | `avg`, `min`, `max` | kg                                             |
-| `sleep`                | —                   | not supported — use `readSleepSamples`         |
-
-Requesting a metric that is not supported for `dataType`, an empty `metrics` array, an unknown `bucket`, or the `sleep`, `heartRateVariability`, or `oxygenSaturation` data type all reject before crossing the native boundary.
-
-**Bucket behavior:** buckets anchor at `query.startDate` on both platforms — pass a local-midnight `startDate` when you need calendar-day buckets. `'week'` buckets are a rolling 7 days from the anchor, not calendar weeks. The final bucket is clamped to `endDate`, empty buckets are omitted, and results are always ascending. `'hour'` buckets are a fixed 3600 seconds; `'day'`, `'week'`, and `'month'` buckets are calendar-aware in the device's local timezone, so a bucket can span 23 or 25 hours across a daylight-saving transition. On Android, heart-rate and resting-heart-rate `avg` are integer-valued (Health Connect's `BPM_AVG` is a `Long`); on iOS they are fractional. As with other reads, HealthKit cannot distinguish a denied read from no data (see the permission caveat in the Permissions section above) — a denied read resolves with empty buckets rather than rejecting.
-
-`readHeartRateStatistics()` returns `{ average, min, max }` in beats per minute for the whole query range in a single result. Each field is `undefined` when no matching heart-rate data exists. It is not deprecated — it remains the way to get a single whole-range aggregate, which `readStatistics()` cannot express since it always returns one or more buckets.
-
-## Read Heart Rate
-
-```ts
-import { NitroHealth } from 'react-native-nitro-health'
-
-const { samples: heartRate } = await NitroHealth.readHeartRate({
-  startDate: new Date('2026-01-01T00:00:00.000Z'),
-  endDate: new Date('2026-01-02T00:00:00.000Z'),
-  limit: 100,
-  ascending: true,
-})
-```
-
-`readHeartRate()` resolves with a page of individual readings with `uuid`, `date`, `bpm`, and an optional `source` (the originating app or device). On iOS each reading is one `HKQuantitySample`, its `uuid` is the HealthKit sample UUID, and `limit` caps the readings per page exactly. On Android a `HeartRateRecord` holds many readings, so records are flattened to individual points and pages are cut by record: `limit` counts records, and a page can contain more readings than `limit` when records hold multiple readings. Because Android readings live inside a parent record, each reading's `uuid` is the record id plus a `#index` suffix (for example `"a1b2…#3"`). `samples` is empty and `nextCursor` absent when the query succeeds but no samples are available. Apps must request and receive heart rate read permission before relying on returned data.
-
-## Read Resting Heart Rate
-
-```ts
-import { NitroHealth } from 'react-native-nitro-health'
-
-const { samples: restingHeartRate } = await NitroHealth.readRestingHeartRate({
-  startDate: new Date('2026-01-01T00:00:00.000Z'),
-  endDate: new Date('2026-01-08T00:00:00.000Z'),
-  limit: 100,
-  ascending: true,
-})
-```
-
-`readRestingHeartRate()` resolves with a page of individual readings with `uuid`, `date`, `bpm`, and an optional `source`. `samples` is empty and `nextCursor` absent when the query succeeds but no samples are available. Apps must request and receive resting heart rate read permission before relying on returned data.
-
-## Read Heart Rate Variability
-
-```ts
-import { NitroHealth } from 'react-native-nitro-health'
-
-const { samples: hrv } = await NitroHealth.readHeartRateVariability({
-  startDate: new Date('2026-01-01T00:00:00.000Z'),
-  endDate: new Date('2026-01-08T00:00:00.000Z'),
-  limit: 100,
-  ascending: true,
-})
-```
-
-`readHeartRateVariability()` resolves with a page of individual readings with `uuid`, `date`, `milliseconds`, a `method` field, and an optional `source`. `samples` is empty and `nextCursor` absent when the query succeeds but no samples are available.
-
-> [!IMPORTANT]
-> **SDNN and RMSSD are different, non-comparable HRV measures — never mix or chart samples with different `method` values together.** iOS reports HealthKit's HRV SDNN metric, so every sample read on iOS has `method: 'sdnn'`. Android reports Health Connect's HRV RMSSD metric, so every sample read on Android has `method: 'rmssd'`. The `method` field exists precisely so app code can tell which metric a sample used and avoid combining SDNN and RMSSD values in the same average, trend line, or chart. There is no `saveHeartRateVariability()`: because the two platforms use non-comparable metrics, there is no single value that would be meaningful to write on both.
-
-## Read Body Mass
-
-```ts
-import { NitroHealth } from 'react-native-nitro-health'
-
-const { samples: bodyMass } = await NitroHealth.readBodyMass({
-  startDate: new Date('2026-01-01T00:00:00.000Z'),
-  endDate: new Date('2026-02-01T00:00:00.000Z'),
-  limit: 100,
-  ascending: true,
-})
-```
-
-`readBodyMass()` resolves with a page of body mass samples with `uuid`, `startDate`, `endDate`, `kilograms`, and an optional `source`. `samples` is empty and `nextCursor` absent when the platform query succeeds but no matching samples are available. Apps must request and receive body mass read permission before relying on returned data.
-
-## Read Oxygen Saturation
-
-```ts
-import { NitroHealth } from 'react-native-nitro-health'
-
-const { samples: oxygenSaturation } = await NitroHealth.readOxygenSaturation({
-  startDate: new Date('2026-01-01T00:00:00.000Z'),
-  endDate: new Date('2026-01-08T00:00:00.000Z'),
-  limit: 100,
-  ascending: true,
-})
-```
-
-`readOxygenSaturation()` resolves with a page of individual readings with `uuid`, `date`, `percentage`, and an optional `source`. `percentage` is 0-100 on both platforms: Health Connect's `Percentage` is used directly, while HealthKit stores oxygen saturation as a 0-1 fraction, so iOS reads are converted (`× 100`) before they reach JavaScript. `samples` is empty and `nextCursor` absent when the query succeeds but no samples are available. Apps must request and receive oxygen saturation read permission before relying on returned data.
-
-## Read Height
-
-```ts
-import { NitroHealth } from 'react-native-nitro-health'
-
-const { samples: height } = await NitroHealth.readHeight({
-  startDate: new Date('2026-01-01T00:00:00.000Z'),
-  endDate: new Date('2026-01-08T00:00:00.000Z'),
-  limit: 100,
-  ascending: true,
-})
-```
-
-`readHeight()` resolves with a page of individual readings with `uuid`, `date`, `meters`, and an optional `source`. `samples` is empty and `nextCursor` absent when the query succeeds but no samples are available. Apps must request and receive height read permission before relying on returned data.
-
-## Read Sleep
-
-```ts
-import { NitroHealth } from 'react-native-nitro-health'
-
-const { samples: sleep } = await NitroHealth.readSleepSamples({
-  startDate: new Date('2026-01-01T00:00:00.000Z'),
-  endDate: new Date('2026-01-08T00:00:00.000Z'),
-  limit: 100,
-  ascending: true,
-})
-```
-
-`readSleepSamples()` resolves with a page of sleep intervals with `uuid`, `startDate`, `endDate`, `stage`, and an optional `source`. Stages are normalized to `inBed`, `awake`, `awakeInBed`, `asleep`, `asleepCore`, `asleepDeep`, `asleepREM`, `outOfBed`, or `unknown`. `samples` is empty and `nextCursor` absent when the query succeeds but no samples are available.
-
-On iOS, HealthKit sleep analysis is category interval data and `inBed` samples can overlap `asleep` stage samples; each interval's `uuid` is the HealthKit sample UUID and `limit` caps the intervals per page exactly. On Android, Health Connect sleep sessions are flattened to stage intervals and pages are cut by session record: `limit` counts sessions, and a page can contain more intervals than `limit` when sessions hold multiple stages. Because Android stages live inside a session record, each stage's `uuid` is the session record id plus a `#index` suffix; a session without explicit stages is returned as one `asleep` interval that keeps the plain record id. Apps must request and receive sleep read permission before relying on returned data.
-
-## Read Workouts
-
-```ts
-import { NitroHealth } from 'react-native-nitro-health'
-
-const { samples: workouts } = await NitroHealth.readWorkouts({
-  startDate: new Date('2026-01-01T00:00:00.000Z'),
-  endDate: new Date('2026-01-08T00:00:00.000Z'),
-  limit: 50,
-  ascending: false,
-})
-```
-
-`readWorkouts()` resolves with a page of workout sessions (`HKWorkout` on iOS, `ExerciseSessionRecord` on Android) with `uuid`, `startDate`, `endDate`, `durationSeconds`, `activityType`, and optional `title`, `source`, `totalDistanceMeters`, and `totalEnergyBurnedKcal` fields. `samples` is empty and `nextCursor` absent when the query succeeds but no sessions are available.
-
-`activityType` is normalized to a single cross-platform union (`running`, `cycling`, `swimming`, `strengthTraining`, `yoga`, `hiking`, ... — see `WorkoutActivityType` for the full list). Platform sub-variants fold into the parent activity: treadmill running and outdoor running both map to `running`, stationary and outdoor biking to `cycling`, pool and open-water swimming to `swimming`, and individual strength exercises (bench press, deadlift, dumbbell curls, ...) to `strengthTraining`. Values with no cross-platform equivalent map to `other`, as do unknown values from future OS versions. Some union members are only ever produced by one platform (for example `archery` on iOS or `paragliding` on Android).
-
-Platform differences: `totalDistanceMeters` and `totalEnergyBurnedKcal` are iOS-only for now — Health Connect exercise sessions carry no totals, so they are `undefined` on Android (per-session aggregation may be added later). `durationSeconds` excludes pauses on iOS (`HKWorkout.duration`) but is the wall-clock `endDate - startDate` on Android, which has no pause-aware duration on the session record. `title` is the user-visible session title on Android; on iOS it falls back to the rarely-set workout brand name metadata. Apps must request and receive workout read permission before relying on returned data.
-
-## Write Samples
-
-Save methods are available for `steps`, `distance`, `activeEnergyBurned`, `heartRate`, `restingHeartRate`, `oxygenSaturation`, `height`, `bodyMass`, sleep sessions, and completed workouts. Heart rate variability remains read-only by design; see [Read Heart Rate Variability](#read-heart-rate-variability). Request write authorization first, then save:
-
-```ts
-import { NitroHealth } from 'react-native-nitro-health'
-
-const result = await NitroHealth.requestAuthorization([{ accessType: 'write', dataType: 'steps' }])
-
-if (result.deniedPermissions.length === 0) {
+if (stepsWrite?.status === 'granted') {
   await NitroHealth.saveSteps([
     {
       startDate: new Date('2026-01-01T09:00:00.000Z'),
@@ -506,29 +694,43 @@ if (result.deniedPermissions.length === 0) {
 }
 ```
 
-Interval samples take `startDate`/`endDate` with `startDate` strictly before `endDate`:
+The main value constraints are:
 
-- `saveSteps(samples)` — `{ startDate, endDate, count }`, `count` must be a positive integer up to 1,000,000.
-- `saveDistance(samples)` — `{ startDate, endDate, distanceMeters }`, `distanceMeters` must be non-negative, up to 1,000,000.
-- `saveActiveEnergyBurned(samples)` — `{ startDate, endDate, kilocalories }`, `kilocalories` must be non-negative, up to 1,000,000.
+- `saveSteps`: positive integer `count`, at most 1,000,000.
+- `saveDistance`: non-negative `distanceMeters`, at most 1,000,000, plus required scope intent.
+- `saveActiveEnergyBurned`: non-negative `kilocalories`, at most 1,000,000.
+- `saveHeartRate` and `saveRestingHeartRate`: `bpm` from 1 through 300. Android rounds to whole bpm.
+- `saveOxygenSaturation`: `percentage` from 0 through 100.
+- `saveHeight`: `meters` greater than 0 and at most 3.
+- `saveBodyMass`: `kilograms` greater than 0 and at most 1,000.
 
-Point-in-time samples take a single `date`:
+Interval inputs require `startDate < endDate`; point measurements use `date`. Batch saves require a non-empty array.
 
-- `saveHeartRate(samples)` — `{ date, bpm }`, `bpm` must be between 1 and 300. Android stores whole bpm (fractional values are rounded to the nearest integer); iOS stores the exact value.
-- `saveRestingHeartRate(samples)` — `{ date, bpm }`, `bpm` must be between 1 and 300. Android stores whole bpm (fractional values are rounded to the nearest integer); iOS stores the exact value.
-- `saveOxygenSaturation(samples)` — `{ date, percentage }`, `percentage` must be between 0 and 100 inclusive. iOS converts to HealthKit's 0-1 fraction before saving (`÷ 100`); Android stores the value directly.
-- `saveHeight(samples)` — `{ date, meters }`, `meters` must be greater than 0, up to 3.
-- `saveBodyMass(samples)` — `{ date, kilograms }`, `kilograms` must be greater than 0, up to 1,000.
+Most inputs can include `sync: { id, version }` for retry-safe versioned writes. Exact retries are idempotent in stored state, a higher version replaces the logical record, and a lower version is ignored. Increment `version` whenever payload changes. IDs are nonblank, case-sensitive, scoped to the app and data type, and unique within one batch. Sleep sessions intentionally do not accept `sync` because one session can map to several independent HealthKit samples.
 
-Every non-sleep sample input may include `sync: { id, version }` for retry-safe, versioned writes. Without `sync`, the write has no application-controlled identity and retries are not portably idempotent. With `sync`, an exact retry of the same id, version, and payload is idempotent in stored state; a strictly higher version replaces the logical record, and a lower version is ignored. Native change tracking may still emit a current-state upsert for a retry. Reusing an id and version with a changed payload is unsupported — increment `version` whenever the payload changes. IDs must be nonblank, versions must be non-negative safe integers, and IDs are case-sensitive and scoped to the writing app and `HealthDataType`. Batch sample saves additionally reject duplicate IDs within one call.
+Avoid overlapping cumulative writes. Health Connect and HealthKit aggregate overlaps differently even though raw reads preserve every stored record.
 
-Batch sample and sleep save methods take non-empty arrays; `saveWorkout` takes one completed workout because modern HealthKit uses one builder per workout. Save methods resolve to `void` and do not report whether an input was inserted, retried, replaced, or ignored. They reject before crossing the native boundary when JavaScript validation fails — errors identify the input, for example `samples[2]: bpm must be between 1 and 300` or `workout: startDate must be before endDate`.
+### Write Distance
 
-The value ranges mirror what Health Connect enforces at insert time, applied on both platforms so a sample that saves on iOS also saves on Android.
+Distance writes require explicit walking/running intent:
+
+```ts
+const result = await NitroHealth.saveDistance([
+  {
+    scope: 'walking-running',
+    startDate,
+    endDate,
+    distanceMeters: 1250,
+    sync: { id: 'walk-2026-01-01', version: 1 },
+  },
+])
+
+console.log(result.status, result.storedScope)
+```
+
+The only accepted input scope is `walking-running`. The returned `{ status: 'completed', storedScope }` reports what the native store retained. HealthKit stores walking/running distance and returns `walking-running`. Health Connect stores a general `DistanceRecord` without activity scope and returns `activity-unspecified`. The result makes this loss of specificity explicit.
 
 ### Write Sleep Sessions
-
-`saveSleepSessions(sessions)` writes complete session bounds with optional detailed stages:
 
 ```ts
 await NitroHealth.saveSleepSessions([
@@ -552,84 +754,93 @@ await NitroHealth.saveSleepSessions([
 ])
 ```
 
-Writable stages are `awake`, `asleep`, `asleepCore`, `asleepDeep`, and `asleepREM`. The read-only values `inBed`, `awakeInBed`, `outOfBed`, and `unknown` are rejected because they do not have the same meaning on both platforms. Stage intervals must have positive duration, remain inside the session, and not overlap; adjacency and gaps are allowed. Input stages are saved in chronological order without mutating the caller's array.
+Writable stages are `awake`, `asleep`, `asleepCore`, `asleepDeep`, and `asleepREM`. Stages must have positive duration, stay inside the session, and not overlap. Gaps and adjacent intervals are allowed. `timeZone` is an optional IANA identifier and defaults to the device time zone.
 
-`timeZone` is an optional IANA identifier such as `America/New_York`. When omitted, the device's current time zone is used. Android derives separate start and end offsets so sessions crossing a daylight-saving transition retain the correct civil time. iOS stores the time zone as HealthKit metadata on every written interval.
-
-Android writes one `SleepSessionRecord` with nested stages. iOS writes one `inBed` interval for the session envelope plus one interval per stage, all in one HealthKit save call. Consequently, `readSleepSamples()` returns only flattened stages for a staged Android session but returns the overlapping `inBed` envelope and stages on iOS. A stage-less session reads as `asleep` on Android under the existing read normalization and `inBed` on iOS.
-
-Sleep sessions intentionally do not accept `sync`: one logical session maps to one Android record but several independent HealthKit samples, so HealthKit cannot provide the same atomic whole-session replacement semantics. Each call is atomic, but retrying a successful sleep write can create duplicates.
+Android writes one session record with nested stages. iOS writes one `inBed` category interval and each explicit stage in one save operation. Reads return Android session envelopes or independent iOS stages through the flat tagged model; neither platform receives a synthetic `asleep` stage for an unstaged session.
 
 ### Write Workouts
-
-`saveWorkout(workout)` saves one completed workout using a modern `HKWorkoutBuilder` on iOS and one `ExerciseSessionRecord` on Android:
 
 ```ts
 await NitroHealth.saveWorkout({
   startDate: new Date('2026-08-04T10:00:00.000Z'),
   endDate: new Date('2026-08-04T10:45:00.000Z'),
   activityType: 'running',
-  title: 'Morning run',
+  displayName: 'Morning run',
   timeZone: 'America/New_York',
   sync: { id: 'workout-2026-08-04-morning', version: 1 },
 })
 ```
 
-Writable activities are the 49 values in `WritableWorkoutActivityType` that can be read back with the same normalized value on Android and throughout the package's iOS 16+ range. Platform-only values are read-compatible but not writable: examples include `archery` (iOS-only), `calisthenics` (Android-only), the Android legacy values `coreTraining` and `jumpRope`, and `underwaterDiving` (requires iOS 17). Unsupported values reject rather than silently changing to `other`.
+`activityType` accepts `WritableWorkoutActivityType`, the portable subset that reads back with the same normalized meaning. Read-only and unknown activities reject rather than silently changing meaning. Canonical writes choose one native subtype where reads broaden several variants.
 
-Canonical writes intentionally choose one native subtype where reads already fold several variants together: `running` writes a non-treadmill run, `cycling` writes general biking, `swimming` writes pool swimming on Android, and `strengthTraining` writes functional strength training on iOS. Reading the saved workout returns the same normalized activity type, but does not recover an equipment or location subtype that the public input did not express.
+`displayName` is write intent, not a promise that both stores expose the same native field. It becomes the Android workout `title` and the iOS workout `brandName`; reads keep those fields separate. The workout interval supplies elapsed duration. This API does not write pause events, distance/energy totals, routes, segments, laps, or planned workouts.
 
-The workout interval determines duration because v1 writes no pause/resume events. `title` maps to the native Android title and HealthKit workout-brand metadata. `timeZone` follows the sleep-write convention: Android stores endpoint offsets and iOS stores time-zone metadata. `sync` maps to the same versioned native identity used by other single-record saves, so exact retries are idempotent and higher versions replace the logical workout.
+## Deleting Records
 
-Workout routes, distance/energy totals, segments, laps, notes, pause events, and planned workouts are not part of this method. Routes require separate native objects and Android's additional `WRITE_EXERCISE_ROUTE` permission; they remain a separate roadmap feature.
+Deletion removes only records written by the calling app and requires the matching write permission.
 
-Unlike reads, missing write permission is detectable on both platforms: save methods reject with a missing-permission error on Android and iOS alike (on iOS this includes the not-yet-requested state, so request write authorization first). Saved samples are attributed to your app as the source.
-
-Avoid writing cumulative samples with overlapping time intervals. The platforms aggregate overlapping records differently: Health Connect deduplicates overlapping intervals when computing totals (writing 250 steps twice over the same 30-minute window still totals roughly 250), while HealthKit cumulative sums count every sample (the same two writes total 500). Raw reads for those cumulative types return every stored record on both platforms — only aggregates differ. Writing non-overlapping intervals produces consistent totals everywhere.
-
-## Delete Samples
-
-Samples can be deleted by uuid or by time range for every `HealthDataType` (`steps`, `heartRate`, `restingHeartRate`, `heartRateVariability`, `distance`, `activeEnergyBurned`, `oxygenSaturation`, `height`, `sleep`, `bodyMass`, and `workout`). Deletion only removes data **your app wrote** — Health Connect automatically restricts deletes to records owned by the calling app, and HealthKit can only delete objects your app saved. Like saves, deletes are gated on write permission and reject with a missing-permission error otherwise (on iOS this includes the not-yet-requested state, so request write authorization first).
+`deleteRecordsByIds()` accepts only independently deletable `HealthRecordIdentity` values, not strings or record-child identities:
 
 ```ts
-import { NitroHealth } from 'react-native-nitro-health'
+const [sample] = (await NitroHealth.readSteps({ startDate, endDate })).samples
 
-const result = await NitroHealth.requestAuthorization([{ accessType: 'write', dataType: 'steps' }])
+if (sample?.identity.kind === 'record') {
+  const result = await NitroHealth.deleteRecordsByIds('steps', [sample.identity])
 
-if (result.deniedPermissions.length === 0) {
-  // Delete specific samples using the `uuid` values returned by reads:
-  await NitroHealth.deleteSamplesByUuids('steps', [sample.uuid])
-
-  // Or delete everything your app wrote in a time range:
-  await NitroHealth.deleteSamplesByTimeRange('steps', {
-    startDate: new Date('2026-01-01T00:00:00.000Z'),
-    endDate: new Date('2026-01-02T00:00:00.000Z'),
-  })
+  console.log(result.deletedCount.value)
 }
 ```
 
-- `deleteSamplesByUuids(dataType, uuids)` — deletes samples by the physical `uuid` values returned by reads, not by logical `sync.id`. Takes a non-empty array and rejects before crossing the native boundary when validation fails — error messages include the failing index, for example `uuids[0]: a non-empty uuid string is required`.
-- `deleteSamplesByTimeRange(dataType, { startDate, endDate })` — deletes every sample your app wrote in `[startDate, endDate)` on both platforms: `startDate` inclusive, `endDate` exclusive, `startDate` strictly before `endDate`. A time-range delete removes exactly the own-app samples a read over the same range returns, and resolves even when nothing matches.
+The result is:
 
-Both methods resolve to `void` — Health Connect does not report how many records were deleted, so neither platform exposes a count.
+```ts
+type HealthIdentityDeleteResult = {
+  status: 'completed'
+  requestedCount: number
+  deletedCount: { status: 'known'; value: number }
+}
 
-On Android, heart-rate readings and sleep stages live inside parent Health Connect records and are read back under synthetic `uuid` values of the form `recordId#index`. Health Connect can only delete whole records, so passing a synthetic uuid to `deleteSamplesByUuids` rejects with `uuids[N]: synthetic reading ids (record id + '#index') cannot be deleted individually; use deleteSamplesByTimeRange instead` — it never silently deletes the parent record and its sibling readings. A sleep session without stages keeps its plain record id and stays deletable by uuid. On iOS every sample — including each heart-rate reading and sleep interval — is its own HealthKit object with a real UUID, so per-sample deletion works there; use time-range deletion when the same code path must also cover Android. iOS additionally rejects malformed uuid strings with `uuids[N]: "…" is not a valid HealthKit sample uuid`.
-
-The no-match behavior of `deleteSamplesByUuids` also differs by platform. On iOS, deleting uuids that match nothing resolves successfully with nothing deleted (HealthKit's no-data error is normalized to success). On Android, delete-by-id is transactional and all-or-nothing: a uuid that does not exist rejects (Health Connect reports it as an IPC failure), a uuid owned by another app rejects with a security error, and in both cases none of the requested records are deleted.
-
-After a higher-version write, current Health Connect implementations retain the record UUID, so it remains valid for deletion. iOS replaces the physical sample, so an older UUID is stale and deleting it is a successful no-op; use the latest UUID from reads or change tracking, or delete by time range.
-
-## Jest
-
-The package ships a Jest mock so app tests do not need to mock Nitro internals. By default, mocked raw sample reads resolve with an empty page (`{ samples: [] }`), `readStatistics` resolves with `[]`, `createChangesToken` resolves with `'mock-changes-token'`, and `getChanges` resolves with an empty successful changes page. The mock is stateless: saves and deletes resolve to `void` but do not affect reads, track sync ids or versions, or emulate retry, replacement, and change-tracking behavior.
-
-Add it to your Jest setup file:
-
-```js
-jest.mock('react-native-nitro-health', () => require('react-native-nitro-health/jest/mock'))
+type HealthTimeRangeDeleteResult = {
+  status: 'completed'
+  deletedCount: { status: 'known'; value: number } | { status: 'unverifiable' }
+}
 ```
 
-Or load the provided setup file from your Jest config:
+Delete-by-ID always reports an exact count after success. A no-match or foreign record rejects on both platforms rather than returning plausible success. Android deletion remains transactional; iOS can report a partial count for mixed matching and nonmatching identities. Time-range deletion reports an exact iOS count and an `unverifiable` Android count.
+
+Record-child identities cannot be passed directly. To intentionally delete a child's whole parent, pass its parent record identity:
+
+```ts
+if (heartRateReading.identity.kind === 'record-child') {
+  // This removes the complete Health Connect HeartRateRecord and every sibling reading.
+  await NitroHealth.deleteRecordsByIds('heartRate', [heartRateReading.identity.record])
+}
+```
+
+The same implication applies to Android sleep stages: deleting `stage.identity.record` deletes the complete sleep session envelope and all sibling stages.
+
+Delete caller-owned records overlapping a range with:
+
+```ts
+const result = await NitroHealth.deleteRecordsByTimeRange('steps', {
+  startDate: new Date('2026-01-01T00:00:00.000Z'),
+  endDate: new Date('2026-01-02T00:00:00.000Z'),
+})
+```
+
+Time-range deletion always returns `completed` when the native operation succeeds. iOS reports a known exact count; Health Connect does not expose the count, so Android returns `{ status: 'unverifiable' }`. A successful no-match range is not an error.
+
+## Jest Mock
+
+The package mock models the portable workflow rather than Nitro internals. Load the shared mock in a Jest setup file:
+
+```js
+jest.mock('react-native-nitro-health', () =>
+  require('react-native-nitro-health/jest/mock')
+)
+```
+
+Or use the packaged setup entry:
 
 ```js
 module.exports = {
@@ -637,17 +848,66 @@ module.exports = {
 }
 ```
 
-Then override behavior in tests as needed:
+Three profiles are available:
+
+- `polling` (default): available service, app-owned polling, background/history access `not-granted`, direct revocation, and distance writes stored as `activity-unspecified`.
+- `observer`: available service, observer frequencies, included background/history access, observer subscriptions, manual permission management/revocation, and walking/running distance storage.
+- `unavailable`: `not-supported` availability, unsupported additional access, unavailable permission/background outcomes, and polling capability shape.
+
+Reset the exported singleton for each test and select the workflow under test:
 
 ```ts
-import { NitroHealth, resetNitroHealthMock } from 'react-native-nitro-health/jest/mock'
+import {
+  NitroHealth,
+  resetNitroHealthMock,
+} from 'react-native-nitro-health/jest/mock'
 
 beforeEach(() => {
-  resetNitroHealthMock()
+  resetNitroHealthMock({ profile: 'observer' })
 })
 
-NitroHealth.getAvailabilityStatus.mockReturnValue('unavailable')
+test('handles unavailable health data', () => {
+  resetNitroHealthMock({ profile: 'unavailable' })
+  expect(NitroHealth.getAvailability()).toEqual({
+    status: 'unavailable',
+    reason: 'not-supported',
+  })
+})
 ```
+
+Use `options.overrides` for one test-specific method while retaining a profile's other defaults:
+
+```ts
+resetNitroHealthMock({
+  profile: 'polling',
+  overrides: {
+    getChanges: jest.fn().mockResolvedValue({ tokenExpired: true }),
+  },
+})
+```
+
+`createNitroHealthMock(options)` creates an independent mock object for dependency injection. `resetNitroHealthMock(options)` mutates and returns the exported `NitroHealth` mock used by the package mock. Overrides are applied after profile defaults.
+
+Default reads return empty pages, statistics return empty results, `createChangesToken()` returns `mock-changes-token`, and `getChanges()` returns an empty successful page. The mock enforces workflow-level requirements such as non-empty permission, background, write, and deletion inputs, but deliberately does not duplicate every sample-field validator from the facade. It is stateless: writes and deletes do not modify subsequent reads or emulate version replacement, native ownership, or token history.
+
+## Breaking Migration
+
+This API replaces the previous surface; removed names and shapes are not compatibility aliases.
+
+- Replace `getAvailabilityStatus()` and `isAvailable()` with `getAvailability()`; old `providerUpdateRequired` is now the typed unavailable reason `provider-install-or-update-required` with a recovery action.
+- Replace `openHealthConnectInstall()` with `performAvailabilityRecovery(availability.recovery)` when `getAvailability()` supplies recovery.
+- Remove `getRequestStatusForAuthorization()`. Inspect each entry returned by `getPermissionStatuses()` or `requestAuthorization()`.
+- `getPermissionStatuses()` now returns a tagged `status` result; the old `availabilityStatus` field is removed.
+- `requestAuthorization()` no longer returns aggregate `requestStatus`, `grantedPermissions`, `deniedPermissions`, or `unverifiablePermissions`. It returns `completed` or `unavailable` plus ordered `statuses` entries.
+- Replace `openHealthSettings()` with `managePermissions()` and use `revokeAllPermissions()` for explicit revocation.
+- Replace `getBackgroundReadAuthorizationStatus()` and `requestBackgroundReadAuthorization()` with `getCapabilities()` and `requestAdditionalAccess('background-read')`; history access uses `'history-read'`.
+- Replace `enableBackgroundDelivery`, `disableBackgroundDelivery`, and `addOnChangeNotificationListener` with `configureBackgroundChanges`, `disableBackgroundChanges`, and `subscribeToBackgroundChanges`.
+- Replace sample `uuid`, `recordUuid`, and optional `source` with tagged `identity` and required `origin`.
+- Replace `deleteSamplesByUuids` and `deleteSamplesByTimeRange` with `deleteRecordsByIds` and `deleteRecordsByTimeRange`; both now return typed outcomes.
+- Sleep results are now `session-envelope` or `stage` records. Stage-less sessions no longer produce a synthetic `asleep` interval.
+- Workout `durationSeconds`, `activityType`, `totalDistanceMeters`, and `totalEnergyBurnedKcal` are now `elapsedDurationSeconds`, `activity`, `totalDistance`, and `totalActiveEnergyBurned`. `activeDuration`, `brandName`, and metric availability are explicit. Workout write `title` is now `displayName` intent.
+- Distance reads/statistics now include `scope`; distance writes require `scope: 'walking-running'` and return `storedScope`.
+- Root exports no longer include `Native*` types or `NitroHealthSpec`. Platform and source subpaths are not package entry points.
 
 ## Credits
 
@@ -655,4 +915,4 @@ Bootstrapped with [create-nitro-module](https://github.com/patrickkabwe/create-n
 
 ## Contributing
 
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+Pull requests are welcome. For major changes, open an issue first to discuss the intended API and native semantics.

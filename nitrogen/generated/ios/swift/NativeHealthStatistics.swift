@@ -18,7 +18,7 @@ public extension NativeHealthStatistics {
   /**
    * Create a new instance of `NativeHealthStatistics`.
    */
-  init(startTimeMs: Double, endTimeMs: Double, sum: Double?, avg: Double?, min: Double?, max: Double?) {
+  init(startTimeMs: Double, endTimeMs: Double, sum: Double?, avg: Double?, min: Double?, max: Double?, scope: NativeDistanceScope?) {
     self.init(startTimeMs, endTimeMs, { () -> bridge.std__optional_double_ in
       if let __unwrappedValue = sum {
         return bridge.create_std__optional_double_(__unwrappedValue)
@@ -40,6 +40,12 @@ public extension NativeHealthStatistics {
     }(), { () -> bridge.std__optional_double_ in
       if let __unwrappedValue = max {
         return bridge.create_std__optional_double_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_NativeDistanceScope_ in
+      if let __unwrappedValue = scope {
+        return bridge.create_std__optional_NativeDistanceScope_(__unwrappedValue)
       } else {
         return .init()
       }
@@ -102,5 +108,10 @@ public extension NativeHealthStatistics {
         return nil
       }
     }()
+  }
+  
+  @inline(__always)
+  var scope: NativeDistanceScope? {
+    return self.__scope.value
   }
 }

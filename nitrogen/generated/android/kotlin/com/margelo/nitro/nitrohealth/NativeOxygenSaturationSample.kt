@@ -20,34 +20,34 @@ import java.util.Objects
 data class NativeOxygenSaturationSample(
   @DoNotStrip
   @Keep
-  val uuid: String,
+  val identity: NativeHealthSampleIdentity,
+  @DoNotStrip
+  @Keep
+  val origin: NativeHealthDataOrigin,
   @DoNotStrip
   @Keep
   val timeMs: Double,
   @DoNotStrip
   @Keep
-  val percentage: Double,
-  @DoNotStrip
-  @Keep
-  val source: String?
+  val percentage: Double
 ) {
   /* primary constructor */
 
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other !is NativeOxygenSaturationSample) return false
-    return Objects.deepEquals(this.uuid, other.uuid)
+    return Objects.deepEquals(this.identity, other.identity)
+      && Objects.deepEquals(this.origin, other.origin)
       && Objects.deepEquals(this.timeMs, other.timeMs)
       && Objects.deepEquals(this.percentage, other.percentage)
-      && Objects.deepEquals(this.source, other.source)
   }
 
   override fun hashCode(): Int {
     return arrayOf<Any?>(
-      uuid,
+      identity,
+      origin,
       timeMs,
-      percentage,
-      source
+      percentage
     ).contentDeepHashCode()
   }
 
@@ -59,8 +59,8 @@ data class NativeOxygenSaturationSample(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(uuid: String, timeMs: Double, percentage: Double, source: String?): NativeOxygenSaturationSample {
-      return NativeOxygenSaturationSample(uuid, timeMs, percentage, source)
+    private fun fromCpp(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, timeMs: Double, percentage: Double): NativeOxygenSaturationSample {
+      return NativeOxygenSaturationSample(identity, origin, timeMs, percentage)
     }
   }
 }

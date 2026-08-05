@@ -20,7 +20,10 @@ import java.util.Objects
 data class NativeDistanceSample(
   @DoNotStrip
   @Keep
-  val uuid: String,
+  val identity: NativeHealthSampleIdentity,
+  @DoNotStrip
+  @Keep
+  val origin: NativeHealthDataOrigin,
   @DoNotStrip
   @Keep
   val startTimeMs: Double,
@@ -29,25 +32,32 @@ data class NativeDistanceSample(
   val endTimeMs: Double,
   @DoNotStrip
   @Keep
-  val distanceMeters: Double
+  val distanceMeters: Double,
+  @DoNotStrip
+  @Keep
+  val scope: NativeDistanceScope
 ) {
   /* primary constructor */
 
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other !is NativeDistanceSample) return false
-    return Objects.deepEquals(this.uuid, other.uuid)
+    return Objects.deepEquals(this.identity, other.identity)
+      && Objects.deepEquals(this.origin, other.origin)
       && Objects.deepEquals(this.startTimeMs, other.startTimeMs)
       && Objects.deepEquals(this.endTimeMs, other.endTimeMs)
       && Objects.deepEquals(this.distanceMeters, other.distanceMeters)
+      && Objects.deepEquals(this.scope, other.scope)
   }
 
   override fun hashCode(): Int {
     return arrayOf<Any?>(
-      uuid,
+      identity,
+      origin,
       startTimeMs,
       endTimeMs,
-      distanceMeters
+      distanceMeters,
+      scope
     ).contentDeepHashCode()
   }
 
@@ -59,8 +69,8 @@ data class NativeDistanceSample(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(uuid: String, startTimeMs: Double, endTimeMs: Double, distanceMeters: Double): NativeDistanceSample {
-      return NativeDistanceSample(uuid, startTimeMs, endTimeMs, distanceMeters)
+    private fun fromCpp(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, startTimeMs: Double, endTimeMs: Double, distanceMeters: Double, scope: NativeDistanceScope): NativeDistanceSample {
+      return NativeDistanceSample(identity, origin, startTimeMs, endTimeMs, distanceMeters, scope)
     }
   }
 }

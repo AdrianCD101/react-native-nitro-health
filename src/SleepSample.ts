@@ -1,14 +1,29 @@
-import type { HealthSampleIdentity } from './HealthSampleIdentity'
+import type { HealthSample } from './HealthSample'
 import type { SleepStage } from './SleepStage'
 
-/** Sleep interval returned by {@linkcode NitroHealth.readSleepSamples}. */
-export interface SleepSample extends HealthSampleIdentity {
+/** Sleep-session envelope returned by {@linkcode NitroHealth.readSleepSamples}. */
+export interface SleepSessionEnvelope extends HealthSample {
+  /** Identifies this interval as a session envelope rather than a stage. */
+  kind: 'session-envelope'
+  /** Start of the sleep session. */
+  startDate: Date
+  /** End of the sleep session. */
+  endDate: Date
+  /** Whether explicit stage detail exists or can be observed for this envelope. */
+  stageData: 'reported' | 'not-reported' | 'unverifiable'
+}
+
+/** Explicit sleep-stage interval returned by {@linkcode NitroHealth.readSleepSamples}. */
+export interface SleepStageSample extends HealthSample {
+  /** Identifies this interval as an explicit sleep stage. */
+  kind: 'stage'
   /** Start of the sleep interval. */
   startDate: Date
   /** End of the sleep interval. */
   endDate: Date
   /** Normalized sleep stage for this interval. */
   stage: SleepStage
-  /** Originating app or device, when available. */
-  source?: string
 }
+
+/** Tagged sleep record that preserves session envelopes and explicit stages. */
+export type SleepSample = SleepSessionEnvelope | SleepStageSample

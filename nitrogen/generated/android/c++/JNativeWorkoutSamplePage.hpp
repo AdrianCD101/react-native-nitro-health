@@ -10,7 +10,25 @@
 #include <fbjni/fbjni.h>
 #include "NativeWorkoutSamplePage.hpp"
 
+#include "JNativeHealthDataOrigin.hpp"
+#include "JNativeHealthMetricValue.hpp"
+#include "JNativeHealthMetricValueStatus.hpp"
+#include "JNativeHealthSampleIdentity.hpp"
+#include "JNativeHealthSampleIdentityKind.hpp"
+#include "JNativeWorkoutActivity.hpp"
+#include "JNativeWorkoutActivityMapping.hpp"
+#include "JNativeWorkoutActivityPortability.hpp"
+#include "JNativeWorkoutActivityStatus.hpp"
 #include "JNativeWorkoutSample.hpp"
+#include "NativeHealthDataOrigin.hpp"
+#include "NativeHealthMetricValue.hpp"
+#include "NativeHealthMetricValueStatus.hpp"
+#include "NativeHealthSampleIdentity.hpp"
+#include "NativeHealthSampleIdentityKind.hpp"
+#include "NativeWorkoutActivity.hpp"
+#include "NativeWorkoutActivityMapping.hpp"
+#include "NativeWorkoutActivityPortability.hpp"
+#include "NativeWorkoutActivityStatus.hpp"
 #include "NativeWorkoutSample.hpp"
 #include <optional>
 #include <string>

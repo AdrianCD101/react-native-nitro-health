@@ -19,8 +19,7 @@ class DeleteRecordIdValidationTest {
 
     @Test
     fun acceptsBareSleepSessionRecordId() {
-        // A sleep session with zero stages is surfaced under its bare record id (no '#index'),
-        // so it must stay deletable by uuid.
+        // Session envelopes expose their parent record id and remain deletable.
         val recordIds = ensureDeletableRecordIds(arrayOf("3f2b9c1e-7a54-4f0d-9e2a-1c8d5b6e4a30"))
 
         assertEquals(listOf("3f2b9c1e-7a54-4f0d-9e2a-1c8d5b6e4a30"), recordIds)
@@ -33,8 +32,8 @@ class DeleteRecordIdValidationTest {
         }
 
         assertEquals(
-            "uuids[0]: synthetic reading ids (record id + '#index') cannot be deleted" +
-                " individually; use deleteSamplesByTimeRange instead",
+            "recordIds[0]: synthetic child ids (record id + '#index') cannot be deleted;" +
+                " pass the parent record id instead",
             error.message
         )
     }
@@ -46,8 +45,8 @@ class DeleteRecordIdValidationTest {
         }
 
         assertEquals(
-            "uuids[1]: synthetic reading ids (record id + '#index') cannot be deleted" +
-                " individually; use deleteSamplesByTimeRange instead",
+            "recordIds[1]: synthetic child ids (record id + '#index') cannot be deleted;" +
+                " pass the parent record id instead",
             error.message
         )
     }
@@ -58,15 +57,15 @@ class DeleteRecordIdValidationTest {
             ensureDeletableRecordIds(emptyArray())
         }
 
-        assertEquals("At least one uuid is required", error.message)
+        assertEquals("At least one record id is required", error.message)
     }
 
     @Test
-    fun rejectsBlankUuid() {
+    fun rejectsBlankRecordId() {
         val error = assertThrows(IllegalArgumentException::class.java) {
             ensureDeletableRecordIds(arrayOf(" "))
         }
 
-        assertEquals("uuids[0]: a non-empty uuid string is required", error.message)
+        assertEquals("recordIds[0]: a non-empty record id string is required", error.message)
     }
 }

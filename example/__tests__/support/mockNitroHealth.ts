@@ -1,57 +1,92 @@
-/**
- * Mock NitroHealth hybrid object shared by the Jest contract tests.
- *
- * This lives in its own module (rather than a `const mockNitroHealth = {...}` declared
- * inline in each test file) so that ES module import hoisting resolves it correctly: Babel
- * hoists `import` statements above other top-level code, and jest hoists `jest.mock()` calls
- * above imports. `src/index.ts` calls `NitroModules.createHybridObject(...)` eagerly at module
- * load time, so by the time `import { NitroHealth } from 'react-native-nitro-health'` runs,
- * this module must already be fully evaluated. Importing it (rather than declaring it inline)
- * guarantees that ordering, because both imports are hoisted in the order they're written.
- *
- * It intentionally covers the full native spec surface so every contract test file can share
- * it; `jest.clearAllMocks()` in each file's `beforeEach` keeps suites isolated.
- */
+import type { NitroHealth as NitroHealthSpec } from '../../../src/specs/nitro-health.nitro'
+import type { NativeHealthDataOrigin } from '../../../src/NativeHealthDataOrigin'
+import type { NativeHealthSampleIdentity } from '../../../src/NativeHealthSampleIdentity'
+
+type NativeMethod = (...args: any[]) => any
+
+interface NativeRecordMetadata {
+  identity: NativeHealthSampleIdentity
+  origin: NativeHealthDataOrigin
+}
+
+function mockNativeMethod<T extends NativeMethod>(): jest.Mock<ReturnType<T>, Parameters<T>> {
+  return jest.fn<ReturnType<T>, Parameters<T>>()
+}
+
+/** Full native Nitro contract shared by the Jest wrapper tests. */
 export const mockNitroHealth = {
-  isAvailable: jest.fn(),
-  getAvailabilityStatus: jest.fn(),
-  openHealthConnectInstall: jest.fn(),
-  openHealthSettings: jest.fn(),
-  enableBackgroundDelivery: jest.fn(),
-  disableBackgroundDelivery: jest.fn(),
-  disableAllBackgroundDelivery: jest.fn(),
-  setOnChangeNotificationListener: jest.fn(),
-  acknowledgeChangeNotification: jest.fn(),
-  getBackgroundReadAuthorizationStatus: jest.fn(),
-  requestBackgroundReadAuthorization: jest.fn(),
-  createChangesToken: jest.fn(),
-  getChanges: jest.fn(),
-  requestAuthorization: jest.fn(),
-  getPermissionStatuses: jest.fn(),
-  getRequestStatusForAuthorization: jest.fn(),
-  readSteps: jest.fn(),
-  readDistance: jest.fn(),
-  readActiveEnergyBurned: jest.fn(),
-  readBodyMass: jest.fn(),
-  readHeartRate: jest.fn(),
-  readHeartRateStatistics: jest.fn(),
-  readRestingHeartRate: jest.fn(),
-  readHeartRateVariability: jest.fn(),
-  readOxygenSaturation: jest.fn(),
-  readHeight: jest.fn(),
-  readStatistics: jest.fn(),
-  readSleepSamples: jest.fn(),
-  readWorkouts: jest.fn(),
-  saveSteps: jest.fn(),
-  saveDistance: jest.fn(),
-  saveActiveEnergyBurned: jest.fn(),
-  saveHeartRate: jest.fn(),
-  saveBodyMass: jest.fn(),
-  saveRestingHeartRate: jest.fn(),
-  saveOxygenSaturation: jest.fn(),
-  saveHeight: jest.fn(),
-  saveSleepSessions: jest.fn(),
-  saveWorkout: jest.fn(),
-  deleteSamplesByUuids: jest.fn(),
-  deleteSamplesByTimeRange: jest.fn(),
+  name: 'NitroHealth',
+  toString: mockNativeMethod<NitroHealthSpec['toString']>(),
+  equals: mockNativeMethod<NitroHealthSpec['equals']>(),
+  dispose: mockNativeMethod<NitroHealthSpec['dispose']>(),
+  getAvailability: mockNativeMethod<NitroHealthSpec['getAvailability']>(),
+  performAvailabilityRecovery:
+    mockNativeMethod<NitroHealthSpec['performAvailabilityRecovery']>(),
+  getCapabilities: mockNativeMethod<NitroHealthSpec['getCapabilities']>(),
+  requestAdditionalAccess: mockNativeMethod<NitroHealthSpec['requestAdditionalAccess']>(),
+  managePermissions: mockNativeMethod<NitroHealthSpec['managePermissions']>(),
+  revokeAllPermissions: mockNativeMethod<NitroHealthSpec['revokeAllPermissions']>(),
+  getBackgroundChangesMode: mockNativeMethod<NitroHealthSpec['getBackgroundChangesMode']>(),
+  configureBackgroundChanges:
+    mockNativeMethod<NitroHealthSpec['configureBackgroundChanges']>(),
+  disableBackgroundChanges: mockNativeMethod<NitroHealthSpec['disableBackgroundChanges']>(),
+  setOnBackgroundChangeListener:
+    mockNativeMethod<NitroHealthSpec['setOnBackgroundChangeListener']>(),
+  acknowledgeBackgroundChange:
+    mockNativeMethod<NitroHealthSpec['acknowledgeBackgroundChange']>(),
+  createChangesToken: mockNativeMethod<NitroHealthSpec['createChangesToken']>(),
+  getChanges: mockNativeMethod<NitroHealthSpec['getChanges']>(),
+  readSteps: mockNativeMethod<NitroHealthSpec['readSteps']>(),
+  readDistance: mockNativeMethod<NitroHealthSpec['readDistance']>(),
+  readActiveEnergyBurned: mockNativeMethod<NitroHealthSpec['readActiveEnergyBurned']>(),
+  readBodyMass: mockNativeMethod<NitroHealthSpec['readBodyMass']>(),
+  readHeartRate: mockNativeMethod<NitroHealthSpec['readHeartRate']>(),
+  readHeartRateStatistics:
+    mockNativeMethod<NitroHealthSpec['readHeartRateStatistics']>(),
+  readRestingHeartRate: mockNativeMethod<NitroHealthSpec['readRestingHeartRate']>(),
+  readHeartRateVariability:
+    mockNativeMethod<NitroHealthSpec['readHeartRateVariability']>(),
+  readOxygenSaturation: mockNativeMethod<NitroHealthSpec['readOxygenSaturation']>(),
+  readHeight: mockNativeMethod<NitroHealthSpec['readHeight']>(),
+  readStatistics: mockNativeMethod<NitroHealthSpec['readStatistics']>(),
+  readSleepSamples: mockNativeMethod<NitroHealthSpec['readSleepSamples']>(),
+  readWorkouts: mockNativeMethod<NitroHealthSpec['readWorkouts']>(),
+  saveSteps: mockNativeMethod<NitroHealthSpec['saveSteps']>(),
+  saveDistance: mockNativeMethod<NitroHealthSpec['saveDistance']>(),
+  saveActiveEnergyBurned: mockNativeMethod<NitroHealthSpec['saveActiveEnergyBurned']>(),
+  saveHeartRate: mockNativeMethod<NitroHealthSpec['saveHeartRate']>(),
+  saveBodyMass: mockNativeMethod<NitroHealthSpec['saveBodyMass']>(),
+  saveRestingHeartRate: mockNativeMethod<NitroHealthSpec['saveRestingHeartRate']>(),
+  saveOxygenSaturation: mockNativeMethod<NitroHealthSpec['saveOxygenSaturation']>(),
+  saveHeight: mockNativeMethod<NitroHealthSpec['saveHeight']>(),
+  saveSleepSessions: mockNativeMethod<NitroHealthSpec['saveSleepSessions']>(),
+  saveWorkout: mockNativeMethod<NitroHealthSpec['saveWorkout']>(),
+  deleteRecordsByIds: mockNativeMethod<NitroHealthSpec['deleteRecordsByIds']>(),
+  deleteRecordsByTimeRange:
+    mockNativeMethod<NitroHealthSpec['deleteRecordsByTimeRange']>(),
+  getPermissionStatuses: mockNativeMethod<NitroHealthSpec['getPermissionStatuses']>(),
+  requestAuthorization: mockNativeMethod<NitroHealthSpec['requestAuthorization']>(),
+} satisfies NitroHealthSpec
+
+export function nativeRecordMetadata(
+  id: string,
+  identifier = 'com.example.health',
+  displayName?: string
+): NativeRecordMetadata {
+  return {
+    identity: { kind: 'record' as const, id, recordId: id },
+    origin: displayName === undefined ? { identifier } : { identifier, displayName },
+  }
+}
+
+export function nativeRecordChildMetadata(
+  id: string,
+  recordId: string,
+  identifier = 'com.example.health',
+  displayName?: string
+): NativeRecordMetadata {
+  return {
+    identity: { kind: 'recordChild' as const, id, recordId },
+    origin: displayName === undefined ? { identifier } : { identifier, displayName },
+  }
 }

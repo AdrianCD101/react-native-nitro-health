@@ -1,12 +1,20 @@
-import React, { useState } from 'react'
-import { Pressable, ScrollView, Text, View, StyleSheet } from 'react-native'
+import React, { useEffect, useRef, useState } from 'react'
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { NitroHealth } from 'react-native-nitro-health'
 import type {
-  AuthorizationRequestStatus,
+  BackgroundChangesConfigurationResult,
+  HealthAdditionalAccess,
   HealthAuthorizationResult,
+  HealthCapabilitiesResult,
+  HealthDataOrigin,
   HealthDataType,
-  HealthAvailabilityStatus,
+  HealthMetricValue,
   HealthPermission,
+  HealthPermissionStatusResult,
+  HealthSampleIdentity,
+  ListenerSubscription,
+  WorkoutActivity,
+  WritableHealthDataType,
 } from 'react-native-nitro-health'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
@@ -20,14 +28,95 @@ const readPermissions: Array<{ dataType: HealthDataType; label: string }> = [
   { dataType: 'workout', label: 'Workouts' },
 ]
 
+const writableDataTypes: WritableHealthDataType[] = [
+  'steps',
+  'distance',
+  'activeEnergyBurned',
+  'heartRate',
+  'bodyMass',
+  'sleep',
+  'workout',
+]
+
+function isWritableDataType(dataType: HealthDataType): dataType is WritableHealthDataType {
+  return writableDataTypes.includes(dataType as WritableHealthDataType)
+}
+
 function lastDays(days: number): { startDate: Date; endDate: Date } {
   const endDate = new Date()
-
   return { startDate: new Date(endDate.getTime() - days * 24 * 60 * 60 * 1000), endDate }
 }
 
-// Each read card normalizes its result to display lines so differently-shaped reads
-// (statistics buckets, a single statistics object, sleep stages, workouts) share one renderer.
+function formatIdentity(identity: HealthSampleIdentity): string {
+  if (identity.kind === 'record') {
+    return `record ${identity.id}`
+  }
+  return `child ${identity.id} of record ${identity.record.id}`
+}
+
+function formatOrigin(origin: HealthDataOrigin): string {
+  return origin.displayName
+    ? `${origin.displayName} (${origin.identifier})`
+    : origin.identifier
+}
+
+function formatSampleContext(identity: HealthSampleIdentity, origin: HealthDataOrigin): string {
+  return `${formatIdentity(identity)} | source ${formatOrigin(origin)}`
+}
+
+function formatMetric(metric: HealthMetricValue, unit: string): string {
+  return metric.status === 'available' ? `${Math.round(metric.value)} ${unit}` : metric.status
+}
+
+function formatActivity(activity: WorkoutActivity): string {
+  return activity.status === 'known'
+    ? `${activity.type} (${activity.portability}, ${activity.mapping})`
+    : 'unknown activity'
+}
+
+function formatPermissionStatuses(result: HealthPermissionStatusResult): string {
+  const entries = result.statuses
+    .map(({ permission, status }) => `${permission.accessType}:${permission.dataType}=${status}`)
+    .join(', ')
+  return result.status === 'available'
+    ? entries
+    : `unavailable (${result.availability.reason}); ${entries}`
+}
+
+function formatAuthorization(result: HealthAuthorizationResult): string {
+  const entries = result.statuses
+    .map(({ permission, status }) => `${permission.accessType}:${permission.dataType}=${status}`)
+    .join(', ')
+  return result.status === 'completed'
+    ? entries
+    : `unavailable (${result.availability.reason}); ${entries}`
+}
+
+function formatBackgroundResult(result: BackgroundChangesConfigurationResult): string {
+  if (result.status === 'completed') {
+    return 'Observer delivery configured'
+  }
+  if (result.status === 'user-action-required') {
+    return `Polling requires ${result.scheduling} scheduling; background read: ${result.backgroundRead}`
+  }
+  return 'Background changes unavailable'
+}
+
+function authorizationAllowsOperation(result: HealthAuthorizationResult): boolean {
+  return (
+    result.status === 'completed' &&
+    result.statuses.every(({ permission, status }) =>
+      permission.accessType === 'write'
+        ? status === 'granted'
+        : status === 'granted' || status === 'unverifiable'
+    )
+  )
+}
+
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error)
+}
+
 const readCards: Partial<
   Record<HealthDataType, { buttonLabel: string; execute: () => Promise<string[]> }>
 > = {
@@ -39,30 +128,28 @@ const readCards: Partial<
         bucket: 'day',
         metrics: ['sum'],
       })
-      const latestBuckets = buckets.slice(-7).reverse()
-
       return [
-        `Daily step buckets: ${latestBuckets.length}`,
-        ...latestBuckets.map(
-          (bucket) => `${bucket.startDate.toLocaleDateString()}: ${bucket.sum ?? 0} steps`
-        ),
+        `Daily step buckets: ${buckets.length}`,
+        ...buckets
+          .slice(-7)
+          .reverse()
+          .map((bucket) => `${bucket.startDate.toLocaleDateString()}: ${bucket.sum ?? 0} steps`),
       ]
     },
   },
   distance: {
-    buttonLabel: 'Read daily distance totals',
+    buttonLabel: 'Read distance samples',
     execute: async () => {
-      const buckets = await NitroHealth.readStatistics('distance', {
+      const page = await NitroHealth.readDistance({
         ...lastDays(7),
-        bucket: 'day',
-        metrics: ['sum'],
+        limit: 20,
+        ascending: false,
       })
-      const latestBuckets = buckets.slice(-7).reverse()
-
       return [
-        `Daily distance buckets: ${latestBuckets.length}`,
-        ...latestBuckets.map(
-          (bucket) => `${bucket.startDate.toLocaleDateString()}: ${Math.round(bucket.sum ?? 0)} m`
+        `Distance samples: ${page.samples.length}${page.nextCursor ? ' (more available)' : ''}`,
+        ...page.samples.map(
+          (sample) =>
+            `${sample.startDate.toLocaleString()}: ${Math.round(sample.distanceMeters)} m | scope ${sample.scope} | ${formatSampleContext(sample.identity, sample.origin)}`
         ),
       ]
     },
@@ -75,14 +162,15 @@ const readCards: Partial<
         bucket: 'day',
         metrics: ['sum'],
       })
-      const latestBuckets = buckets.slice(-7).reverse()
-
       return [
-        `Daily active-energy buckets: ${latestBuckets.length}`,
-        ...latestBuckets.map(
-          (bucket) =>
-            `${bucket.startDate.toLocaleDateString()}: ${Math.round(bucket.sum ?? 0)} kcal`
-        ),
+        `Daily active-energy buckets: ${buckets.length}`,
+        ...buckets
+          .slice(-7)
+          .reverse()
+          .map(
+            (bucket) =>
+              `${bucket.startDate.toLocaleDateString()}: ${Math.round(bucket.sum ?? 0)} kcal`
+          ),
       ]
     },
   },
@@ -90,7 +178,6 @@ const readCards: Partial<
     buttonLabel: 'Read Heart Rate stats',
     execute: async () => {
       const statistics = await NitroHealth.readHeartRateStatistics(lastDays(1))
-
       return [
         `Average bpm: ${statistics.average ?? 'n/a'}`,
         `Min bpm: ${statistics.min ?? 'n/a'}`,
@@ -106,10 +193,15 @@ const readCards: Partial<
         limit: 50,
         ascending: false,
       })
-
       return [
         `Sleep samples: ${page.samples.length}${page.nextCursor ? ' (more available)' : ''}`,
-        ...page.samples.map((sample) => `${sample.startDate.toLocaleString()}: ${sample.stage}`),
+        ...page.samples.map((sample) => {
+          const sleepDetail =
+            sample.kind === 'session-envelope'
+              ? `session envelope; stage data ${sample.stageData}`
+              : `stage ${sample.stage}${sample.identity.kind === 'record-child' ? `; parent ${sample.identity.record.id}` : ''}`
+          return `${sample.startDate.toLocaleString()}: ${sleepDetail} | ${formatSampleContext(sample.identity, sample.origin)}`
+        }),
       ]
     },
   },
@@ -121,11 +213,11 @@ const readCards: Partial<
         limit: 20,
         ascending: false,
       })
-
       return [
         `Body mass samples: ${page.samples.length}${page.nextCursor ? ' (more available)' : ''}`,
         ...page.samples.map(
-          (sample) => `${sample.startDate.toLocaleString()}: ${sample.kilograms.toFixed(1)} kg`
+          (sample) =>
+            `${sample.startDate.toLocaleString()}: ${sample.kilograms.toFixed(1)} kg | ${formatSampleContext(sample.identity, sample.origin)}`
         ),
       ]
     },
@@ -138,100 +230,176 @@ const readCards: Partial<
         limit: 20,
         ascending: false,
       })
-
       return [
         `Workouts: ${page.samples.length}${page.nextCursor ? ' (more available)' : ''}`,
         ...page.samples.map(
           (workout) =>
-            `${workout.startDate.toLocaleString()}: ${workout.activityType} (${Math.round(workout.durationSeconds / 60)} min)`
+            `${workout.startDate.toLocaleString()}: ${formatActivity(workout.activity)} | elapsed ${Math.round(workout.elapsedDurationSeconds / 60)} min | active ${formatMetric(workout.activeDuration, 'sec')} | title ${workout.title ?? 'n/a'} | brand ${workout.brandName ?? 'n/a'} | distance ${formatMetric(workout.totalDistance, 'm')} | energy ${formatMetric(workout.totalActiveEnergyBurned, 'kcal')} | ${formatSampleContext(workout.identity, workout.origin)}`
         ),
       ]
     },
   },
 }
 
-const writableDataTypes: HealthDataType[] = [
-  'steps',
-  'distance',
-  'activeEnergyBurned',
-  'heartRate',
-  'bodyMass',
-  'sleep',
-  'workout',
-]
+type CardActivity = 'checking' | 'requesting' | 'requestingWrite' | 'reading' | 'saving'
 
-// Each card runs one operation at a time, so in-flight work is a single finite activity
-// instead of a boolean per operation.
-type CardActivity =
-  | 'checking'
-  | 'requesting'
-  | 'requestingWrite'
-  | 'openingSettings'
-  | 'reading'
-  | 'saving'
-
-// Permission state lives in the OS; readRequestStatus/readResult/writeResult are the last
-// native answers we saw, cached for display. Gating decisions that must be correct (saving)
-// re-consult native instead of trusting these caches.
 interface CardState {
   activity?: CardActivity
-  readRequestStatus?: AuthorizationRequestStatus
+  statusResult?: HealthPermissionStatusResult
   readResult?: HealthAuthorizationResult
   writeResult?: HealthAuthorizationResult
   feedback?: { kind: 'error' | 'saved'; message: string }
 }
 
-function getAvailabilityLabel(status: HealthAvailabilityStatus): string {
-  switch (status) {
-    case 'available':
-      return 'Available'
-    case 'providerUpdateRequired':
-      return 'Install or update Health Connect'
-    case 'unavailable':
-      return 'Unavailable'
-  }
-}
-
-function getErrorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error)
-}
-
 function App(): React.JSX.Element {
-  const availabilityStatus = NitroHealth.getAvailabilityStatus()
-  const isAvailable = availabilityStatus === 'available'
-  const canOpenInstall = availabilityStatus === 'providerUpdateRequired'
+  const availability = NitroHealth.getAvailability()
+  const isAvailable = availability.status === 'available'
+  const [capabilities, setCapabilities] = useState<HealthCapabilitiesResult>()
   const [cards, setCards] = useState<Partial<Record<HealthDataType, CardState>>>({})
   const [readResults, setReadResults] = useState<Partial<Record<HealthDataType, string[]>>>({})
-  const [openingHealthSettings, setOpeningHealthSettings] = useState(false)
-  const [healthSettingsError, setHealthSettingsError] = useState<string>()
+  const [workflowActivity, setWorkflowActivity] = useState<string>()
+  const [workflowMessage, setWorkflowMessage] = useState<string>()
+  const [workflowError, setWorkflowError] = useState<string>()
+  const backgroundSubscription = useRef<ListenerSubscription | undefined>(undefined)
 
-  async function openHealthSettings(): Promise<void> {
-    setOpeningHealthSettings(true)
-    setHealthSettingsError(undefined)
+  useEffect(() => {
+    let isActive = true
+    NitroHealth.getCapabilities()
+      .then((result) => {
+        if (isActive) setCapabilities(result)
+      })
+      .catch((error: unknown) => {
+        if (isActive) setWorkflowError(getErrorMessage(error))
+      })
 
-    try {
-      const didOpen = await NitroHealth.openHealthSettings()
-      if (!didOpen) {
-        setHealthSettingsError('Health settings could not be opened on this device.')
-      }
-    } catch (error) {
-      setHealthSettingsError(getErrorMessage(error))
-    } finally {
-      setOpeningHealthSettings(false)
+    return () => {
+      isActive = false
+      backgroundSubscription.current?.remove()
     }
-  }
+  }, [])
 
   function updateCard(dataType: HealthDataType, patch: Partial<CardState>): void {
     setCards((current) => ({ ...current, [dataType]: { ...current[dataType], ...patch } }))
   }
 
+  async function runWorkflow(name: string, operation: () => Promise<void>): Promise<void> {
+    setWorkflowActivity(name)
+    setWorkflowError(undefined)
+    try {
+      await operation()
+    } catch (error) {
+      setWorkflowError(getErrorMessage(error))
+    } finally {
+      setWorkflowActivity(undefined)
+    }
+  }
+
+  async function refreshCapabilities(): Promise<void> {
+    await runWorkflow('capabilities', async () => {
+      const result = await NitroHealth.getCapabilities()
+      setCapabilities(result)
+      if (result.status === 'unavailable') {
+        setWorkflowMessage(`Capabilities unavailable: ${result.availability.reason}`)
+        return
+      }
+      const background = result.backgroundChanges
+      setWorkflowMessage(
+        background.mode === 'observer'
+          ? `Observer background changes: ${background.frequencies.join(', ')}; history read: ${result.historyRead}`
+          : `Polling background changes: ${background.scheduling}; background read: ${background.backgroundRead}; history read: ${result.historyRead}`
+      )
+    })
+  }
+
+  async function recoverAvailability(): Promise<void> {
+    if (
+      availability.status === 'available' ||
+      availability.reason !== 'provider-install-or-update-required'
+    ) {
+      return
+    }
+    await runWorkflow('recovery', async () => {
+      const result = await NitroHealth.performAvailabilityRecovery(availability.recovery)
+      setWorkflowMessage(
+        result.status === 'user-action-required'
+          ? `Continue in ${result.destination}`
+          : `Recovery unavailable: ${result.reason}`
+      )
+    })
+  }
+
+  async function requestAdditionalAccess(access: HealthAdditionalAccess): Promise<void> {
+    await runWorkflow(access, async () => {
+      const result = await NitroHealth.requestAdditionalAccess(access)
+      setWorkflowMessage(`${result.access}: ${result.status}`)
+      setCapabilities(await NitroHealth.getCapabilities())
+    })
+  }
+
+  async function managePermissions(): Promise<void> {
+    await runWorkflow('manage', async () => {
+      const result = await NitroHealth.managePermissions()
+      setWorkflowMessage(
+        result.status === 'unavailable'
+          ? `Permission management unavailable: ${result.availability.reason}`
+          : `${result.action.kind}: ${result.action.destination}`
+      )
+    })
+  }
+
+  async function revokePermissions(): Promise<void> {
+    await runWorkflow('revoke', async () => {
+      const result = await NitroHealth.revokeAllPermissions()
+      if (result.status === 'completed') {
+        setWorkflowMessage('All health permissions revoked')
+      } else if (result.status === 'user-action-required') {
+        setWorkflowMessage(`Revoke manually in ${result.action.destination}`)
+      } else {
+        setWorkflowMessage(`Revocation unavailable: ${result.availability.reason}`)
+      }
+    })
+  }
+
+  async function startBackgroundChanges(): Promise<void> {
+    await runWorkflow('background', async () => {
+      const configuration = await NitroHealth.configureBackgroundChanges({
+        dataTypes: ['steps', 'sleep', 'workout'],
+        frequency: 'immediate',
+      })
+      backgroundSubscription.current?.remove()
+      const subscription = NitroHealth.subscribeToBackgroundChanges(({ dataTypes }) => {
+        setWorkflowMessage(`Background change: ${dataTypes.join(', ')}`)
+      })
+      if (subscription.mode === 'observer') {
+        backgroundSubscription.current = subscription.subscription
+        setWorkflowMessage(`${formatBackgroundResult(configuration)}; observer subscribed`)
+      } else if (subscription.mode === 'polling') {
+        backgroundSubscription.current = undefined
+        setWorkflowMessage(
+          `${formatBackgroundResult(configuration)}; ${subscription.scheduling} polling required`
+        )
+      } else {
+        backgroundSubscription.current = undefined
+        setWorkflowMessage(`Background changes unavailable: ${subscription.availability.reason}`)
+      }
+    })
+  }
+
+  async function stopBackgroundChanges(): Promise<void> {
+    await runWorkflow('stopBackground', async () => {
+      backgroundSubscription.current?.remove()
+      backgroundSubscription.current = undefined
+      const result = await NitroHealth.disableBackgroundChanges(['steps', 'sleep', 'workout'])
+      setWorkflowMessage(formatBackgroundResult(result))
+    })
+  }
+
   async function checkPermission(dataType: HealthDataType): Promise<void> {
     const permission: HealthPermission[] = [{ accessType: 'read', dataType }]
     updateCard(dataType, { activity: 'checking', feedback: undefined })
-
     try {
-      const status = await NitroHealth.getRequestStatusForAuthorization(permission)
-      updateCard(dataType, { activity: undefined, readRequestStatus: status })
+      const statusResult = await NitroHealth.getPermissionStatuses(permission)
+      updateCard(dataType, { activity: undefined, statusResult })
     } catch (error) {
       updateCard(dataType, {
         activity: undefined,
@@ -240,86 +408,27 @@ function App(): React.JSX.Element {
     }
   }
 
-  async function requestPermission(dataType: HealthDataType): Promise<void> {
-    const permission: HealthPermission[] = [{ accessType: 'read', dataType }]
-    updateCard(dataType, { activity: 'requesting', feedback: undefined, readResult: undefined })
-
+  async function requestPermission(
+    dataType: HealthDataType,
+    accessType: 'read' | 'write'
+  ): Promise<void> {
+    updateCard(dataType, {
+      activity: accessType === 'read' ? 'requesting' : 'requestingWrite',
+      feedback: undefined,
+    })
     try {
-      const result = await NitroHealth.requestAuthorization(permission)
-      updateCard(dataType, {
-        activity: undefined,
-        readResult: result,
-        readRequestStatus: result.requestStatus,
-      })
-    } catch (error) {
-      updateCard(dataType, {
-        activity: undefined,
-        feedback: { kind: 'error', message: getErrorMessage(error) },
-      })
-    }
-  }
-
-  async function requestWritePermission(dataType: HealthDataType): Promise<void> {
-    const permission: HealthPermission[] = [{ accessType: 'write', dataType }]
-    updateCard(dataType, { activity: 'requestingWrite', feedback: undefined })
-
-    try {
-      const result = await NitroHealth.requestAuthorization(permission)
-      updateCard(dataType, { activity: undefined, writeResult: result })
-    } catch (error) {
-      updateCard(dataType, {
-        activity: undefined,
-        feedback: { kind: 'error', message: getErrorMessage(error) },
-      })
-    }
-  }
-
-  async function openSettings(dataType: HealthDataType): Promise<void> {
-    updateCard(dataType, { activity: 'openingSettings', feedback: undefined })
-
-    try {
-      const didOpen = await NitroHealth.openHealthSettings()
-      updateCard(dataType, {
-        activity: undefined,
-        feedback: didOpen
-          ? undefined
-          : { kind: 'error', message: 'Health settings could not be opened on this device.' },
-      })
-    } catch (error) {
-      updateCard(dataType, {
-        activity: undefined,
-        feedback: { kind: 'error', message: getErrorMessage(error) },
-      })
-    }
-  }
-
-  // Reading never gates on cached permission state: it asks native for read authorization
-  // first (silent when already determined, prompts only when needed), then reads.
-  async function readData(dataType: HealthDataType, read: () => Promise<void>): Promise<void> {
-    updateCard(dataType, { activity: 'reading', feedback: undefined })
-
-    try {
-      const readResult = await NitroHealth.requestAuthorization([{ accessType: 'read', dataType }])
-
-      if (readResult.deniedPermissions.length > 0) {
-        updateCard(dataType, {
-          activity: undefined,
-          readResult,
-          readRequestStatus: readResult.requestStatus,
-          feedback: {
-            kind: 'error',
-            message: 'Read permission denied. Open health settings to enable it.',
-          },
-        })
-        return
+      let permission: HealthPermission = { accessType: 'read', dataType }
+      if (accessType === 'write') {
+        if (!isWritableDataType(dataType)) throw new Error(`${dataType} is read-only`)
+        permission = { accessType: 'write', dataType }
       }
-
-      await read()
-      updateCard(dataType, {
-        activity: undefined,
-        readResult,
-        readRequestStatus: readResult.requestStatus,
-      })
+      const result = await NitroHealth.requestAuthorization([permission])
+      updateCard(
+        dataType,
+        accessType === 'read'
+          ? { activity: undefined, readResult: result }
+          : { activity: undefined, writeResult: result }
+      )
     } catch (error) {
       updateCard(dataType, {
         activity: undefined,
@@ -330,40 +439,44 @@ function App(): React.JSX.Element {
 
   async function runReadCard(dataType: HealthDataType): Promise<void> {
     const readCard = readCards[dataType]
+    if (!readCard) return
 
-    if (!readCard) {
-      return
-    }
-
-    await readData(dataType, async () => {
+    updateCard(dataType, { activity: 'reading', feedback: undefined })
+    try {
+      const readResult = await NitroHealth.requestAuthorization([{ accessType: 'read', dataType }])
+      if (!authorizationAllowsOperation(readResult)) {
+        updateCard(dataType, {
+          activity: undefined,
+          readResult,
+          feedback: { kind: 'error', message: 'Read access is unavailable or not granted.' },
+        })
+        return
+      }
       const lines = await readCard.execute()
       setReadResults((current) => ({ ...current, [dataType]: lines }))
-    })
+      updateCard(dataType, { activity: undefined, readResult })
+    } catch (error) {
+      updateCard(dataType, {
+        activity: undefined,
+        feedback: { kind: 'error', message: getErrorMessage(error) },
+      })
+    }
   }
 
-  // Saving never gates on cached permission state: it asks native for write authorization
-  // first (silent when already granted, prompts only when needed), then saves.
-  // Each save covers the last minute only: Health Connect deduplicates overlapping intervals
-  // when aggregating, so repeatedly saving the same wide window would not accumulate on Android.
-  async function saveSample(dataType: HealthDataType): Promise<void> {
+  async function saveSample(dataType: WritableHealthDataType): Promise<void> {
     const endDate = new Date()
     const startDate = new Date(endDate.getTime() - 60 * 1000)
-
     updateCard(dataType, { activity: 'saving', feedback: undefined })
 
     try {
       const writeResult = await NitroHealth.requestAuthorization([
         { accessType: 'write', dataType },
       ])
-
-      if (writeResult.deniedPermissions.length > 0) {
+      if (!authorizationAllowsOperation(writeResult)) {
         updateCard(dataType, {
           activity: undefined,
           writeResult,
-          feedback: {
-            kind: 'error',
-            message: 'Write permission denied. Open health settings to enable it.',
-          },
+          feedback: { kind: 'error', message: 'Write access is unavailable or not granted.' },
         })
         return
       }
@@ -372,15 +485,18 @@ function App(): React.JSX.Element {
       switch (dataType) {
         case 'steps':
           await NitroHealth.saveSteps([{ startDate, endDate, count: 250 }])
-          message = 'Saved 250 steps over the last minute'
+          message = 'Saved 250 steps'
           break
-        case 'distance':
-          await NitroHealth.saveDistance([{ startDate, endDate, distanceMeters: 400 }])
-          message = 'Saved 400 m over the last minute'
+        case 'distance': {
+          const result = await NitroHealth.saveDistance([
+            { scope: 'walking-running', startDate, endDate, distanceMeters: 400 },
+          ])
+          message = `Saved 400 m with storage scope ${result.storedScope}`
           break
+        }
         case 'activeEnergyBurned':
           await NitroHealth.saveActiveEnergyBurned([{ startDate, endDate, kilocalories: 45 }])
-          message = 'Saved 45 kcal over the last minute'
+          message = 'Saved 45 kcal'
           break
         case 'heartRate':
           await NitroHealth.saveHeartRate([{ date: endDate, bpm: 76 }])
@@ -392,11 +508,7 @@ function App(): React.JSX.Element {
           break
         case 'sleep':
           await NitroHealth.saveSleepSessions([
-            {
-              startDate,
-              endDate,
-              stages: [{ startDate, endDate, stage: 'asleep' }],
-            },
+            { startDate, endDate, stages: [{ startDate, endDate, stage: 'asleep' }] },
           ])
           message = 'Saved a one-minute asleep session'
           break
@@ -405,7 +517,7 @@ function App(): React.JSX.Element {
             startDate,
             endDate,
             activityType: 'running',
-            title: 'Example run',
+            displayName: 'Example run',
           })
           message = 'Saved a one-minute running workout'
           break
@@ -427,74 +539,109 @@ function App(): React.JSX.Element {
     }
   }
 
+  const availabilityDetail =
+    availability.status === 'available'
+      ? 'Health service ready'
+      : `Unavailable: ${availability.reason}`
+
   return (
-    <SafeAreaView>
+    <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>Health APIs</Text>
+        <Text style={styles.title}>Nitro Health</Text>
         <Text style={[styles.status, isAvailable ? styles.available : styles.unavailable]}>
-          {getAvailabilityLabel(availabilityStatus)}
+          {availabilityDetail}
         </Text>
-        <Text style={styles.detail}>Status: {availabilityStatus}</Text>
-        <Pressable
-          disabled={openingHealthSettings}
-          onPress={() => {
-            openHealthSettings()
-          }}
-          style={({ pressed }) => [
-            styles.button,
-            styles.settingsButton,
-            styles.settingsLink,
-            pressed ? styles.buttonPressed : null,
-            openingHealthSettings ? styles.buttonDisabled : null,
-          ]}
-        >
-          <Text style={styles.buttonText}>
-            {openingHealthSettings ? 'Opening...' : 'Open health settings'}
+
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Workflows</Text>
+          <Text style={styles.detail}>
+            Background:{' '}
+            {capabilities?.status === 'available'
+              ? `${capabilities.backgroundChanges.mode}; history ${capabilities.historyRead}`
+              : capabilities
+                ? `unavailable (${capabilities.availability.reason})`
+                : 'loading'}
           </Text>
-        </Pressable>
-        {healthSettingsError ? <Text style={styles.error}>{healthSettingsError}</Text> : null}
+          {capabilities?.status === 'available' &&
+          capabilities.backgroundChanges.mode === 'polling' ? (
+            <Text style={styles.detail}>
+              Background read: {capabilities.backgroundChanges.backgroundRead}; scheduling:{' '}
+              {capabilities.backgroundChanges.scheduling}
+            </Text>
+          ) : capabilities?.status === 'available' &&
+            capabilities.backgroundChanges.mode === 'observer' ? (
+            <Text style={styles.detail}>
+              Observer frequencies: {capabilities.backgroundChanges.frequencies.join(', ')}
+            </Text>
+          ) : null}
+          {workflowMessage ? <Text style={styles.saved}>{workflowMessage}</Text> : null}
+          {workflowError ? <Text style={styles.error}>{workflowError}</Text> : null}
+          <View style={styles.buttonRow}>
+            {availability.status === 'unavailable' &&
+            availability.reason === 'provider-install-or-update-required' ? (
+              <ActionButton
+                disabled={workflowActivity !== undefined}
+                label={workflowActivity === 'recovery' ? 'Opening...' : 'Install or update provider'}
+                onPress={recoverAvailability}
+              />
+            ) : null}
+            <ActionButton
+              disabled={workflowActivity !== undefined}
+              label={workflowActivity === 'capabilities' ? 'Refreshing...' : 'Refresh capabilities'}
+              onPress={refreshCapabilities}
+            />
+            <ActionButton
+              disabled={!isAvailable || workflowActivity !== undefined}
+              label="Request background read"
+              onPress={() => requestAdditionalAccess('background-read')}
+            />
+            <ActionButton
+              disabled={!isAvailable || workflowActivity !== undefined}
+              label="Request history read"
+              onPress={() => requestAdditionalAccess('history-read')}
+            />
+            <ActionButton
+              disabled={!isAvailable || workflowActivity !== undefined}
+              label="Configure background changes"
+              onPress={startBackgroundChanges}
+            />
+            <ActionButton
+              disabled={!isAvailable || workflowActivity !== undefined}
+              label="Disable background changes"
+              onPress={stopBackgroundChanges}
+            />
+            <ActionButton
+              disabled={workflowActivity !== undefined}
+              label="Manage permissions"
+              onPress={managePermissions}
+            />
+            <ActionButton
+              danger
+              disabled={workflowActivity !== undefined}
+              label="Revoke all permissions"
+              onPress={revokePermissions}
+            />
+          </View>
+        </View>
+
         {readPermissions.map(({ dataType, label }) => {
           const card = cards[dataType] ?? {}
           const isBusy = card.activity !== undefined
-          const isChecking = card.activity === 'checking'
-          const isRequesting = card.activity === 'requesting'
-          const isRequestingWrite = card.activity === 'requestingWrite'
-          const isOpeningSettings = card.activity === 'openingSettings'
-          const isReading = card.activity === 'reading'
-          const isSaving = card.activity === 'saving'
-          const result = card.readResult
-          const requestStatus = card.readRequestStatus
-          const writeResult = card.writeResult
-          const canOpenSettings =
-            (result !== undefined && result.status !== 'granted') ||
-            writeResult?.status === 'denied' ||
-            writeResult?.status === 'partial'
-          const canWrite = writableDataTypes.includes(dataType)
           const readCard = readCards[dataType]
           const readLines = readResults[dataType]
-
           return (
-            <View key={dataType} style={styles.permissionCard}>
-              <Text style={styles.cardTitle}>{label} permission</Text>
-              <Text style={styles.detail}>
-                {label} request status: {requestStatus ?? 'not checked'}
-              </Text>
-              {result ? (
+            <View key={dataType} style={styles.card}>
+              <Text style={styles.cardTitle}>{label}</Text>
+              {card.statusResult ? (
                 <Text style={styles.detail}>
-                  {label} authorization result: {result.status}
+                  Current: {formatPermissionStatuses(card.statusResult)}
                 </Text>
               ) : null}
-              {result ? (
-                <Text style={styles.detail}>
-                  {label} granted: {result.grantedPermissions.length} | denied:{' '}
-                  {result.deniedPermissions.length} | unverifiable:{' '}
-                  {result.unverifiablePermissions.length}
-                </Text>
+              {card.readResult ? (
+                <Text style={styles.detail}>Read: {formatAuthorization(card.readResult)}</Text>
               ) : null}
-              {writeResult ? (
-                <Text style={styles.detail}>
-                  {label} write authorization result: {writeResult.status}
-                </Text>
+              {card.writeResult ? (
+                <Text style={styles.detail}>Write: {formatAuthorization(card.writeResult)}</Text>
               ) : null}
               {card.feedback ? (
                 <Text style={card.feedback.kind === 'saved' ? styles.saved : styles.error}>
@@ -511,231 +658,117 @@ function App(): React.JSX.Element {
                 </View>
               ) : null}
               <View style={styles.buttonRow}>
-                <Pressable
+                <ActionButton
                   disabled={!isAvailable || isBusy}
-                  onPress={() => {
-                    checkPermission(dataType)
-                  }}
-                  style={({ pressed }) => [
-                    styles.button,
-                    styles.secondaryButton,
-                    pressed ? styles.buttonPressed : null,
-                    !isAvailable || isBusy ? styles.buttonDisabled : null,
-                  ]}
-                >
-                  <Text style={styles.buttonText}>
-                    {isChecking ? 'Checking...' : `Check ${label} permission`}
-                  </Text>
-                </Pressable>
-                <Pressable
+                  label={card.activity === 'checking' ? 'Checking...' : 'Check read status'}
+                  onPress={() => checkPermission(dataType)}
+                />
+                <ActionButton
                   disabled={!isAvailable || isBusy}
-                  onPress={() => {
-                    requestPermission(dataType)
-                  }}
-                  style={({ pressed }) => [
-                    styles.button,
-                    pressed ? styles.buttonPressed : null,
-                    !isAvailable || isBusy ? styles.buttonDisabled : null,
-                  ]}
-                >
-                  <Text style={styles.buttonText}>
-                    {isRequesting ? 'Requesting...' : `Request ${label} permission`}
-                  </Text>
-                </Pressable>
-                {canOpenSettings ? (
-                  <Pressable
-                    disabled={isBusy}
-                    onPress={() => {
-                      openSettings(dataType)
-                    }}
-                    style={({ pressed }) => [
-                      styles.button,
-                      styles.settingsButton,
-                      pressed ? styles.buttonPressed : null,
-                      isBusy ? styles.buttonDisabled : null,
-                    ]}
-                  >
-                    <Text style={styles.buttonText}>
-                      {isOpeningSettings ? 'Opening...' : 'Open health settings'}
-                    </Text>
-                  </Pressable>
-                ) : null}
+                  label={card.activity === 'requesting' ? 'Requesting...' : 'Request read access'}
+                  onPress={() => requestPermission(dataType, 'read')}
+                />
                 {readCard ? (
-                  <Pressable
+                  <ActionButton
                     disabled={!isAvailable || isBusy}
-                    onPress={() => {
-                      runReadCard(dataType)
-                    }}
-                    style={({ pressed }) => [
-                      styles.button,
-                      styles.readButton,
-                      pressed ? styles.buttonPressed : null,
-                      !isAvailable || isBusy ? styles.buttonDisabled : null,
-                    ]}
-                  >
-                    <Text style={styles.buttonText}>
-                      {isReading ? 'Reading...' : readCard.buttonLabel}
-                    </Text>
-                  </Pressable>
+                    label={card.activity === 'reading' ? 'Reading...' : readCard.buttonLabel}
+                    onPress={() => runReadCard(dataType)}
+                    tone="read"
+                  />
                 ) : null}
-                {canWrite ? (
-                  <Pressable
+                {isWritableDataType(dataType) ? (
+                  <ActionButton
                     disabled={!isAvailable || isBusy}
-                    onPress={() => {
-                      requestWritePermission(dataType)
-                    }}
-                    style={({ pressed }) => [
-                      styles.button,
-                      pressed ? styles.buttonPressed : null,
-                      !isAvailable || isBusy ? styles.buttonDisabled : null,
-                    ]}
-                  >
-                    <Text style={styles.buttonText}>
-                      {isRequestingWrite ? 'Requesting...' : `Request ${label} write permission`}
-                    </Text>
-                  </Pressable>
+                    label={
+                      card.activity === 'requestingWrite' ? 'Requesting...' : 'Request write access'
+                    }
+                    onPress={() => requestPermission(dataType, 'write')}
+                  />
                 ) : null}
-                {canWrite ? (
-                  <Pressable
+                {isWritableDataType(dataType) ? (
+                  <ActionButton
                     disabled={!isAvailable || isBusy}
-                    onPress={() => {
-                      saveSample(dataType)
-                    }}
-                    style={({ pressed }) => [
-                      styles.button,
-                      styles.writeButton,
-                      pressed ? styles.buttonPressed : null,
-                      !isAvailable || isBusy ? styles.buttonDisabled : null,
-                    ]}
-                  >
-                    <Text style={styles.buttonText}>
-                      {isSaving ? 'Saving...' : `Save sample ${label.toLowerCase()}`}
-                    </Text>
-                  </Pressable>
+                    label={card.activity === 'saving' ? 'Saving...' : 'Save sample'}
+                    onPress={() => saveSample(dataType)}
+                    tone="write"
+                  />
                 ) : null}
               </View>
             </View>
           )
         })}
-        {canOpenInstall ? (
-          <Pressable
-            onPress={() => {
-              NitroHealth.openHealthConnectInstall()
-            }}
-            style={({ pressed }) => [
-              styles.button,
-              styles.installButton,
-              pressed ? styles.buttonPressed : null,
-            ]}
-          >
-            <Text style={styles.buttonText}>Open Health Connect install</Text>
-          </Pressable>
-        ) : null}
       </ScrollView>
     </SafeAreaView>
   )
 }
 
+function ActionButton({
+  danger = false,
+  disabled,
+  label,
+  onPress,
+  tone,
+}: {
+  danger?: boolean
+  disabled: boolean
+  label: string
+  onPress: () => void
+  tone?: 'read' | 'write'
+}): React.JSX.Element {
+  return (
+    <Pressable
+      disabled={disabled}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.button,
+        tone === 'read' ? styles.readButton : null,
+        tone === 'write' ? styles.writeButton : null,
+        danger ? styles.dangerButton : null,
+        pressed ? styles.buttonPressed : null,
+        disabled ? styles.buttonDisabled : null,
+      ]}
+    >
+      <Text style={styles.buttonText}>{label}</Text>
+    </Pressable>
+  )
+}
+
 const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-    backgroundColor: '#f8fafc',
-  },
-  title: {
-    fontSize: 18,
-    color: '#475569',
-    marginBottom: 8,
-  },
-  status: {
-    fontSize: 32,
-    fontWeight: '700',
-    textAlign: 'center',
-  },
-  available: {
-    color: '#15803d',
-  },
-  unavailable: {
-    color: '#b91c1c',
-  },
-  detail: {
-    marginTop: 12,
-    fontSize: 14,
-    color: '#64748b',
-  },
-  permissionCard: {
-    width: '100%',
-    marginTop: 24,
+  safeArea: { flex: 1, backgroundColor: '#f8fafc' },
+  container: { padding: 20, paddingBottom: 48, backgroundColor: '#f8fafc' },
+  title: { fontSize: 32, fontWeight: '800', color: '#0f172a' },
+  status: { marginTop: 8, fontSize: 16, fontWeight: '700' },
+  available: { color: '#15803d' },
+  unavailable: { color: '#b91c1c' },
+  card: {
+    marginTop: 20,
     padding: 16,
-    borderRadius: 18,
+    borderRadius: 16,
     backgroundColor: '#ffffff',
     borderWidth: 1,
     borderColor: '#e2e8f0',
-    boxShadow: '0 8px 24px rgba(15, 23, 42, 0.08)',
   },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#0f172a',
-  },
-  error: {
-    marginTop: 12,
-    fontSize: 14,
-    color: '#b91c1c',
-  },
-  saved: {
-    marginTop: 12,
-    fontSize: 14,
-    color: '#15803d',
-  },
-  buttonRow: {
-    marginTop: 16,
-    gap: 12,
-  },
-  readResult: {
-    marginTop: 4,
-  },
+  cardTitle: { fontSize: 18, fontWeight: '700', color: '#0f172a' },
+  detail: { marginTop: 8, fontSize: 14, lineHeight: 20, color: '#64748b' },
+  error: { marginTop: 10, fontSize: 14, color: '#b91c1c' },
+  saved: { marginTop: 10, fontSize: 14, color: '#15803d' },
+  buttonRow: { marginTop: 14, gap: 10 },
+  readResult: { marginTop: 4 },
   button: {
     minHeight: 44,
-    paddingVertical: 12,
-    paddingHorizontal: 18,
-    borderRadius: 999,
-    backgroundColor: '#0f172a',
+    paddingVertical: 11,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    backgroundColor: '#334155',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  secondaryButton: {
-    backgroundColor: '#475569',
-  },
-  settingsButton: {
-    backgroundColor: '#64748b',
-  },
-  readButton: {
-    backgroundColor: '#15803d',
-  },
-  writeButton: {
-    backgroundColor: '#1d4ed8',
-  },
-  installButton: {
-    marginTop: 24,
-  },
-  settingsLink: {
-    marginTop: 16,
-    alignSelf: 'stretch',
-  },
-  buttonPressed: {
-    backgroundColor: '#334155',
-  },
-  buttonDisabled: {
-    backgroundColor: '#94a3b8',
-  },
-  buttonText: {
-    color: '#ffffff',
-    fontSize: 15,
-    fontWeight: '600',
-  },
+  readButton: { backgroundColor: '#15803d' },
+  writeButton: { backgroundColor: '#1d4ed8' },
+  dangerButton: { backgroundColor: '#b91c1c' },
+  buttonPressed: { opacity: 0.8 },
+  buttonDisabled: { backgroundColor: '#94a3b8' },
+  buttonText: { color: '#ffffff', fontSize: 15, fontWeight: '600', textAlign: 'center' },
 })
 
 export default App

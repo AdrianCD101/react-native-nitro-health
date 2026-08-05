@@ -18,8 +18,8 @@ import com.facebook.proguard.annotations.DoNotStrip
 enum class HealthPermissionStatus(@DoNotStrip @Keep val value: Int) {
   NOTGRANTED(0),
   GRANTED(1),
-  NOTDETERMINED(2),
-  UNVERIFIABLE(3);
+  UNVERIFIABLE(2),
+  NOTDETERMINED(3);
 
   companion object
 }

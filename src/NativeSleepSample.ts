@@ -1,14 +1,16 @@
+import type { NativeHealthDataOrigin } from './NativeHealthDataOrigin'
+import type { NativeHealthSampleIdentity } from './NativeHealthSampleIdentity'
+
+export type NativeSleepSampleKind = 'sessionEnvelope' | 'stage'
+export type NativeSleepStageData = 'reported' | 'notReported' | 'unverifiable'
+
 /** Native sleep interval shape returned through the Nitro spec. */
 export interface NativeSleepSample {
-  /**
-   * Stable sample identifier. HealthKit UUID on iOS; on Android, Health Connect
-   * session record id plus a `#index` suffix for each stage within the session.
-   */
-  uuid: string
-  /** Parent Health Connect session id on Android; equal to `uuid` on iOS. */
-  recordUuid: string
+  identity: NativeHealthSampleIdentity
+  origin: NativeHealthDataOrigin
+  kind: NativeSleepSampleKind
   startTimeMs: number
   endTimeMs: number
-  stage: string
-  source?: string
+  stage?: string
+  stageData?: NativeSleepStageData
 }

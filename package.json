@@ -42,6 +42,24 @@
   "module": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
   "react-native": "src/index",
+  "exports": {
+    ".": {
+      "types": "./lib/typescript/src/index.d.ts",
+      "react-native": "./src/index.ts",
+      "import": "./lib/module/index.js",
+      "require": "./lib/commonjs/index.js",
+      "default": "./lib/module/index.js"
+    },
+    "./jest/mock": {
+      "types": "./jest/mock.d.ts",
+      "default": "./jest/mock.js"
+    },
+    "./jest/setup": {
+      "types": "./jest/setup.d.ts",
+      "default": "./jest/setup.js"
+    },
+    "./package.json": "./package.json"
+  },
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"

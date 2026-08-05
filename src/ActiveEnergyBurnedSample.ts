@@ -1,7 +1,7 @@
-import type { HealthSampleIdentity } from './HealthSampleIdentity'
+import type { HealthSample } from './HealthSample'
 
 /** Active energy interval returned by {@linkcode NitroHealth.readActiveEnergyBurned}. */
-export interface ActiveEnergyBurnedSample extends HealthSampleIdentity {
+export interface ActiveEnergyBurnedSample extends HealthSample {
   /** Inclusive start of the sample interval. */
   startDate: Date
   /** Exclusive end of the sample interval. */

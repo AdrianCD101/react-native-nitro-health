@@ -28,10 +28,21 @@
 #error NitroModules cannot be found! Are you sure you installed NitroModules properly?
 #endif
 
+// Forward declaration of `NativeHealthSampleIdentity` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthSampleIdentity; }
+// Forward declaration of `NativeHealthDataOrigin` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthDataOrigin; }
+// Forward declaration of `NativeSleepSampleKind` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeSleepSampleKind; }
+// Forward declaration of `NativeSleepStageData` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeSleepStageData; }
 
-
+#include "NativeHealthSampleIdentity.hpp"
+#include "NativeHealthDataOrigin.hpp"
+#include "NativeSleepSampleKind.hpp"
 #include <string>
 #include <optional>
+#include "NativeSleepStageData.hpp"
 
 namespace margelo::nitro::nitrohealth {
 
@@ -40,16 +51,17 @@ namespace margelo::nitro::nitrohealth {
    */
   struct NativeSleepSample final {
   public:
-    std::string uuid     SWIFT_PRIVATE;
-    std::string recordUuid     SWIFT_PRIVATE;
+    NativeHealthSampleIdentity identity     SWIFT_PRIVATE;
+    NativeHealthDataOrigin origin     SWIFT_PRIVATE;
+    NativeSleepSampleKind kind     SWIFT_PRIVATE;
     double startTimeMs     SWIFT_PRIVATE;
     double endTimeMs     SWIFT_PRIVATE;
-    std::string stage     SWIFT_PRIVATE;
-    std::optional<std::string> source     SWIFT_PRIVATE;
+    std::optional<std::string> stage     SWIFT_PRIVATE;
+    std::optional<NativeSleepStageData> stageData     SWIFT_PRIVATE;
 
   public:
     NativeSleepSample() = default;
-    explicit NativeSleepSample(std::string uuid, std::string recordUuid, double startTimeMs, double endTimeMs, std::string stage, std::optional<std::string> source): uuid(uuid), recordUuid(recordUuid), startTimeMs(startTimeMs), endTimeMs(endTimeMs), stage(stage), source(source) {}
+    explicit NativeSleepSample(NativeHealthSampleIdentity identity, NativeHealthDataOrigin origin, NativeSleepSampleKind kind, double startTimeMs, double endTimeMs, std::optional<std::string> stage, std::optional<NativeSleepStageData> stageData): identity(identity), origin(origin), kind(kind), startTimeMs(startTimeMs), endTimeMs(endTimeMs), stage(stage), stageData(stageData) {}
 
   public:
     friend bool operator==(const NativeSleepSample& lhs, const NativeSleepSample& rhs) = default;
@@ -65,22 +77,24 @@ namespace margelo::nitro {
     static inline margelo::nitro::nitrohealth::NativeSleepSample fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       jsi::Object obj = arg.asObject(runtime);
       return margelo::nitro::nitrohealth::NativeSleepSample(
-        JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "uuid"))),
-        JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "recordUuid"))),
+        JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleIdentity>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "identity"))),
+        JSIConverter<margelo::nitro::nitrohealth::NativeHealthDataOrigin>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "origin"))),
+        JSIConverter<margelo::nitro::nitrohealth::NativeSleepSampleKind>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "kind"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "startTimeMs"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs"))),
-        JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "stage"))),
-        JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "source")))
+        JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "stage"))),
+        JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeSleepStageData>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "stageData")))
       );
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::nitrohealth::NativeSleepSample& arg) {
       jsi::Object obj(runtime);
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "uuid"), JSIConverter<std::string>::toJSI(runtime, arg.uuid));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "recordUuid"), JSIConverter<std::string>::toJSI(runtime, arg.recordUuid));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "identity"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleIdentity>::toJSI(runtime, arg.identity));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "origin"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthDataOrigin>::toJSI(runtime, arg.origin));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "kind"), JSIConverter<margelo::nitro::nitrohealth::NativeSleepSampleKind>::toJSI(runtime, arg.kind));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "startTimeMs"), JSIConverter<double>::toJSI(runtime, arg.startTimeMs));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs"), JSIConverter<double>::toJSI(runtime, arg.endTimeMs));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "stage"), JSIConverter<std::string>::toJSI(runtime, arg.stage));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "source"), JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.source));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "stage"), JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.stage));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "stageData"), JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeSleepStageData>>::toJSI(runtime, arg.stageData));
       return obj;
     }
     static inline bool canConvert(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -91,12 +105,13 @@ namespace margelo::nitro {
       if (!nitro::isPlainObject(runtime, obj)) {
         return false;
       }
-      if (!JSIConverter<std::string>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "uuid")))) return false;
-      if (!JSIConverter<std::string>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "recordUuid")))) return false;
+      if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleIdentity>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "identity")))) return false;
+      if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthDataOrigin>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "origin")))) return false;
+      if (!JSIConverter<margelo::nitro::nitrohealth::NativeSleepSampleKind>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "kind")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "startTimeMs")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs")))) return false;
-      if (!JSIConverter<std::string>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "stage")))) return false;
-      if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "source")))) return false;
+      if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "stage")))) return false;
+      if (!JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeSleepStageData>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "stageData")))) return false;
       return true;
     }
   };

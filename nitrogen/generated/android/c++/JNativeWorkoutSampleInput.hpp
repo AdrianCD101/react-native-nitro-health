@@ -38,8 +38,8 @@ namespace margelo::nitro::nitrohealth {
       double endTimeMs = this->getFieldValue(fieldEndTimeMs);
       static const auto fieldActivityType = clazz->getField<jni::JString>("activityType");
       jni::local_ref<jni::JString> activityType = this->getFieldValue(fieldActivityType);
-      static const auto fieldTitle = clazz->getField<jni::JString>("title");
-      jni::local_ref<jni::JString> title = this->getFieldValue(fieldTitle);
+      static const auto fieldDisplayName = clazz->getField<jni::JString>("displayName");
+      jni::local_ref<jni::JString> displayName = this->getFieldValue(fieldDisplayName);
       static const auto fieldTimeZone = clazz->getField<jni::JString>("timeZone");
       jni::local_ref<jni::JString> timeZone = this->getFieldValue(fieldTimeZone);
       static const auto fieldSyncId = clazz->getField<jni::JString>("syncId");
@@ -50,7 +50,7 @@ namespace margelo::nitro::nitrohealth {
         startTimeMs,
         endTimeMs,
         activityType->toStdString(),
-        title != nullptr ? std::make_optional(title->toStdString()) : std::nullopt,
+        displayName != nullptr ? std::make_optional(displayName->toStdString()) : std::nullopt,
         timeZone != nullptr ? std::make_optional(timeZone->toStdString()) : std::nullopt,
         syncId != nullptr ? std::make_optional(syncId->toStdString()) : std::nullopt,
         syncVersion != nullptr ? std::make_optional(syncVersion->value()) : std::nullopt
@@ -71,7 +71,7 @@ namespace margelo::nitro::nitrohealth {
         value.startTimeMs,
         value.endTimeMs,
         jni::make_jstring(value.activityType),
-        value.title.has_value() ? jni::make_jstring(value.title.value()) : nullptr,
+        value.displayName.has_value() ? jni::make_jstring(value.displayName.value()) : nullptr,
         value.timeZone.has_value() ? jni::make_jstring(value.timeZone.value()) : nullptr,
         value.syncId.has_value() ? jni::make_jstring(value.syncId.value()) : nullptr,
         value.syncVersion.has_value() ? jni::JDouble::valueOf(value.syncVersion.value()) : nullptr

@@ -28,10 +28,13 @@
 #error NitroModules cannot be found! Are you sure you installed NitroModules properly?
 #endif
 
+// Forward declaration of `NativeHealthSampleIdentity` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthSampleIdentity; }
+// Forward declaration of `NativeHealthDataOrigin` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthDataOrigin; }
 
-
-#include <string>
-#include <optional>
+#include "NativeHealthSampleIdentity.hpp"
+#include "NativeHealthDataOrigin.hpp"
 
 namespace margelo::nitro::nitrohealth {
 
@@ -40,14 +43,14 @@ namespace margelo::nitro::nitrohealth {
    */
   struct NativeOxygenSaturationSample final {
   public:
-    std::string uuid     SWIFT_PRIVATE;
+    NativeHealthSampleIdentity identity     SWIFT_PRIVATE;
+    NativeHealthDataOrigin origin     SWIFT_PRIVATE;
     double timeMs     SWIFT_PRIVATE;
     double percentage     SWIFT_PRIVATE;
-    std::optional<std::string> source     SWIFT_PRIVATE;
 
   public:
     NativeOxygenSaturationSample() = default;
-    explicit NativeOxygenSaturationSample(std::string uuid, double timeMs, double percentage, std::optional<std::string> source): uuid(uuid), timeMs(timeMs), percentage(percentage), source(source) {}
+    explicit NativeOxygenSaturationSample(NativeHealthSampleIdentity identity, NativeHealthDataOrigin origin, double timeMs, double percentage): identity(identity), origin(origin), timeMs(timeMs), percentage(percentage) {}
 
   public:
     friend bool operator==(const NativeOxygenSaturationSample& lhs, const NativeOxygenSaturationSample& rhs) = default;
@@ -63,18 +66,18 @@ namespace margelo::nitro {
     static inline margelo::nitro::nitrohealth::NativeOxygenSaturationSample fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       jsi::Object obj = arg.asObject(runtime);
       return margelo::nitro::nitrohealth::NativeOxygenSaturationSample(
-        JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "uuid"))),
+        JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleIdentity>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "identity"))),
+        JSIConverter<margelo::nitro::nitrohealth::NativeHealthDataOrigin>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "origin"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeMs"))),
-        JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "percentage"))),
-        JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "source")))
+        JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "percentage")))
       );
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::nitrohealth::NativeOxygenSaturationSample& arg) {
       jsi::Object obj(runtime);
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "uuid"), JSIConverter<std::string>::toJSI(runtime, arg.uuid));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "identity"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleIdentity>::toJSI(runtime, arg.identity));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "origin"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthDataOrigin>::toJSI(runtime, arg.origin));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "timeMs"), JSIConverter<double>::toJSI(runtime, arg.timeMs));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "percentage"), JSIConverter<double>::toJSI(runtime, arg.percentage));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "source"), JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.source));
       return obj;
     }
     static inline bool canConvert(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -85,10 +88,10 @@ namespace margelo::nitro {
       if (!nitro::isPlainObject(runtime, obj)) {
         return false;
       }
-      if (!JSIConverter<std::string>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "uuid")))) return false;
+      if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleIdentity>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "identity")))) return false;
+      if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthDataOrigin>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "origin")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeMs")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "percentage")))) return false;
-      if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "source")))) return false;
       return true;
     }
   };

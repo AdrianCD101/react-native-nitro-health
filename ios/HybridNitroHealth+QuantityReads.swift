@@ -28,12 +28,11 @@ extension HybridNitroHealth {
         let quantityType = try makeHealthKitQuantityType(dataType: dataType)
         let unit = descriptor.unit
 
-        try await requireDeterminedReadAuthorization(for: quantityType, label: descriptor.label)
-
         return try await queryPagedSamples(
             sampleType: quantityType,
             dataType: dataType,
-            query: query
+            query: query,
+            authorizationLabel: descriptor.label
         ) { sample in
             guard let quantitySample = sample as? HKQuantitySample else {
                 return nil
@@ -51,10 +50,10 @@ extension HybridNitroHealth {
         return Promise<NativeRestingHeartRateSamplePage>.async {
             let page = try await self.readInstantQuantitySamplePage(dataType: "restingHeartRate", query: query) { quantitySample, unit in
                 NativeRestingHeartRateSample(
-                    uuid: quantitySample.uuid.uuidString,
+                    identity: quantitySample.nativeHealthSampleIdentity,
+                    origin: quantitySample.nativeHealthDataOrigin,
                     timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
-                    bpm: quantitySample.quantity.doubleValue(for: unit),
-                    source: quantitySample.sourceRevision.source.name
+                    bpm: quantitySample.quantity.doubleValue(for: unit)
                 )
             }
 
@@ -72,11 +71,11 @@ extension HybridNitroHealth {
         return Promise<NativeHeartRateVariabilitySamplePage>.async {
             let page = try await self.readInstantQuantitySamplePage(dataType: "heartRateVariability", query: query) { quantitySample, unit in
                 NativeHeartRateVariabilitySample(
-                    uuid: quantitySample.uuid.uuidString,
+                    identity: quantitySample.nativeHealthSampleIdentity,
+                    origin: quantitySample.nativeHealthDataOrigin,
                     timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
                     milliseconds: quantitySample.quantity.doubleValue(for: unit),
-                    method: "sdnn",
-                    source: quantitySample.sourceRevision.source.name
+                    method: "sdnn"
                 )
             }
 
@@ -95,10 +94,10 @@ extension HybridNitroHealth {
         return Promise<NativeOxygenSaturationSamplePage>.async {
             let page = try await self.readInstantQuantitySamplePage(dataType: "oxygenSaturation", query: query) { quantitySample, unit in
                 NativeOxygenSaturationSample(
-                    uuid: quantitySample.uuid.uuidString,
+                    identity: quantitySample.nativeHealthSampleIdentity,
+                    origin: quantitySample.nativeHealthDataOrigin,
                     timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
-                    percentage: quantitySample.quantity.doubleValue(for: unit) * 100,
-                    source: quantitySample.sourceRevision.source.name
+                    percentage: quantitySample.quantity.doubleValue(for: unit) * 100
                 )
             }
 
@@ -114,10 +113,10 @@ extension HybridNitroHealth {
         return Promise<NativeHeightSamplePage>.async {
             let page = try await self.readInstantQuantitySamplePage(dataType: "height", query: query) { quantitySample, unit in
                 NativeHeightSample(
-                    uuid: quantitySample.uuid.uuidString,
+                    identity: quantitySample.nativeHealthSampleIdentity,
+                    origin: quantitySample.nativeHealthDataOrigin,
                     timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
-                    meters: quantitySample.quantity.doubleValue(for: unit),
-                    source: quantitySample.sourceRevision.source.name
+                    meters: quantitySample.quantity.doubleValue(for: unit)
                 )
             }
 

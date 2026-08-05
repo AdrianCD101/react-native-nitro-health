@@ -73,14 +73,27 @@ describe('NitroHealth changes (native)', () => {
       return
     }
 
-    expect(upsert.samples.every((sample) => sample.recordUuid === upsert.recordUuid)).toBe(true)
+    expect(
+      upsert.samples.every((sample) =>
+        sample.identity.kind === 'record'
+          ? sample.identity.id === upsert.record.id
+          : sample.identity.record.id === upsert.record.id
+      )
+    ).toBe(true)
 
-    await NitroHealth.deleteSamplesByUuids('steps', [upsert.samples[0].uuid])
+    const deletion = await NitroHealth.deleteRecordsByIds('steps', [upsert.record])
+    expect(deletion.status).toBe('completed')
+    if (deletion.status === 'completed') {
+      expect(deletion.requestedCount).toBe(1)
+      if (deletion.deletedCount.status === 'known') {
+        expect(deletion.deletedCount.value).toBe(1)
+      }
+    }
 
     const afterDelete = await drainStepChanges(afterSave.changesToken)
     expect(
       afterDelete.changes.some(
-        (change) => change.type === 'delete' && change.recordUuid === upsert.recordUuid
+        (change) => change.type === 'delete' && change.record.id === upsert.record.id
       )
     ).toBe(true)
   })
@@ -95,7 +108,7 @@ describe('NitroHealth changes (native)', () => {
       return
     }
 
-    await NitroHealth.deleteSamplesByTimeRange('steps', replacementChangeRange)
+    await NitroHealth.deleteRecordsByTimeRange('steps', replacementChangeRange)
 
     try {
       const baselineToken = await NitroHealth.createChangesToken('steps')
@@ -144,18 +157,18 @@ describe('NitroHealth changes (native)', () => {
       }
 
       const deletedInitialRecord = afterReplacement.changes.some(
-        (change) => change.type === 'delete' && change.recordUuid === initialUpsert.recordUuid
+        (change) => change.type === 'delete' && change.record.id === initialUpsert.record.id
       )
 
       if (Platform.OS === 'android') {
-        expect(replacementUpsert.recordUuid).toBe(initialUpsert.recordUuid)
+        expect(replacementUpsert.record.id).toBe(initialUpsert.record.id)
         expect(deletedInitialRecord).toBe(false)
       } else if (Platform.OS === 'ios') {
-        expect(replacementUpsert.recordUuid).not.toBe(initialUpsert.recordUuid)
+        expect(replacementUpsert.record.id).not.toBe(initialUpsert.record.id)
         expect(deletedInitialRecord).toBe(true)
       }
     } finally {
-      await NitroHealth.deleteSamplesByTimeRange('steps', replacementChangeRange)
+      await NitroHealth.deleteRecordsByTimeRange('steps', replacementChangeRange)
     }
   })
 
