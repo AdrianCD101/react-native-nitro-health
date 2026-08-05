@@ -20,7 +20,10 @@ import java.util.Objects
 data class NativeActiveEnergyBurnedSample(
   @DoNotStrip
   @Keep
-  val uuid: String,
+  val identity: NativeHealthSampleIdentity,
+  @DoNotStrip
+  @Keep
+  val origin: NativeHealthDataOrigin,
   @DoNotStrip
   @Keep
   val startTimeMs: Double,
@@ -36,7 +39,8 @@ data class NativeActiveEnergyBurnedSample(
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other !is NativeActiveEnergyBurnedSample) return false
-    return Objects.deepEquals(this.uuid, other.uuid)
+    return Objects.deepEquals(this.identity, other.identity)
+      && Objects.deepEquals(this.origin, other.origin)
       && Objects.deepEquals(this.startTimeMs, other.startTimeMs)
       && Objects.deepEquals(this.endTimeMs, other.endTimeMs)
       && Objects.deepEquals(this.kilocalories, other.kilocalories)
@@ -44,7 +48,8 @@ data class NativeActiveEnergyBurnedSample(
 
   override fun hashCode(): Int {
     return arrayOf<Any?>(
-      uuid,
+      identity,
+      origin,
       startTimeMs,
       endTimeMs,
       kilocalories
@@ -59,8 +64,8 @@ data class NativeActiveEnergyBurnedSample(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(uuid: String, startTimeMs: Double, endTimeMs: Double, kilocalories: Double): NativeActiveEnergyBurnedSample {
-      return NativeActiveEnergyBurnedSample(uuid, startTimeMs, endTimeMs, kilocalories)
+    private fun fromCpp(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, startTimeMs: Double, endTimeMs: Double, kilocalories: Double): NativeActiveEnergyBurnedSample {
+      return NativeActiveEnergyBurnedSample(identity, origin, startTimeMs, endTimeMs, kilocalories)
     }
   }
 }

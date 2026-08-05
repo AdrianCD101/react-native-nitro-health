@@ -28,10 +28,13 @@
 #error NitroModules cannot be found! Are you sure you installed NitroModules properly?
 #endif
 
+// Forward declaration of `NativeHealthSampleIdentity` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthSampleIdentity; }
+// Forward declaration of `NativeHealthDataOrigin` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthDataOrigin; }
 
-
-#include <string>
-#include <optional>
+#include "NativeHealthSampleIdentity.hpp"
+#include "NativeHealthDataOrigin.hpp"
 
 namespace margelo::nitro::nitrohealth {
 
@@ -40,15 +43,15 @@ namespace margelo::nitro::nitrohealth {
    */
   struct NativeBodyMassSample final {
   public:
-    std::string uuid     SWIFT_PRIVATE;
+    NativeHealthSampleIdentity identity     SWIFT_PRIVATE;
+    NativeHealthDataOrigin origin     SWIFT_PRIVATE;
     double startTimeMs     SWIFT_PRIVATE;
     double endTimeMs     SWIFT_PRIVATE;
     double kilograms     SWIFT_PRIVATE;
-    std::optional<std::string> source     SWIFT_PRIVATE;
 
   public:
     NativeBodyMassSample() = default;
-    explicit NativeBodyMassSample(std::string uuid, double startTimeMs, double endTimeMs, double kilograms, std::optional<std::string> source): uuid(uuid), startTimeMs(startTimeMs), endTimeMs(endTimeMs), kilograms(kilograms), source(source) {}
+    explicit NativeBodyMassSample(NativeHealthSampleIdentity identity, NativeHealthDataOrigin origin, double startTimeMs, double endTimeMs, double kilograms): identity(identity), origin(origin), startTimeMs(startTimeMs), endTimeMs(endTimeMs), kilograms(kilograms) {}
 
   public:
     friend bool operator==(const NativeBodyMassSample& lhs, const NativeBodyMassSample& rhs) = default;
@@ -64,20 +67,20 @@ namespace margelo::nitro {
     static inline margelo::nitro::nitrohealth::NativeBodyMassSample fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       jsi::Object obj = arg.asObject(runtime);
       return margelo::nitro::nitrohealth::NativeBodyMassSample(
-        JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "uuid"))),
+        JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleIdentity>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "identity"))),
+        JSIConverter<margelo::nitro::nitrohealth::NativeHealthDataOrigin>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "origin"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "startTimeMs"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs"))),
-        JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "kilograms"))),
-        JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "source")))
+        JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "kilograms")))
       );
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::nitrohealth::NativeBodyMassSample& arg) {
       jsi::Object obj(runtime);
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "uuid"), JSIConverter<std::string>::toJSI(runtime, arg.uuid));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "identity"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleIdentity>::toJSI(runtime, arg.identity));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "origin"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthDataOrigin>::toJSI(runtime, arg.origin));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "startTimeMs"), JSIConverter<double>::toJSI(runtime, arg.startTimeMs));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs"), JSIConverter<double>::toJSI(runtime, arg.endTimeMs));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "kilograms"), JSIConverter<double>::toJSI(runtime, arg.kilograms));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "source"), JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.source));
       return obj;
     }
     static inline bool canConvert(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -88,11 +91,11 @@ namespace margelo::nitro {
       if (!nitro::isPlainObject(runtime, obj)) {
         return false;
       }
-      if (!JSIConverter<std::string>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "uuid")))) return false;
+      if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleIdentity>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "identity")))) return false;
+      if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthDataOrigin>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "origin")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "startTimeMs")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "kilograms")))) return false;
-      if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "source")))) return false;
       return true;
     }
   };

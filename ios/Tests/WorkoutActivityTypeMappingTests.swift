@@ -101,55 +101,75 @@ final class WorkoutActivityTypeMappingTests: XCTestCase {
         3000: "other",
     ]
 
-    func testMapsEveryDefinedActivityType() {
+    func testMapsEveryDefinedActivityTypeAsKnown() {
         for (rawValue, expected) in expectedMappings {
-            XCTAssertEqual(
-                makeWorkoutActivityType(rawValue: rawValue),
-                expected,
-                "rawValue \(rawValue) should map to \(expected)"
-            )
+            guard case .known(let type, _, _) = makeHealthKitWorkoutActivityMapping(rawValue: rawValue) else {
+                XCTFail("rawValue \(rawValue) should be known")
+                continue
+            }
+            XCTAssertEqual(type, expected, "rawValue \(rawValue) should map to \(expected)")
         }
     }
 
     func testFoldsSubVariantsIntoParentActivity() {
         // Skiing variants
-        XCTAssertEqual(makeWorkoutActivityType(rawValue: 60), "skiing")
-        XCTAssertEqual(makeWorkoutActivityType(rawValue: 61), "skiing")
+        assertKnown(rawValue: 60, type: "skiing", portability: .portable, mapping: .broadened)
+        assertKnown(rawValue: 61, type: "skiing", portability: .portable, mapping: .broadened)
         // Dance variants (incl. deprecated danceInspiredTraining)
-        XCTAssertEqual(makeWorkoutActivityType(rawValue: 15), "dance")
-        XCTAssertEqual(makeWorkoutActivityType(rawValue: 77), "dance")
-        XCTAssertEqual(makeWorkoutActivityType(rawValue: 78), "dance")
+        assertKnown(rawValue: 15, type: "dance", portability: .portable, mapping: .broadened)
+        assertKnown(rawValue: 77, type: "dance", portability: .portable, mapping: .broadened)
+        assertKnown(rawValue: 78, type: "dance", portability: .portable, mapping: .broadened)
         // Strength-training variants
-        XCTAssertEqual(makeWorkoutActivityType(rawValue: 20), "strengthTraining")
-        XCTAssertEqual(makeWorkoutActivityType(rawValue: 50), "strengthTraining")
+        assertKnown(rawValue: 20, type: "strengthTraining", portability: .portable, mapping: .broadened)
+        assertKnown(rawValue: 50, type: "strengthTraining", portability: .portable, mapping: .broadened)
         // Wheelchair paces
-        XCTAssertEqual(makeWorkoutActivityType(rawValue: 70), "wheelchair")
-        XCTAssertEqual(makeWorkoutActivityType(rawValue: 71), "wheelchair")
+        assertKnown(rawValue: 70, type: "wheelchair", portability: .portable, mapping: .broadened)
+        assertKnown(rawValue: 71, type: "wheelchair", portability: .portable, mapping: .broadened)
         // Stairs into stairClimbing
-        XCTAssertEqual(makeWorkoutActivityType(rawValue: 68), "stairClimbing")
+        assertKnown(rawValue: 68, type: "stairClimbing", portability: .portable, mapping: .broadened)
     }
 
-    func testUnknownValuesMapToOther() {
-        XCTAssertEqual(makeWorkoutActivityType(rawValue: 0), "other")
-        XCTAssertEqual(makeWorkoutActivityType(rawValue: 81), "other") // gap in HK raw values
-        XCTAssertEqual(makeWorkoutActivityType(rawValue: 99999), "other")
+    func testDistinguishesNativeOtherFromUnknownFutureValues() {
+        assertKnown(rawValue: 3000, type: "other", portability: .portable, mapping: .exact)
+        XCTAssertEqual(makeHealthKitWorkoutActivityMapping(rawValue: 0), .unknown)
+        XCTAssertEqual(makeHealthKitWorkoutActivityMapping(rawValue: 81), .unknown)
+        XCTAssertEqual(makeHealthKitWorkoutActivityMapping(rawValue: 99999), .unknown)
     }
 
     func testWritableActivitiesRoundTripThroughCanonicalNativeTypes() throws {
         XCTAssertEqual(writableActivityTypes.count, 49)
         for activityType in writableActivityTypes {
-            XCTAssertEqual(
-                makeWorkoutActivityType(
-                    rawValue: try healthKitWorkoutActivityRawValue(activityType)
-                ),
-                activityType
-            )
+            let rawValue = try healthKitWorkoutActivityRawValue(activityType)
+            guard case .known(let type, let portability, _) = makeHealthKitWorkoutActivityMapping(rawValue: rawValue) else {
+                XCTFail("\(activityType) should round-trip as known")
+                continue
+            }
+            XCTAssertEqual(type, activityType)
+            XCTAssertEqual(portability, .portable)
         }
+    }
+
+    func testMarksRecognizedNonWritableActivitiesReadOnly() {
+        assertKnown(rawValue: 2, type: "archery", portability: .readOnly, mapping: .exact)
+        assertKnown(rawValue: 64, type: "jumpRope", portability: .readOnly, mapping: .exact)
+        assertKnown(rawValue: 84, type: "underwaterDiving", portability: .readOnly, mapping: .exact)
     }
 
     func testRejectsNonPortableWritableActivities() {
         for activityType in ["archery", "calisthenics", "jumpRope", "underwaterDiving"] {
             XCTAssertThrowsError(try healthKitWorkoutActivityRawValue(activityType))
         }
+    }
+
+    private func assertKnown(
+        rawValue: UInt,
+        type: String,
+        portability: HealthKitWorkoutActivityMapping.Portability,
+        mapping: HealthKitWorkoutActivityMapping.Fidelity
+    ) {
+        XCTAssertEqual(
+            makeHealthKitWorkoutActivityMapping(rawValue: rawValue),
+            .known(type: type, portability: portability, mapping: mapping)
+        )
     }
 }

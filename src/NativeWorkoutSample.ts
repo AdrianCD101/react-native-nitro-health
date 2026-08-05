@@ -1,13 +1,19 @@
+import type { NativeHealthDataOrigin } from './NativeHealthDataOrigin'
+import type { NativeHealthMetricValue } from './NativeHealthMetricValue'
+import type { NativeHealthSampleIdentity } from './NativeHealthSampleIdentity'
+import type { NativeWorkoutActivity } from './NativeWorkoutActivity'
+
 /** Native workout session shape returned through the Nitro spec. */
 export interface NativeWorkoutSample {
-  /** Stable sample identifier (HealthKit UUID on iOS, Health Connect record id on Android). */
-  uuid: string
+  identity: NativeHealthSampleIdentity
+  origin: NativeHealthDataOrigin
   startTimeMs: number
   endTimeMs: number
-  durationSeconds: number
-  activityType: string
+  elapsedDurationSeconds: number
+  activeDuration: NativeHealthMetricValue
+  activity: NativeWorkoutActivity
   title?: string
-  source?: string
-  totalDistanceMeters?: number
-  totalEnergyBurnedKcal?: number
+  brandName?: string
+  totalDistance: NativeHealthMetricValue
+  totalActiveEnergyBurned: NativeHealthMetricValue
 }

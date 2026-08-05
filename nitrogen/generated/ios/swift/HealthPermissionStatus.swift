@@ -21,10 +21,10 @@ public extension HealthPermissionStatus {
         self = .notgranted
       case "granted":
         self = .granted
-      case "notDetermined":
-        self = .notdetermined
       case "unverifiable":
         self = .unverifiable
+      case "notDetermined":
+        self = .notdetermined
       default:
         return nil
     }
@@ -39,10 +39,10 @@ public extension HealthPermissionStatus {
         return "notGranted"
       case .granted:
         return "granted"
-      case .notdetermined:
-        return "notDetermined"
       case .unverifiable:
         return "unverifiable"
+      case .notdetermined:
+        return "notDetermined"
     }
   }
 }

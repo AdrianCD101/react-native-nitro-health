@@ -1,49 +1,6 @@
 # Development Workflow
 
-Use this to decide which command to run after a change.
-
-```mermaid
-flowchart TD
-  A[What changed?] --> B{New clone or deps changed?}
-  B -->|Yes| B1[bun install]
-  B -->|No| C{Nitro spec changed?}
-
-  B1 --> C
-
-  C -->|Yes: src/specs/*.nitro.ts| C1[bun run codegen]
-  C1 --> CI[cd example && bun install]
-  CI --> C2{iOS?}
-  C2 -->|Yes| C3[bun run pod && bun run ios]
-  C2 -->|No: Android| C4[bun run android]
-
-  C -->|No| D{Native implementation changed?}
-  D -->|Yes: Swift/Kotlin| DI[cd example && bun install]
-  DI --> D1[bun run ios or bun run android]
-
-  D -->|No| E{Package TypeScript changed?}
-  E -->|Yes: src/*.ts| E1[bun run build]
-  E1 --> E2[Optional: test in example app]
-
-  E -->|No| F{Example app changed?}
-  F -->|Yes: example/App.tsx etc| F1[cd example && bun run start]
-  F1 --> F2{App already installed?}
-  F2 -->|Yes| F3[Fast Refresh]
-  F2 -->|No| F4[bun run ios or bun run android]
-
-  F -->|No| G[No build step needed]
-
-  C3 --> Q[Before commit]
-  C4 --> Q
-  D1 --> Q
-  E1 --> Q
-  F3 --> Q
-  F4 --> Q
-  G --> Q
-
-  Q --> Q1[bun run test]
-  Q1 --> Q2[bun run lint]
-  Q2 --> Q3[bun run format:check]
-```
+This document lists the verification commands maintainers run for each kind of change. Run the relevant commands locally; no single test layer can validate the TypeScript facade, generated Nitro bindings, native semantic mappings, permission UI, and background delivery by itself.
 
 ## One-Time Setup
 
@@ -51,236 +8,247 @@ flowchart TD
 bun install
 bun run codegen
 cd example
+bun install
 bun run pod # iOS only
 ```
 
-Do not run `bun install` every time. Run it for a new clone or when dependencies change.
+Run `bun install` again only after dependency or workspace-link changes. After codegen or native changes, run `bun install` in `example/` before rebuilding. Otherwise the example can build against a stale workspace copy and report a new native method as undefined even when generation succeeded.
 
-After codegen or any native (Swift/Kotlin) change, run `cd example && bun install` before rebuilding the example app. Bun's workspace linking otherwise leaves the example app building against a stale copy of the library in `example/node_modules`, which manifests as `undefined is not a function` when calling a newly added method — even though `bun run codegen`/`bun run build` succeeded and the native code is correct.
+## Verification Commands
 
-## If/Then
+All commands below already exist in the root or example package scripts.
 
-| Change                              | Run                                                                 |
-| ----------------------------------- | ------------------------------------------------------------------- |
-| New clone                           | `bun install`                                                       |
-| Dependencies changed                | `bun install`                                                       |
-| Nitro spec changed                  | `bun run codegen` then `cd example && bun install`                  |
-| Package TypeScript changed          | `bun run build`                                                     |
-| Swift/Kotlin implementation changed | `cd example && bun install` then `bun run ios` or `bun run android` |
-| iOS native deps/pods changed        | `cd example && bun run pod`                                         |
-| Example app JS changed              | `cd example && bun run start`                                       |
-| Run iOS app                         | `cd example && bun run ios`                                         |
-| Run iOS physical device             | open `example/ios/NitroHealthExample.xcworkspace` in Xcode          |
-| Run Android app                     | `cd example && bun run android`                                     |
-| Run fast tests                      | `bun run test`                                                      |
-| Typecheck package and example       | `bun run typecheck && bun run typecheck:example`                    |
-| Check lint                          | `bun run lint`                                                      |
-| Fix lint                            | `bun run lint:fix`                                                  |
-| Check formatting                    | `bun run format:check`                                              |
-| Apply formatting                    | `bun run format`                                                    |
+| Purpose                                                             | Command from repository root                     |
+| ------------------------------------------------------------------- | ------------------------------------------------ |
+| Generate Nitro bindings, apply the Android package patch, and build | `bun run codegen`                                |
+| Build package output and verify generated Android output            | `bun run build`                                  |
+| Run Jest API and example tests                                      | `bun run test`                                   |
+| Typecheck the package                                               | `bun run typecheck`                              |
+| Typecheck the example                                               | `bun run typecheck:example`                      |
+| Run both TypeScript checks                                          | `bun run typecheck && bun run typecheck:example` |
+| Run Android native semantic tests                                   | `bun run test:android:native`                    |
+| Run iOS native semantic tests                                       | `bun run test:ios:native`                        |
+| Run lint                                                            | `bun run lint`                                   |
+| Apply lint fixes                                                    | `bun run lint:fix`                               |
+| Check formatting                                                    | `bun run format:check`                           |
+| Apply formatting                                                    | `bun run format`                                 |
+| Build and install the iOS example                                   | `cd example && bun run ios`                      |
+| Install iOS pods                                                    | `cd example && bun run pod`                      |
+| Build and install the Android example                               | `cd example && bun run android`                  |
+| Start Metro for an installed example                                | `cd example && bun run start`                    |
+| Run iOS Harness tests                                               | `bun run harness:ios`                            |
+| Run Android Harness tests                                           | `bun run harness:android`                        |
 
-## Common Flows
+Before submitting a change, the minimum repository checks are:
 
-### Native Module Harness
+```sh
+bun run test
+bun run typecheck
+bun run typecheck:example
+bun run lint
+bun run format:check
+```
 
-Use React Native Harness for JS tests that execute inside the real iOS/Android app runtime with access to Nitro native modules.
+Add the platform-native, Harness, build, and device checks that match the changed behavior.
+
+## Change Matrix
+
+| Change                                                         | Required workflow                                                                             |
+| -------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Dependencies or a new clone                                    | `bun install`                                                                                 |
+| `src/specs/*.nitro.ts` or a native transport type              | Codegen workflow, native rebuilds, relevant native/Harness tests                              |
+| Public facade or public TypeScript types                       | `bun run build`, Jest, both typechecks                                                        |
+| Swift implementation or helper                                 | iOS native tests when pure, example relink, iOS rebuild, relevant Harness/device test         |
+| Kotlin implementation or helper                                | Android native tests when pure, example relink, Android rebuild, relevant Harness/device test |
+| iOS pods or native dependencies                                | `cd example && bun run pod`, then iOS rebuild                                                 |
+| Example JavaScript only                                        | Jest/typecheck as relevant, then Metro Fast Refresh                                           |
+| Permission, availability, observer, history, or store behavior | Native semantic tests plus Harness or manual physical-device coverage                         |
+| Documentation only                                             | Review examples against `src/NitroHealth.ts`, public types, and current native outcomes       |
+
+## Codegen Workflow
+
+Nitrogen output under `nitrogen/generated/` is generated code. Do not edit it manually.
+
+After changing a Nitro spec or any type used by the spec:
+
+```sh
+bun run codegen
+bun run test
+bun run typecheck
+bun run typecheck:example
+cd example
+bun install
+bun run pod # iOS only when generated pod inputs changed
+bun run ios # or: bun run android
+```
+
+Use `bun run codegen`, not `bunx nitrogen` directly. The repository script performs this sequence:
+
+1. Runs Nitrogen with debug logging.
+2. Runs `post-script.js`, which patches the generated Android `NitroHealthOnLoad.cpp` package path.
+3. Runs `bun run build`.
+4. `bun run build` executes `verify-codegen.js`, package typechecking, and Bob builds.
+
+The build guard intentionally fails when generated Android output still contains Nitrogen's default `com.margelo.nitro` package path. Re-running the repository codegen script is the fix.
+
+Review generated diffs together with the source spec. A generated signature change must be implemented on both native platforms before the public API is considered complete.
+
+### Native-Only Changes
+
+No codegen is needed when the generated signature is unchanged:
+
+```sh
+bun run test:ios:native # for pure Swift semantics, when relevant
+bun run test:android:native # for pure Kotlin semantics, when relevant
+cd example
+bun install
+bun run ios # or: bun run android
+```
+
+The example relink remains necessary because its workspace dependency can otherwise point at stale library files.
+
+### TypeScript-Only Changes
+
+```sh
+bun run build
+bun run test
+bun run typecheck:example
+```
+
+Use the example and Harness when a TypeScript facade change alters native calls, listener lifetime, or result mapping.
+
+## Test Layers
+
+### Jest
+
+Jest is the fast public-API layer:
+
+```sh
+bun run test
+```
+
+It covers validation, pagination contracts, statistics mapping, durable change results, background observer/polling facade outcomes, per-entry permission results, writes, sleep/workout mapping, typed deletion outcomes, and the packaged mock profiles. Jest does not prove HealthKit or Health Connect behavior.
+
+### Android Native Semantic Tests
+
+```sh
+bun run test:android:native
+```
+
+The JVM suite covers pure Kotlin semantics that do not require a live provider or permission UI:
+
+- Health Connect availability and additional-access status mapping.
+- Background/history manifest and grant-state helpers.
+- Change-token and pagination-cursor validation.
+- Record identity, origin metadata, delete-ID validation, and typed delete outcomes.
+- Daily and general statistics bucket shaping.
+- Distance/sample input conversion and platform unit rules.
+- Sleep session input and flat session-envelope/stage mapping, including record-child identity.
+- Workout input, elapsed/metric availability, activity portability, and mapping fidelity.
+- Time-zone behavior.
+
+Provider IPC, real permission sheets, ownership enforcement, token expiry, and process scheduling belong in Harness or manual device tests.
+
+### iOS Native Semantic Tests
+
+```sh
+bun run test:ios:native
+```
+
+The SwiftPM/XCTest target includes pure helpers only. It covers:
+
+- Durable change-token encoding and validation.
+- Pagination cursors and daily/statistics bucket shaping.
+- Stable origin and record identity metadata mapping.
+- Exact deletion-count mapping and UUID parsing.
+- Sleep session-envelope/stage classification with no synthetic stage.
+- Workout activity portability and exact/broadened mapping.
+- Sync metadata normalization and time-zone behavior.
+
+`Package.swift` is test-only. Consumer iOS builds still use the pod. `HKHealthStore`, authorization UI, observer server delivery, and protected-data behavior require Harness or manual device testing.
+
+### React Native Harness
+
+Harness executes tests inside a real React Native runtime with the Nitro module loaded:
 
 ```sh
 cd example
-bun run harness:ios
-bun run harness:android
+bun run ios # or: bun run android
+cd ..
+bun run harness:ios # or: bun run harness:android
 ```
 
-Harness uses `example/rn-harness.config.mjs`. Override local device names when needed:
+Harness does not build or install the app. Rebuild after native or generated changes before rerunning it.
+
+Override local device names when needed:
 
 ```sh
 RN_HARNESS_IOS_SIMULATOR='iPhone 17 Pro' RN_HARNESS_IOS_RUNTIME='26.0' bun run harness:ios
 RN_HARNESS_ANDROID_AVD='Pixel_7_API_35' RN_HARNESS_ANDROID_API_LEVEL='35' RN_HARNESS_ANDROID_PROFILE='pixel_7' bun run harness:android
 ```
 
-Harness does not build the app. Build and install the debug app first with `bun run ios` or `bun run android`, then run the Harness command. After native changes, rebuild/reinstall before running Harness again.
+Harness suites cover availability, permission status, raw reads, statistics, writes, idempotent saves, durable changes, and deletes through the public facade. Interactive HealthKit and Health Connect permission sheets are specialized system UI; do not assume Harness can auto-accept them like camera or location prompts. Set `permissions: true` in the Harness configuration only for tests that deliberately use Harness-managed prompt handling.
 
-The GitHub Actions Harness workflow runs Android runtime validation on pull requests and `main` pushes that touch native/spec/example paths. iOS remains manual-only to avoid burning macOS minutes while simulator reliability is still being proven. Run it from **Actions → Run Harness → Run workflow** when you want to manually validate Android, iOS, or both.
+The GitHub Actions Harness workflow runs Android runtime validation for relevant pull requests and `main` pushes. iOS is manual. Use the workflow dispatch when CI device coverage is needed.
 
-Set `permissions: true` in the Harness config only when adding tests that need Harness-managed permission prompt handling.
+## Manual Device Cases
 
-The permission Harness tests intentionally skip interactive request flows unless the requested permission is already unnecessary/granted. HealthKit and Health Connect use specialized permission sheets, so do not assume Harness can auto-accept them like camera/location prompts.
+Simulator/emulator checks are not sufficient for observer delivery, real permission revocation, provider history limits, or app lifecycle scheduling.
 
-HealthKit observer callbacks can be exercised while the iOS Harness app is running, but true background server delivery and cold-launch wakeups require a signed physical device. Validate configured observer restoration after an OS-terminated launch, a change written by another source while the app is backgrounded, pending notification handoff before JavaScript is ready, locked-device retry, permission revocation, and disable/re-enable behavior. A user force-quit can suppress HealthKit relaunch and is not equivalent to OS termination.
+### Signed iOS Device
 
-Android Harness can verify background-read feature and permission status. Scheduling, Doze behavior, process death, reboot, and force-stop behavior belong to the consumer application's WorkManager integration and remain outside this library's Harness suite.
+Use a signed physical iPhone with the HealthKit capability and background-delivery entitlement. Validate:
 
-### Android Native Unit Tests
+- `getAvailability()` and per-entry authorization results, including permanently `unverifiable` read entries.
+- `getCapabilities()` returning observer mode with included background/history access.
+- A build without the background-delivery entitlement still reporting observer capability, with `configureBackgroundChanges()` rejecting because iOS cannot inspect the signed entitlement directly.
+- `requestAdditionalAccess('history-read')` and `'background-read'` returning `included` without a separate prompt.
+- `managePermissions()` and `revokeAllPermissions()` returning the manual Health-app action; revoke access in the Health app, resume, and re-read statuses/data.
+- `configureBackgroundChanges()` persistence and bootstrap restoration after an OS-terminated launch, not a user force-quit.
+- A change written by another source while the app is backgrounded.
+- Pending/coalesced notification retention before JavaScript subscribes, followed by a durable token drain.
+- Protected-data behavior while locked, later retry, duplicate hints, and foreground catch-up.
+- Per-type disable, disable-all, re-enable, listener removal, and launch with no listener yet attached.
 
-Use JVM unit tests for pure Kotlin logic that does not need Android framework state, Health Connect, or user permissions.
+A user force-quit can suppress HealthKit relaunch and is not equivalent to OS termination. True HealthKit server delivery is unavailable on Simulator.
 
-Run from the repository root:
+### Android Device With Health Connect
 
-```sh
-bun run test:android:native
-```
+Use a device/profile with the intended Health Connect provider and feature level. Validate:
 
-You can also open `example/android` in Android Studio, then run `DailyBucketUtilsTest` or `HealthConnectPermissionUtilsTest` from the editor gutter or test class context menu.
+- Available, provider-install/update recovery, service-unavailable, and unsupported availability states where devices are available.
+- `not-declared`, `not-granted`, `granted`, and `unsupported` background/history capability states.
+- `requestAdditionalAccess('background-read')` and `requestAdditionalAccess('history-read')` with the matching consumer manifest declarations.
+- Historical reads inside and outside the default window before grant, after grant, and after revocation.
+- `revokeAllPermissions()` completing directly, followed by per-entry `notGranted` statuses and rejected protected operations.
+- `managePermissions()` opening Health Connect settings.
+- App-owned scheduler behavior across backgrounding, process death, reboot, Doze, and force-stop as appropriate for the consumer scheduler.
+- Record ownership and all-or-nothing delete-by-ID outcomes using missing, foreign, parent, and record-child-derived identities.
+- Durable token drain, token expiry/full resync, and concurrent foreground/background drain serialization.
 
-The first native unit tests cover daily bucket shaping helpers: clamping bucket ranges to the requested query, ordering buckets, and applying `limit`. Keep Health Connect client calls, permission prompts, and device/provider behavior in Harness or manual device tests instead.
+Scheduling behavior belongs to the consuming application. The library reports `mode: 'polling'` and `scheduling: 'app-owned'`; it does not install WorkManager jobs.
 
-### iOS Native Unit Tests
+## Consumer App Fixtures
 
-Use SwiftPM/XCTest for pure Swift logic that does not need HealthKit runtime state, permissions, CocoaPods, or Nitro-generated values.
-
-Run from the repository root:
-
-```sh
-bun run test:ios:native
-```
-
-This delegates to `swift test` through the test-only root `Package.swift`. The package includes only pure helper files such as `ios/DailyBucketUtils.swift`; the production iOS pod still builds through `NitroHealth.podspec`. Keep `HKHealthStore`, query execution, and permission prompts in Harness or manual device tests instead.
-
-### TDD Loop
-
-Use Jest for fast JS/API behavior tests. Use native app builds for platform smoke tests.
-
-```sh
-bun run test
-```
-
-When the test is red, implement the smallest change. When it is green, run the relevant build or native smoke step from the sections below.
-
-### Changed Nitro Spec
-
-Example: added or renamed a method in `src/specs/*.nitro.ts`.
-
-```sh
-bun run codegen
-bun run test
-cd example
-bun install # required: re-links the example app to the rebuilt library, see note above
-bun run pod # iOS only
-bun run ios # or bun run android
-```
-
-`bun run codegen` already runs `build`, so do not run both unless you specifically want a build without regenerating Nitro files.
-
-### Changed Swift/Kotlin Only
-
-Example: changed method behavior but the `.nitro.ts` signature stayed the same.
-
-```sh
-cd example
-bun install # required, see note above — skipping it silently rebuilds against the stale library copy
-bun run ios # or bun run android
-```
-
-No `codegen` needed. Run `bun run test` from the repo root if JS behavior or example UI changed too.
-
-### Changed Package TypeScript Only
-
-Example: changed `src/index.ts`.
-
-```sh
-bun run build
-bun run test
-```
-
-If you want to test it in the app:
-
-```sh
-cd example
-bun run start
-```
-
-### Changed Example App Only
-
-Example: changed `example/App.tsx`.
-
-```sh
-cd example
-bun run start
-```
-
-Run the fast tests if behavior changed:
-
-```sh
-bun run test
-```
-
-Fast Refresh should pick it up if the app is already installed. If not:
-
-```sh
-bun run ios # or bun run android
-```
-
-## Consumer App Setup
-
-The library deliberately ships **no health permissions**. Consumer apps must declare every data type they read or write. This avoids forcing every downstream app to inherit permissions it doesn't use, which would fail Play Store privacy review.
-
-The `example/` app is a working reference — copy from it.
+The example app is the reference consumer configuration.
 
 ### iOS
 
-1. Enable HealthKit capability in Xcode: target → **Signing & Capabilities** → **+ Capability** → **HealthKit**. This adds an `.entitlements` file referencing `com.apple.developer.healthkit`.
-2. Add to the app's `Info.plist`:
-   ```xml
-   <key>NSHealthShareUsageDescription</key>
-   <string>Why your app reads health data.</string>
-   <key>NSHealthUpdateUsageDescription</key>
-   <string>Why your app writes health data.</string>
-   ```
-   These strings appear in the system permission prompt. Apple rejects vague text — explain the user-visible feature.
-3. (Optional) For clinical health records, also add the `com.apple.developer.healthkit.access` entitlement with `health-records` and `NSHealthClinicalHealthRecordsShareUsageDescription` in Info.plist.
+Verify the example target includes:
 
-Reference: `example/ios/NitroHealthExample/NitroHealthExample.entitlements`, `example/ios/NitroHealthExample/Info.plist`.
+- HealthKit capability.
+- `NSHealthShareUsageDescription` and `NSHealthUpdateUsageDescription`.
+- Background-delivery entitlement when testing observers.
+- `NitroHealthRegisterPersistedObservers()` before React Native startup.
+
+For a physical device, open `example/ios/NitroHealthExample.xcworkspace` in Xcode, select a local signing team, and use a unique bundle identifier if needed. Do not commit local signing changes.
 
 ### Android
 
-1. Declare each Health Connect data type permission in your `AndroidManifest.xml`:
-   ```xml
-   <uses-permission android:name="android.permission.health.READ_STEPS" />
-   <uses-permission android:name="android.permission.health.WRITE_STEPS" />
-   <uses-permission android:name="android.permission.health.READ_DISTANCE" />
-    <uses-permission android:name="android.permission.health.READ_ACTIVE_CALORIES_BURNED" />
-    <uses-permission android:name="android.permission.health.READ_HEART_RATE" />
-     <uses-permission android:name="android.permission.health.READ_SLEEP" />
-     <uses-permission android:name="android.permission.health.WRITE_SLEEP" />
-     <uses-permission android:name="android.permission.health.WRITE_EXERCISE" />
-    <uses-permission android:name="android.permission.health.READ_WEIGHT" />
-    <!-- declare only the data types your app reads or writes -->
-   ```
-   Full list: <https://developer.android.com/health-and-fitness/guides/health-connect/plan/data-types>.
-2. Add a `<queries>` block so the app can see the Health Connect provider package on Android 11+ (the library declares this too, but explicit in the consumer manifest avoids manifest-merger surprises):
-   ```xml
-   <queries>
-     <package android:name="com.google.android.apps.healthdata" />
-   </queries>
-   ```
-3. Create a `PermissionsRationaleActivity` that displays the app's privacy policy. The system launches this when the user taps the privacy policy link in the Health Connect permissions screen. Register it with two intent-filters — one for Android <14 (`androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE`), one for Android 14+ (an `<activity-alias>` named `ViewPermissionUsageActivity` with `android.intent.action.VIEW_PERMISSION_USAGE`). The activity must show the same privacy policy you list in Play Console.
+Verify the example manifest includes only the Health Connect permissions used by its tests, including background/history declarations when those cases are enabled. It must also include the provider package query and permission-rationale activity/alias required by Health Connect.
 
-Reference: `example/android/app/src/main/AndroidManifest.xml`, `example/android/app/src/main/java/com/nitrohealth/example/PermissionsRationaleActivity.kt`.
-
-## iOS Physical Device Signing
-
-Simulator builds are the default OSS workflow and need no signing setup.
-
-For a physical iPhone:
-
-```sh
-open example/ios/NitroHealthExample.xcworkspace
-```
-
-In Xcode, select the `NitroHealthExample` target → **Signing & Capabilities** → swap **Team** to your own Apple team. If the bundle ID conflicts with another app on your Apple ID, change it (e.g. `com.yourname.nitrohealth`).
-
-Do not commit your local signing changes in `project.pbxproj`. Revert before staging:
-
-```sh
-git restore example/ios/NitroHealthExample.xcodeproj/project.pbxproj
-```
+The library manifest contains no health data permissions. This is intentional: each consumer must declare and justify only the data types and additional access it uses.
 
 ## Before Commit
 
-```sh
-bun run test
-bun run lint
-bun run format:check
-```
-
-Use `bun run lint:fix` for safe lint fixes. Use `bun run format` only when you are ready to accept formatting changes.
+Review the diff for generated files, local signing changes, and unrelated formatting, then let the relevant verification commands above validate the change. Use `bun run lint:fix` for accepted lint fixes and `bun run format` only when the resulting formatting diff is intended.

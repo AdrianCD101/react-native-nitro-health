@@ -28,8 +28,19 @@
 #error NitroModules cannot be found! Are you sure you installed NitroModules properly?
 #endif
 
+// Forward declaration of `NativeHealthSampleIdentity` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthSampleIdentity; }
+// Forward declaration of `NativeHealthDataOrigin` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthDataOrigin; }
+// Forward declaration of `NativeHealthMetricValue` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthMetricValue; }
+// Forward declaration of `NativeWorkoutActivity` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeWorkoutActivity; }
 
-
+#include "NativeHealthSampleIdentity.hpp"
+#include "NativeHealthDataOrigin.hpp"
+#include "NativeHealthMetricValue.hpp"
+#include "NativeWorkoutActivity.hpp"
 #include <string>
 #include <optional>
 
@@ -40,19 +51,21 @@ namespace margelo::nitro::nitrohealth {
    */
   struct NativeWorkoutSample final {
   public:
-    std::string uuid     SWIFT_PRIVATE;
+    NativeHealthSampleIdentity identity     SWIFT_PRIVATE;
+    NativeHealthDataOrigin origin     SWIFT_PRIVATE;
     double startTimeMs     SWIFT_PRIVATE;
     double endTimeMs     SWIFT_PRIVATE;
-    double durationSeconds     SWIFT_PRIVATE;
-    std::string activityType     SWIFT_PRIVATE;
+    double elapsedDurationSeconds     SWIFT_PRIVATE;
+    NativeHealthMetricValue activeDuration     SWIFT_PRIVATE;
+    NativeWorkoutActivity activity     SWIFT_PRIVATE;
     std::optional<std::string> title     SWIFT_PRIVATE;
-    std::optional<std::string> source     SWIFT_PRIVATE;
-    std::optional<double> totalDistanceMeters     SWIFT_PRIVATE;
-    std::optional<double> totalEnergyBurnedKcal     SWIFT_PRIVATE;
+    std::optional<std::string> brandName     SWIFT_PRIVATE;
+    NativeHealthMetricValue totalDistance     SWIFT_PRIVATE;
+    NativeHealthMetricValue totalActiveEnergyBurned     SWIFT_PRIVATE;
 
   public:
     NativeWorkoutSample() = default;
-    explicit NativeWorkoutSample(std::string uuid, double startTimeMs, double endTimeMs, double durationSeconds, std::string activityType, std::optional<std::string> title, std::optional<std::string> source, std::optional<double> totalDistanceMeters, std::optional<double> totalEnergyBurnedKcal): uuid(uuid), startTimeMs(startTimeMs), endTimeMs(endTimeMs), durationSeconds(durationSeconds), activityType(activityType), title(title), source(source), totalDistanceMeters(totalDistanceMeters), totalEnergyBurnedKcal(totalEnergyBurnedKcal) {}
+    explicit NativeWorkoutSample(NativeHealthSampleIdentity identity, NativeHealthDataOrigin origin, double startTimeMs, double endTimeMs, double elapsedDurationSeconds, NativeHealthMetricValue activeDuration, NativeWorkoutActivity activity, std::optional<std::string> title, std::optional<std::string> brandName, NativeHealthMetricValue totalDistance, NativeHealthMetricValue totalActiveEnergyBurned): identity(identity), origin(origin), startTimeMs(startTimeMs), endTimeMs(endTimeMs), elapsedDurationSeconds(elapsedDurationSeconds), activeDuration(activeDuration), activity(activity), title(title), brandName(brandName), totalDistance(totalDistance), totalActiveEnergyBurned(totalActiveEnergyBurned) {}
 
   public:
     friend bool operator==(const NativeWorkoutSample& lhs, const NativeWorkoutSample& rhs) = default;
@@ -68,28 +81,32 @@ namespace margelo::nitro {
     static inline margelo::nitro::nitrohealth::NativeWorkoutSample fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       jsi::Object obj = arg.asObject(runtime);
       return margelo::nitro::nitrohealth::NativeWorkoutSample(
-        JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "uuid"))),
+        JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleIdentity>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "identity"))),
+        JSIConverter<margelo::nitro::nitrohealth::NativeHealthDataOrigin>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "origin"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "startTimeMs"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs"))),
-        JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "durationSeconds"))),
-        JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "activityType"))),
+        JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "elapsedDurationSeconds"))),
+        JSIConverter<margelo::nitro::nitrohealth::NativeHealthMetricValue>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "activeDuration"))),
+        JSIConverter<margelo::nitro::nitrohealth::NativeWorkoutActivity>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "activity"))),
         JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "title"))),
-        JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "source"))),
-        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "totalDistanceMeters"))),
-        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "totalEnergyBurnedKcal")))
+        JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "brandName"))),
+        JSIConverter<margelo::nitro::nitrohealth::NativeHealthMetricValue>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "totalDistance"))),
+        JSIConverter<margelo::nitro::nitrohealth::NativeHealthMetricValue>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "totalActiveEnergyBurned")))
       );
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::nitrohealth::NativeWorkoutSample& arg) {
       jsi::Object obj(runtime);
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "uuid"), JSIConverter<std::string>::toJSI(runtime, arg.uuid));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "identity"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleIdentity>::toJSI(runtime, arg.identity));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "origin"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthDataOrigin>::toJSI(runtime, arg.origin));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "startTimeMs"), JSIConverter<double>::toJSI(runtime, arg.startTimeMs));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs"), JSIConverter<double>::toJSI(runtime, arg.endTimeMs));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "durationSeconds"), JSIConverter<double>::toJSI(runtime, arg.durationSeconds));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "activityType"), JSIConverter<std::string>::toJSI(runtime, arg.activityType));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "elapsedDurationSeconds"), JSIConverter<double>::toJSI(runtime, arg.elapsedDurationSeconds));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "activeDuration"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthMetricValue>::toJSI(runtime, arg.activeDuration));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "activity"), JSIConverter<margelo::nitro::nitrohealth::NativeWorkoutActivity>::toJSI(runtime, arg.activity));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "title"), JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.title));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "source"), JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.source));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "totalDistanceMeters"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.totalDistanceMeters));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "totalEnergyBurnedKcal"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.totalEnergyBurnedKcal));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "brandName"), JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.brandName));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "totalDistance"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthMetricValue>::toJSI(runtime, arg.totalDistance));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "totalActiveEnergyBurned"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthMetricValue>::toJSI(runtime, arg.totalActiveEnergyBurned));
       return obj;
     }
     static inline bool canConvert(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -100,15 +117,17 @@ namespace margelo::nitro {
       if (!nitro::isPlainObject(runtime, obj)) {
         return false;
       }
-      if (!JSIConverter<std::string>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "uuid")))) return false;
+      if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleIdentity>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "identity")))) return false;
+      if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthDataOrigin>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "origin")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "startTimeMs")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs")))) return false;
-      if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "durationSeconds")))) return false;
-      if (!JSIConverter<std::string>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "activityType")))) return false;
+      if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "elapsedDurationSeconds")))) return false;
+      if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthMetricValue>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "activeDuration")))) return false;
+      if (!JSIConverter<margelo::nitro::nitrohealth::NativeWorkoutActivity>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "activity")))) return false;
       if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "title")))) return false;
-      if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "source")))) return false;
-      if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "totalDistanceMeters")))) return false;
-      if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "totalEnergyBurnedKcal")))) return false;
+      if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "brandName")))) return false;
+      if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthMetricValue>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "totalDistance")))) return false;
+      if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthMetricValue>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "totalActiveEnergyBurned")))) return false;
       return true;
     }
   };

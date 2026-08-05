@@ -1,4 +1,4 @@
-import { mockNitroHealth } from './support/mockNitroHealth'
+import { mockNitroHealth, nativeRecordMetadata } from './support/mockNitroHealth'
 
 jest.mock('react-native-nitro-modules', () => ({
   NitroModules: {
@@ -22,15 +22,21 @@ describe('NitroHealth workouts contract', () => {
       mockNitroHealth.readWorkouts.mockResolvedValue({
         samples: [
           {
-            uuid: 'uuid-1',
+            ...nativeRecordMetadata('workout-record-1', 'com.example.watch', 'Example Watch'),
             startTimeMs: workoutStartMs,
             endTimeMs: workoutEndMs,
-            durationSeconds: 2580,
-            activityType: 'running',
+            elapsedDurationSeconds: 2700,
+            activeDuration: { status: 'available', value: 2580 },
+            activity: {
+              status: 'known',
+              type: 'running',
+              portability: 'portable',
+              mapping: 'exact',
+            },
             title: 'Morning Run',
-            source: 'Watch',
-            totalDistanceMeters: 7500,
-            totalEnergyBurnedKcal: 512.5,
+            brandName: 'Example Fitness',
+            totalDistance: { status: 'available', value: 7500 },
+            totalActiveEnergyBurned: { status: 'available', value: 512.5 },
           },
         ],
       })
@@ -44,17 +50,30 @@ describe('NitroHealth workouts contract', () => {
         ascending: true,
       })
       expect(result.samples).toHaveLength(1)
-      expect(result.samples[0].uuid).toBe('uuid-1')
+      expect(result.samples[0].identity).toEqual({ kind: 'record', id: 'workout-record-1' })
+      expect(result.samples[0].origin).toEqual({
+        identifier: 'com.example.watch',
+        displayName: 'Example Watch',
+      })
       expect(result.samples[0].startDate).toBeInstanceOf(Date)
       expect(result.samples[0].startDate.getTime()).toBe(workoutStartMs)
       expect(result.samples[0].endDate).toBeInstanceOf(Date)
       expect(result.samples[0].endDate.getTime()).toBe(workoutEndMs)
-      expect(result.samples[0].durationSeconds).toBe(2580)
-      expect(result.samples[0].activityType).toBe('running')
+      expect(result.samples[0].elapsedDurationSeconds).toBe(2700)
+      expect(result.samples[0].activeDuration).toEqual({ status: 'available', value: 2580 })
+      expect(result.samples[0].activity).toEqual({
+        status: 'known',
+        type: 'running',
+        portability: 'portable',
+        mapping: 'exact',
+      })
       expect(result.samples[0].title).toBe('Morning Run')
-      expect(result.samples[0].source).toBe('Watch')
-      expect(result.samples[0].totalDistanceMeters).toBe(7500)
-      expect(result.samples[0].totalEnergyBurnedKcal).toBe(512.5)
+      expect(result.samples[0].brandName).toBe('Example Fitness')
+      expect(result.samples[0].totalDistance).toEqual({ status: 'available', value: 7500 })
+      expect(result.samples[0].totalActiveEnergyBurned).toEqual({
+        status: 'available',
+        value: 512.5,
+      })
     })
 
     it('forwards explicit limit and ascending options', async () => {
@@ -72,28 +91,32 @@ describe('NitroHealth workouts contract', () => {
       })
     })
 
-    it('leaves optional fields undefined when the native side omits them (Android totals)', async () => {
+    it('preserves unknown activity and unavailable metric states', async () => {
       const startDate = new Date('2026-01-01T00:00:00.000Z')
       const endDate = new Date('2026-01-08T00:00:00.000Z')
       mockNitroHealth.readWorkouts.mockResolvedValue({
         samples: [
           {
-            uuid: 'uuid-1',
+            ...nativeRecordMetadata('workout-record-1'),
             startTimeMs: startDate.getTime(),
             endTimeMs: endDate.getTime(),
-            durationSeconds: 1800,
-            activityType: 'yoga',
+            elapsedDurationSeconds: 1800,
+            activeDuration: { status: 'notReported' },
+            activity: { status: 'unknown' },
+            totalDistance: { status: 'unsupported' },
+            totalActiveEnergyBurned: { status: 'notReported' },
           },
         ],
       })
 
       const result = await NitroHealth.readWorkouts({ startDate, endDate })
 
-      expect(result.samples[0].activityType).toBe('yoga')
+      expect(result.samples[0].activity).toEqual({ status: 'unknown' })
+      expect(result.samples[0].activeDuration).toEqual({ status: 'not-reported' })
+      expect(result.samples[0].totalDistance).toEqual({ status: 'unsupported' })
+      expect(result.samples[0].totalActiveEnergyBurned).toEqual({ status: 'not-reported' })
       expect(result.samples[0].title).toBeUndefined()
-      expect(result.samples[0].source).toBeUndefined()
-      expect(result.samples[0].totalDistanceMeters).toBeUndefined()
-      expect(result.samples[0].totalEnergyBurnedKcal).toBeUndefined()
+      expect(result.samples[0].brandName).toBeUndefined()
     })
 
     it('rejects an invalid date range without crossing the bridge', async () => {
@@ -136,7 +159,7 @@ describe('NitroHealth workouts contract', () => {
           startDate,
           endDate,
           activityType: 'running',
-          title: 'Morning Run',
+          displayName: 'Morning Run',
           timeZone: 'America/New_York',
           sync: { id: 'workout-1', version: 2 },
         })
@@ -146,7 +169,7 @@ describe('NitroHealth workouts contract', () => {
         startTimeMs: startDate.getTime(),
         endTimeMs: endDate.getTime(),
         activityType: 'running',
-        title: 'Morning Run',
+        displayName: 'Morning Run',
         timeZone: 'America/New_York',
         syncId: 'workout-1',
         syncVersion: 2,
@@ -180,8 +203,8 @@ describe('NitroHealth workouts contract', () => {
 
     it('rejects invalid optional strings and sync metadata', async () => {
       await expect(
-        NitroHealth.saveWorkout({ startDate, endDate, activityType: 'running', title: '  ' })
-      ).rejects.toThrow('workout: title must be a non-empty string when provided')
+        NitroHealth.saveWorkout({ startDate, endDate, activityType: 'running', displayName: '  ' })
+      ).rejects.toThrow('workout: displayName must be a non-empty string when provided')
       await expect(
         NitroHealth.saveWorkout({ startDate, endDate, activityType: 'running', timeZone: '' })
       ).rejects.toThrow('workout: timeZone must be a non-empty IANA time-zone identifier')

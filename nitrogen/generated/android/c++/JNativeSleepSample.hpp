@@ -10,6 +10,16 @@
 #include <fbjni/fbjni.h>
 #include "NativeSleepSample.hpp"
 
+#include "JNativeHealthDataOrigin.hpp"
+#include "JNativeHealthSampleIdentity.hpp"
+#include "JNativeHealthSampleIdentityKind.hpp"
+#include "JNativeSleepSampleKind.hpp"
+#include "JNativeSleepStageData.hpp"
+#include "NativeHealthDataOrigin.hpp"
+#include "NativeHealthSampleIdentity.hpp"
+#include "NativeHealthSampleIdentityKind.hpp"
+#include "NativeSleepSampleKind.hpp"
+#include "NativeSleepStageData.hpp"
 #include <optional>
 #include <string>
 
@@ -32,25 +42,28 @@ namespace margelo::nitro::nitrohealth {
     [[nodiscard]]
     NativeSleepSample toCpp() const {
       static const auto clazz = javaClassStatic();
-      static const auto fieldUuid = clazz->getField<jni::JString>("uuid");
-      jni::local_ref<jni::JString> uuid = this->getFieldValue(fieldUuid);
-      static const auto fieldRecordUuid = clazz->getField<jni::JString>("recordUuid");
-      jni::local_ref<jni::JString> recordUuid = this->getFieldValue(fieldRecordUuid);
+      static const auto fieldIdentity = clazz->getField<JNativeHealthSampleIdentity>("identity");
+      jni::local_ref<JNativeHealthSampleIdentity> identity = this->getFieldValue(fieldIdentity);
+      static const auto fieldOrigin = clazz->getField<JNativeHealthDataOrigin>("origin");
+      jni::local_ref<JNativeHealthDataOrigin> origin = this->getFieldValue(fieldOrigin);
+      static const auto fieldKind = clazz->getField<JNativeSleepSampleKind>("kind");
+      jni::local_ref<JNativeSleepSampleKind> kind = this->getFieldValue(fieldKind);
       static const auto fieldStartTimeMs = clazz->getField<double>("startTimeMs");
       double startTimeMs = this->getFieldValue(fieldStartTimeMs);
       static const auto fieldEndTimeMs = clazz->getField<double>("endTimeMs");
       double endTimeMs = this->getFieldValue(fieldEndTimeMs);
       static const auto fieldStage = clazz->getField<jni::JString>("stage");
       jni::local_ref<jni::JString> stage = this->getFieldValue(fieldStage);
-      static const auto fieldSource = clazz->getField<jni::JString>("source");
-      jni::local_ref<jni::JString> source = this->getFieldValue(fieldSource);
+      static const auto fieldStageData = clazz->getField<JNativeSleepStageData>("stageData");
+      jni::local_ref<JNativeSleepStageData> stageData = this->getFieldValue(fieldStageData);
       return NativeSleepSample(
-        uuid->toStdString(),
-        recordUuid->toStdString(),
+        identity->toCpp(),
+        origin->toCpp(),
+        kind->toCpp(),
         startTimeMs,
         endTimeMs,
-        stage->toStdString(),
-        source != nullptr ? std::make_optional(source->toStdString()) : std::nullopt
+        stage != nullptr ? std::make_optional(stage->toStdString()) : std::nullopt,
+        stageData != nullptr ? std::make_optional(stageData->toCpp()) : std::nullopt
       );
     }
 
@@ -60,17 +73,18 @@ namespace margelo::nitro::nitrohealth {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeSleepSample::javaobject> fromCpp(const NativeSleepSample& value) {
-      using JSignature = JNativeSleepSample(jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, double, double, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>);
+      using JSignature = JNativeSleepSample(jni::alias_ref<JNativeHealthSampleIdentity>, jni::alias_ref<JNativeHealthDataOrigin>, jni::alias_ref<JNativeSleepSampleKind>, double, double, jni::alias_ref<jni::JString>, jni::alias_ref<JNativeSleepStageData>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
         clazz,
-        jni::make_jstring(value.uuid),
-        jni::make_jstring(value.recordUuid),
+        JNativeHealthSampleIdentity::fromCpp(value.identity),
+        JNativeHealthDataOrigin::fromCpp(value.origin),
+        JNativeSleepSampleKind::fromCpp(value.kind),
         value.startTimeMs,
         value.endTimeMs,
-        jni::make_jstring(value.stage),
-        value.source.has_value() ? jni::make_jstring(value.source.value()) : nullptr
+        value.stage.has_value() ? jni::make_jstring(value.stage.value()) : nullptr,
+        value.stageData.has_value() ? JNativeSleepStageData::fromCpp(value.stageData.value()) : nullptr
       );
     }
   };

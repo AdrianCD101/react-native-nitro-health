@@ -75,7 +75,7 @@ namespace margelo::nitro::nitrohealth {
   struct NativeHealthChange final {
   public:
     std::string type     SWIFT_PRIVATE;
-    std::string recordUuid     SWIFT_PRIVATE;
+    std::string recordId     SWIFT_PRIVATE;
     std::optional<std::vector<NativeStepSample>> stepSamples     SWIFT_PRIVATE;
     std::optional<std::vector<NativeHeartRateSample>> heartRateSamples     SWIFT_PRIVATE;
     std::optional<std::vector<NativeRestingHeartRateSample>> restingHeartRateSamples     SWIFT_PRIVATE;
@@ -91,7 +91,7 @@ namespace margelo::nitro::nitrohealth {
 
   public:
     NativeHealthChange() = default;
-    explicit NativeHealthChange(std::string type, std::string recordUuid, std::optional<std::vector<NativeStepSample>> stepSamples, std::optional<std::vector<NativeHeartRateSample>> heartRateSamples, std::optional<std::vector<NativeRestingHeartRateSample>> restingHeartRateSamples, std::optional<std::vector<NativeHeartRateVariabilitySample>> heartRateVariabilitySamples, std::optional<std::vector<NativeDistanceSample>> distanceSamples, std::optional<std::vector<NativeActiveEnergyBurnedSample>> activeEnergyBurnedSamples, std::optional<std::vector<NativeOxygenSaturationSample>> oxygenSaturationSamples, std::optional<std::vector<NativeHeightSample>> heightSamples, std::optional<std::vector<NativeSleepSample>> sleepSamples, std::optional<std::vector<NativeBodyMassSample>> bodyMassSamples, std::optional<std::vector<NativeWorkoutSample>> workoutSamples, std::optional<std::function<void()>> dummyNonEquatable): type(type), recordUuid(recordUuid), stepSamples(stepSamples), heartRateSamples(heartRateSamples), restingHeartRateSamples(restingHeartRateSamples), heartRateVariabilitySamples(heartRateVariabilitySamples), distanceSamples(distanceSamples), activeEnergyBurnedSamples(activeEnergyBurnedSamples), oxygenSaturationSamples(oxygenSaturationSamples), heightSamples(heightSamples), sleepSamples(sleepSamples), bodyMassSamples(bodyMassSamples), workoutSamples(workoutSamples), dummyNonEquatable(dummyNonEquatable) {}
+    explicit NativeHealthChange(std::string type, std::string recordId, std::optional<std::vector<NativeStepSample>> stepSamples, std::optional<std::vector<NativeHeartRateSample>> heartRateSamples, std::optional<std::vector<NativeRestingHeartRateSample>> restingHeartRateSamples, std::optional<std::vector<NativeHeartRateVariabilitySample>> heartRateVariabilitySamples, std::optional<std::vector<NativeDistanceSample>> distanceSamples, std::optional<std::vector<NativeActiveEnergyBurnedSample>> activeEnergyBurnedSamples, std::optional<std::vector<NativeOxygenSaturationSample>> oxygenSaturationSamples, std::optional<std::vector<NativeHeightSample>> heightSamples, std::optional<std::vector<NativeSleepSample>> sleepSamples, std::optional<std::vector<NativeBodyMassSample>> bodyMassSamples, std::optional<std::vector<NativeWorkoutSample>> workoutSamples, std::optional<std::function<void()>> dummyNonEquatable): type(type), recordId(recordId), stepSamples(stepSamples), heartRateSamples(heartRateSamples), restingHeartRateSamples(restingHeartRateSamples), heartRateVariabilitySamples(heartRateVariabilitySamples), distanceSamples(distanceSamples), activeEnergyBurnedSamples(activeEnergyBurnedSamples), oxygenSaturationSamples(oxygenSaturationSamples), heightSamples(heightSamples), sleepSamples(sleepSamples), bodyMassSamples(bodyMassSamples), workoutSamples(workoutSamples), dummyNonEquatable(dummyNonEquatable) {}
 
   public:
     // NativeHealthChange is not equatable because these properties are not equatable: dummyNonEquatable
@@ -108,7 +108,7 @@ namespace margelo::nitro {
       jsi::Object obj = arg.asObject(runtime);
       return margelo::nitro::nitrohealth::NativeHealthChange(
         JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "type"))),
-        JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "recordUuid"))),
+        JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "recordId"))),
         JSIConverter<std::optional<std::vector<margelo::nitro::nitrohealth::NativeStepSample>>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "stepSamples"))),
         JSIConverter<std::optional<std::vector<margelo::nitro::nitrohealth::NativeHeartRateSample>>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "heartRateSamples"))),
         JSIConverter<std::optional<std::vector<margelo::nitro::nitrohealth::NativeRestingHeartRateSample>>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "restingHeartRateSamples"))),
@@ -126,7 +126,7 @@ namespace margelo::nitro {
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::nitrohealth::NativeHealthChange& arg) {
       jsi::Object obj(runtime);
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "type"), JSIConverter<std::string>::toJSI(runtime, arg.type));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "recordUuid"), JSIConverter<std::string>::toJSI(runtime, arg.recordUuid));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "recordId"), JSIConverter<std::string>::toJSI(runtime, arg.recordId));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "stepSamples"), JSIConverter<std::optional<std::vector<margelo::nitro::nitrohealth::NativeStepSample>>>::toJSI(runtime, arg.stepSamples));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "heartRateSamples"), JSIConverter<std::optional<std::vector<margelo::nitro::nitrohealth::NativeHeartRateSample>>>::toJSI(runtime, arg.heartRateSamples));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "restingHeartRateSamples"), JSIConverter<std::optional<std::vector<margelo::nitro::nitrohealth::NativeRestingHeartRateSample>>>::toJSI(runtime, arg.restingHeartRateSamples));
@@ -150,7 +150,7 @@ namespace margelo::nitro {
         return false;
       }
       if (!JSIConverter<std::string>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "type")))) return false;
-      if (!JSIConverter<std::string>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "recordUuid")))) return false;
+      if (!JSIConverter<std::string>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "recordId")))) return false;
       if (!JSIConverter<std::optional<std::vector<margelo::nitro::nitrohealth::NativeStepSample>>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "stepSamples")))) return false;
       if (!JSIConverter<std::optional<std::vector<margelo::nitro::nitrohealth::NativeHeartRateSample>>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "heartRateSamples")))) return false;
       if (!JSIConverter<std::optional<std::vector<margelo::nitro::nitrohealth::NativeRestingHeartRateSample>>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "restingHeartRateSamples")))) return false;

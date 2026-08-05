@@ -31,8 +31,8 @@ namespace margelo::nitro::nitrohealth {
   enum class HealthPermissionStatus {
     NOTGRANTED      SWIFT_NAME(notgranted) = 0,
     GRANTED      SWIFT_NAME(granted) = 1,
-    NOTDETERMINED      SWIFT_NAME(notdetermined) = 2,
-    UNVERIFIABLE      SWIFT_NAME(unverifiable) = 3,
+    UNVERIFIABLE      SWIFT_NAME(unverifiable) = 2,
+    NOTDETERMINED      SWIFT_NAME(notdetermined) = 3,
   } CLOSED_ENUM;
 
 } // namespace margelo::nitro::nitrohealth
@@ -47,8 +47,8 @@ namespace margelo::nitro {
       switch (hashString(unionValue.c_str(), unionValue.size())) {
         case hashString("notGranted"): return margelo::nitro::nitrohealth::HealthPermissionStatus::NOTGRANTED;
         case hashString("granted"): return margelo::nitro::nitrohealth::HealthPermissionStatus::GRANTED;
-        case hashString("notDetermined"): return margelo::nitro::nitrohealth::HealthPermissionStatus::NOTDETERMINED;
         case hashString("unverifiable"): return margelo::nitro::nitrohealth::HealthPermissionStatus::UNVERIFIABLE;
+        case hashString("notDetermined"): return margelo::nitro::nitrohealth::HealthPermissionStatus::NOTDETERMINED;
         default: [[unlikely]]
           throw std::invalid_argument("Cannot convert \"" + unionValue + "\" to enum HealthPermissionStatus - invalid value!");
       }
@@ -57,8 +57,8 @@ namespace margelo::nitro {
       switch (arg) {
         case margelo::nitro::nitrohealth::HealthPermissionStatus::NOTGRANTED: return JSIConverter<std::string>::toJSI(runtime, "notGranted");
         case margelo::nitro::nitrohealth::HealthPermissionStatus::GRANTED: return JSIConverter<std::string>::toJSI(runtime, "granted");
-        case margelo::nitro::nitrohealth::HealthPermissionStatus::NOTDETERMINED: return JSIConverter<std::string>::toJSI(runtime, "notDetermined");
         case margelo::nitro::nitrohealth::HealthPermissionStatus::UNVERIFIABLE: return JSIConverter<std::string>::toJSI(runtime, "unverifiable");
+        case margelo::nitro::nitrohealth::HealthPermissionStatus::NOTDETERMINED: return JSIConverter<std::string>::toJSI(runtime, "notDetermined");
         default: [[unlikely]]
           throw std::invalid_argument("Cannot convert HealthPermissionStatus to JS - invalid value: "
                                     + std::to_string(static_cast<int>(arg)) + "!");
@@ -72,8 +72,8 @@ namespace margelo::nitro {
       switch (hashString(unionValue.c_str(), unionValue.size())) {
         case hashString("notGranted"):
         case hashString("granted"):
-        case hashString("notDetermined"):
         case hashString("unverifiable"):
+        case hashString("notDetermined"):
           return true;
         default:
           return false;

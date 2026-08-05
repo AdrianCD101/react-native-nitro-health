@@ -10,7 +10,13 @@
 #include <fbjni/fbjni.h>
 #include "NativeOxygenSaturationSamplePage.hpp"
 
+#include "JNativeHealthDataOrigin.hpp"
+#include "JNativeHealthSampleIdentity.hpp"
+#include "JNativeHealthSampleIdentityKind.hpp"
 #include "JNativeOxygenSaturationSample.hpp"
+#include "NativeHealthDataOrigin.hpp"
+#include "NativeHealthSampleIdentity.hpp"
+#include "NativeHealthSampleIdentityKind.hpp"
 #include "NativeOxygenSaturationSample.hpp"
 #include <optional>
 #include <string>

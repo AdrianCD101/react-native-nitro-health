@@ -1,4 +1,8 @@
-import { mockNitroHealth } from './support/mockNitroHealth'
+import {
+  mockNitroHealth,
+  nativeRecordChildMetadata,
+  nativeRecordMetadata,
+} from './support/mockNitroHealth'
 
 jest.mock('react-native-nitro-modules', () => ({
   NitroModules: {
@@ -27,17 +31,17 @@ describe('NitroHealth changes contract', () => {
     expect(mockNitroHealth.getChanges).not.toHaveBeenCalled()
   })
 
-  it('maps ordered upserts and deletions with record identity', async () => {
+  it('maps ordered upserts and deletions to public record identities', async () => {
     const startTimeMs = Date.parse('2026-01-01T00:00:00.000Z')
     const endTimeMs = Date.parse('2026-01-01T01:00:00.000Z')
     mockNitroHealth.getChanges.mockResolvedValue({
       changes: [
         {
           type: 'upsert',
-          recordUuid: 'record-1',
+          recordId: 'record-1',
           stepSamples: [
             {
-              uuid: 'record-1',
+              ...nativeRecordMetadata('record-1', 'com.example.health', 'Example Health'),
               startTimeMs,
               endTimeMs,
               count: 123,
@@ -46,7 +50,7 @@ describe('NitroHealth changes contract', () => {
         },
         {
           type: 'delete',
-          recordUuid: 'record-2',
+          recordId: 'record-2',
         },
       ],
       nextChangesToken: 'next-token',
@@ -59,11 +63,11 @@ describe('NitroHealth changes contract', () => {
       changes: [
         {
           type: 'upsert',
-          recordUuid: 'record-1',
+          record: { kind: 'record', id: 'record-1' },
           samples: [
             {
-              uuid: 'record-1',
-              recordUuid: 'record-1',
+              identity: { kind: 'record', id: 'record-1' },
+              origin: { identifier: 'com.example.health', displayName: 'Example Health' },
               startDate: new Date(startTimeMs),
               endDate: new Date(endTimeMs),
               count: 123,
@@ -72,7 +76,7 @@ describe('NitroHealth changes contract', () => {
         },
         {
           type: 'delete',
-          recordUuid: 'record-2',
+          record: { kind: 'record', id: 'record-2' },
         },
       ],
       nextChangesToken: 'next-token',
@@ -81,23 +85,21 @@ describe('NitroHealth changes contract', () => {
     expect(mockNitroHealth.getChanges).toHaveBeenCalledWith('steps', 'current-token')
   })
 
-  it('keeps flattened samples grouped under their parent record', async () => {
+  it('keeps flattened sample identities grouped under their parent record', async () => {
     const timeMs = Date.parse('2026-01-01T00:00:00.000Z')
     mockNitroHealth.getChanges.mockResolvedValue({
       changes: [
         {
           type: 'upsert',
-          recordUuid: 'heart-record',
+          recordId: 'heart-record',
           heartRateSamples: [
             {
-              uuid: 'heart-record#0',
-              recordUuid: 'heart-record',
+              ...nativeRecordChildMetadata('heart-record#0', 'heart-record'),
               timeMs,
               bpm: 72,
             },
             {
-              uuid: 'heart-record#1',
-              recordUuid: 'heart-record',
+              ...nativeRecordChildMetadata('heart-record#1', 'heart-record'),
               timeMs: timeMs + 1000,
               bpm: 73,
             },
@@ -111,18 +113,24 @@ describe('NitroHealth changes contract', () => {
 
     const result = await NitroHealth.getChanges('heartRate', 'current-token')
 
-    if (result.tokenExpired) {
-      throw new Error('Expected a successful changes result')
-    }
-
+    if (result.tokenExpired) throw new Error('Expected a successful changes result')
     const change = result.changes[0]
-    if (change.type !== 'upsert') {
+    if (change === undefined || change.type !== 'upsert') {
       throw new Error('Expected an upsert change')
     }
 
-    expect(change.samples.map((sample) => sample.recordUuid)).toEqual([
-      'heart-record',
-      'heart-record',
+    expect(change.record).toEqual({ kind: 'record', id: 'heart-record' })
+    expect(change.samples.map((sample) => sample.identity)).toEqual([
+      {
+        kind: 'record-child',
+        id: 'heart-record#0',
+        record: { kind: 'record', id: 'heart-record' },
+      },
+      {
+        kind: 'record-child',
+        id: 'heart-record#1',
+        record: { kind: 'record', id: 'heart-record' },
+      },
     ])
   })
 
@@ -131,7 +139,7 @@ describe('NitroHealth changes contract', () => {
       changes: [
         {
           type: 'upsert',
-          recordUuid: 'heart-record',
+          recordId: 'heart-record',
           heartRateSamples: [],
         },
       ],
@@ -145,12 +153,124 @@ describe('NitroHealth changes contract', () => {
       changes: [
         {
           type: 'upsert',
-          recordUuid: 'heart-record',
+          record: { kind: 'record', id: 'heart-record' },
           samples: [],
         },
       ],
       nextChangesToken: 'next-token',
       hasMore: false,
+    })
+  })
+
+  it('preserves distance, tagged sleep, and workout semantics in upserts', async () => {
+    const startTimeMs = Date.parse('2026-01-01T00:00:00.000Z')
+    const endTimeMs = Date.parse('2026-01-01T08:00:00.000Z')
+    type NativeChangesResult = Awaited<ReturnType<typeof mockNitroHealth.getChanges>>
+    const changePage = (change: NativeChangesResult['changes'][number]): NativeChangesResult => ({
+      changes: [change],
+      nextChangesToken: 'next-token',
+      hasMore: false,
+      tokenExpired: false,
+    })
+
+    mockNitroHealth.getChanges
+      .mockResolvedValueOnce(
+        changePage({
+          type: 'upsert',
+          recordId: 'distance-record',
+          distanceSamples: [
+            {
+              ...nativeRecordMetadata('distance-record'),
+              startTimeMs,
+              endTimeMs,
+              distanceMeters: 5000,
+              scope: 'walkingRunning',
+            },
+          ],
+        })
+      )
+      .mockResolvedValueOnce(
+        changePage({
+          type: 'upsert',
+          recordId: 'sleep-record',
+          sleepSamples: [
+            {
+              ...nativeRecordMetadata('sleep-record'),
+              kind: 'sessionEnvelope',
+              startTimeMs,
+              endTimeMs,
+              stageData: 'reported',
+            },
+            {
+              ...nativeRecordChildMetadata('sleep-record#stage-0', 'sleep-record'),
+              kind: 'stage',
+              startTimeMs,
+              endTimeMs,
+              stage: 'inBed',
+            },
+          ],
+        })
+      )
+      .mockResolvedValueOnce(
+        changePage({
+          type: 'upsert',
+          recordId: 'workout-record',
+          workoutSamples: [
+            {
+              ...nativeRecordMetadata('workout-record'),
+              startTimeMs,
+              endTimeMs,
+              elapsedDurationSeconds: 28800,
+              activeDuration: { status: 'available', value: 2700 },
+              activity: {
+                status: 'known',
+                type: 'running',
+                portability: 'portable',
+                mapping: 'exact',
+              },
+              totalDistance: { status: 'available', value: 5000 },
+              totalActiveEnergyBurned: { status: 'unsupported' },
+            },
+          ],
+        })
+      )
+
+    const distance = await NitroHealth.getChanges('distance', 'distance-token')
+    const sleep = await NitroHealth.getChanges('sleep', 'sleep-token')
+    const workout = await NitroHealth.getChanges('workout', 'workout-token')
+
+    if (distance.tokenExpired || sleep.tokenExpired || workout.tokenExpired) {
+      throw new Error('Expected successful change pages')
+    }
+    expect(distance.changes[0]).toMatchObject({
+      record: { kind: 'record', id: 'distance-record' },
+      samples: [{ scope: 'walking-running', distanceMeters: 5000 }],
+    })
+    expect(sleep.changes[0]).toMatchObject({
+      record: { kind: 'record', id: 'sleep-record' },
+      samples: [
+        { kind: 'session-envelope', stageData: 'reported' },
+        {
+          kind: 'stage',
+          stage: 'inBed',
+          identity: {
+            kind: 'record-child',
+            record: { kind: 'record', id: 'sleep-record' },
+          },
+        },
+      ],
+    })
+    expect(workout.changes[0]).toMatchObject({
+      record: { kind: 'record', id: 'workout-record' },
+      samples: [
+        {
+          elapsedDurationSeconds: 28800,
+          activeDuration: { status: 'available', value: 2700 },
+          activity: { status: 'known', type: 'running', mapping: 'exact' },
+          totalDistance: { status: 'available', value: 5000 },
+          totalActiveEnergyBurned: { status: 'unsupported' },
+        },
+      ],
     })
   })
 
@@ -171,7 +291,7 @@ describe('NitroHealth changes contract', () => {
       changes: [
         {
           type: 'upsert',
-          recordUuid: 'record-1',
+          recordId: 'record-1',
           distanceSamples: [],
         },
       ],
@@ -182,6 +302,34 @@ describe('NitroHealth changes contract', () => {
 
     await expect(NitroHealth.getChanges('steps', 'current-token')).rejects.toThrow(
       "Native 'steps' upsert is missing samples"
+    )
+  })
+
+  it('rejects samples whose parent identity does not match the changed record', async () => {
+    const startTimeMs = Date.parse('2026-01-01T00:00:00.000Z')
+    const endTimeMs = Date.parse('2026-01-01T01:00:00.000Z')
+    mockNitroHealth.getChanges.mockResolvedValue({
+      changes: [
+        {
+          type: 'upsert',
+          recordId: 'record-1',
+          stepSamples: [
+            {
+              ...nativeRecordMetadata('different-record'),
+              startTimeMs,
+              endTimeMs,
+              count: 123,
+            },
+          ],
+        },
+      ],
+      nextChangesToken: 'must-not-surface',
+      hasMore: false,
+      tokenExpired: false,
+    })
+
+    await expect(NitroHealth.getChanges('steps', 'current-token')).rejects.toThrow(
+      "Native 'steps' upsert samples do not match recordId"
     )
   })
 })

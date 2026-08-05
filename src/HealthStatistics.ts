@@ -13,3 +13,9 @@ export interface HealthStatistics {
   /** Maximum of matching values, present only when 'max' was requested and supported. */
   max?: number
 }
+
+/** Distance statistics with explicit native activity coverage. */
+export interface DistanceStatistics extends HealthStatistics {
+  /** Activity coverage represented by the aggregate. */
+  scope: 'walking-running' | 'activity-unspecified'
+}

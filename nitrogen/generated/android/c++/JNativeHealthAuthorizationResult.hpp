@@ -10,14 +10,21 @@
 #include <fbjni/fbjni.h>
 #include "NativeHealthAuthorizationResult.hpp"
 
-#include "AuthorizationRequestStatus.hpp"
-#include "HealthAuthorizationStatus.hpp"
-#include "HealthAvailabilityStatus.hpp"
-#include "JAuthorizationRequestStatus.hpp"
-#include "JHealthAuthorizationStatus.hpp"
-#include "JHealthAvailabilityStatus.hpp"
+#include "HealthPermissionStatus.hpp"
+#include "JHealthPermissionStatus.hpp"
+#include "JNativeHealthAuthorizationStatus.hpp"
+#include "JNativeHealthAvailability.hpp"
+#include "JNativeHealthAvailabilityReason.hpp"
+#include "JNativeHealthAvailabilityStatus.hpp"
 #include "JNativeHealthPermission.hpp"
+#include "JNativeHealthPermissionStatusEntry.hpp"
+#include "NativeHealthAuthorizationStatus.hpp"
+#include "NativeHealthAvailability.hpp"
+#include "NativeHealthAvailabilityReason.hpp"
+#include "NativeHealthAvailabilityStatus.hpp"
 #include "NativeHealthPermission.hpp"
+#include "NativeHealthPermissionStatusEntry.hpp"
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -40,52 +47,25 @@ namespace margelo::nitro::nitrohealth {
     [[nodiscard]]
     NativeHealthAuthorizationResult toCpp() const {
       static const auto clazz = javaClassStatic();
-      static const auto fieldStatus = clazz->getField<JHealthAuthorizationStatus>("status");
-      jni::local_ref<JHealthAuthorizationStatus> status = this->getFieldValue(fieldStatus);
-      static const auto fieldAvailabilityStatus = clazz->getField<JHealthAvailabilityStatus>("availabilityStatus");
-      jni::local_ref<JHealthAvailabilityStatus> availabilityStatus = this->getFieldValue(fieldAvailabilityStatus);
-      static const auto fieldRequestStatus = clazz->getField<JAuthorizationRequestStatus>("requestStatus");
-      jni::local_ref<JAuthorizationRequestStatus> requestStatus = this->getFieldValue(fieldRequestStatus);
-      static const auto fieldGrantedPermissions = clazz->getField<jni::JArrayClass<JNativeHealthPermission>>("grantedPermissions");
-      jni::local_ref<jni::JArrayClass<JNativeHealthPermission>> grantedPermissions = this->getFieldValue(fieldGrantedPermissions);
-      static const auto fieldDeniedPermissions = clazz->getField<jni::JArrayClass<JNativeHealthPermission>>("deniedPermissions");
-      jni::local_ref<jni::JArrayClass<JNativeHealthPermission>> deniedPermissions = this->getFieldValue(fieldDeniedPermissions);
-      static const auto fieldUnverifiablePermissions = clazz->getField<jni::JArrayClass<JNativeHealthPermission>>("unverifiablePermissions");
-      jni::local_ref<jni::JArrayClass<JNativeHealthPermission>> unverifiablePermissions = this->getFieldValue(fieldUnverifiablePermissions);
+      static const auto fieldStatus = clazz->getField<JNativeHealthAuthorizationStatus>("status");
+      jni::local_ref<JNativeHealthAuthorizationStatus> status = this->getFieldValue(fieldStatus);
+      static const auto fieldAvailability = clazz->getField<JNativeHealthAvailability>("availability");
+      jni::local_ref<JNativeHealthAvailability> availability = this->getFieldValue(fieldAvailability);
+      static const auto fieldStatuses = clazz->getField<jni::JArrayClass<JNativeHealthPermissionStatusEntry>>("statuses");
+      jni::local_ref<jni::JArrayClass<JNativeHealthPermissionStatusEntry>> statuses = this->getFieldValue(fieldStatuses);
       return NativeHealthAuthorizationResult(
         status->toCpp(),
-        availabilityStatus->toCpp(),
-        requestStatus->toCpp(),
+        availability->toCpp(),
         [&](auto&& __input) {
           size_t __size = __input->size();
-          std::vector<NativeHealthPermission> __vector;
+          std::vector<NativeHealthPermissionStatusEntry> __vector;
           __vector.reserve(__size);
           for (size_t __i = 0; __i < __size; __i++) {
             auto __element = __input->getElement(__i);
             __vector.push_back(__element->toCpp());
           }
           return __vector;
-        }(grantedPermissions),
-        [&](auto&& __input) {
-          size_t __size = __input->size();
-          std::vector<NativeHealthPermission> __vector;
-          __vector.reserve(__size);
-          for (size_t __i = 0; __i < __size; __i++) {
-            auto __element = __input->getElement(__i);
-            __vector.push_back(__element->toCpp());
-          }
-          return __vector;
-        }(deniedPermissions),
-        [&](auto&& __input) {
-          size_t __size = __input->size();
-          std::vector<NativeHealthPermission> __vector;
-          __vector.reserve(__size);
-          for (size_t __i = 0; __i < __size; __i++) {
-            auto __element = __input->getElement(__i);
-            __vector.push_back(__element->toCpp());
-          }
-          return __vector;
-        }(unverifiablePermissions)
+        }(statuses)
       );
     }
 
@@ -95,44 +75,23 @@ namespace margelo::nitro::nitrohealth {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeHealthAuthorizationResult::javaobject> fromCpp(const NativeHealthAuthorizationResult& value) {
-      using JSignature = JNativeHealthAuthorizationResult(jni::alias_ref<JHealthAuthorizationStatus>, jni::alias_ref<JHealthAvailabilityStatus>, jni::alias_ref<JAuthorizationRequestStatus>, jni::alias_ref<jni::JArrayClass<JNativeHealthPermission>>, jni::alias_ref<jni::JArrayClass<JNativeHealthPermission>>, jni::alias_ref<jni::JArrayClass<JNativeHealthPermission>>);
+      using JSignature = JNativeHealthAuthorizationResult(jni::alias_ref<JNativeHealthAuthorizationStatus>, jni::alias_ref<JNativeHealthAvailability>, jni::alias_ref<jni::JArrayClass<JNativeHealthPermissionStatusEntry>>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
         clazz,
-        JHealthAuthorizationStatus::fromCpp(value.status),
-        JHealthAvailabilityStatus::fromCpp(value.availabilityStatus),
-        JAuthorizationRequestStatus::fromCpp(value.requestStatus),
+        JNativeHealthAuthorizationStatus::fromCpp(value.status),
+        JNativeHealthAvailability::fromCpp(value.availability),
         [&](auto&& __input) {
           size_t __size = __input.size();
-          jni::local_ref<jni::JArrayClass<JNativeHealthPermission>> __array = jni::JArrayClass<JNativeHealthPermission>::newArray(__size);
+          jni::local_ref<jni::JArrayClass<JNativeHealthPermissionStatusEntry>> __array = jni::JArrayClass<JNativeHealthPermissionStatusEntry>::newArray(__size);
           for (size_t __i = 0; __i < __size; __i++) {
             const auto& __element = __input[__i];
-            auto __elementJni = JNativeHealthPermission::fromCpp(__element);
+            auto __elementJni = JNativeHealthPermissionStatusEntry::fromCpp(__element);
             __array->setElement(__i, *__elementJni);
           }
           return __array;
-        }(value.grantedPermissions),
-        [&](auto&& __input) {
-          size_t __size = __input.size();
-          jni::local_ref<jni::JArrayClass<JNativeHealthPermission>> __array = jni::JArrayClass<JNativeHealthPermission>::newArray(__size);
-          for (size_t __i = 0; __i < __size; __i++) {
-            const auto& __element = __input[__i];
-            auto __elementJni = JNativeHealthPermission::fromCpp(__element);
-            __array->setElement(__i, *__elementJni);
-          }
-          return __array;
-        }(value.deniedPermissions),
-        [&](auto&& __input) {
-          size_t __size = __input.size();
-          jni::local_ref<jni::JArrayClass<JNativeHealthPermission>> __array = jni::JArrayClass<JNativeHealthPermission>::newArray(__size);
-          for (size_t __i = 0; __i < __size; __i++) {
-            const auto& __element = __input[__i];
-            auto __elementJni = JNativeHealthPermission::fromCpp(__element);
-            __array->setElement(__i, *__elementJni);
-          }
-          return __array;
-        }(value.unverifiablePermissions)
+        }(value.statuses)
       );
     }
   };

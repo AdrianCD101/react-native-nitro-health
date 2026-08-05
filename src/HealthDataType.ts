@@ -3,7 +3,7 @@
  *
  * @see {@linkcode NitroHealth.requestAuthorization}
  * @see {@linkcode NitroHealth.createChangesToken}
- * @see {@linkcode NitroHealth.enableBackgroundDelivery}
+ * @see {@linkcode NitroHealth.configureBackgroundChanges}
  */
 export type HealthDataType =
   | 'steps'
@@ -17,3 +17,6 @@ export type HealthDataType =
   | 'sleep'
   | 'bodyMass'
   | 'workout'
+
+/** Health data type that can be written portably. */
+export type WritableHealthDataType = Exclude<HealthDataType, 'heartRateVariability'>

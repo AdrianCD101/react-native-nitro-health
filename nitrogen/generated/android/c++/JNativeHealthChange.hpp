@@ -14,24 +14,48 @@
 #include "JNativeActiveEnergyBurnedSample.hpp"
 #include "JNativeBodyMassSample.hpp"
 #include "JNativeDistanceSample.hpp"
+#include "JNativeDistanceScope.hpp"
+#include "JNativeHealthDataOrigin.hpp"
+#include "JNativeHealthMetricValue.hpp"
+#include "JNativeHealthMetricValueStatus.hpp"
+#include "JNativeHealthSampleIdentity.hpp"
+#include "JNativeHealthSampleIdentityKind.hpp"
 #include "JNativeHeartRateSample.hpp"
 #include "JNativeHeartRateVariabilitySample.hpp"
 #include "JNativeHeightSample.hpp"
 #include "JNativeOxygenSaturationSample.hpp"
 #include "JNativeRestingHeartRateSample.hpp"
 #include "JNativeSleepSample.hpp"
+#include "JNativeSleepSampleKind.hpp"
+#include "JNativeSleepStageData.hpp"
 #include "JNativeStepSample.hpp"
+#include "JNativeWorkoutActivity.hpp"
+#include "JNativeWorkoutActivityMapping.hpp"
+#include "JNativeWorkoutActivityPortability.hpp"
+#include "JNativeWorkoutActivityStatus.hpp"
 #include "JNativeWorkoutSample.hpp"
 #include "NativeActiveEnergyBurnedSample.hpp"
 #include "NativeBodyMassSample.hpp"
 #include "NativeDistanceSample.hpp"
+#include "NativeDistanceScope.hpp"
+#include "NativeHealthDataOrigin.hpp"
+#include "NativeHealthMetricValue.hpp"
+#include "NativeHealthMetricValueStatus.hpp"
+#include "NativeHealthSampleIdentity.hpp"
+#include "NativeHealthSampleIdentityKind.hpp"
 #include "NativeHeartRateSample.hpp"
 #include "NativeHeartRateVariabilitySample.hpp"
 #include "NativeHeightSample.hpp"
 #include "NativeOxygenSaturationSample.hpp"
 #include "NativeRestingHeartRateSample.hpp"
 #include "NativeSleepSample.hpp"
+#include "NativeSleepSampleKind.hpp"
+#include "NativeSleepStageData.hpp"
 #include "NativeStepSample.hpp"
+#include "NativeWorkoutActivity.hpp"
+#include "NativeWorkoutActivityMapping.hpp"
+#include "NativeWorkoutActivityPortability.hpp"
+#include "NativeWorkoutActivityStatus.hpp"
 #include "NativeWorkoutSample.hpp"
 #include <NitroModules/JNICallable.hpp>
 #include <functional>
@@ -60,8 +84,8 @@ namespace margelo::nitro::nitrohealth {
       static const auto clazz = javaClassStatic();
       static const auto fieldType = clazz->getField<jni::JString>("type");
       jni::local_ref<jni::JString> type = this->getFieldValue(fieldType);
-      static const auto fieldRecordUuid = clazz->getField<jni::JString>("recordUuid");
-      jni::local_ref<jni::JString> recordUuid = this->getFieldValue(fieldRecordUuid);
+      static const auto fieldRecordId = clazz->getField<jni::JString>("recordId");
+      jni::local_ref<jni::JString> recordId = this->getFieldValue(fieldRecordId);
       static const auto fieldStepSamples = clazz->getField<jni::JArrayClass<JNativeStepSample>>("stepSamples");
       jni::local_ref<jni::JArrayClass<JNativeStepSample>> stepSamples = this->getFieldValue(fieldStepSamples);
       static const auto fieldHeartRateSamples = clazz->getField<jni::JArrayClass<JNativeHeartRateSample>>("heartRateSamples");
@@ -88,7 +112,7 @@ namespace margelo::nitro::nitrohealth {
       jni::local_ref<JFunc_void::javaobject> dummyNonEquatable = this->getFieldValue(fieldDummyNonEquatable);
       return NativeHealthChange(
         type->toStdString(),
-        recordUuid->toStdString(),
+        recordId->toStdString(),
         stepSamples != nullptr ? std::make_optional([&](auto&& __input) {
           size_t __size = __input->size();
           std::vector<NativeStepSample> __vector;
@@ -223,7 +247,7 @@ namespace margelo::nitro::nitrohealth {
       return create(
         clazz,
         jni::make_jstring(value.type),
-        jni::make_jstring(value.recordUuid),
+        jni::make_jstring(value.recordId),
         value.stepSamples.has_value() ? [&](auto&& __input) {
           size_t __size = __input.size();
           jni::local_ref<jni::JArrayClass<JNativeStepSample>> __array = jni::JArrayClass<JNativeStepSample>::newArray(__size);

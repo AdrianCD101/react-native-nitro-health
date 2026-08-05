@@ -54,17 +54,17 @@ namespace margelo::nitro::nitrohealth {
 
   public:
     // Methods
-    bool isAvailable() override;
-    HealthAvailabilityStatus getAvailabilityStatus() override;
-    bool openHealthConnectInstall() override;
-    std::shared_ptr<Promise<bool>> openHealthSettings() override;
-    std::shared_ptr<Promise<void>> enableBackgroundDelivery(const std::string& dataType, BackgroundDeliveryFrequency frequency) override;
-    std::shared_ptr<Promise<void>> disableBackgroundDelivery(const std::string& dataType) override;
-    std::shared_ptr<Promise<void>> disableAllBackgroundDelivery() override;
-    void setOnChangeNotificationListener(const std::optional<std::function<void(const std::vector<std::string>& /* dataTypes */, const std::string& /* deliveryId */)>>& listener) override;
-    void acknowledgeChangeNotification(const std::string& deliveryId) override;
-    std::shared_ptr<Promise<BackgroundReadAuthorizationStatus>> getBackgroundReadAuthorizationStatus() override;
-    std::shared_ptr<Promise<BackgroundReadAuthorizationStatus>> requestBackgroundReadAuthorization() override;
+    NativeHealthAvailability getAvailability() override;
+    std::shared_ptr<Promise<NativeHealthAvailabilityRecoveryResult>> performAvailabilityRecovery() override;
+    std::shared_ptr<Promise<NativeHealthCapabilities>> getCapabilities() override;
+    std::shared_ptr<Promise<NativeHealthAdditionalAccessStatus>> requestAdditionalAccess(const std::string& access) override;
+    std::shared_ptr<Promise<NativePermissionWorkflowResult>> managePermissions() override;
+    std::shared_ptr<Promise<NativePermissionWorkflowResult>> revokeAllPermissions() override;
+    NativeBackgroundChangesMode getBackgroundChangesMode() override;
+    std::shared_ptr<Promise<NativeBackgroundChangesResult>> configureBackgroundChanges(const std::vector<std::string>& dataTypes, BackgroundDeliveryFrequency frequency) override;
+    std::shared_ptr<Promise<NativeBackgroundChangesResult>> disableBackgroundChanges(const std::optional<std::vector<std::string>>& dataTypes) override;
+    bool setOnBackgroundChangeListener(const std::optional<std::function<void(const std::vector<std::string>& /* dataTypes */, const std::string& /* deliveryId */)>>& listener) override;
+    bool acknowledgeBackgroundChange(const std::string& deliveryId) override;
     std::shared_ptr<Promise<std::string>> createChangesToken(const std::string& dataType) override;
     std::shared_ptr<Promise<NativeHealthChangesResult>> getChanges(const std::string& dataType, const std::string& changesToken) override;
     std::shared_ptr<Promise<NativeStepSamplePage>> readSteps(const NativeHealthDateRangeQuery& query) override;
@@ -81,7 +81,7 @@ namespace margelo::nitro::nitrohealth {
     std::shared_ptr<Promise<NativeSleepSamplePage>> readSleepSamples(const NativeHealthDateRangeQuery& query) override;
     std::shared_ptr<Promise<NativeWorkoutSamplePage>> readWorkouts(const NativeHealthDateRangeQuery& query) override;
     std::shared_ptr<Promise<void>> saveSteps(const std::vector<NativeStepSampleInput>& samples) override;
-    std::shared_ptr<Promise<void>> saveDistance(const std::vector<NativeDistanceSampleInput>& samples) override;
+    std::shared_ptr<Promise<NativeDistanceWriteResult>> saveDistance(const std::vector<NativeDistanceSampleInput>& samples) override;
     std::shared_ptr<Promise<void>> saveActiveEnergyBurned(const std::vector<NativeActiveEnergyBurnedSampleInput>& samples) override;
     std::shared_ptr<Promise<void>> saveHeartRate(const std::vector<NativeHeartRateSampleInput>& samples) override;
     std::shared_ptr<Promise<void>> saveBodyMass(const std::vector<NativeBodyMassSampleInput>& samples) override;
@@ -90,10 +90,9 @@ namespace margelo::nitro::nitrohealth {
     std::shared_ptr<Promise<void>> saveHeight(const std::vector<NativeHeightSampleInput>& samples) override;
     std::shared_ptr<Promise<void>> saveSleepSessions(const std::vector<NativeSleepSessionInput>& sessions) override;
     std::shared_ptr<Promise<void>> saveWorkout(const NativeWorkoutSampleInput& workout) override;
-    std::shared_ptr<Promise<void>> deleteSamplesByUuids(const std::string& dataType, const std::vector<std::string>& uuids) override;
-    std::shared_ptr<Promise<void>> deleteSamplesByTimeRange(const std::string& dataType, const NativeHealthTimeRangeQuery& query) override;
+    std::shared_ptr<Promise<NativeHealthDeleteResult>> deleteRecordsByIds(const std::string& dataType, const std::vector<std::string>& recordIds) override;
+    std::shared_ptr<Promise<NativeHealthDeleteResult>> deleteRecordsByTimeRange(const std::string& dataType, const NativeHealthTimeRangeQuery& query) override;
     std::shared_ptr<Promise<NativeHealthPermissionStatusResult>> getPermissionStatuses(const std::vector<NativeHealthPermission>& permissions) override;
-    std::shared_ptr<Promise<AuthorizationRequestStatus>> getRequestStatusForAuthorization(const std::vector<NativeHealthPermission>& permissions) override;
     std::shared_ptr<Promise<NativeHealthAuthorizationResult>> requestAuthorization(const std::vector<NativeHealthPermission>& permissions) override;
 
   private:

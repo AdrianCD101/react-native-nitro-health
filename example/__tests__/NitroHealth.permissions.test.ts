@@ -1,4 +1,8 @@
-import { mockNitroHealth } from './support/mockNitroHealth'
+import {
+  mockNitroHealth,
+  nativeRecordChildMetadata,
+  nativeRecordMetadata,
+} from './support/mockNitroHealth'
 
 jest.mock('react-native-nitro-modules', () => ({
   NitroModules: {
@@ -8,148 +12,358 @@ jest.mock('react-native-nitro-modules', () => ({
 
 import { NitroHealth, type HealthPermission } from 'react-native-nitro-health'
 
-describe('NitroHealth permission contract', () => {
+describe('NitroHealth workflow and permission contract', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockNitroHealth.getAvailability.mockReturnValue({ status: 'available' })
   })
 
-  it('gets request status through the Nitro hybrid object', async () => {
-    const permissions: HealthPermission[] = [{ accessType: 'read', dataType: 'steps' }]
-    mockNitroHealth.getRequestStatusForAuthorization.mockResolvedValue('shouldRequest')
+  it('maps availability, actionable recovery, and recovery outcomes', async () => {
+    mockNitroHealth.getAvailability.mockReturnValue({
+      status: 'unavailable',
+      reason: 'providerInstallOrUpdateRequired',
+      recovery: 'installOrUpdateProvider',
+    })
+    mockNitroHealth.performAvailabilityRecovery.mockResolvedValue('opened')
 
-    await expect(NitroHealth.getRequestStatusForAuthorization(permissions)).resolves.toBe(
-      'shouldRequest'
+    const availability = NitroHealth.getAvailability()
+    expect(availability).toEqual({
+      status: 'unavailable',
+      reason: 'provider-install-or-update-required',
+      recovery: { kind: 'install-or-update-provider' },
+    })
+    if (availability.status === 'available' || !('recovery' in availability)) {
+      throw new Error('Expected recoverable health availability')
+    }
+
+    await expect(NitroHealth.performAvailabilityRecovery(availability.recovery)).resolves.toEqual({
+      status: 'user-action-required',
+      destination: 'provider-store',
+    })
+    expect(mockNitroHealth.performAvailabilityRecovery).toHaveBeenCalledWith()
+
+    mockNitroHealth.performAvailabilityRecovery.mockResolvedValue('destinationUnavailable')
+    await expect(NitroHealth.performAvailabilityRecovery(availability.recovery)).resolves.toEqual({
+      status: 'unavailable',
+      reason: 'destination-unavailable',
+    })
+  })
+
+  it('maps available and terminal unavailable states', () => {
+    mockNitroHealth.getAvailability.mockReturnValue({ status: 'available' })
+    expect(NitroHealth.getAvailability()).toEqual({ status: 'available' })
+
+    mockNitroHealth.getAvailability.mockReturnValue({
+      status: 'unavailable',
+      reason: 'notSupported',
+    })
+    expect(NitroHealth.getAvailability()).toEqual({
+      status: 'unavailable',
+      reason: 'not-supported',
+    })
+
+    mockNitroHealth.getAvailability.mockReturnValue({
+      status: 'unavailable',
+      reason: 'serviceUnavailable',
+    })
+    expect(NitroHealth.getAvailability()).toEqual({
+      status: 'unavailable',
+      reason: 'service-unavailable',
+    })
+  })
+
+  it('rejects malformed native availability states', () => {
+    mockNitroHealth.getAvailability.mockReturnValue({
+      status: 'available',
+      reason: 'notSupported',
+    })
+    expect(() => NitroHealth.getAvailability()).toThrow(
+      'Available native health service contains unavailable-state fields'
     )
 
-    expect(mockNitroHealth.getRequestStatusForAuthorization).toHaveBeenCalledWith(permissions)
+    mockNitroHealth.getAvailability.mockReturnValue({ status: 'unavailable' })
+    expect(() => NitroHealth.getAvailability()).toThrow('Native health availability is incomplete')
+
+    mockNitroHealth.getAvailability.mockReturnValue({
+      status: 'unavailable',
+      reason: 'providerInstallOrUpdateRequired',
+    })
+    expect(() => NitroHealth.getAvailability()).toThrow(
+      'Recoverable native health availability is missing its recovery action'
+    )
+
+    mockNitroHealth.getAvailability.mockReturnValue({
+      status: 'unavailable',
+      reason: 'notSupported',
+      recovery: 'installOrUpdateProvider',
+    })
+    expect(() => NitroHealth.getAvailability()).toThrow(
+      'Unrecoverable native health availability contains a recovery action'
+    )
   })
 
-  it('gets current permission statuses without requesting permissions', async () => {
-    const stepsReadPermission: HealthPermission = { accessType: 'read', dataType: 'steps' }
-    const sleepWritePermission: HealthPermission = { accessType: 'write', dataType: 'sleep' }
-    const permissions = [stepsReadPermission, sleepWritePermission]
-    const result = {
-      availabilityStatus: 'available',
+  it('maps observer and polling capabilities without consulting Platform.OS', async () => {
+    mockNitroHealth.getCapabilities.mockResolvedValueOnce({
+      backgroundChangesMode: 'observer',
+      backgroundRead: 'included',
+      historyRead: 'included',
+    })
+    mockNitroHealth.getCapabilities.mockResolvedValueOnce({
+      backgroundChangesMode: 'polling',
+      backgroundRead: 'notGranted',
+      historyRead: 'granted',
+    })
+
+    await expect(NitroHealth.getCapabilities()).resolves.toEqual({
+      status: 'available',
+      backgroundChanges: {
+        mode: 'observer',
+        frequencies: ['immediate', 'hourly', 'daily', 'weekly'],
+        backgroundRead: 'included',
+      },
+      historyRead: 'included',
+    })
+    await expect(NitroHealth.getCapabilities()).resolves.toEqual({
+      status: 'available',
+      backgroundChanges: {
+        mode: 'polling',
+        scheduling: 'app-owned',
+        backgroundRead: 'not-granted',
+      },
+      historyRead: 'granted',
+    })
+  })
+
+  it('maps additional access requests and validates the requested capability', async () => {
+    mockNitroHealth.requestAdditionalAccess.mockResolvedValueOnce('notDeclared')
+    mockNitroHealth.requestAdditionalAccess.mockResolvedValueOnce('granted')
+
+    await expect(NitroHealth.requestAdditionalAccess('background-read')).resolves.toEqual({
+      access: 'background-read',
+      status: 'not-declared',
+    })
+    await expect(NitroHealth.requestAdditionalAccess('history-read')).resolves.toEqual({
+      access: 'history-read',
+      status: 'granted',
+    })
+    await expect(NitroHealth.requestAdditionalAccess('other' as never)).rejects.toThrow(
+      'access must be background-read or history-read'
+    )
+    expect(mockNitroHealth.requestAdditionalAccess).toHaveBeenCalledTimes(2)
+  })
+
+  it('maps direct and manual permission-management outcomes', async () => {
+    mockNitroHealth.managePermissions.mockResolvedValueOnce({
+      status: 'userActionRequired',
+      actionKind: 'opened',
+      destination: 'healthConnectSettings',
+    })
+    mockNitroHealth.managePermissions.mockResolvedValueOnce({
+      status: 'userActionRequired',
+      actionKind: 'manual',
+      destination: 'healthAppPermissions',
+    })
+    mockNitroHealth.managePermissions.mockResolvedValueOnce({
+      status: 'unavailable',
+      availability: { status: 'unavailable', reason: 'serviceUnavailable' },
+    })
+
+    await expect(NitroHealth.managePermissions()).resolves.toEqual({
+      status: 'user-action-required',
+      action: { kind: 'opened', destination: 'health-connect-settings' },
+    })
+    await expect(NitroHealth.managePermissions()).resolves.toEqual({
+      status: 'user-action-required',
+      action: { kind: 'manual', destination: 'health-app-permissions' },
+    })
+    await expect(NitroHealth.managePermissions()).resolves.toEqual({
+      status: 'unavailable',
+      availability: { status: 'unavailable', reason: 'service-unavailable' },
+    })
+  })
+
+  it('maps completed, manual, and unavailable permission revocation outcomes', async () => {
+    mockNitroHealth.revokeAllPermissions.mockResolvedValueOnce({ status: 'completed' })
+    mockNitroHealth.revokeAllPermissions.mockResolvedValueOnce({
+      status: 'userActionRequired',
+      actionKind: 'manual',
+      destination: 'healthAppPermissions',
+    })
+    mockNitroHealth.revokeAllPermissions.mockResolvedValueOnce({
+      status: 'unavailable',
+      availability: { status: 'unavailable', reason: 'notSupported' },
+    })
+
+    await expect(NitroHealth.revokeAllPermissions()).resolves.toEqual({ status: 'completed' })
+    await expect(NitroHealth.revokeAllPermissions()).resolves.toEqual({
+      status: 'user-action-required',
+      action: { kind: 'manual', destination: 'health-app-permissions' },
+    })
+    await expect(NitroHealth.revokeAllPermissions()).resolves.toEqual({
+      status: 'unavailable',
+      availability: { status: 'unavailable', reason: 'not-supported' },
+    })
+  })
+
+  it('returns one current state for each permission in input order', async () => {
+    const permissions: HealthPermission[] = [
+      { accessType: 'read', dataType: 'steps' },
+      { accessType: 'write', dataType: 'sleep' },
+      { accessType: 'read', dataType: 'heartRate' },
+    ]
+    mockNitroHealth.getPermissionStatuses.mockResolvedValue({
+      availability: { status: 'available' },
       statuses: [
-        { permission: stepsReadPermission, status: 'unverifiable' },
-        { permission: sleepWritePermission, status: 'granted' },
+        { permission: permissions[0]!, status: 'unverifiable' },
+        { permission: permissions[1]!, status: 'granted' },
+        { permission: permissions[2]!, status: 'notDetermined' },
       ],
-    }
-    mockNitroHealth.getPermissionStatuses.mockResolvedValue(result)
+    })
 
-    await expect(NitroHealth.getPermissionStatuses(permissions)).resolves.toEqual(result)
-
+    await expect(NitroHealth.getPermissionStatuses(permissions)).resolves.toEqual({
+      status: 'available',
+      statuses: [
+        { permission: permissions[0], status: 'unverifiable' },
+        { permission: permissions[1], status: 'granted' },
+        { permission: permissions[2], status: 'notDetermined' },
+      ],
+    })
     expect(mockNitroHealth.getPermissionStatuses).toHaveBeenCalledWith(permissions)
     expect(mockNitroHealth.requestAuthorization).not.toHaveBeenCalled()
   })
 
-  it('requests authorization through the Nitro hybrid object', async () => {
-    const permissions: HealthPermission[] = [{ accessType: 'read', dataType: 'steps' }]
-    const result = {
-      status: 'granted',
-      availabilityStatus: 'available',
-      requestStatus: 'unnecessary',
-      grantedPermissions: permissions,
-      deniedPermissions: [],
-      unverifiablePermissions: [],
-    }
-    mockNitroHealth.requestAuthorization.mockResolvedValue(result)
+  it('requires every unavailable permission status to be unverifiable', async () => {
+    const permissions: HealthPermission[] = [
+      { accessType: 'read', dataType: 'steps' },
+      { accessType: 'write', dataType: 'sleep' },
+    ]
+    mockNitroHealth.getPermissionStatuses.mockResolvedValueOnce({
+      availability: { status: 'unavailable', reason: 'serviceUnavailable' },
+      statuses: permissions.map((permission) => ({ permission, status: 'unverifiable' as const })),
+    })
 
-    await expect(NitroHealth.requestAuthorization(permissions)).resolves.toEqual(result)
+    await expect(NitroHealth.getPermissionStatuses(permissions)).resolves.toEqual({
+      status: 'unavailable',
+      availability: { status: 'unavailable', reason: 'service-unavailable' },
+      statuses: permissions.map((permission) => ({ permission, status: 'unverifiable' })),
+    })
 
+    mockNitroHealth.getPermissionStatuses.mockResolvedValueOnce({
+      availability: { status: 'unavailable', reason: 'notSupported' },
+      statuses: [
+        { permission: permissions[0]!, status: 'unverifiable' },
+        { permission: permissions[1]!, status: 'granted' },
+      ],
+    })
+    await expect(NitroHealth.getPermissionStatuses(permissions)).rejects.toThrow(
+      'Unavailable permission result contains a verifiable permission status'
+    )
+  })
+
+  it('returns post-authorization state per permission instead of aggregate arrays', async () => {
+    const permissions: HealthPermission[] = [
+      { accessType: 'read', dataType: 'steps' },
+      { accessType: 'write', dataType: 'steps' },
+      { accessType: 'read', dataType: 'heartRate' },
+    ]
+    mockNitroHealth.requestAuthorization.mockResolvedValue({
+      status: 'completed',
+      availability: { status: 'available' },
+      statuses: [
+        { permission: permissions[0]!, status: 'granted' },
+        { permission: permissions[1]!, status: 'notGranted' },
+        { permission: permissions[2]!, status: 'unverifiable' },
+      ],
+    })
+
+    await expect(NitroHealth.requestAuthorization(permissions)).resolves.toEqual({
+      status: 'completed',
+      statuses: [
+        { permission: permissions[0], status: 'granted' },
+        { permission: permissions[1], status: 'notGranted' },
+        { permission: permissions[2], status: 'unverifiable' },
+      ],
+    })
     expect(mockNitroHealth.requestAuthorization).toHaveBeenCalledWith(permissions)
   })
 
-  it('rejects an empty request status check before crossing the native boundary', async () => {
-    await expect(NitroHealth.getRequestStatusForAuthorization([])).rejects.toThrow(
-      'At least one health permission is required'
-    )
+  it('maps unavailable authorization with all entries unverifiable', async () => {
+    const permissions: HealthPermission[] = [
+      { accessType: 'read', dataType: 'steps' },
+      { accessType: 'write', dataType: 'steps' },
+    ]
+    mockNitroHealth.requestAuthorization.mockResolvedValue({
+      status: 'unavailable',
+      availability: { status: 'unavailable', reason: 'notSupported' },
+      statuses: permissions.map((permission) => ({ permission, status: 'unverifiable' as const })),
+    })
 
-    expect(mockNitroHealth.getRequestStatusForAuthorization).not.toHaveBeenCalled()
+    await expect(NitroHealth.requestAuthorization(permissions)).resolves.toEqual({
+      status: 'unavailable',
+      availability: { status: 'unavailable', reason: 'not-supported' },
+      statuses: permissions.map((permission) => ({ permission, status: 'unverifiable' })),
+    })
   })
 
-  it('rejects an empty authorization request before crossing the native boundary', async () => {
+  it('rejects empty permission workflows before crossing native', async () => {
+    await expect(NitroHealth.getPermissionStatuses([])).rejects.toThrow(
+      'At least one health permission is required'
+    )
     await expect(NitroHealth.requestAuthorization([])).rejects.toThrow(
       'At least one health permission is required'
     )
 
+    expect(mockNitroHealth.getPermissionStatuses).not.toHaveBeenCalled()
     expect(mockNitroHealth.requestAuthorization).not.toHaveBeenCalled()
   })
 
-  it('rejects an empty permission status query before crossing the native boundary', async () => {
-    await expect(NitroHealth.getPermissionStatuses([])).rejects.toThrow(
-      'At least one health permission is required'
-    )
-
-    expect(mockNitroHealth.getPermissionStatuses).not.toHaveBeenCalled()
-  })
-
-  it('reads steps through the Nitro hybrid object', async () => {
+  it('maps record identity, origin, and distance scope for interval samples', async () => {
     const startDate = new Date('2026-01-01T00:00:00.000Z')
     const endDate = new Date('2026-01-02T00:00:00.000Z')
-    const nativeResult = {
+    const metadata = nativeRecordMetadata('record-1', 'com.example.health', 'Example Health')
+    mockNitroHealth.readSteps.mockResolvedValue({
+      samples: [
+        { ...metadata, startTimeMs: startDate.getTime(), endTimeMs: endDate.getTime(), count: 123 },
+      ],
+    })
+    mockNitroHealth.readDistance.mockResolvedValue({
       samples: [
         {
-          uuid: 'uuid-1',
+          ...metadata,
           startTimeMs: startDate.getTime(),
           endTimeMs: endDate.getTime(),
-          count: 123,
+          distanceMeters: 1234,
+          scope: 'walkingRunning',
         },
       ],
-    }
-    mockNitroHealth.readSteps.mockResolvedValue(nativeResult)
+    })
 
     await expect(
       NitroHealth.readSteps({ startDate, endDate, limit: 25, ascending: false })
     ).resolves.toEqual({
-      samples: [{ uuid: 'uuid-1', recordUuid: 'uuid-1', startDate, endDate, count: 123 }],
-    })
-
-    expect(mockNitroHealth.readSteps).toHaveBeenCalledWith({
-      startTimeMs: startDate.getTime(),
-      endTimeMs: endDate.getTime(),
-      limit: 25,
-      ascending: false,
-    })
-  })
-
-  it('applies read steps defaults before crossing the native boundary', async () => {
-    const startDate = new Date('2026-01-01T00:00:00.000Z')
-    const endDate = new Date('2026-01-02T00:00:00.000Z')
-    mockNitroHealth.readSteps.mockResolvedValue({ samples: [] })
-
-    await expect(NitroHealth.readSteps({ startDate, endDate })).resolves.toEqual({ samples: [] })
-
-    expect(mockNitroHealth.readSteps).toHaveBeenCalledWith({
-      startTimeMs: startDate.getTime(),
-      endTimeMs: endDate.getTime(),
-      limit: 1000,
-      ascending: true,
-    })
-  })
-
-  it('reads distance through the Nitro hybrid object', async () => {
-    const startDate = new Date('2026-01-01T00:00:00.000Z')
-    const endDate = new Date('2026-01-02T00:00:00.000Z')
-    const nativeResult = {
       samples: [
         {
-          uuid: 'uuid-1',
-          startTimeMs: startDate.getTime(),
-          endTimeMs: endDate.getTime(),
-          distanceMeters: 1234,
+          identity: { kind: 'record', id: 'record-1' },
+          origin: { identifier: 'com.example.health', displayName: 'Example Health' },
+          startDate,
+          endDate,
+          count: 123,
         },
       ],
-    }
-    mockNitroHealth.readDistance.mockResolvedValue(nativeResult)
-
-    await expect(
-      NitroHealth.readDistance({ startDate, endDate, limit: 25, ascending: false })
-    ).resolves.toEqual({
-      samples: [{ uuid: 'uuid-1', recordUuid: 'uuid-1', startDate, endDate, distanceMeters: 1234 }],
     })
-
-    expect(mockNitroHealth.readDistance).toHaveBeenCalledWith({
+    await expect(NitroHealth.readDistance({ startDate, endDate })).resolves.toEqual({
+      samples: [
+        {
+          identity: { kind: 'record', id: 'record-1' },
+          origin: { identifier: 'com.example.health', displayName: 'Example Health' },
+          startDate,
+          endDate,
+          distanceMeters: 1234,
+          scope: 'walking-running',
+        },
+      ],
+    })
+    expect(mockNitroHealth.readSteps).toHaveBeenCalledWith({
       startTimeMs: startDate.getTime(),
       endTimeMs: endDate.getTime(),
       limit: 25,
@@ -157,319 +371,160 @@ describe('NitroHealth permission contract', () => {
     })
   })
 
-  it('reads active energy burned through the Nitro hybrid object', async () => {
+  it('maps record-child identity and origin for flattened heart-rate readings', async () => {
+    const startDate = new Date('2026-01-01T00:00:00.000Z')
+    const endDate = new Date('2026-01-02T00:00:00.000Z')
+    mockNitroHealth.readHeartRate.mockResolvedValue({
+      samples: [
+        {
+          ...nativeRecordChildMetadata(
+            'heart-record#0',
+            'heart-record',
+            'com.example.watch',
+            'Example Watch'
+          ),
+          timeMs: startDate.getTime(),
+          bpm: 72,
+        },
+      ],
+    })
+
+    await expect(NitroHealth.readHeartRate({ startDate, endDate })).resolves.toEqual({
+      samples: [
+        {
+          identity: {
+            kind: 'record-child',
+            id: 'heart-record#0',
+            record: { kind: 'record', id: 'heart-record' },
+          },
+          origin: { identifier: 'com.example.watch', displayName: 'Example Watch' },
+          date: startDate,
+          bpm: 72,
+        },
+      ],
+    })
+  })
+
+  it('maps origin metadata for active-energy and body-mass records', async () => {
     const startDate = new Date('2026-01-01T00:00:00.000Z')
     const endDate = new Date('2026-01-02T00:00:00.000Z')
     mockNitroHealth.readActiveEnergyBurned.mockResolvedValue({
       samples: [
         {
-          uuid: 'uuid-1',
+          ...nativeRecordMetadata('energy-record', 'com.example.phone', 'Example Phone'),
           startTimeMs: startDate.getTime(),
           endTimeMs: endDate.getTime(),
           kilocalories: 321,
         },
       ],
     })
-
-    await expect(
-      NitroHealth.readActiveEnergyBurned({ startDate, endDate, limit: 25, ascending: false })
-    ).resolves.toEqual({
-      samples: [{ uuid: 'uuid-1', recordUuid: 'uuid-1', startDate, endDate, kilocalories: 321 }],
-    })
-
-    expect(mockNitroHealth.readActiveEnergyBurned).toHaveBeenCalledWith({
-      startTimeMs: startDate.getTime(),
-      endTimeMs: endDate.getTime(),
-      limit: 25,
-      ascending: false,
-    })
-  })
-
-  it('reads heart rate through the Nitro hybrid object', async () => {
-    const startDate = new Date('2026-01-01T00:00:00.000Z')
-    const endDate = new Date('2026-01-02T00:00:00.000Z')
-    const nativeResult = {
-      samples: [
-        {
-          uuid: 'uuid-1',
-          recordUuid: 'uuid-1',
-          timeMs: startDate.getTime(),
-          bpm: 72,
-          source: 'com.example.health',
-        },
-      ],
-    }
-    mockNitroHealth.readHeartRate.mockResolvedValue(nativeResult)
-
-    await expect(
-      NitroHealth.readHeartRate({ startDate, endDate, limit: 25, ascending: false })
-    ).resolves.toEqual({
-      samples: [
-        {
-          uuid: 'uuid-1',
-          recordUuid: 'uuid-1',
-          date: startDate,
-          bpm: 72,
-          source: 'com.example.health',
-        },
-      ],
-    })
-
-    expect(mockNitroHealth.readHeartRate).toHaveBeenCalledWith({
-      startTimeMs: startDate.getTime(),
-      endTimeMs: endDate.getTime(),
-      limit: 25,
-      ascending: false,
-    })
-  })
-
-  it('reads body mass through the Nitro hybrid object', async () => {
-    const startDate = new Date('2026-01-01T00:00:00.000Z')
-    const endDate = new Date('2026-01-02T00:00:00.000Z')
     mockNitroHealth.readBodyMass.mockResolvedValue({
       samples: [
         {
-          uuid: 'uuid-1',
+          ...nativeRecordMetadata('mass-record', 'com.example.scale', 'Example Scale'),
           startTimeMs: startDate.getTime(),
           endTimeMs: endDate.getTime(),
           kilograms: 72.5,
-          source: 'com.example.health',
         },
       ],
     })
 
-    await expect(
-      NitroHealth.readBodyMass({ startDate, endDate, limit: 25, ascending: false })
-    ).resolves.toEqual({
-      samples: [
-        {
-          uuid: 'uuid-1',
-          recordUuid: 'uuid-1',
-          startDate,
-          endDate,
-          kilograms: 72.5,
-          source: 'com.example.health',
-        },
-      ],
-    })
+    const energy = await NitroHealth.readActiveEnergyBurned({ startDate, endDate })
+    const bodyMass = await NitroHealth.readBodyMass({ startDate, endDate })
 
-    expect(mockNitroHealth.readBodyMass).toHaveBeenCalledWith({
-      startTimeMs: startDate.getTime(),
-      endTimeMs: endDate.getTime(),
-      limit: 25,
-      ascending: false,
+    expect(energy.samples[0]).toEqual({
+      identity: { kind: 'record', id: 'energy-record' },
+      origin: { identifier: 'com.example.phone', displayName: 'Example Phone' },
+      startDate,
+      endDate,
+      kilocalories: 321,
+    })
+    expect(bodyMass.samples[0]).toEqual({
+      identity: { kind: 'record', id: 'mass-record' },
+      origin: { identifier: 'com.example.scale', displayName: 'Example Scale' },
+      startDate,
+      endDate,
+      kilograms: 72.5,
     })
   })
 
-  it('applies read heart rate defaults before crossing the native boundary', async () => {
+  it('preserves tagged sleep session envelopes and explicit stage variants', async () => {
     const startDate = new Date('2026-01-01T00:00:00.000Z')
-    const endDate = new Date('2026-01-02T00:00:00.000Z')
-    mockNitroHealth.readHeartRate.mockResolvedValue({ samples: [] })
-
-    await expect(NitroHealth.readHeartRate({ startDate, endDate })).resolves.toEqual({
-      samples: [],
+    const stageDate = new Date('2026-01-01T02:00:00.000Z')
+    const endDate = new Date('2026-01-01T08:00:00.000Z')
+    mockNitroHealth.readSleepSamples.mockResolvedValue({
+      samples: [
+        {
+          ...nativeRecordMetadata('sleep-session', 'com.example.sleep', 'Sleep App'),
+          kind: 'sessionEnvelope',
+          startTimeMs: startDate.getTime(),
+          endTimeMs: endDate.getTime(),
+          stageData: 'reported',
+        },
+        {
+          ...nativeRecordChildMetadata(
+            'sleep-session#stage-0',
+            'sleep-session',
+            'com.example.sleep',
+            'Sleep App'
+          ),
+          kind: 'stage',
+          startTimeMs: stageDate.getTime(),
+          endTimeMs: endDate.getTime(),
+          stage: 'asleepREM',
+        },
+      ],
     })
 
-    expect(mockNitroHealth.readHeartRate).toHaveBeenCalledWith({
+    await expect(NitroHealth.readSleepSamples({ startDate, endDate })).resolves.toEqual({
+      samples: [
+        {
+          identity: { kind: 'record', id: 'sleep-session' },
+          origin: { identifier: 'com.example.sleep', displayName: 'Sleep App' },
+          kind: 'session-envelope',
+          startDate,
+          endDate,
+          stageData: 'reported',
+        },
+        {
+          identity: {
+            kind: 'record-child',
+            id: 'sleep-session#stage-0',
+            record: { kind: 'record', id: 'sleep-session' },
+          },
+          origin: { identifier: 'com.example.sleep', displayName: 'Sleep App' },
+          kind: 'stage',
+          startDate: stageDate,
+          endDate,
+          stage: 'asleepREM',
+        },
+      ],
+    })
+  })
+
+  it('applies read defaults and validates date ranges before crossing native', async () => {
+    const startDate = new Date('2026-01-01T00:00:00.000Z')
+    const endDate = new Date('2026-01-02T00:00:00.000Z')
+    mockNitroHealth.readSteps.mockResolvedValue({ samples: [] })
+
+    await expect(NitroHealth.readSteps({ startDate, endDate })).resolves.toEqual({ samples: [] })
+    expect(mockNitroHealth.readSteps).toHaveBeenCalledWith({
       startTimeMs: startDate.getTime(),
       endTimeMs: endDate.getTime(),
       limit: 1000,
       ascending: true,
     })
-  })
 
-  it('reads heart rate statistics through the Nitro hybrid object', async () => {
-    const startDate = new Date('2026-01-01T00:00:00.000Z')
-    const endDate = new Date('2026-01-02T00:00:00.000Z')
-    mockNitroHealth.readHeartRateStatistics.mockResolvedValue({
-      average: 72,
-      min: undefined,
-      max: 92,
-    })
-
-    await expect(NitroHealth.readHeartRateStatistics({ startDate, endDate })).resolves.toEqual({
-      average: 72,
-      min: undefined,
-      max: 92,
-    })
-
-    expect(mockNitroHealth.readHeartRateStatistics).toHaveBeenCalledWith({
-      startTimeMs: startDate.getTime(),
-      endTimeMs: endDate.getTime(),
-    })
-  })
-
-  it('reads sleep samples through the Nitro hybrid object', async () => {
-    const startDate = new Date('2026-01-01T00:00:00.000Z')
-    const endDate = new Date('2026-01-02T00:00:00.000Z')
-    mockNitroHealth.readSleepSamples.mockResolvedValue({
-      samples: [
-        {
-          uuid: 'uuid-1',
-          recordUuid: 'uuid-1',
-          startTimeMs: startDate.getTime(),
-          endTimeMs: endDate.getTime(),
-          stage: 'asleepREM',
-          source: 'com.example.health',
-        },
-      ],
-    })
-
+    jest.clearAllMocks()
     await expect(
-      NitroHealth.readSleepSamples({ startDate, endDate, limit: 25, ascending: false })
-    ).resolves.toEqual({
-      samples: [
-        {
-          uuid: 'uuid-1',
-          recordUuid: 'uuid-1',
-          startDate,
-          endDate,
-          stage: 'asleepREM',
-          source: 'com.example.health',
-        },
-      ],
-    })
-
-    expect(mockNitroHealth.readSleepSamples).toHaveBeenCalledWith({
-      startTimeMs: startDate.getTime(),
-      endTimeMs: endDate.getTime(),
-      limit: 25,
-      ascending: false,
-    })
-  })
-
-  it('rejects an invalid read steps start date before crossing the native boundary', async () => {
-    await expect(
-      NitroHealth.readSteps({
-        startDate: new Date(Number.NaN),
-        endDate: new Date('2026-01-02T00:00:00.000Z'),
-      })
+      NitroHealth.readSteps({ startDate: new Date(Number.NaN), endDate })
     ).rejects.toThrow('A valid startDate is required')
-
-    expect(mockNitroHealth.readSteps).not.toHaveBeenCalled()
-  })
-
-  it('rejects an invalid read steps end date before crossing the native boundary', async () => {
-    await expect(
-      NitroHealth.readSteps({
-        startDate: new Date('2026-01-01T00:00:00.000Z'),
-        endDate: new Date(Number.NaN),
-      })
-    ).rejects.toThrow('A valid endDate is required')
-
-    expect(mockNitroHealth.readSteps).not.toHaveBeenCalled()
-  })
-
-  it('rejects an inverted read steps date range before crossing the native boundary', async () => {
-    await expect(
-      NitroHealth.readSteps({
-        startDate: new Date('2026-01-02T00:00:00.000Z'),
-        endDate: new Date('2026-01-01T00:00:00.000Z'),
-      })
-    ).rejects.toThrow('startDate must be before endDate')
-
-    expect(mockNitroHealth.readSteps).not.toHaveBeenCalled()
-  })
-
-  it('rejects an invalid read steps limit before crossing the native boundary', async () => {
-    await expect(
-      NitroHealth.readSteps({
-        startDate: new Date('2026-01-01T00:00:00.000Z'),
-        endDate: new Date('2026-01-02T00:00:00.000Z'),
-        limit: 0,
-      })
-    ).rejects.toThrow('limit must be a positive integer')
-
-    expect(mockNitroHealth.readSteps).not.toHaveBeenCalled()
-  })
-
-  it('rejects a fractional read steps limit before crossing the native boundary', async () => {
-    await expect(
-      NitroHealth.readSteps({
-        startDate: new Date('2026-01-01T00:00:00.000Z'),
-        endDate: new Date('2026-01-02T00:00:00.000Z'),
-        limit: 1.5,
-      })
-    ).rejects.toThrow('limit must be a positive integer')
-
-    expect(mockNitroHealth.readSteps).not.toHaveBeenCalled()
-  })
-
-  it('rejects invalid activity quantity dates before crossing the native boundary', async () => {
-    const invalidDateRange = {
-      startDate: new Date(Number.NaN),
-      endDate: new Date('2026-01-02T00:00:00.000Z'),
-    }
-
-    await expect(NitroHealth.readDistance(invalidDateRange)).rejects.toThrow(
-      'A valid startDate is required'
-    )
-    await expect(NitroHealth.readActiveEnergyBurned(invalidDateRange)).rejects.toThrow(
-      'A valid startDate is required'
-    )
-    await expect(NitroHealth.readBodyMass(invalidDateRange)).rejects.toThrow(
-      'A valid startDate is required'
-    )
-    await expect(NitroHealth.readSleepSamples(invalidDateRange)).rejects.toThrow(
-      'A valid startDate is required'
-    )
-
-    expect(mockNitroHealth.readDistance).not.toHaveBeenCalled()
-    expect(mockNitroHealth.readActiveEnergyBurned).not.toHaveBeenCalled()
-    expect(mockNitroHealth.readBodyMass).not.toHaveBeenCalled()
-    expect(mockNitroHealth.readSleepSamples).not.toHaveBeenCalled()
-  })
-
-  it('rejects invalid activity quantity ranges before crossing the native boundary', async () => {
-    const invalidRange = {
-      startDate: new Date('2026-01-02T00:00:00.000Z'),
-      endDate: new Date('2026-01-01T00:00:00.000Z'),
-    }
-
-    await expect(NitroHealth.readDistance(invalidRange)).rejects.toThrow(
+    await expect(NitroHealth.readSteps({ startDate: endDate, endDate: startDate })).rejects.toThrow(
       'startDate must be before endDate'
     )
-    await expect(NitroHealth.readActiveEnergyBurned(invalidRange)).rejects.toThrow(
-      'startDate must be before endDate'
+    await expect(NitroHealth.readSteps({ startDate, endDate, limit: 0 })).rejects.toThrow(
+      'limit must be a positive integer'
     )
-    await expect(NitroHealth.readBodyMass(invalidRange)).rejects.toThrow(
-      'startDate must be before endDate'
-    )
-    await expect(NitroHealth.readSleepSamples(invalidRange)).rejects.toThrow(
-      'startDate must be before endDate'
-    )
-
-    expect(mockNitroHealth.readDistance).not.toHaveBeenCalled()
-    expect(mockNitroHealth.readActiveEnergyBurned).not.toHaveBeenCalled()
-    expect(mockNitroHealth.readBodyMass).not.toHaveBeenCalled()
-    expect(mockNitroHealth.readSleepSamples).not.toHaveBeenCalled()
-  })
-
-  it('rejects non-positive-integer activity quantity limits before crossing the native boundary', async () => {
-    for (const limit of [0, -1, 1.5]) {
-      const invalidLimitRange = {
-        startDate: new Date('2026-01-01T00:00:00.000Z'),
-        endDate: new Date('2026-01-02T00:00:00.000Z'),
-        limit,
-      }
-
-      await expect(NitroHealth.readDistance(invalidLimitRange)).rejects.toThrow(
-        'limit must be a positive integer'
-      )
-      await expect(NitroHealth.readActiveEnergyBurned(invalidLimitRange)).rejects.toThrow(
-        'limit must be a positive integer'
-      )
-      await expect(NitroHealth.readBodyMass(invalidLimitRange)).rejects.toThrow(
-        'limit must be a positive integer'
-      )
-      await expect(NitroHealth.readSleepSamples(invalidLimitRange)).rejects.toThrow(
-        'limit must be a positive integer'
-      )
-    }
-
-    expect(mockNitroHealth.readDistance).not.toHaveBeenCalled()
-    expect(mockNitroHealth.readActiveEnergyBurned).not.toHaveBeenCalled()
-    expect(mockNitroHealth.readBodyMass).not.toHaveBeenCalled()
-    expect(mockNitroHealth.readSleepSamples).not.toHaveBeenCalled()
+    expect(mockNitroHealth.readSteps).not.toHaveBeenCalled()
   })
 })

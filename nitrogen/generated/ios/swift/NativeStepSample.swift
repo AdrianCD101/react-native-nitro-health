@@ -18,13 +18,18 @@ public extension NativeStepSample {
   /**
    * Create a new instance of `NativeStepSample`.
    */
-  init(uuid: String, startTimeMs: Double, endTimeMs: Double, count: Double) {
-    self.init(std.string(uuid), startTimeMs, endTimeMs, count)
+  init(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, startTimeMs: Double, endTimeMs: Double, count: Double) {
+    self.init(identity, origin, startTimeMs, endTimeMs, count)
   }
 
   @inline(__always)
-  var uuid: String {
-    return String(self.__uuid)
+  var identity: NativeHealthSampleIdentity {
+    return self.__identity
+  }
+  
+  @inline(__always)
+  var origin: NativeHealthDataOrigin {
+    return self.__origin
   }
   
   @inline(__always)

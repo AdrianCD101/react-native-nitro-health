@@ -12,6 +12,8 @@ import androidx.health.connect.client.records.RestingHeartRateRecord
 import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.StepsRecord
 import androidx.health.connect.client.records.WeightRecord
+import com.margelo.nitro.nitrohealth.HealthPermissionStatus
+import com.margelo.nitro.nitrohealth.NativeHealthPermission
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Test
@@ -155,5 +157,46 @@ class HealthConnectPermissionUtilsTest {
         }
 
         assertEquals("Unsupported health permission access type: delete", error.message)
+    }
+
+    @Test
+    fun permissionStatusesPreserveRequestedEntriesAndOrder() {
+        val permissions = arrayOf(
+            NativeHealthPermission(accessType = "write", dataType = "steps"),
+            NativeHealthPermission(accessType = "read", dataType = "distance"),
+            NativeHealthPermission(accessType = "read", dataType = "steps")
+        )
+        val statuses = makePermissionStatusEntries(
+            permissions = permissions,
+            grantedHealthConnectPermissions = setOf(
+                HealthPermission.getReadPermission(StepsRecord::class)
+            )
+        )
+
+        assertEquals(permissions.toList(), statuses.map { it.permission })
+        assertEquals(
+            listOf(
+                HealthPermissionStatus.NOTGRANTED,
+                HealthPermissionStatus.NOTGRANTED,
+                HealthPermissionStatus.GRANTED
+            ),
+            statuses.map { it.status }
+        )
+    }
+
+    @Test
+    fun unavailablePermissionStatusesAreAllUnverifiable() {
+        val statuses = makePermissionStatusEntries(
+            permissions = arrayOf(
+                NativeHealthPermission(accessType = "read", dataType = "steps"),
+                NativeHealthPermission(accessType = "write", dataType = "distance")
+            ),
+            grantedHealthConnectPermissions = null
+        )
+
+        assertEquals(
+            listOf(HealthPermissionStatus.UNVERIFIABLE, HealthPermissionStatus.UNVERIFIABLE),
+            statuses.map { it.status }
+        )
     }
 }

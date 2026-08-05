@@ -47,11 +47,11 @@ extension HybridNitroHealth {
 
         let sampleType = try makeHealthKitSampleType(dataType: dataType)
         let label = makeHealthDataTypeLabel(dataType: dataType)
+        let anchor = try decodeChangesAnchor(changesToken, dataType: dataType)
 
         return Promise<NativeHealthChangesResult>.async {
             try await self.requireDeterminedReadAuthorization(for: sampleType, label: label)
 
-            let anchor = try self.decodeChangesAnchor(changesToken, dataType: dataType)
             let page = try await self.queryHealthKitChanges(
                 sampleType: sampleType,
                 anchor: anchor
@@ -60,7 +60,7 @@ extension HybridNitroHealth {
                 try self.makeUpsertChange(sample: $0, dataType: dataType)
             }
             changes.append(contentsOf: page.deletedObjects.map {
-                self.makeNativeHealthChange(type: "delete", recordUuid: $0.uuid.uuidString)
+                self.makeNativeHealthChange(type: "delete", recordId: $0.uuid.uuidString)
             })
 
             let hasMore = !page.samples.isEmpty || !page.deletedObjects.isEmpty
@@ -152,9 +152,10 @@ extension HybridNitroHealth {
             let quantitySample = try requireQuantitySample(sample, dataType: dataType)
             return makeNativeHealthChange(
                 type: "upsert",
-                recordUuid: uuid,
+                recordId: uuid,
                 stepSamples: [NativeStepSample(
-                    uuid: uuid,
+                    identity: quantitySample.nativeHealthSampleIdentity,
+                    origin: quantitySample.nativeHealthDataOrigin,
                     startTimeMs: startTimeMs,
                     endTimeMs: endTimeMs,
                     count: quantitySample.quantity.doubleValue(for: HKUnit.count())
@@ -164,65 +165,67 @@ extension HybridNitroHealth {
             let quantitySample = try requireQuantitySample(sample, dataType: dataType)
             return makeNativeHealthChange(
                 type: "upsert",
-                recordUuid: uuid,
+                recordId: uuid,
                 heartRateSamples: [NativeHeartRateSample(
-                    uuid: uuid,
-                    recordUuid: uuid,
+                    identity: quantitySample.nativeHealthSampleIdentity,
+                    origin: quantitySample.nativeHealthDataOrigin,
                     timeMs: startTimeMs,
                     bpm: quantitySample.quantity.doubleValue(
                         for: HKUnit.count().unitDivided(by: HKUnit.minute())
-                    ),
-                    source: quantitySample.sourceRevision.source.name
+                    )
                 )]
             )
         case "restingHeartRate":
             let quantitySample = try requireQuantitySample(sample, dataType: dataType)
             return makeNativeHealthChange(
                 type: "upsert",
-                recordUuid: uuid,
+                recordId: uuid,
                 restingHeartRateSamples: [NativeRestingHeartRateSample(
-                    uuid: uuid,
+                    identity: quantitySample.nativeHealthSampleIdentity,
+                    origin: quantitySample.nativeHealthDataOrigin,
                     timeMs: startTimeMs,
                     bpm: quantitySample.quantity.doubleValue(
                         for: HKUnit.count().unitDivided(by: HKUnit.minute())
-                    ),
-                    source: quantitySample.sourceRevision.source.name
+                    )
                 )]
             )
         case "heartRateVariability":
             let quantitySample = try requireQuantitySample(sample, dataType: dataType)
             return makeNativeHealthChange(
                 type: "upsert",
-                recordUuid: uuid,
+                recordId: uuid,
                 heartRateVariabilitySamples: [NativeHeartRateVariabilitySample(
-                    uuid: uuid,
+                    identity: quantitySample.nativeHealthSampleIdentity,
+                    origin: quantitySample.nativeHealthDataOrigin,
                     timeMs: startTimeMs,
                     milliseconds: quantitySample.quantity.doubleValue(
                         for: HKUnit.secondUnit(with: .milli)
                     ),
-                    method: "sdnn",
-                    source: quantitySample.sourceRevision.source.name
+                    method: "sdnn"
                 )]
             )
         case "distance":
             let quantitySample = try requireQuantitySample(sample, dataType: dataType)
             return makeNativeHealthChange(
                 type: "upsert",
-                recordUuid: uuid,
+                recordId: uuid,
                 distanceSamples: [NativeDistanceSample(
-                    uuid: uuid,
+                    identity: quantitySample.nativeHealthSampleIdentity,
+                    origin: quantitySample.nativeHealthDataOrigin,
                     startTimeMs: startTimeMs,
                     endTimeMs: endTimeMs,
-                    distanceMeters: quantitySample.quantity.doubleValue(for: HKUnit.meter())
+                    distanceMeters: quantitySample.quantity.doubleValue(for: HKUnit.meter()),
+                    scope: .walkingrunning
                 )]
             )
         case "activeEnergyBurned":
             let quantitySample = try requireQuantitySample(sample, dataType: dataType)
             return makeNativeHealthChange(
                 type: "upsert",
-                recordUuid: uuid,
+                recordId: uuid,
                 activeEnergyBurnedSamples: [NativeActiveEnergyBurnedSample(
-                    uuid: uuid,
+                    identity: quantitySample.nativeHealthSampleIdentity,
+                    origin: quantitySample.nativeHealthDataOrigin,
                     startTimeMs: startTimeMs,
                     endTimeMs: endTimeMs,
                     kilocalories: quantitySample.quantity.doubleValue(for: HKUnit.kilocalorie())
@@ -232,24 +235,24 @@ extension HybridNitroHealth {
             let quantitySample = try requireQuantitySample(sample, dataType: dataType)
             return makeNativeHealthChange(
                 type: "upsert",
-                recordUuid: uuid,
+                recordId: uuid,
                 oxygenSaturationSamples: [NativeOxygenSaturationSample(
-                    uuid: uuid,
+                    identity: quantitySample.nativeHealthSampleIdentity,
+                    origin: quantitySample.nativeHealthDataOrigin,
                     timeMs: startTimeMs,
-                    percentage: quantitySample.quantity.doubleValue(for: HKUnit.percent()) * 100,
-                    source: quantitySample.sourceRevision.source.name
+                    percentage: quantitySample.quantity.doubleValue(for: HKUnit.percent()) * 100
                 )]
             )
         case "height":
             let quantitySample = try requireQuantitySample(sample, dataType: dataType)
             return makeNativeHealthChange(
                 type: "upsert",
-                recordUuid: uuid,
+                recordId: uuid,
                 heightSamples: [NativeHeightSample(
-                    uuid: uuid,
+                    identity: quantitySample.nativeHealthSampleIdentity,
+                    origin: quantitySample.nativeHealthDataOrigin,
                     timeMs: startTimeMs,
-                    meters: quantitySample.quantity.doubleValue(for: HKUnit.meter()),
-                    source: quantitySample.sourceRevision.source.name
+                    meters: quantitySample.quantity.doubleValue(for: HKUnit.meter())
                 )]
             )
         case "sleep":
@@ -263,27 +266,20 @@ extension HybridNitroHealth {
 
             return makeNativeHealthChange(
                 type: "upsert",
-                recordUuid: uuid,
-                sleepSamples: [NativeSleepSample(
-                    uuid: uuid,
-                    recordUuid: uuid,
-                    startTimeMs: startTimeMs,
-                    endTimeMs: endTimeMs,
-                    stage: makeSleepStage(value: categorySample.value),
-                    source: categorySample.sourceRevision.source.name
-                )]
+                recordId: uuid,
+                sleepSamples: [categorySample.nativeSleepSample]
             )
         case "bodyMass":
             let quantitySample = try requireQuantitySample(sample, dataType: dataType)
             return makeNativeHealthChange(
                 type: "upsert",
-                recordUuid: uuid,
+                recordId: uuid,
                 bodyMassSamples: [NativeBodyMassSample(
-                    uuid: uuid,
+                    identity: quantitySample.nativeHealthSampleIdentity,
+                    origin: quantitySample.nativeHealthDataOrigin,
                     startTimeMs: startTimeMs,
                     endTimeMs: endTimeMs,
-                    kilograms: quantitySample.quantity.doubleValue(for: HKUnit.gramUnit(with: .kilo)),
-                    source: quantitySample.sourceRevision.source.name
+                    kilograms: quantitySample.quantity.doubleValue(for: HKUnit.gramUnit(with: .kilo))
                 )]
             )
         case "workout":
@@ -297,20 +293,8 @@ extension HybridNitroHealth {
 
             return makeNativeHealthChange(
                 type: "upsert",
-                recordUuid: uuid,
-                workoutSamples: [NativeWorkoutSample(
-                    uuid: uuid,
-                    startTimeMs: startTimeMs,
-                    endTimeMs: endTimeMs,
-                    durationSeconds: workout.duration,
-                    activityType: makeWorkoutActivityType(
-                        rawValue: workout.workoutActivityType.rawValue
-                    ),
-                    title: workout.metadata?[HKMetadataKeyWorkoutBrandName] as? String,
-                    source: workout.sourceRevision.source.name,
-                    totalDistanceMeters: workout.legacyTotalDistanceMeters,
-                    totalEnergyBurnedKcal: workout.legacyTotalEnergyBurnedKcal
-                )]
+                recordId: uuid,
+                workoutSamples: [workout.nativeWorkoutSample]
             )
         default:
             throw permissionError("Unsupported health data type: \(dataType)")
@@ -345,7 +329,7 @@ extension HybridNitroHealth {
 
     private func makeNativeHealthChange(
         type: String,
-        recordUuid: String,
+        recordId: String,
         stepSamples: [NativeStepSample]? = nil,
         heartRateSamples: [NativeHeartRateSample]? = nil,
         restingHeartRateSamples: [NativeRestingHeartRateSample]? = nil,
@@ -360,7 +344,7 @@ extension HybridNitroHealth {
     ) -> NativeHealthChange {
         return NativeHealthChange(
             type: type,
-            recordUuid: recordUuid,
+            recordId: recordId,
             stepSamples: stepSamples,
             heartRateSamples: heartRateSamples,
             restingHeartRateSamples: restingHeartRateSamples,

@@ -1,17 +1,26 @@
 import type { HybridObject } from 'react-native-nitro-modules'
-import type { AuthorizationRequestStatus } from '../AuthorizationRequestStatus'
 import type { BackgroundDeliveryFrequency } from '../BackgroundDeliveryFrequency'
-import type { BackgroundReadAuthorizationStatus } from '../BackgroundReadAuthorizationStatus'
-import type { HealthAvailabilityStatus } from '../HealthAvailabilityStatus'
 import type { NativeActiveEnergyBurnedSampleInput } from '../NativeActiveEnergyBurnedSampleInput'
 import type { NativeActiveEnergyBurnedSamplePage } from '../NativeActiveEnergyBurnedSamplePage'
+import type { NativeBackgroundChangesResult } from '../NativeBackgroundChangesResult'
 import type { NativeBodyMassSampleInput } from '../NativeBodyMassSampleInput'
 import type { NativeBodyMassSamplePage } from '../NativeBodyMassSamplePage'
 import type { NativeDistanceSampleInput } from '../NativeDistanceSampleInput'
 import type { NativeDistanceSamplePage } from '../NativeDistanceSamplePage'
+import type { NativeDistanceWriteResult } from '../NativeDistanceWriteResult'
 import type { NativeHealthAuthorizationResult } from '../NativeHealthAuthorizationResult'
+import type {
+  NativeHealthAvailability,
+  NativeHealthAvailabilityRecoveryResult,
+} from '../NativeHealthAvailability'
+import type {
+  NativeHealthAdditionalAccessStatus,
+  NativeBackgroundChangesMode,
+  NativeHealthCapabilities,
+} from '../NativeHealthCapabilities'
 import type { NativeHealthChangesResult } from '../NativeHealthChangesResult'
 import type { NativeHealthDateRangeQuery } from '../NativeHealthDateRangeQuery'
+import type { NativeHealthDeleteResult } from '../NativeHealthDeleteResult'
 import type { NativeHealthStatistics } from '../NativeHealthStatistics'
 import type { NativeHealthStatisticsQuery } from '../NativeHealthStatisticsQuery'
 import type { NativeHealthTimeRangeQuery } from '../NativeHealthTimeRangeQuery'
@@ -33,21 +42,25 @@ import type { NativeStepSampleInput } from '../NativeStepSampleInput'
 import type { NativeStepSamplePage } from '../NativeStepSamplePage'
 import type { NativeWorkoutSamplePage } from '../NativeWorkoutSamplePage'
 import type { NativeWorkoutSampleInput } from '../NativeWorkoutSampleInput'
+import type { NativePermissionWorkflowResult } from '../NativePermissionWorkflowResult'
 
 export interface NitroHealth extends HybridObject<{ ios: 'swift'; android: 'kotlin' }> {
-  isAvailable(): boolean
-  getAvailabilityStatus(): HealthAvailabilityStatus
-  openHealthConnectInstall(): boolean
-  openHealthSettings(): Promise<boolean>
-  enableBackgroundDelivery(dataType: string, frequency: BackgroundDeliveryFrequency): Promise<void>
-  disableBackgroundDelivery(dataType: string): Promise<void>
-  disableAllBackgroundDelivery(): Promise<void>
-  setOnChangeNotificationListener(
+  getAvailability(): NativeHealthAvailability
+  performAvailabilityRecovery(): Promise<NativeHealthAvailabilityRecoveryResult>
+  getCapabilities(): Promise<NativeHealthCapabilities>
+  requestAdditionalAccess(access: string): Promise<NativeHealthAdditionalAccessStatus>
+  managePermissions(): Promise<NativePermissionWorkflowResult>
+  revokeAllPermissions(): Promise<NativePermissionWorkflowResult>
+  getBackgroundChangesMode(): NativeBackgroundChangesMode
+  configureBackgroundChanges(
+    dataTypes: string[],
+    frequency: BackgroundDeliveryFrequency
+  ): Promise<NativeBackgroundChangesResult>
+  disableBackgroundChanges(dataTypes?: string[]): Promise<NativeBackgroundChangesResult>
+  setOnBackgroundChangeListener(
     listener: ((dataTypes: string[], deliveryId: string) => void) | undefined
-  ): void
-  acknowledgeChangeNotification(deliveryId: string): void
-  getBackgroundReadAuthorizationStatus(): Promise<BackgroundReadAuthorizationStatus>
-  requestBackgroundReadAuthorization(): Promise<BackgroundReadAuthorizationStatus>
+  ): boolean
+  acknowledgeBackgroundChange(deliveryId: string): boolean
   createChangesToken(dataType: string): Promise<string>
   getChanges(dataType: string, changesToken: string): Promise<NativeHealthChangesResult>
   readSteps(query: NativeHealthDateRangeQuery): Promise<NativeStepSamplePage>
@@ -71,7 +84,7 @@ export interface NitroHealth extends HybridObject<{ ios: 'swift'; android: 'kotl
   readSleepSamples(query: NativeHealthDateRangeQuery): Promise<NativeSleepSamplePage>
   readWorkouts(query: NativeHealthDateRangeQuery): Promise<NativeWorkoutSamplePage>
   saveSteps(samples: NativeStepSampleInput[]): Promise<void>
-  saveDistance(samples: NativeDistanceSampleInput[]): Promise<void>
+  saveDistance(samples: NativeDistanceSampleInput[]): Promise<NativeDistanceWriteResult>
   saveActiveEnergyBurned(samples: NativeActiveEnergyBurnedSampleInput[]): Promise<void>
   saveHeartRate(samples: NativeHeartRateSampleInput[]): Promise<void>
   saveBodyMass(samples: NativeBodyMassSampleInput[]): Promise<void>
@@ -80,14 +93,14 @@ export interface NitroHealth extends HybridObject<{ ios: 'swift'; android: 'kotl
   saveHeight(samples: NativeHeightSampleInput[]): Promise<void>
   saveSleepSessions(sessions: NativeSleepSessionInput[]): Promise<void>
   saveWorkout(workout: NativeWorkoutSampleInput): Promise<void>
-  deleteSamplesByUuids(dataType: string, uuids: string[]): Promise<void>
-  deleteSamplesByTimeRange(dataType: string, query: NativeHealthTimeRangeQuery): Promise<void>
+  deleteRecordsByIds(dataType: string, recordIds: string[]): Promise<NativeHealthDeleteResult>
+  deleteRecordsByTimeRange(
+    dataType: string,
+    query: NativeHealthTimeRangeQuery
+  ): Promise<NativeHealthDeleteResult>
   getPermissionStatuses(
     permissions: NativeHealthPermission[]
   ): Promise<NativeHealthPermissionStatusResult>
-  getRequestStatusForAuthorization(
-    permissions: NativeHealthPermission[]
-  ): Promise<AuthorizationRequestStatus>
   requestAuthorization(
     permissions: NativeHealthPermission[]
   ): Promise<NativeHealthAuthorizationResult>

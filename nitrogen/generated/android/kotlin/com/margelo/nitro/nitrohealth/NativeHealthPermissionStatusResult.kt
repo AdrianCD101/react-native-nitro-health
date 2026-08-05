@@ -20,7 +20,7 @@ import java.util.Objects
 data class NativeHealthPermissionStatusResult(
   @DoNotStrip
   @Keep
-  val availabilityStatus: HealthAvailabilityStatus,
+  val availability: NativeHealthAvailability,
   @DoNotStrip
   @Keep
   val statuses: Array<NativeHealthPermissionStatusEntry>
@@ -30,13 +30,13 @@ data class NativeHealthPermissionStatusResult(
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other !is NativeHealthPermissionStatusResult) return false
-    return Objects.deepEquals(this.availabilityStatus, other.availabilityStatus)
+    return Objects.deepEquals(this.availability, other.availability)
       && Objects.deepEquals(this.statuses, other.statuses)
   }
 
   override fun hashCode(): Int {
     return arrayOf<Any?>(
-      availabilityStatus,
+      availability,
       statuses
     ).contentDeepHashCode()
   }
@@ -49,8 +49,8 @@ data class NativeHealthPermissionStatusResult(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(availabilityStatus: HealthAvailabilityStatus, statuses: Array<NativeHealthPermissionStatusEntry>): NativeHealthPermissionStatusResult {
-      return NativeHealthPermissionStatusResult(availabilityStatus, statuses)
+    private fun fromCpp(availability: NativeHealthAvailability, statuses: Array<NativeHealthPermissionStatusEntry>): NativeHealthPermissionStatusResult {
+      return NativeHealthPermissionStatusResult(availability, statuses)
     }
   }
 }

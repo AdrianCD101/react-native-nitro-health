@@ -13,12 +13,22 @@
 #error NitroModules cannot be found! Are you sure you installed NitroModules properly?
 #endif
 
-// Forward declaration of `HealthAvailabilityStatus` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { enum class HealthAvailabilityStatus; }
+// Forward declaration of `NativeHealthAvailability` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthAvailability; }
+// Forward declaration of `NativeHealthAvailabilityRecoveryResult` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeHealthAvailabilityRecoveryResult; }
+// Forward declaration of `NativeHealthCapabilities` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthCapabilities; }
+// Forward declaration of `NativeHealthAdditionalAccessStatus` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeHealthAdditionalAccessStatus; }
+// Forward declaration of `NativePermissionWorkflowResult` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativePermissionWorkflowResult; }
+// Forward declaration of `NativeBackgroundChangesMode` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeBackgroundChangesMode; }
+// Forward declaration of `NativeBackgroundChangesResult` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeBackgroundChangesResult; }
 // Forward declaration of `BackgroundDeliveryFrequency` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class BackgroundDeliveryFrequency; }
-// Forward declaration of `BackgroundReadAuthorizationStatus` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { enum class BackgroundReadAuthorizationStatus; }
 // Forward declaration of `NativeHealthChangesResult` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthChangesResult; }
 // Forward declaration of `NativeStepSamplePage` to properly resolve imports.
@@ -55,6 +65,8 @@ namespace margelo::nitro::nitrohealth { struct NativeSleepSamplePage; }
 namespace margelo::nitro::nitrohealth { struct NativeWorkoutSamplePage; }
 // Forward declaration of `NativeStepSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeStepSampleInput; }
+// Forward declaration of `NativeDistanceWriteResult` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeDistanceWriteResult; }
 // Forward declaration of `NativeDistanceSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeDistanceSampleInput; }
 // Forward declaration of `NativeActiveEnergyBurnedSampleInput` to properly resolve imports.
@@ -73,23 +85,28 @@ namespace margelo::nitro::nitrohealth { struct NativeHeightSampleInput; }
 namespace margelo::nitro::nitrohealth { struct NativeSleepSessionInput; }
 // Forward declaration of `NativeWorkoutSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeWorkoutSampleInput; }
+// Forward declaration of `NativeHealthDeleteResult` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthDeleteResult; }
 // Forward declaration of `NativeHealthPermissionStatusResult` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthPermissionStatusResult; }
 // Forward declaration of `NativeHealthPermission` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthPermission; }
-// Forward declaration of `AuthorizationRequestStatus` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { enum class AuthorizationRequestStatus; }
 // Forward declaration of `NativeHealthAuthorizationResult` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthAuthorizationResult; }
 
-#include "HealthAvailabilityStatus.hpp"
+#include "NativeHealthAvailability.hpp"
+#include "NativeHealthAvailabilityRecoveryResult.hpp"
 #include <NitroModules/Promise.hpp>
+#include "NativeHealthCapabilities.hpp"
+#include "NativeHealthAdditionalAccessStatus.hpp"
 #include <string>
-#include "BackgroundDeliveryFrequency.hpp"
+#include "NativePermissionWorkflowResult.hpp"
+#include "NativeBackgroundChangesMode.hpp"
+#include "NativeBackgroundChangesResult.hpp"
 #include <vector>
-#include <functional>
+#include "BackgroundDeliveryFrequency.hpp"
 #include <optional>
-#include "BackgroundReadAuthorizationStatus.hpp"
+#include <functional>
 #include "NativeHealthChangesResult.hpp"
 #include "NativeStepSamplePage.hpp"
 #include "NativeHealthDateRangeQuery.hpp"
@@ -108,6 +125,7 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthAuthorizationResult; 
 #include "NativeSleepSamplePage.hpp"
 #include "NativeWorkoutSamplePage.hpp"
 #include "NativeStepSampleInput.hpp"
+#include "NativeDistanceWriteResult.hpp"
 #include "NativeDistanceSampleInput.hpp"
 #include "NativeActiveEnergyBurnedSampleInput.hpp"
 #include "NativeHeartRateSampleInput.hpp"
@@ -117,9 +135,9 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthAuthorizationResult; 
 #include "NativeHeightSampleInput.hpp"
 #include "NativeSleepSessionInput.hpp"
 #include "NativeWorkoutSampleInput.hpp"
+#include "NativeHealthDeleteResult.hpp"
 #include "NativeHealthPermissionStatusResult.hpp"
 #include "NativeHealthPermission.hpp"
-#include "AuthorizationRequestStatus.hpp"
 #include "NativeHealthAuthorizationResult.hpp"
 
 namespace margelo::nitro::nitrohealth {
@@ -153,17 +171,17 @@ namespace margelo::nitro::nitrohealth {
 
     public:
       // Methods
-      virtual bool isAvailable() = 0;
-      virtual HealthAvailabilityStatus getAvailabilityStatus() = 0;
-      virtual bool openHealthConnectInstall() = 0;
-      virtual std::shared_ptr<Promise<bool>> openHealthSettings() = 0;
-      virtual std::shared_ptr<Promise<void>> enableBackgroundDelivery(const std::string& dataType, BackgroundDeliveryFrequency frequency) = 0;
-      virtual std::shared_ptr<Promise<void>> disableBackgroundDelivery(const std::string& dataType) = 0;
-      virtual std::shared_ptr<Promise<void>> disableAllBackgroundDelivery() = 0;
-      virtual void setOnChangeNotificationListener(const std::optional<std::function<void(const std::vector<std::string>& /* dataTypes */, const std::string& /* deliveryId */)>>& listener) = 0;
-      virtual void acknowledgeChangeNotification(const std::string& deliveryId) = 0;
-      virtual std::shared_ptr<Promise<BackgroundReadAuthorizationStatus>> getBackgroundReadAuthorizationStatus() = 0;
-      virtual std::shared_ptr<Promise<BackgroundReadAuthorizationStatus>> requestBackgroundReadAuthorization() = 0;
+      virtual NativeHealthAvailability getAvailability() = 0;
+      virtual std::shared_ptr<Promise<NativeHealthAvailabilityRecoveryResult>> performAvailabilityRecovery() = 0;
+      virtual std::shared_ptr<Promise<NativeHealthCapabilities>> getCapabilities() = 0;
+      virtual std::shared_ptr<Promise<NativeHealthAdditionalAccessStatus>> requestAdditionalAccess(const std::string& access) = 0;
+      virtual std::shared_ptr<Promise<NativePermissionWorkflowResult>> managePermissions() = 0;
+      virtual std::shared_ptr<Promise<NativePermissionWorkflowResult>> revokeAllPermissions() = 0;
+      virtual NativeBackgroundChangesMode getBackgroundChangesMode() = 0;
+      virtual std::shared_ptr<Promise<NativeBackgroundChangesResult>> configureBackgroundChanges(const std::vector<std::string>& dataTypes, BackgroundDeliveryFrequency frequency) = 0;
+      virtual std::shared_ptr<Promise<NativeBackgroundChangesResult>> disableBackgroundChanges(const std::optional<std::vector<std::string>>& dataTypes) = 0;
+      virtual bool setOnBackgroundChangeListener(const std::optional<std::function<void(const std::vector<std::string>& /* dataTypes */, const std::string& /* deliveryId */)>>& listener) = 0;
+      virtual bool acknowledgeBackgroundChange(const std::string& deliveryId) = 0;
       virtual std::shared_ptr<Promise<std::string>> createChangesToken(const std::string& dataType) = 0;
       virtual std::shared_ptr<Promise<NativeHealthChangesResult>> getChanges(const std::string& dataType, const std::string& changesToken) = 0;
       virtual std::shared_ptr<Promise<NativeStepSamplePage>> readSteps(const NativeHealthDateRangeQuery& query) = 0;
@@ -180,7 +198,7 @@ namespace margelo::nitro::nitrohealth {
       virtual std::shared_ptr<Promise<NativeSleepSamplePage>> readSleepSamples(const NativeHealthDateRangeQuery& query) = 0;
       virtual std::shared_ptr<Promise<NativeWorkoutSamplePage>> readWorkouts(const NativeHealthDateRangeQuery& query) = 0;
       virtual std::shared_ptr<Promise<void>> saveSteps(const std::vector<NativeStepSampleInput>& samples) = 0;
-      virtual std::shared_ptr<Promise<void>> saveDistance(const std::vector<NativeDistanceSampleInput>& samples) = 0;
+      virtual std::shared_ptr<Promise<NativeDistanceWriteResult>> saveDistance(const std::vector<NativeDistanceSampleInput>& samples) = 0;
       virtual std::shared_ptr<Promise<void>> saveActiveEnergyBurned(const std::vector<NativeActiveEnergyBurnedSampleInput>& samples) = 0;
       virtual std::shared_ptr<Promise<void>> saveHeartRate(const std::vector<NativeHeartRateSampleInput>& samples) = 0;
       virtual std::shared_ptr<Promise<void>> saveBodyMass(const std::vector<NativeBodyMassSampleInput>& samples) = 0;
@@ -189,10 +207,9 @@ namespace margelo::nitro::nitrohealth {
       virtual std::shared_ptr<Promise<void>> saveHeight(const std::vector<NativeHeightSampleInput>& samples) = 0;
       virtual std::shared_ptr<Promise<void>> saveSleepSessions(const std::vector<NativeSleepSessionInput>& sessions) = 0;
       virtual std::shared_ptr<Promise<void>> saveWorkout(const NativeWorkoutSampleInput& workout) = 0;
-      virtual std::shared_ptr<Promise<void>> deleteSamplesByUuids(const std::string& dataType, const std::vector<std::string>& uuids) = 0;
-      virtual std::shared_ptr<Promise<void>> deleteSamplesByTimeRange(const std::string& dataType, const NativeHealthTimeRangeQuery& query) = 0;
+      virtual std::shared_ptr<Promise<NativeHealthDeleteResult>> deleteRecordsByIds(const std::string& dataType, const std::vector<std::string>& recordIds) = 0;
+      virtual std::shared_ptr<Promise<NativeHealthDeleteResult>> deleteRecordsByTimeRange(const std::string& dataType, const NativeHealthTimeRangeQuery& query) = 0;
       virtual std::shared_ptr<Promise<NativeHealthPermissionStatusResult>> getPermissionStatuses(const std::vector<NativeHealthPermission>& permissions) = 0;
-      virtual std::shared_ptr<Promise<AuthorizationRequestStatus>> getRequestStatusForAuthorization(const std::vector<NativeHealthPermission>& permissions) = 0;
       virtual std::shared_ptr<Promise<NativeHealthAuthorizationResult>> requestAuthorization(const std::vector<NativeHealthPermission>& permissions) = 0;
 
     protected:

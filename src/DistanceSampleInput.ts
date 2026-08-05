@@ -2,6 +2,8 @@ import type { HealthRecordSync } from './HealthRecordSync'
 
 /** Distance sample accepted by {@linkcode NitroHealth.saveDistance}. */
 export interface DistanceSampleInput {
+  /** Declares that the supplied distance was measured while walking or running. */
+  scope: 'walking-running'
   /** Sample start time. */
   startDate: Date
   /** Sample end time. */

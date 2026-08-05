@@ -28,19 +28,16 @@
 #error NitroModules cannot be found! Are you sure you installed NitroModules properly?
 #endif
 
-// Forward declaration of `HealthAuthorizationStatus` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { enum class HealthAuthorizationStatus; }
-// Forward declaration of `HealthAvailabilityStatus` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { enum class HealthAvailabilityStatus; }
-// Forward declaration of `AuthorizationRequestStatus` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { enum class AuthorizationRequestStatus; }
-// Forward declaration of `NativeHealthPermission` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeHealthPermission; }
+// Forward declaration of `NativeHealthAuthorizationStatus` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeHealthAuthorizationStatus; }
+// Forward declaration of `NativeHealthAvailability` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthAvailability; }
+// Forward declaration of `NativeHealthPermissionStatusEntry` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthPermissionStatusEntry; }
 
-#include "HealthAuthorizationStatus.hpp"
-#include "HealthAvailabilityStatus.hpp"
-#include "AuthorizationRequestStatus.hpp"
-#include "NativeHealthPermission.hpp"
+#include "NativeHealthAuthorizationStatus.hpp"
+#include "NativeHealthAvailability.hpp"
+#include "NativeHealthPermissionStatusEntry.hpp"
 #include <vector>
 
 namespace margelo::nitro::nitrohealth {
@@ -50,16 +47,13 @@ namespace margelo::nitro::nitrohealth {
    */
   struct NativeHealthAuthorizationResult final {
   public:
-    HealthAuthorizationStatus status     SWIFT_PRIVATE;
-    HealthAvailabilityStatus availabilityStatus     SWIFT_PRIVATE;
-    AuthorizationRequestStatus requestStatus     SWIFT_PRIVATE;
-    std::vector<NativeHealthPermission> grantedPermissions     SWIFT_PRIVATE;
-    std::vector<NativeHealthPermission> deniedPermissions     SWIFT_PRIVATE;
-    std::vector<NativeHealthPermission> unverifiablePermissions     SWIFT_PRIVATE;
+    NativeHealthAuthorizationStatus status     SWIFT_PRIVATE;
+    NativeHealthAvailability availability     SWIFT_PRIVATE;
+    std::vector<NativeHealthPermissionStatusEntry> statuses     SWIFT_PRIVATE;
 
   public:
     NativeHealthAuthorizationResult() = default;
-    explicit NativeHealthAuthorizationResult(HealthAuthorizationStatus status, HealthAvailabilityStatus availabilityStatus, AuthorizationRequestStatus requestStatus, std::vector<NativeHealthPermission> grantedPermissions, std::vector<NativeHealthPermission> deniedPermissions, std::vector<NativeHealthPermission> unverifiablePermissions): status(status), availabilityStatus(availabilityStatus), requestStatus(requestStatus), grantedPermissions(grantedPermissions), deniedPermissions(deniedPermissions), unverifiablePermissions(unverifiablePermissions) {}
+    explicit NativeHealthAuthorizationResult(NativeHealthAuthorizationStatus status, NativeHealthAvailability availability, std::vector<NativeHealthPermissionStatusEntry> statuses): status(status), availability(availability), statuses(statuses) {}
 
   public:
     friend bool operator==(const NativeHealthAuthorizationResult& lhs, const NativeHealthAuthorizationResult& rhs) = default;
@@ -75,22 +69,16 @@ namespace margelo::nitro {
     static inline margelo::nitro::nitrohealth::NativeHealthAuthorizationResult fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       jsi::Object obj = arg.asObject(runtime);
       return margelo::nitro::nitrohealth::NativeHealthAuthorizationResult(
-        JSIConverter<margelo::nitro::nitrohealth::HealthAuthorizationStatus>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "status"))),
-        JSIConverter<margelo::nitro::nitrohealth::HealthAvailabilityStatus>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "availabilityStatus"))),
-        JSIConverter<margelo::nitro::nitrohealth::AuthorizationRequestStatus>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "requestStatus"))),
-        JSIConverter<std::vector<margelo::nitro::nitrohealth::NativeHealthPermission>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "grantedPermissions"))),
-        JSIConverter<std::vector<margelo::nitro::nitrohealth::NativeHealthPermission>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "deniedPermissions"))),
-        JSIConverter<std::vector<margelo::nitro::nitrohealth::NativeHealthPermission>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "unverifiablePermissions")))
+        JSIConverter<margelo::nitro::nitrohealth::NativeHealthAuthorizationStatus>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "status"))),
+        JSIConverter<margelo::nitro::nitrohealth::NativeHealthAvailability>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "availability"))),
+        JSIConverter<std::vector<margelo::nitro::nitrohealth::NativeHealthPermissionStatusEntry>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "statuses")))
       );
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::nitrohealth::NativeHealthAuthorizationResult& arg) {
       jsi::Object obj(runtime);
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "status"), JSIConverter<margelo::nitro::nitrohealth::HealthAuthorizationStatus>::toJSI(runtime, arg.status));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "availabilityStatus"), JSIConverter<margelo::nitro::nitrohealth::HealthAvailabilityStatus>::toJSI(runtime, arg.availabilityStatus));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "requestStatus"), JSIConverter<margelo::nitro::nitrohealth::AuthorizationRequestStatus>::toJSI(runtime, arg.requestStatus));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "grantedPermissions"), JSIConverter<std::vector<margelo::nitro::nitrohealth::NativeHealthPermission>>::toJSI(runtime, arg.grantedPermissions));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "deniedPermissions"), JSIConverter<std::vector<margelo::nitro::nitrohealth::NativeHealthPermission>>::toJSI(runtime, arg.deniedPermissions));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "unverifiablePermissions"), JSIConverter<std::vector<margelo::nitro::nitrohealth::NativeHealthPermission>>::toJSI(runtime, arg.unverifiablePermissions));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "status"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthAuthorizationStatus>::toJSI(runtime, arg.status));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "availability"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthAvailability>::toJSI(runtime, arg.availability));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "statuses"), JSIConverter<std::vector<margelo::nitro::nitrohealth::NativeHealthPermissionStatusEntry>>::toJSI(runtime, arg.statuses));
       return obj;
     }
     static inline bool canConvert(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -101,12 +89,9 @@ namespace margelo::nitro {
       if (!nitro::isPlainObject(runtime, obj)) {
         return false;
       }
-      if (!JSIConverter<margelo::nitro::nitrohealth::HealthAuthorizationStatus>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "status")))) return false;
-      if (!JSIConverter<margelo::nitro::nitrohealth::HealthAvailabilityStatus>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "availabilityStatus")))) return false;
-      if (!JSIConverter<margelo::nitro::nitrohealth::AuthorizationRequestStatus>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "requestStatus")))) return false;
-      if (!JSIConverter<std::vector<margelo::nitro::nitrohealth::NativeHealthPermission>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "grantedPermissions")))) return false;
-      if (!JSIConverter<std::vector<margelo::nitro::nitrohealth::NativeHealthPermission>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "deniedPermissions")))) return false;
-      if (!JSIConverter<std::vector<margelo::nitro::nitrohealth::NativeHealthPermission>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "unverifiablePermissions")))) return false;
+      if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthAuthorizationStatus>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "status")))) return false;
+      if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthAvailability>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "availability")))) return false;
+      if (!JSIConverter<std::vector<margelo::nitro::nitrohealth::NativeHealthPermissionStatusEntry>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "statuses")))) return false;
       return true;
     }
   };

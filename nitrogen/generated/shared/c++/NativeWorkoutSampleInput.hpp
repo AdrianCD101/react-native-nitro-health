@@ -43,14 +43,14 @@ namespace margelo::nitro::nitrohealth {
     double startTimeMs     SWIFT_PRIVATE;
     double endTimeMs     SWIFT_PRIVATE;
     std::string activityType     SWIFT_PRIVATE;
-    std::optional<std::string> title     SWIFT_PRIVATE;
+    std::optional<std::string> displayName     SWIFT_PRIVATE;
     std::optional<std::string> timeZone     SWIFT_PRIVATE;
     std::optional<std::string> syncId     SWIFT_PRIVATE;
     std::optional<double> syncVersion     SWIFT_PRIVATE;
 
   public:
     NativeWorkoutSampleInput() = default;
-    explicit NativeWorkoutSampleInput(double startTimeMs, double endTimeMs, std::string activityType, std::optional<std::string> title, std::optional<std::string> timeZone, std::optional<std::string> syncId, std::optional<double> syncVersion): startTimeMs(startTimeMs), endTimeMs(endTimeMs), activityType(activityType), title(title), timeZone(timeZone), syncId(syncId), syncVersion(syncVersion) {}
+    explicit NativeWorkoutSampleInput(double startTimeMs, double endTimeMs, std::string activityType, std::optional<std::string> displayName, std::optional<std::string> timeZone, std::optional<std::string> syncId, std::optional<double> syncVersion): startTimeMs(startTimeMs), endTimeMs(endTimeMs), activityType(activityType), displayName(displayName), timeZone(timeZone), syncId(syncId), syncVersion(syncVersion) {}
 
   public:
     friend bool operator==(const NativeWorkoutSampleInput& lhs, const NativeWorkoutSampleInput& rhs) = default;
@@ -69,7 +69,7 @@ namespace margelo::nitro {
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "startTimeMs"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs"))),
         JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "activityType"))),
-        JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "title"))),
+        JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "displayName"))),
         JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeZone"))),
         JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "syncId"))),
         JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "syncVersion")))
@@ -80,7 +80,7 @@ namespace margelo::nitro {
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "startTimeMs"), JSIConverter<double>::toJSI(runtime, arg.startTimeMs));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs"), JSIConverter<double>::toJSI(runtime, arg.endTimeMs));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "activityType"), JSIConverter<std::string>::toJSI(runtime, arg.activityType));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "title"), JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.title));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "displayName"), JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.displayName));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "timeZone"), JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.timeZone));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "syncId"), JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.syncId));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "syncVersion"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.syncVersion));
@@ -97,7 +97,7 @@ namespace margelo::nitro {
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "startTimeMs")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs")))) return false;
       if (!JSIConverter<std::string>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "activityType")))) return false;
-      if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "title")))) return false;
+      if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "displayName")))) return false;
       if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeZone")))) return false;
       if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "syncId")))) return false;
       if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "syncVersion")))) return false;

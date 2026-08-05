@@ -1,6 +1,9 @@
 package com.nitrohealth
 
 import androidx.health.connect.client.records.ExerciseSessionRecord
+import com.margelo.nitro.nitrohealth.NativeWorkoutActivityMapping
+import com.margelo.nitro.nitrohealth.NativeWorkoutActivityPortability
+import com.margelo.nitro.nitrohealth.NativeWorkoutActivityStatus
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -112,7 +115,7 @@ class WorkoutActivityTypeMappingTest {
             assertEquals(
                 "exerciseType $exerciseType should map to $expected",
                 expected,
-                makeWorkoutActivityType(exerciseType)
+                makeNativeWorkoutActivity(exerciseType).type
             )
         }
     }
@@ -121,35 +124,39 @@ class WorkoutActivityTypeMappingTest {
     fun foldsSubVariantsIntoParentActivity() {
         assertEquals(
             "running",
-            makeWorkoutActivityType(ExerciseSessionRecord.EXERCISE_TYPE_RUNNING_TREADMILL)
+            makeNativeWorkoutActivity(ExerciseSessionRecord.EXERCISE_TYPE_RUNNING_TREADMILL).type
         )
         assertEquals(
             "cycling",
-            makeWorkoutActivityType(ExerciseSessionRecord.EXERCISE_TYPE_BIKING_STATIONARY)
+            makeNativeWorkoutActivity(ExerciseSessionRecord.EXERCISE_TYPE_BIKING_STATIONARY).type
         )
         assertEquals(
             "swimming",
-            makeWorkoutActivityType(ExerciseSessionRecord.EXERCISE_TYPE_SWIMMING_POOL)
+            makeNativeWorkoutActivity(ExerciseSessionRecord.EXERCISE_TYPE_SWIMMING_POOL).type
         )
         assertEquals(
             "swimming",
-            makeWorkoutActivityType(ExerciseSessionRecord.EXERCISE_TYPE_SWIMMING_OPEN_WATER)
+            makeNativeWorkoutActivity(ExerciseSessionRecord.EXERCISE_TYPE_SWIMMING_OPEN_WATER).type
         )
         assertEquals(
             "strengthTraining",
-            makeWorkoutActivityType(17) // EXERCISE_TYPE_DEADLIFT (legacy)
+            makeNativeWorkoutActivity(17).type // EXERCISE_TYPE_DEADLIFT (legacy)
         )
         assertEquals(
             "rowing",
-            makeWorkoutActivityType(ExerciseSessionRecord.EXERCISE_TYPE_ROWING_MACHINE)
+            makeNativeWorkoutActivity(ExerciseSessionRecord.EXERCISE_TYPE_ROWING_MACHINE).type
         )
     }
 
     @Test
-    fun unknownValuesMapToOther() {
-        assertEquals("other", makeWorkoutActivityType(45)) // gap in the constant range
-        assertEquals("other", makeWorkoutActivityType(-1))
-        assertEquals("other", makeWorkoutActivityType(9999))
+    fun unknownValuesRemainUnknown() {
+        for (exerciseType in listOf(45, -1, 9999)) {
+            val activity = makeNativeWorkoutActivity(exerciseType)
+            assertEquals(NativeWorkoutActivityStatus.UNKNOWN, activity.status)
+            assertEquals(null, activity.type)
+            assertEquals(null, activity.portability)
+            assertEquals(null, activity.mapping)
+        }
     }
 
     @Test
@@ -158,7 +165,7 @@ class WorkoutActivityTypeMappingTest {
         for (activityType in writableActivityTypes) {
             assertEquals(
                 activityType,
-                makeWorkoutActivityType(toHealthConnectWorkoutActivityType(activityType))
+                makeNativeWorkoutActivity(toHealthConnectWorkoutActivityType(activityType)).type
             )
         }
     }
@@ -170,5 +177,25 @@ class WorkoutActivityTypeMappingTest {
                 toHealthConnectWorkoutActivityType(activityType)
             }
         }
+    }
+
+    @Test
+    fun reportsPortabilityAndFoldQuality() {
+        val running = makeNativeWorkoutActivity(ExerciseSessionRecord.EXERCISE_TYPE_RUNNING)
+        assertEquals(NativeWorkoutActivityStatus.KNOWN, running.status)
+        assertEquals(NativeWorkoutActivityPortability.PORTABLE, running.portability)
+        assertEquals(NativeWorkoutActivityMapping.EXACT, running.mapping)
+
+        val treadmill = makeNativeWorkoutActivity(
+            ExerciseSessionRecord.EXERCISE_TYPE_RUNNING_TREADMILL
+        )
+        assertEquals(NativeWorkoutActivityPortability.PORTABLE, treadmill.portability)
+        assertEquals(NativeWorkoutActivityMapping.BROADENED, treadmill.mapping)
+
+        val paragliding = makeNativeWorkoutActivity(
+            ExerciseSessionRecord.EXERCISE_TYPE_PARAGLIDING
+        )
+        assertEquals(NativeWorkoutActivityPortability.READONLY, paragliding.portability)
+        assertEquals(NativeWorkoutActivityMapping.EXACT, paragliding.mapping)
     }
 }

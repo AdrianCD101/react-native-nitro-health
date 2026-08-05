@@ -11,6 +11,10 @@ enum SleepStageMappingError: LocalizedError {
     }
 }
 
+enum HealthKitSleepIntervalMapping: Equatable {
+    case stage(String)
+}
+
 func healthKitSleepStageValue(_ stage: String) throws -> Int {
     switch stage {
     case "awake":
@@ -45,4 +49,8 @@ func normalizedSleepStage(value: Int) -> String {
     default:
         return "unknown"
     }
+}
+
+func healthKitSleepIntervalMapping(value: Int) -> HealthKitSleepIntervalMapping {
+    return .stage(normalizedSleepStage(value: value))
 }

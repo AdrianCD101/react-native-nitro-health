@@ -22,11 +22,16 @@ extension HybridNitroHealth {
         sampleType: HKSampleType,
         dataType: String,
         query: NativeHealthDateRangeQuery,
+        authorizationLabel: String,
         map: (HKSample) -> T?
     ) async throws -> (samples: [T], nextCursor: String?) {
         let cursor = try query.cursor.map {
             try decodeSampleCursor($0, dataType: dataType, ascending: query.ascending)
         }
+        try await requireDeterminedReadAuthorization(
+            for: sampleType,
+            label: authorizationLabel
+        )
         let sortDescriptors = [
             NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: query.ascending),
         ]

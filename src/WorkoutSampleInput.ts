@@ -9,8 +9,8 @@ export interface WorkoutSampleInput {
   endDate: Date
   /** Portable workout activity recorded during the interval. */
   activityType: WritableWorkoutActivityType
-  /** Optional user-visible workout title. */
-  title?: string
+  /** Optional user-visible label, stored using the closest native workout metadata. */
+  displayName?: string
   /** IANA time-zone identifier. Defaults to the device's current time zone. */
   timeZone?: string
   /** Optional logical identity that makes retries idempotent and higher versions replace. */

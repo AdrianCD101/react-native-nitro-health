@@ -1,34 +1,34 @@
 package com.nitrohealth
 
 /**
- * Validates uuids passed to deleteSamplesByUuids and returns them as the list Health Connect
+ * Validates record ids passed to deleteRecordsByIds and returns them as the list Health Connect
  * expects.
  *
  * readHeartRate and readSleepSamples flatten series/session records into individual readings
  * under synthetic "<recordId>#<index>" ids. Health Connect can only delete whole records, so
  * deleting by a synthetic id would have to delete the parent record and silently remove its
- * sibling readings — those ids are rejected and callers are pointed at deleteSamplesByTimeRange.
- * A stage-less sleep session keeps its bare record id (no '#') and stays deletable.
- *
- * Mirrors assertDeletableUuids in src/internal/validation.ts — keep the message strings in sync.
+ * sibling readings, so those ids are rejected.
+ * Session envelopes keep the bare parent record id and remain deletable.
  */
-internal fun ensureDeletableRecordIds(uuids: Array<String>): List<String> {
-    if (uuids.isEmpty()) {
-        throw IllegalArgumentException("At least one uuid is required")
+internal fun ensureDeletableRecordIds(recordIds: Array<String>): List<String> {
+    if (recordIds.isEmpty()) {
+        throw IllegalArgumentException("At least one record id is required")
     }
 
-    return uuids.mapIndexed { index, uuid ->
-        if (uuid.isBlank()) {
-            throw IllegalArgumentException("uuids[$index]: a non-empty uuid string is required")
-        }
-
-        if (uuid.contains('#')) {
+    return recordIds.mapIndexed { index, recordId ->
+        if (recordId.isBlank()) {
             throw IllegalArgumentException(
-                "uuids[$index]: synthetic reading ids (record id + '#index') cannot be deleted" +
-                    " individually; use deleteSamplesByTimeRange instead"
+                "recordIds[$index]: a non-empty record id string is required"
             )
         }
 
-        uuid
+        if (recordId.contains('#')) {
+            throw IllegalArgumentException(
+                "recordIds[$index]: synthetic child ids (record id + '#index') cannot be deleted;" +
+                    " pass the parent record id instead"
+            )
+        }
+
+        recordId
     }
 }

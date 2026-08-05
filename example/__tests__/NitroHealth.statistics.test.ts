@@ -57,6 +57,35 @@ describe('NitroHealth readStatistics contract', () => {
     expect(result[0].max).toBeUndefined()
   })
 
+  it('maps native distance scope onto every public statistics bucket', async () => {
+    const startDate = new Date('2026-01-01T00:00:00.000Z')
+    const endDate = new Date('2026-01-08T00:00:00.000Z')
+    mockNitroHealth.readStatistics.mockResolvedValue([
+      {
+        startTimeMs: startDate.getTime(),
+        endTimeMs: endDate.getTime(),
+        sum: 5432,
+        scope: 'activityUnspecified',
+      },
+    ])
+
+    await expect(
+      NitroHealth.readStatistics('distance', {
+        startDate,
+        endDate,
+        bucket: 'day',
+        metrics: ['sum'],
+      })
+    ).resolves.toEqual([
+      {
+        startDate,
+        endDate,
+        sum: 5432,
+        scope: 'activity-unspecified',
+      },
+    ])
+  })
+
   it('preserves whichever optional metrics are present and absent', async () => {
     const startDate = new Date('2026-01-01T00:00:00.000Z')
     const endDate = new Date('2026-01-08T00:00:00.000Z')

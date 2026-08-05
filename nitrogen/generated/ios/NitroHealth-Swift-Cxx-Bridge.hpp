@@ -8,14 +8,6 @@
 #pragma once
 
 // Forward declarations of C++ defined types
-// Forward declaration of `AuthorizationRequestStatus` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { enum class AuthorizationRequestStatus; }
-// Forward declaration of `BackgroundReadAuthorizationStatus` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { enum class BackgroundReadAuthorizationStatus; }
-// Forward declaration of `HealthAuthorizationStatus` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { enum class HealthAuthorizationStatus; }
-// Forward declaration of `HealthAvailabilityStatus` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { enum class HealthAvailabilityStatus; }
 // Forward declaration of `HealthPermissionStatus` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class HealthPermissionStatus; }
 // Forward declaration of `HybridNitroHealthSpec` to properly resolve imports.
@@ -26,30 +18,70 @@ namespace margelo::nitro::nitrohealth { struct NativeActiveEnergyBurnedSampleInp
 namespace margelo::nitro::nitrohealth { struct NativeActiveEnergyBurnedSamplePage; }
 // Forward declaration of `NativeActiveEnergyBurnedSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeActiveEnergyBurnedSample; }
+// Forward declaration of `NativeBackgroundChangesMode` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeBackgroundChangesMode; }
+// Forward declaration of `NativeBackgroundChangesResultStatus` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeBackgroundChangesResultStatus; }
+// Forward declaration of `NativeBackgroundChangesResult` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeBackgroundChangesResult; }
 // Forward declaration of `NativeBodyMassSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBodyMassSampleInput; }
 // Forward declaration of `NativeBodyMassSamplePage` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBodyMassSamplePage; }
 // Forward declaration of `NativeBodyMassSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBodyMassSample; }
+// Forward declaration of `NativeDeletedCountStatus` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeDeletedCountStatus; }
 // Forward declaration of `NativeDistanceSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeDistanceSampleInput; }
 // Forward declaration of `NativeDistanceSamplePage` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeDistanceSamplePage; }
 // Forward declaration of `NativeDistanceSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeDistanceSample; }
+// Forward declaration of `NativeDistanceScope` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeDistanceScope; }
+// Forward declaration of `NativeDistanceWriteResult` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeDistanceWriteResult; }
+// Forward declaration of `NativeHealthAdditionalAccessStatus` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeHealthAdditionalAccessStatus; }
 // Forward declaration of `NativeHealthAuthorizationResult` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthAuthorizationResult; }
+// Forward declaration of `NativeHealthAuthorizationStatus` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeHealthAuthorizationStatus; }
+// Forward declaration of `NativeHealthAvailabilityReason` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeHealthAvailabilityReason; }
+// Forward declaration of `NativeHealthAvailabilityRecoveryResult` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeHealthAvailabilityRecoveryResult; }
+// Forward declaration of `NativeHealthAvailabilityStatus` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeHealthAvailabilityStatus; }
+// Forward declaration of `NativeHealthAvailability` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthAvailability; }
+// Forward declaration of `NativeHealthCapabilities` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthCapabilities; }
 // Forward declaration of `NativeHealthChange` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthChange; }
 // Forward declaration of `NativeHealthChangesResult` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthChangesResult; }
+// Forward declaration of `NativeHealthDataOrigin` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthDataOrigin; }
+// Forward declaration of `NativeHealthDeleteResult` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthDeleteResult; }
+// Forward declaration of `NativeHealthDeleteStatus` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeHealthDeleteStatus; }
+// Forward declaration of `NativeHealthMetricValueStatus` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeHealthMetricValueStatus; }
+// Forward declaration of `NativeHealthMetricValue` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthMetricValue; }
 // Forward declaration of `NativeHealthPermissionStatusEntry` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthPermissionStatusEntry; }
 // Forward declaration of `NativeHealthPermissionStatusResult` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthPermissionStatusResult; }
 // Forward declaration of `NativeHealthPermission` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthPermission; }
+// Forward declaration of `NativeHealthSampleIdentityKind` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeHealthSampleIdentityKind; }
+// Forward declaration of `NativeHealthSampleIdentity` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthSampleIdentity; }
 // Forward declaration of `NativeHealthStatistics` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthStatistics; }
 // Forward declaration of `NativeHeartRateSampleInput` to properly resolve imports.
@@ -76,12 +108,22 @@ namespace margelo::nitro::nitrohealth { struct NativeOxygenSaturationSampleInput
 namespace margelo::nitro::nitrohealth { struct NativeOxygenSaturationSamplePage; }
 // Forward declaration of `NativeOxygenSaturationSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeOxygenSaturationSample; }
+// Forward declaration of `NativePermissionActionKind` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativePermissionActionKind; }
+// Forward declaration of `NativePermissionDestination` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativePermissionDestination; }
+// Forward declaration of `NativePermissionWorkflowResult` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativePermissionWorkflowResult; }
+// Forward declaration of `NativePermissionWorkflowStatus` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativePermissionWorkflowStatus; }
 // Forward declaration of `NativeRestingHeartRateSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeRestingHeartRateSampleInput; }
 // Forward declaration of `NativeRestingHeartRateSamplePage` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeRestingHeartRateSamplePage; }
 // Forward declaration of `NativeRestingHeartRateSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeRestingHeartRateSample; }
+// Forward declaration of `NativeSleepSampleKind` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeSleepSampleKind; }
 // Forward declaration of `NativeSleepSamplePage` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeSleepSamplePage; }
 // Forward declaration of `NativeSleepSample` to properly resolve imports.
@@ -90,12 +132,22 @@ namespace margelo::nitro::nitrohealth { struct NativeSleepSample; }
 namespace margelo::nitro::nitrohealth { struct NativeSleepSessionInput; }
 // Forward declaration of `NativeSleepSessionStageInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeSleepSessionStageInput; }
+// Forward declaration of `NativeSleepStageData` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeSleepStageData; }
 // Forward declaration of `NativeStepSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeStepSampleInput; }
 // Forward declaration of `NativeStepSamplePage` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeStepSamplePage; }
 // Forward declaration of `NativeStepSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeStepSample; }
+// Forward declaration of `NativeWorkoutActivityMapping` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeWorkoutActivityMapping; }
+// Forward declaration of `NativeWorkoutActivityPortability` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeWorkoutActivityPortability; }
+// Forward declaration of `NativeWorkoutActivityStatus` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeWorkoutActivityStatus; }
+// Forward declaration of `NativeWorkoutActivity` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeWorkoutActivity; }
 // Forward declaration of `NativeWorkoutSamplePage` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeWorkoutSamplePage; }
 // Forward declaration of `NativeWorkoutSample` to properly resolve imports.
@@ -106,27 +158,43 @@ namespace margelo::nitro::nitrohealth { struct NativeWorkoutSample; }
 namespace NitroHealth { class HybridNitroHealthSpec_cxx; }
 
 // Include C++ defined types
-#include "AuthorizationRequestStatus.hpp"
-#include "BackgroundReadAuthorizationStatus.hpp"
-#include "HealthAuthorizationStatus.hpp"
-#include "HealthAvailabilityStatus.hpp"
 #include "HealthPermissionStatus.hpp"
 #include "HybridNitroHealthSpec.hpp"
 #include "NativeActiveEnergyBurnedSample.hpp"
 #include "NativeActiveEnergyBurnedSampleInput.hpp"
 #include "NativeActiveEnergyBurnedSamplePage.hpp"
+#include "NativeBackgroundChangesMode.hpp"
+#include "NativeBackgroundChangesResult.hpp"
+#include "NativeBackgroundChangesResultStatus.hpp"
 #include "NativeBodyMassSample.hpp"
 #include "NativeBodyMassSampleInput.hpp"
 #include "NativeBodyMassSamplePage.hpp"
+#include "NativeDeletedCountStatus.hpp"
 #include "NativeDistanceSample.hpp"
 #include "NativeDistanceSampleInput.hpp"
 #include "NativeDistanceSamplePage.hpp"
+#include "NativeDistanceScope.hpp"
+#include "NativeDistanceWriteResult.hpp"
+#include "NativeHealthAdditionalAccessStatus.hpp"
 #include "NativeHealthAuthorizationResult.hpp"
+#include "NativeHealthAuthorizationStatus.hpp"
+#include "NativeHealthAvailability.hpp"
+#include "NativeHealthAvailabilityReason.hpp"
+#include "NativeHealthAvailabilityRecoveryResult.hpp"
+#include "NativeHealthAvailabilityStatus.hpp"
+#include "NativeHealthCapabilities.hpp"
 #include "NativeHealthChange.hpp"
 #include "NativeHealthChangesResult.hpp"
+#include "NativeHealthDataOrigin.hpp"
+#include "NativeHealthDeleteResult.hpp"
+#include "NativeHealthDeleteStatus.hpp"
+#include "NativeHealthMetricValue.hpp"
+#include "NativeHealthMetricValueStatus.hpp"
 #include "NativeHealthPermission.hpp"
 #include "NativeHealthPermissionStatusEntry.hpp"
 #include "NativeHealthPermissionStatusResult.hpp"
+#include "NativeHealthSampleIdentity.hpp"
+#include "NativeHealthSampleIdentityKind.hpp"
 #include "NativeHealthStatistics.hpp"
 #include "NativeHeartRateSample.hpp"
 #include "NativeHeartRateSampleInput.hpp"
@@ -140,16 +208,26 @@ namespace NitroHealth { class HybridNitroHealthSpec_cxx; }
 #include "NativeOxygenSaturationSample.hpp"
 #include "NativeOxygenSaturationSampleInput.hpp"
 #include "NativeOxygenSaturationSamplePage.hpp"
+#include "NativePermissionActionKind.hpp"
+#include "NativePermissionDestination.hpp"
+#include "NativePermissionWorkflowResult.hpp"
+#include "NativePermissionWorkflowStatus.hpp"
 #include "NativeRestingHeartRateSample.hpp"
 #include "NativeRestingHeartRateSampleInput.hpp"
 #include "NativeRestingHeartRateSamplePage.hpp"
 #include "NativeSleepSample.hpp"
+#include "NativeSleepSampleKind.hpp"
 #include "NativeSleepSamplePage.hpp"
 #include "NativeSleepSessionInput.hpp"
 #include "NativeSleepSessionStageInput.hpp"
+#include "NativeSleepStageData.hpp"
 #include "NativeStepSample.hpp"
 #include "NativeStepSampleInput.hpp"
 #include "NativeStepSamplePage.hpp"
+#include "NativeWorkoutActivity.hpp"
+#include "NativeWorkoutActivityMapping.hpp"
+#include "NativeWorkoutActivityPortability.hpp"
+#include "NativeWorkoutActivityStatus.hpp"
 #include "NativeWorkoutSample.hpp"
 #include "NativeWorkoutSamplePage.hpp"
 #include <NitroModules/Promise.hpp>
@@ -168,38 +246,68 @@ namespace NitroHealth { class HybridNitroHealthSpec_cxx; }
  */
 namespace margelo::nitro::nitrohealth::bridge::swift {
 
-  // pragma MARK: std::shared_ptr<Promise<bool>>
+  // pragma MARK: std::optional<NativeHealthAvailabilityReason>
   /**
-   * Specialized version of `std::shared_ptr<Promise<bool>>`.
+   * Specialized version of `std::optional<NativeHealthAvailabilityReason>`.
    */
-  using std__shared_ptr_Promise_bool__ = std::shared_ptr<Promise<bool>>;
-  inline std::shared_ptr<Promise<bool>> create_std__shared_ptr_Promise_bool__() noexcept {
-    return Promise<bool>::create();
+  using std__optional_NativeHealthAvailabilityReason_ = std::optional<NativeHealthAvailabilityReason>;
+  inline std::optional<NativeHealthAvailabilityReason> create_std__optional_NativeHealthAvailabilityReason_(const NativeHealthAvailabilityReason& value) noexcept {
+    return std::optional<NativeHealthAvailabilityReason>(value);
   }
-  inline PromiseHolder<bool> wrap_std__shared_ptr_Promise_bool__(std::shared_ptr<Promise<bool>> promise) noexcept {
-    return PromiseHolder<bool>(std::move(promise));
+  inline bool has_value_std__optional_NativeHealthAvailabilityReason_(const std::optional<NativeHealthAvailabilityReason>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline NativeHealthAvailabilityReason get_std__optional_NativeHealthAvailabilityReason_(const std::optional<NativeHealthAvailabilityReason>& optional) noexcept {
+    return optional.value();
   }
   
-  // pragma MARK: std::function<void(bool /* result */)>
+  // pragma MARK: std::optional<std::string>
   /**
-   * Specialized version of `std::function<void(bool)>`.
+   * Specialized version of `std::optional<std::string>`.
    */
-  using Func_void_bool = std::function<void(bool /* result */)>;
+  using std__optional_std__string_ = std::optional<std::string>;
+  inline std::optional<std::string> create_std__optional_std__string_(const std::string& value) noexcept {
+    return std::optional<std::string>(value);
+  }
+  inline bool has_value_std__optional_std__string_(const std::optional<std::string>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline std::string get_std__optional_std__string_(const std::optional<std::string>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::shared_ptr<Promise<NativeHealthAvailabilityRecoveryResult>>
   /**
-   * Wrapper class for a `std::function<void(bool / * result * /)>`, this can be used from Swift.
+   * Specialized version of `std::shared_ptr<Promise<NativeHealthAvailabilityRecoveryResult>>`.
    */
-  class Func_void_bool_Wrapper final {
+  using std__shared_ptr_Promise_NativeHealthAvailabilityRecoveryResult__ = std::shared_ptr<Promise<NativeHealthAvailabilityRecoveryResult>>;
+  inline std::shared_ptr<Promise<NativeHealthAvailabilityRecoveryResult>> create_std__shared_ptr_Promise_NativeHealthAvailabilityRecoveryResult__() noexcept {
+    return Promise<NativeHealthAvailabilityRecoveryResult>::create();
+  }
+  inline PromiseHolder<NativeHealthAvailabilityRecoveryResult> wrap_std__shared_ptr_Promise_NativeHealthAvailabilityRecoveryResult__(std::shared_ptr<Promise<NativeHealthAvailabilityRecoveryResult>> promise) noexcept {
+    return PromiseHolder<NativeHealthAvailabilityRecoveryResult>(std::move(promise));
+  }
+  
+  // pragma MARK: std::function<void(NativeHealthAvailabilityRecoveryResult /* result */)>
+  /**
+   * Specialized version of `std::function<void(NativeHealthAvailabilityRecoveryResult)>`.
+   */
+  using Func_void_NativeHealthAvailabilityRecoveryResult = std::function<void(NativeHealthAvailabilityRecoveryResult /* result */)>;
+  /**
+   * Wrapper class for a `std::function<void(NativeHealthAvailabilityRecoveryResult / * result * /)>`, this can be used from Swift.
+   */
+  class Func_void_NativeHealthAvailabilityRecoveryResult_Wrapper final {
   public:
-    explicit Func_void_bool_Wrapper(std::function<void(bool /* result */)>&& func): _function(std::make_unique<std::function<void(bool /* result */)>>(std::move(func))) {}
-    inline void call(bool result) const noexcept {
-      _function->operator()(result);
+    explicit Func_void_NativeHealthAvailabilityRecoveryResult_Wrapper(std::function<void(NativeHealthAvailabilityRecoveryResult /* result */)>&& func): _function(std::make_unique<std::function<void(NativeHealthAvailabilityRecoveryResult /* result */)>>(std::move(func))) {}
+    inline void call(int result) const noexcept {
+      _function->operator()(static_cast<NativeHealthAvailabilityRecoveryResult>(result));
     }
   private:
-    std::unique_ptr<std::function<void(bool /* result */)>> _function;
+    std::unique_ptr<std::function<void(NativeHealthAvailabilityRecoveryResult /* result */)>> _function;
   } SWIFT_NONCOPYABLE;
-  Func_void_bool create_Func_void_bool(void* NON_NULL swiftClosureWrapper) noexcept;
-  inline Func_void_bool_Wrapper wrap_Func_void_bool(Func_void_bool value) noexcept {
-    return Func_void_bool_Wrapper(std::move(value));
+  Func_void_NativeHealthAvailabilityRecoveryResult create_Func_void_NativeHealthAvailabilityRecoveryResult(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_NativeHealthAvailabilityRecoveryResult_Wrapper wrap_Func_void_NativeHealthAvailabilityRecoveryResult(Func_void_NativeHealthAvailabilityRecoveryResult value) noexcept {
+    return Func_void_NativeHealthAvailabilityRecoveryResult_Wrapper(std::move(value));
   }
   
   // pragma MARK: std::function<void(const std::exception_ptr& /* error */)>
@@ -224,38 +332,185 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return Func_void_std__exception_ptr_Wrapper(std::move(value));
   }
   
-  // pragma MARK: std::shared_ptr<Promise<void>>
+  // pragma MARK: std::shared_ptr<Promise<NativeHealthCapabilities>>
   /**
-   * Specialized version of `std::shared_ptr<Promise<void>>`.
+   * Specialized version of `std::shared_ptr<Promise<NativeHealthCapabilities>>`.
    */
-  using std__shared_ptr_Promise_void__ = std::shared_ptr<Promise<void>>;
-  inline std::shared_ptr<Promise<void>> create_std__shared_ptr_Promise_void__() noexcept {
-    return Promise<void>::create();
+  using std__shared_ptr_Promise_NativeHealthCapabilities__ = std::shared_ptr<Promise<NativeHealthCapabilities>>;
+  inline std::shared_ptr<Promise<NativeHealthCapabilities>> create_std__shared_ptr_Promise_NativeHealthCapabilities__() noexcept {
+    return Promise<NativeHealthCapabilities>::create();
   }
-  inline PromiseHolder<void> wrap_std__shared_ptr_Promise_void__(std::shared_ptr<Promise<void>> promise) noexcept {
-    return PromiseHolder<void>(std::move(promise));
+  inline PromiseHolder<NativeHealthCapabilities> wrap_std__shared_ptr_Promise_NativeHealthCapabilities__(std::shared_ptr<Promise<NativeHealthCapabilities>> promise) noexcept {
+    return PromiseHolder<NativeHealthCapabilities>(std::move(promise));
   }
   
-  // pragma MARK: std::function<void()>
+  // pragma MARK: std::function<void(const NativeHealthCapabilities& /* result */)>
   /**
-   * Specialized version of `std::function<void()>`.
+   * Specialized version of `std::function<void(const NativeHealthCapabilities&)>`.
    */
-  using Func_void = std::function<void()>;
+  using Func_void_NativeHealthCapabilities = std::function<void(const NativeHealthCapabilities& /* result */)>;
   /**
-   * Wrapper class for a `std::function<void()>`, this can be used from Swift.
+   * Wrapper class for a `std::function<void(const NativeHealthCapabilities& / * result * /)>`, this can be used from Swift.
    */
-  class Func_void_Wrapper final {
+  class Func_void_NativeHealthCapabilities_Wrapper final {
   public:
-    explicit Func_void_Wrapper(std::function<void()>&& func): _function(std::make_unique<std::function<void()>>(std::move(func))) {}
-    inline void call() const noexcept {
-      _function->operator()();
+    explicit Func_void_NativeHealthCapabilities_Wrapper(std::function<void(const NativeHealthCapabilities& /* result */)>&& func): _function(std::make_unique<std::function<void(const NativeHealthCapabilities& /* result */)>>(std::move(func))) {}
+    inline void call(NativeHealthCapabilities result) const noexcept {
+      _function->operator()(result);
     }
   private:
-    std::unique_ptr<std::function<void()>> _function;
+    std::unique_ptr<std::function<void(const NativeHealthCapabilities& /* result */)>> _function;
   } SWIFT_NONCOPYABLE;
-  Func_void create_Func_void(void* NON_NULL swiftClosureWrapper) noexcept;
-  inline Func_void_Wrapper wrap_Func_void(Func_void value) noexcept {
-    return Func_void_Wrapper(std::move(value));
+  Func_void_NativeHealthCapabilities create_Func_void_NativeHealthCapabilities(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_NativeHealthCapabilities_Wrapper wrap_Func_void_NativeHealthCapabilities(Func_void_NativeHealthCapabilities value) noexcept {
+    return Func_void_NativeHealthCapabilities_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::shared_ptr<Promise<NativeHealthAdditionalAccessStatus>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<NativeHealthAdditionalAccessStatus>>`.
+   */
+  using std__shared_ptr_Promise_NativeHealthAdditionalAccessStatus__ = std::shared_ptr<Promise<NativeHealthAdditionalAccessStatus>>;
+  inline std::shared_ptr<Promise<NativeHealthAdditionalAccessStatus>> create_std__shared_ptr_Promise_NativeHealthAdditionalAccessStatus__() noexcept {
+    return Promise<NativeHealthAdditionalAccessStatus>::create();
+  }
+  inline PromiseHolder<NativeHealthAdditionalAccessStatus> wrap_std__shared_ptr_Promise_NativeHealthAdditionalAccessStatus__(std::shared_ptr<Promise<NativeHealthAdditionalAccessStatus>> promise) noexcept {
+    return PromiseHolder<NativeHealthAdditionalAccessStatus>(std::move(promise));
+  }
+  
+  // pragma MARK: std::function<void(NativeHealthAdditionalAccessStatus /* result */)>
+  /**
+   * Specialized version of `std::function<void(NativeHealthAdditionalAccessStatus)>`.
+   */
+  using Func_void_NativeHealthAdditionalAccessStatus = std::function<void(NativeHealthAdditionalAccessStatus /* result */)>;
+  /**
+   * Wrapper class for a `std::function<void(NativeHealthAdditionalAccessStatus / * result * /)>`, this can be used from Swift.
+   */
+  class Func_void_NativeHealthAdditionalAccessStatus_Wrapper final {
+  public:
+    explicit Func_void_NativeHealthAdditionalAccessStatus_Wrapper(std::function<void(NativeHealthAdditionalAccessStatus /* result */)>&& func): _function(std::make_unique<std::function<void(NativeHealthAdditionalAccessStatus /* result */)>>(std::move(func))) {}
+    inline void call(int result) const noexcept {
+      _function->operator()(static_cast<NativeHealthAdditionalAccessStatus>(result));
+    }
+  private:
+    std::unique_ptr<std::function<void(NativeHealthAdditionalAccessStatus /* result */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_NativeHealthAdditionalAccessStatus create_Func_void_NativeHealthAdditionalAccessStatus(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_NativeHealthAdditionalAccessStatus_Wrapper wrap_Func_void_NativeHealthAdditionalAccessStatus(Func_void_NativeHealthAdditionalAccessStatus value) noexcept {
+    return Func_void_NativeHealthAdditionalAccessStatus_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::optional<NativePermissionActionKind>
+  /**
+   * Specialized version of `std::optional<NativePermissionActionKind>`.
+   */
+  using std__optional_NativePermissionActionKind_ = std::optional<NativePermissionActionKind>;
+  inline std::optional<NativePermissionActionKind> create_std__optional_NativePermissionActionKind_(const NativePermissionActionKind& value) noexcept {
+    return std::optional<NativePermissionActionKind>(value);
+  }
+  inline bool has_value_std__optional_NativePermissionActionKind_(const std::optional<NativePermissionActionKind>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline NativePermissionActionKind get_std__optional_NativePermissionActionKind_(const std::optional<NativePermissionActionKind>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::optional<NativePermissionDestination>
+  /**
+   * Specialized version of `std::optional<NativePermissionDestination>`.
+   */
+  using std__optional_NativePermissionDestination_ = std::optional<NativePermissionDestination>;
+  inline std::optional<NativePermissionDestination> create_std__optional_NativePermissionDestination_(const NativePermissionDestination& value) noexcept {
+    return std::optional<NativePermissionDestination>(value);
+  }
+  inline bool has_value_std__optional_NativePermissionDestination_(const std::optional<NativePermissionDestination>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline NativePermissionDestination get_std__optional_NativePermissionDestination_(const std::optional<NativePermissionDestination>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::optional<NativeHealthAvailability>
+  /**
+   * Specialized version of `std::optional<NativeHealthAvailability>`.
+   */
+  using std__optional_NativeHealthAvailability_ = std::optional<NativeHealthAvailability>;
+  inline std::optional<NativeHealthAvailability> create_std__optional_NativeHealthAvailability_(const NativeHealthAvailability& value) noexcept {
+    return std::optional<NativeHealthAvailability>(value);
+  }
+  inline bool has_value_std__optional_NativeHealthAvailability_(const std::optional<NativeHealthAvailability>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline NativeHealthAvailability get_std__optional_NativeHealthAvailability_(const std::optional<NativeHealthAvailability>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::shared_ptr<Promise<NativePermissionWorkflowResult>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<NativePermissionWorkflowResult>>`.
+   */
+  using std__shared_ptr_Promise_NativePermissionWorkflowResult__ = std::shared_ptr<Promise<NativePermissionWorkflowResult>>;
+  inline std::shared_ptr<Promise<NativePermissionWorkflowResult>> create_std__shared_ptr_Promise_NativePermissionWorkflowResult__() noexcept {
+    return Promise<NativePermissionWorkflowResult>::create();
+  }
+  inline PromiseHolder<NativePermissionWorkflowResult> wrap_std__shared_ptr_Promise_NativePermissionWorkflowResult__(std::shared_ptr<Promise<NativePermissionWorkflowResult>> promise) noexcept {
+    return PromiseHolder<NativePermissionWorkflowResult>(std::move(promise));
+  }
+  
+  // pragma MARK: std::function<void(const NativePermissionWorkflowResult& /* result */)>
+  /**
+   * Specialized version of `std::function<void(const NativePermissionWorkflowResult&)>`.
+   */
+  using Func_void_NativePermissionWorkflowResult = std::function<void(const NativePermissionWorkflowResult& /* result */)>;
+  /**
+   * Wrapper class for a `std::function<void(const NativePermissionWorkflowResult& / * result * /)>`, this can be used from Swift.
+   */
+  class Func_void_NativePermissionWorkflowResult_Wrapper final {
+  public:
+    explicit Func_void_NativePermissionWorkflowResult_Wrapper(std::function<void(const NativePermissionWorkflowResult& /* result */)>&& func): _function(std::make_unique<std::function<void(const NativePermissionWorkflowResult& /* result */)>>(std::move(func))) {}
+    inline void call(NativePermissionWorkflowResult result) const noexcept {
+      _function->operator()(result);
+    }
+  private:
+    std::unique_ptr<std::function<void(const NativePermissionWorkflowResult& /* result */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_NativePermissionWorkflowResult create_Func_void_NativePermissionWorkflowResult(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_NativePermissionWorkflowResult_Wrapper wrap_Func_void_NativePermissionWorkflowResult(Func_void_NativePermissionWorkflowResult value) noexcept {
+    return Func_void_NativePermissionWorkflowResult_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::shared_ptr<Promise<NativeBackgroundChangesResult>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<NativeBackgroundChangesResult>>`.
+   */
+  using std__shared_ptr_Promise_NativeBackgroundChangesResult__ = std::shared_ptr<Promise<NativeBackgroundChangesResult>>;
+  inline std::shared_ptr<Promise<NativeBackgroundChangesResult>> create_std__shared_ptr_Promise_NativeBackgroundChangesResult__() noexcept {
+    return Promise<NativeBackgroundChangesResult>::create();
+  }
+  inline PromiseHolder<NativeBackgroundChangesResult> wrap_std__shared_ptr_Promise_NativeBackgroundChangesResult__(std::shared_ptr<Promise<NativeBackgroundChangesResult>> promise) noexcept {
+    return PromiseHolder<NativeBackgroundChangesResult>(std::move(promise));
+  }
+  
+  // pragma MARK: std::function<void(const NativeBackgroundChangesResult& /* result */)>
+  /**
+   * Specialized version of `std::function<void(const NativeBackgroundChangesResult&)>`.
+   */
+  using Func_void_NativeBackgroundChangesResult = std::function<void(const NativeBackgroundChangesResult& /* result */)>;
+  /**
+   * Wrapper class for a `std::function<void(const NativeBackgroundChangesResult& / * result * /)>`, this can be used from Swift.
+   */
+  class Func_void_NativeBackgroundChangesResult_Wrapper final {
+  public:
+    explicit Func_void_NativeBackgroundChangesResult_Wrapper(std::function<void(const NativeBackgroundChangesResult& /* result */)>&& func): _function(std::make_unique<std::function<void(const NativeBackgroundChangesResult& /* result */)>>(std::move(func))) {}
+    inline void call(NativeBackgroundChangesResult result) const noexcept {
+      _function->operator()(result);
+    }
+  private:
+    std::unique_ptr<std::function<void(const NativeBackgroundChangesResult& /* result */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_NativeBackgroundChangesResult create_Func_void_NativeBackgroundChangesResult(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_NativeBackgroundChangesResult_Wrapper wrap_Func_void_NativeBackgroundChangesResult(Func_void_NativeBackgroundChangesResult value) noexcept {
+    return Func_void_NativeBackgroundChangesResult_Wrapper(std::move(value));
   }
   
   // pragma MARK: std::vector<std::string>
@@ -267,6 +522,21 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     std::vector<std::string> vector;
     vector.reserve(size);
     return vector;
+  }
+  
+  // pragma MARK: std::optional<std::vector<std::string>>
+  /**
+   * Specialized version of `std::optional<std::vector<std::string>>`.
+   */
+  using std__optional_std__vector_std__string__ = std::optional<std::vector<std::string>>;
+  inline std::optional<std::vector<std::string>> create_std__optional_std__vector_std__string__(const std::vector<std::string>& value) noexcept {
+    return std::optional<std::vector<std::string>>(value);
+  }
+  inline bool has_value_std__optional_std__vector_std__string__(const std::optional<std::vector<std::string>>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline std::vector<std::string> get_std__optional_std__vector_std__string__(const std::optional<std::vector<std::string>>& optional) noexcept {
+    return optional.value();
   }
   
   // pragma MARK: std::function<void(const std::vector<std::string>& /* dataTypes */, const std::string& /* deliveryId */)>
@@ -304,40 +574,6 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
   }
   inline std::function<void(const std::vector<std::string>& /* dataTypes */, const std::string& /* deliveryId */)> get_std__optional_std__function_void_const_std__vector_std__string______dataTypes_____const_std__string_____deliveryId______(const std::optional<std::function<void(const std::vector<std::string>& /* dataTypes */, const std::string& /* deliveryId */)>>& optional) noexcept {
     return optional.value();
-  }
-  
-  // pragma MARK: std::shared_ptr<Promise<BackgroundReadAuthorizationStatus>>
-  /**
-   * Specialized version of `std::shared_ptr<Promise<BackgroundReadAuthorizationStatus>>`.
-   */
-  using std__shared_ptr_Promise_BackgroundReadAuthorizationStatus__ = std::shared_ptr<Promise<BackgroundReadAuthorizationStatus>>;
-  inline std::shared_ptr<Promise<BackgroundReadAuthorizationStatus>> create_std__shared_ptr_Promise_BackgroundReadAuthorizationStatus__() noexcept {
-    return Promise<BackgroundReadAuthorizationStatus>::create();
-  }
-  inline PromiseHolder<BackgroundReadAuthorizationStatus> wrap_std__shared_ptr_Promise_BackgroundReadAuthorizationStatus__(std::shared_ptr<Promise<BackgroundReadAuthorizationStatus>> promise) noexcept {
-    return PromiseHolder<BackgroundReadAuthorizationStatus>(std::move(promise));
-  }
-  
-  // pragma MARK: std::function<void(BackgroundReadAuthorizationStatus /* result */)>
-  /**
-   * Specialized version of `std::function<void(BackgroundReadAuthorizationStatus)>`.
-   */
-  using Func_void_BackgroundReadAuthorizationStatus = std::function<void(BackgroundReadAuthorizationStatus /* result */)>;
-  /**
-   * Wrapper class for a `std::function<void(BackgroundReadAuthorizationStatus / * result * /)>`, this can be used from Swift.
-   */
-  class Func_void_BackgroundReadAuthorizationStatus_Wrapper final {
-  public:
-    explicit Func_void_BackgroundReadAuthorizationStatus_Wrapper(std::function<void(BackgroundReadAuthorizationStatus /* result */)>&& func): _function(std::make_unique<std::function<void(BackgroundReadAuthorizationStatus /* result */)>>(std::move(func))) {}
-    inline void call(int result) const noexcept {
-      _function->operator()(static_cast<BackgroundReadAuthorizationStatus>(result));
-    }
-  private:
-    std::unique_ptr<std::function<void(BackgroundReadAuthorizationStatus /* result */)>> _function;
-  } SWIFT_NONCOPYABLE;
-  Func_void_BackgroundReadAuthorizationStatus create_Func_void_BackgroundReadAuthorizationStatus(void* NON_NULL swiftClosureWrapper) noexcept;
-  inline Func_void_BackgroundReadAuthorizationStatus_Wrapper wrap_Func_void_BackgroundReadAuthorizationStatus(Func_void_BackgroundReadAuthorizationStatus value) noexcept {
-    return Func_void_BackgroundReadAuthorizationStatus_Wrapper(std::move(value));
   }
   
   // pragma MARK: std::shared_ptr<Promise<std::string>>
@@ -397,21 +633,6 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return optional.has_value();
   }
   inline std::vector<NativeStepSample> get_std__optional_std__vector_NativeStepSample__(const std::optional<std::vector<NativeStepSample>>& optional) noexcept {
-    return optional.value();
-  }
-  
-  // pragma MARK: std::optional<std::string>
-  /**
-   * Specialized version of `std::optional<std::string>`.
-   */
-  using std__optional_std__string_ = std::optional<std::string>;
-  inline std::optional<std::string> create_std__optional_std__string_(const std::string& value) noexcept {
-    return std::optional<std::string>(value);
-  }
-  inline bool has_value_std__optional_std__string_(const std::optional<std::string>& optional) noexcept {
-    return optional.has_value();
-  }
-  inline std::string get_std__optional_std__string_(const std::optional<std::string>& optional) noexcept {
     return optional.value();
   }
   
@@ -597,6 +818,21 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return optional.value();
   }
   
+  // pragma MARK: std::optional<NativeSleepStageData>
+  /**
+   * Specialized version of `std::optional<NativeSleepStageData>`.
+   */
+  using std__optional_NativeSleepStageData_ = std::optional<NativeSleepStageData>;
+  inline std::optional<NativeSleepStageData> create_std__optional_NativeSleepStageData_(const NativeSleepStageData& value) noexcept {
+    return std::optional<NativeSleepStageData>(value);
+  }
+  inline bool has_value_std__optional_NativeSleepStageData_(const std::optional<NativeSleepStageData>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline NativeSleepStageData get_std__optional_NativeSleepStageData_(const std::optional<NativeSleepStageData>& optional) noexcept {
+    return optional.value();
+  }
+  
   // pragma MARK: std::vector<NativeSleepSample>
   /**
    * Specialized version of `std::vector<NativeSleepSample>`.
@@ -664,6 +900,36 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return optional.value();
   }
   
+  // pragma MARK: std::optional<NativeWorkoutActivityPortability>
+  /**
+   * Specialized version of `std::optional<NativeWorkoutActivityPortability>`.
+   */
+  using std__optional_NativeWorkoutActivityPortability_ = std::optional<NativeWorkoutActivityPortability>;
+  inline std::optional<NativeWorkoutActivityPortability> create_std__optional_NativeWorkoutActivityPortability_(const NativeWorkoutActivityPortability& value) noexcept {
+    return std::optional<NativeWorkoutActivityPortability>(value);
+  }
+  inline bool has_value_std__optional_NativeWorkoutActivityPortability_(const std::optional<NativeWorkoutActivityPortability>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline NativeWorkoutActivityPortability get_std__optional_NativeWorkoutActivityPortability_(const std::optional<NativeWorkoutActivityPortability>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::optional<NativeWorkoutActivityMapping>
+  /**
+   * Specialized version of `std::optional<NativeWorkoutActivityMapping>`.
+   */
+  using std__optional_NativeWorkoutActivityMapping_ = std::optional<NativeWorkoutActivityMapping>;
+  inline std::optional<NativeWorkoutActivityMapping> create_std__optional_NativeWorkoutActivityMapping_(const NativeWorkoutActivityMapping& value) noexcept {
+    return std::optional<NativeWorkoutActivityMapping>(value);
+  }
+  inline bool has_value_std__optional_NativeWorkoutActivityMapping_(const std::optional<NativeWorkoutActivityMapping>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline NativeWorkoutActivityMapping get_std__optional_NativeWorkoutActivityMapping_(const std::optional<NativeWorkoutActivityMapping>& optional) noexcept {
+    return optional.value();
+  }
+  
   // pragma MARK: std::vector<NativeWorkoutSample>
   /**
    * Specialized version of `std::vector<NativeWorkoutSample>`.
@@ -688,6 +954,28 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
   }
   inline std::vector<NativeWorkoutSample> get_std__optional_std__vector_NativeWorkoutSample__(const std::optional<std::vector<NativeWorkoutSample>>& optional) noexcept {
     return optional.value();
+  }
+  
+  // pragma MARK: std::function<void()>
+  /**
+   * Specialized version of `std::function<void()>`.
+   */
+  using Func_void = std::function<void()>;
+  /**
+   * Wrapper class for a `std::function<void()>`, this can be used from Swift.
+   */
+  class Func_void_Wrapper final {
+  public:
+    explicit Func_void_Wrapper(std::function<void()>&& func): _function(std::make_unique<std::function<void()>>(std::move(func))) {}
+    inline void call() const noexcept {
+      _function->operator()();
+    }
+  private:
+    std::unique_ptr<std::function<void()>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void create_Func_void(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_Wrapper wrap_Func_void(Func_void value) noexcept {
+    return Func_void_Wrapper(std::move(value));
   }
   
   // pragma MARK: std::optional<std::function<void()>>
@@ -1090,6 +1378,21 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return Func_void_NativeHeightSamplePage_Wrapper(std::move(value));
   }
   
+  // pragma MARK: std::optional<NativeDistanceScope>
+  /**
+   * Specialized version of `std::optional<NativeDistanceScope>`.
+   */
+  using std__optional_NativeDistanceScope_ = std::optional<NativeDistanceScope>;
+  inline std::optional<NativeDistanceScope> create_std__optional_NativeDistanceScope_(const NativeDistanceScope& value) noexcept {
+    return std::optional<NativeDistanceScope>(value);
+  }
+  inline bool has_value_std__optional_NativeDistanceScope_(const std::optional<NativeDistanceScope>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline NativeDistanceScope get_std__optional_NativeDistanceScope_(const std::optional<NativeDistanceScope>& optional) noexcept {
+    return optional.value();
+  }
+  
   // pragma MARK: std::vector<NativeHealthStatistics>
   /**
    * Specialized version of `std::vector<NativeHealthStatistics>`.
@@ -1203,6 +1506,18 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return Func_void_NativeWorkoutSamplePage_Wrapper(std::move(value));
   }
   
+  // pragma MARK: std::shared_ptr<Promise<void>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<void>>`.
+   */
+  using std__shared_ptr_Promise_void__ = std::shared_ptr<Promise<void>>;
+  inline std::shared_ptr<Promise<void>> create_std__shared_ptr_Promise_void__() noexcept {
+    return Promise<void>::create();
+  }
+  inline PromiseHolder<void> wrap_std__shared_ptr_Promise_void__(std::shared_ptr<Promise<void>> promise) noexcept {
+    return PromiseHolder<void>(std::move(promise));
+  }
+  
   // pragma MARK: std::vector<NativeStepSampleInput>
   /**
    * Specialized version of `std::vector<NativeStepSampleInput>`.
@@ -1212,6 +1527,40 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     std::vector<NativeStepSampleInput> vector;
     vector.reserve(size);
     return vector;
+  }
+  
+  // pragma MARK: std::shared_ptr<Promise<NativeDistanceWriteResult>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<NativeDistanceWriteResult>>`.
+   */
+  using std__shared_ptr_Promise_NativeDistanceWriteResult__ = std::shared_ptr<Promise<NativeDistanceWriteResult>>;
+  inline std::shared_ptr<Promise<NativeDistanceWriteResult>> create_std__shared_ptr_Promise_NativeDistanceWriteResult__() noexcept {
+    return Promise<NativeDistanceWriteResult>::create();
+  }
+  inline PromiseHolder<NativeDistanceWriteResult> wrap_std__shared_ptr_Promise_NativeDistanceWriteResult__(std::shared_ptr<Promise<NativeDistanceWriteResult>> promise) noexcept {
+    return PromiseHolder<NativeDistanceWriteResult>(std::move(promise));
+  }
+  
+  // pragma MARK: std::function<void(const NativeDistanceWriteResult& /* result */)>
+  /**
+   * Specialized version of `std::function<void(const NativeDistanceWriteResult&)>`.
+   */
+  using Func_void_NativeDistanceWriteResult = std::function<void(const NativeDistanceWriteResult& /* result */)>;
+  /**
+   * Wrapper class for a `std::function<void(const NativeDistanceWriteResult& / * result * /)>`, this can be used from Swift.
+   */
+  class Func_void_NativeDistanceWriteResult_Wrapper final {
+  public:
+    explicit Func_void_NativeDistanceWriteResult_Wrapper(std::function<void(const NativeDistanceWriteResult& /* result */)>&& func): _function(std::make_unique<std::function<void(const NativeDistanceWriteResult& /* result */)>>(std::move(func))) {}
+    inline void call(NativeDistanceWriteResult result) const noexcept {
+      _function->operator()(result);
+    }
+  private:
+    std::unique_ptr<std::function<void(const NativeDistanceWriteResult& /* result */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_NativeDistanceWriteResult create_Func_void_NativeDistanceWriteResult(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_NativeDistanceWriteResult_Wrapper wrap_Func_void_NativeDistanceWriteResult(Func_void_NativeDistanceWriteResult value) noexcept {
+    return Func_void_NativeDistanceWriteResult_Wrapper(std::move(value));
   }
   
   // pragma MARK: std::vector<NativeDistanceSampleInput>
@@ -1313,6 +1662,40 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return vector;
   }
   
+  // pragma MARK: std::shared_ptr<Promise<NativeHealthDeleteResult>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<NativeHealthDeleteResult>>`.
+   */
+  using std__shared_ptr_Promise_NativeHealthDeleteResult__ = std::shared_ptr<Promise<NativeHealthDeleteResult>>;
+  inline std::shared_ptr<Promise<NativeHealthDeleteResult>> create_std__shared_ptr_Promise_NativeHealthDeleteResult__() noexcept {
+    return Promise<NativeHealthDeleteResult>::create();
+  }
+  inline PromiseHolder<NativeHealthDeleteResult> wrap_std__shared_ptr_Promise_NativeHealthDeleteResult__(std::shared_ptr<Promise<NativeHealthDeleteResult>> promise) noexcept {
+    return PromiseHolder<NativeHealthDeleteResult>(std::move(promise));
+  }
+  
+  // pragma MARK: std::function<void(const NativeHealthDeleteResult& /* result */)>
+  /**
+   * Specialized version of `std::function<void(const NativeHealthDeleteResult&)>`.
+   */
+  using Func_void_NativeHealthDeleteResult = std::function<void(const NativeHealthDeleteResult& /* result */)>;
+  /**
+   * Wrapper class for a `std::function<void(const NativeHealthDeleteResult& / * result * /)>`, this can be used from Swift.
+   */
+  class Func_void_NativeHealthDeleteResult_Wrapper final {
+  public:
+    explicit Func_void_NativeHealthDeleteResult_Wrapper(std::function<void(const NativeHealthDeleteResult& /* result */)>&& func): _function(std::make_unique<std::function<void(const NativeHealthDeleteResult& /* result */)>>(std::move(func))) {}
+    inline void call(NativeHealthDeleteResult result) const noexcept {
+      _function->operator()(result);
+    }
+  private:
+    std::unique_ptr<std::function<void(const NativeHealthDeleteResult& /* result */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_NativeHealthDeleteResult create_Func_void_NativeHealthDeleteResult(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_NativeHealthDeleteResult_Wrapper wrap_Func_void_NativeHealthDeleteResult(Func_void_NativeHealthDeleteResult value) noexcept {
+    return Func_void_NativeHealthDeleteResult_Wrapper(std::move(value));
+  }
+  
   // pragma MARK: std::vector<NativeHealthPermissionStatusEntry>
   /**
    * Specialized version of `std::vector<NativeHealthPermissionStatusEntry>`.
@@ -1323,7 +1706,7 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     vector.reserve(size);
     return vector;
   }
-
+  
   // pragma MARK: std::shared_ptr<Promise<NativeHealthPermissionStatusResult>>
   /**
    * Specialized version of `std::shared_ptr<Promise<NativeHealthPermissionStatusResult>>`.
@@ -1335,7 +1718,7 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
   inline PromiseHolder<NativeHealthPermissionStatusResult> wrap_std__shared_ptr_Promise_NativeHealthPermissionStatusResult__(std::shared_ptr<Promise<NativeHealthPermissionStatusResult>> promise) noexcept {
     return PromiseHolder<NativeHealthPermissionStatusResult>(std::move(promise));
   }
-
+  
   // pragma MARK: std::function<void(const NativeHealthPermissionStatusResult& /* result */)>
   /**
    * Specialized version of `std::function<void(const NativeHealthPermissionStatusResult&)>`.
@@ -1357,7 +1740,7 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
   inline Func_void_NativeHealthPermissionStatusResult_Wrapper wrap_Func_void_NativeHealthPermissionStatusResult(Func_void_NativeHealthPermissionStatusResult value) noexcept {
     return Func_void_NativeHealthPermissionStatusResult_Wrapper(std::move(value));
   }
-
+  
   // pragma MARK: std::vector<NativeHealthPermission>
   /**
    * Specialized version of `std::vector<NativeHealthPermission>`.
@@ -1367,40 +1750,6 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     std::vector<NativeHealthPermission> vector;
     vector.reserve(size);
     return vector;
-  }
-
-  // pragma MARK: std::shared_ptr<Promise<AuthorizationRequestStatus>>
-  /**
-   * Specialized version of `std::shared_ptr<Promise<AuthorizationRequestStatus>>`.
-   */
-  using std__shared_ptr_Promise_AuthorizationRequestStatus__ = std::shared_ptr<Promise<AuthorizationRequestStatus>>;
-  inline std::shared_ptr<Promise<AuthorizationRequestStatus>> create_std__shared_ptr_Promise_AuthorizationRequestStatus__() noexcept {
-    return Promise<AuthorizationRequestStatus>::create();
-  }
-  inline PromiseHolder<AuthorizationRequestStatus> wrap_std__shared_ptr_Promise_AuthorizationRequestStatus__(std::shared_ptr<Promise<AuthorizationRequestStatus>> promise) noexcept {
-    return PromiseHolder<AuthorizationRequestStatus>(std::move(promise));
-  }
-  
-  // pragma MARK: std::function<void(AuthorizationRequestStatus /* result */)>
-  /**
-   * Specialized version of `std::function<void(AuthorizationRequestStatus)>`.
-   */
-  using Func_void_AuthorizationRequestStatus = std::function<void(AuthorizationRequestStatus /* result */)>;
-  /**
-   * Wrapper class for a `std::function<void(AuthorizationRequestStatus / * result * /)>`, this can be used from Swift.
-   */
-  class Func_void_AuthorizationRequestStatus_Wrapper final {
-  public:
-    explicit Func_void_AuthorizationRequestStatus_Wrapper(std::function<void(AuthorizationRequestStatus /* result */)>&& func): _function(std::make_unique<std::function<void(AuthorizationRequestStatus /* result */)>>(std::move(func))) {}
-    inline void call(int result) const noexcept {
-      _function->operator()(static_cast<AuthorizationRequestStatus>(result));
-    }
-  private:
-    std::unique_ptr<std::function<void(AuthorizationRequestStatus /* result */)>> _function;
-  } SWIFT_NONCOPYABLE;
-  Func_void_AuthorizationRequestStatus create_Func_void_AuthorizationRequestStatus(void* NON_NULL swiftClosureWrapper) noexcept;
-  inline Func_void_AuthorizationRequestStatus_Wrapper wrap_Func_void_AuthorizationRequestStatus(Func_void_AuthorizationRequestStatus value) noexcept {
-    return Func_void_AuthorizationRequestStatus_Wrapper(std::move(value));
   }
   
   // pragma MARK: std::shared_ptr<Promise<NativeHealthAuthorizationResult>>
@@ -1449,6 +1798,69 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
   using std__weak_ptr_HybridNitroHealthSpec_ = std::weak_ptr<HybridNitroHealthSpec>;
   inline std__weak_ptr_HybridNitroHealthSpec_ weakify_std__shared_ptr_HybridNitroHealthSpec_(const std::shared_ptr<HybridNitroHealthSpec>& strong) noexcept { return strong; }
   
+  // pragma MARK: Result<NativeHealthAvailability>
+  using Result_NativeHealthAvailability_ = Result<NativeHealthAvailability>;
+  inline Result_NativeHealthAvailability_ create_Result_NativeHealthAvailability_(const NativeHealthAvailability& value) noexcept {
+    return Result<NativeHealthAvailability>::withValue(value);
+  }
+  inline Result_NativeHealthAvailability_ create_Result_NativeHealthAvailability_(const std::exception_ptr& error) noexcept {
+    return Result<NativeHealthAvailability>::withError(error);
+  }
+  
+  // pragma MARK: Result<std::shared_ptr<Promise<NativeHealthAvailabilityRecoveryResult>>>
+  using Result_std__shared_ptr_Promise_NativeHealthAvailabilityRecoveryResult___ = Result<std::shared_ptr<Promise<NativeHealthAvailabilityRecoveryResult>>>;
+  inline Result_std__shared_ptr_Promise_NativeHealthAvailabilityRecoveryResult___ create_Result_std__shared_ptr_Promise_NativeHealthAvailabilityRecoveryResult___(const std::shared_ptr<Promise<NativeHealthAvailabilityRecoveryResult>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<NativeHealthAvailabilityRecoveryResult>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_NativeHealthAvailabilityRecoveryResult___ create_Result_std__shared_ptr_Promise_NativeHealthAvailabilityRecoveryResult___(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<NativeHealthAvailabilityRecoveryResult>>>::withError(error);
+  }
+  
+  // pragma MARK: Result<std::shared_ptr<Promise<NativeHealthCapabilities>>>
+  using Result_std__shared_ptr_Promise_NativeHealthCapabilities___ = Result<std::shared_ptr<Promise<NativeHealthCapabilities>>>;
+  inline Result_std__shared_ptr_Promise_NativeHealthCapabilities___ create_Result_std__shared_ptr_Promise_NativeHealthCapabilities___(const std::shared_ptr<Promise<NativeHealthCapabilities>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<NativeHealthCapabilities>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_NativeHealthCapabilities___ create_Result_std__shared_ptr_Promise_NativeHealthCapabilities___(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<NativeHealthCapabilities>>>::withError(error);
+  }
+  
+  // pragma MARK: Result<std::shared_ptr<Promise<NativeHealthAdditionalAccessStatus>>>
+  using Result_std__shared_ptr_Promise_NativeHealthAdditionalAccessStatus___ = Result<std::shared_ptr<Promise<NativeHealthAdditionalAccessStatus>>>;
+  inline Result_std__shared_ptr_Promise_NativeHealthAdditionalAccessStatus___ create_Result_std__shared_ptr_Promise_NativeHealthAdditionalAccessStatus___(const std::shared_ptr<Promise<NativeHealthAdditionalAccessStatus>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<NativeHealthAdditionalAccessStatus>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_NativeHealthAdditionalAccessStatus___ create_Result_std__shared_ptr_Promise_NativeHealthAdditionalAccessStatus___(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<NativeHealthAdditionalAccessStatus>>>::withError(error);
+  }
+  
+  // pragma MARK: Result<std::shared_ptr<Promise<NativePermissionWorkflowResult>>>
+  using Result_std__shared_ptr_Promise_NativePermissionWorkflowResult___ = Result<std::shared_ptr<Promise<NativePermissionWorkflowResult>>>;
+  inline Result_std__shared_ptr_Promise_NativePermissionWorkflowResult___ create_Result_std__shared_ptr_Promise_NativePermissionWorkflowResult___(const std::shared_ptr<Promise<NativePermissionWorkflowResult>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<NativePermissionWorkflowResult>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_NativePermissionWorkflowResult___ create_Result_std__shared_ptr_Promise_NativePermissionWorkflowResult___(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<NativePermissionWorkflowResult>>>::withError(error);
+  }
+  
+  // pragma MARK: Result<NativeBackgroundChangesMode>
+  using Result_NativeBackgroundChangesMode_ = Result<NativeBackgroundChangesMode>;
+  inline Result_NativeBackgroundChangesMode_ create_Result_NativeBackgroundChangesMode_(NativeBackgroundChangesMode value) noexcept {
+    return Result<NativeBackgroundChangesMode>::withValue(std::move(value));
+  }
+  inline Result_NativeBackgroundChangesMode_ create_Result_NativeBackgroundChangesMode_(const std::exception_ptr& error) noexcept {
+    return Result<NativeBackgroundChangesMode>::withError(error);
+  }
+  
+  // pragma MARK: Result<std::shared_ptr<Promise<NativeBackgroundChangesResult>>>
+  using Result_std__shared_ptr_Promise_NativeBackgroundChangesResult___ = Result<std::shared_ptr<Promise<NativeBackgroundChangesResult>>>;
+  inline Result_std__shared_ptr_Promise_NativeBackgroundChangesResult___ create_Result_std__shared_ptr_Promise_NativeBackgroundChangesResult___(const std::shared_ptr<Promise<NativeBackgroundChangesResult>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<NativeBackgroundChangesResult>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_NativeBackgroundChangesResult___ create_Result_std__shared_ptr_Promise_NativeBackgroundChangesResult___(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<NativeBackgroundChangesResult>>>::withError(error);
+  }
+  
   // pragma MARK: Result<bool>
   using Result_bool_ = Result<bool>;
   inline Result_bool_ create_Result_bool_(bool value) noexcept {
@@ -1456,51 +1868,6 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
   }
   inline Result_bool_ create_Result_bool_(const std::exception_ptr& error) noexcept {
     return Result<bool>::withError(error);
-  }
-  
-  // pragma MARK: Result<HealthAvailabilityStatus>
-  using Result_HealthAvailabilityStatus_ = Result<HealthAvailabilityStatus>;
-  inline Result_HealthAvailabilityStatus_ create_Result_HealthAvailabilityStatus_(HealthAvailabilityStatus value) noexcept {
-    return Result<HealthAvailabilityStatus>::withValue(std::move(value));
-  }
-  inline Result_HealthAvailabilityStatus_ create_Result_HealthAvailabilityStatus_(const std::exception_ptr& error) noexcept {
-    return Result<HealthAvailabilityStatus>::withError(error);
-  }
-  
-  // pragma MARK: Result<std::shared_ptr<Promise<bool>>>
-  using Result_std__shared_ptr_Promise_bool___ = Result<std::shared_ptr<Promise<bool>>>;
-  inline Result_std__shared_ptr_Promise_bool___ create_Result_std__shared_ptr_Promise_bool___(const std::shared_ptr<Promise<bool>>& value) noexcept {
-    return Result<std::shared_ptr<Promise<bool>>>::withValue(value);
-  }
-  inline Result_std__shared_ptr_Promise_bool___ create_Result_std__shared_ptr_Promise_bool___(const std::exception_ptr& error) noexcept {
-    return Result<std::shared_ptr<Promise<bool>>>::withError(error);
-  }
-  
-  // pragma MARK: Result<std::shared_ptr<Promise<void>>>
-  using Result_std__shared_ptr_Promise_void___ = Result<std::shared_ptr<Promise<void>>>;
-  inline Result_std__shared_ptr_Promise_void___ create_Result_std__shared_ptr_Promise_void___(const std::shared_ptr<Promise<void>>& value) noexcept {
-    return Result<std::shared_ptr<Promise<void>>>::withValue(value);
-  }
-  inline Result_std__shared_ptr_Promise_void___ create_Result_std__shared_ptr_Promise_void___(const std::exception_ptr& error) noexcept {
-    return Result<std::shared_ptr<Promise<void>>>::withError(error);
-  }
-  
-  // pragma MARK: Result<void>
-  using Result_void_ = Result<void>;
-  inline Result_void_ create_Result_void_() noexcept {
-    return Result<void>::withValue();
-  }
-  inline Result_void_ create_Result_void_(const std::exception_ptr& error) noexcept {
-    return Result<void>::withError(error);
-  }
-  
-  // pragma MARK: Result<std::shared_ptr<Promise<BackgroundReadAuthorizationStatus>>>
-  using Result_std__shared_ptr_Promise_BackgroundReadAuthorizationStatus___ = Result<std::shared_ptr<Promise<BackgroundReadAuthorizationStatus>>>;
-  inline Result_std__shared_ptr_Promise_BackgroundReadAuthorizationStatus___ create_Result_std__shared_ptr_Promise_BackgroundReadAuthorizationStatus___(const std::shared_ptr<Promise<BackgroundReadAuthorizationStatus>>& value) noexcept {
-    return Result<std::shared_ptr<Promise<BackgroundReadAuthorizationStatus>>>::withValue(value);
-  }
-  inline Result_std__shared_ptr_Promise_BackgroundReadAuthorizationStatus___ create_Result_std__shared_ptr_Promise_BackgroundReadAuthorizationStatus___(const std::exception_ptr& error) noexcept {
-    return Result<std::shared_ptr<Promise<BackgroundReadAuthorizationStatus>>>::withError(error);
   }
   
   // pragma MARK: Result<std::shared_ptr<Promise<std::string>>>
@@ -1638,6 +2005,33 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return Result<std::shared_ptr<Promise<NativeWorkoutSamplePage>>>::withError(error);
   }
   
+  // pragma MARK: Result<std::shared_ptr<Promise<void>>>
+  using Result_std__shared_ptr_Promise_void___ = Result<std::shared_ptr<Promise<void>>>;
+  inline Result_std__shared_ptr_Promise_void___ create_Result_std__shared_ptr_Promise_void___(const std::shared_ptr<Promise<void>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<void>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_void___ create_Result_std__shared_ptr_Promise_void___(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<void>>>::withError(error);
+  }
+  
+  // pragma MARK: Result<std::shared_ptr<Promise<NativeDistanceWriteResult>>>
+  using Result_std__shared_ptr_Promise_NativeDistanceWriteResult___ = Result<std::shared_ptr<Promise<NativeDistanceWriteResult>>>;
+  inline Result_std__shared_ptr_Promise_NativeDistanceWriteResult___ create_Result_std__shared_ptr_Promise_NativeDistanceWriteResult___(const std::shared_ptr<Promise<NativeDistanceWriteResult>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<NativeDistanceWriteResult>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_NativeDistanceWriteResult___ create_Result_std__shared_ptr_Promise_NativeDistanceWriteResult___(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<NativeDistanceWriteResult>>>::withError(error);
+  }
+  
+  // pragma MARK: Result<std::shared_ptr<Promise<NativeHealthDeleteResult>>>
+  using Result_std__shared_ptr_Promise_NativeHealthDeleteResult___ = Result<std::shared_ptr<Promise<NativeHealthDeleteResult>>>;
+  inline Result_std__shared_ptr_Promise_NativeHealthDeleteResult___ create_Result_std__shared_ptr_Promise_NativeHealthDeleteResult___(const std::shared_ptr<Promise<NativeHealthDeleteResult>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<NativeHealthDeleteResult>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_NativeHealthDeleteResult___ create_Result_std__shared_ptr_Promise_NativeHealthDeleteResult___(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<NativeHealthDeleteResult>>>::withError(error);
+  }
+  
   // pragma MARK: Result<std::shared_ptr<Promise<NativeHealthPermissionStatusResult>>>
   using Result_std__shared_ptr_Promise_NativeHealthPermissionStatusResult___ = Result<std::shared_ptr<Promise<NativeHealthPermissionStatusResult>>>;
   inline Result_std__shared_ptr_Promise_NativeHealthPermissionStatusResult___ create_Result_std__shared_ptr_Promise_NativeHealthPermissionStatusResult___(const std::shared_ptr<Promise<NativeHealthPermissionStatusResult>>& value) noexcept {
@@ -1645,15 +2039,6 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
   }
   inline Result_std__shared_ptr_Promise_NativeHealthPermissionStatusResult___ create_Result_std__shared_ptr_Promise_NativeHealthPermissionStatusResult___(const std::exception_ptr& error) noexcept {
     return Result<std::shared_ptr<Promise<NativeHealthPermissionStatusResult>>>::withError(error);
-  }
-
-  // pragma MARK: Result<std::shared_ptr<Promise<AuthorizationRequestStatus>>>
-  using Result_std__shared_ptr_Promise_AuthorizationRequestStatus___ = Result<std::shared_ptr<Promise<AuthorizationRequestStatus>>>;
-  inline Result_std__shared_ptr_Promise_AuthorizationRequestStatus___ create_Result_std__shared_ptr_Promise_AuthorizationRequestStatus___(const std::shared_ptr<Promise<AuthorizationRequestStatus>>& value) noexcept {
-    return Result<std::shared_ptr<Promise<AuthorizationRequestStatus>>>::withValue(value);
-  }
-  inline Result_std__shared_ptr_Promise_AuthorizationRequestStatus___ create_Result_std__shared_ptr_Promise_AuthorizationRequestStatus___(const std::exception_ptr& error) noexcept {
-    return Result<std::shared_ptr<Promise<AuthorizationRequestStatus>>>::withError(error);
   }
   
   // pragma MARK: Result<std::shared_ptr<Promise<NativeHealthAuthorizationResult>>>

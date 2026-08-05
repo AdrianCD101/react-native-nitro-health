@@ -15,6 +15,7 @@ import androidx.health.connect.client.units.Percentage
 import com.margelo.nitro.nitrohealth.NativeActiveEnergyBurnedSampleInput
 import com.margelo.nitro.nitrohealth.NativeBodyMassSampleInput
 import com.margelo.nitro.nitrohealth.NativeDistanceSampleInput
+import com.margelo.nitro.nitrohealth.NativeDistanceScope
 import com.margelo.nitro.nitrohealth.NativeHeartRateSampleInput
 import com.margelo.nitro.nitrohealth.NativeHeightSampleInput
 import com.margelo.nitro.nitrohealth.NativeOxygenSaturationSampleInput
@@ -37,7 +38,10 @@ internal fun toStepsRecords(samples: Array<NativeStepSampleInput>): List<StepsRe
 }
 
 internal fun toDistanceRecords(samples: Array<NativeDistanceSampleInput>): List<DistanceRecord> {
-    return samples.map { sample ->
+    return samples.mapIndexed { index, sample ->
+        require(sample.scope == NativeDistanceScope.WALKINGRUNNING) {
+            "samples[$index].scope must be walkingRunning"
+        }
         DistanceRecord(
             startTime = Instant.ofEpochMilli(sample.startTimeMs.toLong()),
             startZoneOffset = null,

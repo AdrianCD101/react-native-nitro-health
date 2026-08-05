@@ -1,4 +1,8 @@
-import { mockNitroHealth } from './support/mockNitroHealth'
+import {
+  mockNitroHealth,
+  nativeRecordChildMetadata,
+  nativeRecordMetadata,
+} from './support/mockNitroHealth'
 
 jest.mock('react-native-nitro-modules', () => ({
   NitroModules: {
@@ -19,7 +23,13 @@ describe('NitroHealth breadth data types contract', () => {
       const endDate = new Date('2026-01-02T00:00:00.000Z')
       const timeMs = new Date('2026-01-01T09:00:00.000Z').getTime()
       mockNitroHealth.readRestingHeartRate.mockResolvedValue({
-        samples: [{ uuid: 'uuid-1', timeMs, bpm: 58, source: 'Watch' }],
+        samples: [
+          {
+            ...nativeRecordMetadata('resting-heart-record', 'com.example.watch', 'Example Watch'),
+            timeMs,
+            bpm: 58,
+          },
+        ],
       })
 
       const result = await NitroHealth.readRestingHeartRate({ startDate, endDate })
@@ -31,11 +41,17 @@ describe('NitroHealth breadth data types contract', () => {
         ascending: true,
       })
       expect(result.samples).toHaveLength(1)
-      expect(result.samples[0].uuid).toBe('uuid-1')
+      expect(result.samples[0].identity).toEqual({
+        kind: 'record',
+        id: 'resting-heart-record',
+      })
       expect(result.samples[0].date).toBeInstanceOf(Date)
       expect(result.samples[0].date.getTime()).toBe(timeMs)
       expect(result.samples[0].bpm).toBe(58)
-      expect(result.samples[0].source).toBe('Watch')
+      expect(result.samples[0].origin).toEqual({
+        identifier: 'com.example.watch',
+        displayName: 'Example Watch',
+      })
     })
   })
 
@@ -45,7 +61,14 @@ describe('NitroHealth breadth data types contract', () => {
       const endDate = new Date('2026-01-02T00:00:00.000Z')
       const timeMs = new Date('2026-01-01T09:00:00.000Z').getTime()
       mockNitroHealth.readHeartRateVariability.mockResolvedValue({
-        samples: [{ uuid: 'uuid-1', timeMs, milliseconds: 42.5, method: 'sdnn', source: 'Watch' }],
+        samples: [
+          {
+            ...nativeRecordChildMetadata('hrv-record#0', 'hrv-record', 'com.example.watch'),
+            timeMs,
+            milliseconds: 42.5,
+            method: 'sdnn',
+          },
+        ],
       })
 
       const result = await NitroHealth.readHeartRateVariability({ startDate, endDate })
@@ -54,7 +77,12 @@ describe('NitroHealth breadth data types contract', () => {
       expect(result.samples[0].date).toBeInstanceOf(Date)
       expect(result.samples[0].milliseconds).toBe(42.5)
       expect(result.samples[0].method).toBe('sdnn')
-      expect(result.samples[0].source).toBe('Watch')
+      expect(result.samples[0].identity).toEqual({
+        kind: 'record-child',
+        id: 'hrv-record#0',
+        record: { kind: 'record', id: 'hrv-record' },
+      })
+      expect(result.samples[0].origin.identifier).toBe('com.example.watch')
     })
 
     it('passes the rmssd method through untouched', async () => {
@@ -62,13 +90,23 @@ describe('NitroHealth breadth data types contract', () => {
       const endDate = new Date('2026-01-02T00:00:00.000Z')
       const timeMs = new Date('2026-01-01T09:00:00.000Z').getTime()
       mockNitroHealth.readHeartRateVariability.mockResolvedValue({
-        samples: [{ uuid: 'uuid-1', timeMs, milliseconds: 30, method: 'rmssd' }],
+        samples: [
+          {
+            ...nativeRecordMetadata('hrv-record', 'com.example.health'),
+            timeMs,
+            milliseconds: 30,
+            method: 'rmssd',
+          },
+        ],
       })
 
       const result = await NitroHealth.readHeartRateVariability({ startDate, endDate })
 
       expect(result.samples[0].method).toBe('rmssd')
-      expect(result.samples[0].source).toBeUndefined()
+      expect(result.samples[0].origin).toEqual({
+        identifier: 'com.example.health',
+        displayName: undefined,
+      })
     })
   })
 
@@ -78,7 +116,13 @@ describe('NitroHealth breadth data types contract', () => {
       const endDate = new Date('2026-01-02T00:00:00.000Z')
       const timeMs = new Date('2026-01-01T09:00:00.000Z').getTime()
       mockNitroHealth.readOxygenSaturation.mockResolvedValue({
-        samples: [{ uuid: 'uuid-1', timeMs, percentage: 97.5, source: 'Watch' }],
+        samples: [
+          {
+            ...nativeRecordMetadata('oxygen-record', 'com.example.watch', 'Example Watch'),
+            timeMs,
+            percentage: 97.5,
+          },
+        ],
       })
 
       const result = await NitroHealth.readOxygenSaturation({ startDate, endDate })
@@ -86,7 +130,10 @@ describe('NitroHealth breadth data types contract', () => {
       expect(result.samples).toHaveLength(1)
       expect(result.samples[0].date).toBeInstanceOf(Date)
       expect(result.samples[0].percentage).toBe(97.5)
-      expect(result.samples[0].source).toBe('Watch')
+      expect(result.samples[0].origin).toEqual({
+        identifier: 'com.example.watch',
+        displayName: 'Example Watch',
+      })
     })
   })
 
@@ -96,7 +143,13 @@ describe('NitroHealth breadth data types contract', () => {
       const endDate = new Date('2026-01-02T00:00:00.000Z')
       const timeMs = new Date('2026-01-01T09:00:00.000Z').getTime()
       mockNitroHealth.readHeight.mockResolvedValue({
-        samples: [{ uuid: 'uuid-1', timeMs, meters: 1.78 }],
+        samples: [
+          {
+            ...nativeRecordMetadata('height-record'),
+            timeMs,
+            meters: 1.78,
+          },
+        ],
       })
 
       const result = await NitroHealth.readHeight({ startDate, endDate })
@@ -110,6 +163,7 @@ describe('NitroHealth breadth data types contract', () => {
       expect(result.samples).toHaveLength(1)
       expect(result.samples[0].date).toBeInstanceOf(Date)
       expect(result.samples[0].meters).toBe(1.78)
+      expect(result.samples[0].identity).toEqual({ kind: 'record', id: 'height-record' })
     })
   })
 

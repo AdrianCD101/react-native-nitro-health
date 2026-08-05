@@ -14,17 +14,17 @@ namespace margelo::nitro::nitrohealth {
     HybridObject::loadHybridMethods();
     // load custom methods/properties
     registerHybrids(this, [](Prototype& prototype) {
-      prototype.registerHybridMethod("isAvailable", &HybridNitroHealthSpec::isAvailable);
-      prototype.registerHybridMethod("getAvailabilityStatus", &HybridNitroHealthSpec::getAvailabilityStatus);
-      prototype.registerHybridMethod("openHealthConnectInstall", &HybridNitroHealthSpec::openHealthConnectInstall);
-      prototype.registerHybridMethod("openHealthSettings", &HybridNitroHealthSpec::openHealthSettings);
-      prototype.registerHybridMethod("enableBackgroundDelivery", &HybridNitroHealthSpec::enableBackgroundDelivery);
-      prototype.registerHybridMethod("disableBackgroundDelivery", &HybridNitroHealthSpec::disableBackgroundDelivery);
-      prototype.registerHybridMethod("disableAllBackgroundDelivery", &HybridNitroHealthSpec::disableAllBackgroundDelivery);
-      prototype.registerHybridMethod("setOnChangeNotificationListener", &HybridNitroHealthSpec::setOnChangeNotificationListener);
-      prototype.registerHybridMethod("acknowledgeChangeNotification", &HybridNitroHealthSpec::acknowledgeChangeNotification);
-      prototype.registerHybridMethod("getBackgroundReadAuthorizationStatus", &HybridNitroHealthSpec::getBackgroundReadAuthorizationStatus);
-      prototype.registerHybridMethod("requestBackgroundReadAuthorization", &HybridNitroHealthSpec::requestBackgroundReadAuthorization);
+      prototype.registerHybridMethod("getAvailability", &HybridNitroHealthSpec::getAvailability);
+      prototype.registerHybridMethod("performAvailabilityRecovery", &HybridNitroHealthSpec::performAvailabilityRecovery);
+      prototype.registerHybridMethod("getCapabilities", &HybridNitroHealthSpec::getCapabilities);
+      prototype.registerHybridMethod("requestAdditionalAccess", &HybridNitroHealthSpec::requestAdditionalAccess);
+      prototype.registerHybridMethod("managePermissions", &HybridNitroHealthSpec::managePermissions);
+      prototype.registerHybridMethod("revokeAllPermissions", &HybridNitroHealthSpec::revokeAllPermissions);
+      prototype.registerHybridMethod("getBackgroundChangesMode", &HybridNitroHealthSpec::getBackgroundChangesMode);
+      prototype.registerHybridMethod("configureBackgroundChanges", &HybridNitroHealthSpec::configureBackgroundChanges);
+      prototype.registerHybridMethod("disableBackgroundChanges", &HybridNitroHealthSpec::disableBackgroundChanges);
+      prototype.registerHybridMethod("setOnBackgroundChangeListener", &HybridNitroHealthSpec::setOnBackgroundChangeListener);
+      prototype.registerHybridMethod("acknowledgeBackgroundChange", &HybridNitroHealthSpec::acknowledgeBackgroundChange);
       prototype.registerHybridMethod("createChangesToken", &HybridNitroHealthSpec::createChangesToken);
       prototype.registerHybridMethod("getChanges", &HybridNitroHealthSpec::getChanges);
       prototype.registerHybridMethod("readSteps", &HybridNitroHealthSpec::readSteps);
@@ -50,10 +50,9 @@ namespace margelo::nitro::nitrohealth {
       prototype.registerHybridMethod("saveHeight", &HybridNitroHealthSpec::saveHeight);
       prototype.registerHybridMethod("saveSleepSessions", &HybridNitroHealthSpec::saveSleepSessions);
       prototype.registerHybridMethod("saveWorkout", &HybridNitroHealthSpec::saveWorkout);
-      prototype.registerHybridMethod("deleteSamplesByUuids", &HybridNitroHealthSpec::deleteSamplesByUuids);
-      prototype.registerHybridMethod("deleteSamplesByTimeRange", &HybridNitroHealthSpec::deleteSamplesByTimeRange);
+      prototype.registerHybridMethod("deleteRecordsByIds", &HybridNitroHealthSpec::deleteRecordsByIds);
+      prototype.registerHybridMethod("deleteRecordsByTimeRange", &HybridNitroHealthSpec::deleteRecordsByTimeRange);
       prototype.registerHybridMethod("getPermissionStatuses", &HybridNitroHealthSpec::getPermissionStatuses);
-      prototype.registerHybridMethod("getRequestStatusForAuthorization", &HybridNitroHealthSpec::getRequestStatusForAuthorization);
       prototype.registerHybridMethod("requestAuthorization", &HybridNitroHealthSpec::requestAuthorization);
     });
   }

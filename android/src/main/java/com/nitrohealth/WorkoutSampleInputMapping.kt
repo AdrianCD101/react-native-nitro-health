@@ -8,8 +8,8 @@ internal fun toExerciseSessionRecord(workout: NativeWorkoutSampleInput): Exercis
     val startTime = Instant.ofEpochMilli(workout.startTimeMs.toLong())
     val endTime = Instant.ofEpochMilli(workout.endTimeMs.toLong())
     require(startTime < endTime) { "workout: startDate must be before endDate" }
-    require(workout.title == null || workout.title.isNotBlank()) {
-        "workout: title must be a non-empty string when provided"
+    require(workout.displayName == null || workout.displayName.isNotBlank()) {
+        "workout: displayName must be a non-empty string when provided"
     }
 
     val zoneId = resolveIanaZoneId(workout.timeZone, "workout")
@@ -19,7 +19,7 @@ internal fun toExerciseSessionRecord(workout: NativeWorkoutSampleInput): Exercis
         endTime = endTime,
         endZoneOffset = zoneId.rules.getOffset(endTime),
         exerciseType = toHealthConnectWorkoutActivityType(workout.activityType),
-        title = workout.title,
+        title = workout.displayName,
         metadata = makeSampleMetadata(workout.syncId, workout.syncVersion)
     )
 }

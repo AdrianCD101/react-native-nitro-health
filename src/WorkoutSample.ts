@@ -1,28 +1,25 @@
-import type { HealthSampleIdentity } from './HealthSampleIdentity'
-import type { WorkoutActivityType } from './WorkoutActivityType'
+import type { HealthMetricValue } from './HealthMetricValue'
+import type { HealthSample } from './HealthSample'
+import type { WorkoutActivity } from './WorkoutActivity'
 
 /** Workout session returned by {@linkcode NitroHealth.readWorkouts}. */
-export interface WorkoutSample extends HealthSampleIdentity {
+export interface WorkoutSample extends HealthSample {
   /** Start of the workout session. */
   startDate: Date
   /** End of the workout session. */
   endDate: Date
-  /**
-   * Active duration in seconds. Pause-aware on iOS (`HKWorkout.duration`);
-   * wall-clock `endDate - startDate` on Android.
-   */
-  durationSeconds: number
-  /** Normalized cross-platform activity type. */
-  activityType: WorkoutActivityType
-  /**
-   * Session title on Android; workout brand name metadata on iOS
-   * (best-effort, rarely set).
-   */
+  /** Wall-clock duration between `startDate` and `endDate`, in seconds. */
+  elapsedDurationSeconds: number
+  /** Pause-aware active duration in seconds when the health service reports it. */
+  activeDuration: HealthMetricValue
+  /** Normalized activity plus portability and mapping fidelity. */
+  activity: WorkoutActivity
+  /** Native workout session title when available. */
   title?: string
-  /** Originating app or device, when available. */
-  source?: string
-  /** Total distance in meters. iOS only; `undefined` on Android. */
-  totalDistanceMeters?: number
-  /** Total active energy burned in kilocalories. iOS only; `undefined` on Android. */
-  totalEnergyBurnedKcal?: number
+  /** Native workout brand metadata when available. */
+  brandName?: string
+  /** Session-associated total distance in meters. */
+  totalDistance: HealthMetricValue
+  /** Session-associated active energy in kilocalories. */
+  totalActiveEnergyBurned: HealthMetricValue
 }

@@ -31,7 +31,7 @@ final class SampleUuidParsingTests: XCTestCase {
         ) { error in
             XCTAssertEqual(
                 (error as NSError).localizedDescription,
-                "uuids[1]: \"not-a-uuid\" is not a valid HealthKit sample uuid"
+                "recordIds[1]: \"not-a-uuid\" is not a valid HealthKit record id"
             )
         }
     }
@@ -44,7 +44,7 @@ final class SampleUuidParsingTests: XCTestCase {
         ) { error in
             XCTAssertEqual(
                 (error as NSError).localizedDescription,
-                "uuids[0]: \"3F2B9C1E-7A54-4F0D-9E2A-1C8D5B6E4A30#0\" is not a valid HealthKit sample uuid"
+                "recordIds[0]: \"3F2B9C1E-7A54-4F0D-9E2A-1C8D5B6E4A30#0\" is not a valid HealthKit record id"
             )
         }
     }

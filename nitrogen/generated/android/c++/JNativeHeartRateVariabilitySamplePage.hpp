@@ -10,7 +10,13 @@
 #include <fbjni/fbjni.h>
 #include "NativeHeartRateVariabilitySamplePage.hpp"
 
+#include "JNativeHealthDataOrigin.hpp"
+#include "JNativeHealthSampleIdentity.hpp"
+#include "JNativeHealthSampleIdentityKind.hpp"
 #include "JNativeHeartRateVariabilitySample.hpp"
+#include "NativeHealthDataOrigin.hpp"
+#include "NativeHealthSampleIdentity.hpp"
+#include "NativeHealthSampleIdentityKind.hpp"
 #include "NativeHeartRateVariabilitySample.hpp"
 #include <optional>
 #include <string>

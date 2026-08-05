@@ -12,18 +12,46 @@
 // Forward declaration of `HybridNitroHealthSpec_cxx` to properly resolve imports.
 namespace NitroHealth { class HybridNitroHealthSpec_cxx; }
 
-// Forward declaration of `HealthAvailabilityStatus` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { enum class HealthAvailabilityStatus; }
+// Forward declaration of `NativeHealthAvailability` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthAvailability; }
+// Forward declaration of `NativeHealthAvailabilityStatus` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeHealthAvailabilityStatus; }
+// Forward declaration of `NativeHealthAvailabilityReason` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeHealthAvailabilityReason; }
+// Forward declaration of `NativeHealthAvailabilityRecoveryResult` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeHealthAvailabilityRecoveryResult; }
+// Forward declaration of `NativeHealthCapabilities` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthCapabilities; }
+// Forward declaration of `NativeBackgroundChangesMode` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeBackgroundChangesMode; }
+// Forward declaration of `NativeHealthAdditionalAccessStatus` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeHealthAdditionalAccessStatus; }
+// Forward declaration of `NativePermissionWorkflowResult` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativePermissionWorkflowResult; }
+// Forward declaration of `NativePermissionWorkflowStatus` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativePermissionWorkflowStatus; }
+// Forward declaration of `NativePermissionActionKind` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativePermissionActionKind; }
+// Forward declaration of `NativePermissionDestination` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativePermissionDestination; }
+// Forward declaration of `NativeBackgroundChangesResult` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeBackgroundChangesResult; }
+// Forward declaration of `NativeBackgroundChangesResultStatus` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeBackgroundChangesResultStatus; }
 // Forward declaration of `BackgroundDeliveryFrequency` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class BackgroundDeliveryFrequency; }
-// Forward declaration of `BackgroundReadAuthorizationStatus` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { enum class BackgroundReadAuthorizationStatus; }
 // Forward declaration of `NativeHealthChangesResult` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthChangesResult; }
 // Forward declaration of `NativeHealthChange` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthChange; }
 // Forward declaration of `NativeStepSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeStepSample; }
+// Forward declaration of `NativeHealthSampleIdentity` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthSampleIdentity; }
+// Forward declaration of `NativeHealthSampleIdentityKind` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeHealthSampleIdentityKind; }
+// Forward declaration of `NativeHealthDataOrigin` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthDataOrigin; }
 // Forward declaration of `NativeHeartRateSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHeartRateSample; }
 // Forward declaration of `NativeRestingHeartRateSample` to properly resolve imports.
@@ -32,6 +60,8 @@ namespace margelo::nitro::nitrohealth { struct NativeRestingHeartRateSample; }
 namespace margelo::nitro::nitrohealth { struct NativeHeartRateVariabilitySample; }
 // Forward declaration of `NativeDistanceSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeDistanceSample; }
+// Forward declaration of `NativeDistanceScope` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeDistanceScope; }
 // Forward declaration of `NativeActiveEnergyBurnedSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeActiveEnergyBurnedSample; }
 // Forward declaration of `NativeOxygenSaturationSample` to properly resolve imports.
@@ -40,10 +70,26 @@ namespace margelo::nitro::nitrohealth { struct NativeOxygenSaturationSample; }
 namespace margelo::nitro::nitrohealth { struct NativeHeightSample; }
 // Forward declaration of `NativeSleepSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeSleepSample; }
+// Forward declaration of `NativeSleepSampleKind` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeSleepSampleKind; }
+// Forward declaration of `NativeSleepStageData` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeSleepStageData; }
 // Forward declaration of `NativeBodyMassSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBodyMassSample; }
 // Forward declaration of `NativeWorkoutSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeWorkoutSample; }
+// Forward declaration of `NativeHealthMetricValue` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthMetricValue; }
+// Forward declaration of `NativeHealthMetricValueStatus` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeHealthMetricValueStatus; }
+// Forward declaration of `NativeWorkoutActivity` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeWorkoutActivity; }
+// Forward declaration of `NativeWorkoutActivityStatus` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeWorkoutActivityStatus; }
+// Forward declaration of `NativeWorkoutActivityPortability` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeWorkoutActivityPortability; }
+// Forward declaration of `NativeWorkoutActivityMapping` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeWorkoutActivityMapping; }
 // Forward declaration of `NativeStepSamplePage` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeStepSamplePage; }
 // Forward declaration of `NativeHealthDateRangeQuery` to properly resolve imports.
@@ -78,6 +124,8 @@ namespace margelo::nitro::nitrohealth { struct NativeSleepSamplePage; }
 namespace margelo::nitro::nitrohealth { struct NativeWorkoutSamplePage; }
 // Forward declaration of `NativeStepSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeStepSampleInput; }
+// Forward declaration of `NativeDistanceWriteResult` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeDistanceWriteResult; }
 // Forward declaration of `NativeDistanceSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeDistanceSampleInput; }
 // Forward declaration of `NativeActiveEnergyBurnedSampleInput` to properly resolve imports.
@@ -98,6 +146,12 @@ namespace margelo::nitro::nitrohealth { struct NativeSleepSessionInput; }
 namespace margelo::nitro::nitrohealth { struct NativeSleepSessionStageInput; }
 // Forward declaration of `NativeWorkoutSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeWorkoutSampleInput; }
+// Forward declaration of `NativeHealthDeleteResult` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthDeleteResult; }
+// Forward declaration of `NativeHealthDeleteStatus` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeHealthDeleteStatus; }
+// Forward declaration of `NativeDeletedCountStatus` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeDeletedCountStatus; }
 // Forward declaration of `NativeHealthPermissionStatusResult` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthPermissionStatusResult; }
 // Forward declaration of `NativeHealthPermissionStatusEntry` to properly resolve imports.
@@ -106,34 +160,55 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthPermissionStatusEntry
 namespace margelo::nitro::nitrohealth { struct NativeHealthPermission; }
 // Forward declaration of `HealthPermissionStatus` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class HealthPermissionStatus; }
-// Forward declaration of `AuthorizationRequestStatus` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { enum class AuthorizationRequestStatus; }
 // Forward declaration of `NativeHealthAuthorizationResult` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthAuthorizationResult; }
-// Forward declaration of `HealthAuthorizationStatus` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { enum class HealthAuthorizationStatus; }
+// Forward declaration of `NativeHealthAuthorizationStatus` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeHealthAuthorizationStatus; }
 
-#include "HealthAvailabilityStatus.hpp"
-#include <NitroModules/Promise.hpp>
-#include <string>
-#include "BackgroundDeliveryFrequency.hpp"
-#include <vector>
-#include <functional>
+#include "NativeHealthAvailability.hpp"
+#include "NativeHealthAvailabilityStatus.hpp"
+#include "NativeHealthAvailabilityReason.hpp"
 #include <optional>
-#include "BackgroundReadAuthorizationStatus.hpp"
+#include <string>
+#include "NativeHealthAvailabilityRecoveryResult.hpp"
+#include <NitroModules/Promise.hpp>
+#include "NativeHealthCapabilities.hpp"
+#include "NativeBackgroundChangesMode.hpp"
+#include "NativeHealthAdditionalAccessStatus.hpp"
+#include "NativePermissionWorkflowResult.hpp"
+#include "NativePermissionWorkflowStatus.hpp"
+#include "NativePermissionActionKind.hpp"
+#include "NativePermissionDestination.hpp"
+#include "NativeBackgroundChangesResult.hpp"
+#include "NativeBackgroundChangesResultStatus.hpp"
+#include <vector>
+#include "BackgroundDeliveryFrequency.hpp"
+#include <functional>
 #include "NativeHealthChangesResult.hpp"
 #include "NativeHealthChange.hpp"
 #include "NativeStepSample.hpp"
+#include "NativeHealthSampleIdentity.hpp"
+#include "NativeHealthSampleIdentityKind.hpp"
+#include "NativeHealthDataOrigin.hpp"
 #include "NativeHeartRateSample.hpp"
 #include "NativeRestingHeartRateSample.hpp"
 #include "NativeHeartRateVariabilitySample.hpp"
 #include "NativeDistanceSample.hpp"
+#include "NativeDistanceScope.hpp"
 #include "NativeActiveEnergyBurnedSample.hpp"
 #include "NativeOxygenSaturationSample.hpp"
 #include "NativeHeightSample.hpp"
 #include "NativeSleepSample.hpp"
+#include "NativeSleepSampleKind.hpp"
+#include "NativeSleepStageData.hpp"
 #include "NativeBodyMassSample.hpp"
 #include "NativeWorkoutSample.hpp"
+#include "NativeHealthMetricValue.hpp"
+#include "NativeHealthMetricValueStatus.hpp"
+#include "NativeWorkoutActivity.hpp"
+#include "NativeWorkoutActivityStatus.hpp"
+#include "NativeWorkoutActivityPortability.hpp"
+#include "NativeWorkoutActivityMapping.hpp"
 #include "NativeStepSamplePage.hpp"
 #include "NativeHealthDateRangeQuery.hpp"
 #include "NativeDistanceSamplePage.hpp"
@@ -151,6 +226,7 @@ namespace margelo::nitro::nitrohealth { enum class HealthAuthorizationStatus; }
 #include "NativeSleepSamplePage.hpp"
 #include "NativeWorkoutSamplePage.hpp"
 #include "NativeStepSampleInput.hpp"
+#include "NativeDistanceWriteResult.hpp"
 #include "NativeDistanceSampleInput.hpp"
 #include "NativeActiveEnergyBurnedSampleInput.hpp"
 #include "NativeHeartRateSampleInput.hpp"
@@ -161,13 +237,15 @@ namespace margelo::nitro::nitrohealth { enum class HealthAuthorizationStatus; }
 #include "NativeSleepSessionInput.hpp"
 #include "NativeSleepSessionStageInput.hpp"
 #include "NativeWorkoutSampleInput.hpp"
+#include "NativeHealthDeleteResult.hpp"
+#include "NativeHealthDeleteStatus.hpp"
+#include "NativeDeletedCountStatus.hpp"
 #include "NativeHealthPermissionStatusResult.hpp"
 #include "NativeHealthPermissionStatusEntry.hpp"
 #include "NativeHealthPermission.hpp"
 #include "HealthPermissionStatus.hpp"
-#include "AuthorizationRequestStatus.hpp"
 #include "NativeHealthAuthorizationResult.hpp"
-#include "HealthAuthorizationStatus.hpp"
+#include "NativeHealthAuthorizationStatus.hpp"
 
 #include "NitroHealth-Swift-Cxx-Umbrella.hpp"
 
@@ -219,84 +297,88 @@ namespace margelo::nitro::nitrohealth {
 
   public:
     // Methods
-    inline bool isAvailable() override {
-      auto __result = _swiftPart.isAvailable();
+    inline NativeHealthAvailability getAvailability() override {
+      auto __result = _swiftPart.getAvailability();
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }
       auto __value = std::move(__result.value());
       return __value;
     }
-    inline HealthAvailabilityStatus getAvailabilityStatus() override {
-      auto __result = _swiftPart.getAvailabilityStatus();
+    inline std::shared_ptr<Promise<NativeHealthAvailabilityRecoveryResult>> performAvailabilityRecovery() override {
+      auto __result = _swiftPart.performAvailabilityRecovery();
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }
       auto __value = std::move(__result.value());
       return __value;
     }
-    inline bool openHealthConnectInstall() override {
-      auto __result = _swiftPart.openHealthConnectInstall();
+    inline std::shared_ptr<Promise<NativeHealthCapabilities>> getCapabilities() override {
+      auto __result = _swiftPart.getCapabilities();
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }
       auto __value = std::move(__result.value());
       return __value;
     }
-    inline std::shared_ptr<Promise<bool>> openHealthSettings() override {
-      auto __result = _swiftPart.openHealthSettings();
+    inline std::shared_ptr<Promise<NativeHealthAdditionalAccessStatus>> requestAdditionalAccess(const std::string& access) override {
+      auto __result = _swiftPart.requestAdditionalAccess(access);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }
       auto __value = std::move(__result.value());
       return __value;
     }
-    inline std::shared_ptr<Promise<void>> enableBackgroundDelivery(const std::string& dataType, BackgroundDeliveryFrequency frequency) override {
-      auto __result = _swiftPart.enableBackgroundDelivery(dataType, static_cast<int>(frequency));
+    inline std::shared_ptr<Promise<NativePermissionWorkflowResult>> managePermissions() override {
+      auto __result = _swiftPart.managePermissions();
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }
       auto __value = std::move(__result.value());
       return __value;
     }
-    inline std::shared_ptr<Promise<void>> disableBackgroundDelivery(const std::string& dataType) override {
-      auto __result = _swiftPart.disableBackgroundDelivery(dataType);
+    inline std::shared_ptr<Promise<NativePermissionWorkflowResult>> revokeAllPermissions() override {
+      auto __result = _swiftPart.revokeAllPermissions();
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }
       auto __value = std::move(__result.value());
       return __value;
     }
-    inline std::shared_ptr<Promise<void>> disableAllBackgroundDelivery() override {
-      auto __result = _swiftPart.disableAllBackgroundDelivery();
+    inline NativeBackgroundChangesMode getBackgroundChangesMode() override {
+      auto __result = _swiftPart.getBackgroundChangesMode();
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }
       auto __value = std::move(__result.value());
       return __value;
     }
-    inline void setOnChangeNotificationListener(const std::optional<std::function<void(const std::vector<std::string>& /* dataTypes */, const std::string& /* deliveryId */)>>& listener) override {
-      auto __result = _swiftPart.setOnChangeNotificationListener(listener);
-      if (__result.hasError()) [[unlikely]] {
-        std::rethrow_exception(__result.error());
-      }
-    }
-    inline void acknowledgeChangeNotification(const std::string& deliveryId) override {
-      auto __result = _swiftPart.acknowledgeChangeNotification(deliveryId);
-      if (__result.hasError()) [[unlikely]] {
-        std::rethrow_exception(__result.error());
-      }
-    }
-    inline std::shared_ptr<Promise<BackgroundReadAuthorizationStatus>> getBackgroundReadAuthorizationStatus() override {
-      auto __result = _swiftPart.getBackgroundReadAuthorizationStatus();
+    inline std::shared_ptr<Promise<NativeBackgroundChangesResult>> configureBackgroundChanges(const std::vector<std::string>& dataTypes, BackgroundDeliveryFrequency frequency) override {
+      auto __result = _swiftPart.configureBackgroundChanges(dataTypes, static_cast<int>(frequency));
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }
       auto __value = std::move(__result.value());
       return __value;
     }
-    inline std::shared_ptr<Promise<BackgroundReadAuthorizationStatus>> requestBackgroundReadAuthorization() override {
-      auto __result = _swiftPart.requestBackgroundReadAuthorization();
+    inline std::shared_ptr<Promise<NativeBackgroundChangesResult>> disableBackgroundChanges(const std::optional<std::vector<std::string>>& dataTypes) override {
+      auto __result = _swiftPart.disableBackgroundChanges(dataTypes);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline bool setOnBackgroundChangeListener(const std::optional<std::function<void(const std::vector<std::string>& /* dataTypes */, const std::string& /* deliveryId */)>>& listener) override {
+      auto __result = _swiftPart.setOnBackgroundChangeListener(listener);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline bool acknowledgeBackgroundChange(const std::string& deliveryId) override {
+      auto __result = _swiftPart.acknowledgeBackgroundChange(deliveryId);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }
@@ -431,7 +513,7 @@ namespace margelo::nitro::nitrohealth {
       auto __value = std::move(__result.value());
       return __value;
     }
-    inline std::shared_ptr<Promise<void>> saveDistance(const std::vector<NativeDistanceSampleInput>& samples) override {
+    inline std::shared_ptr<Promise<NativeDistanceWriteResult>> saveDistance(const std::vector<NativeDistanceSampleInput>& samples) override {
       auto __result = _swiftPart.saveDistance(samples);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
@@ -503,16 +585,16 @@ namespace margelo::nitro::nitrohealth {
       auto __value = std::move(__result.value());
       return __value;
     }
-    inline std::shared_ptr<Promise<void>> deleteSamplesByUuids(const std::string& dataType, const std::vector<std::string>& uuids) override {
-      auto __result = _swiftPart.deleteSamplesByUuids(dataType, uuids);
+    inline std::shared_ptr<Promise<NativeHealthDeleteResult>> deleteRecordsByIds(const std::string& dataType, const std::vector<std::string>& recordIds) override {
+      auto __result = _swiftPart.deleteRecordsByIds(dataType, recordIds);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }
       auto __value = std::move(__result.value());
       return __value;
     }
-    inline std::shared_ptr<Promise<void>> deleteSamplesByTimeRange(const std::string& dataType, const NativeHealthTimeRangeQuery& query) override {
-      auto __result = _swiftPart.deleteSamplesByTimeRange(dataType, std::forward<decltype(query)>(query));
+    inline std::shared_ptr<Promise<NativeHealthDeleteResult>> deleteRecordsByTimeRange(const std::string& dataType, const NativeHealthTimeRangeQuery& query) override {
+      auto __result = _swiftPart.deleteRecordsByTimeRange(dataType, std::forward<decltype(query)>(query));
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }
@@ -521,14 +603,6 @@ namespace margelo::nitro::nitrohealth {
     }
     inline std::shared_ptr<Promise<NativeHealthPermissionStatusResult>> getPermissionStatuses(const std::vector<NativeHealthPermission>& permissions) override {
       auto __result = _swiftPart.getPermissionStatuses(permissions);
-      if (__result.hasError()) [[unlikely]] {
-        std::rethrow_exception(__result.error());
-      }
-      auto __value = std::move(__result.value());
-      return __value;
-    }
-    inline std::shared_ptr<Promise<AuthorizationRequestStatus>> getRequestStatusForAuthorization(const std::vector<NativeHealthPermission>& permissions) override {
-      auto __result = _swiftPart.getRequestStatusForAuthorization(permissions);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }

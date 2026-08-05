@@ -14,8 +14,9 @@ func makeWorkoutBuilderInput(
     guard startDate < endDate else {
         throw workoutInputError("workout: startDate must be before endDate")
     }
-    if let title = workout.title, title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-        throw workoutInputError("workout: title must be a non-empty string when provided")
+    if let displayName = workout.displayName,
+       displayName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+        throw workoutInputError("workout: displayName must be a non-empty string when provided")
     }
 
     let rawActivityType = try healthKitWorkoutActivityRawValue(workout.activityType)
@@ -32,8 +33,8 @@ func makeWorkoutBuilderInput(
         syncVersion: workout.syncVersion
     ) ?? [:]
     metadata[HKMetadataKeyTimeZone] = timeZone.identifier
-    if let title = workout.title {
-        metadata[HKMetadataKeyWorkoutBrandName] = title
+    if let displayName = workout.displayName {
+        metadata[HKMetadataKeyWorkoutBrandName] = displayName
     }
 
     return (

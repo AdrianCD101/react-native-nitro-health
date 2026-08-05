@@ -13,17 +13,17 @@ public protocol HybridNitroHealthSpec_protocol: HybridObject {
   
 
   // Methods
-  func isAvailable() throws -> Bool
-  func getAvailabilityStatus() throws -> HealthAvailabilityStatus
-  func openHealthConnectInstall() throws -> Bool
-  func openHealthSettings() throws -> Promise<Bool>
-  func enableBackgroundDelivery(dataType: String, frequency: BackgroundDeliveryFrequency) throws -> Promise<Void>
-  func disableBackgroundDelivery(dataType: String) throws -> Promise<Void>
-  func disableAllBackgroundDelivery() throws -> Promise<Void>
-  func setOnChangeNotificationListener(listener: ((_ dataTypes: [String], _ deliveryId: String) -> Void)?) throws -> Void
-  func acknowledgeChangeNotification(deliveryId: String) throws -> Void
-  func getBackgroundReadAuthorizationStatus() throws -> Promise<BackgroundReadAuthorizationStatus>
-  func requestBackgroundReadAuthorization() throws -> Promise<BackgroundReadAuthorizationStatus>
+  func getAvailability() throws -> NativeHealthAvailability
+  func performAvailabilityRecovery() throws -> Promise<NativeHealthAvailabilityRecoveryResult>
+  func getCapabilities() throws -> Promise<NativeHealthCapabilities>
+  func requestAdditionalAccess(access: String) throws -> Promise<NativeHealthAdditionalAccessStatus>
+  func managePermissions() throws -> Promise<NativePermissionWorkflowResult>
+  func revokeAllPermissions() throws -> Promise<NativePermissionWorkflowResult>
+  func getBackgroundChangesMode() throws -> NativeBackgroundChangesMode
+  func configureBackgroundChanges(dataTypes: [String], frequency: BackgroundDeliveryFrequency) throws -> Promise<NativeBackgroundChangesResult>
+  func disableBackgroundChanges(dataTypes: [String]?) throws -> Promise<NativeBackgroundChangesResult>
+  func setOnBackgroundChangeListener(listener: ((_ dataTypes: [String], _ deliveryId: String) -> Void)?) throws -> Bool
+  func acknowledgeBackgroundChange(deliveryId: String) throws -> Bool
   func createChangesToken(dataType: String) throws -> Promise<String>
   func getChanges(dataType: String, changesToken: String) throws -> Promise<NativeHealthChangesResult>
   func readSteps(query: NativeHealthDateRangeQuery) throws -> Promise<NativeStepSamplePage>
@@ -40,7 +40,7 @@ public protocol HybridNitroHealthSpec_protocol: HybridObject {
   func readSleepSamples(query: NativeHealthDateRangeQuery) throws -> Promise<NativeSleepSamplePage>
   func readWorkouts(query: NativeHealthDateRangeQuery) throws -> Promise<NativeWorkoutSamplePage>
   func saveSteps(samples: [NativeStepSampleInput]) throws -> Promise<Void>
-  func saveDistance(samples: [NativeDistanceSampleInput]) throws -> Promise<Void>
+  func saveDistance(samples: [NativeDistanceSampleInput]) throws -> Promise<NativeDistanceWriteResult>
   func saveActiveEnergyBurned(samples: [NativeActiveEnergyBurnedSampleInput]) throws -> Promise<Void>
   func saveHeartRate(samples: [NativeHeartRateSampleInput]) throws -> Promise<Void>
   func saveBodyMass(samples: [NativeBodyMassSampleInput]) throws -> Promise<Void>
@@ -49,10 +49,9 @@ public protocol HybridNitroHealthSpec_protocol: HybridObject {
   func saveHeight(samples: [NativeHeightSampleInput]) throws -> Promise<Void>
   func saveSleepSessions(sessions: [NativeSleepSessionInput]) throws -> Promise<Void>
   func saveWorkout(workout: NativeWorkoutSampleInput) throws -> Promise<Void>
-  func deleteSamplesByUuids(dataType: String, uuids: [String]) throws -> Promise<Void>
-  func deleteSamplesByTimeRange(dataType: String, query: NativeHealthTimeRangeQuery) throws -> Promise<Void>
+  func deleteRecordsByIds(dataType: String, recordIds: [String]) throws -> Promise<NativeHealthDeleteResult>
+  func deleteRecordsByTimeRange(dataType: String, query: NativeHealthTimeRangeQuery) throws -> Promise<NativeHealthDeleteResult>
   func getPermissionStatuses(permissions: [NativeHealthPermission]) throws -> Promise<NativeHealthPermissionStatusResult>
-  func getRequestStatusForAuthorization(permissions: [NativeHealthPermission]) throws -> Promise<AuthorizationRequestStatus>
   func requestAuthorization(permissions: [NativeHealthPermission]) throws -> Promise<NativeHealthAuthorizationResult>
 }
 

@@ -18,8 +18,8 @@ public extension NativeDistanceSampleInput {
   /**
    * Create a new instance of `NativeDistanceSampleInput`.
    */
-  init(startTimeMs: Double, endTimeMs: Double, distanceMeters: Double, syncId: String?, syncVersion: Double?) {
-    self.init(startTimeMs, endTimeMs, distanceMeters, { () -> bridge.std__optional_std__string_ in
+  init(startTimeMs: Double, endTimeMs: Double, distanceMeters: Double, scope: NativeDistanceScope, syncId: String?, syncVersion: Double?) {
+    self.init(startTimeMs, endTimeMs, distanceMeters, scope, { () -> bridge.std__optional_std__string_ in
       if let __unwrappedValue = syncId {
         return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
       } else {
@@ -47,6 +47,11 @@ public extension NativeDistanceSampleInput {
   @inline(__always)
   var distanceMeters: Double {
     return self.__distanceMeters
+  }
+  
+  @inline(__always)
+  var scope: NativeDistanceScope {
+    return self.__scope
   }
   
   @inline(__always)

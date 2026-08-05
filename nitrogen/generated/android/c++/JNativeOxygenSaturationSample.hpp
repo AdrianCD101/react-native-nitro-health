@@ -10,6 +10,12 @@
 #include <fbjni/fbjni.h>
 #include "NativeOxygenSaturationSample.hpp"
 
+#include "JNativeHealthDataOrigin.hpp"
+#include "JNativeHealthSampleIdentity.hpp"
+#include "JNativeHealthSampleIdentityKind.hpp"
+#include "NativeHealthDataOrigin.hpp"
+#include "NativeHealthSampleIdentity.hpp"
+#include "NativeHealthSampleIdentityKind.hpp"
 #include <optional>
 #include <string>
 
@@ -32,19 +38,19 @@ namespace margelo::nitro::nitrohealth {
     [[nodiscard]]
     NativeOxygenSaturationSample toCpp() const {
       static const auto clazz = javaClassStatic();
-      static const auto fieldUuid = clazz->getField<jni::JString>("uuid");
-      jni::local_ref<jni::JString> uuid = this->getFieldValue(fieldUuid);
+      static const auto fieldIdentity = clazz->getField<JNativeHealthSampleIdentity>("identity");
+      jni::local_ref<JNativeHealthSampleIdentity> identity = this->getFieldValue(fieldIdentity);
+      static const auto fieldOrigin = clazz->getField<JNativeHealthDataOrigin>("origin");
+      jni::local_ref<JNativeHealthDataOrigin> origin = this->getFieldValue(fieldOrigin);
       static const auto fieldTimeMs = clazz->getField<double>("timeMs");
       double timeMs = this->getFieldValue(fieldTimeMs);
       static const auto fieldPercentage = clazz->getField<double>("percentage");
       double percentage = this->getFieldValue(fieldPercentage);
-      static const auto fieldSource = clazz->getField<jni::JString>("source");
-      jni::local_ref<jni::JString> source = this->getFieldValue(fieldSource);
       return NativeOxygenSaturationSample(
-        uuid->toStdString(),
+        identity->toCpp(),
+        origin->toCpp(),
         timeMs,
-        percentage,
-        source != nullptr ? std::make_optional(source->toStdString()) : std::nullopt
+        percentage
       );
     }
 
@@ -54,15 +60,15 @@ namespace margelo::nitro::nitrohealth {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeOxygenSaturationSample::javaobject> fromCpp(const NativeOxygenSaturationSample& value) {
-      using JSignature = JNativeOxygenSaturationSample(jni::alias_ref<jni::JString>, double, double, jni::alias_ref<jni::JString>);
+      using JSignature = JNativeOxygenSaturationSample(jni::alias_ref<JNativeHealthSampleIdentity>, jni::alias_ref<JNativeHealthDataOrigin>, double, double);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
         clazz,
-        jni::make_jstring(value.uuid),
+        JNativeHealthSampleIdentity::fromCpp(value.identity),
+        JNativeHealthDataOrigin::fromCpp(value.origin),
         value.timeMs,
-        value.percentage,
-        value.source.has_value() ? jni::make_jstring(value.source.value()) : nullptr
+        value.percentage
       );
     }
   };

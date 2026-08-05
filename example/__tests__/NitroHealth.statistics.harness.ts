@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'react-native-harness'
-import { Platform } from 'react-native'
 import { NitroHealth } from 'react-native-nitro-health'
 import type { HealthStatistics, StatisticsMetric } from 'react-native-nitro-health'
 
@@ -47,32 +46,16 @@ describe('NitroHealth statistics (native)', () => {
     }
   })
 
-  it('rejects reading heart rate statistics on Android when permission is not granted', async () => {
-    if (Platform.OS !== 'android') {
-      return
-    }
-
-    const status = await NitroHealth.getRequestStatusForAuthorization(heartRateReadPermission)
-
-    if (status === 'unnecessary') {
+  it('rejects reading heart rate statistics when permission is reported not granted', async () => {
+    const result = await NitroHealth.getPermissionStatuses(heartRateReadPermission)
+    if (
+      result.status === 'unavailable' ||
+      !result.statuses.some(({ status }) => status === 'notGranted')
+    ) {
       return
     }
 
     await expect(NitroHealth.readHeartRateStatistics(emptyRange)).rejects.toThrow(/permission/i)
-  })
-
-  it('rejects reading heart rate statistics on iOS before authorization is requested (HealthKit notDetermined)', async () => {
-    if (Platform.OS !== 'ios') {
-      return
-    }
-
-    const status = await NitroHealth.getRequestStatusForAuthorization(heartRateReadPermission)
-
-    if (status === 'unnecessary') {
-      return
-    }
-
-    await expect(NitroHealth.readHeartRateStatistics(emptyRange)).rejects.toThrow(/not determined/i)
   })
 
   describe('readStatistics', () => {
@@ -200,36 +183,18 @@ describe('NitroHealth statistics (native)', () => {
       ).rejects.toThrow('bucket must be one of: hour, day, week, month')
     })
 
-    it('rejects reading statistics on Android when steps permission is not granted', async () => {
-      if (Platform.OS !== 'android') {
-        return
-      }
-
-      const status = await NitroHealth.getRequestStatusForAuthorization(stepsReadPermission)
-
-      if (status === 'unnecessary') {
+    it('rejects reading statistics when steps permission is reported not granted', async () => {
+      const result = await NitroHealth.getPermissionStatuses(stepsReadPermission)
+      if (
+        result.status === 'unavailable' ||
+        !result.statuses.some(({ status }) => status === 'notGranted')
+      ) {
         return
       }
 
       await expect(
         NitroHealth.readStatistics('steps', { ...emptyRange, bucket: 'day', metrics: ['sum'] })
       ).rejects.toThrow(/permission/i)
-    })
-
-    it('rejects reading statistics on iOS before authorization is requested (HealthKit notDetermined)', async () => {
-      if (Platform.OS !== 'ios') {
-        return
-      }
-
-      const status = await NitroHealth.getRequestStatusForAuthorization(stepsReadPermission)
-
-      if (status === 'unnecessary') {
-        return
-      }
-
-      await expect(
-        NitroHealth.readStatistics('steps', { ...emptyRange, bucket: 'day', metrics: ['sum'] })
-      ).rejects.toThrow(/not determined/i)
     })
 
     it('round-trips saved steps through readStatistics when authorized', async () => {

@@ -10,6 +10,15 @@
 #include <fbjni/fbjni.h>
 #include "NativeDistanceSample.hpp"
 
+#include "JNativeDistanceScope.hpp"
+#include "JNativeHealthDataOrigin.hpp"
+#include "JNativeHealthSampleIdentity.hpp"
+#include "JNativeHealthSampleIdentityKind.hpp"
+#include "NativeDistanceScope.hpp"
+#include "NativeHealthDataOrigin.hpp"
+#include "NativeHealthSampleIdentity.hpp"
+#include "NativeHealthSampleIdentityKind.hpp"
+#include <optional>
 #include <string>
 
 namespace margelo::nitro::nitrohealth {
@@ -31,19 +40,25 @@ namespace margelo::nitro::nitrohealth {
     [[nodiscard]]
     NativeDistanceSample toCpp() const {
       static const auto clazz = javaClassStatic();
-      static const auto fieldUuid = clazz->getField<jni::JString>("uuid");
-      jni::local_ref<jni::JString> uuid = this->getFieldValue(fieldUuid);
+      static const auto fieldIdentity = clazz->getField<JNativeHealthSampleIdentity>("identity");
+      jni::local_ref<JNativeHealthSampleIdentity> identity = this->getFieldValue(fieldIdentity);
+      static const auto fieldOrigin = clazz->getField<JNativeHealthDataOrigin>("origin");
+      jni::local_ref<JNativeHealthDataOrigin> origin = this->getFieldValue(fieldOrigin);
       static const auto fieldStartTimeMs = clazz->getField<double>("startTimeMs");
       double startTimeMs = this->getFieldValue(fieldStartTimeMs);
       static const auto fieldEndTimeMs = clazz->getField<double>("endTimeMs");
       double endTimeMs = this->getFieldValue(fieldEndTimeMs);
       static const auto fieldDistanceMeters = clazz->getField<double>("distanceMeters");
       double distanceMeters = this->getFieldValue(fieldDistanceMeters);
+      static const auto fieldScope = clazz->getField<JNativeDistanceScope>("scope");
+      jni::local_ref<JNativeDistanceScope> scope = this->getFieldValue(fieldScope);
       return NativeDistanceSample(
-        uuid->toStdString(),
+        identity->toCpp(),
+        origin->toCpp(),
         startTimeMs,
         endTimeMs,
-        distanceMeters
+        distanceMeters,
+        scope->toCpp()
       );
     }
 
@@ -53,15 +68,17 @@ namespace margelo::nitro::nitrohealth {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeDistanceSample::javaobject> fromCpp(const NativeDistanceSample& value) {
-      using JSignature = JNativeDistanceSample(jni::alias_ref<jni::JString>, double, double, double);
+      using JSignature = JNativeDistanceSample(jni::alias_ref<JNativeHealthSampleIdentity>, jni::alias_ref<JNativeHealthDataOrigin>, double, double, double, jni::alias_ref<JNativeDistanceScope>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
         clazz,
-        jni::make_jstring(value.uuid),
+        JNativeHealthSampleIdentity::fromCpp(value.identity),
+        JNativeHealthDataOrigin::fromCpp(value.origin),
         value.startTimeMs,
         value.endTimeMs,
-        value.distanceMeters
+        value.distanceMeters,
+        JNativeDistanceScope::fromCpp(value.scope)
       );
     }
   };

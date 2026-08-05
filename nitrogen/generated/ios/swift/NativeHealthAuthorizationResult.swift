@@ -18,22 +18,10 @@ public extension NativeHealthAuthorizationResult {
   /**
    * Create a new instance of `NativeHealthAuthorizationResult`.
    */
-  init(status: HealthAuthorizationStatus, availabilityStatus: HealthAvailabilityStatus, requestStatus: AuthorizationRequestStatus, grantedPermissions: [NativeHealthPermission], deniedPermissions: [NativeHealthPermission], unverifiablePermissions: [NativeHealthPermission]) {
-    self.init(status, availabilityStatus, requestStatus, { () -> bridge.std__vector_NativeHealthPermission_ in
-      var __vector = bridge.create_std__vector_NativeHealthPermission_(grantedPermissions.count)
-      for __item in grantedPermissions {
-        __vector.push_back(__item)
-      }
-      return __vector
-    }(), { () -> bridge.std__vector_NativeHealthPermission_ in
-      var __vector = bridge.create_std__vector_NativeHealthPermission_(deniedPermissions.count)
-      for __item in deniedPermissions {
-        __vector.push_back(__item)
-      }
-      return __vector
-    }(), { () -> bridge.std__vector_NativeHealthPermission_ in
-      var __vector = bridge.create_std__vector_NativeHealthPermission_(unverifiablePermissions.count)
-      for __item in unverifiablePermissions {
+  init(status: NativeHealthAuthorizationStatus, availability: NativeHealthAvailability, statuses: [NativeHealthPermissionStatusEntry]) {
+    self.init(status, availability, { () -> bridge.std__vector_NativeHealthPermissionStatusEntry_ in
+      var __vector = bridge.create_std__vector_NativeHealthPermissionStatusEntry_(statuses.count)
+      for __item in statuses {
         __vector.push_back(__item)
       }
       return __vector
@@ -41,32 +29,17 @@ public extension NativeHealthAuthorizationResult {
   }
 
   @inline(__always)
-  var status: HealthAuthorizationStatus {
+  var status: NativeHealthAuthorizationStatus {
     return self.__status
   }
   
   @inline(__always)
-  var availabilityStatus: HealthAvailabilityStatus {
-    return self.__availabilityStatus
+  var availability: NativeHealthAvailability {
+    return self.__availability
   }
   
   @inline(__always)
-  var requestStatus: AuthorizationRequestStatus {
-    return self.__requestStatus
-  }
-  
-  @inline(__always)
-  var grantedPermissions: [NativeHealthPermission] {
-    return self.__grantedPermissions.map({ __item in __item })
-  }
-  
-  @inline(__always)
-  var deniedPermissions: [NativeHealthPermission] {
-    return self.__deniedPermissions.map({ __item in __item })
-  }
-  
-  @inline(__always)
-  var unverifiablePermissions: [NativeHealthPermission] {
-    return self.__unverifiablePermissions.map({ __item in __item })
+  var statuses: [NativeHealthPermissionStatusEntry] {
+    return self.__statuses.map({ __item in __item })
   }
 }

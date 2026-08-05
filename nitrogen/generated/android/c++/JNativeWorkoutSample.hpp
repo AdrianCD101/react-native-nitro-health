@@ -10,6 +10,24 @@
 #include <fbjni/fbjni.h>
 #include "NativeWorkoutSample.hpp"
 
+#include "JNativeHealthDataOrigin.hpp"
+#include "JNativeHealthMetricValue.hpp"
+#include "JNativeHealthMetricValueStatus.hpp"
+#include "JNativeHealthSampleIdentity.hpp"
+#include "JNativeHealthSampleIdentityKind.hpp"
+#include "JNativeWorkoutActivity.hpp"
+#include "JNativeWorkoutActivityMapping.hpp"
+#include "JNativeWorkoutActivityPortability.hpp"
+#include "JNativeWorkoutActivityStatus.hpp"
+#include "NativeHealthDataOrigin.hpp"
+#include "NativeHealthMetricValue.hpp"
+#include "NativeHealthMetricValueStatus.hpp"
+#include "NativeHealthSampleIdentity.hpp"
+#include "NativeHealthSampleIdentityKind.hpp"
+#include "NativeWorkoutActivity.hpp"
+#include "NativeWorkoutActivityMapping.hpp"
+#include "NativeWorkoutActivityPortability.hpp"
+#include "NativeWorkoutActivityStatus.hpp"
 #include <optional>
 #include <string>
 
@@ -32,34 +50,40 @@ namespace margelo::nitro::nitrohealth {
     [[nodiscard]]
     NativeWorkoutSample toCpp() const {
       static const auto clazz = javaClassStatic();
-      static const auto fieldUuid = clazz->getField<jni::JString>("uuid");
-      jni::local_ref<jni::JString> uuid = this->getFieldValue(fieldUuid);
+      static const auto fieldIdentity = clazz->getField<JNativeHealthSampleIdentity>("identity");
+      jni::local_ref<JNativeHealthSampleIdentity> identity = this->getFieldValue(fieldIdentity);
+      static const auto fieldOrigin = clazz->getField<JNativeHealthDataOrigin>("origin");
+      jni::local_ref<JNativeHealthDataOrigin> origin = this->getFieldValue(fieldOrigin);
       static const auto fieldStartTimeMs = clazz->getField<double>("startTimeMs");
       double startTimeMs = this->getFieldValue(fieldStartTimeMs);
       static const auto fieldEndTimeMs = clazz->getField<double>("endTimeMs");
       double endTimeMs = this->getFieldValue(fieldEndTimeMs);
-      static const auto fieldDurationSeconds = clazz->getField<double>("durationSeconds");
-      double durationSeconds = this->getFieldValue(fieldDurationSeconds);
-      static const auto fieldActivityType = clazz->getField<jni::JString>("activityType");
-      jni::local_ref<jni::JString> activityType = this->getFieldValue(fieldActivityType);
+      static const auto fieldElapsedDurationSeconds = clazz->getField<double>("elapsedDurationSeconds");
+      double elapsedDurationSeconds = this->getFieldValue(fieldElapsedDurationSeconds);
+      static const auto fieldActiveDuration = clazz->getField<JNativeHealthMetricValue>("activeDuration");
+      jni::local_ref<JNativeHealthMetricValue> activeDuration = this->getFieldValue(fieldActiveDuration);
+      static const auto fieldActivity = clazz->getField<JNativeWorkoutActivity>("activity");
+      jni::local_ref<JNativeWorkoutActivity> activity = this->getFieldValue(fieldActivity);
       static const auto fieldTitle = clazz->getField<jni::JString>("title");
       jni::local_ref<jni::JString> title = this->getFieldValue(fieldTitle);
-      static const auto fieldSource = clazz->getField<jni::JString>("source");
-      jni::local_ref<jni::JString> source = this->getFieldValue(fieldSource);
-      static const auto fieldTotalDistanceMeters = clazz->getField<jni::JDouble>("totalDistanceMeters");
-      jni::local_ref<jni::JDouble> totalDistanceMeters = this->getFieldValue(fieldTotalDistanceMeters);
-      static const auto fieldTotalEnergyBurnedKcal = clazz->getField<jni::JDouble>("totalEnergyBurnedKcal");
-      jni::local_ref<jni::JDouble> totalEnergyBurnedKcal = this->getFieldValue(fieldTotalEnergyBurnedKcal);
+      static const auto fieldBrandName = clazz->getField<jni::JString>("brandName");
+      jni::local_ref<jni::JString> brandName = this->getFieldValue(fieldBrandName);
+      static const auto fieldTotalDistance = clazz->getField<JNativeHealthMetricValue>("totalDistance");
+      jni::local_ref<JNativeHealthMetricValue> totalDistance = this->getFieldValue(fieldTotalDistance);
+      static const auto fieldTotalActiveEnergyBurned = clazz->getField<JNativeHealthMetricValue>("totalActiveEnergyBurned");
+      jni::local_ref<JNativeHealthMetricValue> totalActiveEnergyBurned = this->getFieldValue(fieldTotalActiveEnergyBurned);
       return NativeWorkoutSample(
-        uuid->toStdString(),
+        identity->toCpp(),
+        origin->toCpp(),
         startTimeMs,
         endTimeMs,
-        durationSeconds,
-        activityType->toStdString(),
+        elapsedDurationSeconds,
+        activeDuration->toCpp(),
+        activity->toCpp(),
         title != nullptr ? std::make_optional(title->toStdString()) : std::nullopt,
-        source != nullptr ? std::make_optional(source->toStdString()) : std::nullopt,
-        totalDistanceMeters != nullptr ? std::make_optional(totalDistanceMeters->value()) : std::nullopt,
-        totalEnergyBurnedKcal != nullptr ? std::make_optional(totalEnergyBurnedKcal->value()) : std::nullopt
+        brandName != nullptr ? std::make_optional(brandName->toStdString()) : std::nullopt,
+        totalDistance->toCpp(),
+        totalActiveEnergyBurned->toCpp()
       );
     }
 
@@ -69,20 +93,22 @@ namespace margelo::nitro::nitrohealth {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeWorkoutSample::javaobject> fromCpp(const NativeWorkoutSample& value) {
-      using JSignature = JNativeWorkoutSample(jni::alias_ref<jni::JString>, double, double, double, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>);
+      using JSignature = JNativeWorkoutSample(jni::alias_ref<JNativeHealthSampleIdentity>, jni::alias_ref<JNativeHealthDataOrigin>, double, double, double, jni::alias_ref<JNativeHealthMetricValue>, jni::alias_ref<JNativeWorkoutActivity>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<JNativeHealthMetricValue>, jni::alias_ref<JNativeHealthMetricValue>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
         clazz,
-        jni::make_jstring(value.uuid),
+        JNativeHealthSampleIdentity::fromCpp(value.identity),
+        JNativeHealthDataOrigin::fromCpp(value.origin),
         value.startTimeMs,
         value.endTimeMs,
-        value.durationSeconds,
-        jni::make_jstring(value.activityType),
+        value.elapsedDurationSeconds,
+        JNativeHealthMetricValue::fromCpp(value.activeDuration),
+        JNativeWorkoutActivity::fromCpp(value.activity),
         value.title.has_value() ? jni::make_jstring(value.title.value()) : nullptr,
-        value.source.has_value() ? jni::make_jstring(value.source.value()) : nullptr,
-        value.totalDistanceMeters.has_value() ? jni::JDouble::valueOf(value.totalDistanceMeters.value()) : nullptr,
-        value.totalEnergyBurnedKcal.has_value() ? jni::JDouble::valueOf(value.totalEnergyBurnedKcal.value()) : nullptr
+        value.brandName.has_value() ? jni::make_jstring(value.brandName.value()) : nullptr,
+        JNativeHealthMetricValue::fromCpp(value.totalDistance),
+        JNativeHealthMetricValue::fromCpp(value.totalActiveEnergyBurned)
       );
     }
   };

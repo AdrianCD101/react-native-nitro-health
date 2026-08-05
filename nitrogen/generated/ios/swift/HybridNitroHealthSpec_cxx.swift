@@ -84,7 +84,7 @@ open class HybridNitroHealthSpec_cxx {
     }
   }
 
-
+  
 
   /**
    * Get the memory size of the Swift class (plus size of any other allocations)
@@ -125,121 +125,173 @@ open class HybridNitroHealthSpec_cxx {
 
   // Methods
   @inline(__always)
-  public final func isAvailable() -> bridge.Result_bool_ {
+  public final func getAvailability() -> bridge.Result_NativeHealthAvailability_ {
     do {
-      let __result = try self.__implementation.isAvailable()
+      let __result = try self.__implementation.getAvailability()
       let __resultCpp = __result
-      return bridge.create_Result_bool_(__resultCpp)
+      return bridge.create_Result_NativeHealthAvailability_(__resultCpp)
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_bool_(__exceptionPtr)
+      return bridge.create_Result_NativeHealthAvailability_(__exceptionPtr)
     }
   }
   
   @inline(__always)
-  public final func getAvailabilityStatus() -> bridge.Result_HealthAvailabilityStatus_ {
+  public final func performAvailabilityRecovery() -> bridge.Result_std__shared_ptr_Promise_NativeHealthAvailabilityRecoveryResult___ {
     do {
-      let __result = try self.__implementation.getAvailabilityStatus()
-      let __resultCpp = __result
-      return bridge.create_Result_HealthAvailabilityStatus_(__resultCpp)
-    } catch (let __error) {
-      let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_HealthAvailabilityStatus_(__exceptionPtr)
-    }
-  }
-  
-  @inline(__always)
-  public final func openHealthConnectInstall() -> bridge.Result_bool_ {
-    do {
-      let __result = try self.__implementation.openHealthConnectInstall()
-      let __resultCpp = __result
-      return bridge.create_Result_bool_(__resultCpp)
-    } catch (let __error) {
-      let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_bool_(__exceptionPtr)
-    }
-  }
-  
-  @inline(__always)
-  public final func openHealthSettings() -> bridge.Result_std__shared_ptr_Promise_bool___ {
-    do {
-      let __result = try self.__implementation.openHealthSettings()
-      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_bool__ in
-        let __promise = bridge.create_std__shared_ptr_Promise_bool__()
-        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_bool__(__promise)
+      let __result = try self.__implementation.performAvailabilityRecovery()
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_NativeHealthAvailabilityRecoveryResult__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_NativeHealthAvailabilityRecoveryResult__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_NativeHealthAvailabilityRecoveryResult__(__promise)
         __result
           .then({ __result in __promiseHolder.resolve(__result) })
           .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
         return __promise
       }()
-      return bridge.create_Result_std__shared_ptr_Promise_bool___(__resultCpp)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthAvailabilityRecoveryResult___(__resultCpp)
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_std__shared_ptr_Promise_bool___(__exceptionPtr)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthAvailabilityRecoveryResult___(__exceptionPtr)
     }
   }
   
   @inline(__always)
-  public final func enableBackgroundDelivery(dataType: std.string, frequency: Int32) -> bridge.Result_std__shared_ptr_Promise_void___ {
+  public final func getCapabilities() -> bridge.Result_std__shared_ptr_Promise_NativeHealthCapabilities___ {
     do {
-      let __result = try self.__implementation.enableBackgroundDelivery(dataType: String(dataType), frequency: margelo.nitro.nitrohealth.BackgroundDeliveryFrequency(rawValue: frequency)!)
-      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_void__ in
-        let __promise = bridge.create_std__shared_ptr_Promise_void__()
-        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_void__(__promise)
+      let __result = try self.__implementation.getCapabilities()
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_NativeHealthCapabilities__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_NativeHealthCapabilities__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_NativeHealthCapabilities__(__promise)
         __result
-          .then({ __result in __promiseHolder.resolve() })
+          .then({ __result in __promiseHolder.resolve(__result) })
           .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
         return __promise
       }()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__resultCpp)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthCapabilities___(__resultCpp)
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
-    }
-  }
-
-  @inline(__always)
-  public final func disableBackgroundDelivery(dataType: std.string) -> bridge.Result_std__shared_ptr_Promise_void___ {
-    do {
-      let __result = try self.__implementation.disableBackgroundDelivery(dataType: String(dataType))
-      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_void__ in
-        let __promise = bridge.create_std__shared_ptr_Promise_void__()
-        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_void__(__promise)
-        __result
-          .then({ __result in __promiseHolder.resolve() })
-          .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
-        return __promise
-      }()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__resultCpp)
-    } catch (let __error) {
-      let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthCapabilities___(__exceptionPtr)
     }
   }
   
   @inline(__always)
-  public final func disableAllBackgroundDelivery() -> bridge.Result_std__shared_ptr_Promise_void___ {
+  public final func requestAdditionalAccess(access: std.string) -> bridge.Result_std__shared_ptr_Promise_NativeHealthAdditionalAccessStatus___ {
     do {
-      let __result = try self.__implementation.disableAllBackgroundDelivery()
-      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_void__ in
-        let __promise = bridge.create_std__shared_ptr_Promise_void__()
-        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_void__(__promise)
+      let __result = try self.__implementation.requestAdditionalAccess(access: String(access))
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_NativeHealthAdditionalAccessStatus__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_NativeHealthAdditionalAccessStatus__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_NativeHealthAdditionalAccessStatus__(__promise)
         __result
-          .then({ __result in __promiseHolder.resolve() })
+          .then({ __result in __promiseHolder.resolve(__result) })
           .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
         return __promise
       }()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__resultCpp)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthAdditionalAccessStatus___(__resultCpp)
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthAdditionalAccessStatus___(__exceptionPtr)
     }
   }
   
   @inline(__always)
-  public final func setOnChangeNotificationListener(listener: bridge.std__optional_std__function_void_const_std__vector_std__string______dataTypes_____const_std__string_____deliveryId______) -> bridge.Result_void_ {
+  public final func managePermissions() -> bridge.Result_std__shared_ptr_Promise_NativePermissionWorkflowResult___ {
     do {
-      try self.__implementation.setOnChangeNotificationListener(listener: { () -> ((_ dataTypes: [String], _ deliveryId: String) -> Void)? in
+      let __result = try self.__implementation.managePermissions()
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_NativePermissionWorkflowResult__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_NativePermissionWorkflowResult__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_NativePermissionWorkflowResult__(__promise)
+        __result
+          .then({ __result in __promiseHolder.resolve(__result) })
+          .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
+        return __promise
+      }()
+      return bridge.create_Result_std__shared_ptr_Promise_NativePermissionWorkflowResult___(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_std__shared_ptr_Promise_NativePermissionWorkflowResult___(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func revokeAllPermissions() -> bridge.Result_std__shared_ptr_Promise_NativePermissionWorkflowResult___ {
+    do {
+      let __result = try self.__implementation.revokeAllPermissions()
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_NativePermissionWorkflowResult__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_NativePermissionWorkflowResult__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_NativePermissionWorkflowResult__(__promise)
+        __result
+          .then({ __result in __promiseHolder.resolve(__result) })
+          .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
+        return __promise
+      }()
+      return bridge.create_Result_std__shared_ptr_Promise_NativePermissionWorkflowResult___(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_std__shared_ptr_Promise_NativePermissionWorkflowResult___(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func getBackgroundChangesMode() -> bridge.Result_NativeBackgroundChangesMode_ {
+    do {
+      let __result = try self.__implementation.getBackgroundChangesMode()
+      let __resultCpp = __result
+      return bridge.create_Result_NativeBackgroundChangesMode_(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_NativeBackgroundChangesMode_(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func configureBackgroundChanges(dataTypes: bridge.std__vector_std__string_, frequency: Int32) -> bridge.Result_std__shared_ptr_Promise_NativeBackgroundChangesResult___ {
+    do {
+      let __result = try self.__implementation.configureBackgroundChanges(dataTypes: dataTypes.map({ __item in String(__item) }), frequency: margelo.nitro.nitrohealth.BackgroundDeliveryFrequency(rawValue: frequency)!)
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_NativeBackgroundChangesResult__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_NativeBackgroundChangesResult__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_NativeBackgroundChangesResult__(__promise)
+        __result
+          .then({ __result in __promiseHolder.resolve(__result) })
+          .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
+        return __promise
+      }()
+      return bridge.create_Result_std__shared_ptr_Promise_NativeBackgroundChangesResult___(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_std__shared_ptr_Promise_NativeBackgroundChangesResult___(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func disableBackgroundChanges(dataTypes: bridge.std__optional_std__vector_std__string__) -> bridge.Result_std__shared_ptr_Promise_NativeBackgroundChangesResult___ {
+    do {
+      let __result = try self.__implementation.disableBackgroundChanges(dataTypes: { () -> [String]? in
+        if bridge.has_value_std__optional_std__vector_std__string__(dataTypes) {
+          let __unwrapped = bridge.get_std__optional_std__vector_std__string__(dataTypes)
+          return __unwrapped.map({ __item in String(__item) })
+        } else {
+          return nil
+        }
+      }())
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_NativeBackgroundChangesResult__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_NativeBackgroundChangesResult__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_NativeBackgroundChangesResult__(__promise)
+        __result
+          .then({ __result in __promiseHolder.resolve(__result) })
+          .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
+        return __promise
+      }()
+      return bridge.create_Result_std__shared_ptr_Promise_NativeBackgroundChangesResult___(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_std__shared_ptr_Promise_NativeBackgroundChangesResult___(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func setOnBackgroundChangeListener(listener: bridge.std__optional_std__function_void_const_std__vector_std__string______dataTypes_____const_std__string_____deliveryId______) -> bridge.Result_bool_ {
+    do {
+      let __result = try self.__implementation.setOnBackgroundChangeListener(listener: { () -> ((_ dataTypes: [String], _ deliveryId: String) -> Void)? in
         if bridge.has_value_std__optional_std__function_void_const_std__vector_std__string______dataTypes_____const_std__string_____deliveryId______(listener) {
           let __unwrapped = bridge.get_std__optional_std__function_void_const_std__vector_std__string______dataTypes_____const_std__string_____deliveryId______(listener)
           return { () -> ([String], String) -> Void in
@@ -258,59 +310,23 @@ open class HybridNitroHealthSpec_cxx {
           return nil
         }
       }())
-      return bridge.create_Result_void_()
+      let __resultCpp = __result
+      return bridge.create_Result_bool_(__resultCpp)
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_void_(__exceptionPtr)
+      return bridge.create_Result_bool_(__exceptionPtr)
     }
   }
   
   @inline(__always)
-  public final func acknowledgeChangeNotification(deliveryId: std.string) -> bridge.Result_void_ {
+  public final func acknowledgeBackgroundChange(deliveryId: std.string) -> bridge.Result_bool_ {
     do {
-      try self.__implementation.acknowledgeChangeNotification(deliveryId: String(deliveryId))
-      return bridge.create_Result_void_()
+      let __result = try self.__implementation.acknowledgeBackgroundChange(deliveryId: String(deliveryId))
+      let __resultCpp = __result
+      return bridge.create_Result_bool_(__resultCpp)
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_void_(__exceptionPtr)
-    }
-  }
-  
-  @inline(__always)
-  public final func getBackgroundReadAuthorizationStatus() -> bridge.Result_std__shared_ptr_Promise_BackgroundReadAuthorizationStatus___ {
-    do {
-      let __result = try self.__implementation.getBackgroundReadAuthorizationStatus()
-      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_BackgroundReadAuthorizationStatus__ in
-        let __promise = bridge.create_std__shared_ptr_Promise_BackgroundReadAuthorizationStatus__()
-        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_BackgroundReadAuthorizationStatus__(__promise)
-        __result
-          .then({ __result in __promiseHolder.resolve(__result) })
-          .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
-        return __promise
-      }()
-      return bridge.create_Result_std__shared_ptr_Promise_BackgroundReadAuthorizationStatus___(__resultCpp)
-    } catch (let __error) {
-      let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_std__shared_ptr_Promise_BackgroundReadAuthorizationStatus___(__exceptionPtr)
-    }
-  }
-  
-  @inline(__always)
-  public final func requestBackgroundReadAuthorization() -> bridge.Result_std__shared_ptr_Promise_BackgroundReadAuthorizationStatus___ {
-    do {
-      let __result = try self.__implementation.requestBackgroundReadAuthorization()
-      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_BackgroundReadAuthorizationStatus__ in
-        let __promise = bridge.create_std__shared_ptr_Promise_BackgroundReadAuthorizationStatus__()
-        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_BackgroundReadAuthorizationStatus__(__promise)
-        __result
-          .then({ __result in __promiseHolder.resolve(__result) })
-          .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
-        return __promise
-      }()
-      return bridge.create_Result_std__shared_ptr_Promise_BackgroundReadAuthorizationStatus___(__resultCpp)
-    } catch (let __error) {
-      let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_std__shared_ptr_Promise_BackgroundReadAuthorizationStatus___(__exceptionPtr)
+      return bridge.create_Result_bool_(__exceptionPtr)
     }
   }
   
@@ -625,21 +641,21 @@ open class HybridNitroHealthSpec_cxx {
   }
   
   @inline(__always)
-  public final func saveDistance(samples: bridge.std__vector_NativeDistanceSampleInput_) -> bridge.Result_std__shared_ptr_Promise_void___ {
+  public final func saveDistance(samples: bridge.std__vector_NativeDistanceSampleInput_) -> bridge.Result_std__shared_ptr_Promise_NativeDistanceWriteResult___ {
     do {
       let __result = try self.__implementation.saveDistance(samples: samples.map({ __item in __item }))
-      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_void__ in
-        let __promise = bridge.create_std__shared_ptr_Promise_void__()
-        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_void__(__promise)
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_NativeDistanceWriteResult__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_NativeDistanceWriteResult__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_NativeDistanceWriteResult__(__promise)
         __result
-          .then({ __result in __promiseHolder.resolve() })
+          .then({ __result in __promiseHolder.resolve(__result) })
           .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
         return __promise
       }()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__resultCpp)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeDistanceWriteResult___(__resultCpp)
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeDistanceWriteResult___(__exceptionPtr)
     }
   }
   
@@ -794,42 +810,42 @@ open class HybridNitroHealthSpec_cxx {
       return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
     }
   }
-
+  
   @inline(__always)
-  public final func deleteSamplesByUuids(dataType: std.string, uuids: bridge.std__vector_std__string_) -> bridge.Result_std__shared_ptr_Promise_void___ {
+  public final func deleteRecordsByIds(dataType: std.string, recordIds: bridge.std__vector_std__string_) -> bridge.Result_std__shared_ptr_Promise_NativeHealthDeleteResult___ {
     do {
-      let __result = try self.__implementation.deleteSamplesByUuids(dataType: String(dataType), uuids: uuids.map({ __item in String(__item) }))
-      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_void__ in
-        let __promise = bridge.create_std__shared_ptr_Promise_void__()
-        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_void__(__promise)
+      let __result = try self.__implementation.deleteRecordsByIds(dataType: String(dataType), recordIds: recordIds.map({ __item in String(__item) }))
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_NativeHealthDeleteResult__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_NativeHealthDeleteResult__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_NativeHealthDeleteResult__(__promise)
         __result
-          .then({ __result in __promiseHolder.resolve() })
+          .then({ __result in __promiseHolder.resolve(__result) })
           .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
         return __promise
       }()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__resultCpp)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthDeleteResult___(__resultCpp)
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthDeleteResult___(__exceptionPtr)
     }
   }
   
   @inline(__always)
-  public final func deleteSamplesByTimeRange(dataType: std.string, query: NativeHealthTimeRangeQuery) -> bridge.Result_std__shared_ptr_Promise_void___ {
+  public final func deleteRecordsByTimeRange(dataType: std.string, query: NativeHealthTimeRangeQuery) -> bridge.Result_std__shared_ptr_Promise_NativeHealthDeleteResult___ {
     do {
-      let __result = try self.__implementation.deleteSamplesByTimeRange(dataType: String(dataType), query: query)
-      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_void__ in
-        let __promise = bridge.create_std__shared_ptr_Promise_void__()
-        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_void__(__promise)
+      let __result = try self.__implementation.deleteRecordsByTimeRange(dataType: String(dataType), query: query)
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_NativeHealthDeleteResult__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_NativeHealthDeleteResult__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_NativeHealthDeleteResult__(__promise)
         __result
-          .then({ __result in __promiseHolder.resolve() })
+          .then({ __result in __promiseHolder.resolve(__result) })
           .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
         return __promise
       }()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__resultCpp)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthDeleteResult___(__resultCpp)
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthDeleteResult___(__exceptionPtr)
     }
   }
   
@@ -849,25 +865,6 @@ open class HybridNitroHealthSpec_cxx {
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()
       return bridge.create_Result_std__shared_ptr_Promise_NativeHealthPermissionStatusResult___(__exceptionPtr)
-    }
-  }
-
-  @inline(__always)
-  public final func getRequestStatusForAuthorization(permissions: bridge.std__vector_NativeHealthPermission_) -> bridge.Result_std__shared_ptr_Promise_AuthorizationRequestStatus___ {
-    do {
-      let __result = try self.__implementation.getRequestStatusForAuthorization(permissions: permissions.map({ __item in __item }))
-      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_AuthorizationRequestStatus__ in
-        let __promise = bridge.create_std__shared_ptr_Promise_AuthorizationRequestStatus__()
-        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_AuthorizationRequestStatus__(__promise)
-        __result
-          .then({ __result in __promiseHolder.resolve(__result) })
-          .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
-        return __promise
-      }()
-      return bridge.create_Result_std__shared_ptr_Promise_AuthorizationRequestStatus___(__resultCpp)
-    } catch (let __error) {
-      let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_std__shared_ptr_Promise_AuthorizationRequestStatus___(__exceptionPtr)
     }
   }
   

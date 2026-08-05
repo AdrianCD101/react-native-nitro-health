@@ -29,7 +29,7 @@ data class NativeWorkoutSampleInput(
   val activityType: String,
   @DoNotStrip
   @Keep
-  val title: String?,
+  val displayName: String?,
   @DoNotStrip
   @Keep
   val timeZone: String?,
@@ -48,7 +48,7 @@ data class NativeWorkoutSampleInput(
     return Objects.deepEquals(this.startTimeMs, other.startTimeMs)
       && Objects.deepEquals(this.endTimeMs, other.endTimeMs)
       && Objects.deepEquals(this.activityType, other.activityType)
-      && Objects.deepEquals(this.title, other.title)
+      && Objects.deepEquals(this.displayName, other.displayName)
       && Objects.deepEquals(this.timeZone, other.timeZone)
       && Objects.deepEquals(this.syncId, other.syncId)
       && Objects.deepEquals(this.syncVersion, other.syncVersion)
@@ -59,7 +59,7 @@ data class NativeWorkoutSampleInput(
       startTimeMs,
       endTimeMs,
       activityType,
-      title,
+      displayName,
       timeZone,
       syncId,
       syncVersion
@@ -74,8 +74,8 @@ data class NativeWorkoutSampleInput(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(startTimeMs: Double, endTimeMs: Double, activityType: String, title: String?, timeZone: String?, syncId: String?, syncVersion: Double?): NativeWorkoutSampleInput {
-      return NativeWorkoutSampleInput(startTimeMs, endTimeMs, activityType, title, timeZone, syncId, syncVersion)
+    private fun fromCpp(startTimeMs: Double, endTimeMs: Double, activityType: String, displayName: String?, timeZone: String?, syncId: String?, syncVersion: Double?): NativeWorkoutSampleInput {
+      return NativeWorkoutSampleInput(startTimeMs, endTimeMs, activityType, displayName, timeZone, syncId, syncVersion)
     }
   }
 }

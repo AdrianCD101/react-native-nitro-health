@@ -5,7 +5,9 @@
   "compilerOptions": {
     "strict": true,
     "paths": {
-      "react-native-nitro-health": ["../src"]
+      "react-native-nitro-health": ["../src"],
+      "react-native-nitro-health/jest/mock": ["../jest/mock.d.ts"],
+      "react-native-nitro-health/jest/setup": ["../jest/setup.d.ts"]
     }
   }
 }

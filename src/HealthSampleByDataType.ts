@@ -28,7 +28,7 @@ export interface HealthSampleByDataType {
   oxygenSaturation: OxygenSaturationSample
   /** Height measurements. */
   height: HeightSample
-  /** Sleep-stage intervals. */
+  /** Tagged sleep session envelopes and stage intervals. */
   sleep: SleepSample
   /** Body-mass measurements. */
   bodyMass: BodyMassSample

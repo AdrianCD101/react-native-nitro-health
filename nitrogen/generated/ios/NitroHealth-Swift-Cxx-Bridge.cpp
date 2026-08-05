@@ -14,11 +14,11 @@
 
 namespace margelo::nitro::nitrohealth::bridge::swift {
 
-  // pragma MARK: std::function<void(bool /* result */)>
-  Func_void_bool create_Func_void_bool(void* NON_NULL swiftClosureWrapper) noexcept {
-    auto swiftClosure = NitroHealth::Func_void_bool::fromUnsafe(swiftClosureWrapper);
-    return [swiftClosure = std::move(swiftClosure)](bool result) mutable -> void {
-      swiftClosure.call(result);
+  // pragma MARK: std::function<void(NativeHealthAvailabilityRecoveryResult /* result */)>
+  Func_void_NativeHealthAvailabilityRecoveryResult create_Func_void_NativeHealthAvailabilityRecoveryResult(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroHealth::Func_void_NativeHealthAvailabilityRecoveryResult::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](NativeHealthAvailabilityRecoveryResult result) mutable -> void {
+      swiftClosure.call(static_cast<int>(result));
     };
   }
   
@@ -30,11 +30,35 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     };
   }
   
-  // pragma MARK: std::function<void()>
-  Func_void create_Func_void(void* NON_NULL swiftClosureWrapper) noexcept {
-    auto swiftClosure = NitroHealth::Func_void::fromUnsafe(swiftClosureWrapper);
-    return [swiftClosure = std::move(swiftClosure)]() mutable -> void {
-      swiftClosure.call();
+  // pragma MARK: std::function<void(const NativeHealthCapabilities& /* result */)>
+  Func_void_NativeHealthCapabilities create_Func_void_NativeHealthCapabilities(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroHealth::Func_void_NativeHealthCapabilities::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const NativeHealthCapabilities& result) mutable -> void {
+      swiftClosure.call(result);
+    };
+  }
+  
+  // pragma MARK: std::function<void(NativeHealthAdditionalAccessStatus /* result */)>
+  Func_void_NativeHealthAdditionalAccessStatus create_Func_void_NativeHealthAdditionalAccessStatus(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroHealth::Func_void_NativeHealthAdditionalAccessStatus::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](NativeHealthAdditionalAccessStatus result) mutable -> void {
+      swiftClosure.call(static_cast<int>(result));
+    };
+  }
+  
+  // pragma MARK: std::function<void(const NativePermissionWorkflowResult& /* result */)>
+  Func_void_NativePermissionWorkflowResult create_Func_void_NativePermissionWorkflowResult(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroHealth::Func_void_NativePermissionWorkflowResult::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const NativePermissionWorkflowResult& result) mutable -> void {
+      swiftClosure.call(result);
+    };
+  }
+  
+  // pragma MARK: std::function<void(const NativeBackgroundChangesResult& /* result */)>
+  Func_void_NativeBackgroundChangesResult create_Func_void_NativeBackgroundChangesResult(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroHealth::Func_void_NativeBackgroundChangesResult::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const NativeBackgroundChangesResult& result) mutable -> void {
+      swiftClosure.call(result);
     };
   }
   
@@ -46,19 +70,19 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     };
   }
   
-  // pragma MARK: std::function<void(BackgroundReadAuthorizationStatus /* result */)>
-  Func_void_BackgroundReadAuthorizationStatus create_Func_void_BackgroundReadAuthorizationStatus(void* NON_NULL swiftClosureWrapper) noexcept {
-    auto swiftClosure = NitroHealth::Func_void_BackgroundReadAuthorizationStatus::fromUnsafe(swiftClosureWrapper);
-    return [swiftClosure = std::move(swiftClosure)](BackgroundReadAuthorizationStatus result) mutable -> void {
-      swiftClosure.call(static_cast<int>(result));
-    };
-  }
-  
   // pragma MARK: std::function<void(const std::string& /* result */)>
   Func_void_std__string create_Func_void_std__string(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = NitroHealth::Func_void_std__string::fromUnsafe(swiftClosureWrapper);
     return [swiftClosure = std::move(swiftClosure)](const std::string& result) mutable -> void {
       swiftClosure.call(result);
+    };
+  }
+  
+  // pragma MARK: std::function<void()>
+  Func_void create_Func_void(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroHealth::Func_void::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)]() mutable -> void {
+      swiftClosure.call();
     };
   }
   
@@ -174,19 +198,27 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     };
   }
   
+  // pragma MARK: std::function<void(const NativeDistanceWriteResult& /* result */)>
+  Func_void_NativeDistanceWriteResult create_Func_void_NativeDistanceWriteResult(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroHealth::Func_void_NativeDistanceWriteResult::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const NativeDistanceWriteResult& result) mutable -> void {
+      swiftClosure.call(result);
+    };
+  }
+  
+  // pragma MARK: std::function<void(const NativeHealthDeleteResult& /* result */)>
+  Func_void_NativeHealthDeleteResult create_Func_void_NativeHealthDeleteResult(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroHealth::Func_void_NativeHealthDeleteResult::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const NativeHealthDeleteResult& result) mutable -> void {
+      swiftClosure.call(result);
+    };
+  }
+  
   // pragma MARK: std::function<void(const NativeHealthPermissionStatusResult& /* result */)>
   Func_void_NativeHealthPermissionStatusResult create_Func_void_NativeHealthPermissionStatusResult(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = NitroHealth::Func_void_NativeHealthPermissionStatusResult::fromUnsafe(swiftClosureWrapper);
     return [swiftClosure = std::move(swiftClosure)](const NativeHealthPermissionStatusResult& result) mutable -> void {
       swiftClosure.call(result);
-    };
-  }
-
-  // pragma MARK: std::function<void(AuthorizationRequestStatus /* result */)>
-  Func_void_AuthorizationRequestStatus create_Func_void_AuthorizationRequestStatus(void* NON_NULL swiftClosureWrapper) noexcept {
-    auto swiftClosure = NitroHealth::Func_void_AuthorizationRequestStatus::fromUnsafe(swiftClosureWrapper);
-    return [swiftClosure = std::move(swiftClosure)](AuthorizationRequestStatus result) mutable -> void {
-      swiftClosure.call(static_cast<int>(result));
     };
   }
   

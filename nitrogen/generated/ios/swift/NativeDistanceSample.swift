@@ -18,13 +18,18 @@ public extension NativeDistanceSample {
   /**
    * Create a new instance of `NativeDistanceSample`.
    */
-  init(uuid: String, startTimeMs: Double, endTimeMs: Double, distanceMeters: Double) {
-    self.init(std.string(uuid), startTimeMs, endTimeMs, distanceMeters)
+  init(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, startTimeMs: Double, endTimeMs: Double, distanceMeters: Double, scope: NativeDistanceScope) {
+    self.init(identity, origin, startTimeMs, endTimeMs, distanceMeters, scope)
   }
 
   @inline(__always)
-  var uuid: String {
-    return String(self.__uuid)
+  var identity: NativeHealthSampleIdentity {
+    return self.__identity
+  }
+  
+  @inline(__always)
+  var origin: NativeHealthDataOrigin {
+    return self.__origin
   }
   
   @inline(__always)
@@ -40,5 +45,10 @@ public extension NativeDistanceSample {
   @inline(__always)
   var distanceMeters: Double {
     return self.__distanceMeters
+  }
+  
+  @inline(__always)
+  var scope: NativeDistanceScope {
+    return self.__scope
   }
 }

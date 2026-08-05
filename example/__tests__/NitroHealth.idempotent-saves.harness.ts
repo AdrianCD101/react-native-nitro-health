@@ -1,7 +1,12 @@
 import { Platform } from 'react-native'
 import { describe, expect, it } from 'react-native-harness'
 import { NitroHealth } from 'react-native-nitro-health'
-import type { HealthPermission, StepSample, WorkoutSample } from 'react-native-nitro-health'
+import type {
+  HealthPermission,
+  HealthSampleIdentity,
+  StepSample,
+  WorkoutSample,
+} from 'react-native-nitro-health'
 
 import { hasVerifiedPermissions } from './support/harnessSupport'
 
@@ -20,6 +25,14 @@ const idempotentInterval = {
 const idempotentReadRange = {
   startDate: new Date('2004-06-01T00:00:00.000Z'),
   endDate: new Date('2004-06-02T00:00:00.000Z'),
+}
+
+function recordId(identity: HealthSampleIdentity): string {
+  return identity.kind === 'record' ? identity.id : identity.record.id
+}
+
+function workoutDisplayName(workout: WorkoutSample): string | undefined {
+  return workout.title ?? workout.brandName
 }
 
 async function readIdempotentStepSamples(expectedCounts: readonly number[]): Promise<StepSample[]> {
@@ -47,14 +60,16 @@ async function readIdempotentStepSamples(expectedCounts: readonly number[]): Pro
   return samples
 }
 
-async function readIdempotentWorkouts(expectedTitles: readonly string[]): Promise<WorkoutSample[]> {
+async function readIdempotentWorkouts(
+  expectedDisplayNames: readonly string[]
+): Promise<WorkoutSample[]> {
   const page = await NitroHealth.readWorkouts({ ...idempotentReadRange, limit: 1000 })
   return page.samples.filter(
     (workout) =>
       workout.startDate.getTime() === idempotentInterval.startDate.getTime() &&
       workout.endDate.getTime() === idempotentInterval.endDate.getTime() &&
-      workout.title !== undefined &&
-      expectedTitles.includes(workout.title)
+      workoutDisplayName(workout) !== undefined &&
+      expectedDisplayNames.includes(workoutDisplayName(workout) ?? '')
   )
 }
 
@@ -64,7 +79,7 @@ describe('NitroHealth idempotent saves (native)', () => {
       return
     }
 
-    await NitroHealth.deleteSamplesByTimeRange('steps', idempotentReadRange)
+    await NitroHealth.deleteRecordsByTimeRange('steps', idempotentReadRange)
 
     try {
       const sample = {
@@ -84,7 +99,7 @@ describe('NitroHealth idempotent saves (native)', () => {
       expect(samples).toHaveLength(1)
       expect(samples[0]?.count).toBe(710_001)
     } finally {
-      await NitroHealth.deleteSamplesByTimeRange('steps', idempotentReadRange)
+      await NitroHealth.deleteRecordsByTimeRange('steps', idempotentReadRange)
     }
   })
 
@@ -93,7 +108,7 @@ describe('NitroHealth idempotent saves (native)', () => {
       return
     }
 
-    await NitroHealth.deleteSamplesByTimeRange('steps', idempotentReadRange)
+    await NitroHealth.deleteRecordsByTimeRange('steps', idempotentReadRange)
 
     try {
       await NitroHealth.saveSteps([
@@ -133,12 +148,12 @@ describe('NitroHealth idempotent saves (native)', () => {
 
       expect(replacementSample.count).toBe(720_002)
       if (Platform.OS === 'android') {
-        expect(replacementSample.recordUuid).toBe(initialSample.recordUuid)
+        expect(recordId(replacementSample.identity)).toBe(recordId(initialSample.identity))
       } else if (Platform.OS === 'ios') {
-        expect(replacementSample.recordUuid).not.toBe(initialSample.recordUuid)
+        expect(recordId(replacementSample.identity)).not.toBe(recordId(initialSample.identity))
       }
     } finally {
-      await NitroHealth.deleteSamplesByTimeRange('steps', idempotentReadRange)
+      await NitroHealth.deleteRecordsByTimeRange('steps', idempotentReadRange)
     }
   })
 
@@ -147,7 +162,7 @@ describe('NitroHealth idempotent saves (native)', () => {
       return
     }
 
-    await NitroHealth.deleteSamplesByTimeRange('steps', idempotentReadRange)
+    await NitroHealth.deleteRecordsByTimeRange('steps', idempotentReadRange)
 
     try {
       await NitroHealth.saveSteps([
@@ -181,9 +196,11 @@ describe('NitroHealth idempotent saves (native)', () => {
 
       expect(afterLowerVersion).toHaveLength(1)
       expect(afterLowerVersion[0]?.count).toBe(730_002)
-      expect(afterLowerVersion[0]?.recordUuid).toBe(currentSample.recordUuid)
+      expect(afterLowerVersion[0] ? recordId(afterLowerVersion[0].identity) : undefined).toBe(
+        recordId(currentSample.identity)
+      )
     } finally {
-      await NitroHealth.deleteSamplesByTimeRange('steps', idempotentReadRange)
+      await NitroHealth.deleteRecordsByTimeRange('steps', idempotentReadRange)
     }
   })
 
@@ -192,12 +209,12 @@ describe('NitroHealth idempotent saves (native)', () => {
       return
     }
 
-    await NitroHealth.deleteSamplesByTimeRange('workout', idempotentReadRange)
+    await NitroHealth.deleteRecordsByTimeRange('workout', idempotentReadRange)
     try {
       const workout = {
         ...idempotentInterval,
         activityType: 'running' as const,
-        title: 'Nitro Retry Workout',
+        displayName: 'Nitro Retry Workout',
         timeZone: 'UTC',
         sync: { id: 'nitro-health-harness-workout-retry', version: 1 },
       }
@@ -212,7 +229,7 @@ describe('NitroHealth idempotent saves (native)', () => {
 
       expect(workouts).toHaveLength(1)
     } finally {
-      await NitroHealth.deleteSamplesByTimeRange('workout', idempotentReadRange)
+      await NitroHealth.deleteRecordsByTimeRange('workout', idempotentReadRange)
     }
   })
 
@@ -221,13 +238,13 @@ describe('NitroHealth idempotent saves (native)', () => {
       return
     }
 
-    await NitroHealth.deleteSamplesByTimeRange('workout', idempotentReadRange)
+    await NitroHealth.deleteRecordsByTimeRange('workout', idempotentReadRange)
     try {
       const syncId = 'nitro-health-harness-workout-higher-version'
       await NitroHealth.saveWorkout({
         ...idempotentInterval,
         activityType: 'running',
-        title: 'Nitro Workout Version 1',
+        displayName: 'Nitro Workout Version 1',
         sync: { id: syncId, version: 1 },
       })
 
@@ -243,7 +260,7 @@ describe('NitroHealth idempotent saves (native)', () => {
       await NitroHealth.saveWorkout({
         ...idempotentInterval,
         activityType: 'running',
-        title: 'Nitro Workout Version 2',
+        displayName: 'Nitro Workout Version 2',
         sync: { id: syncId, version: 2 },
       })
 
@@ -252,14 +269,24 @@ describe('NitroHealth idempotent saves (native)', () => {
         'Nitro Workout Version 2',
       ])
       expect(replacement).toHaveLength(1)
-      expect(replacement[0]?.title).toBe('Nitro Workout Version 2')
+      expect(replacement[0] ? workoutDisplayName(replacement[0]) : undefined).toBe(
+        'Nitro Workout Version 2'
+      )
       if (Platform.OS === 'android') {
-        expect(replacement[0]?.recordUuid).toBe(initial[0]?.recordUuid)
+        expect(replacement[0]?.title).toBe('Nitro Workout Version 2')
+        expect(replacement[0]?.brandName).toBeUndefined()
+        expect(replacement[0] ? recordId(replacement[0].identity) : undefined).toBe(
+          initial[0] ? recordId(initial[0].identity) : undefined
+        )
       } else if (Platform.OS === 'ios') {
-        expect(replacement[0]?.recordUuid).not.toBe(initial[0]?.recordUuid)
+        expect(replacement[0]?.title).toBeUndefined()
+        expect(replacement[0]?.brandName).toBe('Nitro Workout Version 2')
+        expect(replacement[0] ? recordId(replacement[0].identity) : undefined).not.toBe(
+          initial[0] ? recordId(initial[0].identity) : undefined
+        )
       }
     } finally {
-      await NitroHealth.deleteSamplesByTimeRange('workout', idempotentReadRange)
+      await NitroHealth.deleteRecordsByTimeRange('workout', idempotentReadRange)
     }
   })
 })

@@ -15,7 +15,7 @@ export interface NativeHealthChange {
   /** Native change kind; either `upsert` or `delete`. */
   type: string
   /** Identifier of the native record affected by the change. */
-  recordUuid: string
+  recordId: string
   /** Step samples for a `steps` upsert. */
   stepSamples?: NativeStepSample[]
   /** Heart-rate readings for a `heartRate` upsert. */

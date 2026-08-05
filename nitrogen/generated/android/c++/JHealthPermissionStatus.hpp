@@ -48,12 +48,12 @@ namespace margelo::nitro::nitrohealth {
         case HealthPermissionStatus::GRANTED:
           static const auto fieldGRANTED = clazz->getStaticField<JHealthPermissionStatus>("GRANTED");
           return clazz->getStaticFieldValue(fieldGRANTED);
-        case HealthPermissionStatus::NOTDETERMINED:
-          static const auto fieldNOTDETERMINED = clazz->getStaticField<JHealthPermissionStatus>("NOTDETERMINED");
-          return clazz->getStaticFieldValue(fieldNOTDETERMINED);
         case HealthPermissionStatus::UNVERIFIABLE:
           static const auto fieldUNVERIFIABLE = clazz->getStaticField<JHealthPermissionStatus>("UNVERIFIABLE");
           return clazz->getStaticFieldValue(fieldUNVERIFIABLE);
+        case HealthPermissionStatus::NOTDETERMINED:
+          static const auto fieldNOTDETERMINED = clazz->getStaticField<JHealthPermissionStatus>("NOTDETERMINED");
+          return clazz->getStaticFieldValue(fieldNOTDETERMINED);
         default:
           std::string stringValue = std::to_string(static_cast<int>(value));
           throw std::invalid_argument("Invalid enum value (" + stringValue + "!");

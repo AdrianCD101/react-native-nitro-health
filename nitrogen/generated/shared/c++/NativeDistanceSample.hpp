@@ -28,9 +28,16 @@
 #error NitroModules cannot be found! Are you sure you installed NitroModules properly?
 #endif
 
+// Forward declaration of `NativeHealthSampleIdentity` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthSampleIdentity; }
+// Forward declaration of `NativeHealthDataOrigin` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthDataOrigin; }
+// Forward declaration of `NativeDistanceScope` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeDistanceScope; }
 
-
-#include <string>
+#include "NativeHealthSampleIdentity.hpp"
+#include "NativeHealthDataOrigin.hpp"
+#include "NativeDistanceScope.hpp"
 
 namespace margelo::nitro::nitrohealth {
 
@@ -39,14 +46,16 @@ namespace margelo::nitro::nitrohealth {
    */
   struct NativeDistanceSample final {
   public:
-    std::string uuid     SWIFT_PRIVATE;
+    NativeHealthSampleIdentity identity     SWIFT_PRIVATE;
+    NativeHealthDataOrigin origin     SWIFT_PRIVATE;
     double startTimeMs     SWIFT_PRIVATE;
     double endTimeMs     SWIFT_PRIVATE;
     double distanceMeters     SWIFT_PRIVATE;
+    NativeDistanceScope scope     SWIFT_PRIVATE;
 
   public:
     NativeDistanceSample() = default;
-    explicit NativeDistanceSample(std::string uuid, double startTimeMs, double endTimeMs, double distanceMeters): uuid(uuid), startTimeMs(startTimeMs), endTimeMs(endTimeMs), distanceMeters(distanceMeters) {}
+    explicit NativeDistanceSample(NativeHealthSampleIdentity identity, NativeHealthDataOrigin origin, double startTimeMs, double endTimeMs, double distanceMeters, NativeDistanceScope scope): identity(identity), origin(origin), startTimeMs(startTimeMs), endTimeMs(endTimeMs), distanceMeters(distanceMeters), scope(scope) {}
 
   public:
     friend bool operator==(const NativeDistanceSample& lhs, const NativeDistanceSample& rhs) = default;
@@ -62,18 +71,22 @@ namespace margelo::nitro {
     static inline margelo::nitro::nitrohealth::NativeDistanceSample fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       jsi::Object obj = arg.asObject(runtime);
       return margelo::nitro::nitrohealth::NativeDistanceSample(
-        JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "uuid"))),
+        JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleIdentity>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "identity"))),
+        JSIConverter<margelo::nitro::nitrohealth::NativeHealthDataOrigin>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "origin"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "startTimeMs"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs"))),
-        JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "distanceMeters")))
+        JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "distanceMeters"))),
+        JSIConverter<margelo::nitro::nitrohealth::NativeDistanceScope>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "scope")))
       );
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::nitrohealth::NativeDistanceSample& arg) {
       jsi::Object obj(runtime);
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "uuid"), JSIConverter<std::string>::toJSI(runtime, arg.uuid));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "identity"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleIdentity>::toJSI(runtime, arg.identity));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "origin"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthDataOrigin>::toJSI(runtime, arg.origin));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "startTimeMs"), JSIConverter<double>::toJSI(runtime, arg.startTimeMs));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs"), JSIConverter<double>::toJSI(runtime, arg.endTimeMs));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "distanceMeters"), JSIConverter<double>::toJSI(runtime, arg.distanceMeters));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "scope"), JSIConverter<margelo::nitro::nitrohealth::NativeDistanceScope>::toJSI(runtime, arg.scope));
       return obj;
     }
     static inline bool canConvert(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -84,10 +97,12 @@ namespace margelo::nitro {
       if (!nitro::isPlainObject(runtime, obj)) {
         return false;
       }
-      if (!JSIConverter<std::string>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "uuid")))) return false;
+      if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleIdentity>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "identity")))) return false;
+      if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthDataOrigin>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "origin")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "startTimeMs")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "distanceMeters")))) return false;
+      if (!JSIConverter<margelo::nitro::nitrohealth::NativeDistanceScope>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "scope")))) return false;
       return true;
     }
   };

@@ -10,7 +10,13 @@
 #include <fbjni/fbjni.h>
 #include "NativeHeightSamplePage.hpp"
 
+#include "JNativeHealthDataOrigin.hpp"
+#include "JNativeHealthSampleIdentity.hpp"
+#include "JNativeHealthSampleIdentityKind.hpp"
 #include "JNativeHeightSample.hpp"
+#include "NativeHealthDataOrigin.hpp"
+#include "NativeHealthSampleIdentity.hpp"
+#include "NativeHealthSampleIdentityKind.hpp"
 #include "NativeHeightSample.hpp"
 #include <optional>
 #include <string>

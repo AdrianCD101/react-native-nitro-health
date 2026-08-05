@@ -10,14 +10,19 @@
 #include <fbjni/fbjni.h>
 #include "NativeHealthPermissionStatusResult.hpp"
 
-#include "HealthAvailabilityStatus.hpp"
 #include "HealthPermissionStatus.hpp"
-#include "JHealthAvailabilityStatus.hpp"
 #include "JHealthPermissionStatus.hpp"
+#include "JNativeHealthAvailability.hpp"
+#include "JNativeHealthAvailabilityReason.hpp"
+#include "JNativeHealthAvailabilityStatus.hpp"
 #include "JNativeHealthPermission.hpp"
 #include "JNativeHealthPermissionStatusEntry.hpp"
+#include "NativeHealthAvailability.hpp"
+#include "NativeHealthAvailabilityReason.hpp"
+#include "NativeHealthAvailabilityStatus.hpp"
 #include "NativeHealthPermission.hpp"
 #include "NativeHealthPermissionStatusEntry.hpp"
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -40,12 +45,12 @@ namespace margelo::nitro::nitrohealth {
     [[nodiscard]]
     NativeHealthPermissionStatusResult toCpp() const {
       static const auto clazz = javaClassStatic();
-      static const auto fieldAvailabilityStatus = clazz->getField<JHealthAvailabilityStatus>("availabilityStatus");
-      jni::local_ref<JHealthAvailabilityStatus> availabilityStatus = this->getFieldValue(fieldAvailabilityStatus);
+      static const auto fieldAvailability = clazz->getField<JNativeHealthAvailability>("availability");
+      jni::local_ref<JNativeHealthAvailability> availability = this->getFieldValue(fieldAvailability);
       static const auto fieldStatuses = clazz->getField<jni::JArrayClass<JNativeHealthPermissionStatusEntry>>("statuses");
       jni::local_ref<jni::JArrayClass<JNativeHealthPermissionStatusEntry>> statuses = this->getFieldValue(fieldStatuses);
       return NativeHealthPermissionStatusResult(
-        availabilityStatus->toCpp(),
+        availability->toCpp(),
         [&](auto&& __input) {
           size_t __size = __input->size();
           std::vector<NativeHealthPermissionStatusEntry> __vector;
@@ -65,12 +70,12 @@ namespace margelo::nitro::nitrohealth {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeHealthPermissionStatusResult::javaobject> fromCpp(const NativeHealthPermissionStatusResult& value) {
-      using JSignature = JNativeHealthPermissionStatusResult(jni::alias_ref<JHealthAvailabilityStatus>, jni::alias_ref<jni::JArrayClass<JNativeHealthPermissionStatusEntry>>);
+      using JSignature = JNativeHealthPermissionStatusResult(jni::alias_ref<JNativeHealthAvailability>, jni::alias_ref<jni::JArrayClass<JNativeHealthPermissionStatusEntry>>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
         clazz,
-        JHealthAvailabilityStatus::fromCpp(value.availabilityStatus),
+        JNativeHealthAvailability::fromCpp(value.availability),
         [&](auto&& __input) {
           size_t __size = __input.size();
           jni::local_ref<jni::JArrayClass<JNativeHealthPermissionStatusEntry>> __array = jni::JArrayClass<JNativeHealthPermissionStatusEntry>::newArray(__size);

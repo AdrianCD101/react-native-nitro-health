@@ -4,6 +4,7 @@ import androidx.health.connect.client.records.metadata.Metadata
 import com.margelo.nitro.nitrohealth.NativeActiveEnergyBurnedSampleInput
 import com.margelo.nitro.nitrohealth.NativeBodyMassSampleInput
 import com.margelo.nitro.nitrohealth.NativeDistanceSampleInput
+import com.margelo.nitro.nitrohealth.NativeDistanceScope
 import com.margelo.nitro.nitrohealth.NativeHeartRateSampleInput
 import com.margelo.nitro.nitrohealth.NativeHeightSampleInput
 import com.margelo.nitro.nitrohealth.NativeOxygenSaturationSampleInput
@@ -12,6 +13,7 @@ import com.margelo.nitro.nitrohealth.NativeStepSampleInput
 import java.time.Instant
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertThrows
 import org.junit.Test
 
 class SampleInputConvertersTest {
@@ -46,6 +48,7 @@ class SampleInputConvertersTest {
                     startTimeMs = startTimeMs,
                     endTimeMs = endTimeMs,
                     distanceMeters = 1250.5,
+                    scope = NativeDistanceScope.WALKINGRUNNING,
                     syncId = null,
                     syncVersion = null
                 )
@@ -54,6 +57,26 @@ class SampleInputConvertersTest {
 
         assertEquals(1, records.size)
         assertEquals(1250.5, records[0].distance.inMeters, 0.0)
+    }
+
+    @Test
+    fun toDistanceRecordsRejectsNonWalkingRunningInputScope() {
+        val error = assertThrows(IllegalArgumentException::class.java) {
+            toDistanceRecords(
+                arrayOf(
+                    NativeDistanceSampleInput(
+                        startTimeMs = startTimeMs,
+                        endTimeMs = endTimeMs,
+                        distanceMeters = 1250.5,
+                        scope = NativeDistanceScope.ACTIVITYUNSPECIFIED,
+                        syncId = null,
+                        syncVersion = null
+                    )
+                )
+            )
+        }
+
+        assertEquals("samples[0].scope must be walkingRunning", error.message)
     }
 
     @Test
@@ -287,6 +310,7 @@ class SampleInputConvertersTest {
                         startTimeMs = startTimeMs,
                         endTimeMs = endTimeMs,
                         distanceMeters = 1250.5,
+                        scope = NativeDistanceScope.WALKINGRUNNING,
                         syncId = syncId,
                         syncVersion = syncVersion
                     )

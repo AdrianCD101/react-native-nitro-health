@@ -11,6 +11,7 @@ import { NitroHealth } from 'react-native-nitro-health'
 describe('NitroHealth save contract', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockNitroHealth.saveDistance.mockResolvedValue({ storedScope: 'walkingRunning' })
   })
 
   it('saves steps through the Nitro hybrid object', async () => {
@@ -34,17 +35,20 @@ describe('NitroHealth save contract', () => {
   it('saves distance through the Nitro hybrid object', async () => {
     const startDate = new Date('2026-01-01T09:00:00.000Z')
     const endDate = new Date('2026-01-01T09:30:00.000Z')
-    mockNitroHealth.saveDistance.mockResolvedValue(undefined)
+    mockNitroHealth.saveDistance.mockResolvedValue({ storedScope: 'activityUnspecified' })
 
     await expect(
-      NitroHealth.saveDistance([{ startDate, endDate, distanceMeters: 1250.5 }])
-    ).resolves.toBeUndefined()
+      NitroHealth.saveDistance([
+        { scope: 'walking-running', startDate, endDate, distanceMeters: 1250.5 },
+      ])
+    ).resolves.toEqual({ status: 'completed', storedScope: 'activity-unspecified' })
 
     expect(mockNitroHealth.saveDistance).toHaveBeenCalledWith([
       {
         startTimeMs: startDate.getTime(),
         endTimeMs: endDate.getTime(),
         distanceMeters: 1250.5,
+        scope: 'walkingRunning',
       },
     ])
   })
@@ -102,7 +106,9 @@ describe('NitroHealth save contract', () => {
     const nativeSync = { syncId: sync.id, syncVersion: sync.version }
 
     await NitroHealth.saveSteps([{ startDate, endDate, count: 512, sync }])
-    await NitroHealth.saveDistance([{ startDate, endDate, distanceMeters: 1250.5, sync }])
+    await NitroHealth.saveDistance([
+      { scope: 'walking-running', startDate, endDate, distanceMeters: 1250.5, sync },
+    ])
     await NitroHealth.saveActiveEnergyBurned([{ startDate, endDate, kilocalories: 215, sync }])
     await NitroHealth.saveHeartRate([{ date: startDate, bpm: 72, sync }])
     await NitroHealth.saveBodyMass([{ date: startDate, kilograms: 72.5, sync }])
@@ -118,6 +124,7 @@ describe('NitroHealth save contract', () => {
         startTimeMs: startDate.getTime(),
         endTimeMs: endDate.getTime(),
         distanceMeters: 1250.5,
+        scope: 'walkingRunning',
         ...nativeSync,
       },
     ])
@@ -260,6 +267,22 @@ describe('NitroHealth save contract', () => {
     expect(mockNitroHealth.saveBodyMass).not.toHaveBeenCalled()
   })
 
+  it('requires walking-running scope for distance writes', async () => {
+    const startDate = new Date('2026-01-01T09:00:00.000Z')
+    const endDate = new Date('2026-01-01T09:30:00.000Z')
+
+    await expect(
+      NitroHealth.saveDistance([{ startDate, endDate, distanceMeters: 5 } as never])
+    ).rejects.toThrow('samples[0]: scope must be walking-running')
+    await expect(
+      NitroHealth.saveDistance([
+        { scope: 'activity-unspecified', startDate, endDate, distanceMeters: 5 } as never,
+      ])
+    ).rejects.toThrow('samples[0]: scope must be walking-running')
+
+    expect(mockNitroHealth.saveDistance).not.toHaveBeenCalled()
+  })
+
   it('rejects invalid interval sample dates before crossing the native boundary', async () => {
     const endDate = new Date('2026-01-01T09:30:00.000Z')
 
@@ -272,6 +295,7 @@ describe('NitroHealth save contract', () => {
           startDate: new Date('2026-01-01T09:00:00.000Z'),
           endDate: new Date(Number.NaN),
           distanceMeters: 5,
+          scope: 'walking-running',
         },
       ])
     ).rejects.toThrow('samples[0]: a valid endDate is required')
@@ -324,7 +348,7 @@ describe('NitroHealth save contract', () => {
     }
     for (const distanceMeters of [-1, Number.NaN, Number.POSITIVE_INFINITY]) {
       await expect(
-        NitroHealth.saveDistance([{ startDate, endDate, distanceMeters }])
+        NitroHealth.saveDistance([{ scope: 'walking-running', startDate, endDate, distanceMeters }])
       ).rejects.toThrow('samples[0]: distanceMeters must be a non-negative number')
     }
     for (const kilocalories of [-1, Number.NaN, Number.POSITIVE_INFINITY]) {
@@ -361,7 +385,14 @@ describe('NitroHealth save contract', () => {
       'samples[0]: count must not exceed 1000000'
     )
     await expect(
-      NitroHealth.saveDistance([{ startDate, endDate, distanceMeters: 1_000_000.5 }])
+      NitroHealth.saveDistance([
+        {
+          scope: 'walking-running',
+          startDate,
+          endDate,
+          distanceMeters: 1_000_000.5,
+        },
+      ])
     ).rejects.toThrow('samples[0]: distanceMeters must not exceed 1000000')
     await expect(
       NitroHealth.saveActiveEnergyBurned([{ startDate, endDate, kilocalories: 1_000_001 }])

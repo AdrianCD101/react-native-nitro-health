@@ -20,7 +20,7 @@ class WorkoutSampleInputMappingTest {
                 startTimeMs = startTime.toEpochMilli().toDouble(),
                 endTimeMs = endTime.toEpochMilli().toDouble(),
                 activityType = "running",
-                title = "Morning Run",
+                displayName = "Morning Run",
                 timeZone = "America/New_York",
                 syncId = "workout-1",
                 syncVersion = 2.0
@@ -46,7 +46,7 @@ class WorkoutSampleInputMappingTest {
                     startTimeMs = endTime.toEpochMilli().toDouble(),
                     endTimeMs = startTime.toEpochMilli().toDouble(),
                     activityType = "running",
-                    title = null,
+                    displayName = null,
                     timeZone = "UTC",
                     syncId = null,
                     syncVersion = null
@@ -59,7 +59,7 @@ class WorkoutSampleInputMappingTest {
                     startTimeMs = startTime.toEpochMilli().toDouble(),
                     endTimeMs = endTime.toEpochMilli().toDouble(),
                     activityType = "archery",
-                    title = null,
+                    displayName = null,
                     timeZone = "UTC",
                     syncId = null,
                     syncVersion = null

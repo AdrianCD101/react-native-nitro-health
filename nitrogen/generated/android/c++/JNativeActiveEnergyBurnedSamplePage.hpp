@@ -11,7 +11,13 @@
 #include "NativeActiveEnergyBurnedSamplePage.hpp"
 
 #include "JNativeActiveEnergyBurnedSample.hpp"
+#include "JNativeHealthDataOrigin.hpp"
+#include "JNativeHealthSampleIdentity.hpp"
+#include "JNativeHealthSampleIdentityKind.hpp"
 #include "NativeActiveEnergyBurnedSample.hpp"
+#include "NativeHealthDataOrigin.hpp"
+#include "NativeHealthSampleIdentity.hpp"
+#include "NativeHealthSampleIdentityKind.hpp"
 #include <optional>
 #include <string>
 #include <vector>

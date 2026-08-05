@@ -20,22 +20,13 @@ import java.util.Objects
 data class NativeHealthAuthorizationResult(
   @DoNotStrip
   @Keep
-  val status: HealthAuthorizationStatus,
+  val status: NativeHealthAuthorizationStatus,
   @DoNotStrip
   @Keep
-  val availabilityStatus: HealthAvailabilityStatus,
+  val availability: NativeHealthAvailability,
   @DoNotStrip
   @Keep
-  val requestStatus: AuthorizationRequestStatus,
-  @DoNotStrip
-  @Keep
-  val grantedPermissions: Array<NativeHealthPermission>,
-  @DoNotStrip
-  @Keep
-  val deniedPermissions: Array<NativeHealthPermission>,
-  @DoNotStrip
-  @Keep
-  val unverifiablePermissions: Array<NativeHealthPermission>
+  val statuses: Array<NativeHealthPermissionStatusEntry>
 ) {
   /* primary constructor */
 
@@ -43,21 +34,15 @@ data class NativeHealthAuthorizationResult(
     if (this === other) return true
     if (other !is NativeHealthAuthorizationResult) return false
     return Objects.deepEquals(this.status, other.status)
-      && Objects.deepEquals(this.availabilityStatus, other.availabilityStatus)
-      && Objects.deepEquals(this.requestStatus, other.requestStatus)
-      && Objects.deepEquals(this.grantedPermissions, other.grantedPermissions)
-      && Objects.deepEquals(this.deniedPermissions, other.deniedPermissions)
-      && Objects.deepEquals(this.unverifiablePermissions, other.unverifiablePermissions)
+      && Objects.deepEquals(this.availability, other.availability)
+      && Objects.deepEquals(this.statuses, other.statuses)
   }
 
   override fun hashCode(): Int {
     return arrayOf<Any?>(
       status,
-      availabilityStatus,
-      requestStatus,
-      grantedPermissions,
-      deniedPermissions,
-      unverifiablePermissions
+      availability,
+      statuses
     ).contentDeepHashCode()
   }
 
@@ -69,8 +54,8 @@ data class NativeHealthAuthorizationResult(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(status: HealthAuthorizationStatus, availabilityStatus: HealthAvailabilityStatus, requestStatus: AuthorizationRequestStatus, grantedPermissions: Array<NativeHealthPermission>, deniedPermissions: Array<NativeHealthPermission>, unverifiablePermissions: Array<NativeHealthPermission>): NativeHealthAuthorizationResult {
-      return NativeHealthAuthorizationResult(status, availabilityStatus, requestStatus, grantedPermissions, deniedPermissions, unverifiablePermissions)
+    private fun fromCpp(status: NativeHealthAuthorizationStatus, availability: NativeHealthAvailability, statuses: Array<NativeHealthPermissionStatusEntry>): NativeHealthAuthorizationResult {
+      return NativeHealthAuthorizationResult(status, availability, statuses)
     }
   }
 }

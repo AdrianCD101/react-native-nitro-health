@@ -12,7 +12,7 @@ module.exports = (api) => {
           // .ts/.tsx before .js so stray compiled artifacts can never shadow sources
           extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
           alias: {
-            [pak.name]: path.join(__dirname, '../', pak.source),
+            [`^${pak.name}$`]: path.join(__dirname, '../', pak.source),
           },
         },
       ],
