@@ -348,9 +348,7 @@ describe('NitroHealth save contract', () => {
     }
     for (const distanceMeters of [-1, Number.NaN, Number.POSITIVE_INFINITY]) {
       await expect(
-        NitroHealth.saveDistance([
-          { scope: 'walking-running', startDate, endDate, distanceMeters },
-        ])
+        NitroHealth.saveDistance([{ scope: 'walking-running', startDate, endDate, distanceMeters }])
       ).rejects.toThrow('samples[0]: distanceMeters must be a non-negative number')
     }
     for (const kilocalories of [-1, Number.NaN, Number.POSITIVE_INFINITY]) {

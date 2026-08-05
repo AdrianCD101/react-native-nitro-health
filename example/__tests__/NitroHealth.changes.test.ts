@@ -41,11 +41,7 @@ describe('NitroHealth changes contract', () => {
           recordId: 'record-1',
           stepSamples: [
             {
-              ...nativeRecordMetadata(
-                'record-1',
-                'com.example.health',
-                'Example Health'
-              ),
+              ...nativeRecordMetadata('record-1', 'com.example.health', 'Example Health'),
               startTimeMs,
               endTimeMs,
               count: 123,
@@ -170,9 +166,7 @@ describe('NitroHealth changes contract', () => {
     const startTimeMs = Date.parse('2026-01-01T00:00:00.000Z')
     const endTimeMs = Date.parse('2026-01-01T08:00:00.000Z')
     type NativeChangesResult = Awaited<ReturnType<typeof mockNitroHealth.getChanges>>
-    const changePage = (
-      change: NativeChangesResult['changes'][number]
-    ): NativeChangesResult => ({
+    const changePage = (change: NativeChangesResult['changes'][number]): NativeChangesResult => ({
       changes: [change],
       nextChangesToken: 'next-token',
       hasMore: false,

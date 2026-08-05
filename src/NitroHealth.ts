@@ -26,10 +26,7 @@ import type { HealthChangeNotification } from './HealthChangeNotification'
 import type { HealthChangesResult } from './HealthChangesResult'
 import type { HealthDataType } from './HealthDataType'
 import type { HealthDateRangeQuery } from './HealthDateRangeQuery'
-import type {
-  HealthIdentityDeleteResult,
-  HealthTimeRangeDeleteResult,
-} from './HealthDeleteResult'
+import type { HealthIdentityDeleteResult, HealthTimeRangeDeleteResult } from './HealthDeleteResult'
 import type { HealthPermission } from './HealthPermission'
 import type {
   HealthPermissionManagementResult,

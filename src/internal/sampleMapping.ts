@@ -744,10 +744,7 @@ export function makeSleepSample(sample: NativeSleepSample): SleepSample {
     return {
       ...base,
       kind: 'session-envelope',
-      stageData:
-        sample.stageData === 'notReported'
-          ? 'not-reported'
-          : sample.stageData,
+      stageData: sample.stageData === 'notReported' ? 'not-reported' : sample.stageData,
     }
   }
 

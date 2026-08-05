@@ -22,11 +22,7 @@ bun add react-native-nitro-health react-native-nitro-modules
 Rebuild the native application after installation. Import the runtime and all public types from the package root:
 
 ```ts
-import {
-  NitroHealth,
-  type HealthPermission,
-  type StepSample,
-} from 'react-native-nitro-health'
+import { NitroHealth, type HealthPermission, type StepSample } from 'react-native-nitro-health'
 ```
 
 ### Public package surface
@@ -230,19 +226,19 @@ On iOS, enable the HealthKit capability and add usage descriptions to the consum
 
 On Android, the consumer app must declare every Health Connect data permission it requests. The library deliberately does not add health data permissions to its own manifest.
 
-| Data type | Read permission | Write permission |
-| --- | --- | --- |
-| `steps` | `android.permission.health.READ_STEPS` | `android.permission.health.WRITE_STEPS` |
-| `distance` | `android.permission.health.READ_DISTANCE` | `android.permission.health.WRITE_DISTANCE` |
-| `activeEnergyBurned` | `android.permission.health.READ_ACTIVE_CALORIES_BURNED` | `android.permission.health.WRITE_ACTIVE_CALORIES_BURNED` |
-| `heartRate` | `android.permission.health.READ_HEART_RATE` | `android.permission.health.WRITE_HEART_RATE` |
-| `restingHeartRate` | `android.permission.health.READ_RESTING_HEART_RATE` | `android.permission.health.WRITE_RESTING_HEART_RATE` |
-| `heartRateVariability` | `android.permission.health.READ_HEART_RATE_VARIABILITY` | Not supported |
-| `oxygenSaturation` | `android.permission.health.READ_OXYGEN_SATURATION` | `android.permission.health.WRITE_OXYGEN_SATURATION` |
-| `height` | `android.permission.health.READ_HEIGHT` | `android.permission.health.WRITE_HEIGHT` |
-| `sleep` | `android.permission.health.READ_SLEEP` | `android.permission.health.WRITE_SLEEP` |
-| `bodyMass` | `android.permission.health.READ_WEIGHT` | `android.permission.health.WRITE_WEIGHT` |
-| `workout` | `android.permission.health.READ_EXERCISE` | `android.permission.health.WRITE_EXERCISE` |
+| Data type              | Read permission                                         | Write permission                                         |
+| ---------------------- | ------------------------------------------------------- | -------------------------------------------------------- |
+| `steps`                | `android.permission.health.READ_STEPS`                  | `android.permission.health.WRITE_STEPS`                  |
+| `distance`             | `android.permission.health.READ_DISTANCE`               | `android.permission.health.WRITE_DISTANCE`               |
+| `activeEnergyBurned`   | `android.permission.health.READ_ACTIVE_CALORIES_BURNED` | `android.permission.health.WRITE_ACTIVE_CALORIES_BURNED` |
+| `heartRate`            | `android.permission.health.READ_HEART_RATE`             | `android.permission.health.WRITE_HEART_RATE`             |
+| `restingHeartRate`     | `android.permission.health.READ_RESTING_HEART_RATE`     | `android.permission.health.WRITE_RESTING_HEART_RATE`     |
+| `heartRateVariability` | `android.permission.health.READ_HEART_RATE_VARIABILITY` | Not supported                                            |
+| `oxygenSaturation`     | `android.permission.health.READ_OXYGEN_SATURATION`      | `android.permission.health.WRITE_OXYGEN_SATURATION`      |
+| `height`               | `android.permission.health.READ_HEIGHT`                 | `android.permission.health.WRITE_HEIGHT`                 |
+| `sleep`                | `android.permission.health.READ_SLEEP`                  | `android.permission.health.WRITE_SLEEP`                  |
+| `bodyMass`             | `android.permission.health.READ_WEIGHT`                 | `android.permission.health.WRITE_WEIGHT`                 |
+| `workout`              | `android.permission.health.READ_EXERCISE`               | `android.permission.health.WRITE_EXERCISE`               |
 
 Undeclared Health Connect permissions do not appear in the system permission sheet and cannot be granted. The Android privacy-policy rationale activity and provider package query are also consumer-app responsibilities; see `example/android/app/src/main/AndroidManifest.xml` for a complete reference.
 
@@ -304,19 +300,19 @@ Selecting a child sample's `identity.record` for deletion explicitly selects its
 
 All raw reads return `{ samples, nextCursor? }`. Every listed sample also includes the common `identity` and `origin` fields.
 
-| Method | Data-specific sample fields |
-| --- | --- |
-| `readSteps` | `startDate`, `endDate`, `count` |
-| `readDistance` | `startDate`, `endDate`, `distanceMeters`, `scope` |
-| `readActiveEnergyBurned` | `startDate`, `endDate`, `kilocalories` |
-| `readBodyMass` | `startDate`, `endDate`, `kilograms` |
-| `readHeartRate` | `date`, `bpm` |
-| `readRestingHeartRate` | `date`, `bpm` |
-| `readHeartRateVariability` | `date`, `milliseconds`, `method` |
-| `readOxygenSaturation` | `date`, `percentage` |
-| `readHeight` | `date`, `meters` |
-| `readSleepSamples` | tagged session-envelope or stage fields |
-| `readWorkouts` | workout duration, activity, labels, and metric availability |
+| Method                     | Data-specific sample fields                                 |
+| -------------------------- | ----------------------------------------------------------- |
+| `readSteps`                | `startDate`, `endDate`, `count`                             |
+| `readDistance`             | `startDate`, `endDate`, `distanceMeters`, `scope`           |
+| `readActiveEnergyBurned`   | `startDate`, `endDate`, `kilocalories`                      |
+| `readBodyMass`             | `startDate`, `endDate`, `kilograms`                         |
+| `readHeartRate`            | `date`, `bpm`                                               |
+| `readRestingHeartRate`     | `date`, `bpm`                                               |
+| `readHeartRateVariability` | `date`, `milliseconds`, `method`                            |
+| `readOxygenSaturation`     | `date`, `percentage`                                        |
+| `readHeight`               | `date`, `meters`                                            |
+| `readSleepSamples`         | tagged session-envelope or stage fields                     |
+| `readWorkouts`             | workout duration, activity, labels, and metric availability |
 
 ```ts
 const page = await NitroHealth.readSteps({
@@ -418,11 +414,7 @@ for (const workout of workouts) {
   }
 
   if (workout.activity.status === 'known') {
-    console.log(
-      workout.activity.type,
-      workout.activity.portability,
-      workout.activity.mapping
-    )
+    console.log(workout.activity.type, workout.activity.portability, workout.activity.mapping)
   } else {
     console.log('unknown native activity')
   }
@@ -448,9 +440,7 @@ Unknown or future native activity values remain explicitly `unknown`; they are n
 
 ```ts
 type HealthMetricValue =
-  | { status: 'available'; value: number }
-  | { status: 'not-reported' }
-  | { status: 'unsupported' }
+  { status: 'available'; value: number } | { status: 'not-reported' } | { status: 'unsupported' }
 ```
 
 On iOS, total distance and active energy are `available` when the workout reports them and `not-reported` otherwise. Android currently returns `unsupported` for both exercise-session totals.
@@ -475,15 +465,15 @@ const heartRate = await NitroHealth.readStatistics('heartRate', {
 })
 ```
 
-| Data type | Metrics | Unit |
-| --- | --- | --- |
-| `steps` | `sum` | count |
-| `distance` | `sum` | meters, plus `scope` |
-| `activeEnergyBurned` | `sum` | kcal |
-| `heartRate` | `avg`, `min`, `max` | bpm |
-| `restingHeartRate` | `avg`, `min`, `max` | bpm |
-| `height` | `avg`, `min`, `max` | meters |
-| `bodyMass` | `avg`, `min`, `max` | kg |
+| Data type            | Metrics             | Unit                 |
+| -------------------- | ------------------- | -------------------- |
+| `steps`              | `sum`               | count                |
+| `distance`           | `sum`               | meters, plus `scope` |
+| `activeEnergyBurned` | `sum`               | kcal                 |
+| `heartRate`          | `avg`, `min`, `max` | bpm                  |
+| `restingHeartRate`   | `avg`, `min`, `max` | bpm                  |
+| `height`             | `avg`, `min`, `max` | meters               |
+| `bodyMass`           | `avg`, `min`, `max` | kg                   |
 
 Sleep, HRV, oxygen saturation, and workout statistics are not supported by `readStatistics()`. Invalid data-type/metric combinations reject before crossing the native boundary.
 
@@ -498,10 +488,7 @@ Change tokens are durable synchronization checkpoints. They are different from p
 Create the token before the initial snapshot so changes that occur while paging the snapshot are not lost:
 
 ```ts
-import {
-  NitroHealth,
-  type HealthRecordChange,
-} from 'react-native-nitro-health'
+import { NitroHealth, type HealthRecordChange } from 'react-native-nitro-health'
 
 let changesToken = await NitroHealth.createChangesToken('steps')
 await replaceInitialStepSnapshot()
@@ -678,8 +665,7 @@ const authorization = await NitroHealth.requestAuthorization([
 ])
 
 const stepsWrite = authorization.statuses.find(
-  ({ permission }) =>
-    permission.accessType === 'write' && permission.dataType === 'steps'
+  ({ permission }) => permission.accessType === 'write' && permission.dataType === 'steps'
 )
 
 if (stepsWrite?.status === 'granted') {
@@ -835,9 +821,7 @@ Time-range deletion always returns `completed` when the native operation succeed
 The package mock models the portable workflow rather than Nitro internals. Load the shared mock in a Jest setup file:
 
 ```js
-jest.mock('react-native-nitro-health', () =>
-  require('react-native-nitro-health/jest/mock')
-)
+jest.mock('react-native-nitro-health', () => require('react-native-nitro-health/jest/mock'))
 ```
 
 Or use the packaged setup entry:
@@ -857,10 +841,7 @@ Three profiles are available:
 Reset the exported singleton for each test and select the workflow under test:
 
 ```ts
-import {
-  NitroHealth,
-  resetNitroHealthMock,
-} from 'react-native-nitro-health/jest/mock'
+import { NitroHealth, resetNitroHealthMock } from 'react-native-nitro-health/jest/mock'
 
 beforeEach(() => {
   resetNitroHealthMock({ profile: 'observer' })

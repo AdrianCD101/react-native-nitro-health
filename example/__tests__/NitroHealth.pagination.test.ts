@@ -87,11 +87,7 @@ describe('NitroHealth pagination contract', () => {
       mockNitroHealth.readSteps.mockResolvedValue({
         samples: [
           {
-            ...nativeRecordMetadata(
-              'record-1',
-              'com.example.health',
-              'Example Health'
-            ),
+            ...nativeRecordMetadata('record-1', 'com.example.health', 'Example Health'),
             startTimeMs: startDate.getTime(),
             endTimeMs: endDate.getTime(),
             count: 123,

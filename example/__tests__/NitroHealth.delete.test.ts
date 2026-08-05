@@ -91,9 +91,9 @@ describe('NitroHealth delete contract', () => {
     await expect(
       NitroHealth.deleteRecordsByIds('steps', [{ kind: 'record', id: '  ' }])
     ).rejects.toThrow('records[0]: an independently deletable record identity is required')
-    await expect(
-      NitroHealth.deleteRecordsByIds('steps', [null as never])
-    ).rejects.toThrow('records[0]: an independently deletable record identity is required')
+    await expect(NitroHealth.deleteRecordsByIds('steps', [null as never])).rejects.toThrow(
+      'records[0]: an independently deletable record identity is required'
+    )
     await expect(
       NitroHealth.deleteRecordsByIds('steps', [
         { kind: 'record', id: 'record-1' },

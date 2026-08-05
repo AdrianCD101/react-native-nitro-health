@@ -1,10 +1,7 @@
 import { Platform } from 'react-native'
 import { describe, expect, it, waitUntil } from 'react-native-harness'
 import { NitroHealth } from 'react-native-nitro-health'
-import type {
-  HealthAdditionalAccessStatus,
-  HealthRecordChange,
-} from 'react-native-nitro-health'
+import type { HealthAdditionalAccessStatus, HealthRecordChange } from 'react-native-nitro-health'
 
 import { hasVerifiedPermissions } from './support/harnessSupport'
 

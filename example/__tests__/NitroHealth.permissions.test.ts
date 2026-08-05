@@ -36,18 +36,14 @@ describe('NitroHealth workflow and permission contract', () => {
       throw new Error('Expected recoverable health availability')
     }
 
-    await expect(
-      NitroHealth.performAvailabilityRecovery(availability.recovery)
-    ).resolves.toEqual({
+    await expect(NitroHealth.performAvailabilityRecovery(availability.recovery)).resolves.toEqual({
       status: 'user-action-required',
       destination: 'provider-store',
     })
     expect(mockNitroHealth.performAvailabilityRecovery).toHaveBeenCalledWith()
 
     mockNitroHealth.performAvailabilityRecovery.mockResolvedValue('destinationUnavailable')
-    await expect(
-      NitroHealth.performAvailabilityRecovery(availability.recovery)
-    ).resolves.toEqual({
+    await expect(NitroHealth.performAvailabilityRecovery(availability.recovery)).resolves.toEqual({
       status: 'unavailable',
       reason: 'destination-unavailable',
     })
@@ -324,13 +320,11 @@ describe('NitroHealth workflow and permission contract', () => {
   it('maps record identity, origin, and distance scope for interval samples', async () => {
     const startDate = new Date('2026-01-01T00:00:00.000Z')
     const endDate = new Date('2026-01-02T00:00:00.000Z')
-    const metadata = nativeRecordMetadata(
-      'record-1',
-      'com.example.health',
-      'Example Health'
-    )
+    const metadata = nativeRecordMetadata('record-1', 'com.example.health', 'Example Health')
     mockNitroHealth.readSteps.mockResolvedValue({
-      samples: [{ ...metadata, startTimeMs: startDate.getTime(), endTimeMs: endDate.getTime(), count: 123 }],
+      samples: [
+        { ...metadata, startTimeMs: startDate.getTime(), endTimeMs: endDate.getTime(), count: 123 },
+      ],
     })
     mockNitroHealth.readDistance.mockResolvedValue({
       samples: [

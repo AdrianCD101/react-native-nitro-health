@@ -87,9 +87,8 @@ describe('NitroHealth reads (native)', () => {
       expect(error).toBeInstanceOf(Error)
     }
 
-    await assertReadRejectedWhenReportedDenied(
-      [{ accessType: 'read', dataType: 'distance' }],
-      () => NitroHealth.readDistance(emptyRange)
+    await assertReadRejectedWhenReportedDenied([{ accessType: 'read', dataType: 'distance' }], () =>
+      NitroHealth.readDistance(emptyRange)
     )
   })
 

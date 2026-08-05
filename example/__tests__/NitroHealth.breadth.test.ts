@@ -25,11 +25,7 @@ describe('NitroHealth breadth data types contract', () => {
       mockNitroHealth.readRestingHeartRate.mockResolvedValue({
         samples: [
           {
-            ...nativeRecordMetadata(
-              'resting-heart-record',
-              'com.example.watch',
-              'Example Watch'
-            ),
+            ...nativeRecordMetadata('resting-heart-record', 'com.example.watch', 'Example Watch'),
             timeMs,
             bpm: 58,
           },

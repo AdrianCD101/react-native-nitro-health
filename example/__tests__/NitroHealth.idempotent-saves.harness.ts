@@ -196,9 +196,9 @@ describe('NitroHealth idempotent saves (native)', () => {
 
       expect(afterLowerVersion).toHaveLength(1)
       expect(afterLowerVersion[0]?.count).toBe(730_002)
-      expect(
-        afterLowerVersion[0] ? recordId(afterLowerVersion[0].identity) : undefined
-      ).toBe(recordId(currentSample.identity))
+      expect(afterLowerVersion[0] ? recordId(afterLowerVersion[0].identity) : undefined).toBe(
+        recordId(currentSample.identity)
+      )
     } finally {
       await NitroHealth.deleteRecordsByTimeRange('steps', idempotentReadRange)
     }

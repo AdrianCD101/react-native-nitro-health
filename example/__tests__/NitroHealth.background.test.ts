@@ -68,10 +68,7 @@ describe('NitroHealth background contract', () => {
       backgroundRead: 'not-declared',
     })
 
-    expect(mockNitroHealth.disableBackgroundChanges).toHaveBeenCalledWith([
-      'steps',
-      'distance',
-    ])
+    expect(mockNitroHealth.disableBackgroundChanges).toHaveBeenCalledWith(['steps', 'distance'])
   })
 
   it('disables every configured data type when no list is supplied', async () => {

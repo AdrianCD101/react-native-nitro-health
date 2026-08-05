@@ -39,9 +39,7 @@ describe('NitroHealth saves (native)', () => {
       'samples[0]: count must be a positive integer'
     )
     await expect(
-      NitroHealth.saveDistance([
-        { ...saveInterval, scope: 'walking-running', distanceMeters: -1 },
-      ])
+      NitroHealth.saveDistance([{ ...saveInterval, scope: 'walking-running', distanceMeters: -1 }])
     ).rejects.toThrow('samples[0]: distanceMeters must be a non-negative number')
     await expect(
       NitroHealth.saveActiveEnergyBurned([{ ...saveInterval, kilocalories: -1 }])
@@ -195,8 +193,7 @@ describe('NitroHealth saves (native)', () => {
       { ...saveInterval, scope: 'walking-running', distanceMeters: 1234 },
     ])
 
-    const expectedStoredScope =
-      Platform.OS === 'ios' ? 'walking-running' : 'activity-unspecified'
+    const expectedStoredScope = Platform.OS === 'ios' ? 'walking-running' : 'activity-unspecified'
     expect(result).toEqual({ status: 'completed', storedScope: expectedStoredScope })
     const page = await NitroHealth.readDistance(saveReadRange)
     if (isInconclusiveRead(page.samples)) return

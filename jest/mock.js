@@ -112,7 +112,8 @@ function createNitroHealthMock(options = {}) {
     const statuses = permissions.map((permission) => ({
       permission,
       status:
-        availability !== undefined || (profileName === 'observer' && permission.accessType === 'read')
+        availability !== undefined ||
+        (profileName === 'observer' && permission.accessType === 'read')
           ? 'unverifiable'
           : profileName === 'observer'
             ? 'notDetermined'

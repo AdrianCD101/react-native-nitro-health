@@ -20,20 +20,17 @@ export const mockNitroHealth = {
   equals: mockNativeMethod<NitroHealthSpec['equals']>(),
   dispose: mockNativeMethod<NitroHealthSpec['dispose']>(),
   getAvailability: mockNativeMethod<NitroHealthSpec['getAvailability']>(),
-  performAvailabilityRecovery:
-    mockNativeMethod<NitroHealthSpec['performAvailabilityRecovery']>(),
+  performAvailabilityRecovery: mockNativeMethod<NitroHealthSpec['performAvailabilityRecovery']>(),
   getCapabilities: mockNativeMethod<NitroHealthSpec['getCapabilities']>(),
   requestAdditionalAccess: mockNativeMethod<NitroHealthSpec['requestAdditionalAccess']>(),
   managePermissions: mockNativeMethod<NitroHealthSpec['managePermissions']>(),
   revokeAllPermissions: mockNativeMethod<NitroHealthSpec['revokeAllPermissions']>(),
   getBackgroundChangesMode: mockNativeMethod<NitroHealthSpec['getBackgroundChangesMode']>(),
-  configureBackgroundChanges:
-    mockNativeMethod<NitroHealthSpec['configureBackgroundChanges']>(),
+  configureBackgroundChanges: mockNativeMethod<NitroHealthSpec['configureBackgroundChanges']>(),
   disableBackgroundChanges: mockNativeMethod<NitroHealthSpec['disableBackgroundChanges']>(),
   setOnBackgroundChangeListener:
     mockNativeMethod<NitroHealthSpec['setOnBackgroundChangeListener']>(),
-  acknowledgeBackgroundChange:
-    mockNativeMethod<NitroHealthSpec['acknowledgeBackgroundChange']>(),
+  acknowledgeBackgroundChange: mockNativeMethod<NitroHealthSpec['acknowledgeBackgroundChange']>(),
   createChangesToken: mockNativeMethod<NitroHealthSpec['createChangesToken']>(),
   getChanges: mockNativeMethod<NitroHealthSpec['getChanges']>(),
   readSteps: mockNativeMethod<NitroHealthSpec['readSteps']>(),
@@ -41,11 +38,9 @@ export const mockNitroHealth = {
   readActiveEnergyBurned: mockNativeMethod<NitroHealthSpec['readActiveEnergyBurned']>(),
   readBodyMass: mockNativeMethod<NitroHealthSpec['readBodyMass']>(),
   readHeartRate: mockNativeMethod<NitroHealthSpec['readHeartRate']>(),
-  readHeartRateStatistics:
-    mockNativeMethod<NitroHealthSpec['readHeartRateStatistics']>(),
+  readHeartRateStatistics: mockNativeMethod<NitroHealthSpec['readHeartRateStatistics']>(),
   readRestingHeartRate: mockNativeMethod<NitroHealthSpec['readRestingHeartRate']>(),
-  readHeartRateVariability:
-    mockNativeMethod<NitroHealthSpec['readHeartRateVariability']>(),
+  readHeartRateVariability: mockNativeMethod<NitroHealthSpec['readHeartRateVariability']>(),
   readOxygenSaturation: mockNativeMethod<NitroHealthSpec['readOxygenSaturation']>(),
   readHeight: mockNativeMethod<NitroHealthSpec['readHeight']>(),
   readStatistics: mockNativeMethod<NitroHealthSpec['readStatistics']>(),
@@ -62,8 +57,7 @@ export const mockNitroHealth = {
   saveSleepSessions: mockNativeMethod<NitroHealthSpec['saveSleepSessions']>(),
   saveWorkout: mockNativeMethod<NitroHealthSpec['saveWorkout']>(),
   deleteRecordsByIds: mockNativeMethod<NitroHealthSpec['deleteRecordsByIds']>(),
-  deleteRecordsByTimeRange:
-    mockNativeMethod<NitroHealthSpec['deleteRecordsByTimeRange']>(),
+  deleteRecordsByTimeRange: mockNativeMethod<NitroHealthSpec['deleteRecordsByTimeRange']>(),
   getPermissionStatuses: mockNativeMethod<NitroHealthSpec['getPermissionStatuses']>(),
   requestAuthorization: mockNativeMethod<NitroHealthSpec['requestAuthorization']>(),
 } satisfies NitroHealthSpec

@@ -55,9 +55,7 @@ function formatIdentity(identity: HealthSampleIdentity): string {
 }
 
 function formatOrigin(origin: HealthDataOrigin): string {
-  return origin.displayName
-    ? `${origin.displayName} (${origin.identifier})`
-    : origin.identifier
+  return origin.displayName ? `${origin.displayName} (${origin.identifier})` : origin.identifier
 }
 
 function formatSampleContext(identity: HealthSampleIdentity, origin: HealthDataOrigin): string {
@@ -581,7 +579,9 @@ function App(): React.JSX.Element {
             availability.reason === 'provider-install-or-update-required' ? (
               <ActionButton
                 disabled={workflowActivity !== undefined}
-                label={workflowActivity === 'recovery' ? 'Opening...' : 'Install or update provider'}
+                label={
+                  workflowActivity === 'recovery' ? 'Opening...' : 'Install or update provider'
+                }
                 onPress={recoverAvailability}
               />
             ) : null}

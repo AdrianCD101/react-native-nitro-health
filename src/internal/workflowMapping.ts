@@ -1,19 +1,11 @@
-import type {
-  BackgroundChangesConfigurationResult,
-} from '../BackgroundChangesResult'
-import type {
-  HealthAvailability,
-  HealthAvailabilityRecoveryResult,
-} from '../HealthAvailability'
+import type { BackgroundChangesConfigurationResult } from '../BackgroundChangesResult'
+import type { HealthAvailability, HealthAvailabilityRecoveryResult } from '../HealthAvailability'
 import type {
   HealthAdditionalAccess,
   HealthAdditionalAccessResult,
   HealthCapabilities,
 } from '../HealthCapabilities'
-import type {
-  HealthIdentityDeleteResult,
-  HealthTimeRangeDeleteResult,
-} from '../HealthDeleteResult'
+import type { HealthIdentityDeleteResult, HealthTimeRangeDeleteResult } from '../HealthDeleteResult'
 import type { HealthAuthorizationResult } from '../HealthAuthorizationResult'
 import type { HealthPermission } from '../HealthPermission'
 import type { HealthPermissionStatusResult } from '../HealthPermissionStatusResult'
@@ -122,7 +114,9 @@ export function makeHealthCapabilities(capabilities: NativeHealthCapabilities): 
   }
 
   if (capabilities.backgroundChangesMode !== 'polling') {
-    throw new Error(`Unsupported native background changes mode: ${capabilities.backgroundChangesMode}`)
+    throw new Error(
+      `Unsupported native background changes mode: ${capabilities.backgroundChangesMode}`
+    )
   }
   return {
     backgroundChanges: {

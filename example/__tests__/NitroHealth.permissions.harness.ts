@@ -35,10 +35,7 @@ describe('NitroHealth permissions (native)', () => {
   it('only exposes provider installation recovery on Android', () => {
     const availability = NitroHealth.getAvailability()
 
-    if (
-      Platform.OS === 'ios' &&
-      availability.status === 'unavailable'
-    ) {
+    if (Platform.OS === 'ios' && availability.status === 'unavailable') {
       expect(availability.reason).not.toBe('provider-install-or-update-required')
     }
   })

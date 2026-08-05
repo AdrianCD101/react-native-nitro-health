@@ -18,26 +18,26 @@ Run `bun install` again only after dependency or workspace-link changes. After c
 
 All commands below already exist in the root or example package scripts.
 
-| Purpose | Command from repository root |
-| --- | --- |
-| Generate Nitro bindings, apply the Android package patch, and build | `bun run codegen` |
-| Build package output and verify generated Android output | `bun run build` |
-| Run Jest API and example tests | `bun run test` |
-| Typecheck the package | `bun run typecheck` |
-| Typecheck the example | `bun run typecheck:example` |
-| Run both TypeScript checks | `bun run typecheck && bun run typecheck:example` |
-| Run Android native semantic tests | `bun run test:android:native` |
-| Run iOS native semantic tests | `bun run test:ios:native` |
-| Run lint | `bun run lint` |
-| Apply lint fixes | `bun run lint:fix` |
-| Check formatting | `bun run format:check` |
-| Apply formatting | `bun run format` |
-| Build and install the iOS example | `cd example && bun run ios` |
-| Install iOS pods | `cd example && bun run pod` |
-| Build and install the Android example | `cd example && bun run android` |
-| Start Metro for an installed example | `cd example && bun run start` |
-| Run iOS Harness tests | `bun run harness:ios` |
-| Run Android Harness tests | `bun run harness:android` |
+| Purpose                                                             | Command from repository root                     |
+| ------------------------------------------------------------------- | ------------------------------------------------ |
+| Generate Nitro bindings, apply the Android package patch, and build | `bun run codegen`                                |
+| Build package output and verify generated Android output            | `bun run build`                                  |
+| Run Jest API and example tests                                      | `bun run test`                                   |
+| Typecheck the package                                               | `bun run typecheck`                              |
+| Typecheck the example                                               | `bun run typecheck:example`                      |
+| Run both TypeScript checks                                          | `bun run typecheck && bun run typecheck:example` |
+| Run Android native semantic tests                                   | `bun run test:android:native`                    |
+| Run iOS native semantic tests                                       | `bun run test:ios:native`                        |
+| Run lint                                                            | `bun run lint`                                   |
+| Apply lint fixes                                                    | `bun run lint:fix`                               |
+| Check formatting                                                    | `bun run format:check`                           |
+| Apply formatting                                                    | `bun run format`                                 |
+| Build and install the iOS example                                   | `cd example && bun run ios`                      |
+| Install iOS pods                                                    | `cd example && bun run pod`                      |
+| Build and install the Android example                               | `cd example && bun run android`                  |
+| Start Metro for an installed example                                | `cd example && bun run start`                    |
+| Run iOS Harness tests                                               | `bun run harness:ios`                            |
+| Run Android Harness tests                                           | `bun run harness:android`                        |
 
 Before submitting a change, the minimum repository checks are:
 
@@ -53,17 +53,17 @@ Add the platform-native, Harness, build, and device checks that match the change
 
 ## Change Matrix
 
-| Change | Required workflow |
-| --- | --- |
-| Dependencies or a new clone | `bun install` |
-| `src/specs/*.nitro.ts` or a native transport type | Codegen workflow, native rebuilds, relevant native/Harness tests |
-| Public facade or public TypeScript types | `bun run build`, Jest, both typechecks |
-| Swift implementation or helper | iOS native tests when pure, example relink, iOS rebuild, relevant Harness/device test |
-| Kotlin implementation or helper | Android native tests when pure, example relink, Android rebuild, relevant Harness/device test |
-| iOS pods or native dependencies | `cd example && bun run pod`, then iOS rebuild |
-| Example JavaScript only | Jest/typecheck as relevant, then Metro Fast Refresh |
-| Permission, availability, observer, history, or store behavior | Native semantic tests plus Harness or manual physical-device coverage |
-| Documentation only | Review examples against `src/NitroHealth.ts`, public types, and current native outcomes |
+| Change                                                         | Required workflow                                                                             |
+| -------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Dependencies or a new clone                                    | `bun install`                                                                                 |
+| `src/specs/*.nitro.ts` or a native transport type              | Codegen workflow, native rebuilds, relevant native/Harness tests                              |
+| Public facade or public TypeScript types                       | `bun run build`, Jest, both typechecks                                                        |
+| Swift implementation or helper                                 | iOS native tests when pure, example relink, iOS rebuild, relevant Harness/device test         |
+| Kotlin implementation or helper                                | Android native tests when pure, example relink, Android rebuild, relevant Harness/device test |
+| iOS pods or native dependencies                                | `cd example && bun run pod`, then iOS rebuild                                                 |
+| Example JavaScript only                                        | Jest/typecheck as relevant, then Metro Fast Refresh                                           |
+| Permission, availability, observer, history, or store behavior | Native semantic tests plus Harness or manual physical-device coverage                         |
+| Documentation only                                             | Review examples against `src/NitroHealth.ts`, public types, and current native outcomes       |
 
 ## Codegen Workflow
 

@@ -93,9 +93,7 @@ describe('NitroHealth Jest mock', () => {
     await expect(NitroHealth.saveSteps([stepInput])).resolves.toBeUndefined()
     expect(NitroHealth.saveSteps).toHaveBeenCalledWith([stepInput])
     await expect(
-      NitroHealth.saveDistance([
-        { ...range, scope: 'walking-running', distanceMeters: 1000 },
-      ])
+      NitroHealth.saveDistance([{ ...range, scope: 'walking-running', distanceMeters: 1000 }])
     ).resolves.toEqual({ status: 'completed', storedScope: 'activity-unspecified' })
     await expect(
       NitroHealth.saveSleepSessions([{ ...range, timeZone: 'UTC' }])
@@ -186,7 +184,9 @@ describe('NitroHealth Jest mock', () => {
         },
       ])
     ).resolves.toEqual({ status: 'completed', storedScope: 'walking-running' })
-    await expect(observer.getPermissionStatuses([readPermission, writePermission])).resolves.toEqual({
+    await expect(
+      observer.getPermissionStatuses([readPermission, writePermission])
+    ).resolves.toEqual({
       status: 'available',
       statuses: [
         { permission: readPermission, status: 'unverifiable' },

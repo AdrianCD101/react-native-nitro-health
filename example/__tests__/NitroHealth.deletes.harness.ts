@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'react-native-harness'
 import { NitroHealth } from 'react-native-nitro-health'
-import type {
-  HealthRecordChildIdentity,
-  HealthRecordIdentity,
-} from 'react-native-nitro-health'
+import type { HealthRecordChildIdentity, HealthRecordIdentity } from 'react-native-nitro-health'
 
 import {
   deleteInterval,
@@ -60,12 +57,12 @@ describe('NitroHealth deletes (native)', () => {
       return
     }
 
-    await expect(
-      NitroHealth.deleteRecordsByIds('steps', [nonexistentRecord])
-    ).rejects.toThrow(/permission/i)
-    await expect(
-      NitroHealth.deleteRecordsByTimeRange('steps', deleteReadRange)
-    ).rejects.toThrow(/permission/i)
+    await expect(NitroHealth.deleteRecordsByIds('steps', [nonexistentRecord])).rejects.toThrow(
+      /permission/i
+    )
+    await expect(NitroHealth.deleteRecordsByTimeRange('steps', deleteReadRange)).rejects.toThrow(
+      /permission/i
+    )
   })
 
   it('returns observable count state for a time-range delete that matches nothing', async () => {

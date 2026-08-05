@@ -22,11 +22,7 @@ describe('NitroHealth workouts contract', () => {
       mockNitroHealth.readWorkouts.mockResolvedValue({
         samples: [
           {
-            ...nativeRecordMetadata(
-              'workout-record-1',
-              'com.example.watch',
-              'Example Watch'
-            ),
+            ...nativeRecordMetadata('workout-record-1', 'com.example.watch', 'Example Watch'),
             startTimeMs: workoutStartMs,
             endTimeMs: workoutEndMs,
             elapsedDurationSeconds: 2700,
