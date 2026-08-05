@@ -209,7 +209,15 @@ if (revocation.status === 'completed') {
 }
 ```
 
-Both methods can return `{ status: 'unavailable', availability }`. `managePermissions()` opens Health Connect settings on Android and returns a stable manual Health-app destination on iOS. `revokeAllPermissions()` completes directly on Android; HealthKit does not provide direct all-permission revocation, so iOS returns the manual action.
+Every `user-action-required` result carries a typed action:
+
+```ts
+type HealthPermissionAction =
+  | { kind: 'opened'; destination: 'health-connect-settings' }
+  | { kind: 'manual'; destination: 'health-app-permissions' }
+```
+
+Both methods can return `{ status: 'unavailable', availability }`. `managePermissions()` opens Health Connect settings on Android and returns a stable manual Health-app destination on iOS. `revokeAllPermissions()` completes directly on Android; HealthKit does not provide direct all-permission revocation, so iOS returns the `manual` action — its `user-action-required` result never carries `kind: 'opened'`. Use the `destination` literal to select localized instructions rather than checking the platform.
 
 Re-read permission statuses and perform a full data resync after a material permission change. Cached data and change tokens do not prove current authorization.
 
