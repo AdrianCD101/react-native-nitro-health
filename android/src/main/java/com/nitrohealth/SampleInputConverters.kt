@@ -3,6 +3,8 @@ package com.nitrohealth
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
 import androidx.health.connect.client.records.BloodGlucoseRecord
 import androidx.health.connect.client.records.BloodPressureRecord
+import androidx.health.connect.client.records.BodyTemperatureMeasurementLocation
+import androidx.health.connect.client.records.BodyTemperatureRecord
 import androidx.health.connect.client.records.DistanceRecord
 import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.MealType
@@ -16,11 +18,13 @@ import androidx.health.connect.client.units.Energy
 import androidx.health.connect.client.units.Length
 import androidx.health.connect.client.units.Mass
 import androidx.health.connect.client.units.Percentage
+import androidx.health.connect.client.units.Temperature
 import androidx.health.connect.client.units.Pressure
 import com.margelo.nitro.nitrohealth.NativeActiveEnergyBurnedSampleInput
 import com.margelo.nitro.nitrohealth.NativeBloodGlucoseSampleInput
 import com.margelo.nitro.nitrohealth.NativeBloodPressureSampleInput
 import com.margelo.nitro.nitrohealth.NativeBodyMassSampleInput
+import com.margelo.nitro.nitrohealth.NativeBodyTemperatureSampleInput
 import com.margelo.nitro.nitrohealth.NativeDistanceSampleInput
 import com.margelo.nitro.nitrohealth.NativeDistanceScope
 import com.margelo.nitro.nitrohealth.NativeHeartRateSampleInput
@@ -131,6 +135,22 @@ internal fun toBloodGlucoseRecords(
             specimenSource = BloodGlucoseRecord.SPECIMEN_SOURCE_UNKNOWN,
             mealType = MealType.MEAL_TYPE_UNKNOWN,
             relationToMeal = BloodGlucoseRecord.RELATION_TO_MEAL_UNKNOWN
+        )
+    }
+}
+
+internal fun toBodyTemperatureRecords(
+    samples: Array<NativeBodyTemperatureSampleInput>
+): List<BodyTemperatureRecord> {
+    return samples.map { sample ->
+        BodyTemperatureRecord(
+            time = Instant.ofEpochMilli(sample.timeMs.toLong()),
+            zoneOffset = null,
+            metadata = makeSampleMetadata(sample.syncId, sample.syncVersion),
+            temperature = Temperature.celsius(sample.celsius),
+            // Deferred to metadata passthrough (issue #73); strongest promotion candidate
+            // since HealthKit has a matching sensor-location metadata key.
+            measurementLocation = BodyTemperatureMeasurementLocation.MEASUREMENT_LOCATION_UNKNOWN
         )
     }
 }

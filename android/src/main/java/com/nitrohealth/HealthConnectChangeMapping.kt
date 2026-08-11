@@ -6,6 +6,7 @@ import androidx.health.connect.client.changes.UpsertionChange
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
 import androidx.health.connect.client.records.BloodGlucoseRecord
 import androidx.health.connect.client.records.BloodPressureRecord
+import androidx.health.connect.client.records.BodyTemperatureRecord
 import androidx.health.connect.client.records.DistanceRecord
 import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.health.connect.client.records.HeartRateRecord
@@ -20,6 +21,7 @@ import androidx.health.connect.client.records.WeightRecord
 import com.margelo.nitro.nitrohealth.NativeActiveEnergyBurnedSample
 import com.margelo.nitro.nitrohealth.NativeBloodGlucoseSample
 import com.margelo.nitro.nitrohealth.NativeBloodPressureSample
+import com.margelo.nitro.nitrohealth.NativeBodyTemperatureSample
 import com.margelo.nitro.nitrohealth.NativeBodyMassSample
 import com.margelo.nitro.nitrohealth.NativeDistanceSample
 import com.margelo.nitro.nitrohealth.NativeDistanceScope
@@ -105,6 +107,18 @@ private fun makeNativeUpsertionChange(record: Record): NativeHealthChange {
                     origin = origin,
                     timeMs = record.time.toEpochMilli().toDouble(),
                     millimolesPerLiter = record.level.inMillimolesPerLiter
+                )
+            )
+        )
+        is BodyTemperatureRecord -> makeNativeChange(
+            type = "upsert",
+            recordId = recordId,
+            bodyTemperatureSamples = arrayOf(
+                NativeBodyTemperatureSample(
+                    identity = identity,
+                    origin = origin,
+                    timeMs = record.time.toEpochMilli().toDouble(),
+                    celsius = record.temperature.inCelsius
                 )
             )
         )
@@ -220,6 +234,7 @@ private fun makeNativeChange(
     heartRateSamples: Array<NativeHeartRateSample>? = null,
     bloodPressureSamples: Array<NativeBloodPressureSample>? = null,
     bloodGlucoseSamples: Array<NativeBloodGlucoseSample>? = null,
+    bodyTemperatureSamples: Array<NativeBodyTemperatureSample>? = null,
     restingHeartRateSamples: Array<NativeRestingHeartRateSample>? = null,
     heartRateVariabilitySamples: Array<NativeHeartRateVariabilitySample>? = null,
     distanceSamples: Array<NativeDistanceSample>? = null,
@@ -237,6 +252,7 @@ private fun makeNativeChange(
         heartRateSamples = heartRateSamples,
         bloodPressureSamples = bloodPressureSamples,
         bloodGlucoseSamples = bloodGlucoseSamples,
+        bodyTemperatureSamples = bodyTemperatureSamples,
         restingHeartRateSamples = restingHeartRateSamples,
         heartRateVariabilitySamples = heartRateVariabilitySamples,
         distanceSamples = distanceSamples,

@@ -2,6 +2,7 @@ import type { ActiveEnergyBurnedSample } from './ActiveEnergyBurnedSample'
 import type { BloodGlucoseSample } from './BloodGlucoseSample'
 import type { BloodPressureSample } from './BloodPressureSample'
 import type { BodyMassSample } from './BodyMassSample'
+import type { BodyTemperatureSample } from './BodyTemperatureSample'
 import type { DistanceSample } from './DistanceSample'
 import type { HeartRateSample } from './HeartRateSample'
 import type { HeartRateVariabilitySample } from './HeartRateVariabilitySample'
@@ -22,6 +23,8 @@ export interface HealthSampleByDataType {
   bloodPressure: BloodPressureSample
   /** Blood glucose readings. */
   bloodGlucose: BloodGlucoseSample
+  /** Body-temperature readings. */
+  bodyTemperature: BodyTemperatureSample
   /** Resting heart-rate readings. */
   restingHeartRate: RestingHeartRateSample
   /** Platform-specific heart-rate variability readings. */

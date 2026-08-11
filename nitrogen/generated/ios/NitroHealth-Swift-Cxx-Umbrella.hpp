@@ -44,6 +44,12 @@ namespace margelo::nitro::nitrohealth { struct NativeBodyMassSampleInput; }
 namespace margelo::nitro::nitrohealth { struct NativeBodyMassSamplePage; }
 // Forward declaration of `NativeBodyMassSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBodyMassSample; }
+// Forward declaration of `NativeBodyTemperatureSampleInput` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeBodyTemperatureSampleInput; }
+// Forward declaration of `NativeBodyTemperatureSamplePage` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeBodyTemperatureSamplePage; }
+// Forward declaration of `NativeBodyTemperatureSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeBodyTemperatureSample; }
 // Forward declaration of `NativeDeletedCountStatus` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class NativeDeletedCountStatus; }
 // Forward declaration of `NativeDistanceSampleInput` to properly resolve imports.
@@ -194,6 +200,9 @@ namespace margelo::nitro::nitrohealth { struct NativeWorkoutSample; }
 #include "NativeBodyMassSample.hpp"
 #include "NativeBodyMassSampleInput.hpp"
 #include "NativeBodyMassSamplePage.hpp"
+#include "NativeBodyTemperatureSample.hpp"
+#include "NativeBodyTemperatureSampleInput.hpp"
+#include "NativeBodyTemperatureSamplePage.hpp"
 #include "NativeDeletedCountStatus.hpp"
 #include "NativeDistanceSample.hpp"
 #include "NativeDistanceSampleInput.hpp"

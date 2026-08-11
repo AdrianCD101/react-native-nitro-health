@@ -4,6 +4,7 @@ import { NitroHealth } from 'react-native-nitro-health'
 import type {
   BloodGlucoseSample,
   BloodPressureSample,
+  BodyTemperatureSample,
   HealthPermission,
   HealthSampleIdentity,
   StepSample,
@@ -27,6 +28,10 @@ const bloodPressureReadWritePermissions: HealthPermission[] = [
 const bloodGlucoseReadWritePermissions: HealthPermission[] = [
   { accessType: 'read', dataType: 'bloodGlucose' },
   { accessType: 'write', dataType: 'bloodGlucose' },
+]
+const bodyTemperatureReadWritePermissions: HealthPermission[] = [
+  { accessType: 'read', dataType: 'bodyTemperature' },
+  { accessType: 'write', dataType: 'bodyTemperature' },
 ]
 const idempotentInterval = {
   startDate: new Date('2004-06-01T09:00:00.000Z'),
@@ -91,6 +96,17 @@ async function readIdempotentBloodGlucose(
       expectedMmolPerLiter.some(
         (expected) => Math.abs(sample.millimolesPerLiter - expected) < 0.001
       )
+  )
+}
+
+async function readIdempotentBodyTemperature(
+  expectedCelsius: readonly number[]
+): Promise<BodyTemperatureSample[]> {
+  const page = await NitroHealth.readBodyTemperature({ ...idempotentReadRange, limit: 1000 })
+  return page.samples.filter(
+    (sample) =>
+      sample.date.getTime() === idempotentInterval.startDate.getTime() &&
+      expectedCelsius.some((expected) => Math.abs(sample.celsius - expected) < 0.001)
   )
 }
 
@@ -431,6 +447,85 @@ describe('NitroHealth idempotent saves (native)', () => {
       }
     } finally {
       await NitroHealth.deleteRecordsByTimeRange('bloodGlucose', idempotentReadRange)
+    }
+  })
+
+  it('keeps exactly one body temperature reading when the same versioned save is retried', async () => {
+    if (!(await hasVerifiedPermissions(bodyTemperatureReadWritePermissions))) {
+      return
+    }
+
+    await NitroHealth.deleteRecordsByTimeRange('bodyTemperature', idempotentReadRange)
+    try {
+      const sample = {
+        date: idempotentInterval.startDate,
+        celsius: 37.1,
+        sync: { id: 'nitro-health-harness-bt-retry', version: 1 },
+      }
+
+      await NitroHealth.saveBodyTemperature([sample])
+      await NitroHealth.saveBodyTemperature([sample])
+
+      const samples = await readIdempotentBodyTemperature([37.1])
+      if (Platform.OS === 'ios' && samples.length === 0) {
+        return
+      }
+
+      expect(samples).toHaveLength(1)
+    } finally {
+      await NitroHealth.deleteRecordsByTimeRange('bodyTemperature', idempotentReadRange)
+    }
+  })
+
+  it('replaces a body temperature reading at a higher version with platform-specific identity', async () => {
+    if (!(await hasVerifiedPermissions(bodyTemperatureReadWritePermissions))) {
+      return
+    }
+
+    await NitroHealth.deleteRecordsByTimeRange('bodyTemperature', idempotentReadRange)
+    try {
+      const syncId = 'nitro-health-harness-bt-higher-version'
+      await NitroHealth.saveBodyTemperature([
+        {
+          date: idempotentInterval.startDate,
+          celsius: 37.1,
+          sync: { id: syncId, version: 1 },
+        },
+      ])
+
+      const initial = await readIdempotentBodyTemperature([37.1, 37.2])
+      if (Platform.OS === 'ios' && initial.length === 0) {
+        return
+      }
+      expect(initial).toHaveLength(1)
+      const initialSample = initial[0]
+      if (initialSample === undefined) {
+        return
+      }
+
+      await NitroHealth.saveBodyTemperature([
+        {
+          date: idempotentInterval.startDate,
+          celsius: 37.2,
+          sync: { id: syncId, version: 2 },
+        },
+      ])
+
+      const replacement = await readIdempotentBodyTemperature([37.1, 37.2])
+      expect(replacement).toHaveLength(1)
+      const replacementSample = replacement[0]
+      if (replacementSample === undefined) {
+        return
+      }
+
+      expect(Math.abs(replacementSample.celsius - 37.2)).toBeLessThan(0.001)
+      if (Platform.OS === 'android') {
+        expect(recordId(replacementSample.identity)).toBe(recordId(initialSample.identity))
+      } else if (Platform.OS === 'ios') {
+        expect(recordId(replacementSample.identity)).not.toBe(recordId(initialSample.identity))
+      }
+    } finally {
+      await NitroHealth.deleteRecordsByTimeRange('bodyTemperature', idempotentReadRange)
     }
   })
 

@@ -182,6 +182,41 @@ describe('NitroHealth breadth data types contract', () => {
     })
   })
 
+  describe('readBodyTemperature', () => {
+    it('maps one native sample and leaves the celsius value untouched', async () => {
+      const startDate = new Date('2026-01-01T00:00:00.000Z')
+      const endDate = new Date('2026-01-02T00:00:00.000Z')
+      const timeMs = new Date('2026-01-01T09:00:00.000Z').getTime()
+      mockNitroHealth.readBodyTemperature.mockResolvedValue({
+        samples: [
+          {
+            ...nativeRecordMetadata('bt-record', 'com.example.thermometer', 'Example Thermometer'),
+            timeMs,
+            celsius: 36.6,
+          },
+        ],
+      })
+
+      const result = await NitroHealth.readBodyTemperature({ startDate, endDate })
+
+      expect(mockNitroHealth.readBodyTemperature).toHaveBeenCalledWith({
+        startTimeMs: startDate.getTime(),
+        endTimeMs: endDate.getTime(),
+        limit: 1000,
+        ascending: true,
+      })
+      expect(result.samples).toHaveLength(1)
+      expect(result.samples[0].identity).toEqual({ kind: 'record', id: 'bt-record' })
+      expect(result.samples[0].date).toBeInstanceOf(Date)
+      expect(result.samples[0].date.getTime()).toBe(timeMs)
+      expect(result.samples[0].celsius).toBe(36.6)
+      expect(result.samples[0].origin).toEqual({
+        identifier: 'com.example.thermometer',
+        displayName: 'Example Thermometer',
+      })
+    })
+  })
+
   describe('readOxygenSaturation', () => {
     it('leaves the percentage value untouched (no JS-side unit conversion)', async () => {
       const startDate = new Date('2026-01-01T00:00:00.000Z')
@@ -388,6 +423,53 @@ describe('NitroHealth breadth data types contract', () => {
     })
   })
 
+  describe('saveBodyTemperature', () => {
+    it('saves through the Nitro hybrid object', async () => {
+      const date = new Date('2026-01-01T09:00:00.000Z')
+      mockNitroHealth.saveBodyTemperature.mockResolvedValue(undefined)
+
+      await expect(
+        NitroHealth.saveBodyTemperature([{ date, celsius: 36.6 }])
+      ).resolves.toBeUndefined()
+
+      expect(mockNitroHealth.saveBodyTemperature).toHaveBeenCalledWith([
+        { timeMs: date.getTime(), celsius: 36.6 },
+      ])
+    })
+
+    it('rejects celsius outside 20-45 before crossing the native boundary', async () => {
+      const date = new Date('2026-01-01T09:00:00.000Z')
+
+      for (const celsius of [19, 45.1, Number.NaN, Number.POSITIVE_INFINITY]) {
+        await expect(NitroHealth.saveBodyTemperature([{ date, celsius }])).rejects.toThrow(
+          'samples[0]: celsius must be between 20 and 45'
+        )
+      }
+
+      expect(mockNitroHealth.saveBodyTemperature).not.toHaveBeenCalled()
+    })
+
+    it('accepts the inclusive bound values', async () => {
+      const date = new Date('2026-01-01T09:00:00.000Z')
+      mockNitroHealth.saveBodyTemperature.mockResolvedValue(undefined)
+
+      await expect(
+        NitroHealth.saveBodyTemperature([{ date, celsius: 20 }])
+      ).resolves.toBeUndefined()
+      await expect(
+        NitroHealth.saveBodyTemperature([{ date, celsius: 45 }])
+      ).resolves.toBeUndefined()
+    })
+
+    it('rejects an invalid sample date before crossing the native boundary', async () => {
+      await expect(
+        NitroHealth.saveBodyTemperature([{ date: new Date(Number.NaN), celsius: 36.6 }])
+      ).rejects.toThrow('samples[0]: a valid date is required')
+
+      expect(mockNitroHealth.saveBodyTemperature).not.toHaveBeenCalled()
+    })
+  })
+
   describe('saveOxygenSaturation', () => {
     it('saves through the Nitro hybrid object', async () => {
       const date = new Date('2026-01-01T09:00:00.000Z')
@@ -551,6 +633,22 @@ describe('NitroHealth breadth data types contract', () => {
           metrics: ['avg'],
         })
       ).rejects.toThrow(`readStatistics does not support the 'bloodGlucose' data type`)
+
+      expect(mockNitroHealth.readStatistics).not.toHaveBeenCalled()
+    })
+
+    it('rejects bodyTemperature entirely before crossing the native boundary', async () => {
+      const startDate = new Date('2026-01-01T00:00:00.000Z')
+      const endDate = new Date('2026-01-08T00:00:00.000Z')
+
+      await expect(
+        NitroHealth.readStatistics('bodyTemperature', {
+          startDate,
+          endDate,
+          bucket: 'day',
+          metrics: ['avg'],
+        })
+      ).rejects.toThrow(`readStatistics does not support the 'bodyTemperature' data type`)
 
       expect(mockNitroHealth.readStatistics).not.toHaveBeenCalled()
     })

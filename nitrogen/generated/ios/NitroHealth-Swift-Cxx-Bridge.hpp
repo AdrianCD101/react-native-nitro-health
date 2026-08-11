@@ -42,6 +42,12 @@ namespace margelo::nitro::nitrohealth { struct NativeBodyMassSampleInput; }
 namespace margelo::nitro::nitrohealth { struct NativeBodyMassSamplePage; }
 // Forward declaration of `NativeBodyMassSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBodyMassSample; }
+// Forward declaration of `NativeBodyTemperatureSampleInput` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeBodyTemperatureSampleInput; }
+// Forward declaration of `NativeBodyTemperatureSamplePage` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeBodyTemperatureSamplePage; }
+// Forward declaration of `NativeBodyTemperatureSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeBodyTemperatureSample; }
 // Forward declaration of `NativeDeletedCountStatus` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class NativeDeletedCountStatus; }
 // Forward declaration of `NativeDistanceSampleInput` to properly resolve imports.
@@ -187,6 +193,9 @@ namespace NitroHealth { class HybridNitroHealthSpec_cxx; }
 #include "NativeBodyMassSample.hpp"
 #include "NativeBodyMassSampleInput.hpp"
 #include "NativeBodyMassSamplePage.hpp"
+#include "NativeBodyTemperatureSample.hpp"
+#include "NativeBodyTemperatureSampleInput.hpp"
+#include "NativeBodyTemperatureSamplePage.hpp"
 #include "NativeDeletedCountStatus.hpp"
 #include "NativeDistanceSample.hpp"
 #include "NativeDistanceSampleInput.hpp"
@@ -729,6 +738,32 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return optional.has_value();
   }
   inline std::vector<NativeBloodGlucoseSample> get_std__optional_std__vector_NativeBloodGlucoseSample__(const std::optional<std::vector<NativeBloodGlucoseSample>>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::vector<NativeBodyTemperatureSample>
+  /**
+   * Specialized version of `std::vector<NativeBodyTemperatureSample>`.
+   */
+  using std__vector_NativeBodyTemperatureSample_ = std::vector<NativeBodyTemperatureSample>;
+  inline std::vector<NativeBodyTemperatureSample> create_std__vector_NativeBodyTemperatureSample_(size_t size) noexcept {
+    std::vector<NativeBodyTemperatureSample> vector;
+    vector.reserve(size);
+    return vector;
+  }
+  
+  // pragma MARK: std::optional<std::vector<NativeBodyTemperatureSample>>
+  /**
+   * Specialized version of `std::optional<std::vector<NativeBodyTemperatureSample>>`.
+   */
+  using std__optional_std__vector_NativeBodyTemperatureSample__ = std::optional<std::vector<NativeBodyTemperatureSample>>;
+  inline std::optional<std::vector<NativeBodyTemperatureSample>> create_std__optional_std__vector_NativeBodyTemperatureSample__(const std::vector<NativeBodyTemperatureSample>& value) noexcept {
+    return std::optional<std::vector<NativeBodyTemperatureSample>>(value);
+  }
+  inline bool has_value_std__optional_std__vector_NativeBodyTemperatureSample__(const std::optional<std::vector<NativeBodyTemperatureSample>>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline std::vector<NativeBodyTemperatureSample> get_std__optional_std__vector_NativeBodyTemperatureSample__(const std::optional<std::vector<NativeBodyTemperatureSample>>& optional) noexcept {
     return optional.value();
   }
   
@@ -1346,6 +1381,40 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return Func_void_NativeBloodGlucoseSamplePage_Wrapper(std::move(value));
   }
   
+  // pragma MARK: std::shared_ptr<Promise<NativeBodyTemperatureSamplePage>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<NativeBodyTemperatureSamplePage>>`.
+   */
+  using std__shared_ptr_Promise_NativeBodyTemperatureSamplePage__ = std::shared_ptr<Promise<NativeBodyTemperatureSamplePage>>;
+  inline std::shared_ptr<Promise<NativeBodyTemperatureSamplePage>> create_std__shared_ptr_Promise_NativeBodyTemperatureSamplePage__() noexcept {
+    return Promise<NativeBodyTemperatureSamplePage>::create();
+  }
+  inline PromiseHolder<NativeBodyTemperatureSamplePage> wrap_std__shared_ptr_Promise_NativeBodyTemperatureSamplePage__(std::shared_ptr<Promise<NativeBodyTemperatureSamplePage>> promise) noexcept {
+    return PromiseHolder<NativeBodyTemperatureSamplePage>(std::move(promise));
+  }
+  
+  // pragma MARK: std::function<void(const NativeBodyTemperatureSamplePage& /* result */)>
+  /**
+   * Specialized version of `std::function<void(const NativeBodyTemperatureSamplePage&)>`.
+   */
+  using Func_void_NativeBodyTemperatureSamplePage = std::function<void(const NativeBodyTemperatureSamplePage& /* result */)>;
+  /**
+   * Wrapper class for a `std::function<void(const NativeBodyTemperatureSamplePage& / * result * /)>`, this can be used from Swift.
+   */
+  class Func_void_NativeBodyTemperatureSamplePage_Wrapper final {
+  public:
+    explicit Func_void_NativeBodyTemperatureSamplePage_Wrapper(std::function<void(const NativeBodyTemperatureSamplePage& /* result */)>&& func): _function(std::make_unique<std::function<void(const NativeBodyTemperatureSamplePage& /* result */)>>(std::move(func))) {}
+    inline void call(NativeBodyTemperatureSamplePage result) const noexcept {
+      _function->operator()(result);
+    }
+  private:
+    std::unique_ptr<std::function<void(const NativeBodyTemperatureSamplePage& /* result */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_NativeBodyTemperatureSamplePage create_Func_void_NativeBodyTemperatureSamplePage(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_NativeBodyTemperatureSamplePage_Wrapper wrap_Func_void_NativeBodyTemperatureSamplePage(Func_void_NativeBodyTemperatureSamplePage value) noexcept {
+    return Func_void_NativeBodyTemperatureSamplePage_Wrapper(std::move(value));
+  }
+  
   // pragma MARK: std::shared_ptr<Promise<NativeHeartRateStatistics>>
   /**
    * Specialized version of `std::shared_ptr<Promise<NativeHeartRateStatistics>>`.
@@ -1756,6 +1825,17 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return vector;
   }
   
+  // pragma MARK: std::vector<NativeBodyTemperatureSampleInput>
+  /**
+   * Specialized version of `std::vector<NativeBodyTemperatureSampleInput>`.
+   */
+  using std__vector_NativeBodyTemperatureSampleInput_ = std::vector<NativeBodyTemperatureSampleInput>;
+  inline std::vector<NativeBodyTemperatureSampleInput> create_std__vector_NativeBodyTemperatureSampleInput_(size_t size) noexcept {
+    std::vector<NativeBodyTemperatureSampleInput> vector;
+    vector.reserve(size);
+    return vector;
+  }
+  
   // pragma MARK: std::vector<NativeBodyMassSampleInput>
   /**
    * Specialized version of `std::vector<NativeBodyMassSampleInput>`.
@@ -2109,6 +2189,15 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
   }
   inline Result_std__shared_ptr_Promise_NativeBloodGlucoseSamplePage___ create_Result_std__shared_ptr_Promise_NativeBloodGlucoseSamplePage___(const std::exception_ptr& error) noexcept {
     return Result<std::shared_ptr<Promise<NativeBloodGlucoseSamplePage>>>::withError(error);
+  }
+  
+  // pragma MARK: Result<std::shared_ptr<Promise<NativeBodyTemperatureSamplePage>>>
+  using Result_std__shared_ptr_Promise_NativeBodyTemperatureSamplePage___ = Result<std::shared_ptr<Promise<NativeBodyTemperatureSamplePage>>>;
+  inline Result_std__shared_ptr_Promise_NativeBodyTemperatureSamplePage___ create_Result_std__shared_ptr_Promise_NativeBodyTemperatureSamplePage___(const std::shared_ptr<Promise<NativeBodyTemperatureSamplePage>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<NativeBodyTemperatureSamplePage>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_NativeBodyTemperatureSamplePage___ create_Result_std__shared_ptr_Promise_NativeBodyTemperatureSamplePage___(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<NativeBodyTemperatureSamplePage>>>::withError(error);
   }
   
   // pragma MARK: Result<std::shared_ptr<Promise<NativeHeartRateStatistics>>>

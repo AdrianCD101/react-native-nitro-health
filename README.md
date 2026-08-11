@@ -137,7 +137,7 @@ if (capabilities.status === 'available' && capabilities.historyRead === 'not-gra
 
 ## Permissions
 
-Supported data types are `steps`, `heartRate`, `bloodPressure`, `bloodGlucose`, `restingHeartRate`, `heartRateVariability`, `distance`, `activeEnergyBurned`, `oxygenSaturation`, `height`, `sleep`, `bodyMass`, and `workout`.
+Supported data types are `steps`, `heartRate`, `bloodPressure`, `bloodGlucose`, `bodyTemperature`, `restingHeartRate`, `heartRateVariability`, `distance`, `activeEnergyBurned`, `oxygenSaturation`, `height`, `sleep`, `bodyMass`, and `workout`.
 
 ### Authorization
 
@@ -242,6 +242,7 @@ On Android, the consumer app must declare every Health Connect data permission i
 | `heartRate`            | `android.permission.health.READ_HEART_RATE`             | `android.permission.health.WRITE_HEART_RATE`             |
 | `bloodPressure`        | `android.permission.health.READ_BLOOD_PRESSURE`         | `android.permission.health.WRITE_BLOOD_PRESSURE`         |
 | `bloodGlucose`         | `android.permission.health.READ_BLOOD_GLUCOSE`          | `android.permission.health.WRITE_BLOOD_GLUCOSE`          |
+| `bodyTemperature`      | `android.permission.health.READ_BODY_TEMPERATURE`       | `android.permission.health.WRITE_BODY_TEMPERATURE`       |
 | `restingHeartRate`     | `android.permission.health.READ_RESTING_HEART_RATE`     | `android.permission.health.WRITE_RESTING_HEART_RATE`     |
 | `heartRateVariability` | `android.permission.health.READ_HEART_RATE_VARIABILITY` | Not supported                                            |
 | `oxygenSaturation`     | `android.permission.health.READ_OXYGEN_SATURATION`      | `android.permission.health.WRITE_OXYGEN_SATURATION`      |
@@ -319,6 +320,7 @@ All raw reads return `{ samples, nextCursor? }`. Every listed sample also includ
 | `readHeartRate`            | `date`, `bpm`                                               |
 | `readBloodPressure`        | `date`, `systolicMmHg`, `diastolicMmHg`                     |
 | `readBloodGlucose`         | `date`, `millimolesPerLiter`                                |
+| `readBodyTemperature`      | `date`, `celsius`                                           |
 | `readRestingHeartRate`     | `date`, `bpm`                                               |
 | `readHeartRateVariability` | `date`, `milliseconds`, `method`                            |
 | `readOxygenSaturation`     | `date`, `percentage`                                        |
@@ -417,6 +419,19 @@ interface BloodGlucoseSample extends HealthSample {
 ```
 
 Android maps a Health Connect `BloodGlucoseRecord` one-to-one; iOS stores an `HKQuantitySample` in a composed mmol/L unit, so neither platform converts the value in JavaScript. Health Connect's extra fields (`specimenSource`, `mealType`, `relationToMeal`) and HealthKit's `HKMetadataKeyBloodGlucoseMealTime` are intentionally not modeled — they have no clean cross-platform mapping and are tracked for delivery through metadata passthrough in [#69](https://github.com/AdrianCD101/react-native-nitro-health/issues/69). Android writes store the explicit `*_UNKNOWN` constants. Blood glucose statistics are not supported by `readStatistics()`.
+
+### Body Temperature
+
+One `BodyTemperatureSample` carries the reading in degrees Celsius (°F = °C × 9/5 + 32):
+
+```ts
+interface BodyTemperatureSample extends HealthSample {
+  date: Date
+  celsius: number
+}
+```
+
+Android maps a Health Connect `BodyTemperatureRecord` one-to-one; iOS stores an `HKQuantitySample` in `HKUnit.degreeCelsius()`. Health Connect's `measurementLocation` and HealthKit's `HKMetadataKeyBodyTemperatureSensorLocation` are intentionally not modeled yet — tracked in [#73](https://github.com/AdrianCD101/react-native-nitro-health/issues/73), where they are the strongest candidate so far for promotion to a typed portable field (8 of 10 values map exactly across platforms). Android writes store the explicit `MEASUREMENT_LOCATION_UNKNOWN` constant. Body temperature statistics are not supported by `readStatistics()`.
 
 ### Heart Rate Variability
 
@@ -529,7 +544,7 @@ const heartRate = await NitroHealth.readStatistics('heartRate', {
 | `height`             | `avg`, `min`, `max` | meters               |
 | `bodyMass`           | `avg`, `min`, `max` | kg                   |
 
-Sleep, HRV, oxygen saturation, blood pressure, blood glucose, and workout statistics are not supported by `readStatistics()`. Invalid data-type/metric combinations reject before crossing the native boundary.
+Sleep, HRV, oxygen saturation, blood pressure, blood glucose, body temperature, and workout statistics are not supported by `readStatistics()`. Invalid data-type/metric combinations reject before crossing the native boundary.
 
 Buckets anchor at `startDate`. Use local midnight for calendar-day buckets. `week` is a rolling seven-day interval from that anchor. The final bucket is clamped to `endDate`, empty buckets are omitted, and results are ascending. Hour buckets are fixed 3600-second intervals; day, week, and month buckets follow the device calendar and local time zone.
 
@@ -711,7 +726,7 @@ Each scheduled run should recheck availability, `getCapabilities()`, and relevan
 
 ## Writing Data
 
-Request write authorization before saving. Save methods exist for steps, distance, active energy, heart rate, blood pressure, blood glucose, resting heart rate, oxygen saturation, height, body mass, sleep sessions, and completed workouts. HRV remains read-only.
+Request write authorization before saving. Save methods exist for steps, distance, active energy, heart rate, blood pressure, blood glucose, body temperature, resting heart rate, oxygen saturation, height, body mass, sleep sessions, and completed workouts. HRV remains read-only.
 
 ```ts
 const authorization = await NitroHealth.requestAuthorization([
@@ -742,6 +757,7 @@ The main value constraints are:
 - `saveHeartRate` and `saveRestingHeartRate`: `bpm` from 1 through 300. Android rounds to whole bpm.
 - `saveBloodPressure`: `systolicMmHg` from 20 through 200 and `diastolicMmHg` from 10 through 180.
 - `saveBloodGlucose`: `millimolesPerLiter` from 0.5 through 50.
+- `saveBodyTemperature`: `celsius` from 20 through 45.
 - `saveOxygenSaturation`: `percentage` from 0 through 100.
 - `saveHeight`: `meters` greater than 0 and at most 3.
 - `saveBodyMass`: `kilograms` greater than 0 and at most 1,000.

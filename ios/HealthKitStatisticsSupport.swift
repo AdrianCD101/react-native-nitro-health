@@ -77,6 +77,13 @@ func makeHealthDataTypeDescriptor(dataType: String) throws -> HealthDataTypeDesc
             label: "blood glucose",
             isCumulative: false
         )
+    case "bodyTemperature":
+        return HealthDataTypeDescriptor(
+            identifier: .bodyTemperature,
+            unit: HKUnit.degreeCelsius(),
+            label: "body temperature",
+            isCumulative: false
+        )
     default:
         throw permissionError("Unsupported health data type: \(dataType)")
     }

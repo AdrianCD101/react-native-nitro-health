@@ -540,6 +540,43 @@ describe('NitroHealth saves (native)', () => {
     })
   })
 
+  describe('body temperature', () => {
+    it('rejects saving body temperature when write permission is not granted', async () => {
+      if (await hasVerifiedPermissions([{ accessType: 'write', dataType: 'bodyTemperature' }])) {
+        return
+      }
+
+      await expect(
+        NitroHealth.saveBodyTemperature([{ date: saveInterval.startDate, celsius: 36.6 }])
+      ).rejects.toThrow(/permission/i)
+    })
+
+    it('round-trips a saved reading in celsius when authorized', async () => {
+      const authorized = await hasVerifiedPermissions([
+        { accessType: 'write', dataType: 'bodyTemperature' },
+        { accessType: 'read', dataType: 'bodyTemperature' },
+      ])
+
+      if (!authorized) {
+        return
+      }
+
+      await NitroHealth.saveBodyTemperature([{ date: saveInterval.startDate, celsius: 36.6 }])
+
+      const page = await NitroHealth.readBodyTemperature(saveReadRange)
+
+      if (isInconclusiveRead(page.samples)) {
+        return
+      }
+
+      // HealthKit stores temperature canonically, so allow float round-tripping.
+      const matches = page.samples.filter((sample) => Math.abs(sample.celsius - 36.6) < 0.001)
+
+      expect(matches.length).toBeGreaterThanOrEqual(1)
+      expect(matches[0]?.identity.kind).toBe('record')
+    })
+  })
+
   describe('height', () => {
     it('rejects saving height when write permission is not granted', async () => {
       if (await hasVerifiedPermissions([{ accessType: 'write', dataType: 'height' }])) {
