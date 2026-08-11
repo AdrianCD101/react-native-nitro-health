@@ -28,7 +28,13 @@ extension HybridNitroHealth {
         map: (HKSample) throws -> T?
     ) async throws -> (samples: [T], nextCursor: String?) {
         let cursor = try query.cursor.map {
-            try decodeSampleCursor($0, dataType: dataType, ascending: query.ascending)
+            try decodeSampleCursor(
+                $0,
+                dataType: dataType,
+                ascending: query.ascending,
+                queryStartTimeMs: query.startTimeMs,
+                queryEndTimeMs: query.endTimeMs
+            )
         }
         try await requireDeterminedReadAuthorization(
             for: makeReadAuthorizationObjectTypes(dataType: dataType),
@@ -65,6 +71,8 @@ extension HybridNitroHealth {
             limit: Int(query.limit),
             dataType: dataType,
             ascending: query.ascending,
+            queryStartTimeMs: query.startTimeMs,
+            queryEndTimeMs: query.endTimeMs,
             cursor: cursor
         )
 

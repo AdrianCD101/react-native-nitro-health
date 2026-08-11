@@ -1,10 +1,11 @@
 package com.nitrohealth
 
+import com.margelo.nitro.nitrohealth.NativeHealthDateRangeQuery
 import java.util.Base64
 
 private const val CURSOR_VERSION = "v1"
 private const val CURSOR_PLATFORM = "android"
-private const val CURSOR_FIELD_COUNT = 5
+private const val CURSOR_FIELD_COUNT = 7
 
 private fun cursorOrder(ascending: Boolean): String {
     return if (ascending) "asc" else "desc"
@@ -13,14 +14,21 @@ private fun cursorOrder(ascending: Boolean): String {
 /**
  * Wraps Health Connect's opaque page token in a versioned, platform-tagged envelope so a cursor
  * handed back to JS can only be replayed against the read that produced it. The payload is
- * "v1|android|<dataType>|<asc|desc>|<hcPageToken>", base64url-encoded without padding.
+ * "v1|android|<dataType>|<asc|desc>|<startTimeMs>|<endTimeMs>|<hcPageToken>", base64url-encoded
+ * without padding.
  */
-internal fun encodeSampleCursor(dataType: String, ascending: Boolean, pageToken: String): String {
+internal fun encodeSampleCursor(
+    dataType: String,
+    query: NativeHealthDateRangeQuery,
+    pageToken: String
+): String {
     val payload = listOf(
         CURSOR_VERSION,
         CURSOR_PLATFORM,
         dataType,
-        cursorOrder(ascending),
+        cursorOrder(query.ascending),
+        query.startTimeMs.toLong(),
+        query.endTimeMs.toLong(),
         pageToken
     ).joinToString("|")
 
@@ -30,11 +38,15 @@ internal fun encodeSampleCursor(dataType: String, ascending: Boolean, pageToken:
 
 /**
  * Unwraps a cursor produced by [encodeSampleCursor] back into the raw Health Connect page token,
- * validating that it belongs to this platform, the given data type, and the same sort order that
- * produced it. Throws [IllegalArgumentException] on any mismatch or malformed input (including
- * cursors produced by the iOS implementation, which use a different envelope).
+ * validating that it belongs to this platform, data type, sort order, and date range. Throws
+ * [IllegalArgumentException] on any mismatch or malformed input (including cursors produced by
+ * the iOS implementation, which use a different envelope).
  */
-internal fun decodeSampleCursor(cursor: String, dataType: String, ascending: Boolean): String {
+internal fun decodeSampleCursor(
+    cursor: String,
+    dataType: String,
+    query: NativeHealthDateRangeQuery
+): String {
     val payload = try {
         String(Base64.getUrlDecoder().decode(cursor), Charsets.UTF_8)
     } catch (_: IllegalArgumentException) {
@@ -65,11 +77,19 @@ internal fun decodeSampleCursor(cursor: String, dataType: String, ascending: Boo
             "Invalid cursor: expected a cursor for '$dataType' reads"
         )
     }
-    if (fields[3] != cursorOrder(ascending)) {
+    if (fields[3] != cursorOrder(query.ascending)) {
         throw IllegalArgumentException(
             "Invalid cursor: cursor must be used with the same ascending option that produced it"
         )
     }
+    if (
+        fields[4].toLongOrNull() != query.startTimeMs.toLong() ||
+        fields[5].toLongOrNull() != query.endTimeMs.toLong()
+    ) {
+        throw IllegalArgumentException(
+            "Invalid cursor: cursor must be used with the same date range that produced it"
+        )
+    }
 
-    return fields[4]
+    return fields[6]
 }

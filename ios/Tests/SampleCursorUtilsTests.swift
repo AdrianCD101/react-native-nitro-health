@@ -1,10 +1,15 @@
 import XCTest
 @testable import NitroHealthHelpers
 
+private let defaultQueryStartTimeMs = 1_600_000_000_000.0
+private let defaultQueryEndTimeMs = 1_700_000_000_000.0
+
 final class SampleCursorUtilsTests: XCTestCase {
     private func makeCursor(
         dataType: String = "steps",
         ascending: Bool = true,
+        queryStartTimeMs: Double = defaultQueryStartTimeMs,
+        queryEndTimeMs: Double = defaultQueryEndTimeMs,
         startInterval: Double = 1_700_000_000,
         seenUuids: [String] = ["A"]
     ) -> SampleCursor {
@@ -13,6 +18,8 @@ final class SampleCursorUtilsTests: XCTestCase {
             platform: "ios",
             dataType: dataType,
             ascending: ascending,
+            queryStartTimeMs: queryStartTimeMs,
+            queryEndTimeMs: queryEndTimeMs,
             startInterval: startInterval,
             seenUuids: seenUuids
         )
@@ -30,7 +37,9 @@ final class SampleCursorUtilsTests: XCTestCase {
         let decoded = try decodeSampleCursor(
             try encodeSampleCursor(cursor),
             dataType: "steps",
-            ascending: true
+            ascending: true,
+            queryStartTimeMs: defaultQueryStartTimeMs,
+            queryEndTimeMs: defaultQueryEndTimeMs
         )
 
         XCTAssertEqual(decoded, cursor)
@@ -42,7 +51,9 @@ final class SampleCursorUtilsTests: XCTestCase {
         let decoded = try decodeSampleCursor(
             try encodeSampleCursor(cursor),
             dataType: "workout",
-            ascending: false
+            ascending: false,
+            queryStartTimeMs: defaultQueryStartTimeMs,
+            queryEndTimeMs: defaultQueryEndTimeMs
         )
 
         XCTAssertEqual(decoded, cursor)
@@ -55,41 +66,65 @@ final class SampleCursorUtilsTests: XCTestCase {
     }
 
     func testDecodeRejectsGarbage() {
-        XCTAssertThrowsError(try decodeSampleCursor("not a cursor!!", dataType: "steps", ascending: true)) { error in
+        XCTAssertThrowsError(try decodeSampleCursor(
+            "not a cursor!!",
+            dataType: "steps",
+            ascending: true,
+            queryStartTimeMs: defaultQueryStartTimeMs,
+            queryEndTimeMs: defaultQueryEndTimeMs
+        )) { error in
             XCTAssertTrue(error.localizedDescription.contains("Invalid cursor for steps read"))
         }
     }
 
     func testDecodeRejectsAndroidEnvelope() {
-        // Android cursors are base64url of "v1|android|<dataType>|<asc|desc>|<token>" — valid
-        // base64, but not JSON.
-        let androidCursor = Data("v1|android|steps|asc|token123".utf8)
+        // Android cursors are base64url of
+        // "v1|android|<dataType>|<asc|desc>|<startTimeMs>|<endTimeMs>|<token>".
+        let androidCursor = Data("v1|android|steps|asc|1000|2000|token123".utf8)
             .base64EncodedString()
             .replacingOccurrences(of: "=", with: "")
 
-        XCTAssertThrowsError(try decodeSampleCursor(androidCursor, dataType: "steps", ascending: true)) { error in
+        XCTAssertThrowsError(try decodeSampleCursor(
+            androidCursor,
+            dataType: "steps",
+            ascending: true,
+            queryStartTimeMs: defaultQueryStartTimeMs,
+            queryEndTimeMs: defaultQueryEndTimeMs
+        )) { error in
             XCTAssertTrue(error.localizedDescription.contains("Invalid cursor for steps read"))
         }
     }
 
     func testDecodeRejectsForeignPlatform() throws {
         let payload = """
-        {"version":1,"platform":"android","dataType":"steps","ascending":true,"startInterval":0,"seenUuids":[]}
+        {"version":1,"platform":"android","dataType":"steps","ascending":true,"queryStartTimeMs":1000,"queryEndTimeMs":2000,"startInterval":0,"seenUuids":[]}
         """
         let encoded = Data(payload.utf8).base64EncodedString().replacingOccurrences(of: "=", with: "")
 
-        XCTAssertThrowsError(try decodeSampleCursor(encoded, dataType: "steps", ascending: true)) { error in
+        XCTAssertThrowsError(try decodeSampleCursor(
+            encoded,
+            dataType: "steps",
+            ascending: true,
+            queryStartTimeMs: defaultQueryStartTimeMs,
+            queryEndTimeMs: defaultQueryEndTimeMs
+        )) { error in
             XCTAssertTrue(error.localizedDescription.contains("another platform"))
         }
     }
 
     func testDecodeRejectsNewerVersion() throws {
         let payload = """
-        {"version":2,"platform":"ios","dataType":"steps","ascending":true,"startInterval":0,"seenUuids":[]}
+        {"version":2,"platform":"ios","dataType":"steps","ascending":true,"queryStartTimeMs":1000,"queryEndTimeMs":2000,"startInterval":0,"seenUuids":[]}
         """
         let encoded = Data(payload.utf8).base64EncodedString().replacingOccurrences(of: "=", with: "")
 
-        XCTAssertThrowsError(try decodeSampleCursor(encoded, dataType: "steps", ascending: true)) { error in
+        XCTAssertThrowsError(try decodeSampleCursor(
+            encoded,
+            dataType: "steps",
+            ascending: true,
+            queryStartTimeMs: defaultQueryStartTimeMs,
+            queryEndTimeMs: defaultQueryEndTimeMs
+        )) { error in
             XCTAssertTrue(error.localizedDescription.contains("another platform or by a newer library version"))
         }
     }
@@ -97,7 +132,13 @@ final class SampleCursorUtilsTests: XCTestCase {
     func testDecodeRejectsDataTypeMismatch() throws {
         let encoded = try encodeSampleCursor(makeCursor(dataType: "heartRate"))
 
-        XCTAssertThrowsError(try decodeSampleCursor(encoded, dataType: "steps", ascending: true)) { error in
+        XCTAssertThrowsError(try decodeSampleCursor(
+            encoded,
+            dataType: "steps",
+            ascending: true,
+            queryStartTimeMs: defaultQueryStartTimeMs,
+            queryEndTimeMs: defaultQueryEndTimeMs
+        )) { error in
             XCTAssertTrue(error.localizedDescription.contains("created by a heartRate read"))
         }
     }
@@ -105,8 +146,42 @@ final class SampleCursorUtilsTests: XCTestCase {
     func testDecodeRejectsAscendingMismatch() throws {
         let encoded = try encodeSampleCursor(makeCursor(ascending: true))
 
-        XCTAssertThrowsError(try decodeSampleCursor(encoded, dataType: "steps", ascending: false)) { error in
+        XCTAssertThrowsError(try decodeSampleCursor(
+            encoded,
+            dataType: "steps",
+            ascending: false,
+            queryStartTimeMs: defaultQueryStartTimeMs,
+            queryEndTimeMs: defaultQueryEndTimeMs
+        )) { error in
             XCTAssertTrue(error.localizedDescription.contains("different ascending option"))
+        }
+    }
+
+    func testDecodeRejectsStartTimeMismatch() throws {
+        let encoded = try encodeSampleCursor(makeCursor())
+
+        XCTAssertThrowsError(try decodeSampleCursor(
+            encoded,
+            dataType: "steps",
+            ascending: true,
+            queryStartTimeMs: defaultQueryStartTimeMs - 1,
+            queryEndTimeMs: defaultQueryEndTimeMs
+        )) { error in
+            XCTAssertTrue(error.localizedDescription.contains("different date range"))
+        }
+    }
+
+    func testDecodeRejectsEndTimeMismatch() throws {
+        let encoded = try encodeSampleCursor(makeCursor())
+
+        XCTAssertThrowsError(try decodeSampleCursor(
+            encoded,
+            dataType: "steps",
+            ascending: true,
+            queryStartTimeMs: defaultQueryStartTimeMs,
+            queryEndTimeMs: defaultQueryEndTimeMs + 1
+        )) { error in
+            XCTAssertTrue(error.localizedDescription.contains("different date range"))
         }
     }
 
@@ -149,6 +224,8 @@ final class SampleCursorUtilsTests: XCTestCase {
             limit: 3,
             dataType: "steps",
             ascending: true,
+            queryStartTimeMs: defaultQueryStartTimeMs,
+            queryEndTimeMs: defaultQueryEndTimeMs,
             cursor: nil
         )
 
@@ -162,6 +239,8 @@ final class SampleCursorUtilsTests: XCTestCase {
             limit: 3,
             dataType: "steps",
             ascending: true,
+            queryStartTimeMs: defaultQueryStartTimeMs,
+            queryEndTimeMs: defaultQueryEndTimeMs,
             cursor: nil
         )
 
@@ -170,6 +249,8 @@ final class SampleCursorUtilsTests: XCTestCase {
         XCTAssertEqual(page.nextCursor?.seenUuids, ["C"])
         XCTAssertEqual(page.nextCursor?.dataType, "steps")
         XCTAssertEqual(page.nextCursor?.ascending, true)
+        XCTAssertEqual(page.nextCursor?.queryStartTimeMs, defaultQueryStartTimeMs)
+        XCTAssertEqual(page.nextCursor?.queryEndTimeMs, defaultQueryEndTimeMs)
     }
 
     func testBoundaryTiesAreRecordedInNextCursor() {
@@ -178,6 +259,8 @@ final class SampleCursorUtilsTests: XCTestCase {
             limit: 3,
             dataType: "steps",
             ascending: true,
+            queryStartTimeMs: defaultQueryStartTimeMs,
+            queryEndTimeMs: defaultQueryEndTimeMs,
             cursor: nil
         )
 
@@ -196,6 +279,8 @@ final class SampleCursorUtilsTests: XCTestCase {
             limit: 2,
             dataType: "steps",
             ascending: true,
+            queryStartTimeMs: defaultQueryStartTimeMs,
+            queryEndTimeMs: defaultQueryEndTimeMs,
             cursor: makeCursor(startInterval: 2, seenUuids: ["B", "C"])
         )
 
@@ -210,6 +295,8 @@ final class SampleCursorUtilsTests: XCTestCase {
             limit: 2,
             dataType: "steps",
             ascending: true,
+            queryStartTimeMs: defaultQueryStartTimeMs,
+            queryEndTimeMs: defaultQueryEndTimeMs,
             cursor: makeCursor(startInterval: 7, seenUuids: ["A", "B"])
         )
 
@@ -224,6 +311,8 @@ final class SampleCursorUtilsTests: XCTestCase {
             limit: 2,
             dataType: "steps",
             ascending: true,
+            queryStartTimeMs: defaultQueryStartTimeMs,
+            queryEndTimeMs: defaultQueryEndTimeMs,
             cursor: makeCursor(startInterval: 7, seenUuids: ["A"])
         )
 
@@ -238,6 +327,8 @@ final class SampleCursorUtilsTests: XCTestCase {
             limit: 3,
             dataType: "steps",
             ascending: true,
+            queryStartTimeMs: defaultQueryStartTimeMs,
+            queryEndTimeMs: defaultQueryEndTimeMs,
             cursor: makeCursor(startInterval: 5, seenUuids: ["A", "B"])
         )
 
@@ -251,6 +342,8 @@ final class SampleCursorUtilsTests: XCTestCase {
             limit: 3,
             dataType: "workout",
             ascending: false,
+            queryStartTimeMs: defaultQueryStartTimeMs,
+            queryEndTimeMs: defaultQueryEndTimeMs,
             cursor: nil
         )
 
@@ -268,6 +361,8 @@ final class SampleCursorUtilsTests: XCTestCase {
             limit: 3,
             dataType: "steps",
             ascending: true,
+            queryStartTimeMs: defaultQueryStartTimeMs,
+            queryEndTimeMs: defaultQueryEndTimeMs,
             cursor: nil
         )
 

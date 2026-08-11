@@ -305,6 +305,20 @@ export function makeIdentityDeleteResult(
   result: NativeHealthDeleteResult,
   requestedCount: number
 ): HealthIdentityDeleteResult {
+  if (result.status !== 'completed') {
+    throw new Error('Identity deletion returned an unsupported native status')
+  }
+  if (result.deletedCountStatus === 'unverifiable') {
+    if (result.deletedCount !== undefined) {
+      throw new Error('Unverifiable native deletion result contains a deleted count')
+    }
+    return {
+      status: 'completed',
+      requestedCount,
+      deletedCount: { status: 'unverifiable' },
+    }
+  }
+
   const deletedCount = makeKnownDeletedCount(result)
   if (deletedCount === 0) {
     throw new Error('No caller-owned health records matched the supplied identities')

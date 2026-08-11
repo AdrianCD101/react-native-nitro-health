@@ -919,7 +919,7 @@ The result is:
 type HealthIdentityDeleteResult = {
   status: 'completed'
   requestedCount: number
-  deletedCount: { status: 'known'; value: number }
+  deletedCount: { status: 'known'; value: number } | { status: 'unverifiable' }
 }
 
 type HealthTimeRangeDeleteResult = {
@@ -928,7 +928,7 @@ type HealthTimeRangeDeleteResult = {
 }
 ```
 
-Delete-by-ID always reports an exact count after success. A no-match or foreign record rejects on both platforms rather than returning plausible success. Android deletion remains transactional; iOS can report a partial count for mixed matching and nonmatching identities. Time-range deletion reports an exact iOS count and an `unverifiable` Android count.
+Delete-by-ID reports an exact iOS count, so a known no-match rejects and mixed matching/nonmatching identities can report a partial count. Health Connect does not expose the deleted count and can complete while ignoring identities that do not match caller-owned records, so Android returns `{ status: 'unverifiable' }`. Time-range deletion follows the same count visibility: exact on iOS and `unverifiable` on Android.
 
 Record-child identities cannot be passed directly. To intentionally delete a child's whole parent, pass its parent record identity:
 

@@ -1,5 +1,6 @@
 package com.nitrohealth
 
+import com.margelo.nitro.nitrohealth.NativeHealthDateRangeQuery
 import java.util.Base64
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
@@ -49,7 +50,17 @@ class ChangesTokenTest {
 
     @Test
     fun decodeRejectsPaginationCursorKind() {
-        val cursor = encodeSampleCursor("steps", true, "page-token")
+        val cursor = encodeSampleCursor(
+            "steps",
+            NativeHealthDateRangeQuery(
+                startTimeMs = 1_000.0,
+                endTimeMs = 2_000.0,
+                limit = 100.0,
+                ascending = true,
+                cursor = null
+            ),
+            "page-token"
+        )
 
         val error = assertThrows(IllegalArgumentException::class.java) {
             decodeChangesToken(cursor, "steps")

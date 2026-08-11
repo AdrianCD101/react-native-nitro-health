@@ -1,44 +1,61 @@
 package com.nitrohealth
 
+import com.margelo.nitro.nitrohealth.NativeHealthDateRangeQuery
 import java.util.Base64
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Test
 
 class SampleCursorTest {
+    private fun makeQuery(
+        startTimeMs: Double = 1_000.0,
+        endTimeMs: Double = 2_000.0,
+        ascending: Boolean = true
+    ) = NativeHealthDateRangeQuery(
+        startTimeMs = startTimeMs,
+        endTimeMs = endTimeMs,
+        limit = 100.0,
+        ascending = ascending,
+        cursor = null
+    )
+
     @Test
     fun encodeDecodeRoundTripsAscending() {
-        val cursor = encodeSampleCursor("steps", true, "hc-token-123")
+        val query = makeQuery()
+        val cursor = encodeSampleCursor("steps", query, "hc-token-123")
 
-        assertEquals("hc-token-123", decodeSampleCursor(cursor, "steps", true))
+        assertEquals("hc-token-123", decodeSampleCursor(cursor, "steps", query))
     }
 
     @Test
     fun encodeDecodeRoundTripsDescending() {
-        val cursor = encodeSampleCursor("heartRate", false, "hc-token-456")
+        val query = makeQuery(ascending = false)
+        val cursor = encodeSampleCursor("heartRate", query, "hc-token-456")
 
-        assertEquals("hc-token-456", decodeSampleCursor(cursor, "heartRate", false))
+        assertEquals("hc-token-456", decodeSampleCursor(cursor, "heartRate", query))
     }
 
     @Test
     fun pageTokenContainingPipesSurvivesRoundTrip() {
         val pageToken = "part|with|pipes|inside"
-        val cursor = encodeSampleCursor("sleep", true, pageToken)
+        val query = makeQuery()
+        val cursor = encodeSampleCursor("sleep", query, pageToken)
 
-        assertEquals(pageToken, decodeSampleCursor(cursor, "sleep", true))
+        assertEquals(pageToken, decodeSampleCursor(cursor, "sleep", query))
     }
 
     @Test
     fun emptyPageTokenRoundTrips() {
-        val cursor = encodeSampleCursor("workout", false, "")
+        val query = makeQuery(ascending = false)
+        val cursor = encodeSampleCursor("workout", query, "")
 
-        assertEquals("", decodeSampleCursor(cursor, "workout", false))
+        assertEquals("", decodeSampleCursor(cursor, "workout", query))
     }
 
     @Test
     fun decodeRejectsGarbageString() {
         val error = assertThrows(IllegalArgumentException::class.java) {
-            decodeSampleCursor("not base64!!", "steps", true)
+            decodeSampleCursor("not base64!!", "steps", makeQuery())
         }
 
         assertEquals("Invalid cursor: not a cursor produced by a previous read", error.message)
@@ -50,7 +67,7 @@ class SampleCursorTest {
             .encodeToString("just some text".toByteArray(Charsets.UTF_8))
 
         val error = assertThrows(IllegalArgumentException::class.java) {
-            decodeSampleCursor(cursor, "steps", true)
+            decodeSampleCursor(cursor, "steps", makeQuery())
         }
 
         assertEquals(
@@ -69,7 +86,7 @@ class SampleCursorTest {
             .encodeToString(iosPayload.toByteArray(Charsets.UTF_8))
 
         val error = assertThrows(IllegalArgumentException::class.java) {
-            decodeSampleCursor(cursor, "steps", true)
+            decodeSampleCursor(cursor, "steps", makeQuery())
         }
 
         assertEquals(
@@ -82,10 +99,10 @@ class SampleCursorTest {
     @Test
     fun decodeRejectsUnsupportedVersion() {
         val cursor = Base64.getUrlEncoder().withoutPadding()
-            .encodeToString("v2|android|steps|asc|token".toByteArray(Charsets.UTF_8))
+            .encodeToString("v2|android|steps|asc|1000|2000|token".toByteArray(Charsets.UTF_8))
 
         val error = assertThrows(IllegalArgumentException::class.java) {
-            decodeSampleCursor(cursor, "steps", true)
+            decodeSampleCursor(cursor, "steps", makeQuery())
         }
 
         assertEquals("Invalid cursor: unsupported cursor version \"v2\"", error.message)
@@ -94,10 +111,10 @@ class SampleCursorTest {
     @Test
     fun decodeRejectsOtherPlatform() {
         val cursor = Base64.getUrlEncoder().withoutPadding()
-            .encodeToString("v1|ios|steps|asc|token".toByteArray(Charsets.UTF_8))
+            .encodeToString("v1|ios|steps|asc|1000|2000|token".toByteArray(Charsets.UTF_8))
 
         val error = assertThrows(IllegalArgumentException::class.java) {
-            decodeSampleCursor(cursor, "steps", true)
+            decodeSampleCursor(cursor, "steps", makeQuery())
         }
 
         assertEquals(
@@ -109,10 +126,11 @@ class SampleCursorTest {
 
     @Test
     fun decodeRejectsDataTypeMismatch() {
-        val cursor = encodeSampleCursor("steps", true, "hc-token-123")
+        val query = makeQuery()
+        val cursor = encodeSampleCursor("steps", query, "hc-token-123")
 
         val error = assertThrows(IllegalArgumentException::class.java) {
-            decodeSampleCursor(cursor, "heartRate", true)
+            decodeSampleCursor(cursor, "heartRate", query)
         }
 
         assertEquals("Invalid cursor: expected a cursor for 'heartRate' reads", error.message)
@@ -120,14 +138,42 @@ class SampleCursorTest {
 
     @Test
     fun decodeRejectsAscendingMismatch() {
-        val cursor = encodeSampleCursor("steps", true, "hc-token-123")
+        val cursor = encodeSampleCursor("steps", makeQuery(), "hc-token-123")
 
         val error = assertThrows(IllegalArgumentException::class.java) {
-            decodeSampleCursor(cursor, "steps", false)
+            decodeSampleCursor(cursor, "steps", makeQuery(ascending = false))
         }
 
         assertEquals(
             "Invalid cursor: cursor must be used with the same ascending option that produced it",
+            error.message
+        )
+    }
+
+    @Test
+    fun decodeRejectsStartTimeMismatch() {
+        val cursor = encodeSampleCursor("steps", makeQuery(), "hc-token-123")
+
+        val error = assertThrows(IllegalArgumentException::class.java) {
+            decodeSampleCursor(cursor, "steps", makeQuery(startTimeMs = 999.0))
+        }
+
+        assertEquals(
+            "Invalid cursor: cursor must be used with the same date range that produced it",
+            error.message
+        )
+    }
+
+    @Test
+    fun decodeRejectsEndTimeMismatch() {
+        val cursor = encodeSampleCursor("steps", makeQuery(), "hc-token-123")
+
+        val error = assertThrows(IllegalArgumentException::class.java) {
+            decodeSampleCursor(cursor, "steps", makeQuery(endTimeMs = 2_001.0))
+        }
+
+        assertEquals(
+            "Invalid cursor: cursor must be used with the same date range that produced it",
             error.message
         )
     }
