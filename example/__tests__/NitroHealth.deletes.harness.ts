@@ -289,9 +289,7 @@ describe('NitroHealth deletes (native)', () => {
     ])
     if (!authorized) return
 
-    await NitroHealth.saveBasalBodyTemperature([
-      { date: deleteInterval.startDate, celsius: 35.9 },
-    ])
+    await NitroHealth.saveBasalBodyTemperature([{ date: deleteInterval.startDate, celsius: 35.9 }])
     const page = await NitroHealth.readBasalBodyTemperature(deleteReadRange)
     if (isInconclusiveRead(page.samples)) return
 

@@ -727,9 +727,9 @@ describe('NitroHealth breadth data types contract', () => {
     it('rejects kilograms above the Health Connect ceiling', async () => {
       const date = new Date('2026-01-01T09:00:00.000Z')
 
-      await expect(
-        NitroHealth.saveLeanBodyMass([{ date, kilograms: 1000.1 }])
-      ).rejects.toThrow('samples[0]: kilograms must not exceed 1000')
+      await expect(NitroHealth.saveLeanBodyMass([{ date, kilograms: 1000.1 }])).rejects.toThrow(
+        'samples[0]: kilograms must not exceed 1000'
+      )
 
       expect(mockNitroHealth.saveLeanBodyMass).not.toHaveBeenCalled()
     })
