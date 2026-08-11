@@ -32,6 +32,7 @@ namespace margelo::nitro::nitrohealth {
       prototype.registerHybridMethod("readActiveEnergyBurned", &HybridNitroHealthSpec::readActiveEnergyBurned);
       prototype.registerHybridMethod("readBodyMass", &HybridNitroHealthSpec::readBodyMass);
       prototype.registerHybridMethod("readHeartRate", &HybridNitroHealthSpec::readHeartRate);
+      prototype.registerHybridMethod("readBloodPressure", &HybridNitroHealthSpec::readBloodPressure);
       prototype.registerHybridMethod("readHeartRateStatistics", &HybridNitroHealthSpec::readHeartRateStatistics);
       prototype.registerHybridMethod("readRestingHeartRate", &HybridNitroHealthSpec::readRestingHeartRate);
       prototype.registerHybridMethod("readHeartRateVariability", &HybridNitroHealthSpec::readHeartRateVariability);
@@ -44,6 +45,7 @@ namespace margelo::nitro::nitrohealth {
       prototype.registerHybridMethod("saveDistance", &HybridNitroHealthSpec::saveDistance);
       prototype.registerHybridMethod("saveActiveEnergyBurned", &HybridNitroHealthSpec::saveActiveEnergyBurned);
       prototype.registerHybridMethod("saveHeartRate", &HybridNitroHealthSpec::saveHeartRate);
+      prototype.registerHybridMethod("saveBloodPressure", &HybridNitroHealthSpec::saveBloodPressure);
       prototype.registerHybridMethod("saveBodyMass", &HybridNitroHealthSpec::saveBodyMass);
       prototype.registerHybridMethod("saveRestingHeartRate", &HybridNitroHealthSpec::saveRestingHeartRate);
       prototype.registerHybridMethod("saveOxygenSaturation", &HybridNitroHealthSpec::saveOxygenSaturation);

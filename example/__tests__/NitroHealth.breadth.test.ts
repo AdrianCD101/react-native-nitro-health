@@ -110,6 +110,43 @@ describe('NitroHealth breadth data types contract', () => {
     })
   })
 
+  describe('readBloodPressure', () => {
+    it('maps one native sample carrying both values onto a single record identity', async () => {
+      const startDate = new Date('2026-01-01T00:00:00.000Z')
+      const endDate = new Date('2026-01-02T00:00:00.000Z')
+      const timeMs = new Date('2026-01-01T09:00:00.000Z').getTime()
+      mockNitroHealth.readBloodPressure.mockResolvedValue({
+        samples: [
+          {
+            ...nativeRecordMetadata('bp-record', 'com.example.cuff', 'Example Cuff'),
+            timeMs,
+            systolicMmHg: 118,
+            diastolicMmHg: 76,
+          },
+        ],
+      })
+
+      const result = await NitroHealth.readBloodPressure({ startDate, endDate })
+
+      expect(mockNitroHealth.readBloodPressure).toHaveBeenCalledWith({
+        startTimeMs: startDate.getTime(),
+        endTimeMs: endDate.getTime(),
+        limit: 1000,
+        ascending: true,
+      })
+      expect(result.samples).toHaveLength(1)
+      expect(result.samples[0].identity).toEqual({ kind: 'record', id: 'bp-record' })
+      expect(result.samples[0].date).toBeInstanceOf(Date)
+      expect(result.samples[0].date.getTime()).toBe(timeMs)
+      expect(result.samples[0].systolicMmHg).toBe(118)
+      expect(result.samples[0].diastolicMmHg).toBe(76)
+      expect(result.samples[0].origin).toEqual({
+        identifier: 'com.example.cuff',
+        displayName: 'Example Cuff',
+      })
+    })
+  })
+
   describe('readOxygenSaturation', () => {
     it('leaves the percentage value untouched (no JS-side unit conversion)', async () => {
       const startDate = new Date('2026-01-01T00:00:00.000Z')
@@ -205,6 +242,67 @@ describe('NitroHealth breadth data types contract', () => {
       ).rejects.toThrow('samples[0]: a valid date is required')
 
       expect(mockNitroHealth.saveRestingHeartRate).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('saveBloodPressure', () => {
+    it('saves through the Nitro hybrid object', async () => {
+      const date = new Date('2026-01-01T09:00:00.000Z')
+      mockNitroHealth.saveBloodPressure.mockResolvedValue(undefined)
+
+      await expect(
+        NitroHealth.saveBloodPressure([{ date, systolicMmHg: 118, diastolicMmHg: 76 }])
+      ).resolves.toBeUndefined()
+
+      expect(mockNitroHealth.saveBloodPressure).toHaveBeenCalledWith([
+        { timeMs: date.getTime(), systolicMmHg: 118, diastolicMmHg: 76 },
+      ])
+    })
+
+    it('rejects systolicMmHg outside 20-200 before crossing the native boundary', async () => {
+      const date = new Date('2026-01-01T09:00:00.000Z')
+
+      for (const systolicMmHg of [19, 200.1, Number.NaN, Number.POSITIVE_INFINITY]) {
+        await expect(
+          NitroHealth.saveBloodPressure([{ date, systolicMmHg, diastolicMmHg: 76 }])
+        ).rejects.toThrow('samples[0]: systolicMmHg must be between 20 and 200')
+      }
+
+      expect(mockNitroHealth.saveBloodPressure).not.toHaveBeenCalled()
+    })
+
+    it('rejects diastolicMmHg outside 10-180 before crossing the native boundary', async () => {
+      const date = new Date('2026-01-01T09:00:00.000Z')
+
+      for (const diastolicMmHg of [9, 180.1, Number.NaN, Number.POSITIVE_INFINITY]) {
+        await expect(
+          NitroHealth.saveBloodPressure([{ date, systolicMmHg: 118, diastolicMmHg }])
+        ).rejects.toThrow('samples[0]: diastolicMmHg must be between 10 and 180')
+      }
+
+      expect(mockNitroHealth.saveBloodPressure).not.toHaveBeenCalled()
+    })
+
+    it('accepts the inclusive bound values', async () => {
+      const date = new Date('2026-01-01T09:00:00.000Z')
+      mockNitroHealth.saveBloodPressure.mockResolvedValue(undefined)
+
+      await expect(
+        NitroHealth.saveBloodPressure([{ date, systolicMmHg: 20, diastolicMmHg: 10 }])
+      ).resolves.toBeUndefined()
+      await expect(
+        NitroHealth.saveBloodPressure([{ date, systolicMmHg: 200, diastolicMmHg: 180 }])
+      ).resolves.toBeUndefined()
+    })
+
+    it('rejects an invalid sample date before crossing the native boundary', async () => {
+      await expect(
+        NitroHealth.saveBloodPressure([
+          { date: new Date(Number.NaN), systolicMmHg: 118, diastolicMmHg: 76 },
+        ])
+      ).rejects.toThrow('samples[0]: a valid date is required')
+
+      expect(mockNitroHealth.saveBloodPressure).not.toHaveBeenCalled()
     })
   })
 
@@ -339,6 +437,22 @@ describe('NitroHealth breadth data types contract', () => {
           metrics: ['avg'],
         })
       ).rejects.toThrow(`readStatistics does not support the 'heartRateVariability' data type`)
+
+      expect(mockNitroHealth.readStatistics).not.toHaveBeenCalled()
+    })
+
+    it('rejects bloodPressure entirely before crossing the native boundary', async () => {
+      const startDate = new Date('2026-01-01T00:00:00.000Z')
+      const endDate = new Date('2026-01-08T00:00:00.000Z')
+
+      await expect(
+        NitroHealth.readStatistics('bloodPressure', {
+          startDate,
+          endDate,
+          bucket: 'day',
+          metrics: ['avg'],
+        })
+      ).rejects.toThrow(`readStatistics does not support the 'bloodPressure' data type`)
 
       expect(mockNitroHealth.readStatistics).not.toHaveBeenCalled()
     })

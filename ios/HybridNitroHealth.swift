@@ -462,13 +462,19 @@ class HybridNitroHealth: HybridNitroHealthSpec {
     // all. Reads reject before the first authorization request (matching Android's behavior as
     // closely as the platform allows); after the user responds, denied reads resolve empty.
     //
-    // Internal (not private) so HybridNitroHealth+QuantityReads.swift can reuse it.
-    func requireDeterminedReadAuthorization(for objectType: HKObjectType, label: String) async throws {
-        let status = try await getAuthorizationRequestStatus(healthKitTypes: (toShare: [], toRead: [objectType]))
+    // Internal (not private) so HybridNitroHealth+QuantityReads.swift can reuse it. The set
+    // overload exists for blood pressure, whose read authorization spans both member quantity
+    // types (correlation types cannot be checked).
+    func requireDeterminedReadAuthorization(for objectTypes: Set<HKObjectType>, label: String) async throws {
+        let status = try await getAuthorizationRequestStatus(healthKitTypes: (toShare: [], toRead: objectTypes))
 
         if status == .shouldRequest {
             throw permissionError("Read authorization is not determined for \(label). Request authorization first.")
         }
+    }
+
+    func requireDeterminedReadAuthorization(for objectType: HKObjectType, label: String) async throws {
+        try await requireDeterminedReadAuthorization(for: [objectType] as Set<HKObjectType>, label: label)
     }
 
     // Internal (not private) so HybridNitroHealth+Deletes.swift can reuse it.
@@ -621,22 +627,54 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         case "read":
             status = .unverifiable
         case "write":
-            let sampleType = try makeHealthKitSampleType(dataType: permission.dataType)
-            switch healthStore.authorizationStatus(for: sampleType) {
-            case .notDetermined:
-                status = .notdetermined
-            case .sharingDenied:
-                status = .notgranted
-            case .sharingAuthorized:
-                status = .granted
-            @unknown default:
-                status = .unverifiable
+            // Blood pressure writes save an HKCorrelation whose members need sharing
+            // authorization on both quantity types, so its status is the worst-of the two.
+            if permission.dataType == "bloodPressure" {
+                let quantityTypes = try makeBloodPressureQuantityTypes()
+                status = makeWorstOfWriteStatus(
+                    healthStore.authorizationStatus(for: quantityTypes.systolic),
+                    healthStore.authorizationStatus(for: quantityTypes.diastolic)
+                )
+            } else {
+                let sampleType = try makeHealthKitSampleType(dataType: permission.dataType)
+                status = makeWriteStatus(healthStore.authorizationStatus(for: sampleType))
             }
         default:
             throw permissionError("Unsupported health permission access type: \(permission.accessType)")
         }
 
         return NativeHealthPermissionStatusEntry(permission: permission, status: status)
+    }
+
+    private func makeWriteStatus(_ authorizationStatus: HKAuthorizationStatus) -> HealthPermissionStatus {
+        switch authorizationStatus {
+        case .notDetermined:
+            return .notdetermined
+        case .sharingDenied:
+            return .notgranted
+        case .sharingAuthorized:
+            return .granted
+        @unknown default:
+            return .unverifiable
+        }
+    }
+
+    private func makeWorstOfWriteStatus(
+        _ first: HKAuthorizationStatus,
+        _ second: HKAuthorizationStatus
+    ) -> HealthPermissionStatus {
+        let statuses = [makeWriteStatus(first), makeWriteStatus(second)]
+
+        if statuses.contains(.notgranted) {
+            return .notgranted
+        }
+        if statuses.contains(.unverifiable) {
+            return .unverifiable
+        }
+        if statuses.contains(.notdetermined) {
+            return .notdetermined
+        }
+        return .granted
     }
 
     private func makeHealthKitTypeSets(permissions: [NativeHealthPermission]) throws -> (
@@ -647,6 +685,24 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         var toRead = Set<HKObjectType>()
 
         for permission in permissions {
+            // requestAuthorization rejects correlation types; blood pressure authorizes its
+            // two member quantity types instead.
+            if permission.dataType == "bloodPressure" {
+                let quantityTypes = try makeBloodPressureQuantityTypes()
+
+                switch permission.accessType {
+                case "read":
+                    toRead.insert(quantityTypes.systolic)
+                    toRead.insert(quantityTypes.diastolic)
+                case "write":
+                    toShare.insert(quantityTypes.systolic)
+                    toShare.insert(quantityTypes.diastolic)
+                default:
+                    throw permissionError("Unsupported health permission access type: \(permission.accessType)")
+                }
+                continue
+            }
+
             let sampleType = try makeHealthKitSampleType(dataType: permission.dataType)
 
             switch permission.accessType {

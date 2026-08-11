@@ -235,6 +235,24 @@ describe('NitroHealth reads (native)', () => {
     }
   })
 
+  it('reads blood pressure as one sample carrying both values under a record identity', async () => {
+    try {
+      const page = await NitroHealth.readBloodPressure(emptyRange)
+      for (const sample of page.samples) {
+        assertSampleIdentityAndOrigin(sample)
+        // One record identity per reading on BOTH platforms: Android's BloodPressureRecord id,
+        // iOS's HKCorrelation uuid (never a member quantity sample uuid).
+        expect(sample.identity.kind).toBe('record')
+        expect(sample.systolicMmHg).toBeGreaterThanOrEqual(20)
+        expect(sample.systolicMmHg).toBeLessThanOrEqual(200)
+        expect(sample.diastolicMmHg).toBeGreaterThanOrEqual(10)
+        expect(sample.diastolicMmHg).toBeLessThanOrEqual(180)
+      }
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error)
+    }
+  })
+
   // SDNN and RMSSD are non-comparable, so this assertion intentionally verifies the native
   // implementation detail for each platform after public permission state allows the read.
   it('reports SDNN on iOS and RMSSD on Android when HRV samples are observable', async () => {

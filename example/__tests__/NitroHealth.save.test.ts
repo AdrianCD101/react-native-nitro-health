@@ -111,6 +111,9 @@ describe('NitroHealth save contract', () => {
     ])
     await NitroHealth.saveActiveEnergyBurned([{ startDate, endDate, kilocalories: 215, sync }])
     await NitroHealth.saveHeartRate([{ date: startDate, bpm: 72, sync }])
+    await NitroHealth.saveBloodPressure([
+      { date: startDate, systolicMmHg: 118, diastolicMmHg: 76, sync },
+    ])
     await NitroHealth.saveBodyMass([{ date: startDate, kilograms: 72.5, sync }])
     await NitroHealth.saveRestingHeartRate([{ date: startDate, bpm: 58, sync }])
     await NitroHealth.saveOxygenSaturation([{ date: startDate, percentage: 97.5, sync }])
@@ -138,6 +141,9 @@ describe('NitroHealth save contract', () => {
     ])
     expect(mockNitroHealth.saveHeartRate).toHaveBeenCalledWith([
       { timeMs: startDate.getTime(), bpm: 72, ...nativeSync },
+    ])
+    expect(mockNitroHealth.saveBloodPressure).toHaveBeenCalledWith([
+      { timeMs: startDate.getTime(), systolicMmHg: 118, diastolicMmHg: 76, ...nativeSync },
     ])
     expect(mockNitroHealth.saveBodyMass).toHaveBeenCalledWith([
       { timeMs: startDate.getTime(), kilograms: 72.5, ...nativeSync },

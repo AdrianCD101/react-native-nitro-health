@@ -12,6 +12,7 @@
 
 #include "JFunc_void.hpp"
 #include "JNativeActiveEnergyBurnedSample.hpp"
+#include "JNativeBloodPressureSample.hpp"
 #include "JNativeBodyMassSample.hpp"
 #include "JNativeDistanceSample.hpp"
 #include "JNativeDistanceScope.hpp"
@@ -36,6 +37,7 @@
 #include "JNativeWorkoutActivityStatus.hpp"
 #include "JNativeWorkoutSample.hpp"
 #include "NativeActiveEnergyBurnedSample.hpp"
+#include "NativeBloodPressureSample.hpp"
 #include "NativeBodyMassSample.hpp"
 #include "NativeDistanceSample.hpp"
 #include "NativeDistanceScope.hpp"

@@ -2,6 +2,7 @@ import { Platform } from 'react-native'
 import { describe, expect, it } from 'react-native-harness'
 import { NitroHealth } from 'react-native-nitro-health'
 import type {
+  BloodPressureSample,
   HealthPermission,
   HealthSampleIdentity,
   StepSample,
@@ -17,6 +18,10 @@ const stepReadWritePermissions: HealthPermission[] = [
 const workoutReadWritePermissions: HealthPermission[] = [
   { accessType: 'read', dataType: 'workout' },
   { accessType: 'write', dataType: 'workout' },
+]
+const bloodPressureReadWritePermissions: HealthPermission[] = [
+  { accessType: 'read', dataType: 'bloodPressure' },
+  { accessType: 'write', dataType: 'bloodPressure' },
 ]
 const idempotentInterval = {
   startDate: new Date('2004-06-01T09:00:00.000Z'),
@@ -58,6 +63,17 @@ async function readIdempotentStepSamples(expectedCounts: readonly number[]): Pro
   } while (cursor !== undefined)
 
   return samples
+}
+
+async function readIdempotentBloodPressure(
+  expectedSystolic: readonly number[]
+): Promise<BloodPressureSample[]> {
+  const page = await NitroHealth.readBloodPressure({ ...idempotentReadRange, limit: 1000 })
+  return page.samples.filter(
+    (sample) =>
+      sample.date.getTime() === idempotentInterval.startDate.getTime() &&
+      expectedSystolic.includes(sample.systolicMmHg)
+  )
 }
 
 async function readIdempotentWorkouts(
@@ -230,6 +246,94 @@ describe('NitroHealth idempotent saves (native)', () => {
       expect(workouts).toHaveLength(1)
     } finally {
       await NitroHealth.deleteRecordsByTimeRange('workout', idempotentReadRange)
+    }
+  })
+
+  // The acceptance gate for correlation sync metadata (plan risk R3): retries and versioned
+  // replaces must leave exactly one reading — a leftover old correlation would surface as a
+  // second sample here. Member samples carry derived '<id>#systolic'/'#diastolic' identities
+  // so the same save replaces them alongside the correlation.
+  it('keeps exactly one blood pressure reading when the same versioned save is retried', async () => {
+    if (!(await hasVerifiedPermissions(bloodPressureReadWritePermissions))) {
+      return
+    }
+
+    await NitroHealth.deleteRecordsByTimeRange('bloodPressure', idempotentReadRange)
+    try {
+      const sample = {
+        date: idempotentInterval.startDate,
+        systolicMmHg: 141,
+        diastolicMmHg: 91,
+        sync: { id: 'nitro-health-harness-bp-retry', version: 1 },
+      }
+
+      await NitroHealth.saveBloodPressure([sample])
+      await NitroHealth.saveBloodPressure([sample])
+
+      const samples = await readIdempotentBloodPressure([141])
+      if (Platform.OS === 'ios' && samples.length === 0) {
+        return
+      }
+
+      expect(samples).toHaveLength(1)
+      expect(samples[0]?.diastolicMmHg).toBe(91)
+    } finally {
+      await NitroHealth.deleteRecordsByTimeRange('bloodPressure', idempotentReadRange)
+    }
+  })
+
+  it('replaces a blood pressure reading at a higher version with platform-specific identity', async () => {
+    if (!(await hasVerifiedPermissions(bloodPressureReadWritePermissions))) {
+      return
+    }
+
+    await NitroHealth.deleteRecordsByTimeRange('bloodPressure', idempotentReadRange)
+    try {
+      const syncId = 'nitro-health-harness-bp-higher-version'
+      await NitroHealth.saveBloodPressure([
+        {
+          date: idempotentInterval.startDate,
+          systolicMmHg: 142,
+          diastolicMmHg: 92,
+          sync: { id: syncId, version: 1 },
+        },
+      ])
+
+      const initial = await readIdempotentBloodPressure([142, 143])
+      if (Platform.OS === 'ios' && initial.length === 0) {
+        return
+      }
+      expect(initial).toHaveLength(1)
+      const initialSample = initial[0]
+      if (initialSample === undefined) {
+        return
+      }
+
+      await NitroHealth.saveBloodPressure([
+        {
+          date: idempotentInterval.startDate,
+          systolicMmHg: 143,
+          diastolicMmHg: 93,
+          sync: { id: syncId, version: 2 },
+        },
+      ])
+
+      const replacement = await readIdempotentBloodPressure([142, 143])
+      expect(replacement).toHaveLength(1)
+      const replacementSample = replacement[0]
+      if (replacementSample === undefined) {
+        return
+      }
+
+      expect(replacementSample.systolicMmHg).toBe(143)
+      expect(replacementSample.diastolicMmHg).toBe(93)
+      if (Platform.OS === 'android') {
+        expect(recordId(replacementSample.identity)).toBe(recordId(initialSample.identity))
+      } else if (Platform.OS === 'ios') {
+        expect(recordId(replacementSample.identity)).not.toBe(recordId(initialSample.identity))
+      }
+    } finally {
+      await NitroHealth.deleteRecordsByTimeRange('bloodPressure', idempotentReadRange)
     }
   })
 

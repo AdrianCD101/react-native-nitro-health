@@ -8,6 +8,7 @@ import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.aggregate.AggregationResult
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
+import androidx.health.connect.client.records.BloodPressureRecord
 import androidx.health.connect.client.records.DistanceRecord
 import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.health.connect.client.records.HeartRateRecord
@@ -33,6 +34,9 @@ import com.margelo.nitro.nitrohealth.HybridNitroHealthSpec
 import com.margelo.nitro.nitrohealth.NativeActiveEnergyBurnedSample
 import com.margelo.nitro.nitrohealth.NativeActiveEnergyBurnedSampleInput
 import com.margelo.nitro.nitrohealth.NativeActiveEnergyBurnedSamplePage
+import com.margelo.nitro.nitrohealth.NativeBloodPressureSample
+import com.margelo.nitro.nitrohealth.NativeBloodPressureSampleInput
+import com.margelo.nitro.nitrohealth.NativeBloodPressureSamplePage
 import com.margelo.nitro.nitrohealth.NativeBodyMassSample
 import com.margelo.nitro.nitrohealth.NativeBodyMassSampleInput
 import com.margelo.nitro.nitrohealth.NativeBodyMassSamplePage
@@ -555,6 +559,26 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         return client.readRecords(request)
     }
 
+    override fun readBloodPressure(
+        query: NativeHealthDateRangeQuery
+    ): Promise<NativeBloodPressureSamplePage> {
+        return Promise.async {
+            val response = readInstantRecords<BloodPressureRecord>("bloodPressure", query)
+            NativeBloodPressureSamplePage(
+                samples = response.records.map { record ->
+                    NativeBloodPressureSample(
+                        identity = makeRecordIdentity(record.metadata.id),
+                        origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
+                        timeMs = record.time.toEpochMilli().toDouble(),
+                        systolicMmHg = record.systolic.inMillimetersOfMercury,
+                        diastolicMmHg = record.diastolic.inMillimetersOfMercury
+                    )
+                }.toTypedArray(),
+                nextCursor = response.pageToken?.let { encodeSampleCursor("bloodPressure", query.ascending, it) }
+            )
+        }
+    }
+
     override fun readRestingHeartRate(
         query: NativeHealthDateRangeQuery
     ): Promise<NativeRestingHeartRateSamplePage> {
@@ -881,6 +905,14 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         return Promise.async {
             val client = requireWritableClient("heartRate")
             client.insertRecords(toHeartRateRecords(samples))
+            Unit
+        }
+    }
+
+    override fun saveBloodPressure(samples: Array<NativeBloodPressureSampleInput>): Promise<Unit> {
+        return Promise.async {
+            val client = requireWritableClient("bloodPressure")
+            client.insertRecords(toBloodPressureRecords(samples))
             Unit
         }
     }

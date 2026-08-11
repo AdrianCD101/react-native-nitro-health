@@ -137,7 +137,7 @@ if (capabilities.status === 'available' && capabilities.historyRead === 'not-gra
 
 ## Permissions
 
-Supported data types are `steps`, `heartRate`, `restingHeartRate`, `heartRateVariability`, `distance`, `activeEnergyBurned`, `oxygenSaturation`, `height`, `sleep`, `bodyMass`, and `workout`.
+Supported data types are `steps`, `heartRate`, `bloodPressure`, `restingHeartRate`, `heartRateVariability`, `distance`, `activeEnergyBurned`, `oxygenSaturation`, `height`, `sleep`, `bodyMass`, and `workout`.
 
 ### Authorization
 
@@ -240,6 +240,7 @@ On Android, the consumer app must declare every Health Connect data permission i
 | `distance`             | `android.permission.health.READ_DISTANCE`               | `android.permission.health.WRITE_DISTANCE`               |
 | `activeEnergyBurned`   | `android.permission.health.READ_ACTIVE_CALORIES_BURNED` | `android.permission.health.WRITE_ACTIVE_CALORIES_BURNED` |
 | `heartRate`            | `android.permission.health.READ_HEART_RATE`             | `android.permission.health.WRITE_HEART_RATE`             |
+| `bloodPressure`        | `android.permission.health.READ_BLOOD_PRESSURE`         | `android.permission.health.WRITE_BLOOD_PRESSURE`         |
 | `restingHeartRate`     | `android.permission.health.READ_RESTING_HEART_RATE`     | `android.permission.health.WRITE_RESTING_HEART_RATE`     |
 | `heartRateVariability` | `android.permission.health.READ_HEART_RATE_VARIABILITY` | Not supported                                            |
 | `oxygenSaturation`     | `android.permission.health.READ_OXYGEN_SATURATION`      | `android.permission.health.WRITE_OXYGEN_SATURATION`      |
@@ -315,6 +316,7 @@ All raw reads return `{ samples, nextCursor? }`. Every listed sample also includ
 | `readActiveEnergyBurned`   | `startDate`, `endDate`, `kilocalories`                      |
 | `readBodyMass`             | `startDate`, `endDate`, `kilograms`                         |
 | `readHeartRate`            | `date`, `bpm`                                               |
+| `readBloodPressure`        | `date`, `systolicMmHg`, `diastolicMmHg`                     |
 | `readRestingHeartRate`     | `date`, `bpm`                                               |
 | `readHeartRateVariability` | `date`, `milliseconds`, `method`                            |
 | `readOxygenSaturation`     | `date`, `percentage`                                        |
@@ -371,6 +373,22 @@ type DistanceScope = 'walking-running' | 'activity-unspecified'
 ```
 
 HealthKit uses the walking/running distance quantity, so iOS raw samples and statistics return `scope: 'walking-running'`. A Health Connect `DistanceRecord` does not preserve that distinction, so Android raw samples and statistics return `scope: 'activity-unspecified'`. Do not compare or merge cross-platform distance totals without considering the scope.
+
+### Blood Pressure
+
+One `BloodPressureSample` always carries both values in millimeters of mercury:
+
+```ts
+interface BloodPressureSample extends HealthSample {
+  date: Date
+  systolicMmHg: number
+  diastolicMmHg: number
+}
+```
+
+Android maps a Health Connect `BloodPressureRecord` one-to-one. On iOS a reading is stored as an `HKCorrelation` containing separate systolic and diastolic `HKQuantitySample` members: `saveBloodPressure()` writes the correlation and both members in one atomic call, `readBloodPressure()` returns one sample per correlation, and `identity` is the correlation record on both platforms (`kind: 'record'`). Other HealthKit consumers can see the member samples as individual systolic/diastolic readings — that is how HealthKit models blood pressure, not a duplicate write.
+
+A malformed third-party correlation (missing or duplicated member samples) rejects the read rather than fabricating a value. Deletion by identity or time range removes the correlation together with the member samples this app wrote. Blood pressure statistics are not supported by `readStatistics()` yet.
 
 ### Heart Rate Variability
 
@@ -483,7 +501,7 @@ const heartRate = await NitroHealth.readStatistics('heartRate', {
 | `height`             | `avg`, `min`, `max` | meters               |
 | `bodyMass`           | `avg`, `min`, `max` | kg                   |
 
-Sleep, HRV, oxygen saturation, and workout statistics are not supported by `readStatistics()`. Invalid data-type/metric combinations reject before crossing the native boundary.
+Sleep, HRV, oxygen saturation, blood pressure, and workout statistics are not supported by `readStatistics()`. Invalid data-type/metric combinations reject before crossing the native boundary.
 
 Buckets anchor at `startDate`. Use local midnight for calendar-day buckets. `week` is a rolling seven-day interval from that anchor. The final bucket is clamped to `endDate`, empty buckets are omitted, and results are ascending. Hour buckets are fixed 3600-second intervals; day, week, and month buckets follow the device calendar and local time zone.
 
@@ -665,7 +683,7 @@ Each scheduled run should recheck availability, `getCapabilities()`, and relevan
 
 ## Writing Data
 
-Request write authorization before saving. Save methods exist for steps, distance, active energy, heart rate, resting heart rate, oxygen saturation, height, body mass, sleep sessions, and completed workouts. HRV remains read-only.
+Request write authorization before saving. Save methods exist for steps, distance, active energy, heart rate, blood pressure, resting heart rate, oxygen saturation, height, body mass, sleep sessions, and completed workouts. HRV remains read-only.
 
 ```ts
 const authorization = await NitroHealth.requestAuthorization([
@@ -694,6 +712,7 @@ The main value constraints are:
 - `saveDistance`: non-negative `distanceMeters`, at most 1,000,000, plus required scope intent.
 - `saveActiveEnergyBurned`: non-negative `kilocalories`, at most 1,000,000.
 - `saveHeartRate` and `saveRestingHeartRate`: `bpm` from 1 through 300. Android rounds to whole bpm.
+- `saveBloodPressure`: `systolicMmHg` from 20 through 200 and `diastolicMmHg` from 10 through 180.
 - `saveOxygenSaturation`: `percentage` from 0 through 100.
 - `saveHeight`: `meters` greater than 0 and at most 3.
 - `saveBodyMass`: `kilograms` greater than 0 and at most 1,000.

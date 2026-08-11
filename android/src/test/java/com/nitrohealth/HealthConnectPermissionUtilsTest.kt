@@ -2,6 +2,7 @@ package com.nitrohealth
 
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
+import androidx.health.connect.client.records.BloodPressureRecord
 import androidx.health.connect.client.records.DistanceRecord
 import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.health.connect.client.records.HeartRateRecord
@@ -23,6 +24,7 @@ class HealthConnectPermissionUtilsTest {
     fun healthConnectRecordTypeForDataTypeMapsSupportedDataTypes() {
         assertEquals(StepsRecord::class, healthConnectRecordTypeForDataType("steps"))
         assertEquals(HeartRateRecord::class, healthConnectRecordTypeForDataType("heartRate"))
+        assertEquals(BloodPressureRecord::class, healthConnectRecordTypeForDataType("bloodPressure"))
         assertEquals(DistanceRecord::class, healthConnectRecordTypeForDataType("distance"))
         assertEquals(
             ActiveCaloriesBurnedRecord::class,
@@ -66,6 +68,10 @@ class HealthConnectPermissionUtilsTest {
         assertEquals(
             HealthPermission.getReadPermission(HeartRateRecord::class),
             toHealthConnectPermission("heartRate", "read")
+        )
+        assertEquals(
+            HealthPermission.getReadPermission(BloodPressureRecord::class),
+            toHealthConnectPermission("bloodPressure", "read")
         )
         assertEquals(
             HealthPermission.getReadPermission(SleepSessionRecord::class),
@@ -114,6 +120,10 @@ class HealthConnectPermissionUtilsTest {
         assertEquals(
             HealthPermission.getWritePermission(HeartRateRecord::class),
             toHealthConnectPermission("heartRate", "write")
+        )
+        assertEquals(
+            HealthPermission.getWritePermission(BloodPressureRecord::class),
+            toHealthConnectPermission("bloodPressure", "write")
         )
         assertEquals(
             HealthPermission.getWritePermission(SleepSessionRecord::class),

@@ -24,13 +24,22 @@ extension HybridNitroHealth {
         }
 
         return Promise<NativeHealthDeleteResult>.async {
+            let sampleUuids = try makeSampleUuids(recordIds)
+
+            // Blood pressure records are HKCorrelations; deletion is write-gated on both
+            // member quantity types and removes the members alongside the correlation.
+            if dataType == "bloodPressure" {
+                try self.requireBloodPressureWriteAuthorization()
+                let deletedCount = try await self.deleteBloodPressureRecords(uuids: sampleUuids)
+                return makeNativeHealthDeleteResult(deletedCount: deletedCount)
+            }
+
             let sampleType = try makeHealthKitSampleType(dataType: dataType)
             try self.requireWriteAuthorization(
                 for: sampleType,
                 label: makeHealthDataTypeLabel(dataType: dataType)
             )
 
-            let sampleUuids = try makeSampleUuids(recordIds)
             let deletedCount = try await self.deleteHealthKitObjects(
                 of: sampleType,
                 predicate: HKQuery.predicateForObjects(with: Set(sampleUuids))
@@ -48,12 +57,6 @@ extension HybridNitroHealth {
         }
 
         return Promise<NativeHealthDeleteResult>.async {
-            let sampleType = try makeHealthKitSampleType(dataType: dataType)
-            try self.requireWriteAuthorization(
-                for: sampleType,
-                label: makeHealthDataTypeLabel(dataType: dataType)
-            )
-
             // options: [] matches the read predicates, so a time-range delete removes exactly
             // the own-app samples a read of the same range returns.
             let predicate = HKQuery.predicateForSamples(
@@ -61,6 +64,19 @@ extension HybridNitroHealth {
                 end: Date(timeIntervalSince1970: query.endTimeMs / 1000),
                 options: []
             )
+
+            if dataType == "bloodPressure" {
+                try self.requireBloodPressureWriteAuthorization()
+                let deletedCount = try await self.deleteBloodPressureRecords(timeRangePredicate: predicate)
+                return makeNativeHealthDeleteResult(deletedCount: deletedCount)
+            }
+
+            let sampleType = try makeHealthKitSampleType(dataType: dataType)
+            try self.requireWriteAuthorization(
+                for: sampleType,
+                label: makeHealthDataTypeLabel(dataType: dataType)
+            )
+
             let deletedCount = try await self.deleteHealthKitObjects(
                 of: sampleType,
                 predicate: predicate
@@ -90,12 +106,14 @@ private func makeNativeHealthDeleteResult(deletedCount: Int) -> NativeHealthDele
     )
 }
 
-// sleep and workout have no quantity descriptor (makeHealthDataTypeDescriptor throws for
-// them); their labels mirror the read paths and Android's permissionLabel values. Falls back
+// sleep, workout, and bloodPressure have no quantity descriptor (makeHealthDataTypeDescriptor
+// throws for them); their labels mirror the read paths and Android's permissionLabel values. Falls back
 // to the raw dataType for unsupported values — makeHealthKitSampleType has already thrown by
 // the time labels matter.
 func makeHealthDataTypeLabel(dataType: String) -> String {
     switch dataType {
+    case "bloodPressure":
+        return "blood pressure"
     case "sleep":
         return "sleep"
     case "workout":

@@ -6,6 +6,8 @@ import type {
   BackgroundChangesConfigurationResult,
   BackgroundChangesSubscriptionResult,
 } from './BackgroundChangesResult'
+import type { BloodPressureSample } from './BloodPressureSample'
+import type { BloodPressureSampleInput } from './BloodPressureSampleInput'
 import type { BodyMassSample } from './BodyMassSample'
 import type { BodyMassSampleInput } from './BodyMassSampleInput'
 import type { DistanceSample } from './DistanceSample'
@@ -61,6 +63,7 @@ import {
 } from './internal/queryMapping'
 import {
   makeActiveEnergyBurnedSample,
+  makeBloodPressureSample,
   makeBodyMassSample,
   makeDistanceSample,
   makeDistanceWriteResult,
@@ -71,6 +74,7 @@ import {
   makeHeartRateVariabilitySample,
   makeHeightSample,
   makeNativeActiveEnergyBurnedSampleInput,
+  makeNativeBloodPressureSampleInput,
   makeNativeBodyMassSampleInput,
   makeNativeDistanceSampleInput,
   makeNativeHeartRateSampleInput,
@@ -204,6 +208,7 @@ export interface NitroHealth {
   ): Promise<HealthSamplePage<ActiveEnergyBurnedSample>>
   readBodyMass(query: HealthDateRangeQuery): Promise<HealthSamplePage<BodyMassSample>>
   readHeartRate(query: HealthDateRangeQuery): Promise<HealthSamplePage<HeartRateSample>>
+  readBloodPressure(query: HealthDateRangeQuery): Promise<HealthSamplePage<BloodPressureSample>>
   readHeartRateStatistics(query: HealthTimeRangeQuery): Promise<HeartRateStatistics>
   readRestingHeartRate(
     query: HealthDateRangeQuery
@@ -225,6 +230,7 @@ export interface NitroHealth {
   saveDistance(samples: DistanceSampleInput[]): Promise<DistanceWriteResult>
   saveActiveEnergyBurned(samples: ActiveEnergyBurnedSampleInput[]): Promise<void>
   saveHeartRate(samples: HeartRateSampleInput[]): Promise<void>
+  saveBloodPressure(samples: BloodPressureSampleInput[]): Promise<void>
   saveBodyMass(samples: BodyMassSampleInput[]): Promise<void>
   saveRestingHeartRate(samples: RestingHeartRateSampleInput[]): Promise<void>
   saveOxygenSaturation(samples: OxygenSaturationSampleInput[]): Promise<void>
@@ -395,6 +401,12 @@ export const NitroHealth: NitroHealth = {
       makeHeartRateSample
     )
   },
+  async readBloodPressure(query) {
+    return makeSamplePage(
+      await NitroHealthNative.readBloodPressure(makeNativeSampleQuery(query)),
+      makeBloodPressureSample
+    )
+  },
   async readHeartRateStatistics(query) {
     return makeHeartRateStatistics(
       await NitroHealthNative.readHeartRateStatistics(makeNativeTimeRangeQuery(query))
@@ -466,6 +478,12 @@ export const NitroHealth: NitroHealth = {
     const nativeSamples = samples.map(makeNativeHeartRateSampleInput)
     assertUniqueSampleSyncIds(samples)
     return NitroHealthNative.saveHeartRate(nativeSamples)
+  },
+  async saveBloodPressure(samples) {
+    assertNonEmptySamples(samples)
+    const nativeSamples = samples.map(makeNativeBloodPressureSampleInput)
+    assertUniqueSampleSyncIds(samples)
+    return NitroHealthNative.saveBloodPressure(nativeSamples)
   },
   async saveBodyMass(samples) {
     assertNonEmptySamples(samples)

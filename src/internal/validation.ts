@@ -5,6 +5,7 @@ import type { HealthRecordIdentity } from '../HealthSampleIdentity'
 const HEALTH_DATA_TYPES = new Set<HealthDataType>([
   'steps',
   'heartRate',
+  'bloodPressure',
   'restingHeartRate',
   'heartRateVariability',
   'distance',

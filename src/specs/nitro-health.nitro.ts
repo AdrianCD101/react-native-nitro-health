@@ -3,6 +3,8 @@ import type { BackgroundDeliveryFrequency } from '../BackgroundDeliveryFrequency
 import type { NativeActiveEnergyBurnedSampleInput } from '../NativeActiveEnergyBurnedSampleInput'
 import type { NativeActiveEnergyBurnedSamplePage } from '../NativeActiveEnergyBurnedSamplePage'
 import type { NativeBackgroundChangesResult } from '../NativeBackgroundChangesResult'
+import type { NativeBloodPressureSampleInput } from '../NativeBloodPressureSampleInput'
+import type { NativeBloodPressureSamplePage } from '../NativeBloodPressureSamplePage'
 import type { NativeBodyMassSampleInput } from '../NativeBodyMassSampleInput'
 import type { NativeBodyMassSamplePage } from '../NativeBodyMassSamplePage'
 import type { NativeDistanceSampleInput } from '../NativeDistanceSampleInput'
@@ -70,6 +72,7 @@ export interface NitroHealth extends HybridObject<{ ios: 'swift'; android: 'kotl
   ): Promise<NativeActiveEnergyBurnedSamplePage>
   readBodyMass(query: NativeHealthDateRangeQuery): Promise<NativeBodyMassSamplePage>
   readHeartRate(query: NativeHealthDateRangeQuery): Promise<NativeHeartRateSamplePage>
+  readBloodPressure(query: NativeHealthDateRangeQuery): Promise<NativeBloodPressureSamplePage>
   readHeartRateStatistics(query: NativeHealthTimeRangeQuery): Promise<NativeHeartRateStatistics>
   readRestingHeartRate(query: NativeHealthDateRangeQuery): Promise<NativeRestingHeartRateSamplePage>
   readHeartRateVariability(
@@ -87,6 +90,7 @@ export interface NitroHealth extends HybridObject<{ ios: 'swift'; android: 'kotl
   saveDistance(samples: NativeDistanceSampleInput[]): Promise<NativeDistanceWriteResult>
   saveActiveEnergyBurned(samples: NativeActiveEnergyBurnedSampleInput[]): Promise<void>
   saveHeartRate(samples: NativeHeartRateSampleInput[]): Promise<void>
+  saveBloodPressure(samples: NativeBloodPressureSampleInput[]): Promise<void>
   saveBodyMass(samples: NativeBodyMassSampleInput[]): Promise<void>
   saveRestingHeartRate(samples: NativeRestingHeartRateSampleInput[]): Promise<void>
   saveOxygenSaturation(samples: NativeOxygenSaturationSampleInput[]): Promise<void>
