@@ -76,6 +76,7 @@ describe('NitroHealth Jest mock', () => {
     await expect(NitroHealth.readHeartRate(range)).resolves.toEqual({ samples: [] })
     await expect(NitroHealth.readBloodPressure(range)).resolves.toEqual({ samples: [] })
     await expect(NitroHealth.readBloodGlucose(range)).resolves.toEqual({ samples: [] })
+    await expect(NitroHealth.readBodyTemperature(range)).resolves.toEqual({ samples: [] })
     await expect(NitroHealth.readHeartRateStatistics(range)).resolves.toEqual({})
     await expect(
       NitroHealth.readStatistics('steps', { ...range, bucket: 'day', metrics: ['sum'] })

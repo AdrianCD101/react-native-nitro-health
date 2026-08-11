@@ -7,6 +7,7 @@ const HEALTH_DATA_TYPES = new Set<HealthDataType>([
   'heartRate',
   'bloodPressure',
   'bloodGlucose',
+  'bodyTemperature',
   'restingHeartRate',
   'heartRateVariability',
   'distance',

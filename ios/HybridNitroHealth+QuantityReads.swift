@@ -2,8 +2,9 @@
 //  HybridNitroHealth+QuantityReads.swift
 //  Pods
 //
-//  Instantaneous-quantity reads/writes (bloodGlucose, restingHeartRate, heartRateVariability,
-//  oxygenSaturation, height; readBodyMass in HybridNitroHealth.swift shares the read helper).
+//  Instantaneous-quantity reads/writes (bloodGlucose, bodyTemperature, restingHeartRate,
+//  heartRateVariability, oxygenSaturation, height; readBodyMass in HybridNitroHealth.swift
+//  shares the read helper).
 //  This file is HealthKit-only, so it must NOT be added to Package.swift's pure-Foundation SPM
 //  test target; the podspec globs ios/**/*.swift and picks it up automatically. Kept separate
 //  from HybridNitroHealth.swift to stay under that file's line budget.
@@ -124,6 +125,25 @@ extension HybridNitroHealth {
         }
     }
 
+    func readBodyTemperature(query: NativeHealthDateRangeQuery) throws -> Promise<NativeBodyTemperatureSamplePage> {
+        if !HKHealthStore.isHealthDataAvailable() {
+            throw permissionError("Health data is not available")
+        }
+
+        return Promise<NativeBodyTemperatureSamplePage>.async {
+            let page = try await self.readInstantQuantitySamplePage(dataType: "bodyTemperature", query: query) { quantitySample, unit in
+                NativeBodyTemperatureSample(
+                    identity: quantitySample.nativeHealthSampleIdentity,
+                    origin: quantitySample.nativeHealthDataOrigin,
+                    timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
+                    celsius: quantitySample.quantity.doubleValue(for: unit)
+                )
+            }
+
+            return NativeBodyTemperatureSamplePage(samples: page.samples, nextCursor: page.nextCursor)
+        }
+    }
+
     func readHeight(query: NativeHealthDateRangeQuery) throws -> Promise<NativeHeightSamplePage> {
         if !HKHealthStore.isHealthDataAvailable() {
             throw permissionError("Health data is not available")
@@ -152,6 +172,12 @@ extension HybridNitroHealth {
     func saveBloodGlucose(samples: [NativeBloodGlucoseSampleInput]) throws -> Promise<Void> {
         return try saveQuantitySamples(dataType: "bloodGlucose", label: "blood glucose") { quantityType in
             try makeBloodGlucoseQuantitySamples(samples: samples, quantityType: quantityType)
+        }
+    }
+
+    func saveBodyTemperature(samples: [NativeBodyTemperatureSampleInput]) throws -> Promise<Void> {
+        return try saveQuantitySamples(dataType: "bodyTemperature", label: "body temperature") { quantityType in
+            try makeBodyTemperatureQuantitySamples(samples: samples, quantityType: quantityType)
         }
     }
 

@@ -4,6 +4,7 @@ import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
 import androidx.health.connect.client.records.BloodGlucoseRecord
 import androidx.health.connect.client.records.BloodPressureRecord
+import androidx.health.connect.client.records.BodyTemperatureRecord
 import androidx.health.connect.client.records.DistanceRecord
 import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.health.connect.client.records.HeartRateRecord
@@ -27,6 +28,10 @@ class HealthConnectPermissionUtilsTest {
         assertEquals(HeartRateRecord::class, healthConnectRecordTypeForDataType("heartRate"))
         assertEquals(BloodPressureRecord::class, healthConnectRecordTypeForDataType("bloodPressure"))
         assertEquals(BloodGlucoseRecord::class, healthConnectRecordTypeForDataType("bloodGlucose"))
+        assertEquals(
+            BodyTemperatureRecord::class,
+            healthConnectRecordTypeForDataType("bodyTemperature")
+        )
         assertEquals(DistanceRecord::class, healthConnectRecordTypeForDataType("distance"))
         assertEquals(
             ActiveCaloriesBurnedRecord::class,
@@ -78,6 +83,10 @@ class HealthConnectPermissionUtilsTest {
         assertEquals(
             HealthPermission.getReadPermission(BloodGlucoseRecord::class),
             toHealthConnectPermission("bloodGlucose", "read")
+        )
+        assertEquals(
+            HealthPermission.getReadPermission(BodyTemperatureRecord::class),
+            toHealthConnectPermission("bodyTemperature", "read")
         )
         assertEquals(
             HealthPermission.getReadPermission(SleepSessionRecord::class),
@@ -136,6 +145,10 @@ class HealthConnectPermissionUtilsTest {
             toHealthConnectPermission("bloodGlucose", "write")
         )
         assertEquals(
+            HealthPermission.getWritePermission(BodyTemperatureRecord::class),
+            toHealthConnectPermission("bodyTemperature", "write")
+        )
+        assertEquals(
             HealthPermission.getWritePermission(SleepSessionRecord::class),
             toHealthConnectPermission("sleep", "write")
         )
@@ -164,10 +177,10 @@ class HealthConnectPermissionUtilsTest {
     @Test
     fun healthConnectRecordTypeForDataTypeRejectsUnsupportedDataType() {
         val error = assertThrows(IllegalArgumentException::class.java) {
-            healthConnectRecordTypeForDataType("bodyTemperature")
+            healthConnectRecordTypeForDataType("respiratoryRate")
         }
 
-        assertEquals("Unsupported health data type: bodyTemperature", error.message)
+        assertEquals("Unsupported health data type: respiratoryRate", error.message)
     }
 
     @Test

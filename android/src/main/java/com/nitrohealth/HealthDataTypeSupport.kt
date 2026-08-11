@@ -5,6 +5,7 @@ import androidx.health.connect.client.aggregate.AggregationResult
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
 import androidx.health.connect.client.records.BloodGlucoseRecord
 import androidx.health.connect.client.records.BloodPressureRecord
+import androidx.health.connect.client.records.BodyTemperatureRecord
 import androidx.health.connect.client.records.DistanceRecord
 import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.health.connect.client.records.HeartRateRecord
@@ -103,6 +104,10 @@ internal fun healthDataTypeDescriptorFor(dataType: String): HealthDataTypeDescri
         "bloodGlucose" -> HealthDataTypeDescriptor(
             recordType = BloodGlucoseRecord::class,
             permissionLabel = "blood glucose"
+        )
+        "bodyTemperature" -> HealthDataTypeDescriptor(
+            recordType = BodyTemperatureRecord::class,
+            permissionLabel = "body temperature"
         )
         "sleep" -> HealthDataTypeDescriptor(
             recordType = SleepSessionRecord::class,

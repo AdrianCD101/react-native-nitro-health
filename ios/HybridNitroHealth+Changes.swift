@@ -209,6 +209,18 @@ extension HybridNitroHealth {
                     )
                 )]
             )
+        case "bodyTemperature":
+            let quantitySample = try requireQuantitySample(sample, dataType: dataType)
+            return makeNativeHealthChange(
+                type: "upsert",
+                recordId: uuid,
+                bodyTemperatureSamples: [NativeBodyTemperatureSample(
+                    identity: quantitySample.nativeHealthSampleIdentity,
+                    origin: quantitySample.nativeHealthDataOrigin,
+                    timeMs: startTimeMs,
+                    celsius: quantitySample.quantity.doubleValue(for: HKUnit.degreeCelsius())
+                )]
+            )
         case "restingHeartRate":
             let quantitySample = try requireQuantitySample(sample, dataType: dataType)
             return makeNativeHealthChange(
@@ -368,6 +380,7 @@ extension HybridNitroHealth {
         heartRateSamples: [NativeHeartRateSample]? = nil,
         bloodPressureSamples: [NativeBloodPressureSample]? = nil,
         bloodGlucoseSamples: [NativeBloodGlucoseSample]? = nil,
+        bodyTemperatureSamples: [NativeBodyTemperatureSample]? = nil,
         restingHeartRateSamples: [NativeRestingHeartRateSample]? = nil,
         heartRateVariabilitySamples: [NativeHeartRateVariabilitySample]? = nil,
         distanceSamples: [NativeDistanceSample]? = nil,
@@ -385,6 +398,7 @@ extension HybridNitroHealth {
             heartRateSamples: heartRateSamples,
             bloodPressureSamples: bloodPressureSamples,
             bloodGlucoseSamples: bloodGlucoseSamples,
+            bodyTemperatureSamples: bodyTemperatureSamples,
             restingHeartRateSamples: restingHeartRateSamples,
             heartRateVariabilitySamples: heartRateVariabilitySamples,
             distanceSamples: distanceSamples,

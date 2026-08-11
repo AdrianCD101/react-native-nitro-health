@@ -10,6 +10,7 @@ import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
 import androidx.health.connect.client.records.BloodGlucoseRecord
 import androidx.health.connect.client.records.BloodPressureRecord
+import androidx.health.connect.client.records.BodyTemperatureRecord
 import androidx.health.connect.client.records.DistanceRecord
 import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.health.connect.client.records.HeartRateRecord
@@ -38,6 +39,9 @@ import com.margelo.nitro.nitrohealth.NativeActiveEnergyBurnedSamplePage
 import com.margelo.nitro.nitrohealth.NativeBloodGlucoseSample
 import com.margelo.nitro.nitrohealth.NativeBloodGlucoseSampleInput
 import com.margelo.nitro.nitrohealth.NativeBloodGlucoseSamplePage
+import com.margelo.nitro.nitrohealth.NativeBodyTemperatureSample
+import com.margelo.nitro.nitrohealth.NativeBodyTemperatureSampleInput
+import com.margelo.nitro.nitrohealth.NativeBodyTemperatureSamplePage
 import com.margelo.nitro.nitrohealth.NativeBloodPressureSample
 import com.margelo.nitro.nitrohealth.NativeBloodPressureSampleInput
 import com.margelo.nitro.nitrohealth.NativeBloodPressureSamplePage
@@ -602,6 +606,25 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         }
     }
 
+    override fun readBodyTemperature(
+        query: NativeHealthDateRangeQuery
+    ): Promise<NativeBodyTemperatureSamplePage> {
+        return Promise.async {
+            val response = readInstantRecords<BodyTemperatureRecord>("bodyTemperature", query)
+            NativeBodyTemperatureSamplePage(
+                samples = response.records.map { record ->
+                    NativeBodyTemperatureSample(
+                        identity = makeRecordIdentity(record.metadata.id),
+                        origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
+                        timeMs = record.time.toEpochMilli().toDouble(),
+                        celsius = record.temperature.inCelsius
+                    )
+                }.toTypedArray(),
+                nextCursor = response.pageToken?.let { encodeSampleCursor("bodyTemperature", query.ascending, it) }
+            )
+        }
+    }
+
     override fun readRestingHeartRate(
         query: NativeHealthDateRangeQuery
     ): Promise<NativeRestingHeartRateSamplePage> {
@@ -944,6 +967,14 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         return Promise.async {
             val client = requireWritableClient("bloodGlucose")
             client.insertRecords(toBloodGlucoseRecords(samples))
+            Unit
+        }
+    }
+
+    override fun saveBodyTemperature(samples: Array<NativeBodyTemperatureSampleInput>): Promise<Unit> {
+        return Promise.async {
+            val client = requireWritableClient("bodyTemperature")
+            client.insertRecords(toBodyTemperatureRecords(samples))
             Unit
         }
     }
