@@ -3,14 +3,17 @@ package com.nitrohealth
 import androidx.health.connect.client.aggregate.AggregateMetric
 import androidx.health.connect.client.aggregate.AggregationResult
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
+import androidx.health.connect.client.records.BasalBodyTemperatureRecord
 import androidx.health.connect.client.records.BloodGlucoseRecord
 import androidx.health.connect.client.records.BloodPressureRecord
+import androidx.health.connect.client.records.BodyFatRecord
 import androidx.health.connect.client.records.BodyTemperatureRecord
 import androidx.health.connect.client.records.DistanceRecord
 import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.HeartRateVariabilityRmssdRecord
 import androidx.health.connect.client.records.HeightRecord
+import androidx.health.connect.client.records.LeanBodyMassRecord
 import androidx.health.connect.client.records.OxygenSaturationRecord
 import androidx.health.connect.client.records.Record
 import androidx.health.connect.client.records.RespiratoryRateRecord
@@ -113,6 +116,18 @@ internal fun healthDataTypeDescriptorFor(dataType: String): HealthDataTypeDescri
         "respiratoryRate" -> HealthDataTypeDescriptor(
             recordType = RespiratoryRateRecord::class,
             permissionLabel = "respiratory rate"
+        )
+        "bodyFat" -> HealthDataTypeDescriptor(
+            recordType = BodyFatRecord::class,
+            permissionLabel = "body fat"
+        )
+        "leanBodyMass" -> HealthDataTypeDescriptor(
+            recordType = LeanBodyMassRecord::class,
+            permissionLabel = "lean body mass"
+        )
+        "basalBodyTemperature" -> HealthDataTypeDescriptor(
+            recordType = BasalBodyTemperatureRecord::class,
+            permissionLabel = "basal body temperature"
         )
         "sleep" -> HealthDataTypeDescriptor(
             recordType = SleepSessionRecord::class,

@@ -1,12 +1,15 @@
 import type { NativeActiveEnergyBurnedSample } from './NativeActiveEnergyBurnedSample'
+import type { NativeBasalBodyTemperatureSample } from './NativeBasalBodyTemperatureSample'
 import type { NativeBloodGlucoseSample } from './NativeBloodGlucoseSample'
 import type { NativeBloodPressureSample } from './NativeBloodPressureSample'
+import type { NativeBodyFatSample } from './NativeBodyFatSample'
 import type { NativeBodyMassSample } from './NativeBodyMassSample'
 import type { NativeBodyTemperatureSample } from './NativeBodyTemperatureSample'
 import type { NativeDistanceSample } from './NativeDistanceSample'
 import type { NativeHeartRateSample } from './NativeHeartRateSample'
 import type { NativeHeartRateVariabilitySample } from './NativeHeartRateVariabilitySample'
 import type { NativeHeightSample } from './NativeHeightSample'
+import type { NativeLeanBodyMassSample } from './NativeLeanBodyMassSample'
 import type { NativeOxygenSaturationSample } from './NativeOxygenSaturationSample'
 import type { NativeRespiratoryRateSample } from './NativeRespiratoryRateSample'
 import type { NativeRestingHeartRateSample } from './NativeRestingHeartRateSample'
@@ -32,6 +35,12 @@ export interface NativeHealthChange {
   bodyTemperatureSamples?: NativeBodyTemperatureSample[]
   /** Respiratory-rate samples for a `respiratoryRate` upsert. */
   respiratoryRateSamples?: NativeRespiratoryRateSample[]
+  /** Body-fat samples for a `bodyFat` upsert. */
+  bodyFatSamples?: NativeBodyFatSample[]
+  /** Lean-body-mass samples for a `leanBodyMass` upsert. */
+  leanBodyMassSamples?: NativeLeanBodyMassSample[]
+  /** Basal-body-temperature samples for a `basalBodyTemperature` upsert. */
+  basalBodyTemperatureSamples?: NativeBasalBodyTemperatureSample[]
   /** Resting heart-rate samples for a `restingHeartRate` upsert. */
   restingHeartRateSamples?: NativeRestingHeartRateSample[]
   /** HRV samples for a `heartRateVariability` upsert. */

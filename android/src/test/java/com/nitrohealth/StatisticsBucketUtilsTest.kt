@@ -131,6 +131,21 @@ class StatisticsBucketUtilsTest {
         assertTrue(healthDataTypeDescriptorFor("respiratoryRate").statisticsMetrics.isEmpty())
     }
 
+    @Test
+    fun descriptorForBodyFatSupportsNoStatisticsMetrics() {
+        assertTrue(healthDataTypeDescriptorFor("bodyFat").statisticsMetrics.isEmpty())
+    }
+
+    @Test
+    fun descriptorForLeanBodyMassSupportsNoStatisticsMetrics() {
+        assertTrue(healthDataTypeDescriptorFor("leanBodyMass").statisticsMetrics.isEmpty())
+    }
+
+    @Test
+    fun descriptorForBasalBodyTemperatureSupportsNoStatisticsMetrics() {
+        assertTrue(healthDataTypeDescriptorFor("basalBodyTemperature").statisticsMetrics.isEmpty())
+    }
+
     @Test(expected = IllegalArgumentException::class)
     fun descriptorThrowsForUnknownDataType() {
         healthDataTypeDescriptorFor("unknown")

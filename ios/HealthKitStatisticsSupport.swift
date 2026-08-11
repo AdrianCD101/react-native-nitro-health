@@ -91,6 +91,26 @@ func makeHealthDataTypeDescriptor(dataType: String) throws -> HealthDataTypeDesc
             label: "respiratory rate",
             isCumulative: false
         )
+    case "bodyFat":
+        // HealthKit stores this as a fraction (0-1 via HKUnit.percent()); the JS surface uses
+        // 0-100. Statistics are permanently unreachable cross-platform (Health Connect has no
+        // aggregate metrics for BodyFatRecord), but if a statistics path ever existed, it would
+        // need the same *100 / /100 conversion that readBodyFat/save apply.
+        return HealthDataTypeDescriptor(identifier: .bodyFatPercentage, unit: HKUnit.percent(), label: "body fat", isCumulative: false)
+    case "leanBodyMass":
+        return HealthDataTypeDescriptor(
+            identifier: .leanBodyMass,
+            unit: HKUnit.gramUnit(with: .kilo),
+            label: "lean body mass",
+            isCumulative: false
+        )
+    case "basalBodyTemperature":
+        return HealthDataTypeDescriptor(
+            identifier: .basalBodyTemperature,
+            unit: HKUnit.degreeCelsius(),
+            label: "basal body temperature",
+            isCumulative: false
+        )
     default:
         throw permissionError("Unsupported health data type: \(dataType)")
     }

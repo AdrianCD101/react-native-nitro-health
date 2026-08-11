@@ -124,6 +124,18 @@ abstract class HybridNitroHealthSpec: HybridObject() {
   
   @DoNotStrip
   @Keep
+  abstract fun readBodyFat(query: NativeHealthDateRangeQuery): Promise<NativeBodyFatSamplePage>
+  
+  @DoNotStrip
+  @Keep
+  abstract fun readLeanBodyMass(query: NativeHealthDateRangeQuery): Promise<NativeLeanBodyMassSamplePage>
+  
+  @DoNotStrip
+  @Keep
+  abstract fun readBasalBodyTemperature(query: NativeHealthDateRangeQuery): Promise<NativeBasalBodyTemperatureSamplePage>
+  
+  @DoNotStrip
+  @Keep
   abstract fun readHeartRateStatistics(query: NativeHealthTimeRangeQuery): Promise<NativeHeartRateStatistics>
   
   @DoNotStrip
@@ -185,6 +197,18 @@ abstract class HybridNitroHealthSpec: HybridObject() {
   @DoNotStrip
   @Keep
   abstract fun saveRespiratoryRate(samples: Array<NativeRespiratoryRateSampleInput>): Promise<Unit>
+  
+  @DoNotStrip
+  @Keep
+  abstract fun saveBodyFat(samples: Array<NativeBodyFatSampleInput>): Promise<Unit>
+  
+  @DoNotStrip
+  @Keep
+  abstract fun saveLeanBodyMass(samples: Array<NativeLeanBodyMassSampleInput>): Promise<Unit>
+  
+  @DoNotStrip
+  @Keep
+  abstract fun saveBasalBodyTemperature(samples: Array<NativeBasalBodyTemperatureSampleInput>): Promise<Unit>
   
   @DoNotStrip
   @Keep

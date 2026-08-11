@@ -18,7 +18,7 @@ public extension NativeHealthChange {
   /**
    * Create a new instance of `NativeHealthChange`.
    */
-  init(type: String, recordId: String, stepSamples: [NativeStepSample]?, heartRateSamples: [NativeHeartRateSample]?, bloodPressureSamples: [NativeBloodPressureSample]?, bloodGlucoseSamples: [NativeBloodGlucoseSample]?, bodyTemperatureSamples: [NativeBodyTemperatureSample]?, respiratoryRateSamples: [NativeRespiratoryRateSample]?, restingHeartRateSamples: [NativeRestingHeartRateSample]?, heartRateVariabilitySamples: [NativeHeartRateVariabilitySample]?, distanceSamples: [NativeDistanceSample]?, activeEnergyBurnedSamples: [NativeActiveEnergyBurnedSample]?, oxygenSaturationSamples: [NativeOxygenSaturationSample]?, heightSamples: [NativeHeightSample]?, sleepSamples: [NativeSleepSample]?, bodyMassSamples: [NativeBodyMassSample]?, workoutSamples: [NativeWorkoutSample]?, dummyNonEquatable: (() -> Void)?) {
+  init(type: String, recordId: String, stepSamples: [NativeStepSample]?, heartRateSamples: [NativeHeartRateSample]?, bloodPressureSamples: [NativeBloodPressureSample]?, bloodGlucoseSamples: [NativeBloodGlucoseSample]?, bodyTemperatureSamples: [NativeBodyTemperatureSample]?, respiratoryRateSamples: [NativeRespiratoryRateSample]?, bodyFatSamples: [NativeBodyFatSample]?, leanBodyMassSamples: [NativeLeanBodyMassSample]?, basalBodyTemperatureSamples: [NativeBasalBodyTemperatureSample]?, restingHeartRateSamples: [NativeRestingHeartRateSample]?, heartRateVariabilitySamples: [NativeHeartRateVariabilitySample]?, distanceSamples: [NativeDistanceSample]?, activeEnergyBurnedSamples: [NativeActiveEnergyBurnedSample]?, oxygenSaturationSamples: [NativeOxygenSaturationSample]?, heightSamples: [NativeHeightSample]?, sleepSamples: [NativeSleepSample]?, bodyMassSamples: [NativeBodyMassSample]?, workoutSamples: [NativeWorkoutSample]?, dummyNonEquatable: (() -> Void)?) {
     self.init(std.string(type), std.string(recordId), { () -> bridge.std__optional_std__vector_NativeStepSample__ in
       if let __unwrappedValue = stepSamples {
         return bridge.create_std__optional_std__vector_NativeStepSample__({ () -> bridge.std__vector_NativeStepSample_ in
@@ -83,6 +83,42 @@ public extension NativeHealthChange {
       if let __unwrappedValue = respiratoryRateSamples {
         return bridge.create_std__optional_std__vector_NativeRespiratoryRateSample__({ () -> bridge.std__vector_NativeRespiratoryRateSample_ in
           var __vector = bridge.create_std__vector_NativeRespiratoryRateSample_(__unwrappedValue.count)
+          for __item in __unwrappedValue {
+            __vector.push_back(__item)
+          }
+          return __vector
+        }())
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_std__vector_NativeBodyFatSample__ in
+      if let __unwrappedValue = bodyFatSamples {
+        return bridge.create_std__optional_std__vector_NativeBodyFatSample__({ () -> bridge.std__vector_NativeBodyFatSample_ in
+          var __vector = bridge.create_std__vector_NativeBodyFatSample_(__unwrappedValue.count)
+          for __item in __unwrappedValue {
+            __vector.push_back(__item)
+          }
+          return __vector
+        }())
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_std__vector_NativeLeanBodyMassSample__ in
+      if let __unwrappedValue = leanBodyMassSamples {
+        return bridge.create_std__optional_std__vector_NativeLeanBodyMassSample__({ () -> bridge.std__vector_NativeLeanBodyMassSample_ in
+          var __vector = bridge.create_std__vector_NativeLeanBodyMassSample_(__unwrappedValue.count)
+          for __item in __unwrappedValue {
+            __vector.push_back(__item)
+          }
+          return __vector
+        }())
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_std__vector_NativeBasalBodyTemperatureSample__ in
+      if let __unwrappedValue = basalBodyTemperatureSamples {
+        return bridge.create_std__optional_std__vector_NativeBasalBodyTemperatureSample__({ () -> bridge.std__vector_NativeBasalBodyTemperatureSample_ in
+          var __vector = bridge.create_std__vector_NativeBasalBodyTemperatureSample_(__unwrappedValue.count)
           for __item in __unwrappedValue {
             __vector.push_back(__item)
           }
@@ -286,6 +322,42 @@ public extension NativeHealthChange {
     return { () -> [NativeRespiratoryRateSample]? in
       if bridge.has_value_std__optional_std__vector_NativeRespiratoryRateSample__(self.__respiratoryRateSamples) {
         let __unwrapped = bridge.get_std__optional_std__vector_NativeRespiratoryRateSample__(self.__respiratoryRateSamples)
+        return __unwrapped.map({ __item in __item })
+      } else {
+        return nil
+      }
+    }()
+  }
+  
+  @inline(__always)
+  var bodyFatSamples: [NativeBodyFatSample]? {
+    return { () -> [NativeBodyFatSample]? in
+      if bridge.has_value_std__optional_std__vector_NativeBodyFatSample__(self.__bodyFatSamples) {
+        let __unwrapped = bridge.get_std__optional_std__vector_NativeBodyFatSample__(self.__bodyFatSamples)
+        return __unwrapped.map({ __item in __item })
+      } else {
+        return nil
+      }
+    }()
+  }
+  
+  @inline(__always)
+  var leanBodyMassSamples: [NativeLeanBodyMassSample]? {
+    return { () -> [NativeLeanBodyMassSample]? in
+      if bridge.has_value_std__optional_std__vector_NativeLeanBodyMassSample__(self.__leanBodyMassSamples) {
+        let __unwrapped = bridge.get_std__optional_std__vector_NativeLeanBodyMassSample__(self.__leanBodyMassSamples)
+        return __unwrapped.map({ __item in __item })
+      } else {
+        return nil
+      }
+    }()
+  }
+  
+  @inline(__always)
+  var basalBodyTemperatureSamples: [NativeBasalBodyTemperatureSample]? {
+    return { () -> [NativeBasalBodyTemperatureSample]? in
+      if bridge.has_value_std__optional_std__vector_NativeBasalBodyTemperatureSample__(self.__basalBodyTemperatureSamples) {
+        let __unwrapped = bridge.get_std__optional_std__vector_NativeBasalBodyTemperatureSample__(self.__basalBodyTemperatureSamples)
         return __unwrapped.map({ __item in __item })
       } else {
         return nil

@@ -40,6 +40,12 @@ namespace margelo::nitro::nitrohealth { struct NativeBloodGlucoseSample; }
 namespace margelo::nitro::nitrohealth { struct NativeBodyTemperatureSample; }
 // Forward declaration of `NativeRespiratoryRateSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeRespiratoryRateSample; }
+// Forward declaration of `NativeBodyFatSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeBodyFatSample; }
+// Forward declaration of `NativeLeanBodyMassSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeLeanBodyMassSample; }
+// Forward declaration of `NativeBasalBodyTemperatureSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeBasalBodyTemperatureSample; }
 // Forward declaration of `NativeRestingHeartRateSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeRestingHeartRateSample; }
 // Forward declaration of `NativeHeartRateVariabilitySample` to properly resolve imports.
@@ -68,6 +74,9 @@ namespace margelo::nitro::nitrohealth { struct NativeWorkoutSample; }
 #include "NativeBloodGlucoseSample.hpp"
 #include "NativeBodyTemperatureSample.hpp"
 #include "NativeRespiratoryRateSample.hpp"
+#include "NativeBodyFatSample.hpp"
+#include "NativeLeanBodyMassSample.hpp"
+#include "NativeBasalBodyTemperatureSample.hpp"
 #include "NativeRestingHeartRateSample.hpp"
 #include "NativeHeartRateVariabilitySample.hpp"
 #include "NativeDistanceSample.hpp"
@@ -94,6 +103,9 @@ namespace margelo::nitro::nitrohealth {
     std::optional<std::vector<NativeBloodGlucoseSample>> bloodGlucoseSamples     SWIFT_PRIVATE;
     std::optional<std::vector<NativeBodyTemperatureSample>> bodyTemperatureSamples     SWIFT_PRIVATE;
     std::optional<std::vector<NativeRespiratoryRateSample>> respiratoryRateSamples     SWIFT_PRIVATE;
+    std::optional<std::vector<NativeBodyFatSample>> bodyFatSamples     SWIFT_PRIVATE;
+    std::optional<std::vector<NativeLeanBodyMassSample>> leanBodyMassSamples     SWIFT_PRIVATE;
+    std::optional<std::vector<NativeBasalBodyTemperatureSample>> basalBodyTemperatureSamples     SWIFT_PRIVATE;
     std::optional<std::vector<NativeRestingHeartRateSample>> restingHeartRateSamples     SWIFT_PRIVATE;
     std::optional<std::vector<NativeHeartRateVariabilitySample>> heartRateVariabilitySamples     SWIFT_PRIVATE;
     std::optional<std::vector<NativeDistanceSample>> distanceSamples     SWIFT_PRIVATE;
@@ -107,7 +119,7 @@ namespace margelo::nitro::nitrohealth {
 
   public:
     NativeHealthChange() = default;
-    explicit NativeHealthChange(std::string type, std::string recordId, std::optional<std::vector<NativeStepSample>> stepSamples, std::optional<std::vector<NativeHeartRateSample>> heartRateSamples, std::optional<std::vector<NativeBloodPressureSample>> bloodPressureSamples, std::optional<std::vector<NativeBloodGlucoseSample>> bloodGlucoseSamples, std::optional<std::vector<NativeBodyTemperatureSample>> bodyTemperatureSamples, std::optional<std::vector<NativeRespiratoryRateSample>> respiratoryRateSamples, std::optional<std::vector<NativeRestingHeartRateSample>> restingHeartRateSamples, std::optional<std::vector<NativeHeartRateVariabilitySample>> heartRateVariabilitySamples, std::optional<std::vector<NativeDistanceSample>> distanceSamples, std::optional<std::vector<NativeActiveEnergyBurnedSample>> activeEnergyBurnedSamples, std::optional<std::vector<NativeOxygenSaturationSample>> oxygenSaturationSamples, std::optional<std::vector<NativeHeightSample>> heightSamples, std::optional<std::vector<NativeSleepSample>> sleepSamples, std::optional<std::vector<NativeBodyMassSample>> bodyMassSamples, std::optional<std::vector<NativeWorkoutSample>> workoutSamples, std::optional<std::function<void()>> dummyNonEquatable): type(type), recordId(recordId), stepSamples(stepSamples), heartRateSamples(heartRateSamples), bloodPressureSamples(bloodPressureSamples), bloodGlucoseSamples(bloodGlucoseSamples), bodyTemperatureSamples(bodyTemperatureSamples), respiratoryRateSamples(respiratoryRateSamples), restingHeartRateSamples(restingHeartRateSamples), heartRateVariabilitySamples(heartRateVariabilitySamples), distanceSamples(distanceSamples), activeEnergyBurnedSamples(activeEnergyBurnedSamples), oxygenSaturationSamples(oxygenSaturationSamples), heightSamples(heightSamples), sleepSamples(sleepSamples), bodyMassSamples(bodyMassSamples), workoutSamples(workoutSamples), dummyNonEquatable(dummyNonEquatable) {}
+    explicit NativeHealthChange(std::string type, std::string recordId, std::optional<std::vector<NativeStepSample>> stepSamples, std::optional<std::vector<NativeHeartRateSample>> heartRateSamples, std::optional<std::vector<NativeBloodPressureSample>> bloodPressureSamples, std::optional<std::vector<NativeBloodGlucoseSample>> bloodGlucoseSamples, std::optional<std::vector<NativeBodyTemperatureSample>> bodyTemperatureSamples, std::optional<std::vector<NativeRespiratoryRateSample>> respiratoryRateSamples, std::optional<std::vector<NativeBodyFatSample>> bodyFatSamples, std::optional<std::vector<NativeLeanBodyMassSample>> leanBodyMassSamples, std::optional<std::vector<NativeBasalBodyTemperatureSample>> basalBodyTemperatureSamples, std::optional<std::vector<NativeRestingHeartRateSample>> restingHeartRateSamples, std::optional<std::vector<NativeHeartRateVariabilitySample>> heartRateVariabilitySamples, std::optional<std::vector<NativeDistanceSample>> distanceSamples, std::optional<std::vector<NativeActiveEnergyBurnedSample>> activeEnergyBurnedSamples, std::optional<std::vector<NativeOxygenSaturationSample>> oxygenSaturationSamples, std::optional<std::vector<NativeHeightSample>> heightSamples, std::optional<std::vector<NativeSleepSample>> sleepSamples, std::optional<std::vector<NativeBodyMassSample>> bodyMassSamples, std::optional<std::vector<NativeWorkoutSample>> workoutSamples, std::optional<std::function<void()>> dummyNonEquatable): type(type), recordId(recordId), stepSamples(stepSamples), heartRateSamples(heartRateSamples), bloodPressureSamples(bloodPressureSamples), bloodGlucoseSamples(bloodGlucoseSamples), bodyTemperatureSamples(bodyTemperatureSamples), respiratoryRateSamples(respiratoryRateSamples), bodyFatSamples(bodyFatSamples), leanBodyMassSamples(leanBodyMassSamples), basalBodyTemperatureSamples(basalBodyTemperatureSamples), restingHeartRateSamples(restingHeartRateSamples), heartRateVariabilitySamples(heartRateVariabilitySamples), distanceSamples(distanceSamples), activeEnergyBurnedSamples(activeEnergyBurnedSamples), oxygenSaturationSamples(oxygenSaturationSamples), heightSamples(heightSamples), sleepSamples(sleepSamples), bodyMassSamples(bodyMassSamples), workoutSamples(workoutSamples), dummyNonEquatable(dummyNonEquatable) {}
 
   public:
     // NativeHealthChange is not equatable because these properties are not equatable: dummyNonEquatable
@@ -131,6 +143,9 @@ namespace margelo::nitro {
         JSIConverter<std::optional<std::vector<margelo::nitro::nitrohealth::NativeBloodGlucoseSample>>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "bloodGlucoseSamples"))),
         JSIConverter<std::optional<std::vector<margelo::nitro::nitrohealth::NativeBodyTemperatureSample>>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "bodyTemperatureSamples"))),
         JSIConverter<std::optional<std::vector<margelo::nitro::nitrohealth::NativeRespiratoryRateSample>>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "respiratoryRateSamples"))),
+        JSIConverter<std::optional<std::vector<margelo::nitro::nitrohealth::NativeBodyFatSample>>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "bodyFatSamples"))),
+        JSIConverter<std::optional<std::vector<margelo::nitro::nitrohealth::NativeLeanBodyMassSample>>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "leanBodyMassSamples"))),
+        JSIConverter<std::optional<std::vector<margelo::nitro::nitrohealth::NativeBasalBodyTemperatureSample>>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "basalBodyTemperatureSamples"))),
         JSIConverter<std::optional<std::vector<margelo::nitro::nitrohealth::NativeRestingHeartRateSample>>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "restingHeartRateSamples"))),
         JSIConverter<std::optional<std::vector<margelo::nitro::nitrohealth::NativeHeartRateVariabilitySample>>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "heartRateVariabilitySamples"))),
         JSIConverter<std::optional<std::vector<margelo::nitro::nitrohealth::NativeDistanceSample>>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "distanceSamples"))),
@@ -153,6 +168,9 @@ namespace margelo::nitro {
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "bloodGlucoseSamples"), JSIConverter<std::optional<std::vector<margelo::nitro::nitrohealth::NativeBloodGlucoseSample>>>::toJSI(runtime, arg.bloodGlucoseSamples));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "bodyTemperatureSamples"), JSIConverter<std::optional<std::vector<margelo::nitro::nitrohealth::NativeBodyTemperatureSample>>>::toJSI(runtime, arg.bodyTemperatureSamples));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "respiratoryRateSamples"), JSIConverter<std::optional<std::vector<margelo::nitro::nitrohealth::NativeRespiratoryRateSample>>>::toJSI(runtime, arg.respiratoryRateSamples));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "bodyFatSamples"), JSIConverter<std::optional<std::vector<margelo::nitro::nitrohealth::NativeBodyFatSample>>>::toJSI(runtime, arg.bodyFatSamples));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "leanBodyMassSamples"), JSIConverter<std::optional<std::vector<margelo::nitro::nitrohealth::NativeLeanBodyMassSample>>>::toJSI(runtime, arg.leanBodyMassSamples));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "basalBodyTemperatureSamples"), JSIConverter<std::optional<std::vector<margelo::nitro::nitrohealth::NativeBasalBodyTemperatureSample>>>::toJSI(runtime, arg.basalBodyTemperatureSamples));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "restingHeartRateSamples"), JSIConverter<std::optional<std::vector<margelo::nitro::nitrohealth::NativeRestingHeartRateSample>>>::toJSI(runtime, arg.restingHeartRateSamples));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "heartRateVariabilitySamples"), JSIConverter<std::optional<std::vector<margelo::nitro::nitrohealth::NativeHeartRateVariabilitySample>>>::toJSI(runtime, arg.heartRateVariabilitySamples));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "distanceSamples"), JSIConverter<std::optional<std::vector<margelo::nitro::nitrohealth::NativeDistanceSample>>>::toJSI(runtime, arg.distanceSamples));
@@ -181,6 +199,9 @@ namespace margelo::nitro {
       if (!JSIConverter<std::optional<std::vector<margelo::nitro::nitrohealth::NativeBloodGlucoseSample>>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "bloodGlucoseSamples")))) return false;
       if (!JSIConverter<std::optional<std::vector<margelo::nitro::nitrohealth::NativeBodyTemperatureSample>>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "bodyTemperatureSamples")))) return false;
       if (!JSIConverter<std::optional<std::vector<margelo::nitro::nitrohealth::NativeRespiratoryRateSample>>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "respiratoryRateSamples")))) return false;
+      if (!JSIConverter<std::optional<std::vector<margelo::nitro::nitrohealth::NativeBodyFatSample>>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "bodyFatSamples")))) return false;
+      if (!JSIConverter<std::optional<std::vector<margelo::nitro::nitrohealth::NativeLeanBodyMassSample>>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "leanBodyMassSamples")))) return false;
+      if (!JSIConverter<std::optional<std::vector<margelo::nitro::nitrohealth::NativeBasalBodyTemperatureSample>>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "basalBodyTemperatureSamples")))) return false;
       if (!JSIConverter<std::optional<std::vector<margelo::nitro::nitrohealth::NativeRestingHeartRateSample>>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "restingHeartRateSamples")))) return false;
       if (!JSIConverter<std::optional<std::vector<margelo::nitro::nitrohealth::NativeHeartRateVariabilitySample>>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "heartRateVariabilitySamples")))) return false;
       if (!JSIConverter<std::optional<std::vector<margelo::nitro::nitrohealth::NativeDistanceSample>>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "distanceSamples")))) return false;

@@ -166,6 +166,30 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     };
   }
   
+  // pragma MARK: std::function<void(const NativeBodyFatSamplePage& /* result */)>
+  Func_void_NativeBodyFatSamplePage create_Func_void_NativeBodyFatSamplePage(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroHealth::Func_void_NativeBodyFatSamplePage::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const NativeBodyFatSamplePage& result) mutable -> void {
+      swiftClosure.call(result);
+    };
+  }
+  
+  // pragma MARK: std::function<void(const NativeLeanBodyMassSamplePage& /* result */)>
+  Func_void_NativeLeanBodyMassSamplePage create_Func_void_NativeLeanBodyMassSamplePage(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroHealth::Func_void_NativeLeanBodyMassSamplePage::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const NativeLeanBodyMassSamplePage& result) mutable -> void {
+      swiftClosure.call(result);
+    };
+  }
+  
+  // pragma MARK: std::function<void(const NativeBasalBodyTemperatureSamplePage& /* result */)>
+  Func_void_NativeBasalBodyTemperatureSamplePage create_Func_void_NativeBasalBodyTemperatureSamplePage(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroHealth::Func_void_NativeBasalBodyTemperatureSamplePage::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const NativeBasalBodyTemperatureSamplePage& result) mutable -> void {
+      swiftClosure.call(result);
+    };
+  }
+  
   // pragma MARK: std::function<void(const NativeHeartRateStatistics& /* result */)>
   Func_void_NativeHeartRateStatistics create_Func_void_NativeHeartRateStatistics(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = NitroHealth::Func_void_NativeHeartRateStatistics::fromUnsafe(swiftClosureWrapper);

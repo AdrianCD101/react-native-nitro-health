@@ -137,7 +137,7 @@ if (capabilities.status === 'available' && capabilities.historyRead === 'not-gra
 
 ## Permissions
 
-Supported data types are `steps`, `heartRate`, `bloodPressure`, `bloodGlucose`, `bodyTemperature`, `respiratoryRate`, `restingHeartRate`, `heartRateVariability`, `distance`, `activeEnergyBurned`, `oxygenSaturation`, `height`, `sleep`, `bodyMass`, and `workout`.
+Supported data types are `steps`, `heartRate`, `bloodPressure`, `bloodGlucose`, `bodyTemperature`, `respiratoryRate`, `bodyFat`, `leanBodyMass`, `basalBodyTemperature`, `restingHeartRate`, `heartRateVariability`, `distance`, `activeEnergyBurned`, `oxygenSaturation`, `height`, `sleep`, `bodyMass`, and `workout`.
 
 ### Authorization
 
@@ -244,6 +244,9 @@ On Android, the consumer app must declare every Health Connect data permission i
 | `bloodGlucose`         | `android.permission.health.READ_BLOOD_GLUCOSE`          | `android.permission.health.WRITE_BLOOD_GLUCOSE`          |
 | `bodyTemperature`      | `android.permission.health.READ_BODY_TEMPERATURE`       | `android.permission.health.WRITE_BODY_TEMPERATURE`       |
 | `respiratoryRate`      | `android.permission.health.READ_RESPIRATORY_RATE`       | `android.permission.health.WRITE_RESPIRATORY_RATE`       |
+| `bodyFat`              | `android.permission.health.READ_BODY_FAT`               | `android.permission.health.WRITE_BODY_FAT`               |
+| `leanBodyMass`         | `android.permission.health.READ_LEAN_BODY_MASS`         | `android.permission.health.WRITE_LEAN_BODY_MASS`         |
+| `basalBodyTemperature` | `android.permission.health.READ_BASAL_BODY_TEMPERATURE` | `android.permission.health.WRITE_BASAL_BODY_TEMPERATURE` |
 | `restingHeartRate`     | `android.permission.health.READ_RESTING_HEART_RATE`     | `android.permission.health.WRITE_RESTING_HEART_RATE`     |
 | `heartRateVariability` | `android.permission.health.READ_HEART_RATE_VARIABILITY` | Not supported                                            |
 | `oxygenSaturation`     | `android.permission.health.READ_OXYGEN_SATURATION`      | `android.permission.health.WRITE_OXYGEN_SATURATION`      |
@@ -323,6 +326,9 @@ All raw reads return `{ samples, nextCursor? }`. Every listed sample also includ
 | `readBloodGlucose`         | `date`, `millimolesPerLiter`                                |
 | `readBodyTemperature`      | `date`, `celsius`                                           |
 | `readRespiratoryRate`      | `date`, `breathsPerMinute`                                  |
+| `readBodyFat`              | `date`, `percentage`                                        |
+| `readLeanBodyMass`         | `date`, `kilograms`                                         |
+| `readBasalBodyTemperature` | `date`, `celsius`                                           |
 | `readRestingHeartRate`     | `date`, `bpm`                                               |
 | `readHeartRateVariability` | `date`, `milliseconds`, `method`                            |
 | `readOxygenSaturation`     | `date`, `percentage`                                        |
@@ -448,6 +454,45 @@ interface RespiratoryRateSample extends HealthSample {
 
 Android maps a Health Connect `RespiratoryRateRecord` one-to-one (its `rate` field is already breaths per minute); iOS stores an `HKQuantitySample` in `count/min`, so neither platform converts the value in JavaScript. Respiratory rate statistics are not supported by `readStatistics()`.
 
+### Body Fat
+
+One `BodyFatSample` carries the reading in percent of total body mass:
+
+```ts
+interface BodyFatSample extends HealthSample {
+  date: Date
+  percentage: number
+}
+```
+
+HealthKit stores body fat as a fraction (0-1); Health Connect stores 0-100. The JS surface is always 0-100 — iOS converts natively on read and write, so the same save round-trips to the same value on both platforms. Body fat statistics are not supported by `readStatistics()` (Health Connect exposes no aggregate metrics for `BodyFatRecord`).
+
+### Lean Body Mass
+
+One `LeanBodyMassSample` carries the reading in kilograms:
+
+```ts
+interface LeanBodyMassSample extends HealthSample {
+  date: Date
+  kilograms: number
+}
+```
+
+Android maps a Health Connect `LeanBodyMassRecord` one-to-one; iOS stores an `HKQuantitySample` in kilograms, so neither platform converts the value in JavaScript. Lean body mass statistics are not supported by `readStatistics()`.
+
+### Basal Body Temperature
+
+One `BasalBodyTemperatureSample` carries the reading in degrees Celsius (°F = °C × 9/5 + 32):
+
+```ts
+interface BasalBodyTemperatureSample extends HealthSample {
+  date: Date
+  celsius: number
+}
+```
+
+Android maps a Health Connect `BasalBodyTemperatureRecord` one-to-one; iOS stores an `HKQuantitySample` in `HKUnit.degreeCelsius()`. Like body temperature, Health Connect's `measurementLocation` is intentionally not modeled yet — tracked in [#73](https://github.com/AdrianCD101/react-native-nitro-health/issues/73); Android writes store the explicit `MEASUREMENT_LOCATION_UNKNOWN` constant. Basal body temperature statistics are not supported by `readStatistics()`.
+
 ### Heart Rate Variability
 
 `readHeartRateVariability()` returns `method: 'sdnn'` on iOS and `method: 'rmssd'` on Android. SDNN and RMSSD are different, non-comparable measures. Never mix samples with different `method` values in one average, chart, or trend. HRV is read-only because there is no portable value to write.
@@ -559,7 +604,7 @@ const heartRate = await NitroHealth.readStatistics('heartRate', {
 | `height`             | `avg`, `min`, `max` | meters               |
 | `bodyMass`           | `avg`, `min`, `max` | kg                   |
 
-Sleep, HRV, oxygen saturation, blood pressure, blood glucose, body temperature, respiratory rate, and workout statistics are not supported by `readStatistics()`. Invalid data-type/metric combinations reject before crossing the native boundary.
+Sleep, HRV, oxygen saturation, blood pressure, blood glucose, body temperature, respiratory rate, body fat, lean body mass, basal body temperature, and workout statistics are not supported by `readStatistics()`. Invalid data-type/metric combinations reject before crossing the native boundary.
 
 Buckets anchor at `startDate`. Use local midnight for calendar-day buckets. `week` is a rolling seven-day interval from that anchor. The final bucket is clamped to `endDate`, empty buckets are omitted, and results are ascending. Hour buckets are fixed 3600-second intervals; day, week, and month buckets follow the device calendar and local time zone.
 
@@ -741,7 +786,7 @@ Each scheduled run should recheck availability, `getCapabilities()`, and relevan
 
 ## Writing Data
 
-Request write authorization before saving. Save methods exist for steps, distance, active energy, heart rate, blood pressure, blood glucose, body temperature, respiratory rate, resting heart rate, oxygen saturation, height, body mass, sleep sessions, and completed workouts. HRV remains read-only.
+Request write authorization before saving. Save methods exist for steps, distance, active energy, heart rate, blood pressure, blood glucose, body temperature, respiratory rate, body fat, lean body mass, basal body temperature, resting heart rate, oxygen saturation, height, body mass, sleep sessions, and completed workouts. HRV remains read-only.
 
 ```ts
 const authorization = await NitroHealth.requestAuthorization([
@@ -774,6 +819,9 @@ The main value constraints are:
 - `saveBloodGlucose`: `millimolesPerLiter` from 0.5 through 50.
 - `saveBodyTemperature`: `celsius` from 20 through 45.
 - `saveRespiratoryRate`: `breathsPerMinute` from 0 through 120.
+- `saveBodyFat`: `percentage` from 0 through 100.
+- `saveLeanBodyMass`: `kilograms` greater than 0 and at most 1,000.
+- `saveBasalBodyTemperature`: `celsius` from 20 through 45.
 - `saveOxygenSaturation`: `percentage` from 0 through 100.
 - `saveHeight`: `meters` greater than 0 and at most 3.
 - `saveBodyMass`: `kilograms` greater than 0 and at most 1,000.

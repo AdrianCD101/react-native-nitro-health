@@ -1,12 +1,15 @@
 import type { ActiveEnergyBurnedSample } from './ActiveEnergyBurnedSample'
+import type { BasalBodyTemperatureSample } from './BasalBodyTemperatureSample'
 import type { BloodGlucoseSample } from './BloodGlucoseSample'
 import type { BloodPressureSample } from './BloodPressureSample'
+import type { BodyFatSample } from './BodyFatSample'
 import type { BodyMassSample } from './BodyMassSample'
 import type { BodyTemperatureSample } from './BodyTemperatureSample'
 import type { DistanceSample } from './DistanceSample'
 import type { HeartRateSample } from './HeartRateSample'
 import type { HeartRateVariabilitySample } from './HeartRateVariabilitySample'
 import type { HeightSample } from './HeightSample'
+import type { LeanBodyMassSample } from './LeanBodyMassSample'
 import type { OxygenSaturationSample } from './OxygenSaturationSample'
 import type { RespiratoryRateSample } from './RespiratoryRateSample'
 import type { RestingHeartRateSample } from './RestingHeartRateSample'
@@ -28,6 +31,12 @@ export interface HealthSampleByDataType {
   bodyTemperature: BodyTemperatureSample
   /** Respiratory-rate readings. */
   respiratoryRate: RespiratoryRateSample
+  /** Body-fat percentage readings. */
+  bodyFat: BodyFatSample
+  /** Lean-body-mass measurements. */
+  leanBodyMass: LeanBodyMassSample
+  /** Basal-body-temperature readings. */
+  basalBodyTemperature: BasalBodyTemperatureSample
   /** Resting heart-rate readings. */
   restingHeartRate: RestingHeartRateSample
   /** Platform-specific heart-rate variability readings. */

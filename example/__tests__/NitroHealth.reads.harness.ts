@@ -295,6 +295,48 @@ describe('NitroHealth reads (native)', () => {
     }
   })
 
+  it('reads body fat readings under a record identity with plausible percentages', async () => {
+    try {
+      const page = await NitroHealth.readBodyFat(emptyRange)
+      for (const sample of page.samples) {
+        assertSampleIdentityAndOrigin(sample)
+        expect(sample.identity.kind).toBe('record')
+        expect(sample.percentage).toBeGreaterThanOrEqual(0)
+        expect(sample.percentage).toBeLessThanOrEqual(100)
+      }
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error)
+    }
+  })
+
+  it('reads lean body mass readings under a record identity with plausible kilograms', async () => {
+    try {
+      const page = await NitroHealth.readLeanBodyMass(emptyRange)
+      for (const sample of page.samples) {
+        assertSampleIdentityAndOrigin(sample)
+        expect(sample.identity.kind).toBe('record')
+        expect(sample.kilograms).toBeGreaterThan(0)
+        expect(sample.kilograms).toBeLessThanOrEqual(1000)
+      }
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error)
+    }
+  })
+
+  it('reads basal body temperature readings under a record identity with plausible celsius values', async () => {
+    try {
+      const page = await NitroHealth.readBasalBodyTemperature(emptyRange)
+      for (const sample of page.samples) {
+        assertSampleIdentityAndOrigin(sample)
+        expect(sample.identity.kind).toBe('record')
+        expect(sample.celsius).toBeGreaterThanOrEqual(20)
+        expect(sample.celsius).toBeLessThanOrEqual(45)
+      }
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error)
+    }
+  })
+
   // SDNN and RMSSD are non-comparable, so this assertion intentionally verifies the native
   // implementation detail for each platform after public permission state allows the read.
   it('reports SDNN on iOS and RMSSD on Android when HRV samples are observable', async () => {

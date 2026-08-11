@@ -234,6 +234,80 @@ describe('NitroHealth deletes (native)', () => {
     )
   })
 
+  it('round-trips save, delete by record identity, and re-read for body fat', async () => {
+    const authorized = await hasVerifiedPermissions([
+      { accessType: 'write', dataType: 'bodyFat' },
+      { accessType: 'read', dataType: 'bodyFat' },
+    ])
+    if (!authorized) return
+
+    await NitroHealth.saveBodyFat([{ date: deleteInterval.startDate, percentage: 27.5 }])
+    const page = await NitroHealth.readBodyFat(deleteReadRange)
+    if (isInconclusiveRead(page.samples)) return
+
+    const saved = page.samples.find((sample) => Math.abs(sample.percentage - 27.5) < 0.001)
+    expect(saved).toBeDefined()
+    if (saved === undefined || saved.identity.kind !== 'record') return
+
+    const result = await NitroHealth.deleteRecordsByIds('bodyFat', [saved.identity])
+    assertCompletedIdentityDelete(result)
+
+    const afterDelete = await NitroHealth.readBodyFat(deleteReadRange)
+    expect(afterDelete.samples.some((sample) => sample.identity.id === saved.identity.id)).toBe(
+      false
+    )
+  })
+
+  it('round-trips save, delete by record identity, and re-read for lean body mass', async () => {
+    const authorized = await hasVerifiedPermissions([
+      { accessType: 'write', dataType: 'leanBodyMass' },
+      { accessType: 'read', dataType: 'leanBodyMass' },
+    ])
+    if (!authorized) return
+
+    await NitroHealth.saveLeanBodyMass([{ date: deleteInterval.startDate, kilograms: 48.5 }])
+    const page = await NitroHealth.readLeanBodyMass(deleteReadRange)
+    if (isInconclusiveRead(page.samples)) return
+
+    const saved = page.samples.find((sample) => Math.abs(sample.kilograms - 48.5) < 0.001)
+    expect(saved).toBeDefined()
+    if (saved === undefined || saved.identity.kind !== 'record') return
+
+    const result = await NitroHealth.deleteRecordsByIds('leanBodyMass', [saved.identity])
+    assertCompletedIdentityDelete(result)
+
+    const afterDelete = await NitroHealth.readLeanBodyMass(deleteReadRange)
+    expect(afterDelete.samples.some((sample) => sample.identity.id === saved.identity.id)).toBe(
+      false
+    )
+  })
+
+  it('round-trips save, delete by record identity, and re-read for basal body temperature', async () => {
+    const authorized = await hasVerifiedPermissions([
+      { accessType: 'write', dataType: 'basalBodyTemperature' },
+      { accessType: 'read', dataType: 'basalBodyTemperature' },
+    ])
+    if (!authorized) return
+
+    await NitroHealth.saveBasalBodyTemperature([
+      { date: deleteInterval.startDate, celsius: 35.9 },
+    ])
+    const page = await NitroHealth.readBasalBodyTemperature(deleteReadRange)
+    if (isInconclusiveRead(page.samples)) return
+
+    const saved = page.samples.find((sample) => Math.abs(sample.celsius - 35.9) < 0.001)
+    expect(saved).toBeDefined()
+    if (saved === undefined || saved.identity.kind !== 'record') return
+
+    const result = await NitroHealth.deleteRecordsByIds('basalBodyTemperature', [saved.identity])
+    assertCompletedIdentityDelete(result)
+
+    const afterDelete = await NitroHealth.readBasalBodyTemperature(deleteReadRange)
+    expect(afterDelete.samples.some((sample) => sample.identity.id === saved.identity.id)).toBe(
+      false
+    )
+  })
+
   it('deletes a heart-rate record and explicitly selects a parent for record children', async () => {
     const authorized = await hasVerifiedPermissions([
       { accessType: 'write', dataType: 'heartRate' },

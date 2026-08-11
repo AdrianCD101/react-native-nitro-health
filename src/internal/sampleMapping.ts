@@ -28,6 +28,12 @@ import type { NativeBodyMassSample } from '../NativeBodyMassSample'
 import type { NativeBodyMassSampleInput } from '../NativeBodyMassSampleInput'
 import type { NativeBodyTemperatureSample } from '../NativeBodyTemperatureSample'
 import type { NativeBodyTemperatureSampleInput } from '../NativeBodyTemperatureSampleInput'
+import type { NativeBasalBodyTemperatureSample } from '../NativeBasalBodyTemperatureSample'
+import type { NativeBasalBodyTemperatureSampleInput } from '../NativeBasalBodyTemperatureSampleInput'
+import type { NativeBodyFatSample } from '../NativeBodyFatSample'
+import type { NativeBodyFatSampleInput } from '../NativeBodyFatSampleInput'
+import type { NativeLeanBodyMassSample } from '../NativeLeanBodyMassSample'
+import type { NativeLeanBodyMassSampleInput } from '../NativeLeanBodyMassSampleInput'
 import type { NativeDistanceSample } from '../NativeDistanceSample'
 import type { NativeBloodGlucoseSample } from '../NativeBloodGlucoseSample'
 import type { NativeBloodGlucoseSampleInput } from '../NativeBloodGlucoseSampleInput'
@@ -67,6 +73,12 @@ import type { BloodPressureSample } from '../BloodPressureSample'
 import type { BloodPressureSampleInput } from '../BloodPressureSampleInput'
 import type { BodyTemperatureSample } from '../BodyTemperatureSample'
 import type { BodyTemperatureSampleInput } from '../BodyTemperatureSampleInput'
+import type { BasalBodyTemperatureSample } from '../BasalBodyTemperatureSample'
+import type { BasalBodyTemperatureSampleInput } from '../BasalBodyTemperatureSampleInput'
+import type { BodyFatSample } from '../BodyFatSample'
+import type { BodyFatSampleInput } from '../BodyFatSampleInput'
+import type { LeanBodyMassSample } from '../LeanBodyMassSample'
+import type { LeanBodyMassSampleInput } from '../LeanBodyMassSampleInput'
 import type { OxygenSaturationSample } from '../OxygenSaturationSample'
 import type { OxygenSaturationSampleInput } from '../OxygenSaturationSampleInput'
 import type { RespiratoryRateSample } from '../RespiratoryRateSample'
@@ -488,6 +500,52 @@ export function makeNativeRespiratoryRateSampleInput(
   }
 }
 
+export function makeNativeBodyFatSampleInput(
+  sample: BodyFatSampleInput,
+  index: number
+): NativeBodyFatSampleInput {
+  const timeMs = makeSampleInstant(sample, index)
+
+  assertSampleBetween(sample.percentage, 0, 100, index, 'percentage')
+
+  return {
+    timeMs,
+    percentage: sample.percentage,
+    ...makeNativeSync(sample.sync, index),
+  }
+}
+
+export function makeNativeLeanBodyMassSampleInput(
+  sample: LeanBodyMassSampleInput,
+  index: number
+): NativeLeanBodyMassSampleInput {
+  const timeMs = makeSampleInstant(sample, index)
+
+  assertSampleGreaterThanZero(sample.kilograms, index, 'kilograms')
+  assertSampleMaxValue(sample.kilograms, MAX_KILOGRAMS, index, 'kilograms')
+
+  return {
+    timeMs,
+    kilograms: sample.kilograms,
+    ...makeNativeSync(sample.sync, index),
+  }
+}
+
+export function makeNativeBasalBodyTemperatureSampleInput(
+  sample: BasalBodyTemperatureSampleInput,
+  index: number
+): NativeBasalBodyTemperatureSampleInput {
+  const timeMs = makeSampleInstant(sample, index)
+
+  assertSampleBetween(sample.celsius, MIN_CELSIUS, MAX_CELSIUS, index, 'celsius')
+
+  return {
+    timeMs,
+    celsius: sample.celsius,
+    ...makeNativeSync(sample.sync, index),
+  }
+}
+
 export function makeNativeOxygenSaturationSampleInput(
   sample: OxygenSaturationSampleInput,
   index: number
@@ -861,6 +919,35 @@ export function makeRespiratoryRateSample(
   }
 }
 
+export function makeBodyFatSample(sample: NativeBodyFatSample): BodyFatSample {
+  return {
+    identity: makeHealthSampleIdentity(sample.identity),
+    origin: makeHealthDataOrigin(sample.origin),
+    date: new Date(sample.timeMs),
+    percentage: sample.percentage,
+  }
+}
+
+export function makeLeanBodyMassSample(sample: NativeLeanBodyMassSample): LeanBodyMassSample {
+  return {
+    identity: makeHealthSampleIdentity(sample.identity),
+    origin: makeHealthDataOrigin(sample.origin),
+    date: new Date(sample.timeMs),
+    kilograms: sample.kilograms,
+  }
+}
+
+export function makeBasalBodyTemperatureSample(
+  sample: NativeBasalBodyTemperatureSample
+): BasalBodyTemperatureSample {
+  return {
+    identity: makeHealthSampleIdentity(sample.identity),
+    origin: makeHealthDataOrigin(sample.origin),
+    date: new Date(sample.timeMs),
+    celsius: sample.celsius,
+  }
+}
+
 export function makeOxygenSaturationSample(
   sample: NativeOxygenSaturationSample
 ): OxygenSaturationSample {
@@ -987,6 +1074,9 @@ const CHANGE_SAMPLE_FIELDS = [
   'bloodGlucoseSamples',
   'bodyTemperatureSamples',
   'respiratoryRateSamples',
+  'bodyFatSamples',
+  'leanBodyMassSamples',
+  'basalBodyTemperatureSamples',
   'restingHeartRateSamples',
   'heartRateVariabilitySamples',
   'distanceSamples',
@@ -1045,6 +1135,21 @@ function makeUpsertSamples(
       if (change.respiratoryRateSamples === undefined)
         throw new Error("Native 'respiratoryRate' upsert is missing samples")
       samples = change.respiratoryRateSamples.map(makeRespiratoryRateSample)
+      break
+    case 'bodyFat':
+      if (change.bodyFatSamples === undefined)
+        throw new Error("Native 'bodyFat' upsert is missing samples")
+      samples = change.bodyFatSamples.map(makeBodyFatSample)
+      break
+    case 'leanBodyMass':
+      if (change.leanBodyMassSamples === undefined)
+        throw new Error("Native 'leanBodyMass' upsert is missing samples")
+      samples = change.leanBodyMassSamples.map(makeLeanBodyMassSample)
+      break
+    case 'basalBodyTemperature':
+      if (change.basalBodyTemperatureSamples === undefined)
+        throw new Error("Native 'basalBodyTemperature' upsert is missing samples")
+      samples = change.basalBodyTemperatureSamples.map(makeBasalBodyTemperatureSample)
       break
     case 'restingHeartRate':
       if (change.restingHeartRateSamples === undefined)

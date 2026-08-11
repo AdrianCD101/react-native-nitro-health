@@ -2,11 +2,14 @@ import { Platform } from 'react-native'
 import { describe, expect, it } from 'react-native-harness'
 import { NitroHealth } from 'react-native-nitro-health'
 import type {
+  BasalBodyTemperatureSample,
   BloodGlucoseSample,
   BloodPressureSample,
+  BodyFatSample,
   BodyTemperatureSample,
   HealthPermission,
   HealthSampleIdentity,
+  LeanBodyMassSample,
   RespiratoryRateSample,
   StepSample,
   WorkoutSample,
@@ -37,6 +40,18 @@ const bodyTemperatureReadWritePermissions: HealthPermission[] = [
 const respiratoryRateReadWritePermissions: HealthPermission[] = [
   { accessType: 'read', dataType: 'respiratoryRate' },
   { accessType: 'write', dataType: 'respiratoryRate' },
+]
+const bodyFatReadWritePermissions: HealthPermission[] = [
+  { accessType: 'read', dataType: 'bodyFat' },
+  { accessType: 'write', dataType: 'bodyFat' },
+]
+const leanBodyMassReadWritePermissions: HealthPermission[] = [
+  { accessType: 'read', dataType: 'leanBodyMass' },
+  { accessType: 'write', dataType: 'leanBodyMass' },
+]
+const basalBodyTemperatureReadWritePermissions: HealthPermission[] = [
+  { accessType: 'read', dataType: 'basalBodyTemperature' },
+  { accessType: 'write', dataType: 'basalBodyTemperature' },
 ]
 const idempotentInterval = {
   startDate: new Date('2004-06-01T09:00:00.000Z'),
@@ -125,6 +140,39 @@ async function readIdempotentRespiratoryRate(
       expectedBreathsPerMinute.some(
         (expected) => Math.abs(sample.breathsPerMinute - expected) < 0.001
       )
+  )
+}
+
+async function readIdempotentBodyFat(
+  expectedPercentages: readonly number[]
+): Promise<BodyFatSample[]> {
+  const page = await NitroHealth.readBodyFat({ ...idempotentReadRange, limit: 1000 })
+  return page.samples.filter(
+    (sample) =>
+      sample.date.getTime() === idempotentInterval.startDate.getTime() &&
+      expectedPercentages.some((expected) => Math.abs(sample.percentage - expected) < 0.001)
+  )
+}
+
+async function readIdempotentLeanBodyMass(
+  expectedKilograms: readonly number[]
+): Promise<LeanBodyMassSample[]> {
+  const page = await NitroHealth.readLeanBodyMass({ ...idempotentReadRange, limit: 1000 })
+  return page.samples.filter(
+    (sample) =>
+      sample.date.getTime() === idempotentInterval.startDate.getTime() &&
+      expectedKilograms.some((expected) => Math.abs(sample.kilograms - expected) < 0.001)
+  )
+}
+
+async function readIdempotentBasalBodyTemperature(
+  expectedCelsius: readonly number[]
+): Promise<BasalBodyTemperatureSample[]> {
+  const page = await NitroHealth.readBasalBodyTemperature({ ...idempotentReadRange, limit: 1000 })
+  return page.samples.filter(
+    (sample) =>
+      sample.date.getTime() === idempotentInterval.startDate.getTime() &&
+      expectedCelsius.some((expected) => Math.abs(sample.celsius - expected) < 0.001)
   )
 }
 
@@ -623,6 +671,243 @@ describe('NitroHealth idempotent saves (native)', () => {
       }
     } finally {
       await NitroHealth.deleteRecordsByTimeRange('respiratoryRate', idempotentReadRange)
+    }
+  })
+
+  it('keeps exactly one body fat reading when the same versioned save is retried', async () => {
+    if (!(await hasVerifiedPermissions(bodyFatReadWritePermissions))) {
+      return
+    }
+
+    await NitroHealth.deleteRecordsByTimeRange('bodyFat', idempotentReadRange)
+    try {
+      const sample = {
+        date: idempotentInterval.startDate,
+        percentage: 18.5,
+        sync: { id: 'nitro-health-harness-bf-retry', version: 1 },
+      }
+
+      await NitroHealth.saveBodyFat([sample])
+      await NitroHealth.saveBodyFat([sample])
+
+      const samples = await readIdempotentBodyFat([18.5])
+      if (Platform.OS === 'ios' && samples.length === 0) {
+        return
+      }
+
+      expect(samples).toHaveLength(1)
+    } finally {
+      await NitroHealth.deleteRecordsByTimeRange('bodyFat', idempotentReadRange)
+    }
+  })
+
+  it('replaces a body fat reading at a higher version with platform-specific identity', async () => {
+    if (!(await hasVerifiedPermissions(bodyFatReadWritePermissions))) {
+      return
+    }
+
+    await NitroHealth.deleteRecordsByTimeRange('bodyFat', idempotentReadRange)
+    try {
+      const syncId = 'nitro-health-harness-bf-higher-version'
+      await NitroHealth.saveBodyFat([
+        {
+          date: idempotentInterval.startDate,
+          percentage: 18.5,
+          sync: { id: syncId, version: 1 },
+        },
+      ])
+
+      const initial = await readIdempotentBodyFat([18.5, 19.5])
+      if (Platform.OS === 'ios' && initial.length === 0) {
+        return
+      }
+      expect(initial).toHaveLength(1)
+      const initialSample = initial[0]
+      if (initialSample === undefined) {
+        return
+      }
+
+      await NitroHealth.saveBodyFat([
+        {
+          date: idempotentInterval.startDate,
+          percentage: 19.5,
+          sync: { id: syncId, version: 2 },
+        },
+      ])
+
+      const replacement = await readIdempotentBodyFat([18.5, 19.5])
+      expect(replacement).toHaveLength(1)
+      const replacementSample = replacement[0]
+      if (replacementSample === undefined) {
+        return
+      }
+
+      expect(Math.abs(replacementSample.percentage - 19.5)).toBeLessThan(0.001)
+      if (Platform.OS === 'android') {
+        expect(recordId(replacementSample.identity)).toBe(recordId(initialSample.identity))
+      } else if (Platform.OS === 'ios') {
+        expect(recordId(replacementSample.identity)).not.toBe(recordId(initialSample.identity))
+      }
+    } finally {
+      await NitroHealth.deleteRecordsByTimeRange('bodyFat', idempotentReadRange)
+    }
+  })
+
+  it('keeps exactly one lean body mass reading when the same versioned save is retried', async () => {
+    if (!(await hasVerifiedPermissions(leanBodyMassReadWritePermissions))) {
+      return
+    }
+
+    await NitroHealth.deleteRecordsByTimeRange('leanBodyMass', idempotentReadRange)
+    try {
+      const sample = {
+        date: idempotentInterval.startDate,
+        kilograms: 55.4,
+        sync: { id: 'nitro-health-harness-lbm-retry', version: 1 },
+      }
+
+      await NitroHealth.saveLeanBodyMass([sample])
+      await NitroHealth.saveLeanBodyMass([sample])
+
+      const samples = await readIdempotentLeanBodyMass([55.4])
+      if (Platform.OS === 'ios' && samples.length === 0) {
+        return
+      }
+
+      expect(samples).toHaveLength(1)
+    } finally {
+      await NitroHealth.deleteRecordsByTimeRange('leanBodyMass', idempotentReadRange)
+    }
+  })
+
+  it('replaces a lean body mass reading at a higher version with platform-specific identity', async () => {
+    if (!(await hasVerifiedPermissions(leanBodyMassReadWritePermissions))) {
+      return
+    }
+
+    await NitroHealth.deleteRecordsByTimeRange('leanBodyMass', idempotentReadRange)
+    try {
+      const syncId = 'nitro-health-harness-lbm-higher-version'
+      await NitroHealth.saveLeanBodyMass([
+        {
+          date: idempotentInterval.startDate,
+          kilograms: 55.4,
+          sync: { id: syncId, version: 1 },
+        },
+      ])
+
+      const initial = await readIdempotentLeanBodyMass([55.4, 56.4])
+      if (Platform.OS === 'ios' && initial.length === 0) {
+        return
+      }
+      expect(initial).toHaveLength(1)
+      const initialSample = initial[0]
+      if (initialSample === undefined) {
+        return
+      }
+
+      await NitroHealth.saveLeanBodyMass([
+        {
+          date: idempotentInterval.startDate,
+          kilograms: 56.4,
+          sync: { id: syncId, version: 2 },
+        },
+      ])
+
+      const replacement = await readIdempotentLeanBodyMass([55.4, 56.4])
+      expect(replacement).toHaveLength(1)
+      const replacementSample = replacement[0]
+      if (replacementSample === undefined) {
+        return
+      }
+
+      expect(Math.abs(replacementSample.kilograms - 56.4)).toBeLessThan(0.001)
+      if (Platform.OS === 'android') {
+        expect(recordId(replacementSample.identity)).toBe(recordId(initialSample.identity))
+      } else if (Platform.OS === 'ios') {
+        expect(recordId(replacementSample.identity)).not.toBe(recordId(initialSample.identity))
+      }
+    } finally {
+      await NitroHealth.deleteRecordsByTimeRange('leanBodyMass', idempotentReadRange)
+    }
+  })
+
+  it('keeps exactly one basal body temperature reading when the same versioned save is retried', async () => {
+    if (!(await hasVerifiedPermissions(basalBodyTemperatureReadWritePermissions))) {
+      return
+    }
+
+    await NitroHealth.deleteRecordsByTimeRange('basalBodyTemperature', idempotentReadRange)
+    try {
+      const sample = {
+        date: idempotentInterval.startDate,
+        celsius: 36.4,
+        sync: { id: 'nitro-health-harness-bbt-retry', version: 1 },
+      }
+
+      await NitroHealth.saveBasalBodyTemperature([sample])
+      await NitroHealth.saveBasalBodyTemperature([sample])
+
+      const samples = await readIdempotentBasalBodyTemperature([36.4])
+      if (Platform.OS === 'ios' && samples.length === 0) {
+        return
+      }
+
+      expect(samples).toHaveLength(1)
+    } finally {
+      await NitroHealth.deleteRecordsByTimeRange('basalBodyTemperature', idempotentReadRange)
+    }
+  })
+
+  it('replaces a basal body temperature reading at a higher version with platform-specific identity', async () => {
+    if (!(await hasVerifiedPermissions(basalBodyTemperatureReadWritePermissions))) {
+      return
+    }
+
+    await NitroHealth.deleteRecordsByTimeRange('basalBodyTemperature', idempotentReadRange)
+    try {
+      const syncId = 'nitro-health-harness-bbt-higher-version'
+      await NitroHealth.saveBasalBodyTemperature([
+        {
+          date: idempotentInterval.startDate,
+          celsius: 36.4,
+          sync: { id: syncId, version: 1 },
+        },
+      ])
+
+      const initial = await readIdempotentBasalBodyTemperature([36.4, 36.5])
+      if (Platform.OS === 'ios' && initial.length === 0) {
+        return
+      }
+      expect(initial).toHaveLength(1)
+      const initialSample = initial[0]
+      if (initialSample === undefined) {
+        return
+      }
+
+      await NitroHealth.saveBasalBodyTemperature([
+        {
+          date: idempotentInterval.startDate,
+          celsius: 36.5,
+          sync: { id: syncId, version: 2 },
+        },
+      ])
+
+      const replacement = await readIdempotentBasalBodyTemperature([36.4, 36.5])
+      expect(replacement).toHaveLength(1)
+      const replacementSample = replacement[0]
+      if (replacementSample === undefined) {
+        return
+      }
+
+      expect(Math.abs(replacementSample.celsius - 36.5)).toBeLessThan(0.001)
+      if (Platform.OS === 'android') {
+        expect(recordId(replacementSample.identity)).toBe(recordId(initialSample.identity))
+      } else if (Platform.OS === 'ios') {
+        expect(recordId(replacementSample.identity)).not.toBe(recordId(initialSample.identity))
+      }
+    } finally {
+      await NitroHealth.deleteRecordsByTimeRange('basalBodyTemperature', idempotentReadRange)
     }
   })
 

@@ -3,10 +3,14 @@ import type { BackgroundDeliveryFrequency } from '../BackgroundDeliveryFrequency
 import type { NativeActiveEnergyBurnedSampleInput } from '../NativeActiveEnergyBurnedSampleInput'
 import type { NativeActiveEnergyBurnedSamplePage } from '../NativeActiveEnergyBurnedSamplePage'
 import type { NativeBackgroundChangesResult } from '../NativeBackgroundChangesResult'
+import type { NativeBasalBodyTemperatureSampleInput } from '../NativeBasalBodyTemperatureSampleInput'
+import type { NativeBasalBodyTemperatureSamplePage } from '../NativeBasalBodyTemperatureSamplePage'
 import type { NativeBloodGlucoseSampleInput } from '../NativeBloodGlucoseSampleInput'
 import type { NativeBloodGlucoseSamplePage } from '../NativeBloodGlucoseSamplePage'
 import type { NativeBloodPressureSampleInput } from '../NativeBloodPressureSampleInput'
 import type { NativeBloodPressureSamplePage } from '../NativeBloodPressureSamplePage'
+import type { NativeBodyFatSampleInput } from '../NativeBodyFatSampleInput'
+import type { NativeBodyFatSamplePage } from '../NativeBodyFatSamplePage'
 import type { NativeBodyMassSampleInput } from '../NativeBodyMassSampleInput'
 import type { NativeBodyMassSamplePage } from '../NativeBodyMassSamplePage'
 import type { NativeBodyTemperatureSampleInput } from '../NativeBodyTemperatureSampleInput'
@@ -37,6 +41,8 @@ import type { NativeHeartRateSamplePage } from '../NativeHeartRateSamplePage'
 import type { NativeHeartRateStatistics } from '../NativeHeartRateStatistics'
 import type { NativeHeartRateVariabilitySamplePage } from '../NativeHeartRateVariabilitySamplePage'
 import type { NativeHeightSampleInput } from '../NativeHeightSampleInput'
+import type { NativeLeanBodyMassSampleInput } from '../NativeLeanBodyMassSampleInput'
+import type { NativeLeanBodyMassSamplePage } from '../NativeLeanBodyMassSamplePage'
 import type { NativeHeightSamplePage } from '../NativeHeightSamplePage'
 import type { NativeOxygenSaturationSampleInput } from '../NativeOxygenSaturationSampleInput'
 import type { NativeOxygenSaturationSamplePage } from '../NativeOxygenSaturationSamplePage'
@@ -82,6 +88,11 @@ export interface NitroHealth extends HybridObject<{ ios: 'swift'; android: 'kotl
   readBloodGlucose(query: NativeHealthDateRangeQuery): Promise<NativeBloodGlucoseSamplePage>
   readBodyTemperature(query: NativeHealthDateRangeQuery): Promise<NativeBodyTemperatureSamplePage>
   readRespiratoryRate(query: NativeHealthDateRangeQuery): Promise<NativeRespiratoryRateSamplePage>
+  readBodyFat(query: NativeHealthDateRangeQuery): Promise<NativeBodyFatSamplePage>
+  readLeanBodyMass(query: NativeHealthDateRangeQuery): Promise<NativeLeanBodyMassSamplePage>
+  readBasalBodyTemperature(
+    query: NativeHealthDateRangeQuery
+  ): Promise<NativeBasalBodyTemperatureSamplePage>
   readHeartRateStatistics(query: NativeHealthTimeRangeQuery): Promise<NativeHeartRateStatistics>
   readRestingHeartRate(query: NativeHealthDateRangeQuery): Promise<NativeRestingHeartRateSamplePage>
   readHeartRateVariability(
@@ -103,6 +114,9 @@ export interface NitroHealth extends HybridObject<{ ios: 'swift'; android: 'kotl
   saveBloodGlucose(samples: NativeBloodGlucoseSampleInput[]): Promise<void>
   saveBodyTemperature(samples: NativeBodyTemperatureSampleInput[]): Promise<void>
   saveRespiratoryRate(samples: NativeRespiratoryRateSampleInput[]): Promise<void>
+  saveBodyFat(samples: NativeBodyFatSampleInput[]): Promise<void>
+  saveLeanBodyMass(samples: NativeLeanBodyMassSampleInput[]): Promise<void>
+  saveBasalBodyTemperature(samples: NativeBasalBodyTemperatureSampleInput[]): Promise<void>
   saveBodyMass(samples: NativeBodyMassSampleInput[]): Promise<void>
   saveRestingHeartRate(samples: NativeRestingHeartRateSampleInput[]): Promise<void>
   saveOxygenSaturation(samples: NativeOxygenSaturationSampleInput[]): Promise<void>
