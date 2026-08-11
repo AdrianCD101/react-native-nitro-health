@@ -390,8 +390,20 @@ export function makeNativeBloodPressureSampleInput(
 ): NativeBloodPressureSampleInput {
   const timeMs = makeSampleInstant(sample, index)
 
-  assertSampleBetween(sample.systolicMmHg, MIN_SYSTOLIC_MMHG, MAX_SYSTOLIC_MMHG, index, 'systolicMmHg')
-  assertSampleBetween(sample.diastolicMmHg, MIN_DIASTOLIC_MMHG, MAX_DIASTOLIC_MMHG, index, 'diastolicMmHg')
+  assertSampleBetween(
+    sample.systolicMmHg,
+    MIN_SYSTOLIC_MMHG,
+    MAX_SYSTOLIC_MMHG,
+    index,
+    'systolicMmHg'
+  )
+  assertSampleBetween(
+    sample.diastolicMmHg,
+    MIN_DIASTOLIC_MMHG,
+    MAX_DIASTOLIC_MMHG,
+    index,
+    'diastolicMmHg'
+  )
 
   return {
     timeMs,
