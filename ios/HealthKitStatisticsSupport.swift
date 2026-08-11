@@ -11,6 +11,14 @@
 
 import HealthKit
 
+/// HealthKit has no ready-made blood glucose unit; compose mmol/L from the molar mass so the
+/// JS surface's `millimolesPerLiter` maps without conversion. Shared by the descriptor, save
+/// mapping, and change mapping so all three always agree.
+let bloodGlucoseMmolPerLiterUnit = HKUnit.moleUnit(
+    with: .milli,
+    molarMass: HKUnitMolarMassBloodGlucose
+).unitDivided(by: HKUnit.liter())
+
 struct HealthDataTypeDescriptor {
     let identifier: HKQuantityTypeIdentifier
     let unit: HKUnit
@@ -62,6 +70,13 @@ func makeHealthDataTypeDescriptor(dataType: String) throws -> HealthDataTypeDesc
         return HealthDataTypeDescriptor(identifier: .oxygenSaturation, unit: HKUnit.percent(), label: "oxygen saturation", isCumulative: false)
     case "height":
         return HealthDataTypeDescriptor(identifier: .height, unit: HKUnit.meter(), label: "height", isCumulative: false)
+    case "bloodGlucose":
+        return HealthDataTypeDescriptor(
+            identifier: .bloodGlucose,
+            unit: bloodGlucoseMmolPerLiterUnit,
+            label: "blood glucose",
+            isCumulative: false
+        )
     default:
         throw permissionError("Unsupported health data type: \(dataType)")
     }

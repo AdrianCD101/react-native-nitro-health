@@ -49,6 +49,8 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthDataOrigin; }
 namespace margelo::nitro::nitrohealth { struct NativeHeartRateSample; }
 // Forward declaration of `NativeBloodPressureSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBloodPressureSample; }
+// Forward declaration of `NativeBloodGlucoseSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeBloodGlucoseSample; }
 // Forward declaration of `NativeRestingHeartRateSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeRestingHeartRateSample; }
 // Forward declaration of `NativeHeartRateVariabilitySample` to properly resolve imports.
@@ -97,6 +99,8 @@ namespace margelo::nitro::nitrohealth { struct NativeBodyMassSamplePage; }
 namespace margelo::nitro::nitrohealth { struct NativeHeartRateSamplePage; }
 // Forward declaration of `NativeBloodPressureSamplePage` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBloodPressureSamplePage; }
+// Forward declaration of `NativeBloodGlucoseSamplePage` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeBloodGlucoseSamplePage; }
 // Forward declaration of `NativeHeartRateStatistics` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHeartRateStatistics; }
 // Forward declaration of `NativeRestingHeartRateSamplePage` to properly resolve imports.
@@ -151,6 +155,8 @@ namespace margelo::nitro::nitrohealth { struct NativeActiveEnergyBurnedSampleInp
 namespace margelo::nitro::nitrohealth { struct NativeHeartRateSampleInput; }
 // Forward declaration of `NativeBloodPressureSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBloodPressureSampleInput; }
+// Forward declaration of `NativeBloodGlucoseSampleInput` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeBloodGlucoseSampleInput; }
 // Forward declaration of `NativeBodyMassSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBodyMassSampleInput; }
 // Forward declaration of `NativeRestingHeartRateSampleInput` to properly resolve imports.
@@ -213,6 +219,8 @@ namespace margelo::nitro::nitrohealth { struct NativeWorkoutSampleInput; }
 #include "JNativeHeartRateSample.hpp"
 #include "NativeBloodPressureSample.hpp"
 #include "JNativeBloodPressureSample.hpp"
+#include "NativeBloodGlucoseSample.hpp"
+#include "JNativeBloodGlucoseSample.hpp"
 #include "NativeRestingHeartRateSample.hpp"
 #include "JNativeRestingHeartRateSample.hpp"
 #include "NativeHeartRateVariabilitySample.hpp"
@@ -264,6 +272,8 @@ namespace margelo::nitro::nitrohealth { struct NativeWorkoutSampleInput; }
 #include "JNativeHeartRateSamplePage.hpp"
 #include "NativeBloodPressureSamplePage.hpp"
 #include "JNativeBloodPressureSamplePage.hpp"
+#include "NativeBloodGlucoseSamplePage.hpp"
+#include "JNativeBloodGlucoseSamplePage.hpp"
 #include "NativeHeartRateStatistics.hpp"
 #include "JNativeHeartRateStatistics.hpp"
 #include "NativeRestingHeartRateSamplePage.hpp"
@@ -320,6 +330,8 @@ namespace margelo::nitro::nitrohealth { struct NativeWorkoutSampleInput; }
 #include "JNativeHeartRateSampleInput.hpp"
 #include "NativeBloodPressureSampleInput.hpp"
 #include "JNativeBloodPressureSampleInput.hpp"
+#include "NativeBloodGlucoseSampleInput.hpp"
+#include "JNativeBloodGlucoseSampleInput.hpp"
 #include "NativeBodyMassSampleInput.hpp"
 #include "JNativeBodyMassSampleInput.hpp"
 #include "NativeRestingHeartRateSampleInput.hpp"
@@ -646,6 +658,22 @@ namespace margelo::nitro::nitrohealth {
       return __promise;
     }();
   }
+  std::shared_ptr<Promise<NativeBloodGlucoseSamplePage>> JHybridNitroHealthSpec::readBloodGlucose(const NativeHealthDateRangeQuery& query) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<JNativeHealthDateRangeQuery> /* query */)>("readBloodGlucose");
+    auto __result = method(_javaPart, JNativeHealthDateRangeQuery::fromCpp(query));
+    return [&]() {
+      auto __promise = Promise<NativeBloodGlucoseSamplePage>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {
+        auto __result = jni::static_ref_cast<JNativeBloodGlucoseSamplePage>(__boxedResult);
+        __promise->resolve(__result->toCpp());
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
+  }
   std::shared_ptr<Promise<NativeHeartRateStatistics>> JHybridNitroHealthSpec::readHeartRateStatistics(const NativeHealthTimeRangeQuery& query) {
     static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<JNativeHealthTimeRangeQuery> /* query */)>("readHeartRateStatistics");
     auto __result = method(_javaPart, JNativeHealthTimeRangeQuery::fromCpp(query));
@@ -888,6 +916,30 @@ namespace margelo::nitro::nitrohealth {
       for (size_t __i = 0; __i < __size; __i++) {
         const auto& __element = __input[__i];
         auto __elementJni = JNativeBloodPressureSampleInput::fromCpp(__element);
+        __array->setElement(__i, *__elementJni);
+      }
+      return __array;
+    }(samples));
+    return [&]() {
+      auto __promise = Promise<void>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& /* unit */) {
+        __promise->resolve();
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
+  }
+  std::shared_ptr<Promise<void>> JHybridNitroHealthSpec::saveBloodGlucose(const std::vector<NativeBloodGlucoseSampleInput>& samples) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<jni::JArrayClass<JNativeBloodGlucoseSampleInput>> /* samples */)>("saveBloodGlucose");
+    auto __result = method(_javaPart, [&](auto&& __input) {
+      size_t __size = __input.size();
+      jni::local_ref<jni::JArrayClass<JNativeBloodGlucoseSampleInput>> __array = jni::JArrayClass<JNativeBloodGlucoseSampleInput>::newArray(__size);
+      for (size_t __i = 0; __i < __size; __i++) {
+        const auto& __element = __input[__i];
+        auto __elementJni = JNativeBloodGlucoseSampleInput::fromCpp(__element);
         __array->setElement(__i, *__elementJni);
       }
       return __array;

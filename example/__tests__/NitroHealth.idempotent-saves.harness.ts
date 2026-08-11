@@ -2,6 +2,7 @@ import { Platform } from 'react-native'
 import { describe, expect, it } from 'react-native-harness'
 import { NitroHealth } from 'react-native-nitro-health'
 import type {
+  BloodGlucoseSample,
   BloodPressureSample,
   HealthPermission,
   HealthSampleIdentity,
@@ -22,6 +23,10 @@ const workoutReadWritePermissions: HealthPermission[] = [
 const bloodPressureReadWritePermissions: HealthPermission[] = [
   { accessType: 'read', dataType: 'bloodPressure' },
   { accessType: 'write', dataType: 'bloodPressure' },
+]
+const bloodGlucoseReadWritePermissions: HealthPermission[] = [
+  { accessType: 'read', dataType: 'bloodGlucose' },
+  { accessType: 'write', dataType: 'bloodGlucose' },
 ]
 const idempotentInterval = {
   startDate: new Date('2004-06-01T09:00:00.000Z'),
@@ -73,6 +78,19 @@ async function readIdempotentBloodPressure(
     (sample) =>
       sample.date.getTime() === idempotentInterval.startDate.getTime() &&
       expectedSystolic.includes(sample.systolicMmHg)
+  )
+}
+
+async function readIdempotentBloodGlucose(
+  expectedMmolPerLiter: readonly number[]
+): Promise<BloodGlucoseSample[]> {
+  const page = await NitroHealth.readBloodGlucose({ ...idempotentReadRange, limit: 1000 })
+  return page.samples.filter(
+    (sample) =>
+      sample.date.getTime() === idempotentInterval.startDate.getTime() &&
+      expectedMmolPerLiter.some(
+        (expected) => Math.abs(sample.millimolesPerLiter - expected) < 0.001
+      )
   )
 }
 
@@ -334,6 +352,85 @@ describe('NitroHealth idempotent saves (native)', () => {
       }
     } finally {
       await NitroHealth.deleteRecordsByTimeRange('bloodPressure', idempotentReadRange)
+    }
+  })
+
+  it('keeps exactly one blood glucose reading when the same versioned save is retried', async () => {
+    if (!(await hasVerifiedPermissions(bloodGlucoseReadWritePermissions))) {
+      return
+    }
+
+    await NitroHealth.deleteRecordsByTimeRange('bloodGlucose', idempotentReadRange)
+    try {
+      const sample = {
+        date: idempotentInterval.startDate,
+        millimolesPerLiter: 6.1,
+        sync: { id: 'nitro-health-harness-bg-retry', version: 1 },
+      }
+
+      await NitroHealth.saveBloodGlucose([sample])
+      await NitroHealth.saveBloodGlucose([sample])
+
+      const samples = await readIdempotentBloodGlucose([6.1])
+      if (Platform.OS === 'ios' && samples.length === 0) {
+        return
+      }
+
+      expect(samples).toHaveLength(1)
+    } finally {
+      await NitroHealth.deleteRecordsByTimeRange('bloodGlucose', idempotentReadRange)
+    }
+  })
+
+  it('replaces a blood glucose reading at a higher version with platform-specific identity', async () => {
+    if (!(await hasVerifiedPermissions(bloodGlucoseReadWritePermissions))) {
+      return
+    }
+
+    await NitroHealth.deleteRecordsByTimeRange('bloodGlucose', idempotentReadRange)
+    try {
+      const syncId = 'nitro-health-harness-bg-higher-version'
+      await NitroHealth.saveBloodGlucose([
+        {
+          date: idempotentInterval.startDate,
+          millimolesPerLiter: 6.2,
+          sync: { id: syncId, version: 1 },
+        },
+      ])
+
+      const initial = await readIdempotentBloodGlucose([6.2, 6.3])
+      if (Platform.OS === 'ios' && initial.length === 0) {
+        return
+      }
+      expect(initial).toHaveLength(1)
+      const initialSample = initial[0]
+      if (initialSample === undefined) {
+        return
+      }
+
+      await NitroHealth.saveBloodGlucose([
+        {
+          date: idempotentInterval.startDate,
+          millimolesPerLiter: 6.3,
+          sync: { id: syncId, version: 2 },
+        },
+      ])
+
+      const replacement = await readIdempotentBloodGlucose([6.2, 6.3])
+      expect(replacement).toHaveLength(1)
+      const replacementSample = replacement[0]
+      if (replacementSample === undefined) {
+        return
+      }
+
+      expect(Math.abs(replacementSample.millimolesPerLiter - 6.3)).toBeLessThan(0.001)
+      if (Platform.OS === 'android') {
+        expect(recordId(replacementSample.identity)).toBe(recordId(initialSample.identity))
+      } else if (Platform.OS === 'ios') {
+        expect(recordId(replacementSample.identity)).not.toBe(recordId(initialSample.identity))
+      }
+    } finally {
+      await NitroHealth.deleteRecordsByTimeRange('bloodGlucose', idempotentReadRange)
     }
   })
 

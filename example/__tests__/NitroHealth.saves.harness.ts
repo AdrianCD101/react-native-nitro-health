@@ -499,6 +499,47 @@ describe('NitroHealth saves (native)', () => {
     })
   })
 
+  describe('blood glucose', () => {
+    it('rejects saving blood glucose when write permission is not granted', async () => {
+      if (await hasVerifiedPermissions([{ accessType: 'write', dataType: 'bloodGlucose' }])) {
+        return
+      }
+
+      await expect(
+        NitroHealth.saveBloodGlucose([{ date: saveInterval.startDate, millimolesPerLiter: 5.4 }])
+      ).rejects.toThrow(/permission/i)
+    })
+
+    it('round-trips a saved reading in mmol/L when authorized', async () => {
+      const authorized = await hasVerifiedPermissions([
+        { accessType: 'write', dataType: 'bloodGlucose' },
+        { accessType: 'read', dataType: 'bloodGlucose' },
+      ])
+
+      if (!authorized) {
+        return
+      }
+
+      await NitroHealth.saveBloodGlucose([
+        { date: saveInterval.startDate, millimolesPerLiter: 5.4 },
+      ])
+
+      const page = await NitroHealth.readBloodGlucose(saveReadRange)
+
+      if (isInconclusiveRead(page.samples)) {
+        return
+      }
+
+      // HealthKit stores glucose in its composed mole unit, so allow float round-tripping.
+      const matches = page.samples.filter(
+        (sample) => Math.abs(sample.millimolesPerLiter - 5.4) < 0.001
+      )
+
+      expect(matches.length).toBeGreaterThanOrEqual(1)
+      expect(matches[0]?.identity.kind).toBe('record')
+    })
+  })
+
   describe('height', () => {
     it('rejects saving height when write permission is not granted', async () => {
       if (await hasVerifiedPermissions([{ accessType: 'write', dataType: 'height' }])) {

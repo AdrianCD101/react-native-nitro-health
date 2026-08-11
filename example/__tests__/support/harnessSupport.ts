@@ -25,6 +25,12 @@ export const bloodPressureReadPermission: HealthPermission[] = [
 export const bloodPressureWritePermission: HealthPermission[] = [
   { accessType: 'write', dataType: 'bloodPressure' },
 ]
+export const bloodGlucoseReadPermission: HealthPermission[] = [
+  { accessType: 'read', dataType: 'bloodGlucose' },
+]
+export const bloodGlucoseWritePermission: HealthPermission[] = [
+  { accessType: 'write', dataType: 'bloodGlucose' },
+]
 export const sleepReadPermission: HealthPermission[] = [{ accessType: 'read', dataType: 'sleep' }]
 export const sleepWritePermission: HealthPermission[] = [{ accessType: 'write', dataType: 'sleep' }]
 export const bodyMassReadPermission: HealthPermission[] = [

@@ -1,20 +1,24 @@
 package com.nitrohealth
 
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
+import androidx.health.connect.client.records.BloodGlucoseRecord
 import androidx.health.connect.client.records.BloodPressureRecord
 import androidx.health.connect.client.records.DistanceRecord
 import androidx.health.connect.client.records.HeartRateRecord
+import androidx.health.connect.client.records.MealType
 import androidx.health.connect.client.records.HeightRecord
 import androidx.health.connect.client.records.OxygenSaturationRecord
 import androidx.health.connect.client.records.RestingHeartRateRecord
 import androidx.health.connect.client.records.StepsRecord
 import androidx.health.connect.client.records.WeightRecord
+import androidx.health.connect.client.units.BloodGlucose
 import androidx.health.connect.client.units.Energy
 import androidx.health.connect.client.units.Length
 import androidx.health.connect.client.units.Mass
 import androidx.health.connect.client.units.Percentage
 import androidx.health.connect.client.units.Pressure
 import com.margelo.nitro.nitrohealth.NativeActiveEnergyBurnedSampleInput
+import com.margelo.nitro.nitrohealth.NativeBloodGlucoseSampleInput
 import com.margelo.nitro.nitrohealth.NativeBloodPressureSampleInput
 import com.margelo.nitro.nitrohealth.NativeBodyMassSampleInput
 import com.margelo.nitro.nitrohealth.NativeDistanceSampleInput
@@ -104,11 +108,29 @@ internal fun toBloodPressureRecords(
             zoneOffset = null,
             systolic = Pressure.millimetersOfMercury(sample.systolicMmHg),
             diastolic = Pressure.millimetersOfMercury(sample.diastolicMmHg),
-            // The unified sample is flat in v1; store the explicit unknown constants rather
-            // than surfacing Android-only enum fields HealthKit cannot represent.
+            // Deferred to metadata passthrough (issue #70); HealthKit cannot represent these
+            // Android-only enum fields, so store the explicit unknown constants.
             bodyPosition = BloodPressureRecord.BODY_POSITION_UNKNOWN,
             measurementLocation = BloodPressureRecord.MEASUREMENT_LOCATION_UNKNOWN,
             metadata = makeSampleMetadata(sample.syncId, sample.syncVersion)
+        )
+    }
+}
+
+internal fun toBloodGlucoseRecords(
+    samples: Array<NativeBloodGlucoseSampleInput>
+): List<BloodGlucoseRecord> {
+    return samples.map { sample ->
+        BloodGlucoseRecord(
+            time = Instant.ofEpochMilli(sample.timeMs.toLong()),
+            zoneOffset = null,
+            metadata = makeSampleMetadata(sample.syncId, sample.syncVersion),
+            level = BloodGlucose.millimolesPerLiter(sample.millimolesPerLiter),
+            // Deferred to metadata passthrough (issue #69); iOS has no counterpart for
+            // these fields, so store the explicit unknown constants.
+            specimenSource = BloodGlucoseRecord.SPECIMEN_SOURCE_UNKNOWN,
+            mealType = MealType.MEAL_TYPE_UNKNOWN,
+            relationToMeal = BloodGlucoseRecord.RELATION_TO_MEAL_UNKNOWN
         )
     }
 }

@@ -147,6 +147,41 @@ describe('NitroHealth breadth data types contract', () => {
     })
   })
 
+  describe('readBloodGlucose', () => {
+    it('maps one native sample and leaves the mmol/L value untouched', async () => {
+      const startDate = new Date('2026-01-01T00:00:00.000Z')
+      const endDate = new Date('2026-01-02T00:00:00.000Z')
+      const timeMs = new Date('2026-01-01T09:00:00.000Z').getTime()
+      mockNitroHealth.readBloodGlucose.mockResolvedValue({
+        samples: [
+          {
+            ...nativeRecordMetadata('bg-record', 'com.example.meter', 'Example Meter'),
+            timeMs,
+            millimolesPerLiter: 5.4,
+          },
+        ],
+      })
+
+      const result = await NitroHealth.readBloodGlucose({ startDate, endDate })
+
+      expect(mockNitroHealth.readBloodGlucose).toHaveBeenCalledWith({
+        startTimeMs: startDate.getTime(),
+        endTimeMs: endDate.getTime(),
+        limit: 1000,
+        ascending: true,
+      })
+      expect(result.samples).toHaveLength(1)
+      expect(result.samples[0].identity).toEqual({ kind: 'record', id: 'bg-record' })
+      expect(result.samples[0].date).toBeInstanceOf(Date)
+      expect(result.samples[0].date.getTime()).toBe(timeMs)
+      expect(result.samples[0].millimolesPerLiter).toBe(5.4)
+      expect(result.samples[0].origin).toEqual({
+        identifier: 'com.example.meter',
+        displayName: 'Example Meter',
+      })
+    })
+  })
+
   describe('readOxygenSaturation', () => {
     it('leaves the percentage value untouched (no JS-side unit conversion)', async () => {
       const startDate = new Date('2026-01-01T00:00:00.000Z')
@@ -306,6 +341,53 @@ describe('NitroHealth breadth data types contract', () => {
     })
   })
 
+  describe('saveBloodGlucose', () => {
+    it('saves through the Nitro hybrid object', async () => {
+      const date = new Date('2026-01-01T09:00:00.000Z')
+      mockNitroHealth.saveBloodGlucose.mockResolvedValue(undefined)
+
+      await expect(
+        NitroHealth.saveBloodGlucose([{ date, millimolesPerLiter: 5.4 }])
+      ).resolves.toBeUndefined()
+
+      expect(mockNitroHealth.saveBloodGlucose).toHaveBeenCalledWith([
+        { timeMs: date.getTime(), millimolesPerLiter: 5.4 },
+      ])
+    })
+
+    it('rejects millimolesPerLiter outside 0.5-50 before crossing the native boundary', async () => {
+      const date = new Date('2026-01-01T09:00:00.000Z')
+
+      for (const millimolesPerLiter of [0.4, 50.1, Number.NaN, Number.POSITIVE_INFINITY]) {
+        await expect(NitroHealth.saveBloodGlucose([{ date, millimolesPerLiter }])).rejects.toThrow(
+          'samples[0]: millimolesPerLiter must be between 0.5 and 50'
+        )
+      }
+
+      expect(mockNitroHealth.saveBloodGlucose).not.toHaveBeenCalled()
+    })
+
+    it('accepts the inclusive bound values', async () => {
+      const date = new Date('2026-01-01T09:00:00.000Z')
+      mockNitroHealth.saveBloodGlucose.mockResolvedValue(undefined)
+
+      await expect(
+        NitroHealth.saveBloodGlucose([{ date, millimolesPerLiter: 0.5 }])
+      ).resolves.toBeUndefined()
+      await expect(
+        NitroHealth.saveBloodGlucose([{ date, millimolesPerLiter: 50 }])
+      ).resolves.toBeUndefined()
+    })
+
+    it('rejects an invalid sample date before crossing the native boundary', async () => {
+      await expect(
+        NitroHealth.saveBloodGlucose([{ date: new Date(Number.NaN), millimolesPerLiter: 5.4 }])
+      ).rejects.toThrow('samples[0]: a valid date is required')
+
+      expect(mockNitroHealth.saveBloodGlucose).not.toHaveBeenCalled()
+    })
+  })
+
   describe('saveOxygenSaturation', () => {
     it('saves through the Nitro hybrid object', async () => {
       const date = new Date('2026-01-01T09:00:00.000Z')
@@ -453,6 +535,22 @@ describe('NitroHealth breadth data types contract', () => {
           metrics: ['avg'],
         })
       ).rejects.toThrow(`readStatistics does not support the 'bloodPressure' data type`)
+
+      expect(mockNitroHealth.readStatistics).not.toHaveBeenCalled()
+    })
+
+    it('rejects bloodGlucose entirely before crossing the native boundary', async () => {
+      const startDate = new Date('2026-01-01T00:00:00.000Z')
+      const endDate = new Date('2026-01-08T00:00:00.000Z')
+
+      await expect(
+        NitroHealth.readStatistics('bloodGlucose', {
+          startDate,
+          endDate,
+          bucket: 'day',
+          metrics: ['avg'],
+        })
+      ).rejects.toThrow(`readStatistics does not support the 'bloodGlucose' data type`)
 
       expect(mockNitroHealth.readStatistics).not.toHaveBeenCalled()
     })

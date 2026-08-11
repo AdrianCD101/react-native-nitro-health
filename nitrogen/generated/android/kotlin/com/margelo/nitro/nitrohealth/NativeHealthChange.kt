@@ -35,6 +35,9 @@ data class NativeHealthChange(
   val bloodPressureSamples: Array<NativeBloodPressureSample>?,
   @DoNotStrip
   @Keep
+  val bloodGlucoseSamples: Array<NativeBloodGlucoseSample>?,
+  @DoNotStrip
+  @Keep
   val restingHeartRateSamples: Array<NativeRestingHeartRateSample>?,
   @DoNotStrip
   @Keep
@@ -67,8 +70,8 @@ data class NativeHealthChange(
   /**
    * Create a new instance of NativeHealthChange from Kotlin
    */
-  constructor(type: String, recordId: String, stepSamples: Array<NativeStepSample>?, heartRateSamples: Array<NativeHeartRateSample>?, bloodPressureSamples: Array<NativeBloodPressureSample>?, restingHeartRateSamples: Array<NativeRestingHeartRateSample>?, heartRateVariabilitySamples: Array<NativeHeartRateVariabilitySample>?, distanceSamples: Array<NativeDistanceSample>?, activeEnergyBurnedSamples: Array<NativeActiveEnergyBurnedSample>?, oxygenSaturationSamples: Array<NativeOxygenSaturationSample>?, heightSamples: Array<NativeHeightSample>?, sleepSamples: Array<NativeSleepSample>?, bodyMassSamples: Array<NativeBodyMassSample>?, workoutSamples: Array<NativeWorkoutSample>?, dummyNonEquatable: (() -> Unit)?):
-         this(type, recordId, stepSamples, heartRateSamples, bloodPressureSamples, restingHeartRateSamples, heartRateVariabilitySamples, distanceSamples, activeEnergyBurnedSamples, oxygenSaturationSamples, heightSamples, sleepSamples, bodyMassSamples, workoutSamples, dummyNonEquatable?.let { Func_void_java(it) })
+  constructor(type: String, recordId: String, stepSamples: Array<NativeStepSample>?, heartRateSamples: Array<NativeHeartRateSample>?, bloodPressureSamples: Array<NativeBloodPressureSample>?, bloodGlucoseSamples: Array<NativeBloodGlucoseSample>?, restingHeartRateSamples: Array<NativeRestingHeartRateSample>?, heartRateVariabilitySamples: Array<NativeHeartRateVariabilitySample>?, distanceSamples: Array<NativeDistanceSample>?, activeEnergyBurnedSamples: Array<NativeActiveEnergyBurnedSample>?, oxygenSaturationSamples: Array<NativeOxygenSaturationSample>?, heightSamples: Array<NativeHeightSample>?, sleepSamples: Array<NativeSleepSample>?, bodyMassSamples: Array<NativeBodyMassSample>?, workoutSamples: Array<NativeWorkoutSample>?, dummyNonEquatable: (() -> Unit)?):
+         this(type, recordId, stepSamples, heartRateSamples, bloodPressureSamples, bloodGlucoseSamples, restingHeartRateSamples, heartRateVariabilitySamples, distanceSamples, activeEnergyBurnedSamples, oxygenSaturationSamples, heightSamples, sleepSamples, bodyMassSamples, workoutSamples, dummyNonEquatable?.let { Func_void_java(it) })
 
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
@@ -78,6 +81,7 @@ data class NativeHealthChange(
       && Objects.deepEquals(this.stepSamples, other.stepSamples)
       && Objects.deepEquals(this.heartRateSamples, other.heartRateSamples)
       && Objects.deepEquals(this.bloodPressureSamples, other.bloodPressureSamples)
+      && Objects.deepEquals(this.bloodGlucoseSamples, other.bloodGlucoseSamples)
       && Objects.deepEquals(this.restingHeartRateSamples, other.restingHeartRateSamples)
       && Objects.deepEquals(this.heartRateVariabilitySamples, other.heartRateVariabilitySamples)
       && Objects.deepEquals(this.distanceSamples, other.distanceSamples)
@@ -97,6 +101,7 @@ data class NativeHealthChange(
       stepSamples,
       heartRateSamples,
       bloodPressureSamples,
+      bloodGlucoseSamples,
       restingHeartRateSamples,
       heartRateVariabilitySamples,
       distanceSamples,
@@ -118,8 +123,8 @@ data class NativeHealthChange(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(type: String, recordId: String, stepSamples: Array<NativeStepSample>?, heartRateSamples: Array<NativeHeartRateSample>?, bloodPressureSamples: Array<NativeBloodPressureSample>?, restingHeartRateSamples: Array<NativeRestingHeartRateSample>?, heartRateVariabilitySamples: Array<NativeHeartRateVariabilitySample>?, distanceSamples: Array<NativeDistanceSample>?, activeEnergyBurnedSamples: Array<NativeActiveEnergyBurnedSample>?, oxygenSaturationSamples: Array<NativeOxygenSaturationSample>?, heightSamples: Array<NativeHeightSample>?, sleepSamples: Array<NativeSleepSample>?, bodyMassSamples: Array<NativeBodyMassSample>?, workoutSamples: Array<NativeWorkoutSample>?, dummyNonEquatable: Func_void?): NativeHealthChange {
-      return NativeHealthChange(type, recordId, stepSamples, heartRateSamples, bloodPressureSamples, restingHeartRateSamples, heartRateVariabilitySamples, distanceSamples, activeEnergyBurnedSamples, oxygenSaturationSamples, heightSamples, sleepSamples, bodyMassSamples, workoutSamples, dummyNonEquatable)
+    private fun fromCpp(type: String, recordId: String, stepSamples: Array<NativeStepSample>?, heartRateSamples: Array<NativeHeartRateSample>?, bloodPressureSamples: Array<NativeBloodPressureSample>?, bloodGlucoseSamples: Array<NativeBloodGlucoseSample>?, restingHeartRateSamples: Array<NativeRestingHeartRateSample>?, heartRateVariabilitySamples: Array<NativeHeartRateVariabilitySample>?, distanceSamples: Array<NativeDistanceSample>?, activeEnergyBurnedSamples: Array<NativeActiveEnergyBurnedSample>?, oxygenSaturationSamples: Array<NativeOxygenSaturationSample>?, heightSamples: Array<NativeHeightSample>?, sleepSamples: Array<NativeSleepSample>?, bodyMassSamples: Array<NativeBodyMassSample>?, workoutSamples: Array<NativeWorkoutSample>?, dummyNonEquatable: Func_void?): NativeHealthChange {
+      return NativeHealthChange(type, recordId, stepSamples, heartRateSamples, bloodPressureSamples, bloodGlucoseSamples, restingHeartRateSamples, heartRateVariabilitySamples, distanceSamples, activeEnergyBurnedSamples, oxygenSaturationSamples, heightSamples, sleepSamples, bodyMassSamples, workoutSamples, dummyNonEquatable)
     }
   }
 }
