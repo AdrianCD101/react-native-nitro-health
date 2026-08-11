@@ -35,6 +35,9 @@ public protocol HybridNitroHealthSpec_protocol: HybridObject {
   func readBloodGlucose(query: NativeHealthDateRangeQuery) throws -> Promise<NativeBloodGlucoseSamplePage>
   func readBodyTemperature(query: NativeHealthDateRangeQuery) throws -> Promise<NativeBodyTemperatureSamplePage>
   func readRespiratoryRate(query: NativeHealthDateRangeQuery) throws -> Promise<NativeRespiratoryRateSamplePage>
+  func readBodyFat(query: NativeHealthDateRangeQuery) throws -> Promise<NativeBodyFatSamplePage>
+  func readLeanBodyMass(query: NativeHealthDateRangeQuery) throws -> Promise<NativeLeanBodyMassSamplePage>
+  func readBasalBodyTemperature(query: NativeHealthDateRangeQuery) throws -> Promise<NativeBasalBodyTemperatureSamplePage>
   func readHeartRateStatistics(query: NativeHealthTimeRangeQuery) throws -> Promise<NativeHeartRateStatistics>
   func readRestingHeartRate(query: NativeHealthDateRangeQuery) throws -> Promise<NativeRestingHeartRateSamplePage>
   func readHeartRateVariability(query: NativeHealthDateRangeQuery) throws -> Promise<NativeHeartRateVariabilitySamplePage>
@@ -51,6 +54,9 @@ public protocol HybridNitroHealthSpec_protocol: HybridObject {
   func saveBloodGlucose(samples: [NativeBloodGlucoseSampleInput]) throws -> Promise<Void>
   func saveBodyTemperature(samples: [NativeBodyTemperatureSampleInput]) throws -> Promise<Void>
   func saveRespiratoryRate(samples: [NativeRespiratoryRateSampleInput]) throws -> Promise<Void>
+  func saveBodyFat(samples: [NativeBodyFatSampleInput]) throws -> Promise<Void>
+  func saveLeanBodyMass(samples: [NativeLeanBodyMassSampleInput]) throws -> Promise<Void>
+  func saveBasalBodyTemperature(samples: [NativeBasalBodyTemperatureSampleInput]) throws -> Promise<Void>
   func saveBodyMass(samples: [NativeBodyMassSampleInput]) throws -> Promise<Void>
   func saveRestingHeartRate(samples: [NativeRestingHeartRateSampleInput]) throws -> Promise<Void>
   func saveOxygenSaturation(samples: [NativeOxygenSaturationSampleInput]) throws -> Promise<Void>

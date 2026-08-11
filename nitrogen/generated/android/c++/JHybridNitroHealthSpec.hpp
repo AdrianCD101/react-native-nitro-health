@@ -76,6 +76,9 @@ namespace margelo::nitro::nitrohealth {
     std::shared_ptr<Promise<NativeBloodGlucoseSamplePage>> readBloodGlucose(const NativeHealthDateRangeQuery& query) override;
     std::shared_ptr<Promise<NativeBodyTemperatureSamplePage>> readBodyTemperature(const NativeHealthDateRangeQuery& query) override;
     std::shared_ptr<Promise<NativeRespiratoryRateSamplePage>> readRespiratoryRate(const NativeHealthDateRangeQuery& query) override;
+    std::shared_ptr<Promise<NativeBodyFatSamplePage>> readBodyFat(const NativeHealthDateRangeQuery& query) override;
+    std::shared_ptr<Promise<NativeLeanBodyMassSamplePage>> readLeanBodyMass(const NativeHealthDateRangeQuery& query) override;
+    std::shared_ptr<Promise<NativeBasalBodyTemperatureSamplePage>> readBasalBodyTemperature(const NativeHealthDateRangeQuery& query) override;
     std::shared_ptr<Promise<NativeHeartRateStatistics>> readHeartRateStatistics(const NativeHealthTimeRangeQuery& query) override;
     std::shared_ptr<Promise<NativeRestingHeartRateSamplePage>> readRestingHeartRate(const NativeHealthDateRangeQuery& query) override;
     std::shared_ptr<Promise<NativeHeartRateVariabilitySamplePage>> readHeartRateVariability(const NativeHealthDateRangeQuery& query) override;
@@ -92,6 +95,9 @@ namespace margelo::nitro::nitrohealth {
     std::shared_ptr<Promise<void>> saveBloodGlucose(const std::vector<NativeBloodGlucoseSampleInput>& samples) override;
     std::shared_ptr<Promise<void>> saveBodyTemperature(const std::vector<NativeBodyTemperatureSampleInput>& samples) override;
     std::shared_ptr<Promise<void>> saveRespiratoryRate(const std::vector<NativeRespiratoryRateSampleInput>& samples) override;
+    std::shared_ptr<Promise<void>> saveBodyFat(const std::vector<NativeBodyFatSampleInput>& samples) override;
+    std::shared_ptr<Promise<void>> saveLeanBodyMass(const std::vector<NativeLeanBodyMassSampleInput>& samples) override;
+    std::shared_ptr<Promise<void>> saveBasalBodyTemperature(const std::vector<NativeBasalBodyTemperatureSampleInput>& samples) override;
     std::shared_ptr<Promise<void>> saveBodyMass(const std::vector<NativeBodyMassSampleInput>& samples) override;
     std::shared_ptr<Promise<void>> saveRestingHeartRate(const std::vector<NativeRestingHeartRateSampleInput>& samples) override;
     std::shared_ptr<Promise<void>> saveOxygenSaturation(const std::vector<NativeOxygenSaturationSampleInput>& samples) override;

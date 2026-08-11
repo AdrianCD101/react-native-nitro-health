@@ -252,6 +252,111 @@ describe('NitroHealth breadth data types contract', () => {
     })
   })
 
+  describe('readBodyFat', () => {
+    it('maps one native sample and leaves the percentage value untouched at the JS layer', async () => {
+      const startDate = new Date('2026-01-01T00:00:00.000Z')
+      const endDate = new Date('2026-01-02T00:00:00.000Z')
+      const timeMs = new Date('2026-01-01T09:00:00.000Z').getTime()
+      mockNitroHealth.readBodyFat.mockResolvedValue({
+        samples: [
+          {
+            ...nativeRecordMetadata('bf-record', 'com.example.scale', 'Example Scale'),
+            timeMs,
+            percentage: 18.5,
+          },
+        ],
+      })
+
+      const result = await NitroHealth.readBodyFat({ startDate, endDate })
+
+      expect(mockNitroHealth.readBodyFat).toHaveBeenCalledWith({
+        startTimeMs: startDate.getTime(),
+        endTimeMs: endDate.getTime(),
+        limit: 1000,
+        ascending: true,
+      })
+      expect(result.samples).toHaveLength(1)
+      expect(result.samples[0].identity).toEqual({ kind: 'record', id: 'bf-record' })
+      expect(result.samples[0].date).toBeInstanceOf(Date)
+      expect(result.samples[0].date.getTime()).toBe(timeMs)
+      expect(result.samples[0].percentage).toBe(18.5)
+      expect(result.samples[0].origin).toEqual({
+        identifier: 'com.example.scale',
+        displayName: 'Example Scale',
+      })
+    })
+  })
+
+  describe('readLeanBodyMass', () => {
+    it('maps one native sample and leaves the kilograms value untouched', async () => {
+      const startDate = new Date('2026-01-01T00:00:00.000Z')
+      const endDate = new Date('2026-01-02T00:00:00.000Z')
+      const timeMs = new Date('2026-01-01T09:00:00.000Z').getTime()
+      mockNitroHealth.readLeanBodyMass.mockResolvedValue({
+        samples: [
+          {
+            ...nativeRecordMetadata('lbm-record', 'com.example.scale', 'Example Scale'),
+            timeMs,
+            kilograms: 55.4,
+          },
+        ],
+      })
+
+      const result = await NitroHealth.readLeanBodyMass({ startDate, endDate })
+
+      expect(mockNitroHealth.readLeanBodyMass).toHaveBeenCalledWith({
+        startTimeMs: startDate.getTime(),
+        endTimeMs: endDate.getTime(),
+        limit: 1000,
+        ascending: true,
+      })
+      expect(result.samples).toHaveLength(1)
+      expect(result.samples[0].identity).toEqual({ kind: 'record', id: 'lbm-record' })
+      expect(result.samples[0].date).toBeInstanceOf(Date)
+      expect(result.samples[0].date.getTime()).toBe(timeMs)
+      expect(result.samples[0].kilograms).toBe(55.4)
+      expect(result.samples[0].origin).toEqual({
+        identifier: 'com.example.scale',
+        displayName: 'Example Scale',
+      })
+    })
+  })
+
+  describe('readBasalBodyTemperature', () => {
+    it('maps one native sample and leaves the celsius value untouched', async () => {
+      const startDate = new Date('2026-01-01T00:00:00.000Z')
+      const endDate = new Date('2026-01-02T00:00:00.000Z')
+      const timeMs = new Date('2026-01-01T06:30:00.000Z').getTime()
+      mockNitroHealth.readBasalBodyTemperature.mockResolvedValue({
+        samples: [
+          {
+            ...nativeRecordMetadata('bbt-record', 'com.example.thermometer', 'Example Thermometer'),
+            timeMs,
+            celsius: 36.4,
+          },
+        ],
+      })
+
+      const result = await NitroHealth.readBasalBodyTemperature({ startDate, endDate })
+
+      expect(mockNitroHealth.readBasalBodyTemperature).toHaveBeenCalledWith({
+        startTimeMs: startDate.getTime(),
+        endTimeMs: endDate.getTime(),
+        limit: 1000,
+        ascending: true,
+      })
+      expect(result.samples).toHaveLength(1)
+      expect(result.samples[0].identity).toEqual({ kind: 'record', id: 'bbt-record' })
+      expect(result.samples[0].date).toBeInstanceOf(Date)
+      expect(result.samples[0].date.getTime()).toBe(timeMs)
+      expect(result.samples[0].celsius).toBe(36.4)
+      expect(result.samples[0].origin).toEqual({
+        identifier: 'com.example.thermometer',
+        displayName: 'Example Thermometer',
+      })
+    })
+  })
+
   describe('readOxygenSaturation', () => {
     it('leaves the percentage value untouched (no JS-side unit conversion)', async () => {
       const startDate = new Date('2026-01-01T00:00:00.000Z')
@@ -552,6 +657,139 @@ describe('NitroHealth breadth data types contract', () => {
     })
   })
 
+  describe('saveBodyFat', () => {
+    it('saves through the Nitro hybrid object', async () => {
+      const date = new Date('2026-01-01T09:00:00.000Z')
+      mockNitroHealth.saveBodyFat.mockResolvedValue(undefined)
+
+      await expect(NitroHealth.saveBodyFat([{ date, percentage: 18.5 }])).resolves.toBeUndefined()
+
+      expect(mockNitroHealth.saveBodyFat).toHaveBeenCalledWith([
+        { timeMs: date.getTime(), percentage: 18.5 },
+      ])
+    })
+
+    it('rejects percentage outside 0-100 before crossing the native boundary', async () => {
+      const date = new Date('2026-01-01T09:00:00.000Z')
+
+      for (const percentage of [-1, 100.1, Number.NaN, Number.POSITIVE_INFINITY]) {
+        await expect(NitroHealth.saveBodyFat([{ date, percentage }])).rejects.toThrow(
+          'samples[0]: percentage must be between 0 and 100'
+        )
+      }
+
+      expect(mockNitroHealth.saveBodyFat).not.toHaveBeenCalled()
+    })
+
+    it('accepts the inclusive bound values', async () => {
+      const date = new Date('2026-01-01T09:00:00.000Z')
+      mockNitroHealth.saveBodyFat.mockResolvedValue(undefined)
+
+      await expect(NitroHealth.saveBodyFat([{ date, percentage: 0 }])).resolves.toBeUndefined()
+      await expect(NitroHealth.saveBodyFat([{ date, percentage: 100 }])).resolves.toBeUndefined()
+    })
+
+    it('rejects an invalid sample date before crossing the native boundary', async () => {
+      await expect(
+        NitroHealth.saveBodyFat([{ date: new Date(Number.NaN), percentage: 18.5 }])
+      ).rejects.toThrow('samples[0]: a valid date is required')
+
+      expect(mockNitroHealth.saveBodyFat).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('saveLeanBodyMass', () => {
+    it('saves through the Nitro hybrid object', async () => {
+      const date = new Date('2026-01-01T09:00:00.000Z')
+      mockNitroHealth.saveLeanBodyMass.mockResolvedValue(undefined)
+
+      await expect(
+        NitroHealth.saveLeanBodyMass([{ date, kilograms: 55.4 }])
+      ).resolves.toBeUndefined()
+
+      expect(mockNitroHealth.saveLeanBodyMass).toHaveBeenCalledWith([
+        { timeMs: date.getTime(), kilograms: 55.4 },
+      ])
+    })
+
+    it('rejects non-positive kilograms before crossing the native boundary', async () => {
+      const date = new Date('2026-01-01T09:00:00.000Z')
+
+      for (const kilograms of [0, -1, Number.NaN, Number.NEGATIVE_INFINITY]) {
+        await expect(NitroHealth.saveLeanBodyMass([{ date, kilograms }])).rejects.toThrow(
+          'samples[0]: kilograms must be greater than 0'
+        )
+      }
+
+      expect(mockNitroHealth.saveLeanBodyMass).not.toHaveBeenCalled()
+    })
+
+    it('rejects kilograms above the Health Connect ceiling', async () => {
+      const date = new Date('2026-01-01T09:00:00.000Z')
+
+      await expect(NitroHealth.saveLeanBodyMass([{ date, kilograms: 1000.1 }])).rejects.toThrow(
+        'samples[0]: kilograms must not exceed 1000'
+      )
+
+      expect(mockNitroHealth.saveLeanBodyMass).not.toHaveBeenCalled()
+    })
+
+    it('rejects an invalid sample date before crossing the native boundary', async () => {
+      await expect(
+        NitroHealth.saveLeanBodyMass([{ date: new Date(Number.NaN), kilograms: 55.4 }])
+      ).rejects.toThrow('samples[0]: a valid date is required')
+
+      expect(mockNitroHealth.saveLeanBodyMass).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('saveBasalBodyTemperature', () => {
+    it('saves through the Nitro hybrid object', async () => {
+      const date = new Date('2026-01-01T06:30:00.000Z')
+      mockNitroHealth.saveBasalBodyTemperature.mockResolvedValue(undefined)
+
+      await expect(
+        NitroHealth.saveBasalBodyTemperature([{ date, celsius: 36.4 }])
+      ).resolves.toBeUndefined()
+
+      expect(mockNitroHealth.saveBasalBodyTemperature).toHaveBeenCalledWith([
+        { timeMs: date.getTime(), celsius: 36.4 },
+      ])
+    })
+
+    it('rejects celsius outside 20-45 before crossing the native boundary', async () => {
+      const date = new Date('2026-01-01T06:30:00.000Z')
+
+      for (const celsius of [19, 45.1, Number.NaN, Number.POSITIVE_INFINITY]) {
+        await expect(NitroHealth.saveBasalBodyTemperature([{ date, celsius }])).rejects.toThrow(
+          'samples[0]: celsius must be between 20 and 45'
+        )
+      }
+
+      expect(mockNitroHealth.saveBasalBodyTemperature).not.toHaveBeenCalled()
+    })
+
+    it('accepts the inclusive bound values', async () => {
+      const date = new Date('2026-01-01T06:30:00.000Z')
+      mockNitroHealth.saveBasalBodyTemperature.mockResolvedValue(undefined)
+
+      await expect(
+        NitroHealth.saveBasalBodyTemperature([{ date, celsius: 20 }])
+      ).resolves.toBeUndefined()
+      await expect(
+        NitroHealth.saveBasalBodyTemperature([{ date, celsius: 45 }])
+      ).resolves.toBeUndefined()
+    })
+
+    it('rejects an invalid sample date before crossing the native boundary', async () => {
+      await expect(
+        NitroHealth.saveBasalBodyTemperature([{ date: new Date(Number.NaN), celsius: 36.4 }])
+      ).rejects.toThrow('samples[0]: a valid date is required')
+
+      expect(mockNitroHealth.saveBasalBodyTemperature).not.toHaveBeenCalled()
+    })
+  })
+
   describe('saveOxygenSaturation', () => {
     it('saves through the Nitro hybrid object', async () => {
       const date = new Date('2026-01-01T09:00:00.000Z')
@@ -747,6 +985,54 @@ describe('NitroHealth breadth data types contract', () => {
           metrics: ['avg'],
         })
       ).rejects.toThrow(`readStatistics does not support the 'respiratoryRate' data type`)
+
+      expect(mockNitroHealth.readStatistics).not.toHaveBeenCalled()
+    })
+
+    it('rejects bodyFat entirely before crossing the native boundary', async () => {
+      const startDate = new Date('2026-01-01T00:00:00.000Z')
+      const endDate = new Date('2026-01-08T00:00:00.000Z')
+
+      await expect(
+        NitroHealth.readStatistics('bodyFat', {
+          startDate,
+          endDate,
+          bucket: 'day',
+          metrics: ['avg'],
+        })
+      ).rejects.toThrow(`readStatistics does not support the 'bodyFat' data type`)
+
+      expect(mockNitroHealth.readStatistics).not.toHaveBeenCalled()
+    })
+
+    it('rejects leanBodyMass entirely before crossing the native boundary', async () => {
+      const startDate = new Date('2026-01-01T00:00:00.000Z')
+      const endDate = new Date('2026-01-08T00:00:00.000Z')
+
+      await expect(
+        NitroHealth.readStatistics('leanBodyMass', {
+          startDate,
+          endDate,
+          bucket: 'day',
+          metrics: ['avg'],
+        })
+      ).rejects.toThrow(`readStatistics does not support the 'leanBodyMass' data type`)
+
+      expect(mockNitroHealth.readStatistics).not.toHaveBeenCalled()
+    })
+
+    it('rejects basalBodyTemperature entirely before crossing the native boundary', async () => {
+      const startDate = new Date('2026-01-01T00:00:00.000Z')
+      const endDate = new Date('2026-01-08T00:00:00.000Z')
+
+      await expect(
+        NitroHealth.readStatistics('basalBodyTemperature', {
+          startDate,
+          endDate,
+          bucket: 'day',
+          metrics: ['avg'],
+        })
+      ).rejects.toThrow(`readStatistics does not support the 'basalBodyTemperature' data type`)
 
       expect(mockNitroHealth.readStatistics).not.toHaveBeenCalled()
     })

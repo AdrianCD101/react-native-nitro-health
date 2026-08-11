@@ -12,8 +12,10 @@
 
 #include "JFunc_void.hpp"
 #include "JNativeActiveEnergyBurnedSample.hpp"
+#include "JNativeBasalBodyTemperatureSample.hpp"
 #include "JNativeBloodGlucoseSample.hpp"
 #include "JNativeBloodPressureSample.hpp"
+#include "JNativeBodyFatSample.hpp"
 #include "JNativeBodyMassSample.hpp"
 #include "JNativeBodyTemperatureSample.hpp"
 #include "JNativeDistanceSample.hpp"
@@ -26,6 +28,7 @@
 #include "JNativeHeartRateSample.hpp"
 #include "JNativeHeartRateVariabilitySample.hpp"
 #include "JNativeHeightSample.hpp"
+#include "JNativeLeanBodyMassSample.hpp"
 #include "JNativeOxygenSaturationSample.hpp"
 #include "JNativeRespiratoryRateSample.hpp"
 #include "JNativeRestingHeartRateSample.hpp"
@@ -39,8 +42,10 @@
 #include "JNativeWorkoutActivityStatus.hpp"
 #include "JNativeWorkoutSample.hpp"
 #include "NativeActiveEnergyBurnedSample.hpp"
+#include "NativeBasalBodyTemperatureSample.hpp"
 #include "NativeBloodGlucoseSample.hpp"
 #include "NativeBloodPressureSample.hpp"
+#include "NativeBodyFatSample.hpp"
 #include "NativeBodyMassSample.hpp"
 #include "NativeBodyTemperatureSample.hpp"
 #include "NativeDistanceSample.hpp"
@@ -53,6 +58,7 @@
 #include "NativeHeartRateSample.hpp"
 #include "NativeHeartRateVariabilitySample.hpp"
 #include "NativeHeightSample.hpp"
+#include "NativeLeanBodyMassSample.hpp"
 #include "NativeOxygenSaturationSample.hpp"
 #include "NativeRespiratoryRateSample.hpp"
 #include "NativeRestingHeartRateSample.hpp"
@@ -106,6 +112,12 @@ namespace margelo::nitro::nitrohealth {
       jni::local_ref<jni::JArrayClass<JNativeBodyTemperatureSample>> bodyTemperatureSamples = this->getFieldValue(fieldBodyTemperatureSamples);
       static const auto fieldRespiratoryRateSamples = clazz->getField<jni::JArrayClass<JNativeRespiratoryRateSample>>("respiratoryRateSamples");
       jni::local_ref<jni::JArrayClass<JNativeRespiratoryRateSample>> respiratoryRateSamples = this->getFieldValue(fieldRespiratoryRateSamples);
+      static const auto fieldBodyFatSamples = clazz->getField<jni::JArrayClass<JNativeBodyFatSample>>("bodyFatSamples");
+      jni::local_ref<jni::JArrayClass<JNativeBodyFatSample>> bodyFatSamples = this->getFieldValue(fieldBodyFatSamples);
+      static const auto fieldLeanBodyMassSamples = clazz->getField<jni::JArrayClass<JNativeLeanBodyMassSample>>("leanBodyMassSamples");
+      jni::local_ref<jni::JArrayClass<JNativeLeanBodyMassSample>> leanBodyMassSamples = this->getFieldValue(fieldLeanBodyMassSamples);
+      static const auto fieldBasalBodyTemperatureSamples = clazz->getField<jni::JArrayClass<JNativeBasalBodyTemperatureSample>>("basalBodyTemperatureSamples");
+      jni::local_ref<jni::JArrayClass<JNativeBasalBodyTemperatureSample>> basalBodyTemperatureSamples = this->getFieldValue(fieldBasalBodyTemperatureSamples);
       static const auto fieldRestingHeartRateSamples = clazz->getField<jni::JArrayClass<JNativeRestingHeartRateSample>>("restingHeartRateSamples");
       jni::local_ref<jni::JArrayClass<JNativeRestingHeartRateSample>> restingHeartRateSamples = this->getFieldValue(fieldRestingHeartRateSamples);
       static const auto fieldHeartRateVariabilitySamples = clazz->getField<jni::JArrayClass<JNativeHeartRateVariabilitySample>>("heartRateVariabilitySamples");
@@ -189,6 +201,36 @@ namespace margelo::nitro::nitrohealth {
           }
           return __vector;
         }(respiratoryRateSamples)) : std::nullopt,
+        bodyFatSamples != nullptr ? std::make_optional([&](auto&& __input) {
+          size_t __size = __input->size();
+          std::vector<NativeBodyFatSample> __vector;
+          __vector.reserve(__size);
+          for (size_t __i = 0; __i < __size; __i++) {
+            auto __element = __input->getElement(__i);
+            __vector.push_back(__element->toCpp());
+          }
+          return __vector;
+        }(bodyFatSamples)) : std::nullopt,
+        leanBodyMassSamples != nullptr ? std::make_optional([&](auto&& __input) {
+          size_t __size = __input->size();
+          std::vector<NativeLeanBodyMassSample> __vector;
+          __vector.reserve(__size);
+          for (size_t __i = 0; __i < __size; __i++) {
+            auto __element = __input->getElement(__i);
+            __vector.push_back(__element->toCpp());
+          }
+          return __vector;
+        }(leanBodyMassSamples)) : std::nullopt,
+        basalBodyTemperatureSamples != nullptr ? std::make_optional([&](auto&& __input) {
+          size_t __size = __input->size();
+          std::vector<NativeBasalBodyTemperatureSample> __vector;
+          __vector.reserve(__size);
+          for (size_t __i = 0; __i < __size; __i++) {
+            auto __element = __input->getElement(__i);
+            __vector.push_back(__element->toCpp());
+          }
+          return __vector;
+        }(basalBodyTemperatureSamples)) : std::nullopt,
         restingHeartRateSamples != nullptr ? std::make_optional([&](auto&& __input) {
           size_t __size = __input->size();
           std::vector<NativeRestingHeartRateSample> __vector;
@@ -297,7 +339,7 @@ namespace margelo::nitro::nitrohealth {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeHealthChange::javaobject> fromCpp(const NativeHealthChange& value) {
-      using JSignature = JNativeHealthChange(jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JArrayClass<JNativeStepSample>>, jni::alias_ref<jni::JArrayClass<JNativeHeartRateSample>>, jni::alias_ref<jni::JArrayClass<JNativeBloodPressureSample>>, jni::alias_ref<jni::JArrayClass<JNativeBloodGlucoseSample>>, jni::alias_ref<jni::JArrayClass<JNativeBodyTemperatureSample>>, jni::alias_ref<jni::JArrayClass<JNativeRespiratoryRateSample>>, jni::alias_ref<jni::JArrayClass<JNativeRestingHeartRateSample>>, jni::alias_ref<jni::JArrayClass<JNativeHeartRateVariabilitySample>>, jni::alias_ref<jni::JArrayClass<JNativeDistanceSample>>, jni::alias_ref<jni::JArrayClass<JNativeActiveEnergyBurnedSample>>, jni::alias_ref<jni::JArrayClass<JNativeOxygenSaturationSample>>, jni::alias_ref<jni::JArrayClass<JNativeHeightSample>>, jni::alias_ref<jni::JArrayClass<JNativeSleepSample>>, jni::alias_ref<jni::JArrayClass<JNativeBodyMassSample>>, jni::alias_ref<jni::JArrayClass<JNativeWorkoutSample>>, jni::alias_ref<JFunc_void::javaobject>);
+      using JSignature = JNativeHealthChange(jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JArrayClass<JNativeStepSample>>, jni::alias_ref<jni::JArrayClass<JNativeHeartRateSample>>, jni::alias_ref<jni::JArrayClass<JNativeBloodPressureSample>>, jni::alias_ref<jni::JArrayClass<JNativeBloodGlucoseSample>>, jni::alias_ref<jni::JArrayClass<JNativeBodyTemperatureSample>>, jni::alias_ref<jni::JArrayClass<JNativeRespiratoryRateSample>>, jni::alias_ref<jni::JArrayClass<JNativeBodyFatSample>>, jni::alias_ref<jni::JArrayClass<JNativeLeanBodyMassSample>>, jni::alias_ref<jni::JArrayClass<JNativeBasalBodyTemperatureSample>>, jni::alias_ref<jni::JArrayClass<JNativeRestingHeartRateSample>>, jni::alias_ref<jni::JArrayClass<JNativeHeartRateVariabilitySample>>, jni::alias_ref<jni::JArrayClass<JNativeDistanceSample>>, jni::alias_ref<jni::JArrayClass<JNativeActiveEnergyBurnedSample>>, jni::alias_ref<jni::JArrayClass<JNativeOxygenSaturationSample>>, jni::alias_ref<jni::JArrayClass<JNativeHeightSample>>, jni::alias_ref<jni::JArrayClass<JNativeSleepSample>>, jni::alias_ref<jni::JArrayClass<JNativeBodyMassSample>>, jni::alias_ref<jni::JArrayClass<JNativeWorkoutSample>>, jni::alias_ref<JFunc_void::javaobject>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
@@ -364,6 +406,36 @@ namespace margelo::nitro::nitrohealth {
           }
           return __array;
         }(value.respiratoryRateSamples.value()) : nullptr,
+        value.bodyFatSamples.has_value() ? [&](auto&& __input) {
+          size_t __size = __input.size();
+          jni::local_ref<jni::JArrayClass<JNativeBodyFatSample>> __array = jni::JArrayClass<JNativeBodyFatSample>::newArray(__size);
+          for (size_t __i = 0; __i < __size; __i++) {
+            const auto& __element = __input[__i];
+            auto __elementJni = JNativeBodyFatSample::fromCpp(__element);
+            __array->setElement(__i, *__elementJni);
+          }
+          return __array;
+        }(value.bodyFatSamples.value()) : nullptr,
+        value.leanBodyMassSamples.has_value() ? [&](auto&& __input) {
+          size_t __size = __input.size();
+          jni::local_ref<jni::JArrayClass<JNativeLeanBodyMassSample>> __array = jni::JArrayClass<JNativeLeanBodyMassSample>::newArray(__size);
+          for (size_t __i = 0; __i < __size; __i++) {
+            const auto& __element = __input[__i];
+            auto __elementJni = JNativeLeanBodyMassSample::fromCpp(__element);
+            __array->setElement(__i, *__elementJni);
+          }
+          return __array;
+        }(value.leanBodyMassSamples.value()) : nullptr,
+        value.basalBodyTemperatureSamples.has_value() ? [&](auto&& __input) {
+          size_t __size = __input.size();
+          jni::local_ref<jni::JArrayClass<JNativeBasalBodyTemperatureSample>> __array = jni::JArrayClass<JNativeBasalBodyTemperatureSample>::newArray(__size);
+          for (size_t __i = 0; __i < __size; __i++) {
+            const auto& __element = __input[__i];
+            auto __elementJni = JNativeBasalBodyTemperatureSample::fromCpp(__element);
+            __array->setElement(__i, *__elementJni);
+          }
+          return __array;
+        }(value.basalBodyTemperatureSamples.value()) : nullptr,
         value.restingHeartRateSamples.has_value() ? [&](auto&& __input) {
           size_t __size = __input.size();
           jni::local_ref<jni::JArrayClass<JNativeRestingHeartRateSample>> __array = jni::JArrayClass<JNativeRestingHeartRateSample>::newArray(__size);

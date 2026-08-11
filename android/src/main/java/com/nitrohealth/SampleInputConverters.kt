@@ -1,14 +1,17 @@
 package com.nitrohealth
 
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
+import androidx.health.connect.client.records.BasalBodyTemperatureRecord
 import androidx.health.connect.client.records.BloodGlucoseRecord
 import androidx.health.connect.client.records.BloodPressureRecord
+import androidx.health.connect.client.records.BodyFatRecord
 import androidx.health.connect.client.records.BodyTemperatureMeasurementLocation
 import androidx.health.connect.client.records.BodyTemperatureRecord
 import androidx.health.connect.client.records.DistanceRecord
 import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.MealType
 import androidx.health.connect.client.records.HeightRecord
+import androidx.health.connect.client.records.LeanBodyMassRecord
 import androidx.health.connect.client.records.OxygenSaturationRecord
 import androidx.health.connect.client.records.RespiratoryRateRecord
 import androidx.health.connect.client.records.RestingHeartRateRecord
@@ -19,6 +22,9 @@ import androidx.health.connect.client.units.Energy
 import androidx.health.connect.client.units.Length
 import androidx.health.connect.client.units.Mass
 import androidx.health.connect.client.units.Percentage
+import com.margelo.nitro.nitrohealth.NativeBasalBodyTemperatureSampleInput
+import com.margelo.nitro.nitrohealth.NativeBodyFatSampleInput
+import com.margelo.nitro.nitrohealth.NativeLeanBodyMassSampleInput
 import androidx.health.connect.client.units.Temperature
 import androidx.health.connect.client.units.Pressure
 import com.margelo.nitro.nitrohealth.NativeActiveEnergyBurnedSampleInput
@@ -152,6 +158,47 @@ internal fun toBodyTemperatureRecords(
             temperature = Temperature.celsius(sample.celsius),
             // Deferred to metadata passthrough (issue #73); strongest promotion candidate
             // since HealthKit has a matching sensor-location metadata key.
+            measurementLocation = BodyTemperatureMeasurementLocation.MEASUREMENT_LOCATION_UNKNOWN
+        )
+    }
+}
+
+internal fun toBodyFatRecords(
+    samples: Array<NativeBodyFatSampleInput>
+): List<BodyFatRecord> {
+    return samples.map { sample ->
+        BodyFatRecord(
+            time = Instant.ofEpochMilli(sample.timeMs.toLong()),
+            zoneOffset = null,
+            metadata = makeSampleMetadata(sample.syncId, sample.syncVersion),
+            percentage = Percentage(sample.percentage)
+        )
+    }
+}
+
+internal fun toLeanBodyMassRecords(
+    samples: Array<NativeLeanBodyMassSampleInput>
+): List<LeanBodyMassRecord> {
+    return samples.map { sample ->
+        LeanBodyMassRecord(
+            time = Instant.ofEpochMilli(sample.timeMs.toLong()),
+            zoneOffset = null,
+            metadata = makeSampleMetadata(sample.syncId, sample.syncVersion),
+            mass = Mass.kilograms(sample.kilograms)
+        )
+    }
+}
+
+internal fun toBasalBodyTemperatureRecords(
+    samples: Array<NativeBasalBodyTemperatureSampleInput>
+): List<BasalBodyTemperatureRecord> {
+    return samples.map { sample ->
+        BasalBodyTemperatureRecord(
+            time = Instant.ofEpochMilli(sample.timeMs.toLong()),
+            zoneOffset = null,
+            metadata = makeSampleMetadata(sample.syncId, sample.syncVersion),
+            temperature = Temperature.celsius(sample.celsius),
+            // Deferred to metadata passthrough (issue #73), same as body temperature.
             measurementLocation = BodyTemperatureMeasurementLocation.MEASUREMENT_LOCATION_UNKNOWN
         )
     }

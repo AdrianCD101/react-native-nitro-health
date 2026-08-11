@@ -235,6 +235,42 @@ extension HybridNitroHealth {
                     )
                 )]
             )
+        case "bodyFat":
+            let quantitySample = try requireQuantitySample(sample, dataType: dataType)
+            return makeNativeHealthChange(
+                type: "upsert",
+                recordId: uuid,
+                bodyFatSamples: [NativeBodyFatSample(
+                    identity: quantitySample.nativeHealthSampleIdentity,
+                    origin: quantitySample.nativeHealthDataOrigin,
+                    timeMs: startTimeMs,
+                    percentage: quantitySample.quantity.doubleValue(for: HKUnit.percent()) * 100
+                )]
+            )
+        case "leanBodyMass":
+            let quantitySample = try requireQuantitySample(sample, dataType: dataType)
+            return makeNativeHealthChange(
+                type: "upsert",
+                recordId: uuid,
+                leanBodyMassSamples: [NativeLeanBodyMassSample(
+                    identity: quantitySample.nativeHealthSampleIdentity,
+                    origin: quantitySample.nativeHealthDataOrigin,
+                    timeMs: startTimeMs,
+                    kilograms: quantitySample.quantity.doubleValue(for: HKUnit.gramUnit(with: .kilo))
+                )]
+            )
+        case "basalBodyTemperature":
+            let quantitySample = try requireQuantitySample(sample, dataType: dataType)
+            return makeNativeHealthChange(
+                type: "upsert",
+                recordId: uuid,
+                basalBodyTemperatureSamples: [NativeBasalBodyTemperatureSample(
+                    identity: quantitySample.nativeHealthSampleIdentity,
+                    origin: quantitySample.nativeHealthDataOrigin,
+                    timeMs: startTimeMs,
+                    celsius: quantitySample.quantity.doubleValue(for: HKUnit.degreeCelsius())
+                )]
+            )
         case "restingHeartRate":
             let quantitySample = try requireQuantitySample(sample, dataType: dataType)
             return makeNativeHealthChange(
@@ -396,6 +432,9 @@ extension HybridNitroHealth {
         bloodGlucoseSamples: [NativeBloodGlucoseSample]? = nil,
         bodyTemperatureSamples: [NativeBodyTemperatureSample]? = nil,
         respiratoryRateSamples: [NativeRespiratoryRateSample]? = nil,
+        bodyFatSamples: [NativeBodyFatSample]? = nil,
+        leanBodyMassSamples: [NativeLeanBodyMassSample]? = nil,
+        basalBodyTemperatureSamples: [NativeBasalBodyTemperatureSample]? = nil,
         restingHeartRateSamples: [NativeRestingHeartRateSample]? = nil,
         heartRateVariabilitySamples: [NativeHeartRateVariabilitySample]? = nil,
         distanceSamples: [NativeDistanceSample]? = nil,
@@ -415,6 +454,9 @@ extension HybridNitroHealth {
             bloodGlucoseSamples: bloodGlucoseSamples,
             bodyTemperatureSamples: bodyTemperatureSamples,
             respiratoryRateSamples: respiratoryRateSamples,
+            bodyFatSamples: bodyFatSamples,
+            leanBodyMassSamples: leanBodyMassSamples,
+            basalBodyTemperatureSamples: basalBodyTemperatureSamples,
             restingHeartRateSamples: restingHeartRateSamples,
             heartRateVariabilitySamples: heartRateVariabilitySamples,
             distanceSamples: distanceSamples,

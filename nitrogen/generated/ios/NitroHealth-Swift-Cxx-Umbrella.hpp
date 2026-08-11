@@ -26,6 +26,12 @@ namespace margelo::nitro::nitrohealth { enum class NativeBackgroundChangesMode; 
 namespace margelo::nitro::nitrohealth { enum class NativeBackgroundChangesResultStatus; }
 // Forward declaration of `NativeBackgroundChangesResult` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBackgroundChangesResult; }
+// Forward declaration of `NativeBasalBodyTemperatureSampleInput` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeBasalBodyTemperatureSampleInput; }
+// Forward declaration of `NativeBasalBodyTemperatureSamplePage` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeBasalBodyTemperatureSamplePage; }
+// Forward declaration of `NativeBasalBodyTemperatureSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeBasalBodyTemperatureSample; }
 // Forward declaration of `NativeBloodGlucoseSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBloodGlucoseSampleInput; }
 // Forward declaration of `NativeBloodGlucoseSamplePage` to properly resolve imports.
@@ -38,6 +44,12 @@ namespace margelo::nitro::nitrohealth { struct NativeBloodPressureSampleInput; }
 namespace margelo::nitro::nitrohealth { struct NativeBloodPressureSamplePage; }
 // Forward declaration of `NativeBloodPressureSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBloodPressureSample; }
+// Forward declaration of `NativeBodyFatSampleInput` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeBodyFatSampleInput; }
+// Forward declaration of `NativeBodyFatSamplePage` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeBodyFatSamplePage; }
+// Forward declaration of `NativeBodyFatSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeBodyFatSample; }
 // Forward declaration of `NativeBodyMassSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBodyMassSampleInput; }
 // Forward declaration of `NativeBodyMassSamplePage` to properly resolve imports.
@@ -128,6 +140,12 @@ namespace margelo::nitro::nitrohealth { struct NativeHeightSampleInput; }
 namespace margelo::nitro::nitrohealth { struct NativeHeightSamplePage; }
 // Forward declaration of `NativeHeightSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHeightSample; }
+// Forward declaration of `NativeLeanBodyMassSampleInput` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeLeanBodyMassSampleInput; }
+// Forward declaration of `NativeLeanBodyMassSamplePage` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeLeanBodyMassSamplePage; }
+// Forward declaration of `NativeLeanBodyMassSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeLeanBodyMassSample; }
 // Forward declaration of `NativeOxygenSaturationSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeOxygenSaturationSampleInput; }
 // Forward declaration of `NativeOxygenSaturationSamplePage` to properly resolve imports.
@@ -197,12 +215,18 @@ namespace margelo::nitro::nitrohealth { struct NativeWorkoutSample; }
 #include "NativeBackgroundChangesMode.hpp"
 #include "NativeBackgroundChangesResult.hpp"
 #include "NativeBackgroundChangesResultStatus.hpp"
+#include "NativeBasalBodyTemperatureSample.hpp"
+#include "NativeBasalBodyTemperatureSampleInput.hpp"
+#include "NativeBasalBodyTemperatureSamplePage.hpp"
 #include "NativeBloodGlucoseSample.hpp"
 #include "NativeBloodGlucoseSampleInput.hpp"
 #include "NativeBloodGlucoseSamplePage.hpp"
 #include "NativeBloodPressureSample.hpp"
 #include "NativeBloodPressureSampleInput.hpp"
 #include "NativeBloodPressureSamplePage.hpp"
+#include "NativeBodyFatSample.hpp"
+#include "NativeBodyFatSampleInput.hpp"
+#include "NativeBodyFatSamplePage.hpp"
 #include "NativeBodyMassSample.hpp"
 #include "NativeBodyMassSampleInput.hpp"
 #include "NativeBodyMassSamplePage.hpp"
@@ -248,6 +272,9 @@ namespace margelo::nitro::nitrohealth { struct NativeWorkoutSample; }
 #include "NativeHeightSample.hpp"
 #include "NativeHeightSampleInput.hpp"
 #include "NativeHeightSamplePage.hpp"
+#include "NativeLeanBodyMassSample.hpp"
+#include "NativeLeanBodyMassSampleInput.hpp"
+#include "NativeLeanBodyMassSamplePage.hpp"
 #include "NativeOxygenSaturationSample.hpp"
 #include "NativeOxygenSaturationSampleInput.hpp"
 #include "NativeOxygenSaturationSamplePage.hpp"

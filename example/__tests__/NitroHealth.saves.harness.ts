@@ -617,6 +617,118 @@ describe('NitroHealth saves (native)', () => {
     })
   })
 
+  describe('body fat', () => {
+    it('rejects saving body fat when write permission is not granted', async () => {
+      if (await hasVerifiedPermissions([{ accessType: 'write', dataType: 'bodyFat' }])) {
+        return
+      }
+
+      await expect(
+        NitroHealth.saveBodyFat([{ date: saveInterval.startDate, percentage: 18.5 }])
+      ).rejects.toThrow(/permission/i)
+    })
+
+    it('round-trips a saved reading in percent when authorized', async () => {
+      const authorized = await hasVerifiedPermissions([
+        { accessType: 'write', dataType: 'bodyFat' },
+        { accessType: 'read', dataType: 'bodyFat' },
+      ])
+
+      if (!authorized) {
+        return
+      }
+
+      await NitroHealth.saveBodyFat([{ date: saveInterval.startDate, percentage: 18.5 }])
+
+      const page = await NitroHealth.readBodyFat(saveReadRange)
+
+      if (isInconclusiveRead(page.samples)) {
+        return
+      }
+
+      // HealthKit stores body fat as a fraction (0-1); a matching 18.5 read back pins the
+      // native *100 / /100 conversion pair.
+      const matches = page.samples.filter((sample) => Math.abs(sample.percentage - 18.5) < 0.001)
+
+      expect(matches.length).toBeGreaterThanOrEqual(1)
+      expect(matches[0]?.identity.kind).toBe('record')
+    })
+  })
+
+  describe('lean body mass', () => {
+    it('rejects saving lean body mass when write permission is not granted', async () => {
+      if (await hasVerifiedPermissions([{ accessType: 'write', dataType: 'leanBodyMass' }])) {
+        return
+      }
+
+      await expect(
+        NitroHealth.saveLeanBodyMass([{ date: saveInterval.startDate, kilograms: 55.4 }])
+      ).rejects.toThrow(/permission/i)
+    })
+
+    it('round-trips a saved reading in kilograms when authorized', async () => {
+      const authorized = await hasVerifiedPermissions([
+        { accessType: 'write', dataType: 'leanBodyMass' },
+        { accessType: 'read', dataType: 'leanBodyMass' },
+      ])
+
+      if (!authorized) {
+        return
+      }
+
+      await NitroHealth.saveLeanBodyMass([{ date: saveInterval.startDate, kilograms: 55.4 }])
+
+      const page = await NitroHealth.readLeanBodyMass(saveReadRange)
+
+      if (isInconclusiveRead(page.samples)) {
+        return
+      }
+
+      const matches = page.samples.filter((sample) => Math.abs(sample.kilograms - 55.4) < 0.001)
+
+      expect(matches.length).toBeGreaterThanOrEqual(1)
+      expect(matches[0]?.identity.kind).toBe('record')
+    })
+  })
+
+  describe('basal body temperature', () => {
+    it('rejects saving basal body temperature when write permission is not granted', async () => {
+      if (
+        await hasVerifiedPermissions([{ accessType: 'write', dataType: 'basalBodyTemperature' }])
+      ) {
+        return
+      }
+
+      await expect(
+        NitroHealth.saveBasalBodyTemperature([{ date: saveInterval.startDate, celsius: 36.4 }])
+      ).rejects.toThrow(/permission/i)
+    })
+
+    it('round-trips a saved reading in celsius when authorized', async () => {
+      const authorized = await hasVerifiedPermissions([
+        { accessType: 'write', dataType: 'basalBodyTemperature' },
+        { accessType: 'read', dataType: 'basalBodyTemperature' },
+      ])
+
+      if (!authorized) {
+        return
+      }
+
+      await NitroHealth.saveBasalBodyTemperature([{ date: saveInterval.startDate, celsius: 36.4 }])
+
+      const page = await NitroHealth.readBasalBodyTemperature(saveReadRange)
+
+      if (isInconclusiveRead(page.samples)) {
+        return
+      }
+
+      const matches = page.samples.filter((sample) => Math.abs(sample.celsius - 36.4) < 0.001)
+
+      expect(matches.length).toBeGreaterThanOrEqual(1)
+      expect(matches[0]?.identity.kind).toBe('record')
+    })
+  })
+
   describe('height', () => {
     it('rejects saving height when write permission is not granted', async () => {
       if (await hasVerifiedPermissions([{ accessType: 'write', dataType: 'height' }])) {

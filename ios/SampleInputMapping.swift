@@ -252,6 +252,70 @@ func makeRespiratoryRateQuantitySamples(
     }
 }
 
+func makeBodyFatQuantitySamples(
+    samples: [NativeBodyFatSampleInput],
+    quantityType: HKQuantityType
+) throws -> [HKQuantitySample] {
+    return try samples.map { sample in
+        let date = Date(timeIntervalSince1970: sample.timeMs / 1000)
+
+        return HKQuantitySample(
+            type: quantityType,
+            // HealthKit stores body fat as a fraction (0-1); the JS surface uses
+            // percentage (0-100), so convert here (inverse of the *100 in readBodyFat).
+            quantity: HKQuantity(unit: HKUnit.percent(), doubleValue: sample.percentage / 100),
+            start: date,
+            end: date,
+            metadata: try makeHealthKitSyncMetadata(
+                syncId: sample.syncId,
+                syncVersion: sample.syncVersion
+            )
+        )
+    }
+}
+
+func makeLeanBodyMassQuantitySamples(
+    samples: [NativeLeanBodyMassSampleInput],
+    quantityType: HKQuantityType
+) throws -> [HKQuantitySample] {
+    let kilogramUnit = HKUnit.gramUnit(with: .kilo)
+
+    return try samples.map { sample in
+        let date = Date(timeIntervalSince1970: sample.timeMs / 1000)
+
+        return HKQuantitySample(
+            type: quantityType,
+            quantity: HKQuantity(unit: kilogramUnit, doubleValue: sample.kilograms),
+            start: date,
+            end: date,
+            metadata: try makeHealthKitSyncMetadata(
+                syncId: sample.syncId,
+                syncVersion: sample.syncVersion
+            )
+        )
+    }
+}
+
+func makeBasalBodyTemperatureQuantitySamples(
+    samples: [NativeBasalBodyTemperatureSampleInput],
+    quantityType: HKQuantityType
+) throws -> [HKQuantitySample] {
+    return try samples.map { sample in
+        let date = Date(timeIntervalSince1970: sample.timeMs / 1000)
+
+        return HKQuantitySample(
+            type: quantityType,
+            quantity: HKQuantity(unit: HKUnit.degreeCelsius(), doubleValue: sample.celsius),
+            start: date,
+            end: date,
+            metadata: try makeHealthKitSyncMetadata(
+                syncId: sample.syncId,
+                syncVersion: sample.syncVersion
+            )
+        )
+    }
+}
+
 func makeOxygenSaturationQuantitySamples(
     samples: [NativeOxygenSaturationSampleInput],
     quantityType: HKQuantityType

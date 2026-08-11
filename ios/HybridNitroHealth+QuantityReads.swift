@@ -3,8 +3,8 @@
 //  Pods
 //
 //  Instantaneous-quantity reads/writes (bloodGlucose, bodyTemperature, respiratoryRate,
-//  restingHeartRate, heartRateVariability, oxygenSaturation, height; readBodyMass in
-//  HybridNitroHealth.swift shares the read helper).
+//  bodyFat, leanBodyMass, basalBodyTemperature, restingHeartRate, heartRateVariability,
+//  oxygenSaturation, height; readBodyMass in HybridNitroHealth.swift shares the read helper).
 //  This file is HealthKit-only, so it must NOT be added to Package.swift's pure-Foundation SPM
 //  test target; the podspec globs ios/**/*.swift and picks it up automatically. Kept separate
 //  from HybridNitroHealth.swift to stay under that file's line budget.
@@ -163,6 +163,65 @@ extension HybridNitroHealth {
         }
     }
 
+    // HealthKit stores body fat as a fraction (0-1 via HKUnit.percent()); the JS surface uses
+    // percentage (0-100), so convert here (inverse of the /100 in makeBodyFatQuantitySamples).
+    func readBodyFat(query: NativeHealthDateRangeQuery) throws -> Promise<NativeBodyFatSamplePage> {
+        if !HKHealthStore.isHealthDataAvailable() {
+            throw permissionError("Health data is not available")
+        }
+
+        return Promise<NativeBodyFatSamplePage>.async {
+            let page = try await self.readInstantQuantitySamplePage(dataType: "bodyFat", query: query) { quantitySample, unit in
+                NativeBodyFatSample(
+                    identity: quantitySample.nativeHealthSampleIdentity,
+                    origin: quantitySample.nativeHealthDataOrigin,
+                    timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
+                    percentage: quantitySample.quantity.doubleValue(for: unit) * 100
+                )
+            }
+
+            return NativeBodyFatSamplePage(samples: page.samples, nextCursor: page.nextCursor)
+        }
+    }
+
+    func readLeanBodyMass(query: NativeHealthDateRangeQuery) throws -> Promise<NativeLeanBodyMassSamplePage> {
+        if !HKHealthStore.isHealthDataAvailable() {
+            throw permissionError("Health data is not available")
+        }
+
+        return Promise<NativeLeanBodyMassSamplePage>.async {
+            let page = try await self.readInstantQuantitySamplePage(dataType: "leanBodyMass", query: query) { quantitySample, unit in
+                NativeLeanBodyMassSample(
+                    identity: quantitySample.nativeHealthSampleIdentity,
+                    origin: quantitySample.nativeHealthDataOrigin,
+                    timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
+                    kilograms: quantitySample.quantity.doubleValue(for: unit)
+                )
+            }
+
+            return NativeLeanBodyMassSamplePage(samples: page.samples, nextCursor: page.nextCursor)
+        }
+    }
+
+    func readBasalBodyTemperature(query: NativeHealthDateRangeQuery) throws -> Promise<NativeBasalBodyTemperatureSamplePage> {
+        if !HKHealthStore.isHealthDataAvailable() {
+            throw permissionError("Health data is not available")
+        }
+
+        return Promise<NativeBasalBodyTemperatureSamplePage>.async {
+            let page = try await self.readInstantQuantitySamplePage(dataType: "basalBodyTemperature", query: query) { quantitySample, unit in
+                NativeBasalBodyTemperatureSample(
+                    identity: quantitySample.nativeHealthSampleIdentity,
+                    origin: quantitySample.nativeHealthDataOrigin,
+                    timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
+                    celsius: quantitySample.quantity.doubleValue(for: unit)
+                )
+            }
+
+            return NativeBasalBodyTemperatureSamplePage(samples: page.samples, nextCursor: page.nextCursor)
+        }
+    }
+
     func readHeight(query: NativeHealthDateRangeQuery) throws -> Promise<NativeHeightSamplePage> {
         if !HKHealthStore.isHealthDataAvailable() {
             throw permissionError("Health data is not available")
@@ -203,6 +262,24 @@ extension HybridNitroHealth {
     func saveRespiratoryRate(samples: [NativeRespiratoryRateSampleInput]) throws -> Promise<Void> {
         return try saveQuantitySamples(dataType: "respiratoryRate", label: "respiratory rate") { quantityType in
             try makeRespiratoryRateQuantitySamples(samples: samples, quantityType: quantityType)
+        }
+    }
+
+    func saveBodyFat(samples: [NativeBodyFatSampleInput]) throws -> Promise<Void> {
+        return try saveQuantitySamples(dataType: "bodyFat", label: "body fat") { quantityType in
+            try makeBodyFatQuantitySamples(samples: samples, quantityType: quantityType)
+        }
+    }
+
+    func saveLeanBodyMass(samples: [NativeLeanBodyMassSampleInput]) throws -> Promise<Void> {
+        return try saveQuantitySamples(dataType: "leanBodyMass", label: "lean body mass") { quantityType in
+            try makeLeanBodyMassQuantitySamples(samples: samples, quantityType: quantityType)
+        }
+    }
+
+    func saveBasalBodyTemperature(samples: [NativeBasalBodyTemperatureSampleInput]) throws -> Promise<Void> {
+        return try saveQuantitySamples(dataType: "basalBodyTemperature", label: "basal body temperature") { quantityType in
+            try makeBasalBodyTemperatureQuantitySamples(samples: samples, quantityType: quantityType)
         }
     }
 

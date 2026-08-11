@@ -10,6 +10,10 @@ import type { BloodGlucoseSample } from './BloodGlucoseSample'
 import type { BloodGlucoseSampleInput } from './BloodGlucoseSampleInput'
 import type { BloodPressureSample } from './BloodPressureSample'
 import type { BloodPressureSampleInput } from './BloodPressureSampleInput'
+import type { BasalBodyTemperatureSample } from './BasalBodyTemperatureSample'
+import type { BasalBodyTemperatureSampleInput } from './BasalBodyTemperatureSampleInput'
+import type { BodyFatSample } from './BodyFatSample'
+import type { BodyFatSampleInput } from './BodyFatSampleInput'
 import type { BodyTemperatureSample } from './BodyTemperatureSample'
 import type { BodyTemperatureSampleInput } from './BodyTemperatureSampleInput'
 import type { BodyMassSample } from './BodyMassSample'
@@ -50,6 +54,8 @@ import type { HeartRateStatistics } from './HeartRateStatistics'
 import type { HeartRateVariabilitySample } from './HeartRateVariabilitySample'
 import type { HeightSample } from './HeightSample'
 import type { HeightSampleInput } from './HeightSampleInput'
+import type { LeanBodyMassSample } from './LeanBodyMassSample'
+import type { LeanBodyMassSampleInput } from './LeanBodyMassSampleInput'
 import type { OxygenSaturationSample } from './OxygenSaturationSample'
 import type { OxygenSaturationSampleInput } from './OxygenSaturationSampleInput'
 import type { RespiratoryRateSample } from './RespiratoryRateSample'
@@ -69,8 +75,10 @@ import {
 } from './internal/queryMapping'
 import {
   makeActiveEnergyBurnedSample,
+  makeBasalBodyTemperatureSample,
   makeBloodGlucoseSample,
   makeBloodPressureSample,
+  makeBodyFatSample,
   makeBodyTemperatureSample,
   makeBodyMassSample,
   makeDistanceSample,
@@ -81,14 +89,18 @@ import {
   makeHeartRateStatistics,
   makeHeartRateVariabilitySample,
   makeHeightSample,
+  makeLeanBodyMassSample,
   makeNativeActiveEnergyBurnedSampleInput,
+  makeNativeBasalBodyTemperatureSampleInput,
   makeNativeBloodGlucoseSampleInput,
   makeNativeBloodPressureSampleInput,
+  makeNativeBodyFatSampleInput,
   makeNativeBodyTemperatureSampleInput,
   makeNativeBodyMassSampleInput,
   makeNativeDistanceSampleInput,
   makeNativeHeartRateSampleInput,
   makeNativeHeightSampleInput,
+  makeNativeLeanBodyMassSampleInput,
   makeNativeOxygenSaturationSampleInput,
   makeNativeRespiratoryRateSampleInput,
   makeNativeRestingHeartRateSampleInput,
@@ -224,6 +236,11 @@ export interface NitroHealth {
   readBloodGlucose(query: HealthDateRangeQuery): Promise<HealthSamplePage<BloodGlucoseSample>>
   readBodyTemperature(query: HealthDateRangeQuery): Promise<HealthSamplePage<BodyTemperatureSample>>
   readRespiratoryRate(query: HealthDateRangeQuery): Promise<HealthSamplePage<RespiratoryRateSample>>
+  readBodyFat(query: HealthDateRangeQuery): Promise<HealthSamplePage<BodyFatSample>>
+  readLeanBodyMass(query: HealthDateRangeQuery): Promise<HealthSamplePage<LeanBodyMassSample>>
+  readBasalBodyTemperature(
+    query: HealthDateRangeQuery
+  ): Promise<HealthSamplePage<BasalBodyTemperatureSample>>
   readHeartRateStatistics(query: HealthTimeRangeQuery): Promise<HeartRateStatistics>
   readRestingHeartRate(
     query: HealthDateRangeQuery
@@ -249,6 +266,9 @@ export interface NitroHealth {
   saveBloodGlucose(samples: BloodGlucoseSampleInput[]): Promise<void>
   saveBodyTemperature(samples: BodyTemperatureSampleInput[]): Promise<void>
   saveRespiratoryRate(samples: RespiratoryRateSampleInput[]): Promise<void>
+  saveBodyFat(samples: BodyFatSampleInput[]): Promise<void>
+  saveLeanBodyMass(samples: LeanBodyMassSampleInput[]): Promise<void>
+  saveBasalBodyTemperature(samples: BasalBodyTemperatureSampleInput[]): Promise<void>
   saveBodyMass(samples: BodyMassSampleInput[]): Promise<void>
   saveRestingHeartRate(samples: RestingHeartRateSampleInput[]): Promise<void>
   saveOxygenSaturation(samples: OxygenSaturationSampleInput[]): Promise<void>
@@ -443,6 +463,24 @@ export const NitroHealth: NitroHealth = {
       makeRespiratoryRateSample
     )
   },
+  async readBodyFat(query) {
+    return makeSamplePage(
+      await NitroHealthNative.readBodyFat(makeNativeSampleQuery(query)),
+      makeBodyFatSample
+    )
+  },
+  async readLeanBodyMass(query) {
+    return makeSamplePage(
+      await NitroHealthNative.readLeanBodyMass(makeNativeSampleQuery(query)),
+      makeLeanBodyMassSample
+    )
+  },
+  async readBasalBodyTemperature(query) {
+    return makeSamplePage(
+      await NitroHealthNative.readBasalBodyTemperature(makeNativeSampleQuery(query)),
+      makeBasalBodyTemperatureSample
+    )
+  },
   async readHeartRateStatistics(query) {
     return makeHeartRateStatistics(
       await NitroHealthNative.readHeartRateStatistics(makeNativeTimeRangeQuery(query))
@@ -538,6 +576,24 @@ export const NitroHealth: NitroHealth = {
     const nativeSamples = samples.map(makeNativeRespiratoryRateSampleInput)
     assertUniqueSampleSyncIds(samples)
     return NitroHealthNative.saveRespiratoryRate(nativeSamples)
+  },
+  async saveBodyFat(samples) {
+    assertNonEmptySamples(samples)
+    const nativeSamples = samples.map(makeNativeBodyFatSampleInput)
+    assertUniqueSampleSyncIds(samples)
+    return NitroHealthNative.saveBodyFat(nativeSamples)
+  },
+  async saveLeanBodyMass(samples) {
+    assertNonEmptySamples(samples)
+    const nativeSamples = samples.map(makeNativeLeanBodyMassSampleInput)
+    assertUniqueSampleSyncIds(samples)
+    return NitroHealthNative.saveLeanBodyMass(nativeSamples)
+  },
+  async saveBasalBodyTemperature(samples) {
+    assertNonEmptySamples(samples)
+    const nativeSamples = samples.map(makeNativeBasalBodyTemperatureSampleInput)
+    assertUniqueSampleSyncIds(samples)
+    return NitroHealthNative.saveBasalBodyTemperature(nativeSamples)
   },
   async saveBodyMass(samples) {
     assertNonEmptySamples(samples)

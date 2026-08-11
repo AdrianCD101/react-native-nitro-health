@@ -2,14 +2,17 @@ package com.nitrohealth
 
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
+import androidx.health.connect.client.records.BasalBodyTemperatureRecord
 import androidx.health.connect.client.records.BloodGlucoseRecord
 import androidx.health.connect.client.records.BloodPressureRecord
+import androidx.health.connect.client.records.BodyFatRecord
 import androidx.health.connect.client.records.BodyTemperatureRecord
 import androidx.health.connect.client.records.DistanceRecord
 import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.HeartRateVariabilityRmssdRecord
 import androidx.health.connect.client.records.HeightRecord
+import androidx.health.connect.client.records.LeanBodyMassRecord
 import androidx.health.connect.client.records.OxygenSaturationRecord
 import androidx.health.connect.client.records.RespiratoryRateRecord
 import androidx.health.connect.client.records.RestingHeartRateRecord
@@ -36,6 +39,15 @@ class HealthConnectPermissionUtilsTest {
         assertEquals(
             RespiratoryRateRecord::class,
             healthConnectRecordTypeForDataType("respiratoryRate")
+        )
+        assertEquals(BodyFatRecord::class, healthConnectRecordTypeForDataType("bodyFat"))
+        assertEquals(
+            LeanBodyMassRecord::class,
+            healthConnectRecordTypeForDataType("leanBodyMass")
+        )
+        assertEquals(
+            BasalBodyTemperatureRecord::class,
+            healthConnectRecordTypeForDataType("basalBodyTemperature")
         )
         assertEquals(DistanceRecord::class, healthConnectRecordTypeForDataType("distance"))
         assertEquals(
@@ -96,6 +108,18 @@ class HealthConnectPermissionUtilsTest {
         assertEquals(
             HealthPermission.getReadPermission(RespiratoryRateRecord::class),
             toHealthConnectPermission("respiratoryRate", "read")
+        )
+        assertEquals(
+            HealthPermission.getReadPermission(BodyFatRecord::class),
+            toHealthConnectPermission("bodyFat", "read")
+        )
+        assertEquals(
+            HealthPermission.getReadPermission(LeanBodyMassRecord::class),
+            toHealthConnectPermission("leanBodyMass", "read")
+        )
+        assertEquals(
+            HealthPermission.getReadPermission(BasalBodyTemperatureRecord::class),
+            toHealthConnectPermission("basalBodyTemperature", "read")
         )
         assertEquals(
             HealthPermission.getReadPermission(SleepSessionRecord::class),
@@ -162,6 +186,18 @@ class HealthConnectPermissionUtilsTest {
             toHealthConnectPermission("respiratoryRate", "write")
         )
         assertEquals(
+            HealthPermission.getWritePermission(BodyFatRecord::class),
+            toHealthConnectPermission("bodyFat", "write")
+        )
+        assertEquals(
+            HealthPermission.getWritePermission(LeanBodyMassRecord::class),
+            toHealthConnectPermission("leanBodyMass", "write")
+        )
+        assertEquals(
+            HealthPermission.getWritePermission(BasalBodyTemperatureRecord::class),
+            toHealthConnectPermission("basalBodyTemperature", "write")
+        )
+        assertEquals(
             HealthPermission.getWritePermission(SleepSessionRecord::class),
             toHealthConnectPermission("sleep", "write")
         )
@@ -190,10 +226,10 @@ class HealthConnectPermissionUtilsTest {
     @Test
     fun healthConnectRecordTypeForDataTypeRejectsUnsupportedDataType() {
         val error = assertThrows(IllegalArgumentException::class.java) {
-            healthConnectRecordTypeForDataType("bodyFat")
+            healthConnectRecordTypeForDataType("notARealDataType")
         }
 
-        assertEquals("Unsupported health data type: bodyFat", error.message)
+        assertEquals("Unsupported health data type: notARealDataType", error.message)
     }
 
     @Test

@@ -8,14 +8,17 @@ import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.aggregate.AggregationResult
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
+import androidx.health.connect.client.records.BasalBodyTemperatureRecord
 import androidx.health.connect.client.records.BloodGlucoseRecord
 import androidx.health.connect.client.records.BloodPressureRecord
+import androidx.health.connect.client.records.BodyFatRecord
 import androidx.health.connect.client.records.BodyTemperatureRecord
 import androidx.health.connect.client.records.DistanceRecord
 import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.HeartRateVariabilityRmssdRecord
 import androidx.health.connect.client.records.HeightRecord
+import androidx.health.connect.client.records.LeanBodyMassRecord
 import androidx.health.connect.client.records.OxygenSaturationRecord
 import androidx.health.connect.client.records.Record
 import androidx.health.connect.client.records.RespiratoryRateRecord
@@ -40,6 +43,12 @@ import com.margelo.nitro.nitrohealth.NativeActiveEnergyBurnedSamplePage
 import com.margelo.nitro.nitrohealth.NativeBloodGlucoseSample
 import com.margelo.nitro.nitrohealth.NativeBloodGlucoseSampleInput
 import com.margelo.nitro.nitrohealth.NativeBloodGlucoseSamplePage
+import com.margelo.nitro.nitrohealth.NativeBasalBodyTemperatureSample
+import com.margelo.nitro.nitrohealth.NativeBasalBodyTemperatureSampleInput
+import com.margelo.nitro.nitrohealth.NativeBasalBodyTemperatureSamplePage
+import com.margelo.nitro.nitrohealth.NativeBodyFatSample
+import com.margelo.nitro.nitrohealth.NativeBodyFatSampleInput
+import com.margelo.nitro.nitrohealth.NativeBodyFatSamplePage
 import com.margelo.nitro.nitrohealth.NativeBodyTemperatureSample
 import com.margelo.nitro.nitrohealth.NativeBodyTemperatureSampleInput
 import com.margelo.nitro.nitrohealth.NativeBodyTemperatureSamplePage
@@ -78,6 +87,9 @@ import com.margelo.nitro.nitrohealth.NativeHeartRateStatistics
 import com.margelo.nitro.nitrohealth.NativeHeartRateVariabilitySample
 import com.margelo.nitro.nitrohealth.NativeHeartRateVariabilitySamplePage
 import com.margelo.nitro.nitrohealth.NativeHeightSample
+import com.margelo.nitro.nitrohealth.NativeLeanBodyMassSample
+import com.margelo.nitro.nitrohealth.NativeLeanBodyMassSampleInput
+import com.margelo.nitro.nitrohealth.NativeLeanBodyMassSamplePage
 import com.margelo.nitro.nitrohealth.NativeHeightSampleInput
 import com.margelo.nitro.nitrohealth.NativeHeightSamplePage
 import com.margelo.nitro.nitrohealth.NativeOxygenSaturationSample
@@ -648,6 +660,63 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         }
     }
 
+    override fun readBodyFat(
+        query: NativeHealthDateRangeQuery
+    ): Promise<NativeBodyFatSamplePage> {
+        return Promise.async {
+            val response = readInstantRecords<BodyFatRecord>("bodyFat", query)
+            NativeBodyFatSamplePage(
+                samples = response.records.map { record ->
+                    NativeBodyFatSample(
+                        identity = makeRecordIdentity(record.metadata.id),
+                        origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
+                        timeMs = record.time.toEpochMilli().toDouble(),
+                        percentage = record.percentage.value
+                    )
+                }.toTypedArray(),
+                nextCursor = response.pageToken?.let { encodeSampleCursor("bodyFat", query.ascending, it) }
+            )
+        }
+    }
+
+    override fun readLeanBodyMass(
+        query: NativeHealthDateRangeQuery
+    ): Promise<NativeLeanBodyMassSamplePage> {
+        return Promise.async {
+            val response = readInstantRecords<LeanBodyMassRecord>("leanBodyMass", query)
+            NativeLeanBodyMassSamplePage(
+                samples = response.records.map { record ->
+                    NativeLeanBodyMassSample(
+                        identity = makeRecordIdentity(record.metadata.id),
+                        origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
+                        timeMs = record.time.toEpochMilli().toDouble(),
+                        kilograms = record.mass.inKilograms
+                    )
+                }.toTypedArray(),
+                nextCursor = response.pageToken?.let { encodeSampleCursor("leanBodyMass", query.ascending, it) }
+            )
+        }
+    }
+
+    override fun readBasalBodyTemperature(
+        query: NativeHealthDateRangeQuery
+    ): Promise<NativeBasalBodyTemperatureSamplePage> {
+        return Promise.async {
+            val response = readInstantRecords<BasalBodyTemperatureRecord>("basalBodyTemperature", query)
+            NativeBasalBodyTemperatureSamplePage(
+                samples = response.records.map { record ->
+                    NativeBasalBodyTemperatureSample(
+                        identity = makeRecordIdentity(record.metadata.id),
+                        origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
+                        timeMs = record.time.toEpochMilli().toDouble(),
+                        celsius = record.temperature.inCelsius
+                    )
+                }.toTypedArray(),
+                nextCursor = response.pageToken?.let { encodeSampleCursor("basalBodyTemperature", query.ascending, it) }
+            )
+        }
+    }
+
     override fun readRestingHeartRate(
         query: NativeHealthDateRangeQuery
     ): Promise<NativeRestingHeartRateSamplePage> {
@@ -1014,6 +1083,27 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         return Promise.async {
             val client = requireWritableClient("respiratoryRate")
             client.insertRecords(toRespiratoryRateRecords(samples))
+        }
+    }
+
+    override fun saveBodyFat(samples: Array<NativeBodyFatSampleInput>): Promise<Unit> {
+        return Promise.async {
+            val client = requireWritableClient("bodyFat")
+            client.insertRecords(toBodyFatRecords(samples))
+        }
+    }
+
+    override fun saveLeanBodyMass(samples: Array<NativeLeanBodyMassSampleInput>): Promise<Unit> {
+        return Promise.async {
+            val client = requireWritableClient("leanBodyMass")
+            client.insertRecords(toLeanBodyMassRecords(samples))
+        }
+    }
+
+    override fun saveBasalBodyTemperature(samples: Array<NativeBasalBodyTemperatureSampleInput>): Promise<Unit> {
+        return Promise.async {
+            val client = requireWritableClient("basalBodyTemperature")
+            client.insertRecords(toBasalBodyTemperatureRecords(samples))
         }
     }
 
