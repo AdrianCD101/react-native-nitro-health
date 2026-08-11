@@ -37,6 +37,12 @@ export const bodyTemperatureReadPermission: HealthPermission[] = [
 export const bodyTemperatureWritePermission: HealthPermission[] = [
   { accessType: 'write', dataType: 'bodyTemperature' },
 ]
+export const respiratoryRateReadPermission: HealthPermission[] = [
+  { accessType: 'read', dataType: 'respiratoryRate' },
+]
+export const respiratoryRateWritePermission: HealthPermission[] = [
+  { accessType: 'write', dataType: 'respiratoryRate' },
+]
 export const sleepReadPermission: HealthPermission[] = [{ accessType: 'read', dataType: 'sleep' }]
 export const sleepWritePermission: HealthPermission[] = [{ accessType: 'write', dataType: 'sleep' }]
 export const bodyMassReadPermission: HealthPermission[] = [

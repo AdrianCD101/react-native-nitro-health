@@ -208,6 +208,32 @@ describe('NitroHealth deletes (native)', () => {
     )
   })
 
+  it('round-trips save, delete by record identity, and re-read for respiratory rate', async () => {
+    const authorized = await hasVerifiedPermissions([
+      { accessType: 'write', dataType: 'respiratoryRate' },
+      { accessType: 'read', dataType: 'respiratoryRate' },
+    ])
+    if (!authorized) return
+
+    await NitroHealth.saveRespiratoryRate([
+      { date: deleteInterval.startDate, breathsPerMinute: 22.5 },
+    ])
+    const page = await NitroHealth.readRespiratoryRate(deleteReadRange)
+    if (isInconclusiveRead(page.samples)) return
+
+    const saved = page.samples.find((sample) => Math.abs(sample.breathsPerMinute - 22.5) < 0.001)
+    expect(saved).toBeDefined()
+    if (saved === undefined || saved.identity.kind !== 'record') return
+
+    const result = await NitroHealth.deleteRecordsByIds('respiratoryRate', [saved.identity])
+    assertCompletedIdentityDelete(result)
+
+    const afterDelete = await NitroHealth.readRespiratoryRate(deleteReadRange)
+    expect(afterDelete.samples.some((sample) => sample.identity.id === saved.identity.id)).toBe(
+      false
+    )
+  })
+
   it('deletes a heart-rate record and explicitly selects a parent for record children', async () => {
     const authorized = await hasVerifiedPermissions([
       { accessType: 'write', dataType: 'heartRate' },

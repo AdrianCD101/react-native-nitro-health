@@ -49,6 +49,8 @@ import type { NativeHeightSample } from '../NativeHeightSample'
 import type { NativeHeightSampleInput } from '../NativeHeightSampleInput'
 import type { NativeOxygenSaturationSample } from '../NativeOxygenSaturationSample'
 import type { NativeOxygenSaturationSampleInput } from '../NativeOxygenSaturationSampleInput'
+import type { NativeRespiratoryRateSample } from '../NativeRespiratoryRateSample'
+import type { NativeRespiratoryRateSampleInput } from '../NativeRespiratoryRateSampleInput'
 import type { NativeRestingHeartRateSample } from '../NativeRestingHeartRateSample'
 import type { NativeRestingHeartRateSampleInput } from '../NativeRestingHeartRateSampleInput'
 import type { NativeSleepSessionInput } from '../NativeSleepSessionInput'
@@ -67,6 +69,8 @@ import type { BodyTemperatureSample } from '../BodyTemperatureSample'
 import type { BodyTemperatureSampleInput } from '../BodyTemperatureSampleInput'
 import type { OxygenSaturationSample } from '../OxygenSaturationSample'
 import type { OxygenSaturationSampleInput } from '../OxygenSaturationSampleInput'
+import type { RespiratoryRateSample } from '../RespiratoryRateSample'
+import type { RespiratoryRateSampleInput } from '../RespiratoryRateSampleInput'
 import type { RestingHeartRateSample } from '../RestingHeartRateSample'
 import type { RestingHeartRateSampleInput } from '../RestingHeartRateSampleInput'
 import type { SleepSample } from '../SleepSample'
@@ -108,6 +112,8 @@ const MIN_MILLIMOLES_PER_LITER = 0.5
 const MAX_MILLIMOLES_PER_LITER = 50
 const MIN_CELSIUS = 20
 const MAX_CELSIUS = 45
+const MIN_BREATHS_PER_MINUTE = 0
+const MAX_BREATHS_PER_MINUTE = 120
 const MAX_KILOGRAMS = 1_000
 const MAX_HEIGHT_METERS = 3
 const WRITABLE_SLEEP_STAGES = new Set<WritableSleepStage>([
@@ -457,6 +463,27 @@ export function makeNativeBodyTemperatureSampleInput(
   return {
     timeMs,
     celsius: sample.celsius,
+    ...makeNativeSync(sample.sync, index),
+  }
+}
+
+export function makeNativeRespiratoryRateSampleInput(
+  sample: RespiratoryRateSampleInput,
+  index: number
+): NativeRespiratoryRateSampleInput {
+  const timeMs = makeSampleInstant(sample, index)
+
+  assertSampleBetween(
+    sample.breathsPerMinute,
+    MIN_BREATHS_PER_MINUTE,
+    MAX_BREATHS_PER_MINUTE,
+    index,
+    'breathsPerMinute'
+  )
+
+  return {
+    timeMs,
+    breathsPerMinute: sample.breathsPerMinute,
     ...makeNativeSync(sample.sync, index),
   }
 }
@@ -823,6 +850,17 @@ export function makeBodyTemperatureSample(
   }
 }
 
+export function makeRespiratoryRateSample(
+  sample: NativeRespiratoryRateSample
+): RespiratoryRateSample {
+  return {
+    identity: makeHealthSampleIdentity(sample.identity),
+    origin: makeHealthDataOrigin(sample.origin),
+    date: new Date(sample.timeMs),
+    breathsPerMinute: sample.breathsPerMinute,
+  }
+}
+
 export function makeOxygenSaturationSample(
   sample: NativeOxygenSaturationSample
 ): OxygenSaturationSample {
@@ -948,6 +986,7 @@ const CHANGE_SAMPLE_FIELDS = [
   'bloodPressureSamples',
   'bloodGlucoseSamples',
   'bodyTemperatureSamples',
+  'respiratoryRateSamples',
   'restingHeartRateSamples',
   'heartRateVariabilitySamples',
   'distanceSamples',
@@ -1001,6 +1040,11 @@ function makeUpsertSamples(
       if (change.bodyTemperatureSamples === undefined)
         throw new Error("Native 'bodyTemperature' upsert is missing samples")
       samples = change.bodyTemperatureSamples.map(makeBodyTemperatureSample)
+      break
+    case 'respiratoryRate':
+      if (change.respiratoryRateSamples === undefined)
+        throw new Error("Native 'respiratoryRate' upsert is missing samples")
+      samples = change.respiratoryRateSamples.map(makeRespiratoryRateSample)
       break
     case 'restingHeartRate':
       if (change.restingHeartRateSamples === undefined)

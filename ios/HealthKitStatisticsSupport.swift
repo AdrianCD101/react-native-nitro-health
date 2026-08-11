@@ -84,6 +84,13 @@ func makeHealthDataTypeDescriptor(dataType: String) throws -> HealthDataTypeDesc
             label: "body temperature",
             isCumulative: false
         )
+    case "respiratoryRate":
+        return HealthDataTypeDescriptor(
+            identifier: .respiratoryRate,
+            unit: HKUnit.count().unitDivided(by: HKUnit.minute()),
+            label: "respiratory rate",
+            isCumulative: false
+        )
     default:
         throw permissionError("Unsupported health data type: \(dataType)")
     }

@@ -10,6 +10,7 @@ import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.MealType
 import androidx.health.connect.client.records.HeightRecord
 import androidx.health.connect.client.records.OxygenSaturationRecord
+import androidx.health.connect.client.records.RespiratoryRateRecord
 import androidx.health.connect.client.records.RestingHeartRateRecord
 import androidx.health.connect.client.records.StepsRecord
 import androidx.health.connect.client.records.WeightRecord
@@ -30,6 +31,7 @@ import com.margelo.nitro.nitrohealth.NativeDistanceScope
 import com.margelo.nitro.nitrohealth.NativeHeartRateSampleInput
 import com.margelo.nitro.nitrohealth.NativeHeightSampleInput
 import com.margelo.nitro.nitrohealth.NativeOxygenSaturationSampleInput
+import com.margelo.nitro.nitrohealth.NativeRespiratoryRateSampleInput
 import com.margelo.nitro.nitrohealth.NativeRestingHeartRateSampleInput
 import com.margelo.nitro.nitrohealth.NativeStepSampleInput
 import java.time.Instant
@@ -151,6 +153,19 @@ internal fun toBodyTemperatureRecords(
             // Deferred to metadata passthrough (issue #73); strongest promotion candidate
             // since HealthKit has a matching sensor-location metadata key.
             measurementLocation = BodyTemperatureMeasurementLocation.MEASUREMENT_LOCATION_UNKNOWN
+        )
+    }
+}
+
+internal fun toRespiratoryRateRecords(
+    samples: Array<NativeRespiratoryRateSampleInput>
+): List<RespiratoryRateRecord> {
+    return samples.map { sample ->
+        RespiratoryRateRecord(
+            time = Instant.ofEpochMilli(sample.timeMs.toLong()),
+            zoneOffset = null,
+            metadata = makeSampleMetadata(sample.syncId, sample.syncVersion),
+            rate = sample.breathsPerMinute
         )
     }
 }

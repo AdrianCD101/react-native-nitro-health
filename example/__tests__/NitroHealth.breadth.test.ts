@@ -217,6 +217,41 @@ describe('NitroHealth breadth data types contract', () => {
     })
   })
 
+  describe('readRespiratoryRate', () => {
+    it('maps one native sample and leaves the breathsPerMinute value untouched', async () => {
+      const startDate = new Date('2026-01-01T00:00:00.000Z')
+      const endDate = new Date('2026-01-02T00:00:00.000Z')
+      const timeMs = new Date('2026-01-01T09:00:00.000Z').getTime()
+      mockNitroHealth.readRespiratoryRate.mockResolvedValue({
+        samples: [
+          {
+            ...nativeRecordMetadata('rr-record', 'com.example.tracker', 'Example Tracker'),
+            timeMs,
+            breathsPerMinute: 16.5,
+          },
+        ],
+      })
+
+      const result = await NitroHealth.readRespiratoryRate({ startDate, endDate })
+
+      expect(mockNitroHealth.readRespiratoryRate).toHaveBeenCalledWith({
+        startTimeMs: startDate.getTime(),
+        endTimeMs: endDate.getTime(),
+        limit: 1000,
+        ascending: true,
+      })
+      expect(result.samples).toHaveLength(1)
+      expect(result.samples[0].identity).toEqual({ kind: 'record', id: 'rr-record' })
+      expect(result.samples[0].date).toBeInstanceOf(Date)
+      expect(result.samples[0].date.getTime()).toBe(timeMs)
+      expect(result.samples[0].breathsPerMinute).toBe(16.5)
+      expect(result.samples[0].origin).toEqual({
+        identifier: 'com.example.tracker',
+        displayName: 'Example Tracker',
+      })
+    })
+  })
+
   describe('readOxygenSaturation', () => {
     it('leaves the percentage value untouched (no JS-side unit conversion)', async () => {
       const startDate = new Date('2026-01-01T00:00:00.000Z')
@@ -470,6 +505,53 @@ describe('NitroHealth breadth data types contract', () => {
     })
   })
 
+  describe('saveRespiratoryRate', () => {
+    it('saves through the Nitro hybrid object', async () => {
+      const date = new Date('2026-01-01T09:00:00.000Z')
+      mockNitroHealth.saveRespiratoryRate.mockResolvedValue(undefined)
+
+      await expect(
+        NitroHealth.saveRespiratoryRate([{ date, breathsPerMinute: 16.5 }])
+      ).resolves.toBeUndefined()
+
+      expect(mockNitroHealth.saveRespiratoryRate).toHaveBeenCalledWith([
+        { timeMs: date.getTime(), breathsPerMinute: 16.5 },
+      ])
+    })
+
+    it('rejects breathsPerMinute outside 0-120 before crossing the native boundary', async () => {
+      const date = new Date('2026-01-01T09:00:00.000Z')
+
+      for (const breathsPerMinute of [-1, 120.1, Number.NaN, Number.POSITIVE_INFINITY]) {
+        await expect(NitroHealth.saveRespiratoryRate([{ date, breathsPerMinute }])).rejects.toThrow(
+          'samples[0]: breathsPerMinute must be between 0 and 120'
+        )
+      }
+
+      expect(mockNitroHealth.saveRespiratoryRate).not.toHaveBeenCalled()
+    })
+
+    it('accepts the inclusive bound values', async () => {
+      const date = new Date('2026-01-01T09:00:00.000Z')
+      mockNitroHealth.saveRespiratoryRate.mockResolvedValue(undefined)
+
+      await expect(
+        NitroHealth.saveRespiratoryRate([{ date, breathsPerMinute: 0 }])
+      ).resolves.toBeUndefined()
+      await expect(
+        NitroHealth.saveRespiratoryRate([{ date, breathsPerMinute: 120 }])
+      ).resolves.toBeUndefined()
+    })
+
+    it('rejects an invalid sample date before crossing the native boundary', async () => {
+      await expect(
+        NitroHealth.saveRespiratoryRate([{ date: new Date(Number.NaN), breathsPerMinute: 16.5 }])
+      ).rejects.toThrow('samples[0]: a valid date is required')
+
+      expect(mockNitroHealth.saveRespiratoryRate).not.toHaveBeenCalled()
+    })
+  })
+
   describe('saveOxygenSaturation', () => {
     it('saves through the Nitro hybrid object', async () => {
       const date = new Date('2026-01-01T09:00:00.000Z')
@@ -649,6 +731,22 @@ describe('NitroHealth breadth data types contract', () => {
           metrics: ['avg'],
         })
       ).rejects.toThrow(`readStatistics does not support the 'bodyTemperature' data type`)
+
+      expect(mockNitroHealth.readStatistics).not.toHaveBeenCalled()
+    })
+
+    it('rejects respiratoryRate entirely before crossing the native boundary', async () => {
+      const startDate = new Date('2026-01-01T00:00:00.000Z')
+      const endDate = new Date('2026-01-08T00:00:00.000Z')
+
+      await expect(
+        NitroHealth.readStatistics('respiratoryRate', {
+          startDate,
+          endDate,
+          bucket: 'day',
+          metrics: ['avg'],
+        })
+      ).rejects.toThrow(`readStatistics does not support the 'respiratoryRate' data type`)
 
       expect(mockNitroHealth.readStatistics).not.toHaveBeenCalled()
     })

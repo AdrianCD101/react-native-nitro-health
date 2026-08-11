@@ -7,6 +7,7 @@ import type {
   BodyTemperatureSample,
   HealthPermission,
   HealthSampleIdentity,
+  RespiratoryRateSample,
   StepSample,
   WorkoutSample,
 } from 'react-native-nitro-health'
@@ -32,6 +33,10 @@ const bloodGlucoseReadWritePermissions: HealthPermission[] = [
 const bodyTemperatureReadWritePermissions: HealthPermission[] = [
   { accessType: 'read', dataType: 'bodyTemperature' },
   { accessType: 'write', dataType: 'bodyTemperature' },
+]
+const respiratoryRateReadWritePermissions: HealthPermission[] = [
+  { accessType: 'read', dataType: 'respiratoryRate' },
+  { accessType: 'write', dataType: 'respiratoryRate' },
 ]
 const idempotentInterval = {
   startDate: new Date('2004-06-01T09:00:00.000Z'),
@@ -107,6 +112,19 @@ async function readIdempotentBodyTemperature(
     (sample) =>
       sample.date.getTime() === idempotentInterval.startDate.getTime() &&
       expectedCelsius.some((expected) => Math.abs(sample.celsius - expected) < 0.001)
+  )
+}
+
+async function readIdempotentRespiratoryRate(
+  expectedBreathsPerMinute: readonly number[]
+): Promise<RespiratoryRateSample[]> {
+  const page = await NitroHealth.readRespiratoryRate({ ...idempotentReadRange, limit: 1000 })
+  return page.samples.filter(
+    (sample) =>
+      sample.date.getTime() === idempotentInterval.startDate.getTime() &&
+      expectedBreathsPerMinute.some(
+        (expected) => Math.abs(sample.breathsPerMinute - expected) < 0.001
+      )
   )
 }
 
@@ -526,6 +544,85 @@ describe('NitroHealth idempotent saves (native)', () => {
       }
     } finally {
       await NitroHealth.deleteRecordsByTimeRange('bodyTemperature', idempotentReadRange)
+    }
+  })
+
+  it('keeps exactly one respiratory rate reading when the same versioned save is retried', async () => {
+    if (!(await hasVerifiedPermissions(respiratoryRateReadWritePermissions))) {
+      return
+    }
+
+    await NitroHealth.deleteRecordsByTimeRange('respiratoryRate', idempotentReadRange)
+    try {
+      const sample = {
+        date: idempotentInterval.startDate,
+        breathsPerMinute: 16.5,
+        sync: { id: 'nitro-health-harness-rr-retry', version: 1 },
+      }
+
+      await NitroHealth.saveRespiratoryRate([sample])
+      await NitroHealth.saveRespiratoryRate([sample])
+
+      const samples = await readIdempotentRespiratoryRate([16.5])
+      if (Platform.OS === 'ios' && samples.length === 0) {
+        return
+      }
+
+      expect(samples).toHaveLength(1)
+    } finally {
+      await NitroHealth.deleteRecordsByTimeRange('respiratoryRate', idempotentReadRange)
+    }
+  })
+
+  it('replaces a respiratory rate reading at a higher version with platform-specific identity', async () => {
+    if (!(await hasVerifiedPermissions(respiratoryRateReadWritePermissions))) {
+      return
+    }
+
+    await NitroHealth.deleteRecordsByTimeRange('respiratoryRate', idempotentReadRange)
+    try {
+      const syncId = 'nitro-health-harness-rr-higher-version'
+      await NitroHealth.saveRespiratoryRate([
+        {
+          date: idempotentInterval.startDate,
+          breathsPerMinute: 16.5,
+          sync: { id: syncId, version: 1 },
+        },
+      ])
+
+      const initial = await readIdempotentRespiratoryRate([16.5, 17.5])
+      if (Platform.OS === 'ios' && initial.length === 0) {
+        return
+      }
+      expect(initial).toHaveLength(1)
+      const initialSample = initial[0]
+      if (initialSample === undefined) {
+        return
+      }
+
+      await NitroHealth.saveRespiratoryRate([
+        {
+          date: idempotentInterval.startDate,
+          breathsPerMinute: 17.5,
+          sync: { id: syncId, version: 2 },
+        },
+      ])
+
+      const replacement = await readIdempotentRespiratoryRate([16.5, 17.5])
+      expect(replacement).toHaveLength(1)
+      const replacementSample = replacement[0]
+      if (replacementSample === undefined) {
+        return
+      }
+
+      expect(Math.abs(replacementSample.breathsPerMinute - 17.5)).toBeLessThan(0.001)
+      if (Platform.OS === 'android') {
+        expect(recordId(replacementSample.identity)).toBe(recordId(initialSample.identity))
+      } else if (Platform.OS === 'ios') {
+        expect(recordId(replacementSample.identity)).not.toBe(recordId(initialSample.identity))
+      }
+    } finally {
+      await NitroHealth.deleteRecordsByTimeRange('respiratoryRate', idempotentReadRange)
     }
   })
 
