@@ -35,7 +35,7 @@ describe('NitroHealth delete contract', () => {
     ])
   })
 
-  it('rejects an unverifiable identity deletion count', async () => {
+  it('preserves an unverifiable identity deletion count', async () => {
     mockNitroHealth.deleteRecordsByIds.mockResolvedValue({
       status: 'completed',
       deletedCountStatus: 'unverifiable',
@@ -43,7 +43,11 @@ describe('NitroHealth delete contract', () => {
 
     await expect(
       NitroHealth.deleteRecordsByIds('heartRate', [{ kind: 'record', id: 'heart-record' }])
-    ).rejects.toThrow('Identity deletion did not return an exact completed count')
+    ).resolves.toEqual({
+      status: 'completed',
+      requestedCount: 1,
+      deletedCount: { status: 'unverifiable' },
+    })
   })
 
   it('rejects a native no-match-or-ownership identity outcome', async () => {
@@ -54,7 +58,7 @@ describe('NitroHealth delete contract', () => {
 
     await expect(
       NitroHealth.deleteRecordsByIds('sleep', [{ kind: 'record', id: 'foreign-record' }])
-    ).rejects.toThrow('Identity deletion did not return an exact completed count')
+    ).rejects.toThrow('Identity deletion returned an unsupported native status')
   })
 
   it('deletes caller-owned records by time range with typed count visibility', async () => {

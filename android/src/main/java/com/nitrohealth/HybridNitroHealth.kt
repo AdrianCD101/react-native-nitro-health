@@ -382,7 +382,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                 ),
                 ascendingOrder = query.ascending,
                 pageSize = query.limit.toInt(),
-                pageToken = query.cursor?.let { decodeSampleCursor(it, "steps", query.ascending) }
+                pageToken = query.cursor?.let { decodeSampleCursor(it, "steps", query) }
             )
             val response = client.readRecords(request)
 
@@ -396,7 +396,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                         count = record.count.toDouble()
                     )
                 }.toTypedArray(),
-                nextCursor = response.pageToken?.let { encodeSampleCursor("steps", query.ascending, it) }
+                nextCursor = response.pageToken?.let { encodeSampleCursor("steps", query, it) }
             )
         }
     }
@@ -421,7 +421,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                 ),
                 ascendingOrder = query.ascending,
                 pageSize = query.limit.toInt(),
-                pageToken = query.cursor?.let { decodeSampleCursor(it, "distance", query.ascending) }
+                pageToken = query.cursor?.let { decodeSampleCursor(it, "distance", query) }
             )
             val response = client.readRecords(request)
 
@@ -436,7 +436,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                         scope = NativeDistanceScope.ACTIVITYUNSPECIFIED
                     )
                 }.toTypedArray(),
-                nextCursor = response.pageToken?.let { encodeSampleCursor("distance", query.ascending, it) }
+                nextCursor = response.pageToken?.let { encodeSampleCursor("distance", query, it) }
             )
         }
     }
@@ -461,7 +461,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                 ),
                 ascendingOrder = query.ascending,
                 pageSize = query.limit.toInt(),
-                pageToken = query.cursor?.let { decodeSampleCursor(it, "activeEnergyBurned", query.ascending) }
+                pageToken = query.cursor?.let { decodeSampleCursor(it, "activeEnergyBurned", query) }
             )
             val response = client.readRecords(request)
 
@@ -475,7 +475,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                         kilocalories = record.energy.inKilocalories
                     )
                 }.toTypedArray(),
-                nextCursor = response.pageToken?.let { encodeSampleCursor("activeEnergyBurned", query.ascending, it) }
+                nextCursor = response.pageToken?.let { encodeSampleCursor("activeEnergyBurned", query, it) }
             )
         }
     }
@@ -500,7 +500,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                 ),
                 ascendingOrder = query.ascending,
                 pageSize = query.limit.toInt(),
-                pageToken = query.cursor?.let { decodeSampleCursor(it, "heartRate", query.ascending) }
+                pageToken = query.cursor?.let { decodeSampleCursor(it, "heartRate", query) }
             )
             val response = client.readRecords(request)
 
@@ -522,7 +522,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
 
             NativeHeartRateSamplePage(
                 samples = ordered.toTypedArray(),
-                nextCursor = response.pageToken?.let { encodeSampleCursor("heartRate", query.ascending, it) }
+                nextCursor = response.pageToken?.let { encodeSampleCursor("heartRate", query, it) }
             )
         }
     }
@@ -540,7 +540,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                         kilograms = record.weight.inKilograms
                     )
                 }.toTypedArray(),
-                nextCursor = response.pageToken?.let { encodeSampleCursor("bodyMass", query.ascending, it) }
+                nextCursor = response.pageToken?.let { encodeSampleCursor("bodyMass", query, it) }
             )
         }
     }
@@ -577,7 +577,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             ),
             ascendingOrder = query.ascending,
             pageSize = query.limit.toInt(),
-            pageToken = query.cursor?.let { decodeSampleCursor(it, dataType, query.ascending) }
+            pageToken = query.cursor?.let { decodeSampleCursor(it, dataType, query) }
         )
 
         return client.readRecords(request)
@@ -598,7 +598,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                         diastolicMmHg = record.diastolic.inMillimetersOfMercury
                     )
                 }.toTypedArray(),
-                nextCursor = response.pageToken?.let { encodeSampleCursor("bloodPressure", query.ascending, it) }
+                nextCursor = response.pageToken?.let { encodeSampleCursor("bloodPressure", query, it) }
             )
         }
     }
@@ -617,7 +617,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                         millimolesPerLiter = record.level.inMillimolesPerLiter
                     )
                 }.toTypedArray(),
-                nextCursor = response.pageToken?.let { encodeSampleCursor("bloodGlucose", query.ascending, it) }
+                nextCursor = response.pageToken?.let { encodeSampleCursor("bloodGlucose", query, it) }
             )
         }
     }
@@ -636,7 +636,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                         celsius = record.temperature.inCelsius
                     )
                 }.toTypedArray(),
-                nextCursor = response.pageToken?.let { encodeSampleCursor("bodyTemperature", query.ascending, it) }
+                nextCursor = response.pageToken?.let { encodeSampleCursor("bodyTemperature", query, it) }
             )
         }
     }
@@ -655,7 +655,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                         breathsPerMinute = record.rate
                     )
                 }.toTypedArray(),
-                nextCursor = response.pageToken?.let { encodeSampleCursor("respiratoryRate", query.ascending, it) }
+                nextCursor = response.pageToken?.let { encodeSampleCursor("respiratoryRate", query, it) }
             )
         }
     }
@@ -674,7 +674,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                         percentage = record.percentage.value
                     )
                 }.toTypedArray(),
-                nextCursor = response.pageToken?.let { encodeSampleCursor("bodyFat", query.ascending, it) }
+                nextCursor = response.pageToken?.let { encodeSampleCursor("bodyFat", query, it) }
             )
         }
     }
@@ -693,7 +693,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                         kilograms = record.mass.inKilograms
                     )
                 }.toTypedArray(),
-                nextCursor = response.pageToken?.let { encodeSampleCursor("leanBodyMass", query.ascending, it) }
+                nextCursor = response.pageToken?.let { encodeSampleCursor("leanBodyMass", query, it) }
             )
         }
     }
@@ -712,7 +712,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                         celsius = record.temperature.inCelsius
                     )
                 }.toTypedArray(),
-                nextCursor = response.pageToken?.let { encodeSampleCursor("basalBodyTemperature", query.ascending, it) }
+                nextCursor = response.pageToken?.let { encodeSampleCursor("basalBodyTemperature", query, it) }
             )
         }
     }
@@ -731,7 +731,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                         bpm = record.beatsPerMinute.toDouble()
                     )
                 }.toTypedArray(),
-                nextCursor = response.pageToken?.let { encodeSampleCursor("restingHeartRate", query.ascending, it) }
+                nextCursor = response.pageToken?.let { encodeSampleCursor("restingHeartRate", query, it) }
             )
         }
     }
@@ -751,7 +751,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                         method = "rmssd"
                     )
                 }.toTypedArray(),
-                nextCursor = response.pageToken?.let { encodeSampleCursor("heartRateVariability", query.ascending, it) }
+                nextCursor = response.pageToken?.let { encodeSampleCursor("heartRateVariability", query, it) }
             )
         }
     }
@@ -770,7 +770,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                         percentage = record.percentage.value
                     )
                 }.toTypedArray(),
-                nextCursor = response.pageToken?.let { encodeSampleCursor("oxygenSaturation", query.ascending, it) }
+                nextCursor = response.pageToken?.let { encodeSampleCursor("oxygenSaturation", query, it) }
             )
         }
     }
@@ -787,7 +787,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                         meters = record.height.inMeters
                     )
                 }.toTypedArray(),
-                nextCursor = response.pageToken?.let { encodeSampleCursor("height", query.ascending, it) }
+                nextCursor = response.pageToken?.let { encodeSampleCursor("height", query, it) }
             )
         }
     }
@@ -955,7 +955,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                 ),
                 ascendingOrder = query.ascending,
                 pageSize = query.limit.toInt(),
-                pageToken = query.cursor?.let { decodeSampleCursor(it, "sleep", query.ascending) }
+                pageToken = query.cursor?.let { decodeSampleCursor(it, "sleep", query) }
             )
             val response = client.readRecords(request)
             // Paging counts sessions (pageSize/limit and the cursor operate on records, not
@@ -974,7 +974,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
 
             NativeSleepSamplePage(
                 samples = ordered.toTypedArray(),
-                nextCursor = response.pageToken?.let { encodeSampleCursor("sleep", query.ascending, it) }
+                nextCursor = response.pageToken?.let { encodeSampleCursor("sleep", query, it) }
             )
         }
     }
@@ -999,13 +999,13 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                 ),
                 ascendingOrder = query.ascending,
                 pageSize = query.limit.toInt(),
-                pageToken = query.cursor?.let { decodeSampleCursor(it, "workout", query.ascending) }
+                pageToken = query.cursor?.let { decodeSampleCursor(it, "workout", query) }
             )
             val response = client.readRecords(request)
 
             NativeWorkoutSamplePage(
                 samples = response.records.map(::makeNativeWorkoutSample).toTypedArray(),
-                nextCursor = response.pageToken?.let { encodeSampleCursor("workout", query.ascending, it) }
+                nextCursor = response.pageToken?.let { encodeSampleCursor("workout", query, it) }
             )
         }
     }
@@ -1159,9 +1159,9 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                 recordIdsList = validatedRecordIds,
                 clientRecordIdsList = emptyList()
             )
-            // Health Connect rejects invalid IDs and deletes the list transactionally, so a
-            // successful Unit result means every validated ID was deleted.
-            makeCompletedIdDeleteResult(validatedRecordIds.size)
+            // Health Connect exposes no deleted count, and providers can ignore IDs that do not
+            // match a caller-owned record. Success proves only that the delete operation completed.
+            makeCompletedIdDeleteResult()
         }
     }
 

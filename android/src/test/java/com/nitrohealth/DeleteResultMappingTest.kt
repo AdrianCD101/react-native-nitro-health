@@ -8,12 +8,12 @@ import org.junit.Test
 
 class DeleteResultMappingTest {
     @Test
-    fun idSuccessReportsKnownRequestedCount() {
-        val result = makeCompletedIdDeleteResult(3)
+    fun idSuccessHasUnverifiableCount() {
+        val result = makeCompletedIdDeleteResult()
 
         assertEquals(NativeHealthDeleteStatus.COMPLETED, result.status)
-        assertEquals(NativeDeletedCountStatus.KNOWN, result.deletedCountStatus)
-        assertEquals(3.0, result.deletedCount ?: error("missing count"), 0.0)
+        assertEquals(NativeDeletedCountStatus.UNVERIFIABLE, result.deletedCountStatus)
+        assertNull(result.deletedCount)
     }
 
     @Test

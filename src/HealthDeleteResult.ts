@@ -11,14 +11,14 @@ export type HealthDeletedCount =
       status: 'unverifiable'
     }
 
-/** Successful deletion by explicit record identity. No-match operations reject. */
+/** Successful deletion by explicit record identity. */
 export interface HealthIdentityDeleteResult {
   /** The native deletion operation completed. */
   status: 'completed'
   /** Number of record identities supplied. */
   requestedCount: number
-  /** Exact number deleted. */
-  deletedCount: Extract<HealthDeletedCount, { status: 'known' }>
+  /** Native visibility into the number of deleted records. */
+  deletedCount: HealthDeletedCount
 }
 
 /** Successful deletion by time range. */

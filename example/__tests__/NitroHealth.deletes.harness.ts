@@ -76,10 +76,23 @@ describe('NitroHealth deletes (native)', () => {
     }
   })
 
-  it('rejects identity deletion when no caller-owned record matches', async () => {
+  it('reports a no-match identity deletion according to native count visibility', async () => {
     if (!(await hasVerifiedPermissions([{ accessType: 'write', dataType: 'steps' }]))) return
 
-    await expect(NitroHealth.deleteRecordsByIds('steps', [nonexistentRecord])).rejects.toThrow()
+    const outcome = await NitroHealth.deleteRecordsByIds('steps', [nonexistentRecord]).then(
+      (result) => ({ status: 'completed' as const, result }),
+      (error: unknown) => ({ status: 'rejected' as const, error })
+    )
+
+    if (outcome.status === 'completed') {
+      expect(outcome.result.deletedCount).toEqual({ status: 'unverifiable' })
+      return
+    }
+
+    expect(outcome.error).toBeInstanceOf(Error)
+    expect((outcome.error as Error).message).toContain(
+      'No caller-owned health records matched the supplied identities'
+    )
   })
 
   it('round-trips save, delete by record identity, and re-read for steps', async () => {

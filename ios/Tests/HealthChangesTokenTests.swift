@@ -74,6 +74,8 @@ final class HealthChangesTokenTests: XCTestCase {
             platform: "ios",
             dataType: "steps",
             ascending: true,
+            queryStartTimeMs: 1_000,
+            queryEndTimeMs: 2_000,
             startInterval: 0,
             seenUuids: []
         ))

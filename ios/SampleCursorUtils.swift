@@ -31,6 +31,8 @@ struct SampleCursor: Codable, Equatable {
     let platform: String
     let dataType: String
     let ascending: Bool
+    let queryStartTimeMs: Double
+    let queryEndTimeMs: Double
     /// `timeIntervalSince1970` (seconds) of the last returned sample's start date.
     let startInterval: Double
     /// Uuids of already-returned samples whose start date equals `startInterval`.
@@ -45,7 +47,13 @@ func encodeSampleCursor(_ cursor: SampleCursor) throws -> String {
     return base64UrlEncodedString(data)
 }
 
-func decodeSampleCursor(_ cursor: String, dataType: String, ascending: Bool) throws -> SampleCursor {
+func decodeSampleCursor(
+    _ cursor: String,
+    dataType: String,
+    ascending: Bool,
+    queryStartTimeMs: Double,
+    queryEndTimeMs: Double
+) throws -> SampleCursor {
     guard let data = base64UrlDecodedData(cursor),
           let decoded = try? JSONDecoder().decode(SampleCursor.self, from: data)
     else {
@@ -70,6 +78,15 @@ func decodeSampleCursor(_ cursor: String, dataType: String, ascending: Bool) thr
         throw invalidCursorError(
             dataType: dataType,
             detail: "the cursor was created by a query with a different ascending option"
+        )
+    }
+
+    guard decoded.queryStartTimeMs == queryStartTimeMs,
+          decoded.queryEndTimeMs == queryEndTimeMs
+    else {
+        throw invalidCursorError(
+            dataType: dataType,
+            detail: "the cursor was created by a query with a different date range"
         )
     }
 
@@ -129,6 +146,8 @@ func paginateCursorPage(
     limit: Int,
     dataType: String,
     ascending: Bool,
+    queryStartTimeMs: Double,
+    queryEndTimeMs: Double,
     cursor: SampleCursor?
 ) -> CursorPage {
     let seenUuids = Set(cursor?.seenUuids ?? [])
@@ -159,6 +178,8 @@ func paginateCursorPage(
             platform: "ios",
             dataType: dataType,
             ascending: ascending,
+            queryStartTimeMs: queryStartTimeMs,
+            queryEndTimeMs: queryEndTimeMs,
             startInterval: boundaryInterval,
             seenUuids: boundaryUuids
         )
