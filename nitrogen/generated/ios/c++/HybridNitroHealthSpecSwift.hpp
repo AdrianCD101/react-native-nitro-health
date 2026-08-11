@@ -60,6 +60,8 @@ namespace margelo::nitro::nitrohealth { struct NativeBloodPressureSample; }
 namespace margelo::nitro::nitrohealth { struct NativeBloodGlucoseSample; }
 // Forward declaration of `NativeBodyTemperatureSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBodyTemperatureSample; }
+// Forward declaration of `NativeRespiratoryRateSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeRespiratoryRateSample; }
 // Forward declaration of `NativeRestingHeartRateSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeRestingHeartRateSample; }
 // Forward declaration of `NativeHeartRateVariabilitySample` to properly resolve imports.
@@ -114,6 +116,8 @@ namespace margelo::nitro::nitrohealth { struct NativeBloodPressureSamplePage; }
 namespace margelo::nitro::nitrohealth { struct NativeBloodGlucoseSamplePage; }
 // Forward declaration of `NativeBodyTemperatureSamplePage` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBodyTemperatureSamplePage; }
+// Forward declaration of `NativeRespiratoryRateSamplePage` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeRespiratoryRateSamplePage; }
 // Forward declaration of `NativeHeartRateStatistics` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHeartRateStatistics; }
 // Forward declaration of `NativeHealthTimeRangeQuery` to properly resolve imports.
@@ -150,6 +154,8 @@ namespace margelo::nitro::nitrohealth { struct NativeBloodPressureSampleInput; }
 namespace margelo::nitro::nitrohealth { struct NativeBloodGlucoseSampleInput; }
 // Forward declaration of `NativeBodyTemperatureSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBodyTemperatureSampleInput; }
+// Forward declaration of `NativeRespiratoryRateSampleInput` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeRespiratoryRateSampleInput; }
 // Forward declaration of `NativeBodyMassSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBodyMassSampleInput; }
 // Forward declaration of `NativeRestingHeartRateSampleInput` to properly resolve imports.
@@ -212,6 +218,7 @@ namespace margelo::nitro::nitrohealth { enum class NativeHealthAuthorizationStat
 #include "NativeBloodPressureSample.hpp"
 #include "NativeBloodGlucoseSample.hpp"
 #include "NativeBodyTemperatureSample.hpp"
+#include "NativeRespiratoryRateSample.hpp"
 #include "NativeRestingHeartRateSample.hpp"
 #include "NativeHeartRateVariabilitySample.hpp"
 #include "NativeDistanceSample.hpp"
@@ -239,6 +246,7 @@ namespace margelo::nitro::nitrohealth { enum class NativeHealthAuthorizationStat
 #include "NativeBloodPressureSamplePage.hpp"
 #include "NativeBloodGlucoseSamplePage.hpp"
 #include "NativeBodyTemperatureSamplePage.hpp"
+#include "NativeRespiratoryRateSamplePage.hpp"
 #include "NativeHeartRateStatistics.hpp"
 #include "NativeHealthTimeRangeQuery.hpp"
 #include "NativeRestingHeartRateSamplePage.hpp"
@@ -257,6 +265,7 @@ namespace margelo::nitro::nitrohealth { enum class NativeHealthAuthorizationStat
 #include "NativeBloodPressureSampleInput.hpp"
 #include "NativeBloodGlucoseSampleInput.hpp"
 #include "NativeBodyTemperatureSampleInput.hpp"
+#include "NativeRespiratoryRateSampleInput.hpp"
 #include "NativeBodyMassSampleInput.hpp"
 #include "NativeRestingHeartRateSampleInput.hpp"
 #include "NativeOxygenSaturationSampleInput.hpp"
@@ -492,6 +501,14 @@ namespace margelo::nitro::nitrohealth {
       auto __value = std::move(__result.value());
       return __value;
     }
+    inline std::shared_ptr<Promise<NativeRespiratoryRateSamplePage>> readRespiratoryRate(const NativeHealthDateRangeQuery& query) override {
+      auto __result = _swiftPart.readRespiratoryRate(std::forward<decltype(query)>(query));
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
     inline std::shared_ptr<Promise<NativeHeartRateStatistics>> readHeartRateStatistics(const NativeHealthTimeRangeQuery& query) override {
       auto __result = _swiftPart.readHeartRateStatistics(std::forward<decltype(query)>(query));
       if (__result.hasError()) [[unlikely]] {
@@ -606,6 +623,14 @@ namespace margelo::nitro::nitrohealth {
     }
     inline std::shared_ptr<Promise<void>> saveBodyTemperature(const std::vector<NativeBodyTemperatureSampleInput>& samples) override {
       auto __result = _swiftPart.saveBodyTemperature(samples);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline std::shared_ptr<Promise<void>> saveRespiratoryRate(const std::vector<NativeRespiratoryRateSampleInput>& samples) override {
+      auto __result = _swiftPart.saveRespiratoryRate(samples);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }

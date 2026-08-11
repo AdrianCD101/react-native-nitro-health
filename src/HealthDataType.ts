@@ -11,6 +11,7 @@ export type HealthDataType =
   | 'bloodPressure'
   | 'bloodGlucose'
   | 'bodyTemperature'
+  | 'respiratoryRate'
   | 'restingHeartRate'
   | 'heartRateVariability'
   | 'distance'

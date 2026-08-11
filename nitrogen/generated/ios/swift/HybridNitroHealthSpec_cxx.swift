@@ -521,6 +521,25 @@ open class HybridNitroHealthSpec_cxx {
   }
   
   @inline(__always)
+  public final func readRespiratoryRate(query: NativeHealthDateRangeQuery) -> bridge.Result_std__shared_ptr_Promise_NativeRespiratoryRateSamplePage___ {
+    do {
+      let __result = try self.__implementation.readRespiratoryRate(query: query)
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_NativeRespiratoryRateSamplePage__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_NativeRespiratoryRateSamplePage__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_NativeRespiratoryRateSamplePage__(__promise)
+        __result
+          .then({ __result in __promiseHolder.resolve(__result) })
+          .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
+        return __promise
+      }()
+      return bridge.create_Result_std__shared_ptr_Promise_NativeRespiratoryRateSamplePage___(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_std__shared_ptr_Promise_NativeRespiratoryRateSamplePage___(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
   public final func readHeartRateStatistics(query: NativeHealthTimeRangeQuery) -> bridge.Result_std__shared_ptr_Promise_NativeHeartRateStatistics___ {
     do {
       let __result = try self.__implementation.readHeartRateStatistics(query: query)
@@ -796,6 +815,25 @@ open class HybridNitroHealthSpec_cxx {
   public final func saveBodyTemperature(samples: bridge.std__vector_NativeBodyTemperatureSampleInput_) -> bridge.Result_std__shared_ptr_Promise_void___ {
     do {
       let __result = try self.__implementation.saveBodyTemperature(samples: samples.map({ __item in __item }))
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_void__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_void__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_void__(__promise)
+        __result
+          .then({ __result in __promiseHolder.resolve() })
+          .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
+        return __promise
+      }()
+      return bridge.create_Result_std__shared_ptr_Promise_void___(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func saveRespiratoryRate(samples: bridge.std__vector_NativeRespiratoryRateSampleInput_) -> bridge.Result_std__shared_ptr_Promise_void___ {
+    do {
+      let __result = try self.__implementation.saveRespiratoryRate(samples: samples.map({ __item in __item }))
       let __resultCpp = { () -> bridge.std__shared_ptr_Promise_void__ in
         let __promise = bridge.create_std__shared_ptr_Promise_void__()
         let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_void__(__promise)

@@ -281,6 +281,20 @@ describe('NitroHealth reads (native)', () => {
     }
   })
 
+  it('reads respiratory rate readings under a record identity with plausible values', async () => {
+    try {
+      const page = await NitroHealth.readRespiratoryRate(emptyRange)
+      for (const sample of page.samples) {
+        assertSampleIdentityAndOrigin(sample)
+        expect(sample.identity.kind).toBe('record')
+        expect(sample.breathsPerMinute).toBeGreaterThanOrEqual(0)
+        expect(sample.breathsPerMinute).toBeLessThanOrEqual(120)
+      }
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error)
+    }
+  })
+
   // SDNN and RMSSD are non-comparable, so this assertion intentionally verifies the native
   // implementation detail for each platform after public permission state allows the read.
   it('reports SDNN on iOS and RMSSD on Android when HRV samples are observable', async () => {

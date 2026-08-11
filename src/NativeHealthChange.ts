@@ -8,6 +8,7 @@ import type { NativeHeartRateSample } from './NativeHeartRateSample'
 import type { NativeHeartRateVariabilitySample } from './NativeHeartRateVariabilitySample'
 import type { NativeHeightSample } from './NativeHeightSample'
 import type { NativeOxygenSaturationSample } from './NativeOxygenSaturationSample'
+import type { NativeRespiratoryRateSample } from './NativeRespiratoryRateSample'
 import type { NativeRestingHeartRateSample } from './NativeRestingHeartRateSample'
 import type { NativeSleepSample } from './NativeSleepSample'
 import type { NativeStepSample } from './NativeStepSample'
@@ -29,6 +30,8 @@ export interface NativeHealthChange {
   bloodGlucoseSamples?: NativeBloodGlucoseSample[]
   /** Body-temperature samples for a `bodyTemperature` upsert. */
   bodyTemperatureSamples?: NativeBodyTemperatureSample[]
+  /** Respiratory-rate samples for a `respiratoryRate` upsert. */
+  respiratoryRateSamples?: NativeRespiratoryRateSample[]
   /** Resting heart-rate samples for a `restingHeartRate` upsert. */
   restingHeartRateSamples?: NativeRestingHeartRateSample[]
   /** HRV samples for a `heartRateVariability` upsert. */

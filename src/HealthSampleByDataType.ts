@@ -8,6 +8,7 @@ import type { HeartRateSample } from './HeartRateSample'
 import type { HeartRateVariabilitySample } from './HeartRateVariabilitySample'
 import type { HeightSample } from './HeightSample'
 import type { OxygenSaturationSample } from './OxygenSaturationSample'
+import type { RespiratoryRateSample } from './RespiratoryRateSample'
 import type { RestingHeartRateSample } from './RestingHeartRateSample'
 import type { SleepSample } from './SleepSample'
 import type { StepSample } from './StepSample'
@@ -25,6 +26,8 @@ export interface HealthSampleByDataType {
   bloodGlucose: BloodGlucoseSample
   /** Body-temperature readings. */
   bodyTemperature: BodyTemperatureSample
+  /** Respiratory-rate readings. */
+  respiratoryRate: RespiratoryRateSample
   /** Resting heart-rate readings. */
   restingHeartRate: RestingHeartRateSample
   /** Platform-specific heart-rate variability readings. */

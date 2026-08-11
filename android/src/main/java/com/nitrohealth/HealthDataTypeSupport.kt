@@ -13,6 +13,7 @@ import androidx.health.connect.client.records.HeartRateVariabilityRmssdRecord
 import androidx.health.connect.client.records.HeightRecord
 import androidx.health.connect.client.records.OxygenSaturationRecord
 import androidx.health.connect.client.records.Record
+import androidx.health.connect.client.records.RespiratoryRateRecord
 import androidx.health.connect.client.records.RestingHeartRateRecord
 import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.StepsRecord
@@ -108,6 +109,10 @@ internal fun healthDataTypeDescriptorFor(dataType: String): HealthDataTypeDescri
         "bodyTemperature" -> HealthDataTypeDescriptor(
             recordType = BodyTemperatureRecord::class,
             permissionLabel = "body temperature"
+        )
+        "respiratoryRate" -> HealthDataTypeDescriptor(
+            recordType = RespiratoryRateRecord::class,
+            permissionLabel = "respiratory rate"
         )
         "sleep" -> HealthDataTypeDescriptor(
             recordType = SleepSessionRecord::class,

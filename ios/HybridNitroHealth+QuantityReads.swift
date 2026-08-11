@@ -2,9 +2,9 @@
 //  HybridNitroHealth+QuantityReads.swift
 //  Pods
 //
-//  Instantaneous-quantity reads/writes (bloodGlucose, bodyTemperature, restingHeartRate,
-//  heartRateVariability, oxygenSaturation, height; readBodyMass in HybridNitroHealth.swift
-//  shares the read helper).
+//  Instantaneous-quantity reads/writes (bloodGlucose, bodyTemperature, respiratoryRate,
+//  restingHeartRate, heartRateVariability, oxygenSaturation, height; readBodyMass in
+//  HybridNitroHealth.swift shares the read helper).
 //  This file is HealthKit-only, so it must NOT be added to Package.swift's pure-Foundation SPM
 //  test target; the podspec globs ios/**/*.swift and picks it up automatically. Kept separate
 //  from HybridNitroHealth.swift to stay under that file's line budget.
@@ -144,6 +144,25 @@ extension HybridNitroHealth {
         }
     }
 
+    func readRespiratoryRate(query: NativeHealthDateRangeQuery) throws -> Promise<NativeRespiratoryRateSamplePage> {
+        if !HKHealthStore.isHealthDataAvailable() {
+            throw permissionError("Health data is not available")
+        }
+
+        return Promise<NativeRespiratoryRateSamplePage>.async {
+            let page = try await self.readInstantQuantitySamplePage(dataType: "respiratoryRate", query: query) { quantitySample, unit in
+                NativeRespiratoryRateSample(
+                    identity: quantitySample.nativeHealthSampleIdentity,
+                    origin: quantitySample.nativeHealthDataOrigin,
+                    timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
+                    breathsPerMinute: quantitySample.quantity.doubleValue(for: unit)
+                )
+            }
+
+            return NativeRespiratoryRateSamplePage(samples: page.samples, nextCursor: page.nextCursor)
+        }
+    }
+
     func readHeight(query: NativeHealthDateRangeQuery) throws -> Promise<NativeHeightSamplePage> {
         if !HKHealthStore.isHealthDataAvailable() {
             throw permissionError("Health data is not available")
@@ -178,6 +197,12 @@ extension HybridNitroHealth {
     func saveBodyTemperature(samples: [NativeBodyTemperatureSampleInput]) throws -> Promise<Void> {
         return try saveQuantitySamples(dataType: "bodyTemperature", label: "body temperature") { quantityType in
             try makeBodyTemperatureQuantitySamples(samples: samples, quantityType: quantityType)
+        }
+    }
+
+    func saveRespiratoryRate(samples: [NativeRespiratoryRateSampleInput]) throws -> Promise<Void> {
+        return try saveQuantitySamples(dataType: "respiratoryRate", label: "respiratory rate") { quantityType in
+            try makeRespiratoryRateQuantitySamples(samples: samples, quantityType: quantityType)
         }
     }
 

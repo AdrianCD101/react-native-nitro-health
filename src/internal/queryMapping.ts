@@ -64,6 +64,7 @@ const STATISTICS_METRICS_BY_DATA_TYPE: Record<HealthDataType, readonly Statistic
   bloodPressure: [],
   bloodGlucose: [],
   bodyTemperature: [],
+  respiratoryRate: [],
   restingHeartRate: ['avg', 'min', 'max'],
   heartRateVariability: [],
   oxygenSaturation: [],

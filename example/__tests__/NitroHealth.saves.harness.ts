@@ -577,6 +577,46 @@ describe('NitroHealth saves (native)', () => {
     })
   })
 
+  describe('respiratory rate', () => {
+    it('rejects saving respiratory rate when write permission is not granted', async () => {
+      if (await hasVerifiedPermissions([{ accessType: 'write', dataType: 'respiratoryRate' }])) {
+        return
+      }
+
+      await expect(
+        NitroHealth.saveRespiratoryRate([{ date: saveInterval.startDate, breathsPerMinute: 16.5 }])
+      ).rejects.toThrow(/permission/i)
+    })
+
+    it('round-trips a saved reading in breaths per minute when authorized', async () => {
+      const authorized = await hasVerifiedPermissions([
+        { accessType: 'write', dataType: 'respiratoryRate' },
+        { accessType: 'read', dataType: 'respiratoryRate' },
+      ])
+
+      if (!authorized) {
+        return
+      }
+
+      await NitroHealth.saveRespiratoryRate([
+        { date: saveInterval.startDate, breathsPerMinute: 16.5 },
+      ])
+
+      const page = await NitroHealth.readRespiratoryRate(saveReadRange)
+
+      if (isInconclusiveRead(page.samples)) {
+        return
+      }
+
+      const matches = page.samples.filter(
+        (sample) => Math.abs(sample.breathsPerMinute - 16.5) < 0.001
+      )
+
+      expect(matches.length).toBeGreaterThanOrEqual(1)
+      expect(matches[0]?.identity.kind).toBe('record')
+    })
+  })
+
   describe('height', () => {
     it('rejects saving height when write permission is not granted', async () => {
       if (await hasVerifiedPermissions([{ accessType: 'write', dataType: 'height' }])) {

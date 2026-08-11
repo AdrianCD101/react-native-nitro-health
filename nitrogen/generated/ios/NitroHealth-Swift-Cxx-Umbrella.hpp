@@ -142,6 +142,12 @@ namespace margelo::nitro::nitrohealth { enum class NativePermissionDestination; 
 namespace margelo::nitro::nitrohealth { struct NativePermissionWorkflowResult; }
 // Forward declaration of `NativePermissionWorkflowStatus` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class NativePermissionWorkflowStatus; }
+// Forward declaration of `NativeRespiratoryRateSampleInput` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeRespiratoryRateSampleInput; }
+// Forward declaration of `NativeRespiratoryRateSamplePage` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeRespiratoryRateSamplePage; }
+// Forward declaration of `NativeRespiratoryRateSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeRespiratoryRateSample; }
 // Forward declaration of `NativeRestingHeartRateSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeRestingHeartRateSampleInput; }
 // Forward declaration of `NativeRestingHeartRateSamplePage` to properly resolve imports.
@@ -249,6 +255,9 @@ namespace margelo::nitro::nitrohealth { struct NativeWorkoutSample; }
 #include "NativePermissionDestination.hpp"
 #include "NativePermissionWorkflowResult.hpp"
 #include "NativePermissionWorkflowStatus.hpp"
+#include "NativeRespiratoryRateSample.hpp"
+#include "NativeRespiratoryRateSampleInput.hpp"
+#include "NativeRespiratoryRateSamplePage.hpp"
 #include "NativeRestingHeartRateSample.hpp"
 #include "NativeRestingHeartRateSampleInput.hpp"
 #include "NativeRestingHeartRateSamplePage.hpp"
