@@ -22,6 +22,8 @@ import type { HeartRateStatistics } from '../HeartRateStatistics'
 import type { HeartRateVariabilitySample } from '../HeartRateVariabilitySample'
 import type { HeightSample } from '../HeightSample'
 import type { HeightSampleInput } from '../HeightSampleInput'
+import type { Vo2MaxSample } from '../Vo2MaxSample'
+import type { Vo2MaxSampleInput } from '../Vo2MaxSampleInput'
 import type { NativeActiveEnergyBurnedSample } from '../NativeActiveEnergyBurnedSample'
 import type { NativeActiveEnergyBurnedSampleInput } from '../NativeActiveEnergyBurnedSampleInput'
 import type { NativeBodyMassSample } from '../NativeBodyMassSample'
@@ -53,6 +55,8 @@ import type { NativeHeartRateStatistics } from '../NativeHeartRateStatistics'
 import type { NativeHeartRateVariabilitySample } from '../NativeHeartRateVariabilitySample'
 import type { NativeHeightSample } from '../NativeHeightSample'
 import type { NativeHeightSampleInput } from '../NativeHeightSampleInput'
+import type { NativeVo2MaxSample } from '../NativeVo2MaxSample'
+import type { NativeVo2MaxSampleInput } from '../NativeVo2MaxSampleInput'
 import type { NativeOxygenSaturationSample } from '../NativeOxygenSaturationSample'
 import type { NativeOxygenSaturationSampleInput } from '../NativeOxygenSaturationSampleInput'
 import type { NativeRespiratoryRateSample } from '../NativeRespiratoryRateSample'
@@ -128,6 +132,8 @@ const MIN_BREATHS_PER_MINUTE = 0
 const MAX_BREATHS_PER_MINUTE = 120
 const MAX_KILOGRAMS = 1_000
 const MAX_HEIGHT_METERS = 3
+const MIN_VO2_MAX = 0
+const MAX_VO2_MAX = 100
 const WRITABLE_SLEEP_STAGES = new Set<WritableSleepStage>([
   'awake',
   'asleep',
@@ -577,6 +583,27 @@ export function makeNativeHeightSampleInput(
   }
 }
 
+export function makeNativeVo2MaxSampleInput(
+  sample: Vo2MaxSampleInput,
+  index: number
+): NativeVo2MaxSampleInput {
+  const timeMs = makeSampleInstant(sample, index)
+
+  assertSampleBetween(
+    sample.millilitersPerKilogramPerMinute,
+    MIN_VO2_MAX,
+    MAX_VO2_MAX,
+    index,
+    'millilitersPerKilogramPerMinute'
+  )
+
+  return {
+    timeMs,
+    millilitersPerKilogramPerMinute: sample.millilitersPerKilogramPerMinute,
+    ...makeNativeSync(sample.sync, index),
+  }
+}
+
 export function makeNativeSleepSessionInput(
   session: SleepSessionInput,
   sessionIndex: number
@@ -968,6 +995,15 @@ export function makeHeightSample(sample: NativeHeightSample): HeightSample {
   }
 }
 
+export function makeVo2MaxSample(sample: NativeVo2MaxSample): Vo2MaxSample {
+  return {
+    identity: makeHealthSampleIdentity(sample.identity),
+    origin: makeHealthDataOrigin(sample.origin),
+    date: new Date(sample.timeMs),
+    millilitersPerKilogramPerMinute: sample.millilitersPerKilogramPerMinute,
+  }
+}
+
 export function makeSleepSample(sample: NativeSleepSample): SleepSample {
   const identity = makeHealthSampleIdentity(sample.identity)
   const base = {
@@ -1083,6 +1119,7 @@ const CHANGE_SAMPLE_FIELDS = [
   'activeEnergyBurnedSamples',
   'oxygenSaturationSamples',
   'heightSamples',
+  'vo2MaxSamples',
   'sleepSamples',
   'bodyMassSamples',
   'workoutSamples',
@@ -1180,6 +1217,11 @@ function makeUpsertSamples(
       if (change.heightSamples === undefined)
         throw new Error("Native 'height' upsert is missing samples")
       samples = change.heightSamples.map(makeHeightSample)
+      break
+    case 'vo2Max':
+      if (change.vo2MaxSamples === undefined)
+        throw new Error("Native 'vo2Max' upsert is missing samples")
+      samples = change.vo2MaxSamples.map(makeVo2MaxSample)
       break
     case 'sleep':
       if (change.sleepSamples === undefined)

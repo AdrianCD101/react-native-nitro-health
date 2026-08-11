@@ -54,6 +54,8 @@ import type { HeartRateStatistics } from './HeartRateStatistics'
 import type { HeartRateVariabilitySample } from './HeartRateVariabilitySample'
 import type { HeightSample } from './HeightSample'
 import type { HeightSampleInput } from './HeightSampleInput'
+import type { Vo2MaxSample } from './Vo2MaxSample'
+import type { Vo2MaxSampleInput } from './Vo2MaxSampleInput'
 import type { LeanBodyMassSample } from './LeanBodyMassSample'
 import type { LeanBodyMassSampleInput } from './LeanBodyMassSampleInput'
 import type { OxygenSaturationSample } from './OxygenSaturationSample'
@@ -89,6 +91,7 @@ import {
   makeHeartRateStatistics,
   makeHeartRateVariabilitySample,
   makeHeightSample,
+  makeVo2MaxSample,
   makeLeanBodyMassSample,
   makeNativeActiveEnergyBurnedSampleInput,
   makeNativeBasalBodyTemperatureSampleInput,
@@ -100,6 +103,7 @@ import {
   makeNativeDistanceSampleInput,
   makeNativeHeartRateSampleInput,
   makeNativeHeightSampleInput,
+  makeNativeVo2MaxSampleInput,
   makeNativeLeanBodyMassSampleInput,
   makeNativeOxygenSaturationSampleInput,
   makeNativeRespiratoryRateSampleInput,
@@ -252,6 +256,7 @@ export interface NitroHealth {
     query: HealthDateRangeQuery
   ): Promise<HealthSamplePage<OxygenSaturationSample>>
   readHeight(query: HealthDateRangeQuery): Promise<HealthSamplePage<HeightSample>>
+  readVo2Max(query: HealthDateRangeQuery): Promise<HealthSamplePage<Vo2MaxSample>>
   readStatistics<T extends HealthDataType>(
     dataType: T,
     query: HealthStatisticsQuery
@@ -273,6 +278,7 @@ export interface NitroHealth {
   saveRestingHeartRate(samples: RestingHeartRateSampleInput[]): Promise<void>
   saveOxygenSaturation(samples: OxygenSaturationSampleInput[]): Promise<void>
   saveHeight(samples: HeightSampleInput[]): Promise<void>
+  saveVo2Max(samples: Vo2MaxSampleInput[]): Promise<void>
   saveSleepSessions(sessions: SleepSessionInput[]): Promise<void>
   saveWorkout(workout: WorkoutSampleInput): Promise<void>
   /** Deletes independently deletable records by physical identity. */
@@ -510,6 +516,12 @@ export const NitroHealth: NitroHealth = {
       makeHeightSample
     )
   },
+  async readVo2Max(query) {
+    return makeSamplePage(
+      await NitroHealthNative.readVo2Max(makeNativeSampleQuery(query)),
+      makeVo2MaxSample
+    )
+  },
   async readStatistics(dataType, query) {
     const statistics = await NitroHealthNative.readStatistics(
       dataType,
@@ -618,6 +630,12 @@ export const NitroHealth: NitroHealth = {
     const nativeSamples = samples.map(makeNativeHeightSampleInput)
     assertUniqueSampleSyncIds(samples)
     return NitroHealthNative.saveHeight(nativeSamples)
+  },
+  async saveVo2Max(samples) {
+    assertNonEmptySamples(samples)
+    const nativeSamples = samples.map(makeNativeVo2MaxSampleInput)
+    assertUniqueSampleSyncIds(samples)
+    return NitroHealthNative.saveVo2Max(nativeSamples)
   },
   async saveSleepSessions(sessions) {
     assertNonEmptySessions(sessions)

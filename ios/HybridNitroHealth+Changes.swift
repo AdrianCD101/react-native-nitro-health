@@ -351,6 +351,22 @@ extension HybridNitroHealth {
                     meters: quantitySample.quantity.doubleValue(for: HKUnit.meter())
                 )]
             )
+        case "vo2Max":
+            let quantitySample = try requireQuantitySample(sample, dataType: dataType)
+            return makeNativeHealthChange(
+                type: "upsert",
+                recordId: uuid,
+                vo2MaxSamples: [NativeVo2MaxSample(
+                    identity: quantitySample.nativeHealthSampleIdentity,
+                    origin: quantitySample.nativeHealthDataOrigin,
+                    timeMs: startTimeMs,
+                    millilitersPerKilogramPerMinute: quantitySample.quantity.doubleValue(
+                        for: HKUnit.literUnit(with: .milli).unitDivided(
+                            by: HKUnit.gramUnit(with: .kilo).unitMultiplied(by: HKUnit.minute())
+                        )
+                    )
+                )]
+            )
         case "sleep":
             guard let categorySample = sample as? HKCategorySample else {
                 throw unexpectedChangesSampleError(
@@ -441,6 +457,7 @@ extension HybridNitroHealth {
         activeEnergyBurnedSamples: [NativeActiveEnergyBurnedSample]? = nil,
         oxygenSaturationSamples: [NativeOxygenSaturationSample]? = nil,
         heightSamples: [NativeHeightSample]? = nil,
+        vo2MaxSamples: [NativeVo2MaxSample]? = nil,
         sleepSamples: [NativeSleepSample]? = nil,
         bodyMassSamples: [NativeBodyMassSample]? = nil,
         workoutSamples: [NativeWorkoutSample]? = nil
@@ -463,6 +480,7 @@ extension HybridNitroHealth {
             activeEnergyBurnedSamples: activeEnergyBurnedSamples,
             oxygenSaturationSamples: oxygenSaturationSamples,
             heightSamples: heightSamples,
+            vo2MaxSamples: vo2MaxSamples,
             sleepSamples: sleepSamples,
             bodyMassSamples: bodyMassSamples,
             workoutSamples: workoutSamples,

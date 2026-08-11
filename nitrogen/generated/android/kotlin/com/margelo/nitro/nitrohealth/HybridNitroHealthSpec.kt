@@ -156,6 +156,10 @@ abstract class HybridNitroHealthSpec: HybridObject() {
   
   @DoNotStrip
   @Keep
+  abstract fun readVo2Max(query: NativeHealthDateRangeQuery): Promise<NativeVo2MaxSamplePage>
+  
+  @DoNotStrip
+  @Keep
   abstract fun readStatistics(dataType: String, query: NativeHealthStatisticsQuery): Promise<Array<NativeHealthStatistics>>
   
   @DoNotStrip
@@ -225,6 +229,10 @@ abstract class HybridNitroHealthSpec: HybridObject() {
   @DoNotStrip
   @Keep
   abstract fun saveHeight(samples: Array<NativeHeightSampleInput>): Promise<Unit>
+  
+  @DoNotStrip
+  @Keep
+  abstract fun saveVo2Max(samples: Array<NativeVo2MaxSampleInput>): Promise<Unit>
   
   @DoNotStrip
   @Keep

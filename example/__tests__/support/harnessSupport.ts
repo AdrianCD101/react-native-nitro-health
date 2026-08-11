@@ -43,6 +43,10 @@ export const respiratoryRateReadPermission: HealthPermission[] = [
 export const respiratoryRateWritePermission: HealthPermission[] = [
   { accessType: 'write', dataType: 'respiratoryRate' },
 ]
+export const vo2MaxReadPermission: HealthPermission[] = [{ accessType: 'read', dataType: 'vo2Max' }]
+export const vo2MaxWritePermission: HealthPermission[] = [
+  { accessType: 'write', dataType: 'vo2Max' },
+]
 export const bodyFatReadPermission: HealthPermission[] = [
   { accessType: 'read', dataType: 'bodyFat' },
 ]

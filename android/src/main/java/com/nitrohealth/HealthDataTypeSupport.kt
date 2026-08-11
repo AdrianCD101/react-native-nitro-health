@@ -20,6 +20,7 @@ import androidx.health.connect.client.records.RespiratoryRateRecord
 import androidx.health.connect.client.records.RestingHeartRateRecord
 import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.StepsRecord
+import androidx.health.connect.client.records.Vo2MaxRecord
 import androidx.health.connect.client.records.WeightRecord
 import kotlin.reflect.KClass
 
@@ -198,6 +199,10 @@ internal fun healthDataTypeDescriptorFor(dataType: String): HealthDataTypeDescri
                     extract = { result -> result[HeightRecord.HEIGHT_MAX]?.inMeters }
                 )
             )
+        )
+        "vo2Max" -> HealthDataTypeDescriptor(
+            recordType = Vo2MaxRecord::class,
+            permissionLabel = "VO2 max"
         )
         else -> throw IllegalArgumentException("Unsupported health data type: $dataType")
     }

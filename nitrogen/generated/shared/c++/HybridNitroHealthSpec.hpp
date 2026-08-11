@@ -69,6 +69,8 @@ namespace margelo::nitro::nitrohealth { struct NativeHeartRateVariabilitySampleP
 namespace margelo::nitro::nitrohealth { struct NativeOxygenSaturationSamplePage; }
 // Forward declaration of `NativeHeightSamplePage` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHeightSamplePage; }
+// Forward declaration of `NativeVo2MaxSamplePage` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeVo2MaxSamplePage; }
 // Forward declaration of `NativeHealthStatistics` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthStatistics; }
 // Forward declaration of `NativeHealthStatisticsQuery` to properly resolve imports.
@@ -109,6 +111,8 @@ namespace margelo::nitro::nitrohealth { struct NativeRestingHeartRateSampleInput
 namespace margelo::nitro::nitrohealth { struct NativeOxygenSaturationSampleInput; }
 // Forward declaration of `NativeHeightSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHeightSampleInput; }
+// Forward declaration of `NativeVo2MaxSampleInput` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeVo2MaxSampleInput; }
 // Forward declaration of `NativeSleepSessionInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeSleepSessionInput; }
 // Forward declaration of `NativeWorkoutSampleInput` to properly resolve imports.
@@ -155,6 +159,7 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthAuthorizationResult; 
 #include "NativeHeartRateVariabilitySamplePage.hpp"
 #include "NativeOxygenSaturationSamplePage.hpp"
 #include "NativeHeightSamplePage.hpp"
+#include "NativeVo2MaxSamplePage.hpp"
 #include "NativeHealthStatistics.hpp"
 #include "NativeHealthStatisticsQuery.hpp"
 #include "NativeSleepSamplePage.hpp"
@@ -175,6 +180,7 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthAuthorizationResult; 
 #include "NativeRestingHeartRateSampleInput.hpp"
 #include "NativeOxygenSaturationSampleInput.hpp"
 #include "NativeHeightSampleInput.hpp"
+#include "NativeVo2MaxSampleInput.hpp"
 #include "NativeSleepSessionInput.hpp"
 #include "NativeWorkoutSampleInput.hpp"
 #include "NativeHealthDeleteResult.hpp"
@@ -243,6 +249,7 @@ namespace margelo::nitro::nitrohealth {
       virtual std::shared_ptr<Promise<NativeHeartRateVariabilitySamplePage>> readHeartRateVariability(const NativeHealthDateRangeQuery& query) = 0;
       virtual std::shared_ptr<Promise<NativeOxygenSaturationSamplePage>> readOxygenSaturation(const NativeHealthDateRangeQuery& query) = 0;
       virtual std::shared_ptr<Promise<NativeHeightSamplePage>> readHeight(const NativeHealthDateRangeQuery& query) = 0;
+      virtual std::shared_ptr<Promise<NativeVo2MaxSamplePage>> readVo2Max(const NativeHealthDateRangeQuery& query) = 0;
       virtual std::shared_ptr<Promise<std::vector<NativeHealthStatistics>>> readStatistics(const std::string& dataType, const NativeHealthStatisticsQuery& query) = 0;
       virtual std::shared_ptr<Promise<NativeSleepSamplePage>> readSleepSamples(const NativeHealthDateRangeQuery& query) = 0;
       virtual std::shared_ptr<Promise<NativeWorkoutSamplePage>> readWorkouts(const NativeHealthDateRangeQuery& query) = 0;
@@ -261,6 +268,7 @@ namespace margelo::nitro::nitrohealth {
       virtual std::shared_ptr<Promise<void>> saveRestingHeartRate(const std::vector<NativeRestingHeartRateSampleInput>& samples) = 0;
       virtual std::shared_ptr<Promise<void>> saveOxygenSaturation(const std::vector<NativeOxygenSaturationSampleInput>& samples) = 0;
       virtual std::shared_ptr<Promise<void>> saveHeight(const std::vector<NativeHeightSampleInput>& samples) = 0;
+      virtual std::shared_ptr<Promise<void>> saveVo2Max(const std::vector<NativeVo2MaxSampleInput>& samples) = 0;
       virtual std::shared_ptr<Promise<void>> saveSleepSessions(const std::vector<NativeSleepSessionInput>& sessions) = 0;
       virtual std::shared_ptr<Promise<void>> saveWorkout(const NativeWorkoutSampleInput& workout) = 0;
       virtual std::shared_ptr<Promise<NativeHealthDeleteResult>> deleteRecordsByIds(const std::string& dataType, const std::vector<std::string>& recordIds) = 0;

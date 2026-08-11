@@ -25,6 +25,7 @@ import androidx.health.connect.client.records.RespiratoryRateRecord
 import androidx.health.connect.client.records.RestingHeartRateRecord
 import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.StepsRecord
+import androidx.health.connect.client.records.Vo2MaxRecord
 import androidx.health.connect.client.records.WeightRecord
 import androidx.health.connect.client.request.AggregateGroupByDurationRequest
 import androidx.health.connect.client.request.AggregateGroupByPeriodRequest
@@ -111,6 +112,9 @@ import com.margelo.nitro.nitrohealth.NativeSleepSamplePage
 import com.margelo.nitro.nitrohealth.NativeStepSample
 import com.margelo.nitro.nitrohealth.NativeStepSampleInput
 import com.margelo.nitro.nitrohealth.NativeStepSamplePage
+import com.margelo.nitro.nitrohealth.NativeVo2MaxSample
+import com.margelo.nitro.nitrohealth.NativeVo2MaxSampleInput
+import com.margelo.nitro.nitrohealth.NativeVo2MaxSamplePage
 import com.margelo.nitro.nitrohealth.NativeWorkoutSampleInput
 import com.margelo.nitro.nitrohealth.NativeWorkoutSamplePage
 import java.time.Instant
@@ -792,6 +796,23 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         }
     }
 
+    override fun readVo2Max(query: NativeHealthDateRangeQuery): Promise<NativeVo2MaxSamplePage> {
+        return Promise.async {
+            val response = readInstantRecords<Vo2MaxRecord>("vo2Max", query)
+            NativeVo2MaxSamplePage(
+                samples = response.records.map { record ->
+                    NativeVo2MaxSample(
+                        identity = makeRecordIdentity(record.metadata.id),
+                        origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
+                        timeMs = record.time.toEpochMilli().toDouble(),
+                        millilitersPerKilogramPerMinute = record.vo2MillilitersPerMinuteKilogram
+                    )
+                }.toTypedArray(),
+                nextCursor = response.pageToken?.let { encodeSampleCursor("vo2Max", query, it) }
+            )
+        }
+    }
+
     override fun readHeartRateStatistics(query: NativeHealthTimeRangeQuery): Promise<NativeHeartRateStatistics> {
         return Promise.async {
             val context = NitroModules.applicationContext
@@ -1127,6 +1148,14 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         return Promise.async {
             val client = requireWritableClient("height")
             client.insertRecords(toHeightRecords(samples))
+            Unit
+        }
+    }
+
+    override fun saveVo2Max(samples: Array<NativeVo2MaxSampleInput>): Promise<Unit> {
+        return Promise.async {
+            val client = requireWritableClient("vo2Max")
+            client.insertRecords(toVo2MaxRecords(samples))
             Unit
         }
     }

@@ -16,6 +16,7 @@ import androidx.health.connect.client.records.OxygenSaturationRecord
 import androidx.health.connect.client.records.RespiratoryRateRecord
 import androidx.health.connect.client.records.RestingHeartRateRecord
 import androidx.health.connect.client.records.StepsRecord
+import androidx.health.connect.client.records.Vo2MaxRecord
 import androidx.health.connect.client.records.WeightRecord
 import androidx.health.connect.client.units.BloodGlucose
 import androidx.health.connect.client.units.Energy
@@ -40,6 +41,7 @@ import com.margelo.nitro.nitrohealth.NativeOxygenSaturationSampleInput
 import com.margelo.nitro.nitrohealth.NativeRespiratoryRateSampleInput
 import com.margelo.nitro.nitrohealth.NativeRestingHeartRateSampleInput
 import com.margelo.nitro.nitrohealth.NativeStepSampleInput
+import com.margelo.nitro.nitrohealth.NativeVo2MaxSampleInput
 import java.time.Instant
 import kotlin.math.roundToLong
 
@@ -262,6 +264,18 @@ internal fun toHeightRecords(samples: Array<NativeHeightSampleInput>): List<Heig
             time = Instant.ofEpochMilli(sample.timeMs.toLong()),
             zoneOffset = null,
             height = Length.meters(sample.meters),
+            metadata = makeSampleMetadata(sample.syncId, sample.syncVersion)
+        )
+    }
+}
+
+internal fun toVo2MaxRecords(samples: Array<NativeVo2MaxSampleInput>): List<Vo2MaxRecord> {
+    return samples.map { sample ->
+        Vo2MaxRecord(
+            time = Instant.ofEpochMilli(sample.timeMs.toLong()),
+            zoneOffset = null,
+            vo2MillilitersPerMinuteKilogram = sample.millilitersPerKilogramPerMinute,
+            measurementMethod = Vo2MaxRecord.MEASUREMENT_METHOD_OTHER,
             metadata = makeSampleMetadata(sample.syncId, sample.syncVersion)
         )
     }

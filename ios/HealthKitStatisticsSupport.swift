@@ -70,6 +70,15 @@ func makeHealthDataTypeDescriptor(dataType: String) throws -> HealthDataTypeDesc
         return HealthDataTypeDescriptor(identifier: .oxygenSaturation, unit: HKUnit.percent(), label: "oxygen saturation", isCumulative: false)
     case "height":
         return HealthDataTypeDescriptor(identifier: .height, unit: HKUnit.meter(), label: "height", isCumulative: false)
+    case "vo2Max":
+        return HealthDataTypeDescriptor(
+            identifier: .vo2Max,
+            unit: HKUnit.literUnit(with: .milli).unitDivided(
+                by: HKUnit.gramUnit(with: .kilo).unitMultiplied(by: HKUnit.minute())
+            ),
+            label: "VO2 max",
+            isCumulative: false
+        )
     case "bloodGlucose":
         return HealthDataTypeDescriptor(
             identifier: .bloodGlucose,

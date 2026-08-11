@@ -230,6 +230,14 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     };
   }
   
+  // pragma MARK: std::function<void(const NativeVo2MaxSamplePage& /* result */)>
+  Func_void_NativeVo2MaxSamplePage create_Func_void_NativeVo2MaxSamplePage(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroHealth::Func_void_NativeVo2MaxSamplePage::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const NativeVo2MaxSamplePage& result) mutable -> void {
+      swiftClosure.call(result);
+    };
+  }
+  
   // pragma MARK: std::function<void(const std::vector<NativeHealthStatistics>& /* result */)>
   Func_void_std__vector_NativeHealthStatistics_ create_Func_void_std__vector_NativeHealthStatistics_(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = NitroHealth::Func_void_std__vector_NativeHealthStatistics_::fromUnsafe(swiftClosureWrapper);

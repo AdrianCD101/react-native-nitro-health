@@ -21,6 +21,7 @@ export type HealthDataType =
   | 'activeEnergyBurned'
   | 'oxygenSaturation'
   | 'height'
+  | 'vo2Max'
   | 'sleep'
   | 'bodyMass'
   | 'workout'

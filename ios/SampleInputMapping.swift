@@ -357,3 +357,30 @@ func makeHeightQuantitySamples(
         )
     }
 }
+
+func makeVo2MaxQuantitySamples(
+    samples: [NativeVo2MaxSampleInput],
+    quantityType: HKQuantityType
+) throws -> [HKQuantitySample] {
+    let vo2MaxUnit = HKUnit.literUnit(with: .milli).unitDivided(
+        by: HKUnit.gramUnit(with: .kilo).unitMultiplied(by: HKUnit.minute())
+    )
+
+    return try samples.map { sample in
+        let date = Date(timeIntervalSince1970: sample.timeMs / 1000)
+
+        return HKQuantitySample(
+            type: quantityType,
+            quantity: HKQuantity(
+                unit: vo2MaxUnit,
+                doubleValue: sample.millilitersPerKilogramPerMinute
+            ),
+            start: date,
+            end: date,
+            metadata: try makeHealthKitSyncMetadata(
+                syncId: sample.syncId,
+                syncVersion: sample.syncVersion
+            )
+        )
+    }
+}

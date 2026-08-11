@@ -617,6 +617,48 @@ describe('NitroHealth saves (native)', () => {
     })
   })
 
+  describe('VO2 max', () => {
+    it('rejects saving VO2 max when write permission is not granted', async () => {
+      if (await hasVerifiedPermissions([{ accessType: 'write', dataType: 'vo2Max' }])) {
+        return
+      }
+
+      await expect(
+        NitroHealth.saveVo2Max([
+          { date: saveInterval.startDate, millilitersPerKilogramPerMinute: 42.5 },
+        ])
+      ).rejects.toThrow(/permission/i)
+    })
+
+    it('round-trips a saved reading in ml/kg/min when authorized', async () => {
+      const authorized = await hasVerifiedPermissions([
+        { accessType: 'write', dataType: 'vo2Max' },
+        { accessType: 'read', dataType: 'vo2Max' },
+      ])
+
+      if (!authorized) {
+        return
+      }
+
+      await NitroHealth.saveVo2Max([
+        { date: saveInterval.startDate, millilitersPerKilogramPerMinute: 42.5 },
+      ])
+
+      const page = await NitroHealth.readVo2Max(saveReadRange)
+
+      if (isInconclusiveRead(page.samples)) {
+        return
+      }
+
+      const matches = page.samples.filter(
+        (sample) => Math.abs(sample.millilitersPerKilogramPerMinute - 42.5) < 0.001
+      )
+
+      expect(matches.length).toBeGreaterThanOrEqual(1)
+      expect(matches[0]?.identity.kind).toBe('record')
+    })
+  })
+
   describe('body fat', () => {
     it('rejects saving body fat when write permission is not granted', async () => {
       if (await hasVerifiedPermissions([{ accessType: 'write', dataType: 'bodyFat' }])) {

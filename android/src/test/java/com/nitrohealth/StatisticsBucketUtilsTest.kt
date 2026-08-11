@@ -132,6 +132,11 @@ class StatisticsBucketUtilsTest {
     }
 
     @Test
+    fun descriptorForVo2MaxSupportsNoStatisticsMetrics() {
+        assertTrue(healthDataTypeDescriptorFor("vo2Max").statisticsMetrics.isEmpty())
+    }
+
+    @Test
     fun descriptorForBodyFatSupportsNoStatisticsMetrics() {
         assertTrue(healthDataTypeDescriptorFor("bodyFat").statisticsMetrics.isEmpty())
     }

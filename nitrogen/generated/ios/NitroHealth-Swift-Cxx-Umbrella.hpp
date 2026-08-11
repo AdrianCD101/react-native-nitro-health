@@ -190,6 +190,12 @@ namespace margelo::nitro::nitrohealth { struct NativeStepSampleInput; }
 namespace margelo::nitro::nitrohealth { struct NativeStepSamplePage; }
 // Forward declaration of `NativeStepSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeStepSample; }
+// Forward declaration of `NativeVo2MaxSampleInput` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeVo2MaxSampleInput; }
+// Forward declaration of `NativeVo2MaxSamplePage` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeVo2MaxSamplePage; }
+// Forward declaration of `NativeVo2MaxSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeVo2MaxSample; }
 // Forward declaration of `NativeWorkoutActivityMapping` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class NativeWorkoutActivityMapping; }
 // Forward declaration of `NativeWorkoutActivityPortability` to properly resolve imports.
@@ -297,6 +303,9 @@ namespace margelo::nitro::nitrohealth { struct NativeWorkoutSample; }
 #include "NativeStepSample.hpp"
 #include "NativeStepSampleInput.hpp"
 #include "NativeStepSamplePage.hpp"
+#include "NativeVo2MaxSample.hpp"
+#include "NativeVo2MaxSampleInput.hpp"
+#include "NativeVo2MaxSamplePage.hpp"
 #include "NativeWorkoutActivity.hpp"
 #include "NativeWorkoutActivityMapping.hpp"
 #include "NativeWorkoutActivityPortability.hpp"
