@@ -18,6 +18,7 @@ const HEALTH_DATA_TYPES = new Set<HealthDataType>([
   'activeEnergyBurned',
   'oxygenSaturation',
   'height',
+  'vo2Max',
   'sleep',
   'bodyMass',
   'workout',

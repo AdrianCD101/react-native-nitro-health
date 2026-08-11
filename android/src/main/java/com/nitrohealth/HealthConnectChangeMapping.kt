@@ -21,6 +21,7 @@ import androidx.health.connect.client.records.RespiratoryRateRecord
 import androidx.health.connect.client.records.RestingHeartRateRecord
 import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.StepsRecord
+import androidx.health.connect.client.records.Vo2MaxRecord
 import androidx.health.connect.client.records.WeightRecord
 import com.margelo.nitro.nitrohealth.NativeActiveEnergyBurnedSample
 import com.margelo.nitro.nitrohealth.NativeBloodGlucoseSample
@@ -41,6 +42,7 @@ import com.margelo.nitro.nitrohealth.NativeRespiratoryRateSample
 import com.margelo.nitro.nitrohealth.NativeRestingHeartRateSample
 import com.margelo.nitro.nitrohealth.NativeSleepSample
 import com.margelo.nitro.nitrohealth.NativeStepSample
+import com.margelo.nitro.nitrohealth.NativeVo2MaxSample
 import com.margelo.nitro.nitrohealth.NativeWorkoutSample
 import kotlin.reflect.KClass
 
@@ -254,6 +256,18 @@ private fun makeNativeUpsertionChange(record: Record): NativeHealthChange {
                 )
             )
         )
+        is Vo2MaxRecord -> makeNativeChange(
+            type = "upsert",
+            recordId = recordId,
+            vo2MaxSamples = arrayOf(
+                NativeVo2MaxSample(
+                    identity = identity,
+                    origin = origin,
+                    timeMs = record.time.toEpochMilli().toDouble(),
+                    millilitersPerKilogramPerMinute = record.vo2MillilitersPerMinuteKilogram
+                )
+            )
+        )
         is SleepSessionRecord -> makeNativeChange(
             type = "upsert",
             recordId = recordId,
@@ -301,6 +315,7 @@ private fun makeNativeChange(
     activeEnergyBurnedSamples: Array<NativeActiveEnergyBurnedSample>? = null,
     oxygenSaturationSamples: Array<NativeOxygenSaturationSample>? = null,
     heightSamples: Array<NativeHeightSample>? = null,
+    vo2MaxSamples: Array<NativeVo2MaxSample>? = null,
     sleepSamples: Array<NativeSleepSample>? = null,
     bodyMassSamples: Array<NativeBodyMassSample>? = null,
     workoutSamples: Array<NativeWorkoutSample>? = null
@@ -323,6 +338,7 @@ private fun makeNativeChange(
         activeEnergyBurnedSamples = activeEnergyBurnedSamples,
         oxygenSaturationSamples = oxygenSaturationSamples,
         heightSamples = heightSamples,
+        vo2MaxSamples = vo2MaxSamples,
         sleepSamples = sleepSamples,
         bodyMassSamples = bodyMassSamples,
         workoutSamples = workoutSamples,

@@ -182,6 +182,12 @@ namespace margelo::nitro::nitrohealth { struct NativeStepSampleInput; }
 namespace margelo::nitro::nitrohealth { struct NativeStepSamplePage; }
 // Forward declaration of `NativeStepSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeStepSample; }
+// Forward declaration of `NativeVo2MaxSampleInput` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeVo2MaxSampleInput; }
+// Forward declaration of `NativeVo2MaxSamplePage` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeVo2MaxSamplePage; }
+// Forward declaration of `NativeVo2MaxSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeVo2MaxSample; }
 // Forward declaration of `NativeWorkoutActivityMapping` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class NativeWorkoutActivityMapping; }
 // Forward declaration of `NativeWorkoutActivityPortability` to properly resolve imports.
@@ -287,6 +293,9 @@ namespace NitroHealth { class HybridNitroHealthSpec_cxx; }
 #include "NativeStepSample.hpp"
 #include "NativeStepSampleInput.hpp"
 #include "NativeStepSamplePage.hpp"
+#include "NativeVo2MaxSample.hpp"
+#include "NativeVo2MaxSampleInput.hpp"
+#include "NativeVo2MaxSamplePage.hpp"
 #include "NativeWorkoutActivity.hpp"
 #include "NativeWorkoutActivityMapping.hpp"
 #include "NativeWorkoutActivityPortability.hpp"
@@ -1060,6 +1069,32 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return optional.has_value();
   }
   inline std::vector<NativeHeightSample> get_std__optional_std__vector_NativeHeightSample__(const std::optional<std::vector<NativeHeightSample>>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::vector<NativeVo2MaxSample>
+  /**
+   * Specialized version of `std::vector<NativeVo2MaxSample>`.
+   */
+  using std__vector_NativeVo2MaxSample_ = std::vector<NativeVo2MaxSample>;
+  inline std::vector<NativeVo2MaxSample> create_std__vector_NativeVo2MaxSample_(size_t size) noexcept {
+    std::vector<NativeVo2MaxSample> vector;
+    vector.reserve(size);
+    return vector;
+  }
+  
+  // pragma MARK: std::optional<std::vector<NativeVo2MaxSample>>
+  /**
+   * Specialized version of `std::optional<std::vector<NativeVo2MaxSample>>`.
+   */
+  using std__optional_std__vector_NativeVo2MaxSample__ = std::optional<std::vector<NativeVo2MaxSample>>;
+  inline std::optional<std::vector<NativeVo2MaxSample>> create_std__optional_std__vector_NativeVo2MaxSample__(const std::vector<NativeVo2MaxSample>& value) noexcept {
+    return std::optional<std::vector<NativeVo2MaxSample>>(value);
+  }
+  inline bool has_value_std__optional_std__vector_NativeVo2MaxSample__(const std::optional<std::vector<NativeVo2MaxSample>>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline std::vector<NativeVo2MaxSample> get_std__optional_std__vector_NativeVo2MaxSample__(const std::optional<std::vector<NativeVo2MaxSample>>& optional) noexcept {
     return optional.value();
   }
   
@@ -1861,6 +1896,40 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return Func_void_NativeHeightSamplePage_Wrapper(std::move(value));
   }
   
+  // pragma MARK: std::shared_ptr<Promise<NativeVo2MaxSamplePage>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<NativeVo2MaxSamplePage>>`.
+   */
+  using std__shared_ptr_Promise_NativeVo2MaxSamplePage__ = std::shared_ptr<Promise<NativeVo2MaxSamplePage>>;
+  inline std::shared_ptr<Promise<NativeVo2MaxSamplePage>> create_std__shared_ptr_Promise_NativeVo2MaxSamplePage__() noexcept {
+    return Promise<NativeVo2MaxSamplePage>::create();
+  }
+  inline PromiseHolder<NativeVo2MaxSamplePage> wrap_std__shared_ptr_Promise_NativeVo2MaxSamplePage__(std::shared_ptr<Promise<NativeVo2MaxSamplePage>> promise) noexcept {
+    return PromiseHolder<NativeVo2MaxSamplePage>(std::move(promise));
+  }
+  
+  // pragma MARK: std::function<void(const NativeVo2MaxSamplePage& /* result */)>
+  /**
+   * Specialized version of `std::function<void(const NativeVo2MaxSamplePage&)>`.
+   */
+  using Func_void_NativeVo2MaxSamplePage = std::function<void(const NativeVo2MaxSamplePage& /* result */)>;
+  /**
+   * Wrapper class for a `std::function<void(const NativeVo2MaxSamplePage& / * result * /)>`, this can be used from Swift.
+   */
+  class Func_void_NativeVo2MaxSamplePage_Wrapper final {
+  public:
+    explicit Func_void_NativeVo2MaxSamplePage_Wrapper(std::function<void(const NativeVo2MaxSamplePage& /* result */)>&& func): _function(std::make_unique<std::function<void(const NativeVo2MaxSamplePage& /* result */)>>(std::move(func))) {}
+    inline void call(NativeVo2MaxSamplePage result) const noexcept {
+      _function->operator()(result);
+    }
+  private:
+    std::unique_ptr<std::function<void(const NativeVo2MaxSamplePage& /* result */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_NativeVo2MaxSamplePage create_Func_void_NativeVo2MaxSamplePage(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_NativeVo2MaxSamplePage_Wrapper wrap_Func_void_NativeVo2MaxSamplePage(Func_void_NativeVo2MaxSamplePage value) noexcept {
+    return Func_void_NativeVo2MaxSamplePage_Wrapper(std::move(value));
+  }
+  
   // pragma MARK: std::optional<NativeDistanceScope>
   /**
    * Specialized version of `std::optional<NativeDistanceScope>`.
@@ -2196,6 +2265,17 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
   using std__vector_NativeHeightSampleInput_ = std::vector<NativeHeightSampleInput>;
   inline std::vector<NativeHeightSampleInput> create_std__vector_NativeHeightSampleInput_(size_t size) noexcept {
     std::vector<NativeHeightSampleInput> vector;
+    vector.reserve(size);
+    return vector;
+  }
+  
+  // pragma MARK: std::vector<NativeVo2MaxSampleInput>
+  /**
+   * Specialized version of `std::vector<NativeVo2MaxSampleInput>`.
+   */
+  using std__vector_NativeVo2MaxSampleInput_ = std::vector<NativeVo2MaxSampleInput>;
+  inline std::vector<NativeVo2MaxSampleInput> create_std__vector_NativeVo2MaxSampleInput_(size_t size) noexcept {
+    std::vector<NativeVo2MaxSampleInput> vector;
     vector.reserve(size);
     return vector;
   }
@@ -2599,6 +2679,15 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
   }
   inline Result_std__shared_ptr_Promise_NativeHeightSamplePage___ create_Result_std__shared_ptr_Promise_NativeHeightSamplePage___(const std::exception_ptr& error) noexcept {
     return Result<std::shared_ptr<Promise<NativeHeightSamplePage>>>::withError(error);
+  }
+  
+  // pragma MARK: Result<std::shared_ptr<Promise<NativeVo2MaxSamplePage>>>
+  using Result_std__shared_ptr_Promise_NativeVo2MaxSamplePage___ = Result<std::shared_ptr<Promise<NativeVo2MaxSamplePage>>>;
+  inline Result_std__shared_ptr_Promise_NativeVo2MaxSamplePage___ create_Result_std__shared_ptr_Promise_NativeVo2MaxSamplePage___(const std::shared_ptr<Promise<NativeVo2MaxSamplePage>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<NativeVo2MaxSamplePage>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_NativeVo2MaxSamplePage___ create_Result_std__shared_ptr_Promise_NativeVo2MaxSamplePage___(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<NativeVo2MaxSamplePage>>>::withError(error);
   }
   
   // pragma MARK: Result<std::shared_ptr<Promise<std::vector<NativeHealthStatistics>>>>

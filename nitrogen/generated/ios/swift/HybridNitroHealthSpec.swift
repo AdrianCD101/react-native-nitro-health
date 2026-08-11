@@ -43,6 +43,7 @@ public protocol HybridNitroHealthSpec_protocol: HybridObject {
   func readHeartRateVariability(query: NativeHealthDateRangeQuery) throws -> Promise<NativeHeartRateVariabilitySamplePage>
   func readOxygenSaturation(query: NativeHealthDateRangeQuery) throws -> Promise<NativeOxygenSaturationSamplePage>
   func readHeight(query: NativeHealthDateRangeQuery) throws -> Promise<NativeHeightSamplePage>
+  func readVo2Max(query: NativeHealthDateRangeQuery) throws -> Promise<NativeVo2MaxSamplePage>
   func readStatistics(dataType: String, query: NativeHealthStatisticsQuery) throws -> Promise<[NativeHealthStatistics]>
   func readSleepSamples(query: NativeHealthDateRangeQuery) throws -> Promise<NativeSleepSamplePage>
   func readWorkouts(query: NativeHealthDateRangeQuery) throws -> Promise<NativeWorkoutSamplePage>
@@ -61,6 +62,7 @@ public protocol HybridNitroHealthSpec_protocol: HybridObject {
   func saveRestingHeartRate(samples: [NativeRestingHeartRateSampleInput]) throws -> Promise<Void>
   func saveOxygenSaturation(samples: [NativeOxygenSaturationSampleInput]) throws -> Promise<Void>
   func saveHeight(samples: [NativeHeightSampleInput]) throws -> Promise<Void>
+  func saveVo2Max(samples: [NativeVo2MaxSampleInput]) throws -> Promise<Void>
   func saveSleepSessions(sessions: [NativeSleepSessionInput]) throws -> Promise<Void>
   func saveWorkout(workout: NativeWorkoutSampleInput) throws -> Promise<Void>
   func deleteRecordsByIds(dataType: String, recordIds: [String]) throws -> Promise<NativeHealthDeleteResult>

@@ -18,6 +18,7 @@ import androidx.health.connect.client.records.RespiratoryRateRecord
 import androidx.health.connect.client.records.RestingHeartRateRecord
 import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.StepsRecord
+import androidx.health.connect.client.records.Vo2MaxRecord
 import androidx.health.connect.client.records.WeightRecord
 import com.margelo.nitro.nitrohealth.HealthPermissionStatus
 import com.margelo.nitro.nitrohealth.NativeHealthPermission
@@ -69,6 +70,7 @@ class HealthConnectPermissionUtilsTest {
             healthConnectRecordTypeForDataType("oxygenSaturation")
         )
         assertEquals(HeightRecord::class, healthConnectRecordTypeForDataType("height"))
+        assertEquals(Vo2MaxRecord::class, healthConnectRecordTypeForDataType("vo2Max"))
         assertEquals(
             ExerciseSessionRecord::class,
             healthConnectRecordTypeForDataType("workout")
@@ -146,6 +148,10 @@ class HealthConnectPermissionUtilsTest {
             toHealthConnectPermission("height", "read")
         )
         assertEquals(
+            HealthPermission.getReadPermission(Vo2MaxRecord::class),
+            toHealthConnectPermission("vo2Max", "read")
+        )
+        assertEquals(
             HealthPermission.getReadPermission(ExerciseSessionRecord::class),
             toHealthConnectPermission("workout", "read")
         )
@@ -216,6 +222,10 @@ class HealthConnectPermissionUtilsTest {
         assertEquals(
             HealthPermission.getWritePermission(HeightRecord::class),
             toHealthConnectPermission("height", "write")
+        )
+        assertEquals(
+            HealthPermission.getWritePermission(Vo2MaxRecord::class),
+            toHealthConnectPermission("vo2Max", "write")
         )
         assertEquals(
             HealthPermission.getWritePermission(ExerciseSessionRecord::class),

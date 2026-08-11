@@ -9,6 +9,7 @@ import type { DistanceSample } from './DistanceSample'
 import type { HeartRateSample } from './HeartRateSample'
 import type { HeartRateVariabilitySample } from './HeartRateVariabilitySample'
 import type { HeightSample } from './HeightSample'
+import type { Vo2MaxSample } from './Vo2MaxSample'
 import type { LeanBodyMassSample } from './LeanBodyMassSample'
 import type { OxygenSaturationSample } from './OxygenSaturationSample'
 import type { RespiratoryRateSample } from './RespiratoryRateSample'
@@ -49,6 +50,8 @@ export interface HealthSampleByDataType {
   oxygenSaturation: OxygenSaturationSample
   /** Height measurements. */
   height: HeightSample
+  /** VO2 max readings. */
+  vo2Max: Vo2MaxSample
   /** Tagged sleep session envelopes and stage intervals. */
   sleep: SleepSample
   /** Body-mass measurements. */

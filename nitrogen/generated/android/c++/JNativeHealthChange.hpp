@@ -36,6 +36,7 @@
 #include "JNativeSleepSampleKind.hpp"
 #include "JNativeSleepStageData.hpp"
 #include "JNativeStepSample.hpp"
+#include "JNativeVo2MaxSample.hpp"
 #include "JNativeWorkoutActivity.hpp"
 #include "JNativeWorkoutActivityMapping.hpp"
 #include "JNativeWorkoutActivityPortability.hpp"
@@ -66,6 +67,7 @@
 #include "NativeSleepSampleKind.hpp"
 #include "NativeSleepStageData.hpp"
 #include "NativeStepSample.hpp"
+#include "NativeVo2MaxSample.hpp"
 #include "NativeWorkoutActivity.hpp"
 #include "NativeWorkoutActivityMapping.hpp"
 #include "NativeWorkoutActivityPortability.hpp"
@@ -130,6 +132,8 @@ namespace margelo::nitro::nitrohealth {
       jni::local_ref<jni::JArrayClass<JNativeOxygenSaturationSample>> oxygenSaturationSamples = this->getFieldValue(fieldOxygenSaturationSamples);
       static const auto fieldHeightSamples = clazz->getField<jni::JArrayClass<JNativeHeightSample>>("heightSamples");
       jni::local_ref<jni::JArrayClass<JNativeHeightSample>> heightSamples = this->getFieldValue(fieldHeightSamples);
+      static const auto fieldVo2MaxSamples = clazz->getField<jni::JArrayClass<JNativeVo2MaxSample>>("vo2MaxSamples");
+      jni::local_ref<jni::JArrayClass<JNativeVo2MaxSample>> vo2MaxSamples = this->getFieldValue(fieldVo2MaxSamples);
       static const auto fieldSleepSamples = clazz->getField<jni::JArrayClass<JNativeSleepSample>>("sleepSamples");
       jni::local_ref<jni::JArrayClass<JNativeSleepSample>> sleepSamples = this->getFieldValue(fieldSleepSamples);
       static const auto fieldBodyMassSamples = clazz->getField<jni::JArrayClass<JNativeBodyMassSample>>("bodyMassSamples");
@@ -291,6 +295,16 @@ namespace margelo::nitro::nitrohealth {
           }
           return __vector;
         }(heightSamples)) : std::nullopt,
+        vo2MaxSamples != nullptr ? std::make_optional([&](auto&& __input) {
+          size_t __size = __input->size();
+          std::vector<NativeVo2MaxSample> __vector;
+          __vector.reserve(__size);
+          for (size_t __i = 0; __i < __size; __i++) {
+            auto __element = __input->getElement(__i);
+            __vector.push_back(__element->toCpp());
+          }
+          return __vector;
+        }(vo2MaxSamples)) : std::nullopt,
         sleepSamples != nullptr ? std::make_optional([&](auto&& __input) {
           size_t __size = __input->size();
           std::vector<NativeSleepSample> __vector;
@@ -339,7 +353,7 @@ namespace margelo::nitro::nitrohealth {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeHealthChange::javaobject> fromCpp(const NativeHealthChange& value) {
-      using JSignature = JNativeHealthChange(jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JArrayClass<JNativeStepSample>>, jni::alias_ref<jni::JArrayClass<JNativeHeartRateSample>>, jni::alias_ref<jni::JArrayClass<JNativeBloodPressureSample>>, jni::alias_ref<jni::JArrayClass<JNativeBloodGlucoseSample>>, jni::alias_ref<jni::JArrayClass<JNativeBodyTemperatureSample>>, jni::alias_ref<jni::JArrayClass<JNativeRespiratoryRateSample>>, jni::alias_ref<jni::JArrayClass<JNativeBodyFatSample>>, jni::alias_ref<jni::JArrayClass<JNativeLeanBodyMassSample>>, jni::alias_ref<jni::JArrayClass<JNativeBasalBodyTemperatureSample>>, jni::alias_ref<jni::JArrayClass<JNativeRestingHeartRateSample>>, jni::alias_ref<jni::JArrayClass<JNativeHeartRateVariabilitySample>>, jni::alias_ref<jni::JArrayClass<JNativeDistanceSample>>, jni::alias_ref<jni::JArrayClass<JNativeActiveEnergyBurnedSample>>, jni::alias_ref<jni::JArrayClass<JNativeOxygenSaturationSample>>, jni::alias_ref<jni::JArrayClass<JNativeHeightSample>>, jni::alias_ref<jni::JArrayClass<JNativeSleepSample>>, jni::alias_ref<jni::JArrayClass<JNativeBodyMassSample>>, jni::alias_ref<jni::JArrayClass<JNativeWorkoutSample>>, jni::alias_ref<JFunc_void::javaobject>);
+      using JSignature = JNativeHealthChange(jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JArrayClass<JNativeStepSample>>, jni::alias_ref<jni::JArrayClass<JNativeHeartRateSample>>, jni::alias_ref<jni::JArrayClass<JNativeBloodPressureSample>>, jni::alias_ref<jni::JArrayClass<JNativeBloodGlucoseSample>>, jni::alias_ref<jni::JArrayClass<JNativeBodyTemperatureSample>>, jni::alias_ref<jni::JArrayClass<JNativeRespiratoryRateSample>>, jni::alias_ref<jni::JArrayClass<JNativeBodyFatSample>>, jni::alias_ref<jni::JArrayClass<JNativeLeanBodyMassSample>>, jni::alias_ref<jni::JArrayClass<JNativeBasalBodyTemperatureSample>>, jni::alias_ref<jni::JArrayClass<JNativeRestingHeartRateSample>>, jni::alias_ref<jni::JArrayClass<JNativeHeartRateVariabilitySample>>, jni::alias_ref<jni::JArrayClass<JNativeDistanceSample>>, jni::alias_ref<jni::JArrayClass<JNativeActiveEnergyBurnedSample>>, jni::alias_ref<jni::JArrayClass<JNativeOxygenSaturationSample>>, jni::alias_ref<jni::JArrayClass<JNativeHeightSample>>, jni::alias_ref<jni::JArrayClass<JNativeVo2MaxSample>>, jni::alias_ref<jni::JArrayClass<JNativeSleepSample>>, jni::alias_ref<jni::JArrayClass<JNativeBodyMassSample>>, jni::alias_ref<jni::JArrayClass<JNativeWorkoutSample>>, jni::alias_ref<JFunc_void::javaobject>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
@@ -496,6 +510,16 @@ namespace margelo::nitro::nitrohealth {
           }
           return __array;
         }(value.heightSamples.value()) : nullptr,
+        value.vo2MaxSamples.has_value() ? [&](auto&& __input) {
+          size_t __size = __input.size();
+          jni::local_ref<jni::JArrayClass<JNativeVo2MaxSample>> __array = jni::JArrayClass<JNativeVo2MaxSample>::newArray(__size);
+          for (size_t __i = 0; __i < __size; __i++) {
+            const auto& __element = __input[__i];
+            auto __elementJni = JNativeVo2MaxSample::fromCpp(__element);
+            __array->setElement(__i, *__elementJni);
+          }
+          return __array;
+        }(value.vo2MaxSamples.value()) : nullptr,
         value.sleepSamples.has_value() ? [&](auto&& __input) {
           size_t __size = __input.size();
           jni::local_ref<jni::JArrayClass<JNativeSleepSample>> __array = jni::JArrayClass<JNativeSleepSample>::newArray(__size);

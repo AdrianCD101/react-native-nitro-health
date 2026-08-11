@@ -82,6 +82,8 @@ namespace margelo::nitro::nitrohealth { struct NativeActiveEnergyBurnedSample; }
 namespace margelo::nitro::nitrohealth { struct NativeOxygenSaturationSample; }
 // Forward declaration of `NativeHeightSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHeightSample; }
+// Forward declaration of `NativeVo2MaxSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeVo2MaxSample; }
 // Forward declaration of `NativeSleepSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeSleepSample; }
 // Forward declaration of `NativeSleepSampleKind` to properly resolve imports.
@@ -142,6 +144,8 @@ namespace margelo::nitro::nitrohealth { struct NativeHeartRateVariabilitySampleP
 namespace margelo::nitro::nitrohealth { struct NativeOxygenSaturationSamplePage; }
 // Forward declaration of `NativeHeightSamplePage` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHeightSamplePage; }
+// Forward declaration of `NativeVo2MaxSamplePage` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeVo2MaxSamplePage; }
 // Forward declaration of `NativeHealthStatistics` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthStatistics; }
 // Forward declaration of `NativeHealthStatisticsQuery` to properly resolve imports.
@@ -182,6 +186,8 @@ namespace margelo::nitro::nitrohealth { struct NativeRestingHeartRateSampleInput
 namespace margelo::nitro::nitrohealth { struct NativeOxygenSaturationSampleInput; }
 // Forward declaration of `NativeHeightSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHeightSampleInput; }
+// Forward declaration of `NativeVo2MaxSampleInput` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeVo2MaxSampleInput; }
 // Forward declaration of `NativeSleepSessionInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeSleepSessionInput; }
 // Forward declaration of `NativeSleepSessionStageInput` to properly resolve imports.
@@ -247,6 +253,7 @@ namespace margelo::nitro::nitrohealth { enum class NativeHealthAuthorizationStat
 #include "NativeActiveEnergyBurnedSample.hpp"
 #include "NativeOxygenSaturationSample.hpp"
 #include "NativeHeightSample.hpp"
+#include "NativeVo2MaxSample.hpp"
 #include "NativeSleepSample.hpp"
 #include "NativeSleepSampleKind.hpp"
 #include "NativeSleepStageData.hpp"
@@ -277,6 +284,7 @@ namespace margelo::nitro::nitrohealth { enum class NativeHealthAuthorizationStat
 #include "NativeHeartRateVariabilitySamplePage.hpp"
 #include "NativeOxygenSaturationSamplePage.hpp"
 #include "NativeHeightSamplePage.hpp"
+#include "NativeVo2MaxSamplePage.hpp"
 #include "NativeHealthStatistics.hpp"
 #include "NativeHealthStatisticsQuery.hpp"
 #include "NativeSleepSamplePage.hpp"
@@ -297,6 +305,7 @@ namespace margelo::nitro::nitrohealth { enum class NativeHealthAuthorizationStat
 #include "NativeRestingHeartRateSampleInput.hpp"
 #include "NativeOxygenSaturationSampleInput.hpp"
 #include "NativeHeightSampleInput.hpp"
+#include "NativeVo2MaxSampleInput.hpp"
 #include "NativeSleepSessionInput.hpp"
 #include "NativeSleepSessionStageInput.hpp"
 #include "NativeWorkoutSampleInput.hpp"
@@ -600,6 +609,14 @@ namespace margelo::nitro::nitrohealth {
       auto __value = std::move(__result.value());
       return __value;
     }
+    inline std::shared_ptr<Promise<NativeVo2MaxSamplePage>> readVo2Max(const NativeHealthDateRangeQuery& query) override {
+      auto __result = _swiftPart.readVo2Max(std::forward<decltype(query)>(query));
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
     inline std::shared_ptr<Promise<std::vector<NativeHealthStatistics>>> readStatistics(const std::string& dataType, const NativeHealthStatisticsQuery& query) override {
       auto __result = _swiftPart.readStatistics(dataType, std::forward<decltype(query)>(query));
       if (__result.hasError()) [[unlikely]] {
@@ -738,6 +755,14 @@ namespace margelo::nitro::nitrohealth {
     }
     inline std::shared_ptr<Promise<void>> saveHeight(const std::vector<NativeHeightSampleInput>& samples) override {
       auto __result = _swiftPart.saveHeight(samples);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline std::shared_ptr<Promise<void>> saveVo2Max(const std::vector<NativeVo2MaxSampleInput>& samples) override {
+      auto __result = _swiftPart.saveVo2Max(samples);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }

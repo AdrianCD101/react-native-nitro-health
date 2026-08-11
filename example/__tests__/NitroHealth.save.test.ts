@@ -124,6 +124,7 @@ describe('NitroHealth save contract', () => {
     await NitroHealth.saveRestingHeartRate([{ date: startDate, bpm: 58, sync }])
     await NitroHealth.saveOxygenSaturation([{ date: startDate, percentage: 97.5, sync }])
     await NitroHealth.saveHeight([{ date: startDate, meters: 1.78, sync }])
+    await NitroHealth.saveVo2Max([{ date: startDate, millilitersPerKilogramPerMinute: 42.5, sync }])
 
     expect(mockNitroHealth.saveSteps).toHaveBeenCalledWith([
       { startTimeMs: startDate.getTime(), endTimeMs: endDate.getTime(), count: 512, ...nativeSync },
@@ -180,6 +181,9 @@ describe('NitroHealth save contract', () => {
     ])
     expect(mockNitroHealth.saveHeight).toHaveBeenCalledWith([
       { timeMs: startDate.getTime(), meters: 1.78, ...nativeSync },
+    ])
+    expect(mockNitroHealth.saveVo2Max).toHaveBeenCalledWith([
+      { timeMs: startDate.getTime(), millilitersPerKilogramPerMinute: 42.5, ...nativeSync },
     ])
   })
 

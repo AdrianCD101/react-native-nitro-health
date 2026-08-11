@@ -12,6 +12,7 @@ import type {
   LeanBodyMassSample,
   RespiratoryRateSample,
   StepSample,
+  Vo2MaxSample,
   WorkoutSample,
 } from 'react-native-nitro-health'
 
@@ -40,6 +41,10 @@ const bodyTemperatureReadWritePermissions: HealthPermission[] = [
 const respiratoryRateReadWritePermissions: HealthPermission[] = [
   { accessType: 'read', dataType: 'respiratoryRate' },
   { accessType: 'write', dataType: 'respiratoryRate' },
+]
+const vo2MaxReadWritePermissions: HealthPermission[] = [
+  { accessType: 'read', dataType: 'vo2Max' },
+  { accessType: 'write', dataType: 'vo2Max' },
 ]
 const bodyFatReadWritePermissions: HealthPermission[] = [
   { accessType: 'read', dataType: 'bodyFat' },
@@ -139,6 +144,19 @@ async function readIdempotentRespiratoryRate(
       sample.date.getTime() === idempotentInterval.startDate.getTime() &&
       expectedBreathsPerMinute.some(
         (expected) => Math.abs(sample.breathsPerMinute - expected) < 0.001
+      )
+  )
+}
+
+async function readIdempotentVo2Max(
+  expectedMillilitersPerKilogramPerMinute: readonly number[]
+): Promise<Vo2MaxSample[]> {
+  const page = await NitroHealth.readVo2Max({ ...idempotentReadRange, limit: 1000 })
+  return page.samples.filter(
+    (sample) =>
+      sample.date.getTime() === idempotentInterval.startDate.getTime() &&
+      expectedMillilitersPerKilogramPerMinute.some(
+        (expected) => Math.abs(sample.millilitersPerKilogramPerMinute - expected) < 0.001
       )
   )
 }
@@ -671,6 +689,85 @@ describe('NitroHealth idempotent saves (native)', () => {
       }
     } finally {
       await NitroHealth.deleteRecordsByTimeRange('respiratoryRate', idempotentReadRange)
+    }
+  })
+
+  it('keeps exactly one VO2 max reading when the same versioned save is retried', async () => {
+    if (!(await hasVerifiedPermissions(vo2MaxReadWritePermissions))) {
+      return
+    }
+
+    await NitroHealth.deleteRecordsByTimeRange('vo2Max', idempotentReadRange)
+    try {
+      const sample = {
+        date: idempotentInterval.startDate,
+        millilitersPerKilogramPerMinute: 42.5,
+        sync: { id: 'nitro-health-harness-vo2-retry', version: 1 },
+      }
+
+      await NitroHealth.saveVo2Max([sample])
+      await NitroHealth.saveVo2Max([sample])
+
+      const samples = await readIdempotentVo2Max([42.5])
+      if (Platform.OS === 'ios' && samples.length === 0) {
+        return
+      }
+
+      expect(samples).toHaveLength(1)
+    } finally {
+      await NitroHealth.deleteRecordsByTimeRange('vo2Max', idempotentReadRange)
+    }
+  })
+
+  it('replaces a VO2 max reading at a higher version with platform-specific identity', async () => {
+    if (!(await hasVerifiedPermissions(vo2MaxReadWritePermissions))) {
+      return
+    }
+
+    await NitroHealth.deleteRecordsByTimeRange('vo2Max', idempotentReadRange)
+    try {
+      const syncId = 'nitro-health-harness-vo2-higher-version'
+      await NitroHealth.saveVo2Max([
+        {
+          date: idempotentInterval.startDate,
+          millilitersPerKilogramPerMinute: 42.5,
+          sync: { id: syncId, version: 1 },
+        },
+      ])
+
+      const initial = await readIdempotentVo2Max([42.5, 43.5])
+      if (Platform.OS === 'ios' && initial.length === 0) {
+        return
+      }
+      expect(initial).toHaveLength(1)
+      const initialSample = initial[0]
+      if (initialSample === undefined) {
+        return
+      }
+
+      await NitroHealth.saveVo2Max([
+        {
+          date: idempotentInterval.startDate,
+          millilitersPerKilogramPerMinute: 43.5,
+          sync: { id: syncId, version: 2 },
+        },
+      ])
+
+      const replacement = await readIdempotentVo2Max([42.5, 43.5])
+      expect(replacement).toHaveLength(1)
+      const replacementSample = replacement[0]
+      if (replacementSample === undefined) {
+        return
+      }
+
+      expect(Math.abs(replacementSample.millilitersPerKilogramPerMinute - 43.5)).toBeLessThan(0.001)
+      if (Platform.OS === 'android') {
+        expect(recordId(replacementSample.identity)).toBe(recordId(initialSample.identity))
+      } else if (Platform.OS === 'ios') {
+        expect(recordId(replacementSample.identity)).not.toBe(recordId(initialSample.identity))
+      }
+    } finally {
+      await NitroHealth.deleteRecordsByTimeRange('vo2Max', idempotentReadRange)
     }
   })
 

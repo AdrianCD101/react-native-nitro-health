@@ -6,6 +6,7 @@ import androidx.health.connect.client.records.BloodGlucoseRecord
 import androidx.health.connect.client.records.BloodPressureRecord
 import androidx.health.connect.client.records.BodyTemperatureMeasurementLocation
 import androidx.health.connect.client.records.MealType
+import androidx.health.connect.client.records.Vo2MaxRecord
 import com.margelo.nitro.nitrohealth.NativeActiveEnergyBurnedSampleInput
 import com.margelo.nitro.nitrohealth.NativeBloodGlucoseSampleInput
 import com.margelo.nitro.nitrohealth.NativeBloodPressureSampleInput
@@ -22,6 +23,7 @@ import com.margelo.nitro.nitrohealth.NativeOxygenSaturationSampleInput
 import com.margelo.nitro.nitrohealth.NativeRespiratoryRateSampleInput
 import com.margelo.nitro.nitrohealth.NativeRestingHeartRateSampleInput
 import com.margelo.nitro.nitrohealth.NativeStepSampleInput
+import com.margelo.nitro.nitrohealth.NativeVo2MaxSampleInput
 import java.time.Instant
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -406,10 +408,30 @@ class SampleInputConvertersTest {
     }
 
     @Test
+    fun toVo2MaxRecordsMapsPointInTimeMillilitersPerKilogramPerMinute() {
+        val records = toVo2MaxRecords(
+            arrayOf(
+                NativeVo2MaxSampleInput(
+                    timeMs = startTimeMs,
+                    millilitersPerKilogramPerMinute = 42.5,
+                    syncId = null,
+                    syncVersion = null
+                )
+            )
+        )
+
+        assertEquals(1, records.size)
+        assertEquals(Instant.ofEpochMilli(startTimeMs.toLong()), records[0].time)
+        assertNull(records[0].zoneOffset)
+        assertEquals(42.5, records[0].vo2MillilitersPerMinuteKilogram, 0.0)
+        assertEquals(Vo2MaxRecord.MEASUREMENT_METHOD_OTHER, records[0].measurementMethod)
+    }
+
+    @Test
     fun allConvertersPreserveUnknownUnkeyedMetadata() {
         val metadata = metadataFromAllConverters(syncId = null, syncVersion = null)
 
-        assertEquals(15, metadata.size)
+        assertEquals(16, metadata.size)
         metadata.forEach {
             assertNull(it.clientRecordId)
             assertEquals(0L, it.clientRecordVersion)
@@ -421,7 +443,7 @@ class SampleInputConvertersTest {
     fun allConvertersMapVersionedSyncMetadata() {
         val metadata = metadataFromAllConverters(syncId = "sample-sync-id", syncVersion = 42.0)
 
-        assertEquals(15, metadata.size)
+        assertEquals(16, metadata.size)
         metadata.forEach {
             assertEquals("sample-sync-id", it.clientRecordId)
             assertEquals(42L, it.clientRecordVersion)
@@ -603,6 +625,16 @@ class SampleInputConvertersTest {
                     NativeHeightSampleInput(
                         timeMs = startTimeMs,
                         meters = 1.78,
+                        syncId = syncId,
+                        syncVersion = syncVersion
+                    )
+                )
+            ).single().metadata,
+            toVo2MaxRecords(
+                arrayOf(
+                    NativeVo2MaxSampleInput(
+                        timeMs = startTimeMs,
+                        millilitersPerKilogramPerMinute = 42.5,
                         syncId = syncId,
                         syncVersion = syncVersion
                     )

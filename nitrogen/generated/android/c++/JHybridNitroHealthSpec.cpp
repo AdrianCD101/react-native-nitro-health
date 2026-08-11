@@ -75,6 +75,8 @@ namespace margelo::nitro::nitrohealth { struct NativeActiveEnergyBurnedSample; }
 namespace margelo::nitro::nitrohealth { struct NativeOxygenSaturationSample; }
 // Forward declaration of `NativeHeightSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHeightSample; }
+// Forward declaration of `NativeVo2MaxSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeVo2MaxSample; }
 // Forward declaration of `NativeSleepSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeSleepSample; }
 // Forward declaration of `NativeSleepSampleKind` to properly resolve imports.
@@ -131,6 +133,8 @@ namespace margelo::nitro::nitrohealth { struct NativeHeartRateVariabilitySampleP
 namespace margelo::nitro::nitrohealth { struct NativeOxygenSaturationSamplePage; }
 // Forward declaration of `NativeHeightSamplePage` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHeightSamplePage; }
+// Forward declaration of `NativeVo2MaxSamplePage` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeVo2MaxSamplePage; }
 // Forward declaration of `NativeHealthStatistics` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthStatistics; }
 // Forward declaration of `NativeSleepSamplePage` to properly resolve imports.
@@ -195,6 +199,8 @@ namespace margelo::nitro::nitrohealth { struct NativeRestingHeartRateSampleInput
 namespace margelo::nitro::nitrohealth { struct NativeOxygenSaturationSampleInput; }
 // Forward declaration of `NativeHeightSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHeightSampleInput; }
+// Forward declaration of `NativeVo2MaxSampleInput` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeVo2MaxSampleInput; }
 // Forward declaration of `NativeSleepSessionInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeSleepSessionInput; }
 // Forward declaration of `NativeSleepSessionStageInput` to properly resolve imports.
@@ -275,6 +281,8 @@ namespace margelo::nitro::nitrohealth { struct NativeWorkoutSampleInput; }
 #include "JNativeOxygenSaturationSample.hpp"
 #include "NativeHeightSample.hpp"
 #include "JNativeHeightSample.hpp"
+#include "NativeVo2MaxSample.hpp"
+#include "JNativeVo2MaxSample.hpp"
 #include "NativeSleepSample.hpp"
 #include "JNativeSleepSample.hpp"
 #include "NativeSleepSampleKind.hpp"
@@ -334,6 +342,8 @@ namespace margelo::nitro::nitrohealth { struct NativeWorkoutSampleInput; }
 #include "JNativeOxygenSaturationSamplePage.hpp"
 #include "NativeHeightSamplePage.hpp"
 #include "JNativeHeightSamplePage.hpp"
+#include "NativeVo2MaxSamplePage.hpp"
+#include "JNativeVo2MaxSamplePage.hpp"
 #include "NativeHealthStatistics.hpp"
 #include "JNativeHealthStatistics.hpp"
 #include "NativeSleepSamplePage.hpp"
@@ -400,6 +410,8 @@ namespace margelo::nitro::nitrohealth { struct NativeWorkoutSampleInput; }
 #include "JNativeOxygenSaturationSampleInput.hpp"
 #include "NativeHeightSampleInput.hpp"
 #include "JNativeHeightSampleInput.hpp"
+#include "NativeVo2MaxSampleInput.hpp"
+#include "JNativeVo2MaxSampleInput.hpp"
 #include "NativeSleepSessionInput.hpp"
 #include "JNativeSleepSessionInput.hpp"
 #include "NativeSleepSessionStageInput.hpp"
@@ -894,6 +906,22 @@ namespace margelo::nitro::nitrohealth {
       return __promise;
     }();
   }
+  std::shared_ptr<Promise<NativeVo2MaxSamplePage>> JHybridNitroHealthSpec::readVo2Max(const NativeHealthDateRangeQuery& query) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<JNativeHealthDateRangeQuery> /* query */)>("readVo2Max");
+    auto __result = method(_javaPart, JNativeHealthDateRangeQuery::fromCpp(query));
+    return [&]() {
+      auto __promise = Promise<NativeVo2MaxSamplePage>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {
+        auto __result = jni::static_ref_cast<JNativeVo2MaxSamplePage>(__boxedResult);
+        __promise->resolve(__result->toCpp());
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
+  }
   std::shared_ptr<Promise<std::vector<NativeHealthStatistics>>> JHybridNitroHealthSpec::readStatistics(const std::string& dataType, const NativeHealthStatisticsQuery& query) {
     static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<jni::JString> /* dataType */, jni::alias_ref<JNativeHealthStatisticsQuery> /* query */)>("readStatistics");
     auto __result = method(_javaPart, jni::make_jstring(dataType), JNativeHealthStatisticsQuery::fromCpp(query));
@@ -1296,6 +1324,30 @@ namespace margelo::nitro::nitrohealth {
       for (size_t __i = 0; __i < __size; __i++) {
         const auto& __element = __input[__i];
         auto __elementJni = JNativeHeightSampleInput::fromCpp(__element);
+        __array->setElement(__i, *__elementJni);
+      }
+      return __array;
+    }(samples));
+    return [&]() {
+      auto __promise = Promise<void>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& /* unit */) {
+        __promise->resolve();
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
+  }
+  std::shared_ptr<Promise<void>> JHybridNitroHealthSpec::saveVo2Max(const std::vector<NativeVo2MaxSampleInput>& samples) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<jni::JArrayClass<JNativeVo2MaxSampleInput>> /* samples */)>("saveVo2Max");
+    auto __result = method(_javaPart, [&](auto&& __input) {
+      size_t __size = __input.size();
+      jni::local_ref<jni::JArrayClass<JNativeVo2MaxSampleInput>> __array = jni::JArrayClass<JNativeVo2MaxSampleInput>::newArray(__size);
+      for (size_t __i = 0; __i < __size; __i++) {
+        const auto& __element = __input[__i];
+        auto __elementJni = JNativeVo2MaxSampleInput::fromCpp(__element);
         __array->setElement(__i, *__elementJni);
       }
       return __array;

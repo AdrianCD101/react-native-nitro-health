@@ -72,6 +72,7 @@ const STATISTICS_METRICS_BY_DATA_TYPE: Record<HealthDataType, readonly Statistic
   heartRateVariability: [],
   oxygenSaturation: [],
   height: ['avg', 'min', 'max'],
+  vo2Max: [],
   bodyMass: ['avg', 'min', 'max'],
   sleep: [],
   workout: [],

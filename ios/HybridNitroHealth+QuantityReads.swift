@@ -241,6 +241,25 @@ extension HybridNitroHealth {
         }
     }
 
+    func readVo2Max(query: NativeHealthDateRangeQuery) throws -> Promise<NativeVo2MaxSamplePage> {
+        if !HKHealthStore.isHealthDataAvailable() {
+            throw permissionError("Health data is not available")
+        }
+
+        return Promise<NativeVo2MaxSamplePage>.async {
+            let page = try await self.readInstantQuantitySamplePage(dataType: "vo2Max", query: query) { quantitySample, unit in
+                NativeVo2MaxSample(
+                    identity: quantitySample.nativeHealthSampleIdentity,
+                    origin: quantitySample.nativeHealthDataOrigin,
+                    timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
+                    millilitersPerKilogramPerMinute: quantitySample.quantity.doubleValue(for: unit)
+                )
+            }
+
+            return NativeVo2MaxSamplePage(samples: page.samples, nextCursor: page.nextCursor)
+        }
+    }
+
     func saveRestingHeartRate(samples: [NativeRestingHeartRateSampleInput]) throws -> Promise<Void> {
         return try saveQuantitySamples(dataType: "restingHeartRate", label: "resting heart rate") { quantityType in
             try makeRestingHeartRateQuantitySamples(samples: samples, quantityType: quantityType)
@@ -292,6 +311,12 @@ extension HybridNitroHealth {
     func saveHeight(samples: [NativeHeightSampleInput]) throws -> Promise<Void> {
         return try saveQuantitySamples(dataType: "height", label: "height") { quantityType in
             try makeHeightQuantitySamples(samples: samples, quantityType: quantityType)
+        }
+    }
+
+    func saveVo2Max(samples: [NativeVo2MaxSampleInput]) throws -> Promise<Void> {
+        return try saveQuantitySamples(dataType: "vo2Max", label: "VO2 max") { quantityType in
+            try makeVo2MaxQuantitySamples(samples: samples, quantityType: quantityType)
         }
     }
 }

@@ -21,6 +21,7 @@ const healthDataTypes = new Set([
   'activeEnergyBurned',
   'oxygenSaturation',
   'height',
+  'vo2Max',
   'sleep',
   'bodyMass',
   'workout',
@@ -269,6 +270,7 @@ function createNitroHealthMock(options = {}) {
     readHeartRateVariability: createMockFunction(() => rejectWhenUnavailable({ samples: [] })),
     readOxygenSaturation: createMockFunction(() => rejectWhenUnavailable({ samples: [] })),
     readHeight: createMockFunction(() => rejectWhenUnavailable({ samples: [] })),
+    readVo2Max: createMockFunction(() => rejectWhenUnavailable({ samples: [] })),
     readStatistics: createMockFunction(() => rejectWhenUnavailable([])),
     readSleepSamples: createMockFunction(() => rejectWhenUnavailable({ samples: [] })),
     readWorkouts: createMockFunction(() => rejectWhenUnavailable({ samples: [] })),
@@ -292,6 +294,7 @@ function createNitroHealthMock(options = {}) {
     saveRestingHeartRate: createMockFunction((samples) => saveSamples(samples, undefined)),
     saveOxygenSaturation: createMockFunction((samples) => saveSamples(samples, undefined)),
     saveHeight: createMockFunction((samples) => saveSamples(samples, undefined)),
+    saveVo2Max: createMockFunction((samples) => saveSamples(samples, undefined)),
     saveSleepSessions: createMockFunction((sessions) => {
       const validationError = validateNonEmpty(sessions, 'At least one sleep session is required')
       return validationError === undefined

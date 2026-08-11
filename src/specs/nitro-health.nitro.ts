@@ -41,9 +41,11 @@ import type { NativeHeartRateSamplePage } from '../NativeHeartRateSamplePage'
 import type { NativeHeartRateStatistics } from '../NativeHeartRateStatistics'
 import type { NativeHeartRateVariabilitySamplePage } from '../NativeHeartRateVariabilitySamplePage'
 import type { NativeHeightSampleInput } from '../NativeHeightSampleInput'
+import type { NativeVo2MaxSampleInput } from '../NativeVo2MaxSampleInput'
 import type { NativeLeanBodyMassSampleInput } from '../NativeLeanBodyMassSampleInput'
 import type { NativeLeanBodyMassSamplePage } from '../NativeLeanBodyMassSamplePage'
 import type { NativeHeightSamplePage } from '../NativeHeightSamplePage'
+import type { NativeVo2MaxSamplePage } from '../NativeVo2MaxSamplePage'
 import type { NativeOxygenSaturationSampleInput } from '../NativeOxygenSaturationSampleInput'
 import type { NativeOxygenSaturationSamplePage } from '../NativeOxygenSaturationSamplePage'
 import type { NativeRespiratoryRateSampleInput } from '../NativeRespiratoryRateSampleInput'
@@ -100,6 +102,7 @@ export interface NitroHealth extends HybridObject<{ ios: 'swift'; android: 'kotl
   ): Promise<NativeHeartRateVariabilitySamplePage>
   readOxygenSaturation(query: NativeHealthDateRangeQuery): Promise<NativeOxygenSaturationSamplePage>
   readHeight(query: NativeHealthDateRangeQuery): Promise<NativeHeightSamplePage>
+  readVo2Max(query: NativeHealthDateRangeQuery): Promise<NativeVo2MaxSamplePage>
   readStatistics(
     dataType: string,
     query: NativeHealthStatisticsQuery
@@ -121,6 +124,7 @@ export interface NitroHealth extends HybridObject<{ ios: 'swift'; android: 'kotl
   saveRestingHeartRate(samples: NativeRestingHeartRateSampleInput[]): Promise<void>
   saveOxygenSaturation(samples: NativeOxygenSaturationSampleInput[]): Promise<void>
   saveHeight(samples: NativeHeightSampleInput[]): Promise<void>
+  saveVo2Max(samples: NativeVo2MaxSampleInput[]): Promise<void>
   saveSleepSessions(sessions: NativeSleepSessionInput[]): Promise<void>
   saveWorkout(workout: NativeWorkoutSampleInput): Promise<void>
   deleteRecordsByIds(dataType: string, recordIds: string[]): Promise<NativeHealthDeleteResult>

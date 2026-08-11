@@ -295,6 +295,20 @@ describe('NitroHealth reads (native)', () => {
     }
   })
 
+  it('reads VO2 max readings under a record identity with plausible values', async () => {
+    try {
+      const page = await NitroHealth.readVo2Max(emptyRange)
+      for (const sample of page.samples) {
+        assertSampleIdentityAndOrigin(sample)
+        expect(sample.identity.kind).toBe('record')
+        expect(sample.millilitersPerKilogramPerMinute).toBeGreaterThanOrEqual(0)
+        expect(sample.millilitersPerKilogramPerMinute).toBeLessThanOrEqual(100)
+      }
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error)
+    }
+  })
+
   it('reads body fat readings under a record identity with plausible percentages', async () => {
     try {
       const page = await NitroHealth.readBodyFat(emptyRange)
