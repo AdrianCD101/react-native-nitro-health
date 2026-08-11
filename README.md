@@ -390,7 +390,20 @@ interface BloodPressureSample extends HealthSample {
 
 Android maps a Health Connect `BloodPressureRecord` one-to-one. On iOS a reading is stored as an `HKCorrelation` containing separate systolic and diastolic `HKQuantitySample` members: `saveBloodPressure()` writes the correlation and both members in one atomic call, `readBloodPressure()` returns one sample per correlation, and `identity` is the correlation record on both platforms (`kind: 'record'`). Other HealthKit consumers can see the member samples as individual systolic/diastolic readings — that is how HealthKit models blood pressure, not a duplicate write.
 
-A malformed third-party correlation (missing or duplicated member samples) rejects the read rather than fabricating a value. Deletion by identity or time range removes the correlation together with the member samples this app wrote. Blood pressure statistics are not supported by `readStatistics()` yet.
+A malformed third-party correlation (missing or duplicated member samples) rejects the read rather than fabricating a value. Deletion by identity or time range removes the correlation together with the member samples this app wrote. Health Connect's `bodyPosition` and `measurementLocation` have no HealthKit counterpart and are intentionally not modeled — Android writes store the explicit `*_UNKNOWN` constants, tracked for metadata passthrough in [#70](https://github.com/AdrianCD101/react-native-nitro-health/issues/70). Blood pressure statistics are not supported by `readStatistics()` yet.
+
+### Blood Glucose
+
+One `BloodGlucoseSample` carries the concentration in millimoles per liter (multiply by 18.0182 for mg/dL):
+
+```ts
+interface BloodGlucoseSample extends HealthSample {
+  date: Date
+  millimolesPerLiter: number
+}
+```
+
+Android maps a Health Connect `BloodGlucoseRecord` one-to-one; iOS stores an `HKQuantitySample` in a composed mmol/L unit, so neither platform converts the value in JavaScript. Health Connect's extra fields (`specimenSource`, `mealType`, `relationToMeal`) and HealthKit's `HKMetadataKeyBloodGlucoseMealTime` are intentionally not modeled — they have no clean cross-platform mapping and are tracked for delivery through metadata passthrough in [#69](https://github.com/AdrianCD101/react-native-nitro-health/issues/69). Android writes store the explicit `*_UNKNOWN` constants. Blood glucose statistics are not supported by `readStatistics()`.
 
 ### Blood Glucose
 
