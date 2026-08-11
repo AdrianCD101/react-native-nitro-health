@@ -253,6 +253,20 @@ describe('NitroHealth reads (native)', () => {
     }
   })
 
+  it('reads blood glucose readings under a record identity with plausible mmol/L values', async () => {
+    try {
+      const page = await NitroHealth.readBloodGlucose(emptyRange)
+      for (const sample of page.samples) {
+        assertSampleIdentityAndOrigin(sample)
+        expect(sample.identity.kind).toBe('record')
+        expect(sample.millimolesPerLiter).toBeGreaterThanOrEqual(0.5)
+        expect(sample.millimolesPerLiter).toBeLessThanOrEqual(50)
+      }
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error)
+    }
+  })
+
   // SDNN and RMSSD are non-comparable, so this assertion intentionally verifies the native
   // implementation detail for each platform after public permission state allows the read.
   it('reports SDNN on iOS and RMSSD on Android when HRV samples are observable', async () => {

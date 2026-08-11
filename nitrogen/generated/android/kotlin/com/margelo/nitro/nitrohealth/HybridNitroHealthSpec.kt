@@ -112,6 +112,10 @@ abstract class HybridNitroHealthSpec: HybridObject() {
   
   @DoNotStrip
   @Keep
+  abstract fun readBloodGlucose(query: NativeHealthDateRangeQuery): Promise<NativeBloodGlucoseSamplePage>
+  
+  @DoNotStrip
+  @Keep
   abstract fun readHeartRateStatistics(query: NativeHealthTimeRangeQuery): Promise<NativeHeartRateStatistics>
   
   @DoNotStrip
@@ -161,6 +165,10 @@ abstract class HybridNitroHealthSpec: HybridObject() {
   @DoNotStrip
   @Keep
   abstract fun saveBloodPressure(samples: Array<NativeBloodPressureSampleInput>): Promise<Unit>
+  
+  @DoNotStrip
+  @Keep
+  abstract fun saveBloodGlucose(samples: Array<NativeBloodGlucoseSampleInput>): Promise<Unit>
   
   @DoNotStrip
   @Keep

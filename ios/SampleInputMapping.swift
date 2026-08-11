@@ -190,6 +190,26 @@ func makeRestingHeartRateQuantitySamples(
     }
 }
 
+func makeBloodGlucoseQuantitySamples(
+    samples: [NativeBloodGlucoseSampleInput],
+    quantityType: HKQuantityType
+) throws -> [HKQuantitySample] {
+    return try samples.map { sample in
+        let date = Date(timeIntervalSince1970: sample.timeMs / 1000)
+
+        return HKQuantitySample(
+            type: quantityType,
+            quantity: HKQuantity(unit: bloodGlucoseMmolPerLiterUnit, doubleValue: sample.millimolesPerLiter),
+            start: date,
+            end: date,
+            metadata: try makeHealthKitSyncMetadata(
+                syncId: sample.syncId,
+                syncVersion: sample.syncVersion
+            )
+        )
+    }
+}
+
 func makeOxygenSaturationQuantitySamples(
     samples: [NativeOxygenSaturationSampleInput],
     quantityType: HKQuantityType

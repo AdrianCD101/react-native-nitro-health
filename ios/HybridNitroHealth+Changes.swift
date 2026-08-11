@@ -195,6 +195,20 @@ extension HybridNitroHealth {
                     diastolicType: quantityTypes.diastolic
                 )]
             )
+        case "bloodGlucose":
+            let quantitySample = try requireQuantitySample(sample, dataType: dataType)
+            return makeNativeHealthChange(
+                type: "upsert",
+                recordId: uuid,
+                bloodGlucoseSamples: [NativeBloodGlucoseSample(
+                    identity: quantitySample.nativeHealthSampleIdentity,
+                    origin: quantitySample.nativeHealthDataOrigin,
+                    timeMs: startTimeMs,
+                    millimolesPerLiter: quantitySample.quantity.doubleValue(
+                        for: bloodGlucoseMmolPerLiterUnit
+                    )
+                )]
+            )
         case "restingHeartRate":
             let quantitySample = try requireQuantitySample(sample, dataType: dataType)
             return makeNativeHealthChange(
@@ -353,6 +367,7 @@ extension HybridNitroHealth {
         stepSamples: [NativeStepSample]? = nil,
         heartRateSamples: [NativeHeartRateSample]? = nil,
         bloodPressureSamples: [NativeBloodPressureSample]? = nil,
+        bloodGlucoseSamples: [NativeBloodGlucoseSample]? = nil,
         restingHeartRateSamples: [NativeRestingHeartRateSample]? = nil,
         heartRateVariabilitySamples: [NativeHeartRateVariabilitySample]? = nil,
         distanceSamples: [NativeDistanceSample]? = nil,
@@ -369,6 +384,7 @@ extension HybridNitroHealth {
             stepSamples: stepSamples,
             heartRateSamples: heartRateSamples,
             bloodPressureSamples: bloodPressureSamples,
+            bloodGlucoseSamples: bloodGlucoseSamples,
             restingHeartRateSamples: restingHeartRateSamples,
             heartRateVariabilitySamples: heartRateVariabilitySamples,
             distanceSamples: distanceSamples,

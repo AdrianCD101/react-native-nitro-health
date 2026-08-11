@@ -26,6 +26,12 @@ namespace margelo::nitro::nitrohealth { enum class NativeBackgroundChangesMode; 
 namespace margelo::nitro::nitrohealth { enum class NativeBackgroundChangesResultStatus; }
 // Forward declaration of `NativeBackgroundChangesResult` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBackgroundChangesResult; }
+// Forward declaration of `NativeBloodGlucoseSampleInput` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeBloodGlucoseSampleInput; }
+// Forward declaration of `NativeBloodGlucoseSamplePage` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeBloodGlucoseSamplePage; }
+// Forward declaration of `NativeBloodGlucoseSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeBloodGlucoseSample; }
 // Forward declaration of `NativeBloodPressureSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBloodPressureSampleInput; }
 // Forward declaration of `NativeBloodPressureSamplePage` to properly resolve imports.
@@ -179,6 +185,9 @@ namespace margelo::nitro::nitrohealth { struct NativeWorkoutSample; }
 #include "NativeBackgroundChangesMode.hpp"
 #include "NativeBackgroundChangesResult.hpp"
 #include "NativeBackgroundChangesResultStatus.hpp"
+#include "NativeBloodGlucoseSample.hpp"
+#include "NativeBloodGlucoseSampleInput.hpp"
+#include "NativeBloodGlucoseSamplePage.hpp"
 #include "NativeBloodPressureSample.hpp"
 #include "NativeBloodPressureSampleInput.hpp"
 #include "NativeBloodPressureSamplePage.hpp"

@@ -24,6 +24,12 @@ namespace margelo::nitro::nitrohealth { enum class NativeBackgroundChangesMode; 
 namespace margelo::nitro::nitrohealth { enum class NativeBackgroundChangesResultStatus; }
 // Forward declaration of `NativeBackgroundChangesResult` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBackgroundChangesResult; }
+// Forward declaration of `NativeBloodGlucoseSampleInput` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeBloodGlucoseSampleInput; }
+// Forward declaration of `NativeBloodGlucoseSamplePage` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeBloodGlucoseSamplePage; }
+// Forward declaration of `NativeBloodGlucoseSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeBloodGlucoseSample; }
 // Forward declaration of `NativeBloodPressureSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBloodPressureSampleInput; }
 // Forward declaration of `NativeBloodPressureSamplePage` to properly resolve imports.
@@ -172,6 +178,9 @@ namespace NitroHealth { class HybridNitroHealthSpec_cxx; }
 #include "NativeBackgroundChangesMode.hpp"
 #include "NativeBackgroundChangesResult.hpp"
 #include "NativeBackgroundChangesResultStatus.hpp"
+#include "NativeBloodGlucoseSample.hpp"
+#include "NativeBloodGlucoseSampleInput.hpp"
+#include "NativeBloodGlucoseSamplePage.hpp"
 #include "NativeBloodPressureSample.hpp"
 #include "NativeBloodPressureSampleInput.hpp"
 #include "NativeBloodPressureSamplePage.hpp"
@@ -694,6 +703,32 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return optional.has_value();
   }
   inline std::vector<NativeBloodPressureSample> get_std__optional_std__vector_NativeBloodPressureSample__(const std::optional<std::vector<NativeBloodPressureSample>>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::vector<NativeBloodGlucoseSample>
+  /**
+   * Specialized version of `std::vector<NativeBloodGlucoseSample>`.
+   */
+  using std__vector_NativeBloodGlucoseSample_ = std::vector<NativeBloodGlucoseSample>;
+  inline std::vector<NativeBloodGlucoseSample> create_std__vector_NativeBloodGlucoseSample_(size_t size) noexcept {
+    std::vector<NativeBloodGlucoseSample> vector;
+    vector.reserve(size);
+    return vector;
+  }
+  
+  // pragma MARK: std::optional<std::vector<NativeBloodGlucoseSample>>
+  /**
+   * Specialized version of `std::optional<std::vector<NativeBloodGlucoseSample>>`.
+   */
+  using std__optional_std__vector_NativeBloodGlucoseSample__ = std::optional<std::vector<NativeBloodGlucoseSample>>;
+  inline std::optional<std::vector<NativeBloodGlucoseSample>> create_std__optional_std__vector_NativeBloodGlucoseSample__(const std::vector<NativeBloodGlucoseSample>& value) noexcept {
+    return std::optional<std::vector<NativeBloodGlucoseSample>>(value);
+  }
+  inline bool has_value_std__optional_std__vector_NativeBloodGlucoseSample__(const std::optional<std::vector<NativeBloodGlucoseSample>>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline std::vector<NativeBloodGlucoseSample> get_std__optional_std__vector_NativeBloodGlucoseSample__(const std::optional<std::vector<NativeBloodGlucoseSample>>& optional) noexcept {
     return optional.value();
   }
   
@@ -1277,6 +1312,40 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return Func_void_NativeBloodPressureSamplePage_Wrapper(std::move(value));
   }
   
+  // pragma MARK: std::shared_ptr<Promise<NativeBloodGlucoseSamplePage>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<NativeBloodGlucoseSamplePage>>`.
+   */
+  using std__shared_ptr_Promise_NativeBloodGlucoseSamplePage__ = std::shared_ptr<Promise<NativeBloodGlucoseSamplePage>>;
+  inline std::shared_ptr<Promise<NativeBloodGlucoseSamplePage>> create_std__shared_ptr_Promise_NativeBloodGlucoseSamplePage__() noexcept {
+    return Promise<NativeBloodGlucoseSamplePage>::create();
+  }
+  inline PromiseHolder<NativeBloodGlucoseSamplePage> wrap_std__shared_ptr_Promise_NativeBloodGlucoseSamplePage__(std::shared_ptr<Promise<NativeBloodGlucoseSamplePage>> promise) noexcept {
+    return PromiseHolder<NativeBloodGlucoseSamplePage>(std::move(promise));
+  }
+  
+  // pragma MARK: std::function<void(const NativeBloodGlucoseSamplePage& /* result */)>
+  /**
+   * Specialized version of `std::function<void(const NativeBloodGlucoseSamplePage&)>`.
+   */
+  using Func_void_NativeBloodGlucoseSamplePage = std::function<void(const NativeBloodGlucoseSamplePage& /* result */)>;
+  /**
+   * Wrapper class for a `std::function<void(const NativeBloodGlucoseSamplePage& / * result * /)>`, this can be used from Swift.
+   */
+  class Func_void_NativeBloodGlucoseSamplePage_Wrapper final {
+  public:
+    explicit Func_void_NativeBloodGlucoseSamplePage_Wrapper(std::function<void(const NativeBloodGlucoseSamplePage& /* result */)>&& func): _function(std::make_unique<std::function<void(const NativeBloodGlucoseSamplePage& /* result */)>>(std::move(func))) {}
+    inline void call(NativeBloodGlucoseSamplePage result) const noexcept {
+      _function->operator()(result);
+    }
+  private:
+    std::unique_ptr<std::function<void(const NativeBloodGlucoseSamplePage& /* result */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_NativeBloodGlucoseSamplePage create_Func_void_NativeBloodGlucoseSamplePage(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_NativeBloodGlucoseSamplePage_Wrapper wrap_Func_void_NativeBloodGlucoseSamplePage(Func_void_NativeBloodGlucoseSamplePage value) noexcept {
+    return Func_void_NativeBloodGlucoseSamplePage_Wrapper(std::move(value));
+  }
+  
   // pragma MARK: std::shared_ptr<Promise<NativeHeartRateStatistics>>
   /**
    * Specialized version of `std::shared_ptr<Promise<NativeHeartRateStatistics>>`.
@@ -1676,6 +1745,17 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return vector;
   }
   
+  // pragma MARK: std::vector<NativeBloodGlucoseSampleInput>
+  /**
+   * Specialized version of `std::vector<NativeBloodGlucoseSampleInput>`.
+   */
+  using std__vector_NativeBloodGlucoseSampleInput_ = std::vector<NativeBloodGlucoseSampleInput>;
+  inline std::vector<NativeBloodGlucoseSampleInput> create_std__vector_NativeBloodGlucoseSampleInput_(size_t size) noexcept {
+    std::vector<NativeBloodGlucoseSampleInput> vector;
+    vector.reserve(size);
+    return vector;
+  }
+  
   // pragma MARK: std::vector<NativeBodyMassSampleInput>
   /**
    * Specialized version of `std::vector<NativeBodyMassSampleInput>`.
@@ -2020,6 +2100,15 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
   }
   inline Result_std__shared_ptr_Promise_NativeBloodPressureSamplePage___ create_Result_std__shared_ptr_Promise_NativeBloodPressureSamplePage___(const std::exception_ptr& error) noexcept {
     return Result<std::shared_ptr<Promise<NativeBloodPressureSamplePage>>>::withError(error);
+  }
+  
+  // pragma MARK: Result<std::shared_ptr<Promise<NativeBloodGlucoseSamplePage>>>
+  using Result_std__shared_ptr_Promise_NativeBloodGlucoseSamplePage___ = Result<std::shared_ptr<Promise<NativeBloodGlucoseSamplePage>>>;
+  inline Result_std__shared_ptr_Promise_NativeBloodGlucoseSamplePage___ create_Result_std__shared_ptr_Promise_NativeBloodGlucoseSamplePage___(const std::shared_ptr<Promise<NativeBloodGlucoseSamplePage>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<NativeBloodGlucoseSamplePage>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_NativeBloodGlucoseSamplePage___ create_Result_std__shared_ptr_Promise_NativeBloodGlucoseSamplePage___(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<NativeBloodGlucoseSamplePage>>>::withError(error);
   }
   
   // pragma MARK: Result<std::shared_ptr<Promise<NativeHeartRateStatistics>>>

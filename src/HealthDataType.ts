@@ -9,6 +9,7 @@ export type HealthDataType =
   | 'steps'
   | 'heartRate'
   | 'bloodPressure'
+  | 'bloodGlucose'
   | 'restingHeartRate'
   | 'heartRateVariability'
   | 'distance'

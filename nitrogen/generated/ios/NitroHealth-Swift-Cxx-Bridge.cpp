@@ -142,6 +142,14 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     };
   }
   
+  // pragma MARK: std::function<void(const NativeBloodGlucoseSamplePage& /* result */)>
+  Func_void_NativeBloodGlucoseSamplePage create_Func_void_NativeBloodGlucoseSamplePage(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroHealth::Func_void_NativeBloodGlucoseSamplePage::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const NativeBloodGlucoseSamplePage& result) mutable -> void {
+      swiftClosure.call(result);
+    };
+  }
+  
   // pragma MARK: std::function<void(const NativeHeartRateStatistics& /* result */)>
   Func_void_NativeHeartRateStatistics create_Func_void_NativeHeartRateStatistics(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = NitroHealth::Func_void_NativeHeartRateStatistics::fromUnsafe(swiftClosureWrapper);

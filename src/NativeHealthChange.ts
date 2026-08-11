@@ -1,4 +1,5 @@
 import type { NativeActiveEnergyBurnedSample } from './NativeActiveEnergyBurnedSample'
+import type { NativeBloodGlucoseSample } from './NativeBloodGlucoseSample'
 import type { NativeBloodPressureSample } from './NativeBloodPressureSample'
 import type { NativeBodyMassSample } from './NativeBodyMassSample'
 import type { NativeDistanceSample } from './NativeDistanceSample'
@@ -23,6 +24,8 @@ export interface NativeHealthChange {
   heartRateSamples?: NativeHeartRateSample[]
   /** Blood pressure samples for a `bloodPressure` upsert. */
   bloodPressureSamples?: NativeBloodPressureSample[]
+  /** Blood glucose samples for a `bloodGlucose` upsert. */
+  bloodGlucoseSamples?: NativeBloodGlucoseSample[]
   /** Resting heart-rate samples for a `restingHeartRate` upsert. */
   restingHeartRateSamples?: NativeRestingHeartRateSample[]
   /** HRV samples for a `heartRateVariability` upsert. */

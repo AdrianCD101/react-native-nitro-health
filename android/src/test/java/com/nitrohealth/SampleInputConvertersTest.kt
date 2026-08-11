@@ -1,8 +1,11 @@
 package com.nitrohealth
 
 import androidx.health.connect.client.records.metadata.Metadata
+import androidx.health.connect.client.records.BloodGlucoseRecord
 import androidx.health.connect.client.records.BloodPressureRecord
+import androidx.health.connect.client.records.MealType
 import com.margelo.nitro.nitrohealth.NativeActiveEnergyBurnedSampleInput
+import com.margelo.nitro.nitrohealth.NativeBloodGlucoseSampleInput
 import com.margelo.nitro.nitrohealth.NativeBloodPressureSampleInput
 import com.margelo.nitro.nitrohealth.NativeBodyMassSampleInput
 import com.margelo.nitro.nitrohealth.NativeDistanceSampleInput
@@ -235,6 +238,28 @@ class SampleInputConvertersTest {
     }
 
     @Test
+    fun toBloodGlucoseRecordsMapsPointInTimeLevelWithUnknownEnumFields() {
+        val records = toBloodGlucoseRecords(
+            arrayOf(
+                NativeBloodGlucoseSampleInput(
+                    timeMs = startTimeMs,
+                    millimolesPerLiter = 5.4,
+                    syncId = null,
+                    syncVersion = null
+                )
+            )
+        )
+
+        assertEquals(1, records.size)
+        assertEquals(Instant.ofEpochMilli(startTimeMs.toLong()), records[0].time)
+        assertNull(records[0].zoneOffset)
+        assertEquals(5.4, records[0].level.inMillimolesPerLiter, 0.0)
+        assertEquals(BloodGlucoseRecord.SPECIMEN_SOURCE_UNKNOWN, records[0].specimenSource)
+        assertEquals(MealType.MEAL_TYPE_UNKNOWN, records[0].mealType)
+        assertEquals(BloodGlucoseRecord.RELATION_TO_MEAL_UNKNOWN, records[0].relationToMeal)
+    }
+
+    @Test
     fun toOxygenSaturationRecordsMapsPointInTimePercentage() {
         val records = toOxygenSaturationRecords(
             arrayOf(
@@ -274,7 +299,7 @@ class SampleInputConvertersTest {
     fun allConvertersPreserveUnknownUnkeyedMetadata() {
         val metadata = metadataFromAllConverters(syncId = null, syncVersion = null)
 
-        assertEquals(9, metadata.size)
+        assertEquals(10, metadata.size)
         metadata.forEach {
             assertNull(it.clientRecordId)
             assertEquals(0L, it.clientRecordVersion)
@@ -286,7 +311,7 @@ class SampleInputConvertersTest {
     fun allConvertersMapVersionedSyncMetadata() {
         val metadata = metadataFromAllConverters(syncId = "sample-sync-id", syncVersion = 42.0)
 
-        assertEquals(9, metadata.size)
+        assertEquals(10, metadata.size)
         metadata.forEach {
             assertEquals("sample-sync-id", it.clientRecordId)
             assertEquals(42L, it.clientRecordVersion)
@@ -388,6 +413,16 @@ class SampleInputConvertersTest {
                         timeMs = startTimeMs,
                         systolicMmHg = 118.0,
                         diastolicMmHg = 76.0,
+                        syncId = syncId,
+                        syncVersion = syncVersion
+                    )
+                )
+            ).single().metadata,
+            toBloodGlucoseRecords(
+                arrayOf(
+                    NativeBloodGlucoseSampleInput(
+                        timeMs = startTimeMs,
+                        millimolesPerLiter = 5.4,
                         syncId = syncId,
                         syncVersion = syncVersion
                     )

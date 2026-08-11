@@ -116,6 +116,11 @@ class StatisticsBucketUtilsTest {
         assertTrue(healthDataTypeDescriptorFor("bloodPressure").statisticsMetrics.isEmpty())
     }
 
+    @Test
+    fun descriptorForBloodGlucoseSupportsNoStatisticsMetrics() {
+        assertTrue(healthDataTypeDescriptorFor("bloodGlucose").statisticsMetrics.isEmpty())
+    }
+
     @Test(expected = IllegalArgumentException::class)
     fun descriptorThrowsForUnknownDataType() {
         healthDataTypeDescriptorFor("unknown")

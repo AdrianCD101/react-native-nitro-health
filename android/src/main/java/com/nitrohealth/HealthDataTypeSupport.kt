@@ -3,6 +3,7 @@ package com.nitrohealth
 import androidx.health.connect.client.aggregate.AggregateMetric
 import androidx.health.connect.client.aggregate.AggregationResult
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
+import androidx.health.connect.client.records.BloodGlucoseRecord
 import androidx.health.connect.client.records.BloodPressureRecord
 import androidx.health.connect.client.records.DistanceRecord
 import androidx.health.connect.client.records.ExerciseSessionRecord
@@ -98,6 +99,10 @@ internal fun healthDataTypeDescriptorFor(dataType: String): HealthDataTypeDescri
         "bloodPressure" -> HealthDataTypeDescriptor(
             recordType = BloodPressureRecord::class,
             permissionLabel = "blood pressure"
+        )
+        "bloodGlucose" -> HealthDataTypeDescriptor(
+            recordType = BloodGlucoseRecord::class,
+            permissionLabel = "blood glucose"
         )
         "sleep" -> HealthDataTypeDescriptor(
             recordType = SleepSessionRecord::class,

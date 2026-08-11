@@ -2,7 +2,7 @@
 //  HybridNitroHealth+QuantityReads.swift
 //  Pods
 //
-//  Instantaneous-quantity reads/writes (restingHeartRate, heartRateVariability,
+//  Instantaneous-quantity reads/writes (bloodGlucose, restingHeartRate, heartRateVariability,
 //  oxygenSaturation, height; readBodyMass in HybridNitroHealth.swift shares the read helper).
 //  This file is HealthKit-only, so it must NOT be added to Package.swift's pure-Foundation SPM
 //  test target; the podspec globs ios/**/*.swift and picks it up automatically. Kept separate
@@ -105,6 +105,25 @@ extension HybridNitroHealth {
         }
     }
 
+    func readBloodGlucose(query: NativeHealthDateRangeQuery) throws -> Promise<NativeBloodGlucoseSamplePage> {
+        if !HKHealthStore.isHealthDataAvailable() {
+            throw permissionError("Health data is not available")
+        }
+
+        return Promise<NativeBloodGlucoseSamplePage>.async {
+            let page = try await self.readInstantQuantitySamplePage(dataType: "bloodGlucose", query: query) { quantitySample, unit in
+                NativeBloodGlucoseSample(
+                    identity: quantitySample.nativeHealthSampleIdentity,
+                    origin: quantitySample.nativeHealthDataOrigin,
+                    timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
+                    millimolesPerLiter: quantitySample.quantity.doubleValue(for: unit)
+                )
+            }
+
+            return NativeBloodGlucoseSamplePage(samples: page.samples, nextCursor: page.nextCursor)
+        }
+    }
+
     func readHeight(query: NativeHealthDateRangeQuery) throws -> Promise<NativeHeightSamplePage> {
         if !HKHealthStore.isHealthDataAvailable() {
             throw permissionError("Health data is not available")
@@ -127,6 +146,12 @@ extension HybridNitroHealth {
     func saveRestingHeartRate(samples: [NativeRestingHeartRateSampleInput]) throws -> Promise<Void> {
         return try saveQuantitySamples(dataType: "restingHeartRate", label: "resting heart rate") { quantityType in
             try makeRestingHeartRateQuantitySamples(samples: samples, quantityType: quantityType)
+        }
+    }
+
+    func saveBloodGlucose(samples: [NativeBloodGlucoseSampleInput]) throws -> Promise<Void> {
+        return try saveQuantitySamples(dataType: "bloodGlucose", label: "blood glucose") { quantityType in
+            try makeBloodGlucoseQuantitySamples(samples: samples, quantityType: quantityType)
         }
     }
 

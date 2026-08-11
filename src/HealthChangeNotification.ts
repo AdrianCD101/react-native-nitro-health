@@ -1,5 +1,4 @@
 import type { HealthDataType } from './HealthDataType'
-import type { NitroHealth } from './NitroHealth'
 
 /**
  * Coalesced hint that one or more health data types may have changed.

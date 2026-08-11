@@ -62,6 +62,7 @@ const STATISTICS_METRICS_BY_DATA_TYPE: Record<HealthDataType, readonly Statistic
   activeEnergyBurned: ['sum'],
   heartRate: ['avg', 'min', 'max'],
   bloodPressure: [],
+  bloodGlucose: [],
   restingHeartRate: ['avg', 'min', 'max'],
   heartRateVariability: [],
   oxygenSaturation: [],

@@ -27,6 +27,8 @@ import type { NativeActiveEnergyBurnedSampleInput } from '../NativeActiveEnergyB
 import type { NativeBodyMassSample } from '../NativeBodyMassSample'
 import type { NativeBodyMassSampleInput } from '../NativeBodyMassSampleInput'
 import type { NativeDistanceSample } from '../NativeDistanceSample'
+import type { NativeBloodGlucoseSample } from '../NativeBloodGlucoseSample'
+import type { NativeBloodGlucoseSampleInput } from '../NativeBloodGlucoseSampleInput'
 import type { NativeBloodPressureSample } from '../NativeBloodPressureSample'
 import type { NativeBloodPressureSampleInput } from '../NativeBloodPressureSampleInput'
 import type { NativeDistanceSampleInput } from '../NativeDistanceSampleInput'
@@ -55,6 +57,8 @@ import type { NativeStepSampleInput } from '../NativeStepSampleInput'
 import type { NativeWorkoutSample } from '../NativeWorkoutSample'
 import type { NativeWorkoutSampleInput } from '../NativeWorkoutSampleInput'
 import type { NativeWorkoutActivity } from '../NativeWorkoutActivity'
+import type { BloodGlucoseSample } from '../BloodGlucoseSample'
+import type { BloodGlucoseSampleInput } from '../BloodGlucoseSampleInput'
 import type { BloodPressureSample } from '../BloodPressureSample'
 import type { BloodPressureSampleInput } from '../BloodPressureSampleInput'
 import type { OxygenSaturationSample } from '../OxygenSaturationSample'
@@ -96,6 +100,8 @@ const MIN_SYSTOLIC_MMHG = 20
 const MAX_SYSTOLIC_MMHG = 200
 const MIN_DIASTOLIC_MMHG = 10
 const MAX_DIASTOLIC_MMHG = 180
+const MIN_MILLIMOLES_PER_LITER = 0.5
+const MAX_MILLIMOLES_PER_LITER = 50
 const MAX_KILOGRAMS = 1_000
 const MAX_HEIGHT_METERS = 3
 const WRITABLE_SLEEP_STAGES = new Set<WritableSleepStage>([
@@ -409,6 +415,27 @@ export function makeNativeBloodPressureSampleInput(
     timeMs,
     systolicMmHg: sample.systolicMmHg,
     diastolicMmHg: sample.diastolicMmHg,
+    ...makeNativeSync(sample.sync, index),
+  }
+}
+
+export function makeNativeBloodGlucoseSampleInput(
+  sample: BloodGlucoseSampleInput,
+  index: number
+): NativeBloodGlucoseSampleInput {
+  const timeMs = makeSampleInstant(sample, index)
+
+  assertSampleBetween(
+    sample.millimolesPerLiter,
+    MIN_MILLIMOLES_PER_LITER,
+    MAX_MILLIMOLES_PER_LITER,
+    index,
+    'millimolesPerLiter'
+  )
+
+  return {
+    timeMs,
+    millimolesPerLiter: sample.millimolesPerLiter,
     ...makeNativeSync(sample.sync, index),
   }
 }
@@ -755,6 +782,15 @@ export function makeBloodPressureSample(sample: NativeBloodPressureSample): Bloo
   }
 }
 
+export function makeBloodGlucoseSample(sample: NativeBloodGlucoseSample): BloodGlucoseSample {
+  return {
+    identity: makeHealthSampleIdentity(sample.identity),
+    origin: makeHealthDataOrigin(sample.origin),
+    date: new Date(sample.timeMs),
+    millimolesPerLiter: sample.millimolesPerLiter,
+  }
+}
+
 export function makeOxygenSaturationSample(
   sample: NativeOxygenSaturationSample
 ): OxygenSaturationSample {
@@ -878,6 +914,7 @@ const CHANGE_SAMPLE_FIELDS = [
   'stepSamples',
   'heartRateSamples',
   'bloodPressureSamples',
+  'bloodGlucoseSamples',
   'restingHeartRateSamples',
   'heartRateVariabilitySamples',
   'distanceSamples',
@@ -921,6 +958,11 @@ function makeUpsertSamples(
       if (change.bloodPressureSamples === undefined)
         throw new Error("Native 'bloodPressure' upsert is missing samples")
       samples = change.bloodPressureSamples.map(makeBloodPressureSample)
+      break
+    case 'bloodGlucose':
+      if (change.bloodGlucoseSamples === undefined)
+        throw new Error("Native 'bloodGlucose' upsert is missing samples")
+      samples = change.bloodGlucoseSamples.map(makeBloodGlucoseSample)
       break
     case 'restingHeartRate':
       if (change.restingHeartRateSamples === undefined)
