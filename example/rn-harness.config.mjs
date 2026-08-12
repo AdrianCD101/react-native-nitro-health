@@ -16,10 +16,17 @@ const androidAvdProfile = process.env.RN_HARNESS_ANDROID_PROFILE ?? 'pixel_7'
 const androidAvdDiskSize = process.env.RN_HARNESS_ANDROID_DISK_SIZE ?? '4G'
 const iosSimulator = process.env.RN_HARNESS_IOS_SIMULATOR ?? 'iPhone 17 Pro'
 const iosRuntime = process.env.RN_HARNESS_IOS_RUNTIME ?? '26.0'
+const harnessProfile = process.env.RN_HARNESS_PROFILE ?? 'manual'
+const harnessProfiles = new Set(['authorized', 'manual'])
+
+if (!harnessProfiles.has(harnessProfile)) {
+  throw new Error(`Unsupported RN_HARNESS_PROFILE: ${harnessProfile}`)
+}
 
 const config = {
   entryPoint: './index.js',
   appRegistryComponentName: 'NitroHealthExample',
+  permissions: true,
   defaultRunner: 'ios',
   runners: [
     applePlatform({

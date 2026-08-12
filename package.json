@@ -102,6 +102,9 @@
     "react-native": "*",
     "react-native-nitro-modules": "*"
   },
+  "patchedDependencies": {
+    "@react-native-harness/platform-apple@1.3.0": "patches/@react-native-harness%2Fplatform-apple@1.3.0.patch"
+  },
   "react-native-builder-bob": {
     "source": "src",
     "output": "lib",

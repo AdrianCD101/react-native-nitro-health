@@ -38,6 +38,8 @@ async function drainStepChanges(changesToken: string): Promise<HealthRecordChang
 }
 
 describe('NitroHealth background access (native)', () => {
+  const observerIt = Platform.OS === 'ios' ? it : it.skip
+
   it('reports an exact observer or app-owned polling capability', async () => {
     const capabilities = await NitroHealth.getCapabilities()
     if (capabilities.status === 'unavailable') {
@@ -124,10 +126,14 @@ describe('NitroHealth background access (native)', () => {
     }
   })
 
-  it('emits an observer notification that leads to a durable step change', async () => {
+  observerIt('emits an observer notification that leads to a durable step change', async () => {
     const capabilities = await NitroHealth.getCapabilities()
-    if (capabilities.status === 'unavailable') return
-    if (capabilities.backgroundChanges.mode !== 'observer') return
+    if (capabilities.status === 'unavailable') {
+      throw new Error('Harness prerequisite failed: health data is unavailable')
+    }
+    if (capabilities.backgroundChanges.mode !== 'observer') {
+      throw new Error('Harness prerequisite failed: observer background changes are unavailable')
+    }
 
     const authorized = await hasVerifiedPermissions([
       { accessType: 'read', dataType: 'steps' },

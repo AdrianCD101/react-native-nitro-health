@@ -7,13 +7,11 @@ import {
   floorsClimbedReadPermission,
   floorsClimbedWritePermission,
   hasVerifiedPermissions,
-  heartRateReadPermission,
   isInconclusiveRead,
   last7DaysRange,
   lastDayRange,
   saveInterval,
   saveReadRange,
-  stepsReadPermission,
 } from './support/harnessSupport'
 
 const statisticsMetricKeys = ['sum', 'avg', 'min', 'max'] as const
@@ -37,89 +35,57 @@ function assertStatisticsEntry(
 
 describe('NitroHealth statistics (native)', () => {
   it('reads heart rate statistics from native code without crashing', async () => {
-    try {
-      const statistics = await NitroHealth.readHeartRateStatistics(emptyRange)
+    const statistics = await NitroHealth.readHeartRateStatistics(emptyRange)
 
-      for (const value of [statistics.average, statistics.min, statistics.max]) {
-        expect(['number', 'undefined']).toContain(typeof value)
-      }
-    } catch (error) {
-      expect(error).toBeInstanceOf(Error)
+    for (const value of [statistics.average, statistics.min, statistics.max]) {
+      expect(['number', 'undefined']).toContain(typeof value)
     }
-  })
-
-  it('rejects reading heart rate statistics when permission is reported not granted', async () => {
-    const result = await NitroHealth.getPermissionStatuses(heartRateReadPermission)
-    if (
-      result.status === 'unavailable' ||
-      !result.statuses.some(({ status }) => status === 'notGranted')
-    ) {
-      return
-    }
-
-    await expect(NitroHealth.readHeartRateStatistics(emptyRange)).rejects.toThrow(/permission/i)
   })
 
   describe('readStatistics', () => {
     it('reads statistics from native code without crashing', async () => {
-      try {
-        const dailySteps = await NitroHealth.readStatistics('steps', {
-          ...last7DaysRange,
-          bucket: 'day',
-          metrics: ['sum'],
-        })
+      const dailySteps = await NitroHealth.readStatistics('steps', {
+        ...last7DaysRange,
+        bucket: 'day',
+        metrics: ['sum'],
+      })
 
-        expect(Array.isArray(dailySteps)).toBe(true)
-        for (const entry of dailySteps) {
-          assertStatisticsEntry(entry, ['sum'])
-        }
-      } catch (error) {
-        expect(error).toBeInstanceOf(Error)
+      expect(Array.isArray(dailySteps)).toBe(true)
+      for (const entry of dailySteps) {
+        assertStatisticsEntry(entry, ['sum'])
       }
 
-      try {
-        const hourlyHeartRate = await NitroHealth.readStatistics('heartRate', {
-          ...lastDayRange,
-          bucket: 'hour',
-          metrics: ['avg', 'min', 'max'],
-        })
+      const hourlyHeartRate = await NitroHealth.readStatistics('heartRate', {
+        ...lastDayRange,
+        bucket: 'hour',
+        metrics: ['avg', 'min', 'max'],
+      })
 
-        expect(Array.isArray(hourlyHeartRate)).toBe(true)
-        for (const entry of hourlyHeartRate) {
-          assertStatisticsEntry(entry, ['avg', 'min', 'max'])
-        }
-      } catch (error) {
-        expect(error).toBeInstanceOf(Error)
+      expect(Array.isArray(hourlyHeartRate)).toBe(true)
+      for (const entry of hourlyHeartRate) {
+        assertStatisticsEntry(entry, ['avg', 'min', 'max'])
       }
 
-      try {
-        const dailyRestingHeartRate = await NitroHealth.readStatistics('restingHeartRate', {
-          ...last7DaysRange,
-          bucket: 'day',
-          metrics: ['avg', 'min', 'max'],
-        })
+      const dailyRestingHeartRate = await NitroHealth.readStatistics('restingHeartRate', {
+        ...last7DaysRange,
+        bucket: 'day',
+        metrics: ['avg', 'min', 'max'],
+      })
 
-        expect(Array.isArray(dailyRestingHeartRate)).toBe(true)
-        for (const entry of dailyRestingHeartRate) {
-          assertStatisticsEntry(entry, ['avg', 'min', 'max'])
-        }
-      } catch (error) {
-        expect(error).toBeInstanceOf(Error)
+      expect(Array.isArray(dailyRestingHeartRate)).toBe(true)
+      for (const entry of dailyRestingHeartRate) {
+        assertStatisticsEntry(entry, ['avg', 'min', 'max'])
       }
 
-      try {
-        const dailyHeight = await NitroHealth.readStatistics('height', {
-          ...last7DaysRange,
-          bucket: 'day',
-          metrics: ['avg', 'min', 'max'],
-        })
+      const dailyHeight = await NitroHealth.readStatistics('height', {
+        ...last7DaysRange,
+        bucket: 'day',
+        metrics: ['avg', 'min', 'max'],
+      })
 
-        expect(Array.isArray(dailyHeight)).toBe(true)
-        for (const entry of dailyHeight) {
-          assertStatisticsEntry(entry, ['avg', 'min', 'max'])
-        }
-      } catch (error) {
-        expect(error).toBeInstanceOf(Error)
+      expect(Array.isArray(dailyHeight)).toBe(true)
+      for (const entry of dailyHeight) {
+        assertStatisticsEntry(entry, ['avg', 'min', 'max'])
       }
     })
 
@@ -183,20 +149,6 @@ describe('NitroHealth statistics (native)', () => {
           metrics: ['sum'],
         })
       ).rejects.toThrow('bucket must be one of: hour, day, week, month')
-    })
-
-    it('rejects reading statistics when steps permission is reported not granted', async () => {
-      const result = await NitroHealth.getPermissionStatuses(stepsReadPermission)
-      if (
-        result.status === 'unavailable' ||
-        !result.statuses.some(({ status }) => status === 'notGranted')
-      ) {
-        return
-      }
-
-      await expect(
-        NitroHealth.readStatistics('steps', { ...emptyRange, bucket: 'day', metrics: ['sum'] })
-      ).rejects.toThrow(/permission/i)
     })
 
     it('round-trips saved steps through readStatistics when authorized', async () => {

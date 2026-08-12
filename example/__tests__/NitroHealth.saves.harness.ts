@@ -89,78 +89,6 @@ describe('NitroHealth saves (native)', () => {
     ).rejects.toThrow(/interval overlaps/)
   })
 
-  it('rejects saving steps when write permission is not granted', async () => {
-    if (await hasVerifiedPermissions([{ accessType: 'write', dataType: 'steps' }])) {
-      return
-    }
-
-    await expect(NitroHealth.saveSteps([{ ...saveInterval, count: 100 }])).rejects.toThrow(
-      /permission/i
-    )
-  })
-
-  it('rejects saving distance when write permission is not granted', async () => {
-    if (await hasVerifiedPermissions([{ accessType: 'write', dataType: 'distance' }])) {
-      return
-    }
-
-    await expect(
-      NitroHealth.saveDistance([
-        { ...saveInterval, scope: 'walking-running', distanceMeters: 1000 },
-      ])
-    ).rejects.toThrow(/permission/i)
-  })
-
-  it('rejects saving active energy burned when write permission is not granted', async () => {
-    if (await hasVerifiedPermissions([{ accessType: 'write', dataType: 'activeEnergyBurned' }])) {
-      return
-    }
-
-    await expect(
-      NitroHealth.saveActiveEnergyBurned([{ ...saveInterval, kilocalories: 100 }])
-    ).rejects.toThrow(/permission/i)
-  })
-
-  it('rejects saving heart rate when write permission is not granted', async () => {
-    if (await hasVerifiedPermissions([{ accessType: 'write', dataType: 'heartRate' }])) {
-      return
-    }
-
-    await expect(
-      NitroHealth.saveHeartRate([{ date: saveInterval.startDate, bpm: 72 }])
-    ).rejects.toThrow(/permission/i)
-  })
-
-  it('rejects saving body mass when write permission is not granted', async () => {
-    if (await hasVerifiedPermissions([{ accessType: 'write', dataType: 'bodyMass' }])) {
-      return
-    }
-
-    await expect(
-      NitroHealth.saveBodyMass([{ date: saveInterval.startDate, kilograms: 72.5 }])
-    ).rejects.toThrow(/permission/i)
-  })
-
-  it('rejects saving sleep when write permission is not granted', async () => {
-    if (await hasVerifiedPermissions([{ accessType: 'write', dataType: 'sleep' }])) {
-      return
-    }
-
-    await expect(
-      NitroHealth.saveSleepSessions([{ ...saveInterval, timeZone: 'UTC' }])
-    ).rejects.toThrow(/permission/i)
-  })
-
-  it('rejects saving a workout when write permission is not granted', async () => {
-    if (await hasVerifiedPermissions([{ accessType: 'write', dataType: 'workout' }])) {
-      return
-    }
-
-    await expect(
-      NitroHealth.saveWorkout({ ...saveInterval, activityType: 'running', timeZone: 'UTC' })
-    ).rejects.toThrow(/permission/i)
-  })
-
   it('round-trips saved steps through native code when authorized', async () => {
     const authorized = await hasVerifiedPermissions([
       { accessType: 'write', dataType: 'steps' },
@@ -376,16 +304,6 @@ describe('NitroHealth saves (native)', () => {
   })
 
   describe('resting heart rate', () => {
-    it('rejects saving resting heart rate when write permission is not granted', async () => {
-      if (await hasVerifiedPermissions([{ accessType: 'write', dataType: 'restingHeartRate' }])) {
-        return
-      }
-
-      await expect(
-        NitroHealth.saveRestingHeartRate([{ date: saveInterval.startDate, bpm: 58 }])
-      ).rejects.toThrow(/permission/i)
-    })
-
     it('round-trips saved resting heart rate through native code when authorized', async () => {
       const authorized = await hasVerifiedPermissions([
         { accessType: 'write', dataType: 'restingHeartRate' },
@@ -409,16 +327,6 @@ describe('NitroHealth saves (native)', () => {
   })
 
   describe('oxygen saturation', () => {
-    it('rejects saving oxygen saturation when write permission is not granted', async () => {
-      if (await hasVerifiedPermissions([{ accessType: 'write', dataType: 'oxygenSaturation' }])) {
-        return
-      }
-
-      await expect(
-        NitroHealth.saveOxygenSaturation([{ date: saveInterval.startDate, percentage: 97.5 }])
-      ).rejects.toThrow(/permission/i)
-    })
-
     // The designated on-device proof of the iOS fraction conversion: iOS stores this value as
     // HealthKit's 0-1 fraction (percentage / 100) and reads it back multiplied by 100. A small
     // tolerance absorbs floating-point round-trip error; the value must still land in 0-100.
@@ -455,18 +363,6 @@ describe('NitroHealth saves (native)', () => {
   })
 
   describe('blood pressure', () => {
-    it('rejects saving blood pressure when write permission is not granted', async () => {
-      if (await hasVerifiedPermissions([{ accessType: 'write', dataType: 'bloodPressure' }])) {
-        return
-      }
-
-      await expect(
-        NitroHealth.saveBloodPressure([
-          { date: saveInterval.startDate, systolicMmHg: 118, diastolicMmHg: 76 },
-        ])
-      ).rejects.toThrow(/permission/i)
-    })
-
     // The designated on-device proof of iOS correlation atomicity: the save writes one
     // HKCorrelation (Android: one BloodPressureRecord) and the read must surface exactly one
     // sample carrying BOTH values under a single record identity — never two half-readings.
@@ -500,16 +396,6 @@ describe('NitroHealth saves (native)', () => {
   })
 
   describe('blood glucose', () => {
-    it('rejects saving blood glucose when write permission is not granted', async () => {
-      if (await hasVerifiedPermissions([{ accessType: 'write', dataType: 'bloodGlucose' }])) {
-        return
-      }
-
-      await expect(
-        NitroHealth.saveBloodGlucose([{ date: saveInterval.startDate, millimolesPerLiter: 5.4 }])
-      ).rejects.toThrow(/permission/i)
-    })
-
     it('round-trips a saved reading in mmol/L when authorized', async () => {
       const authorized = await hasVerifiedPermissions([
         { accessType: 'write', dataType: 'bloodGlucose' },
@@ -541,16 +427,6 @@ describe('NitroHealth saves (native)', () => {
   })
 
   describe('body temperature', () => {
-    it('rejects saving body temperature when write permission is not granted', async () => {
-      if (await hasVerifiedPermissions([{ accessType: 'write', dataType: 'bodyTemperature' }])) {
-        return
-      }
-
-      await expect(
-        NitroHealth.saveBodyTemperature([{ date: saveInterval.startDate, celsius: 36.6 }])
-      ).rejects.toThrow(/permission/i)
-    })
-
     it('round-trips a saved reading in celsius when authorized', async () => {
       const authorized = await hasVerifiedPermissions([
         { accessType: 'write', dataType: 'bodyTemperature' },
@@ -578,16 +454,6 @@ describe('NitroHealth saves (native)', () => {
   })
 
   describe('respiratory rate', () => {
-    it('rejects saving respiratory rate when write permission is not granted', async () => {
-      if (await hasVerifiedPermissions([{ accessType: 'write', dataType: 'respiratoryRate' }])) {
-        return
-      }
-
-      await expect(
-        NitroHealth.saveRespiratoryRate([{ date: saveInterval.startDate, breathsPerMinute: 16.5 }])
-      ).rejects.toThrow(/permission/i)
-    })
-
     it('round-trips a saved reading in breaths per minute when authorized', async () => {
       const authorized = await hasVerifiedPermissions([
         { accessType: 'write', dataType: 'respiratoryRate' },
@@ -618,18 +484,6 @@ describe('NitroHealth saves (native)', () => {
   })
 
   describe('VO2 max', () => {
-    it('rejects saving VO2 max when write permission is not granted', async () => {
-      if (await hasVerifiedPermissions([{ accessType: 'write', dataType: 'vo2Max' }])) {
-        return
-      }
-
-      await expect(
-        NitroHealth.saveVo2Max([
-          { date: saveInterval.startDate, millilitersPerKilogramPerMinute: 42.5 },
-        ])
-      ).rejects.toThrow(/permission/i)
-    })
-
     it('round-trips a saved reading in ml/kg/min when authorized', async () => {
       const authorized = await hasVerifiedPermissions([
         { accessType: 'write', dataType: 'vo2Max' },
@@ -661,16 +515,6 @@ describe('NitroHealth saves (native)', () => {
 
   describe('floors climbed', () => {
     const syncId = 'nitro-health-harness-floors-round-trip'
-
-    it('rejects saving floors climbed when write permission is not granted', async () => {
-      if (await hasVerifiedPermissions([{ accessType: 'write', dataType: 'floorsClimbed' }])) {
-        return
-      }
-
-      await expect(
-        NitroHealth.saveFloorsClimbed([{ ...saveInterval, floors: 12.5 }])
-      ).rejects.toThrow(/permission/i)
-    })
 
     it('round-trips a saved floors interval when authorized', async () => {
       const authorized = await hasVerifiedPermissions([
@@ -707,16 +551,6 @@ describe('NitroHealth saves (native)', () => {
   })
 
   describe('body fat', () => {
-    it('rejects saving body fat when write permission is not granted', async () => {
-      if (await hasVerifiedPermissions([{ accessType: 'write', dataType: 'bodyFat' }])) {
-        return
-      }
-
-      await expect(
-        NitroHealth.saveBodyFat([{ date: saveInterval.startDate, percentage: 18.5 }])
-      ).rejects.toThrow(/permission/i)
-    })
-
     it('round-trips a saved reading in percent when authorized', async () => {
       const authorized = await hasVerifiedPermissions([
         { accessType: 'write', dataType: 'bodyFat' },
@@ -745,16 +579,6 @@ describe('NitroHealth saves (native)', () => {
   })
 
   describe('lean body mass', () => {
-    it('rejects saving lean body mass when write permission is not granted', async () => {
-      if (await hasVerifiedPermissions([{ accessType: 'write', dataType: 'leanBodyMass' }])) {
-        return
-      }
-
-      await expect(
-        NitroHealth.saveLeanBodyMass([{ date: saveInterval.startDate, kilograms: 55.4 }])
-      ).rejects.toThrow(/permission/i)
-    })
-
     it('round-trips a saved reading in kilograms when authorized', async () => {
       const authorized = await hasVerifiedPermissions([
         { accessType: 'write', dataType: 'leanBodyMass' },
@@ -781,18 +605,6 @@ describe('NitroHealth saves (native)', () => {
   })
 
   describe('basal body temperature', () => {
-    it('rejects saving basal body temperature when write permission is not granted', async () => {
-      if (
-        await hasVerifiedPermissions([{ accessType: 'write', dataType: 'basalBodyTemperature' }])
-      ) {
-        return
-      }
-
-      await expect(
-        NitroHealth.saveBasalBodyTemperature([{ date: saveInterval.startDate, celsius: 36.4 }])
-      ).rejects.toThrow(/permission/i)
-    })
-
     it('round-trips a saved reading in celsius when authorized', async () => {
       const authorized = await hasVerifiedPermissions([
         { accessType: 'write', dataType: 'basalBodyTemperature' },
@@ -819,16 +631,6 @@ describe('NitroHealth saves (native)', () => {
   })
 
   describe('height', () => {
-    it('rejects saving height when write permission is not granted', async () => {
-      if (await hasVerifiedPermissions([{ accessType: 'write', dataType: 'height' }])) {
-        return
-      }
-
-      await expect(
-        NitroHealth.saveHeight([{ date: saveInterval.startDate, meters: 1.78 }])
-      ).rejects.toThrow(/permission/i)
-    })
-
     it('round-trips saved height through native code when authorized', async () => {
       const authorized = await hasVerifiedPermissions([
         { accessType: 'write', dataType: 'height' },

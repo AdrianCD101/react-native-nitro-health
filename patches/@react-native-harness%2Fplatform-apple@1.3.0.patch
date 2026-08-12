@@ -1,0 +1,182 @@
+diff --git a/dist/xctest-agent.js b/dist/xctest-agent.js
+index afde20bfb71bf7c998a208b7f082bd9ca189632c..c1cedbe458960e756a64198c5e366c7cc1f09c2a 100644
+--- a/dist/xctest-agent.js
++++ b/dist/xctest-agent.js
+@@ -432,11 +432,19 @@ const waitForShutdown = async (options) => {
+         return true;
+     }
+     const timedOut = Symbol('timedOut');
+-    const result = await Promise.race([
+-        options.processTask.then(() => undefined),
+-        delay(options.shutdownTimeoutMs).then(() => timedOut),
+-    ]);
+-    return result !== timedOut;
++    let timeout;
++    try {
++        const result = await Promise.race([
++            options.processTask.then(() => undefined),
++            new Promise((resolve) => {
++                timeout = setTimeout(() => resolve(timedOut), options.shutdownTimeoutMs);
++            }),
++        ]);
++        return result !== timedOut;
++    }
++    finally {
++        clearTimeout(timeout);
++    }
+ };
+ const waitForChildProcessExit = async (subprocess) => {
+     const childProcess = await subprocess.nodeChildProcess;
+diff --git a/src/xctest-agent.ts b/src/xctest-agent.ts
+index 00e3034e46cb789a9e3690593b08da63d4ebb1ce..b5f81fd08bc2b1cbff65b22dd7f285fed0316817 100644
+--- a/src/xctest-agent.ts
++++ b/src/xctest-agent.ts
+@@ -768,12 +768,20 @@ const waitForShutdown = async (options: {
+   }
+ 
+   const timedOut = Symbol('timedOut');
+-  const result = await Promise.race([
+-    options.processTask.then(() => undefined),
+-    delay(options.shutdownTimeoutMs).then(() => timedOut),
+-  ]);
++  let timeout: ReturnType<typeof setTimeout> | undefined;
+ 
+-  return result !== timedOut;
++  try {
++    const result = await Promise.race([
++      options.processTask.then(() => undefined),
++      new Promise<typeof timedOut>((resolve) => {
++        timeout = setTimeout(() => resolve(timedOut), options.shutdownTimeoutMs);
++      }),
++    ]);
++
++    return result !== timedOut;
++  } finally {
++    clearTimeout(timeout);
++  }
+ };
+ 
+ const waitForChildProcessExit = async (subprocess: Subprocess) => {
+diff --git a/xctest-agent/HarnessXCTestAgentUITests/HarnessXCTestAgentUITests.swift b/xctest-agent/HarnessXCTestAgentUITests/HarnessXCTestAgentUITests.swift
+index 31abf4b787a602d53fadf30794b27fe287aa0bd2..6e5751d635e775064e13112fd47e4c5494101187 100644
+--- a/xctest-agent/HarnessXCTestAgentUITests/HarnessXCTestAgentUITests.swift
++++ b/xctest-agent/HarnessXCTestAgentUITests/HarnessXCTestAgentUITests.swift
+@@ -273,7 +273,8 @@ final class HarnessXCTestAgentUITests: XCTestCase {
+     capabilities = [
+       PermissionPromptWatchdog(
+         state: state,
+-        springboard: springboard
++        springboard: springboard,
++        targetApplication: makeTargetApplication()
+       )
+     ]
+ 
+diff --git a/xctest-agent/HarnessXCTestAgentUITests/PermissionPromptWatchdog.swift b/xctest-agent/HarnessXCTestAgentUITests/PermissionPromptWatchdog.swift
+index 7b0631f8140afaf4a99d8b7f790f58e23ede808f..6e4c204789467acd62d2e68bb536f35c241974ea 100644
+--- a/xctest-agent/HarnessXCTestAgentUITests/PermissionPromptWatchdog.swift
++++ b/xctest-agent/HarnessXCTestAgentUITests/PermissionPromptWatchdog.swift
+@@ -16,6 +16,15 @@ struct PermissionPromptConfiguration: Codable {
+ 
+ final class PermissionPromptWatchdog: AgentCapability {
+   private enum Constants {
++    static let healthKitPromptLabels = [
++      "Health Access",
++      "Health Data Access",
++      "Allow Access to Health Data"
++    ]
++    static let healthKitSelectAllLabels = [
++      "Turn On All",
++      "Allow All"
++    ]
+     static let knownPositiveButtonLabels = [
+       "Allow",
+       "OK",
+@@ -32,20 +41,76 @@ final class PermissionPromptWatchdog: AgentCapability {
+   }
+ 
+   private let springboard: XCUIApplication
++  private let targetApplication: XCUIApplication?
+   private let state: HarnessXCTestAgentState
++  private var isHandlingHealthKitPrompt = false
+ 
+   private func log(_ message: String) {
+     NSLog("[HarnessXCTestAgent][PermissionPromptWatchdog] %@", message)
+   }
+ 
+-  init(state: HarnessXCTestAgentState, springboard: XCUIApplication) {
++  init(
++    state: HarnessXCTestAgentState,
++    springboard: XCUIApplication,
++    targetApplication: XCUIApplication?
++  ) {
+     self.state = state
+     self.springboard = springboard
++    self.targetApplication = targetApplication
++  }
++
++  private var applications: [XCUIApplication] {
++    return [targetApplication, springboard].compactMap { $0 }
++  }
++
++  private func findElement(labels: [String], buttonsOnly: Bool = false) -> XCUIElement? {
++    for application in applications {
++      for label in labels {
++        let element = buttonsOnly
++          ? application.buttons[label].firstMatch
++          : application.descendants(matching: .any)[label].firstMatch
++
++        if element.exists && element.isHittable {
++          return element
++        }
++      }
++    }
++
++    return nil
++  }
++
++  private func handleHealthKitPrompt() -> Bool {
++    if let selectAll = findElement(labels: Constants.healthKitSelectAllLabels) {
++      log("HealthKit: selecting all requested data types")
++      selectAll.tap()
++      isHandlingHealthKitPrompt = true
++      return true
++    }
++
++    if isHandlingHealthKitPrompt,
++       let allow = findElement(labels: ["Allow"], buttonsOnly: true) {
++      log("HealthKit: confirming selected data types")
++      allow.tap()
++      isHandlingHealthKitPrompt = false
++      return true
++    }
++
++    if findElement(labels: Constants.healthKitPromptLabels) != nil {
++      log("HealthKit prompt detected, but requested data types are not selected")
++      return true
++    }
++
++    return isHandlingHealthKitPrompt
+   }
+ 
+   func setUp() throws {
+     if state.permissions.autoAcceptPermissions {
+       log("permission prompt watchdog enabled")
++
++      if let targetApplication {
++        log("resetting HealthKit authorization for target application")
++        targetApplication.resetAuthorizationStatus(for: .health)
++      }
+     }
+   }
+ 
+@@ -54,6 +119,10 @@ final class PermissionPromptWatchdog: AgentCapability {
+       return
+     }
+ 
++    if handleHealthKitPrompt() {
++      return
++    }
++
+     for label in Constants.knownPositiveButtonLabels {
+       let button = springboard.buttons[label].firstMatch
+ 

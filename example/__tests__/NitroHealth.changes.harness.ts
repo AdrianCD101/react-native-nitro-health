@@ -83,10 +83,6 @@ describe('NitroHealth changes (native)', () => {
     )
 
     // HealthKit hides read denials and returns no changes, even when writing is allowed.
-    if (Platform.OS === 'ios' && upsert === undefined) {
-      return
-    }
-
     expect(upsert).toBeDefined()
     if (upsert === undefined || upsert.type !== 'upsert') {
       return
@@ -146,10 +142,6 @@ describe('NitroHealth changes (native)', () => {
       )
 
       // HealthKit hides read denials and returns no changes, even when writing is allowed.
-      if (Platform.OS === 'ios' && initialUpsert === undefined) {
-        return
-      }
-
       expect(initialUpsert).toBeDefined()
       if (initialUpsert === undefined || initialUpsert.type !== 'upsert') {
         return
@@ -229,8 +221,6 @@ describe('NitroHealth changes (native)', () => {
               sample.endDate.getTime() === interval.endDate.getTime()
           )
       )
-      if (Platform.OS === 'ios' && upsert === undefined) return
-
       expect(upsert).toBeDefined()
       if (upsert === undefined || upsert.type !== 'upsert') return
 

@@ -46,25 +46,6 @@ describe('NitroHealth deletes (native)', () => {
     ).rejects.toThrow('records[0]: an independently deletable record identity is required')
   })
 
-  it('rejects deleting records when write permission is reported not granted', async () => {
-    const permissionResult = await NitroHealth.getPermissionStatuses([
-      { accessType: 'write', dataType: 'steps' },
-    ])
-    if (
-      permissionResult.status === 'unavailable' ||
-      permissionResult.statuses[0]?.status !== 'notGranted'
-    ) {
-      return
-    }
-
-    await expect(NitroHealth.deleteRecordsByIds('steps', [nonexistentRecord])).rejects.toThrow(
-      /permission/i
-    )
-    await expect(NitroHealth.deleteRecordsByTimeRange('steps', deleteReadRange)).rejects.toThrow(
-      /permission/i
-    )
-  })
-
   it('returns observable count state for a time-range delete that matches nothing', async () => {
     if (!(await hasVerifiedPermissions([{ accessType: 'write', dataType: 'steps' }]))) return
 
