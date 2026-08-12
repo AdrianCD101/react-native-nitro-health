@@ -138,6 +138,12 @@ namespace margelo::nitro::nitrohealth { struct NativeHeightSampleInput; }
 namespace margelo::nitro::nitrohealth { struct NativeHeightSamplePage; }
 // Forward declaration of `NativeHeightSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHeightSample; }
+// Forward declaration of `NativeHydrationSampleInput` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHydrationSampleInput; }
+// Forward declaration of `NativeHydrationSamplePage` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHydrationSamplePage; }
+// Forward declaration of `NativeHydrationSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHydrationSample; }
 // Forward declaration of `NativeLeanBodyMassSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeLeanBodyMassSampleInput; }
 // Forward declaration of `NativeLeanBodyMassSamplePage` to properly resolve imports.
@@ -277,6 +283,9 @@ namespace NitroHealth { class HybridNitroHealthSpec_cxx; }
 #include "NativeHeightSample.hpp"
 #include "NativeHeightSampleInput.hpp"
 #include "NativeHeightSamplePage.hpp"
+#include "NativeHydrationSample.hpp"
+#include "NativeHydrationSampleInput.hpp"
+#include "NativeHydrationSamplePage.hpp"
 #include "NativeLeanBodyMassSample.hpp"
 #include "NativeLeanBodyMassSampleInput.hpp"
 #include "NativeLeanBodyMassSamplePage.hpp"
@@ -1029,6 +1038,32 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return optional.value();
   }
   
+  // pragma MARK: std::vector<NativeHydrationSample>
+  /**
+   * Specialized version of `std::vector<NativeHydrationSample>`.
+   */
+  using std__vector_NativeHydrationSample_ = std::vector<NativeHydrationSample>;
+  inline std::vector<NativeHydrationSample> create_std__vector_NativeHydrationSample_(size_t size) noexcept {
+    std::vector<NativeHydrationSample> vector;
+    vector.reserve(size);
+    return vector;
+  }
+  
+  // pragma MARK: std::optional<std::vector<NativeHydrationSample>>
+  /**
+   * Specialized version of `std::optional<std::vector<NativeHydrationSample>>`.
+   */
+  using std__optional_std__vector_NativeHydrationSample__ = std::optional<std::vector<NativeHydrationSample>>;
+  inline std::optional<std::vector<NativeHydrationSample>> create_std__optional_std__vector_NativeHydrationSample__(const std::vector<NativeHydrationSample>& value) noexcept {
+    return std::optional<std::vector<NativeHydrationSample>>(value);
+  }
+  inline bool has_value_std__optional_std__vector_NativeHydrationSample__(const std::optional<std::vector<NativeHydrationSample>>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline std::vector<NativeHydrationSample> get_std__optional_std__vector_NativeHydrationSample__(const std::optional<std::vector<NativeHydrationSample>>& optional) noexcept {
+    return optional.value();
+  }
+  
   // pragma MARK: std::vector<NativeFloorsClimbedSample>
   /**
    * Specialized version of `std::vector<NativeFloorsClimbedSample>`.
@@ -1039,7 +1074,7 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     vector.reserve(size);
     return vector;
   }
-
+  
   // pragma MARK: std::optional<std::vector<NativeFloorsClimbedSample>>
   /**
    * Specialized version of `std::optional<std::vector<NativeFloorsClimbedSample>>`.
@@ -1054,7 +1089,7 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
   inline std::vector<NativeFloorsClimbedSample> get_std__optional_std__vector_NativeFloorsClimbedSample__(const std::optional<std::vector<NativeFloorsClimbedSample>>& optional) noexcept {
     return optional.value();
   }
-
+  
   // pragma MARK: std::vector<NativeOxygenSaturationSample>
   /**
    * Specialized version of `std::vector<NativeOxygenSaturationSample>`.
@@ -1455,6 +1490,40 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return Func_void_NativeActiveEnergyBurnedSamplePage_Wrapper(std::move(value));
   }
   
+  // pragma MARK: std::shared_ptr<Promise<NativeHydrationSamplePage>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<NativeHydrationSamplePage>>`.
+   */
+  using std__shared_ptr_Promise_NativeHydrationSamplePage__ = std::shared_ptr<Promise<NativeHydrationSamplePage>>;
+  inline std::shared_ptr<Promise<NativeHydrationSamplePage>> create_std__shared_ptr_Promise_NativeHydrationSamplePage__() noexcept {
+    return Promise<NativeHydrationSamplePage>::create();
+  }
+  inline PromiseHolder<NativeHydrationSamplePage> wrap_std__shared_ptr_Promise_NativeHydrationSamplePage__(std::shared_ptr<Promise<NativeHydrationSamplePage>> promise) noexcept {
+    return PromiseHolder<NativeHydrationSamplePage>(std::move(promise));
+  }
+  
+  // pragma MARK: std::function<void(const NativeHydrationSamplePage& /* result */)>
+  /**
+   * Specialized version of `std::function<void(const NativeHydrationSamplePage&)>`.
+   */
+  using Func_void_NativeHydrationSamplePage = std::function<void(const NativeHydrationSamplePage& /* result */)>;
+  /**
+   * Wrapper class for a `std::function<void(const NativeHydrationSamplePage& / * result * /)>`, this can be used from Swift.
+   */
+  class Func_void_NativeHydrationSamplePage_Wrapper final {
+  public:
+    explicit Func_void_NativeHydrationSamplePage_Wrapper(std::function<void(const NativeHydrationSamplePage& /* result */)>&& func): _function(std::make_unique<std::function<void(const NativeHydrationSamplePage& /* result */)>>(std::move(func))) {}
+    inline void call(NativeHydrationSamplePage result) const noexcept {
+      _function->operator()(result);
+    }
+  private:
+    std::unique_ptr<std::function<void(const NativeHydrationSamplePage& /* result */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_NativeHydrationSamplePage create_Func_void_NativeHydrationSamplePage(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_NativeHydrationSamplePage_Wrapper wrap_Func_void_NativeHydrationSamplePage(Func_void_NativeHydrationSamplePage value) noexcept {
+    return Func_void_NativeHydrationSamplePage_Wrapper(std::move(value));
+  }
+  
   // pragma MARK: std::shared_ptr<Promise<NativeFloorsClimbedSamplePage>>
   /**
    * Specialized version of `std::shared_ptr<Promise<NativeFloorsClimbedSamplePage>>`.
@@ -1466,7 +1535,7 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
   inline PromiseHolder<NativeFloorsClimbedSamplePage> wrap_std__shared_ptr_Promise_NativeFloorsClimbedSamplePage__(std::shared_ptr<Promise<NativeFloorsClimbedSamplePage>> promise) noexcept {
     return PromiseHolder<NativeFloorsClimbedSamplePage>(std::move(promise));
   }
-
+  
   // pragma MARK: std::function<void(const NativeFloorsClimbedSamplePage& /* result */)>
   /**
    * Specialized version of `std::function<void(const NativeFloorsClimbedSamplePage&)>`.
@@ -1488,7 +1557,7 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
   inline Func_void_NativeFloorsClimbedSamplePage_Wrapper wrap_Func_void_NativeFloorsClimbedSamplePage(Func_void_NativeFloorsClimbedSamplePage value) noexcept {
     return Func_void_NativeFloorsClimbedSamplePage_Wrapper(std::move(value));
   }
-
+  
   // pragma MARK: std::shared_ptr<Promise<NativeBodyMassSamplePage>>
   /**
    * Specialized version of `std::shared_ptr<Promise<NativeBodyMassSamplePage>>`.
@@ -2206,6 +2275,17 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return vector;
   }
   
+  // pragma MARK: std::vector<NativeHydrationSampleInput>
+  /**
+   * Specialized version of `std::vector<NativeHydrationSampleInput>`.
+   */
+  using std__vector_NativeHydrationSampleInput_ = std::vector<NativeHydrationSampleInput>;
+  inline std::vector<NativeHydrationSampleInput> create_std__vector_NativeHydrationSampleInput_(size_t size) noexcept {
+    std::vector<NativeHydrationSampleInput> vector;
+    vector.reserve(size);
+    return vector;
+  }
+  
   // pragma MARK: std::vector<NativeFloorsClimbedSampleInput>
   /**
    * Specialized version of `std::vector<NativeFloorsClimbedSampleInput>`.
@@ -2216,7 +2296,7 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     vector.reserve(size);
     return vector;
   }
-
+  
   // pragma MARK: std::vector<NativeHeartRateSampleInput>
   /**
    * Specialized version of `std::vector<NativeHeartRateSampleInput>`.
@@ -2635,6 +2715,15 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return Result<std::shared_ptr<Promise<NativeActiveEnergyBurnedSamplePage>>>::withError(error);
   }
   
+  // pragma MARK: Result<std::shared_ptr<Promise<NativeHydrationSamplePage>>>
+  using Result_std__shared_ptr_Promise_NativeHydrationSamplePage___ = Result<std::shared_ptr<Promise<NativeHydrationSamplePage>>>;
+  inline Result_std__shared_ptr_Promise_NativeHydrationSamplePage___ create_Result_std__shared_ptr_Promise_NativeHydrationSamplePage___(const std::shared_ptr<Promise<NativeHydrationSamplePage>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<NativeHydrationSamplePage>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_NativeHydrationSamplePage___ create_Result_std__shared_ptr_Promise_NativeHydrationSamplePage___(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<NativeHydrationSamplePage>>>::withError(error);
+  }
+  
   // pragma MARK: Result<std::shared_ptr<Promise<NativeFloorsClimbedSamplePage>>>
   using Result_std__shared_ptr_Promise_NativeFloorsClimbedSamplePage___ = Result<std::shared_ptr<Promise<NativeFloorsClimbedSamplePage>>>;
   inline Result_std__shared_ptr_Promise_NativeFloorsClimbedSamplePage___ create_Result_std__shared_ptr_Promise_NativeFloorsClimbedSamplePage___(const std::shared_ptr<Promise<NativeFloorsClimbedSamplePage>>& value) noexcept {
@@ -2643,7 +2732,7 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
   inline Result_std__shared_ptr_Promise_NativeFloorsClimbedSamplePage___ create_Result_std__shared_ptr_Promise_NativeFloorsClimbedSamplePage___(const std::exception_ptr& error) noexcept {
     return Result<std::shared_ptr<Promise<NativeFloorsClimbedSamplePage>>>::withError(error);
   }
-
+  
   // pragma MARK: Result<std::shared_ptr<Promise<NativeBodyMassSamplePage>>>
   using Result_std__shared_ptr_Promise_NativeBodyMassSamplePage___ = Result<std::shared_ptr<Promise<NativeBodyMassSamplePage>>>;
   inline Result_std__shared_ptr_Promise_NativeBodyMassSamplePage___ create_Result_std__shared_ptr_Promise_NativeBodyMassSamplePage___(const std::shared_ptr<Promise<NativeBodyMassSamplePage>>& value) noexcept {

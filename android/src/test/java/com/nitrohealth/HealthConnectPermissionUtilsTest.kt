@@ -13,6 +13,7 @@ import androidx.health.connect.client.records.FloorsClimbedRecord
 import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.HeartRateVariabilityRmssdRecord
 import androidx.health.connect.client.records.HeightRecord
+import androidx.health.connect.client.records.HydrationRecord
 import androidx.health.connect.client.records.LeanBodyMassRecord
 import androidx.health.connect.client.records.OxygenSaturationRecord
 import androidx.health.connect.client.records.RespiratoryRateRecord
@@ -56,6 +57,7 @@ class HealthConnectPermissionUtilsTest {
             ActiveCaloriesBurnedRecord::class,
             healthConnectRecordTypeForDataType("activeEnergyBurned")
         )
+        assertEquals(HydrationRecord::class, healthConnectRecordTypeForDataType("hydration"))
         assertEquals(
             FloorsClimbedRecord::class,
             healthConnectRecordTypeForDataType("floorsClimbed")
@@ -95,6 +97,10 @@ class HealthConnectPermissionUtilsTest {
         assertEquals(
             HealthPermission.getReadPermission(ActiveCaloriesBurnedRecord::class),
             toHealthConnectPermission("activeEnergyBurned", "read")
+        )
+        assertEquals(
+            HealthPermission.getReadPermission(HydrationRecord::class),
+            toHealthConnectPermission("hydration", "read")
         )
         assertEquals(
             HealthPermission.getReadPermission(FloorsClimbedRecord::class),
@@ -179,6 +185,10 @@ class HealthConnectPermissionUtilsTest {
         assertEquals(
             HealthPermission.getWritePermission(ActiveCaloriesBurnedRecord::class),
             toHealthConnectPermission("activeEnergyBurned", "write")
+        )
+        assertEquals(
+            HealthPermission.getWritePermission(HydrationRecord::class),
+            toHealthConnectPermission("hydration", "write")
         )
         assertEquals(
             HealthPermission.getWritePermission(FloorsClimbedRecord::class),

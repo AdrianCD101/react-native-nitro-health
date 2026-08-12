@@ -118,6 +118,14 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     };
   }
   
+  // pragma MARK: std::function<void(const NativeHydrationSamplePage& /* result */)>
+  Func_void_NativeHydrationSamplePage create_Func_void_NativeHydrationSamplePage(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroHealth::Func_void_NativeHydrationSamplePage::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const NativeHydrationSamplePage& result) mutable -> void {
+      swiftClosure.call(result);
+    };
+  }
+  
   // pragma MARK: std::function<void(const NativeFloorsClimbedSamplePage& /* result */)>
   Func_void_NativeFloorsClimbedSamplePage create_Func_void_NativeFloorsClimbedSamplePage(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = NitroHealth::Func_void_NativeFloorsClimbedSamplePage::fromUnsafe(swiftClosureWrapper);
@@ -125,7 +133,7 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
       swiftClosure.call(result);
     };
   }
-
+  
   // pragma MARK: std::function<void(const NativeBodyMassSamplePage& /* result */)>
   Func_void_NativeBodyMassSamplePage create_Func_void_NativeBodyMassSamplePage(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = NitroHealth::Func_void_NativeBodyMassSamplePage::fromUnsafe(swiftClosureWrapper);

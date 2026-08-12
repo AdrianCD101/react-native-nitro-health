@@ -12,6 +12,7 @@ import androidx.health.connect.client.records.FloorsClimbedRecord
 import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.MealType
 import androidx.health.connect.client.records.HeightRecord
+import androidx.health.connect.client.records.HydrationRecord
 import androidx.health.connect.client.records.LeanBodyMassRecord
 import androidx.health.connect.client.records.OxygenSaturationRecord
 import androidx.health.connect.client.records.RespiratoryRateRecord
@@ -28,6 +29,7 @@ import com.margelo.nitro.nitrohealth.NativeBasalBodyTemperatureSampleInput
 import com.margelo.nitro.nitrohealth.NativeBodyFatSampleInput
 import com.margelo.nitro.nitrohealth.NativeLeanBodyMassSampleInput
 import androidx.health.connect.client.units.Temperature
+import androidx.health.connect.client.units.Volume
 import androidx.health.connect.client.units.Pressure
 import com.margelo.nitro.nitrohealth.NativeActiveEnergyBurnedSampleInput
 import com.margelo.nitro.nitrohealth.NativeBloodGlucoseSampleInput
@@ -38,6 +40,7 @@ import com.margelo.nitro.nitrohealth.NativeDistanceSampleInput
 import com.margelo.nitro.nitrohealth.NativeDistanceScope
 import com.margelo.nitro.nitrohealth.NativeFloorsClimbedSampleInput
 import com.margelo.nitro.nitrohealth.NativeHeartRateSampleInput
+import com.margelo.nitro.nitrohealth.NativeHydrationSampleInput
 import com.margelo.nitro.nitrohealth.NativeHeightSampleInput
 import com.margelo.nitro.nitrohealth.NativeOxygenSaturationSampleInput
 import com.margelo.nitro.nitrohealth.NativeRespiratoryRateSampleInput
@@ -86,6 +89,21 @@ internal fun toActiveCaloriesBurnedRecords(
             endTime = Instant.ofEpochMilli(sample.endTimeMs.toLong()),
             endZoneOffset = null,
             energy = Energy.kilocalories(sample.kilocalories),
+            metadata = makeSampleMetadata(sample.syncId, sample.syncVersion)
+        )
+    }
+}
+
+internal fun toHydrationRecords(
+    samples: Array<NativeHydrationSampleInput>
+): List<HydrationRecord> {
+    return samples.map { sample ->
+        HydrationRecord(
+            startTime = Instant.ofEpochMilli(sample.startTimeMs.toLong()),
+            startZoneOffset = null,
+            endTime = Instant.ofEpochMilli(sample.endTimeMs.toLong()),
+            endZoneOffset = null,
+            volume = Volume.milliliters(sample.milliliters),
             metadata = makeSampleMetadata(sample.syncId, sample.syncVersion)
         )
     }

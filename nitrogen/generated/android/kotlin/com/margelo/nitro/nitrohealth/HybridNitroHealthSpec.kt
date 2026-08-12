@@ -100,8 +100,12 @@ abstract class HybridNitroHealthSpec: HybridObject() {
   
   @DoNotStrip
   @Keep
+  abstract fun readHydration(query: NativeHealthDateRangeQuery): Promise<NativeHydrationSamplePage>
+  
+  @DoNotStrip
+  @Keep
   abstract fun readFloorsClimbed(query: NativeHealthDateRangeQuery): Promise<NativeFloorsClimbedSamplePage>
-
+  
   @DoNotStrip
   @Keep
   abstract fun readBodyMass(query: NativeHealthDateRangeQuery): Promise<NativeBodyMassSamplePage>
@@ -188,8 +192,12 @@ abstract class HybridNitroHealthSpec: HybridObject() {
   
   @DoNotStrip
   @Keep
+  abstract fun saveHydration(samples: Array<NativeHydrationSampleInput>): Promise<Unit>
+  
+  @DoNotStrip
+  @Keep
   abstract fun saveFloorsClimbed(samples: Array<NativeFloorsClimbedSampleInput>): Promise<Unit>
-
+  
   @DoNotStrip
   @Keep
   abstract fun saveHeartRate(samples: Array<NativeHeartRateSampleInput>): Promise<Unit>

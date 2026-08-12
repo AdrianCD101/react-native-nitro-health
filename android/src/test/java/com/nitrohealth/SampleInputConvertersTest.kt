@@ -19,6 +19,7 @@ import com.margelo.nitro.nitrohealth.NativeDistanceScope
 import com.margelo.nitro.nitrohealth.NativeFloorsClimbedSampleInput
 import com.margelo.nitro.nitrohealth.NativeHeartRateSampleInput
 import com.margelo.nitro.nitrohealth.NativeHeightSampleInput
+import com.margelo.nitro.nitrohealth.NativeHydrationSampleInput
 import com.margelo.nitro.nitrohealth.NativeLeanBodyMassSampleInput
 import com.margelo.nitro.nitrohealth.NativeOxygenSaturationSampleInput
 import com.margelo.nitro.nitrohealth.NativeRespiratoryRateSampleInput
@@ -110,6 +111,28 @@ class SampleInputConvertersTest {
 
         assertEquals(1, records.size)
         assertEquals(215.25, records[0].energy.inKilocalories, 0.0)
+    }
+
+    @Test
+    fun toHydrationRecordsMapsMillilitersAndSyncMetadata() {
+        val records = toHydrationRecords(
+            arrayOf(
+                NativeHydrationSampleInput(
+                    startTimeMs = startTimeMs,
+                    endTimeMs = endTimeMs,
+                    milliliters = 250.5,
+                    syncId = "hydration-sync",
+                    syncVersion = 2.0
+                )
+            )
+        )
+
+        assertEquals(1, records.size)
+        assertEquals(Instant.ofEpochMilli(startTimeMs.toLong()), records[0].startTime)
+        assertEquals(Instant.ofEpochMilli(endTimeMs.toLong()), records[0].endTime)
+        assertEquals(250.5, records[0].volume.inMilliliters, 0.0)
+        assertEquals("hydration-sync", records[0].metadata.clientRecordId)
+        assertEquals(2L, records[0].metadata.clientRecordVersion)
     }
 
     @Test

@@ -24,6 +24,8 @@ import type { HeartRateStatistics } from '../HeartRateStatistics'
 import type { HeartRateVariabilitySample } from '../HeartRateVariabilitySample'
 import type { HeightSample } from '../HeightSample'
 import type { HeightSampleInput } from '../HeightSampleInput'
+import type { HydrationSample } from '../HydrationSample'
+import type { HydrationSampleInput } from '../HydrationSampleInput'
 import type { Vo2MaxSample } from '../Vo2MaxSample'
 import type { Vo2MaxSampleInput } from '../Vo2MaxSampleInput'
 import type { NativeActiveEnergyBurnedSample } from '../NativeActiveEnergyBurnedSample'
@@ -59,6 +61,8 @@ import type { NativeHeartRateStatistics } from '../NativeHeartRateStatistics'
 import type { NativeHeartRateVariabilitySample } from '../NativeHeartRateVariabilitySample'
 import type { NativeHeightSample } from '../NativeHeightSample'
 import type { NativeHeightSampleInput } from '../NativeHeightSampleInput'
+import type { NativeHydrationSample } from '../NativeHydrationSample'
+import type { NativeHydrationSampleInput } from '../NativeHydrationSampleInput'
 import type { NativeVo2MaxSample } from '../NativeVo2MaxSample'
 import type { NativeVo2MaxSampleInput } from '../NativeVo2MaxSampleInput'
 import type { NativeOxygenSaturationSample } from '../NativeOxygenSaturationSample'
@@ -122,6 +126,7 @@ import {
 const MAX_STEP_COUNT = 1_000_000
 const MAX_DISTANCE_METERS = 1_000_000
 const MAX_KILOCALORIES = 1_000_000
+const MAX_MILLILITERS = 100_000
 const MAX_FLOORS = 1_000_000
 const MIN_BPM = 1
 const MAX_BPM = 300
@@ -375,6 +380,23 @@ export function makeNativeActiveEnergyBurnedSampleInput(
     startTimeMs,
     endTimeMs,
     kilocalories: sample.kilocalories,
+    ...makeNativeSync(sample.sync, index),
+  }
+}
+
+export function makeNativeHydrationSampleInput(
+  sample: HydrationSampleInput,
+  index: number
+): NativeHydrationSampleInput {
+  const { startTimeMs, endTimeMs } = makeSampleInterval(sample, index)
+
+  assertSampleNonNegativeNumber(sample.milliliters, index, 'milliliters')
+  assertSampleMaxValue(sample.milliliters, MAX_MILLILITERS, index, 'milliliters')
+
+  return {
+    startTimeMs,
+    endTimeMs,
+    milliliters: sample.milliliters,
     ...makeNativeSync(sample.sync, index),
   }
 }
@@ -882,6 +904,16 @@ export function makeActiveEnergyBurnedSample(
   }
 }
 
+export function makeHydrationSample(sample: NativeHydrationSample): HydrationSample {
+  return {
+    identity: makeHealthSampleIdentity(sample.identity),
+    origin: makeHealthDataOrigin(sample.origin),
+    startDate: new Date(sample.startTimeMs),
+    endDate: new Date(sample.endTimeMs),
+    milliliters: sample.milliliters,
+  }
+}
+
 export function makeFloorsClimbedSample(sample: NativeFloorsClimbedSample): FloorsClimbedSample {
   return {
     identity: makeHealthSampleIdentity(sample.identity),
@@ -1149,6 +1181,7 @@ const CHANGE_SAMPLE_FIELDS = [
   'heartRateVariabilitySamples',
   'distanceSamples',
   'activeEnergyBurnedSamples',
+  'hydrationSamples',
   'floorsClimbedSamples',
   'oxygenSaturationSamples',
   'heightSamples',
@@ -1240,6 +1273,11 @@ function makeUpsertSamples(
       if (change.activeEnergyBurnedSamples === undefined)
         throw new Error("Native 'activeEnergyBurned' upsert is missing samples")
       samples = change.activeEnergyBurnedSamples.map(makeActiveEnergyBurnedSample)
+      break
+    case 'hydration':
+      if (change.hydrationSamples === undefined)
+        throw new Error("Native 'hydration' upsert is missing samples")
+      samples = change.hydrationSamples.map(makeHydrationSample)
       break
     case 'floorsClimbed':
       if (change.floorsClimbedSamples === undefined)

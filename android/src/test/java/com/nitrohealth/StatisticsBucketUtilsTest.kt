@@ -1,6 +1,7 @@
 package com.nitrohealth
 
 import androidx.health.connect.client.records.FloorsClimbedRecord
+import androidx.health.connect.client.records.HydrationRecord
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -65,6 +66,18 @@ class StatisticsBucketUtilsTest {
         val descriptor = healthDataTypeDescriptorFor("activeEnergyBurned")
 
         assertEquals(setOf("sum"), descriptor.statisticsMetrics.keys)
+    }
+
+    @Test
+    fun descriptorForHydrationOnlySupportsVolumeSum() {
+        val descriptor = healthDataTypeDescriptorFor("hydration")
+
+        assertEquals(HydrationRecord::class, descriptor.recordType)
+        assertEquals(setOf("sum"), descriptor.statisticsMetrics.keys)
+        assertEquals(
+            HydrationRecord.VOLUME_TOTAL,
+            descriptor.statisticsMetrics.getValue("sum").metric
+        )
     }
 
     @Test

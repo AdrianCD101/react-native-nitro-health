@@ -27,6 +27,7 @@ describe('NitroHealth saves (native)', () => {
     await expect(NitroHealth.saveActiveEnergyBurned([])).rejects.toThrow(
       'At least one sample is required'
     )
+    await expect(NitroHealth.saveHydration([])).rejects.toThrow('At least one sample is required')
     await expect(NitroHealth.saveHeartRate([])).rejects.toThrow('At least one sample is required')
     await expect(NitroHealth.saveBodyMass([])).rejects.toThrow('At least one sample is required')
     await expect(NitroHealth.saveSleepSessions([])).rejects.toThrow(
@@ -44,6 +45,9 @@ describe('NitroHealth saves (native)', () => {
     await expect(
       NitroHealth.saveActiveEnergyBurned([{ ...saveInterval, kilocalories: -1 }])
     ).rejects.toThrow('samples[0]: kilocalories must be a non-negative number')
+    await expect(NitroHealth.saveHydration([{ ...saveInterval, milliliters: -1 }])).rejects.toThrow(
+      'samples[0]: milliliters must be a non-negative number'
+    )
     await expect(
       NitroHealth.saveHeartRate([{ date: saveInterval.startDate, bpm: 0 }])
     ).rejects.toThrow('samples[0]: bpm must be between 1 and 300')
@@ -152,6 +156,38 @@ describe('NitroHealth saves (native)', () => {
     }
 
     expect(page.samples.some((sample) => sample.kilograms === 72.5)).toBe(true)
+  })
+
+  it('round-trips saved hydration through native code when authorized', async () => {
+    const authorized = await hasVerifiedPermissions([
+      { accessType: 'write', dataType: 'hydration' },
+      { accessType: 'read', dataType: 'hydration' },
+    ])
+    if (!authorized) return
+
+    await NitroHealth.deleteRecordsByTimeRange('hydration', saveReadRange)
+    try {
+      await NitroHealth.saveHydration([
+        {
+          ...saveInterval,
+          milliliters: 250.5,
+          sync: { id: 'nitro-health-harness-hydration-round-trip', version: 1 },
+        },
+      ])
+      const page = await NitroHealth.readHydration(saveReadRange)
+      if (isInconclusiveRead(page.samples)) return
+
+      const saved = page.samples.find(
+        (sample) =>
+          Math.abs(sample.milliliters - 250.5) < 0.001 &&
+          sample.startDate.getTime() === saveInterval.startDate.getTime() &&
+          sample.endDate.getTime() === saveInterval.endDate.getTime()
+      )
+      expect(saved).toBeDefined()
+      if (saved !== undefined) assertOrigin(saved)
+    } finally {
+      await NitroHealth.deleteRecordsByTimeRange('hydration', saveReadRange)
+    }
   })
 
   it('round-trips saved heart rate through native code when authorized', async () => {

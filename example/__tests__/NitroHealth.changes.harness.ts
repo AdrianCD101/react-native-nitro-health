@@ -62,6 +62,25 @@ async function drainFloorsClimbedChanges(changesToken: string): Promise<{
   throw new Error('Floors-climbed changes did not drain within 20 pages')
 }
 
+async function drainHydrationChanges(changesToken: string): Promise<{
+  changes: HealthRecordChange<'hydration'>[]
+  changesToken: string
+}> {
+  const changes: HealthRecordChange<'hydration'>[] = []
+  let currentToken = changesToken
+
+  for (let pageIndex = 0; pageIndex < 20; pageIndex += 1) {
+    const result = await NitroHealth.getChanges('hydration', currentToken)
+    if (result.tokenExpired) throw new Error('Fresh changes token expired unexpectedly')
+
+    changes.push(...result.changes)
+    currentToken = result.nextChangesToken
+    if (!result.hasMore) return { changes, changesToken: currentToken }
+  }
+
+  throw new Error('Hydration changes did not drain within 20 pages')
+}
+
 describe('NitroHealth changes (native)', () => {
   it('observes a saved and then deleted step record', async () => {
     const authorized = await hasVerifiedPermissions([
@@ -233,6 +252,54 @@ describe('NitroHealth changes (native)', () => {
       ).toBe(true)
     } finally {
       await NitroHealth.deleteRecordsByTimeRange('floorsClimbed', range)
+    }
+  })
+
+  it('observes a saved and then deleted hydration record', async () => {
+    const permissions = [
+      { accessType: 'read' as const, dataType: 'hydration' as const },
+      { accessType: 'write' as const, dataType: 'hydration' as const },
+    ]
+    if (!(await hasVerifiedPermissions(permissions))) return
+
+    const range = {
+      startDate: new Date('2003-06-04T00:00:00.000Z'),
+      endDate: new Date('2003-06-05T00:00:00.000Z'),
+    }
+    const interval = {
+      startDate: new Date('2003-06-04T09:00:00.000Z'),
+      endDate: new Date('2003-06-04T09:30:00.000Z'),
+    }
+
+    await NitroHealth.deleteRecordsByTimeRange('hydration', range)
+    try {
+      const baselineToken = await NitroHealth.createChangesToken('hydration')
+      await NitroHealth.saveHydration([
+        {
+          ...interval,
+          milliliters: 425.5,
+          sync: { id: 'nitro-health-harness-hydration-changes', version: 1 },
+        },
+      ])
+
+      const afterSave = await drainHydrationChanges(baselineToken)
+      const upsert = afterSave.changes.find(
+        (change) =>
+          change.type === 'upsert' &&
+          change.samples.some((sample) => Math.abs(sample.milliliters - 425.5) < 0.001)
+      )
+      expect(upsert).toBeDefined()
+      if (upsert === undefined || upsert.type !== 'upsert') return
+
+      await NitroHealth.deleteRecordsByIds('hydration', [upsert.record])
+      const afterDelete = await drainHydrationChanges(afterSave.changesToken)
+      expect(
+        afterDelete.changes.some(
+          (change) => change.type === 'delete' && change.record.id === upsert.record.id
+        )
+      ).toBe(true)
+    } finally {
+      await NitroHealth.deleteRecordsByTimeRange('hydration', range)
     }
   })
 
