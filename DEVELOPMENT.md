@@ -196,12 +196,13 @@ The iOS Harness run enables a patched XCTest permission watchdog. Before each te
 
 HealthKit authorization is not a normal simulator privacy service. `xcrun simctl privacy` cannot grant or reset it, and turning access off in the Health app leaves authorization determined. A later call to `requestAuthorization()` therefore does not necessarily present the initial Health access sheet. The upstream Harness permission watchdog also searches SpringBoard for ordinary permission alerts, while the HealthKit sheet and its controls can appear in the target application's accessibility tree.
 
-This repository patches `@react-native-harness/platform-apple@1.3.0` through Bun's `patchedDependencies`. The patch is stored at `patches/@react-native-harness%2Fplatform-apple@1.3.0.patch` and does the following:
+This repository patches `@react-native-harness/platform-apple@1.4.1` through Bun's `patchedDependencies`. The patch is stored at `patches/@react-native-harness%2Fplatform-apple@1.4.1.patch` and does the following:
 
 1. Calls `resetAuthorizationStatus(for: .health)` for the target application when the XCTest agent starts. This makes HealthKit authorization undetermined again, including after permissions were disabled in the Health app.
 2. Searches both the target application and SpringBoard accessibility trees.
 3. Selects `Turn On All` (or `Allow All`) and then confirms `Allow`.
-4. Cancels the XCTest agent's shutdown timeout after `xcodebuild` exits normally. Without this cleanup, Jest reports that it did not exit one second after the test run even though every test passed.
+
+Harness 1.4.1 provides graceful XCTest shutdown and cancels timers left by completed `Promise.race` branches. Do not restore the former local TypeScript/JavaScript shutdown patch; that fix is now upstream.
 
 The JavaScript setup is `example/__tests__/support/harnessAuthorizationSetup.ts`; its shared permission list is `example/healthPermissions.ts`. `permissions: true` in `example/rn-harness.config.mjs` starts the patched XCTest agent. The patch applies during `bun install`; do not edit `node_modules` without regenerating the Bun patch.
 
@@ -219,7 +220,9 @@ bun run harness:ios
 
 The automation currently depends on the English accessibility labels listed in the patch. If authorization setup times out after an iOS update, inspect the XCTest agent log and the target-app/SpringBoard accessibility trees before adding labels. Do not work around the failure with conditional passing returns, `--forceExit`, or manual pre-grant instructions.
 
-The iOS Harness run intentionally does not test denied HealthKit reads or writes. HealthKit conceals read denial, making it observable only as empty data, and denied writes require a separate mutually exclusive authorization state. Denied/unavailable and callback-error branches belong in focused native tests or a future dedicated denied run rather than the positive integration suite. Platform-specific setup is derived directly from `--harnessRunner`; there is no separate profile environment variable. Platform-only Harness cases remain conditional, so one skip on each platform is expected: the Android-only post-request permission-status test on iOS, and the iOS-only observer-delivery test on Android.
+The iOS Harness run intentionally does not test denied HealthKit reads or writes. HealthKit conceals read denial, making it observable only as empty data, and denied writes require a separate mutually exclusive authorization state. Denied/unavailable and callback-error branches belong in focused native tests or a future dedicated denied run rather than the positive integration suite. Platform-specific setup is derived directly from `--harnessRunner`; there is no separate profile environment variable.
+
+Harness 1.4 filters platform-specific files by the `*.ios.harness.ts` and `*.android.harness.ts` suffixes. The opposite platform receives one skipped placeholder per filtered file, so skipped file counts remain expected even though no `it.skip` tests exist. Android currently reports the iOS observer file as skipped; iOS reports the two Android-only permission/prerequisite files as skipped.
 
 The GitHub Actions Harness workflow runs Android runtime validation for relevant pull requests and `main` pushes. iOS authorization is automated, but the iOS job runs only through workflow dispatch. Use workflow dispatch when CI device coverage is needed.
 

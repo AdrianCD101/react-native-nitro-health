@@ -21,10 +21,5 @@ export default {
   testMatch: ['**/__tests__/**/*.harness.{js,ts,tsx}'],
   setupFilesAfterEnv:
     harnessRunner === 'ios' ? ['<rootDir>/__tests__/support/harnessAuthorizationSetup.ts'] : [],
-  testPathIgnorePatterns: [
-    '/node_modules/',
-    ...(harnessRunner === 'ios'
-      ? ['/NitroHealth[.]authorized-prerequisites[.]harness[.][jt]sx?$']
-      : []),
-  ],
+  testPathIgnorePatterns: ['/node_modules/'],
 }

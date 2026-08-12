@@ -7,8 +7,6 @@ import { sleepWritePermission, stepsReadPermission } from './support/harnessSupp
 const permissionStatuses = ['granted', 'notGranted', 'notDetermined', 'unverifiable']
 
 describe('NitroHealth permissions (native)', () => {
-  const androidIt = Platform.OS === 'android' ? it : it.skip
-
   it('returns one exact typed availability variant', () => {
     const availability = NitroHealth.getAvailability()
 
@@ -63,26 +61,6 @@ describe('NitroHealth permissions (native)', () => {
       ).toBe(true)
     }
   })
-
-  androidIt(
-    'returns one post-request status per entry when authorization is already observable',
-    async () => {
-      const before = await NitroHealth.getPermissionStatuses(stepsReadPermission)
-      if (
-        before.status === 'unavailable' ||
-        before.statuses.some(({ status }) => status !== 'granted')
-      ) {
-        return
-      }
-
-      const result = await NitroHealth.requestAuthorization(stepsReadPermission)
-
-      expect(result.status).toBe('completed')
-      expect(result.statuses).toHaveLength(stepsReadPermission.length)
-      expect(result.statuses.map((entry) => entry.permission)).toEqual(stepsReadPermission)
-      expect(result.statuses.every((entry) => permissionStatuses.includes(entry.status))).toBe(true)
-    }
-  )
 
   it('rejects empty permission operations before crossing the native boundary', async () => {
     await expect(NitroHealth.getPermissionStatuses([])).rejects.toThrow(
