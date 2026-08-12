@@ -146,6 +146,12 @@ namespace margelo::nitro::nitrohealth { struct NativeHeightSampleInput; }
 namespace margelo::nitro::nitrohealth { struct NativeHeightSamplePage; }
 // Forward declaration of `NativeHeightSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHeightSample; }
+// Forward declaration of `NativeHydrationSampleInput` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHydrationSampleInput; }
+// Forward declaration of `NativeHydrationSamplePage` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHydrationSamplePage; }
+// Forward declaration of `NativeHydrationSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHydrationSample; }
 // Forward declaration of `NativeLeanBodyMassSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeLeanBodyMassSampleInput; }
 // Forward declaration of `NativeLeanBodyMassSamplePage` to properly resolve imports.
@@ -287,6 +293,9 @@ namespace margelo::nitro::nitrohealth { struct NativeWorkoutSample; }
 #include "NativeHeightSample.hpp"
 #include "NativeHeightSampleInput.hpp"
 #include "NativeHeightSamplePage.hpp"
+#include "NativeHydrationSample.hpp"
+#include "NativeHydrationSampleInput.hpp"
+#include "NativeHydrationSamplePage.hpp"
 #include "NativeLeanBodyMassSample.hpp"
 #include "NativeLeanBodyMassSampleInput.hpp"
 #include "NativeLeanBodyMassSamplePage.hpp"

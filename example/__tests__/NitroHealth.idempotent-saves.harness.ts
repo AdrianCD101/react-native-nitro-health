@@ -8,6 +8,7 @@ import type {
   BodyFatSample,
   BodyTemperatureSample,
   FloorsClimbedSample,
+  HydrationSample,
   HealthPermission,
   HealthSampleIdentity,
   LeanBodyMassSample,
@@ -50,6 +51,10 @@ const vo2MaxReadWritePermissions: HealthPermission[] = [
 const floorsClimbedReadWritePermissions: HealthPermission[] = [
   { accessType: 'read', dataType: 'floorsClimbed' },
   { accessType: 'write', dataType: 'floorsClimbed' },
+]
+const hydrationReadWritePermissions: HealthPermission[] = [
+  { accessType: 'read', dataType: 'hydration' },
+  { accessType: 'write', dataType: 'hydration' },
 ]
 const bodyFatReadWritePermissions: HealthPermission[] = [
   { accessType: 'read', dataType: 'bodyFat' },
@@ -187,6 +192,18 @@ async function readIdempotentFloorsClimbed(
       sample.startDate.getTime() === idempotentInterval.startDate.getTime() &&
       sample.endDate.getTime() === idempotentInterval.endDate.getTime() &&
       expectedFloors.some((expected) => Math.abs(sample.floors - expected) < 0.001)
+  )
+}
+
+async function readIdempotentHydration(
+  expectedMilliliters: readonly number[]
+): Promise<HydrationSample[]> {
+  const page = await NitroHealth.readHydration({ ...idempotentReadRange, limit: 1000 })
+  return page.samples.filter(
+    (sample) =>
+      sample.startDate.getTime() === idempotentInterval.startDate.getTime() &&
+      sample.endDate.getTime() === idempotentInterval.endDate.getTime() &&
+      expectedMilliliters.some((expected) => Math.abs(sample.milliliters - expected) < 0.001)
   )
 }
 
@@ -739,6 +756,27 @@ describe('NitroHealth idempotent saves (native)', () => {
       expect(samples).toHaveLength(1)
     } finally {
       await NitroHealth.deleteRecordsByTimeRange('floorsClimbed', idempotentReadRange)
+    }
+  })
+
+  it('keeps exactly one hydration interval when the same versioned save is retried', async () => {
+    await requireVerifiedPermissions(hydrationReadWritePermissions)
+
+    await NitroHealth.deleteRecordsByTimeRange('hydration', idempotentReadRange)
+    try {
+      const sample = {
+        ...idempotentInterval,
+        milliliters: 625.5,
+        sync: { id: 'nitro-health-harness-hydration-retry', version: 1 },
+      }
+
+      await NitroHealth.saveHydration([sample])
+      await NitroHealth.saveHydration([sample])
+
+      const samples = await readIdempotentHydration([625.5])
+      expect(samples).toHaveLength(1)
+    } finally {
+      await NitroHealth.deleteRecordsByTimeRange('hydration', idempotentReadRange)
     }
   })
 

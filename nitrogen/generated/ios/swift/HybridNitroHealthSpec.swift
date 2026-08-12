@@ -29,6 +29,7 @@ public protocol HybridNitroHealthSpec_protocol: HybridObject {
   func readSteps(query: NativeHealthDateRangeQuery) throws -> Promise<NativeStepSamplePage>
   func readDistance(query: NativeHealthDateRangeQuery) throws -> Promise<NativeDistanceSamplePage>
   func readActiveEnergyBurned(query: NativeHealthDateRangeQuery) throws -> Promise<NativeActiveEnergyBurnedSamplePage>
+  func readHydration(query: NativeHealthDateRangeQuery) throws -> Promise<NativeHydrationSamplePage>
   func readFloorsClimbed(query: NativeHealthDateRangeQuery) throws -> Promise<NativeFloorsClimbedSamplePage>
   func readBodyMass(query: NativeHealthDateRangeQuery) throws -> Promise<NativeBodyMassSamplePage>
   func readHeartRate(query: NativeHealthDateRangeQuery) throws -> Promise<NativeHeartRateSamplePage>
@@ -51,6 +52,7 @@ public protocol HybridNitroHealthSpec_protocol: HybridObject {
   func saveSteps(samples: [NativeStepSampleInput]) throws -> Promise<Void>
   func saveDistance(samples: [NativeDistanceSampleInput]) throws -> Promise<NativeDistanceWriteResult>
   func saveActiveEnergyBurned(samples: [NativeActiveEnergyBurnedSampleInput]) throws -> Promise<Void>
+  func saveHydration(samples: [NativeHydrationSampleInput]) throws -> Promise<Void>
   func saveFloorsClimbed(samples: [NativeFloorsClimbedSampleInput]) throws -> Promise<Void>
   func saveHeartRate(samples: [NativeHeartRateSampleInput]) throws -> Promise<Void>
   func saveBloodPressure(samples: [NativeBloodPressureSampleInput]) throws -> Promise<Void>

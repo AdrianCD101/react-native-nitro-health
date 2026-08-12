@@ -71,6 +71,8 @@ namespace margelo::nitro::nitrohealth { struct NativeDistanceSample; }
 namespace margelo::nitro::nitrohealth { enum class NativeDistanceScope; }
 // Forward declaration of `NativeActiveEnergyBurnedSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeActiveEnergyBurnedSample; }
+// Forward declaration of `NativeHydrationSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHydrationSample; }
 // Forward declaration of `NativeFloorsClimbedSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeFloorsClimbedSample; }
 // Forward declaration of `NativeOxygenSaturationSample` to properly resolve imports.
@@ -107,6 +109,8 @@ namespace margelo::nitro::nitrohealth { struct NativeStepSamplePage; }
 namespace margelo::nitro::nitrohealth { struct NativeDistanceSamplePage; }
 // Forward declaration of `NativeActiveEnergyBurnedSamplePage` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeActiveEnergyBurnedSamplePage; }
+// Forward declaration of `NativeHydrationSamplePage` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHydrationSamplePage; }
 // Forward declaration of `NativeFloorsClimbedSamplePage` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeFloorsClimbedSamplePage; }
 // Forward declaration of `NativeBodyMassSamplePage` to properly resolve imports.
@@ -179,6 +183,8 @@ namespace margelo::nitro::nitrohealth { struct NativeStepSampleInput; }
 namespace margelo::nitro::nitrohealth { struct NativeDistanceSampleInput; }
 // Forward declaration of `NativeActiveEnergyBurnedSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeActiveEnergyBurnedSampleInput; }
+// Forward declaration of `NativeHydrationSampleInput` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHydrationSampleInput; }
 // Forward declaration of `NativeFloorsClimbedSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeFloorsClimbedSampleInput; }
 // Forward declaration of `NativeHeartRateSampleInput` to properly resolve imports.
@@ -283,6 +289,8 @@ namespace margelo::nitro::nitrohealth { struct NativeWorkoutSampleInput; }
 #include "JNativeDistanceScope.hpp"
 #include "NativeActiveEnergyBurnedSample.hpp"
 #include "JNativeActiveEnergyBurnedSample.hpp"
+#include "NativeHydrationSample.hpp"
+#include "JNativeHydrationSample.hpp"
 #include "NativeFloorsClimbedSample.hpp"
 #include "JNativeFloorsClimbedSample.hpp"
 #include "NativeOxygenSaturationSample.hpp"
@@ -322,6 +330,8 @@ namespace margelo::nitro::nitrohealth { struct NativeWorkoutSampleInput; }
 #include "JNativeDistanceSamplePage.hpp"
 #include "NativeActiveEnergyBurnedSamplePage.hpp"
 #include "JNativeActiveEnergyBurnedSamplePage.hpp"
+#include "NativeHydrationSamplePage.hpp"
+#include "JNativeHydrationSamplePage.hpp"
 #include "NativeFloorsClimbedSamplePage.hpp"
 #include "JNativeFloorsClimbedSamplePage.hpp"
 #include "NativeBodyMassSamplePage.hpp"
@@ -396,6 +406,8 @@ namespace margelo::nitro::nitrohealth { struct NativeWorkoutSampleInput; }
 #include "JNativeDistanceSampleInput.hpp"
 #include "NativeActiveEnergyBurnedSampleInput.hpp"
 #include "JNativeActiveEnergyBurnedSampleInput.hpp"
+#include "NativeHydrationSampleInput.hpp"
+#include "JNativeHydrationSampleInput.hpp"
 #include "NativeFloorsClimbedSampleInput.hpp"
 #include "JNativeFloorsClimbedSampleInput.hpp"
 #include "NativeHeartRateSampleInput.hpp"
@@ -685,6 +697,22 @@ namespace margelo::nitro::nitrohealth {
       auto __promise = Promise<NativeActiveEnergyBurnedSamplePage>::create();
       __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {
         auto __result = jni::static_ref_cast<JNativeActiveEnergyBurnedSamplePage>(__boxedResult);
+        __promise->resolve(__result->toCpp());
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
+  }
+  std::shared_ptr<Promise<NativeHydrationSamplePage>> JHybridNitroHealthSpec::readHydration(const NativeHealthDateRangeQuery& query) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<JNativeHealthDateRangeQuery> /* query */)>("readHydration");
+    auto __result = method(_javaPart, JNativeHealthDateRangeQuery::fromCpp(query));
+    return [&]() {
+      auto __promise = Promise<NativeHydrationSamplePage>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {
+        auto __result = jni::static_ref_cast<JNativeHydrationSamplePage>(__boxedResult);
         __promise->resolve(__result->toCpp());
       });
       __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
@@ -1064,6 +1092,30 @@ namespace margelo::nitro::nitrohealth {
       for (size_t __i = 0; __i < __size; __i++) {
         const auto& __element = __input[__i];
         auto __elementJni = JNativeActiveEnergyBurnedSampleInput::fromCpp(__element);
+        __array->setElement(__i, *__elementJni);
+      }
+      return __array;
+    }(samples));
+    return [&]() {
+      auto __promise = Promise<void>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& /* unit */) {
+        __promise->resolve();
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
+  }
+  std::shared_ptr<Promise<void>> JHybridNitroHealthSpec::saveHydration(const std::vector<NativeHydrationSampleInput>& samples) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<jni::JArrayClass<JNativeHydrationSampleInput>> /* samples */)>("saveHydration");
+    auto __result = method(_javaPart, [&](auto&& __input) {
+      size_t __size = __input.size();
+      jni::local_ref<jni::JArrayClass<JNativeHydrationSampleInput>> __array = jni::JArrayClass<JNativeHydrationSampleInput>::newArray(__size);
+      for (size_t __i = 0; __i < __size; __i++) {
+        const auto& __element = __input[__i];
+        auto __elementJni = JNativeHydrationSampleInput::fromCpp(__element);
         __array->setElement(__i, *__elementJni);
       }
       return __array;

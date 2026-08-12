@@ -19,6 +19,9 @@ if (harnessRunner !== 'android' && harnessRunner !== 'ios') {
 export default {
   preset: 'react-native-harness',
   testMatch: ['**/__tests__/**/*.harness.{js,ts,tsx}'],
+  // Several suites poll with waitUntil(..., { timeout: 10_000 }); the Harness default test
+  // timeout of 5s cuts those polls short on slow CI emulators, so give every test headroom.
+  testTimeout: 30_000,
   setupFilesAfterEnv:
     harnessRunner === 'ios' ? ['<rootDir>/__tests__/support/harnessAuthorizationSetup.ts'] : [],
   testPathIgnorePatterns: ['/node_modules/'],

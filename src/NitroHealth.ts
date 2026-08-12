@@ -56,6 +56,8 @@ import type { HeartRateStatistics } from './HeartRateStatistics'
 import type { HeartRateVariabilitySample } from './HeartRateVariabilitySample'
 import type { HeightSample } from './HeightSample'
 import type { HeightSampleInput } from './HeightSampleInput'
+import type { HydrationSample } from './HydrationSample'
+import type { HydrationSampleInput } from './HydrationSampleInput'
 import type { Vo2MaxSample } from './Vo2MaxSample'
 import type { Vo2MaxSampleInput } from './Vo2MaxSampleInput'
 import type { LeanBodyMassSample } from './LeanBodyMassSample'
@@ -94,6 +96,7 @@ import {
   makeHeartRateStatistics,
   makeHeartRateVariabilitySample,
   makeHeightSample,
+  makeHydrationSample,
   makeVo2MaxSample,
   makeLeanBodyMassSample,
   makeNativeActiveEnergyBurnedSampleInput,
@@ -107,6 +110,7 @@ import {
   makeNativeDistanceSampleInput,
   makeNativeHeartRateSampleInput,
   makeNativeHeightSampleInput,
+  makeNativeHydrationSampleInput,
   makeNativeVo2MaxSampleInput,
   makeNativeLeanBodyMassSampleInput,
   makeNativeOxygenSaturationSampleInput,
@@ -238,6 +242,8 @@ export interface NitroHealth {
   readActiveEnergyBurned(
     query: HealthDateRangeQuery
   ): Promise<HealthSamplePage<ActiveEnergyBurnedSample>>
+  /** Reads paginated hydration intervals in milliliters. */
+  readHydration(query: HealthDateRangeQuery): Promise<HealthSamplePage<HydrationSample>>
   /** Reads paginated floors-climbed intervals. iOS maps HealthKit flights climbed to `floors`. */
   readFloorsClimbed(query: HealthDateRangeQuery): Promise<HealthSamplePage<FloorsClimbedSample>>
   readBodyMass(query: HealthDateRangeQuery): Promise<HealthSamplePage<BodyMassSample>>
@@ -272,6 +278,8 @@ export interface NitroHealth {
   saveSteps(samples: StepSampleInput[]): Promise<void>
   saveDistance(samples: DistanceSampleInput[]): Promise<DistanceWriteResult>
   saveActiveEnergyBurned(samples: ActiveEnergyBurnedSampleInput[]): Promise<void>
+  /** Saves hydration intervals in milliliters. */
+  saveHydration(samples: HydrationSampleInput[]): Promise<void>
   /** Saves floors-climbed intervals. iOS stores `floors` as HealthKit flights climbed. */
   saveFloorsClimbed(samples: FloorsClimbedSampleInput[]): Promise<void>
   saveHeartRate(samples: HeartRateSampleInput[]): Promise<void>
@@ -441,6 +449,12 @@ export const NitroHealth: NitroHealth = {
       makeActiveEnergyBurnedSample
     )
   },
+  async readHydration(query) {
+    return makeSamplePage(
+      await NitroHealthNative.readHydration(makeNativeSampleQuery(query)),
+      makeHydrationSample
+    )
+  },
   async readFloorsClimbed(query) {
     return makeSamplePage(
       await NitroHealthNative.readFloorsClimbed(makeNativeSampleQuery(query)),
@@ -572,6 +586,12 @@ export const NitroHealth: NitroHealth = {
     const nativeSamples = samples.map(makeNativeActiveEnergyBurnedSampleInput)
     assertUniqueSampleSyncIds(samples)
     return NitroHealthNative.saveActiveEnergyBurned(nativeSamples)
+  },
+  async saveHydration(samples) {
+    assertNonEmptySamples(samples)
+    const nativeSamples = samples.map(makeNativeHydrationSampleInput)
+    assertUniqueSampleSyncIds(samples)
+    return NitroHealthNative.saveHydration(nativeSamples)
   },
   async saveFloorsClimbed(samples) {
     assertNonEmptySamples(samples)

@@ -47,6 +47,8 @@ import type { NativeVo2MaxSampleInput } from '../NativeVo2MaxSampleInput'
 import type { NativeLeanBodyMassSampleInput } from '../NativeLeanBodyMassSampleInput'
 import type { NativeLeanBodyMassSamplePage } from '../NativeLeanBodyMassSamplePage'
 import type { NativeHeightSamplePage } from '../NativeHeightSamplePage'
+import type { NativeHydrationSampleInput } from '../NativeHydrationSampleInput'
+import type { NativeHydrationSamplePage } from '../NativeHydrationSamplePage'
 import type { NativeVo2MaxSamplePage } from '../NativeVo2MaxSamplePage'
 import type { NativeOxygenSaturationSampleInput } from '../NativeOxygenSaturationSampleInput'
 import type { NativeOxygenSaturationSamplePage } from '../NativeOxygenSaturationSamplePage'
@@ -86,6 +88,7 @@ export interface NitroHealth extends HybridObject<{ ios: 'swift'; android: 'kotl
   readActiveEnergyBurned(
     query: NativeHealthDateRangeQuery
   ): Promise<NativeActiveEnergyBurnedSamplePage>
+  readHydration(query: NativeHealthDateRangeQuery): Promise<NativeHydrationSamplePage>
   readFloorsClimbed(query: NativeHealthDateRangeQuery): Promise<NativeFloorsClimbedSamplePage>
   readBodyMass(query: NativeHealthDateRangeQuery): Promise<NativeBodyMassSamplePage>
   readHeartRate(query: NativeHealthDateRangeQuery): Promise<NativeHeartRateSamplePage>
@@ -115,6 +118,7 @@ export interface NitroHealth extends HybridObject<{ ios: 'swift'; android: 'kotl
   saveSteps(samples: NativeStepSampleInput[]): Promise<void>
   saveDistance(samples: NativeDistanceSampleInput[]): Promise<NativeDistanceWriteResult>
   saveActiveEnergyBurned(samples: NativeActiveEnergyBurnedSampleInput[]): Promise<void>
+  saveHydration(samples: NativeHydrationSampleInput[]): Promise<void>
   saveFloorsClimbed(samples: NativeFloorsClimbedSampleInput[]): Promise<void>
   saveHeartRate(samples: NativeHeartRateSampleInput[]): Promise<void>
   saveBloodPressure(samples: NativeBloodPressureSampleInput[]): Promise<void>

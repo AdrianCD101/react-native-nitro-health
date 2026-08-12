@@ -85,6 +85,16 @@ describe('NitroHealth reads (native)', () => {
     }
   })
 
+  it('reads hydration intervals in milliliters with identity and origin', async () => {
+    const page = await NitroHealth.readHydration(emptyRange)
+    for (const sample of page.samples) {
+      assertSampleIdentityAndOrigin(sample)
+      expect(sample.identity.kind).toBe('record')
+      expect(sample.milliliters).toBeGreaterThanOrEqual(0)
+      expect(sample.endDate.getTime()).toBeGreaterThan(sample.startDate.getTime())
+    }
+  })
+
   it('returns tagged stage-less sleep envelopes and explicit sleep stages', async () => {
     const page = await NitroHealth.readSleepSamples(emptyRange)
 

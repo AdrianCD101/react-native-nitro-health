@@ -10,6 +10,7 @@ import type { HeartRateSample } from './HeartRateSample'
 import type { HeartRateVariabilitySample } from './HeartRateVariabilitySample'
 import type { FloorsClimbedSample } from './FloorsClimbedSample'
 import type { HeightSample } from './HeightSample'
+import type { HydrationSample } from './HydrationSample'
 import type { Vo2MaxSample } from './Vo2MaxSample'
 import type { LeanBodyMassSample } from './LeanBodyMassSample'
 import type { OxygenSaturationSample } from './OxygenSaturationSample'
@@ -47,6 +48,8 @@ export interface HealthSampleByDataType {
   distance: DistanceSample
   /** Active-energy intervals. */
   activeEnergyBurned: ActiveEnergyBurnedSample
+  /** Hydration intervals. */
+  hydration: HydrationSample
   /** Floors climbed intervals. */
   floorsClimbed: FloorsClimbedSample
   /** Oxygen-saturation readings. */

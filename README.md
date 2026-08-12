@@ -137,7 +137,7 @@ if (capabilities.status === 'available' && capabilities.historyRead === 'not-gra
 
 ## Permissions
 
-Supported data types are `steps`, `heartRate`, `bloodPressure`, `bloodGlucose`, `bodyTemperature`, `respiratoryRate`, `bodyFat`, `leanBodyMass`, `basalBodyTemperature`, `restingHeartRate`, `heartRateVariability`, `distance`, `activeEnergyBurned`, `floorsClimbed`, `oxygenSaturation`, `height`, `vo2Max`, `sleep`, `bodyMass`, and `workout`.
+Supported data types are `steps`, `heartRate`, `bloodPressure`, `bloodGlucose`, `bodyTemperature`, `respiratoryRate`, `bodyFat`, `leanBodyMass`, `basalBodyTemperature`, `restingHeartRate`, `heartRateVariability`, `distance`, `activeEnergyBurned`, `hydration`, `floorsClimbed`, `oxygenSaturation`, `height`, `vo2Max`, `sleep`, `bodyMass`, and `workout`.
 
 ### Authorization
 
@@ -239,6 +239,7 @@ On Android, the consumer app must declare every Health Connect data permission i
 | `steps`                | `android.permission.health.READ_STEPS`                  | `android.permission.health.WRITE_STEPS`                  |
 | `distance`             | `android.permission.health.READ_DISTANCE`               | `android.permission.health.WRITE_DISTANCE`               |
 | `activeEnergyBurned`   | `android.permission.health.READ_ACTIVE_CALORIES_BURNED` | `android.permission.health.WRITE_ACTIVE_CALORIES_BURNED` |
+| `hydration`            | `android.permission.health.READ_HYDRATION`              | `android.permission.health.WRITE_HYDRATION`              |
 | `floorsClimbed`        | `android.permission.health.READ_FLOORS_CLIMBED`         | `android.permission.health.WRITE_FLOORS_CLIMBED`         |
 | `heartRate`            | `android.permission.health.READ_HEART_RATE`             | `android.permission.health.WRITE_HEART_RATE`             |
 | `bloodPressure`        | `android.permission.health.READ_BLOOD_PRESSURE`         | `android.permission.health.WRITE_BLOOD_PRESSURE`         |
@@ -322,6 +323,7 @@ All raw reads return `{ samples, nextCursor? }`. Every listed sample also includ
 | `readSteps`                | `startDate`, `endDate`, `count`                             |
 | `readDistance`             | `startDate`, `endDate`, `distanceMeters`, `scope`           |
 | `readActiveEnergyBurned`   | `startDate`, `endDate`, `kilocalories`                      |
+| `readHydration`            | `startDate`, `endDate`, `milliliters`                       |
 | `readFloorsClimbed`        | `startDate`, `endDate`, `floors`                            |
 | `readBodyMass`             | `startDate`, `endDate`, `kilograms`                         |
 | `readHeartRate`            | `date`, `bpm`                                               |
@@ -618,6 +620,7 @@ const heartRate = await NitroHealth.readStatistics('heartRate', {
 | `steps`              | `sum`               | count                |
 | `distance`           | `sum`               | meters, plus `scope` |
 | `activeEnergyBurned` | `sum`               | kcal                 |
+| `hydration`          | `sum`               | mL                   |
 | `floorsClimbed`      | `sum`               | count                |
 | `heartRate`          | `avg`, `min`, `max` | bpm                  |
 | `restingHeartRate`   | `avg`, `min`, `max` | bpm                  |
@@ -808,7 +811,7 @@ Each scheduled run should recheck availability, `getCapabilities()`, and relevan
 
 ## Writing Data
 
-Request write authorization before saving. Save methods exist for steps, distance, active energy, floors climbed, heart rate, blood pressure, blood glucose, body temperature, respiratory rate, body fat, lean body mass, basal body temperature, resting heart rate, oxygen saturation, height, VO2 max, body mass, sleep sessions, and completed workouts. HRV remains read-only.
+Request write authorization before saving. Save methods exist for steps, distance, active energy, hydration, floors climbed, heart rate, blood pressure, blood glucose, body temperature, respiratory rate, body fat, lean body mass, basal body temperature, resting heart rate, oxygen saturation, height, VO2 max, body mass, sleep sessions, and completed workouts. HRV remains read-only.
 
 ```ts
 const authorization = await NitroHealth.requestAuthorization([

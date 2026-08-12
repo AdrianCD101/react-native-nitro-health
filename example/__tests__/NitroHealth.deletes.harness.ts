@@ -292,6 +292,41 @@ describe('NitroHealth deletes (native)', () => {
     )
   })
 
+  it('round-trips save, delete by record identity, and re-read for hydration', async () => {
+    const authorized = await hasVerifiedPermissions([
+      { accessType: 'write', dataType: 'hydration' },
+      { accessType: 'read', dataType: 'hydration' },
+    ])
+    if (!authorized) return
+
+    await NitroHealth.deleteRecordsByTimeRange('hydration', deleteReadRange)
+    try {
+      await NitroHealth.saveHydration([
+        {
+          ...deleteInterval,
+          milliliters: 525.5,
+          sync: { id: 'nitro-health-harness-hydration-delete', version: 1 },
+        },
+      ])
+      const page = await NitroHealth.readHydration(deleteReadRange)
+      if (isInconclusiveRead(page.samples)) return
+
+      const saved = page.samples.find((sample) => Math.abs(sample.milliliters - 525.5) < 0.001)
+      expect(saved).toBeDefined()
+      if (saved === undefined || saved.identity.kind !== 'record') return
+
+      const result = await NitroHealth.deleteRecordsByIds('hydration', [saved.identity])
+      assertCompletedIdentityDelete(result)
+
+      const afterDelete = await NitroHealth.readHydration(deleteReadRange)
+      expect(afterDelete.samples.some((sample) => sample.identity.id === saved.identity.id)).toBe(
+        false
+      )
+    } finally {
+      await NitroHealth.deleteRecordsByTimeRange('hydration', deleteReadRange)
+    }
+  })
+
   it('round-trips save, delete by record identity, and re-read for body fat', async () => {
     const authorized = await hasVerifiedPermissions([
       { accessType: 'write', dataType: 'bodyFat' },

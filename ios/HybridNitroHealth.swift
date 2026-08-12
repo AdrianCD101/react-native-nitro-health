@@ -117,6 +117,39 @@ class HybridNitroHealth: HybridNitroHealthSpec {
     }
 
     // Note: like readSteps, HealthKit resolves with an empty array when read access is denied.
+    func readHydration(query: NativeHealthDateRangeQuery) throws -> Promise<NativeHydrationSamplePage> {
+        if !HKHealthStore.isHealthDataAvailable() {
+            throw permissionError("Health data is not available")
+        }
+
+        let quantityType = try makeHealthKitQuantityType(dataType: "hydration")
+        let unit = HKUnit.literUnit(with: .milli)
+
+        return Promise<NativeHydrationSamplePage>.async {
+            let page = try await self.queryPagedSamples(
+                sampleType: quantityType,
+                dataType: "hydration",
+                query: query,
+                authorizationLabel: "hydration"
+            ) { sample -> NativeHydrationSample? in
+                guard let quantitySample = sample as? HKQuantitySample else {
+                    return nil
+                }
+
+                return NativeHydrationSample(
+                    identity: quantitySample.nativeHealthSampleIdentity,
+                    origin: quantitySample.nativeHealthDataOrigin,
+                    startTimeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
+                    endTimeMs: quantitySample.endDate.timeIntervalSince1970 * 1000,
+                    milliliters: quantitySample.quantity.doubleValue(for: unit)
+                )
+            }
+
+            return NativeHydrationSamplePage(samples: page.samples, nextCursor: page.nextCursor)
+        }
+    }
+
+    // Note: like readSteps, HealthKit resolves with an empty array when read access is denied.
     func readFloorsClimbed(query: NativeHealthDateRangeQuery) throws -> Promise<NativeFloorsClimbedSamplePage> {
         if !HKHealthStore.isHealthDataAvailable() {
             throw permissionError("Health data is not available")
@@ -358,6 +391,12 @@ class HybridNitroHealth: HybridNitroHealthSpec {
     func saveActiveEnergyBurned(samples: [NativeActiveEnergyBurnedSampleInput]) throws -> Promise<Void> {
         return try saveQuantitySamples(dataType: "activeEnergyBurned", label: "active energy burned") { quantityType in
             try makeActiveEnergyBurnedQuantitySamples(samples: samples, quantityType: quantityType)
+        }
+    }
+
+    func saveHydration(samples: [NativeHydrationSampleInput]) throws -> Promise<Void> {
+        return try saveQuantitySamples(dataType: "hydration", label: "hydration") { quantityType in
+            try makeHydrationQuantitySamples(samples: samples, quantityType: quantityType)
         }
     }
 

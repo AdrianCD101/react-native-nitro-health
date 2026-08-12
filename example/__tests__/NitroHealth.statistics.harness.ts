@@ -6,6 +6,8 @@ import {
   emptyRange,
   floorsClimbedReadPermission,
   floorsClimbedWritePermission,
+  hydrationReadPermission,
+  hydrationWritePermission,
   hasVerifiedPermissions,
   last7DaysRange,
   lastDayRange,
@@ -225,6 +227,37 @@ describe('NitroHealth statistics (native)', () => {
         )
       } finally {
         await NitroHealth.deleteRecordsByTimeRange('floorsClimbed', statisticsRange)
+      }
+    })
+
+    it('round-trips saved hydration through readStatistics when authorized', async () => {
+      if (
+        !(await hasVerifiedPermissions([...hydrationReadPermission, ...hydrationWritePermission]))
+      ) {
+        return
+      }
+
+      await NitroHealth.deleteRecordsByTimeRange('hydration', statisticsRange)
+      try {
+        const query = { ...statisticsRange, bucket: 'day' as const, metrics: ['sum' as const] }
+        const baseline = sumStatistics(await NitroHealth.readStatistics('hydration', query))
+
+        await NitroHealth.saveHydration([
+          {
+            ...statisticsInterval,
+            milliliters: 375.5,
+            sync: { id: 'nitro-health-harness-hydration-statistics', version: 1 },
+          },
+        ])
+
+        await waitUntil(
+          async () =>
+            sumStatistics(await NitroHealth.readStatistics('hydration', query)) >=
+            baseline + 375.5 - 0.001,
+          { interval: 250, timeout: 10_000 }
+        )
+      } finally {
+        await NitroHealth.deleteRecordsByTimeRange('hydration', statisticsRange)
       }
     })
   })

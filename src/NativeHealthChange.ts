@@ -10,6 +10,7 @@ import type { NativeDistanceSample } from './NativeDistanceSample'
 import type { NativeHeartRateSample } from './NativeHeartRateSample'
 import type { NativeHeartRateVariabilitySample } from './NativeHeartRateVariabilitySample'
 import type { NativeHeightSample } from './NativeHeightSample'
+import type { NativeHydrationSample } from './NativeHydrationSample'
 import type { NativeVo2MaxSample } from './NativeVo2MaxSample'
 import type { NativeLeanBodyMassSample } from './NativeLeanBodyMassSample'
 import type { NativeOxygenSaturationSample } from './NativeOxygenSaturationSample'
@@ -51,6 +52,8 @@ export interface NativeHealthChange {
   distanceSamples?: NativeDistanceSample[]
   /** Active-energy samples for an `activeEnergyBurned` upsert. */
   activeEnergyBurnedSamples?: NativeActiveEnergyBurnedSample[]
+  /** Hydration samples for a `hydration` upsert. */
+  hydrationSamples?: NativeHydrationSample[]
   /** Floors-climbed samples for a `floorsClimbed` upsert. */
   floorsClimbedSamples?: NativeFloorsClimbedSample[]
   /** Oxygen-saturation samples for an `oxygenSaturation` upsert. */

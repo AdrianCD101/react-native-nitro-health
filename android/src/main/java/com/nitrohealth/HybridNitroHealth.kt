@@ -19,6 +19,7 @@ import androidx.health.connect.client.records.FloorsClimbedRecord
 import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.HeartRateVariabilityRmssdRecord
 import androidx.health.connect.client.records.HeightRecord
+import androidx.health.connect.client.records.HydrationRecord
 import androidx.health.connect.client.records.LeanBodyMassRecord
 import androidx.health.connect.client.records.OxygenSaturationRecord
 import androidx.health.connect.client.records.Record
@@ -97,6 +98,9 @@ import com.margelo.nitro.nitrohealth.NativeLeanBodyMassSampleInput
 import com.margelo.nitro.nitrohealth.NativeLeanBodyMassSamplePage
 import com.margelo.nitro.nitrohealth.NativeHeightSampleInput
 import com.margelo.nitro.nitrohealth.NativeHeightSamplePage
+import com.margelo.nitro.nitrohealth.NativeHydrationSample
+import com.margelo.nitro.nitrohealth.NativeHydrationSampleInput
+import com.margelo.nitro.nitrohealth.NativeHydrationSamplePage
 import com.margelo.nitro.nitrohealth.NativeOxygenSaturationSample
 import com.margelo.nitro.nitrohealth.NativeOxygenSaturationSampleInput
 import com.margelo.nitro.nitrohealth.NativeOxygenSaturationSamplePage
@@ -484,6 +488,45 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                     )
                 }.toTypedArray(),
                 nextCursor = response.pageToken?.let { encodeSampleCursor("activeEnergyBurned", query, it) }
+            )
+        }
+    }
+
+    override fun readHydration(query: NativeHealthDateRangeQuery): Promise<NativeHydrationSamplePage> {
+        return Promise.async {
+            val context = NitroModules.applicationContext
+                ?: throw IllegalStateException("Android application context is unavailable")
+
+            if (getAvailability().status != NativeHealthAvailabilityStatus.AVAILABLE) {
+                throw IllegalStateException("Health Connect is not available")
+            }
+
+            val client = HealthConnectClient.getOrCreate(context)
+            requireReadPermission(client, "hydration")
+
+            val request = ReadRecordsRequest(
+                recordType = HydrationRecord::class,
+                timeRangeFilter = TimeRangeFilter.between(
+                    Instant.ofEpochMilli(query.startTimeMs.toLong()),
+                    Instant.ofEpochMilli(query.endTimeMs.toLong())
+                ),
+                ascendingOrder = query.ascending,
+                pageSize = query.limit.toInt(),
+                pageToken = query.cursor?.let { decodeSampleCursor(it, "hydration", query) }
+            )
+            val response = client.readRecords(request)
+
+            NativeHydrationSamplePage(
+                samples = response.records.map { record ->
+                    NativeHydrationSample(
+                        identity = makeRecordIdentity(record.metadata.id),
+                        origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
+                        startTimeMs = record.startTime.toEpochMilli().toDouble(),
+                        endTimeMs = record.endTime.toEpochMilli().toDouble(),
+                        milliliters = record.volume.inMilliliters
+                    )
+                }.toTypedArray(),
+                nextCursor = response.pageToken?.let { encodeSampleCursor("hydration", query, it) }
             )
         }
     }
@@ -1099,6 +1142,14 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         return Promise.async {
             val client = requireWritableClient("activeEnergyBurned")
             client.insertRecords(toActiveCaloriesBurnedRecords(samples))
+            Unit
+        }
+    }
+
+    override fun saveHydration(samples: Array<NativeHydrationSampleInput>): Promise<Unit> {
+        return Promise.async {
+            val client = requireWritableClient("hydration")
+            client.insertRecords(toHydrationRecords(samples))
             Unit
         }
     }

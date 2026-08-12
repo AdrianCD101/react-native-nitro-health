@@ -71,6 +71,24 @@ describe('NitroHealth save contract', () => {
     ])
   })
 
+  it('saves hydration through the Nitro hybrid object', async () => {
+    const startDate = new Date('2026-01-01T09:00:00.000Z')
+    const endDate = new Date('2026-01-01T09:30:00.000Z')
+    mockNitroHealth.saveHydration.mockResolvedValue(undefined)
+
+    await expect(
+      NitroHealth.saveHydration([{ startDate, endDate, milliliters: 250.5 }])
+    ).resolves.toBeUndefined()
+
+    expect(mockNitroHealth.saveHydration).toHaveBeenCalledWith([
+      {
+        startTimeMs: startDate.getTime(),
+        endTimeMs: endDate.getTime(),
+        milliliters: 250.5,
+      },
+    ])
+  })
+
   it('saves floors climbed through the Nitro hybrid object', async () => {
     const startDate = new Date('2026-01-01T09:00:00.000Z')
     const endDate = new Date('2026-01-01T09:30:00.000Z')

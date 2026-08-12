@@ -65,6 +65,9 @@ data class NativeHealthChange(
   val activeEnergyBurnedSamples: Array<NativeActiveEnergyBurnedSample>?,
   @DoNotStrip
   @Keep
+  val hydrationSamples: Array<NativeHydrationSample>?,
+  @DoNotStrip
+  @Keep
   val floorsClimbedSamples: Array<NativeFloorsClimbedSample>?,
   @DoNotStrip
   @Keep
@@ -91,8 +94,8 @@ data class NativeHealthChange(
   /**
    * Create a new instance of NativeHealthChange from Kotlin
    */
-  constructor(type: String, recordId: String, stepSamples: Array<NativeStepSample>?, heartRateSamples: Array<NativeHeartRateSample>?, bloodPressureSamples: Array<NativeBloodPressureSample>?, bloodGlucoseSamples: Array<NativeBloodGlucoseSample>?, bodyTemperatureSamples: Array<NativeBodyTemperatureSample>?, respiratoryRateSamples: Array<NativeRespiratoryRateSample>?, bodyFatSamples: Array<NativeBodyFatSample>?, leanBodyMassSamples: Array<NativeLeanBodyMassSample>?, basalBodyTemperatureSamples: Array<NativeBasalBodyTemperatureSample>?, restingHeartRateSamples: Array<NativeRestingHeartRateSample>?, heartRateVariabilitySamples: Array<NativeHeartRateVariabilitySample>?, distanceSamples: Array<NativeDistanceSample>?, activeEnergyBurnedSamples: Array<NativeActiveEnergyBurnedSample>?, floorsClimbedSamples: Array<NativeFloorsClimbedSample>?, oxygenSaturationSamples: Array<NativeOxygenSaturationSample>?, heightSamples: Array<NativeHeightSample>?, vo2MaxSamples: Array<NativeVo2MaxSample>?, sleepSamples: Array<NativeSleepSample>?, bodyMassSamples: Array<NativeBodyMassSample>?, workoutSamples: Array<NativeWorkoutSample>?, dummyNonEquatable: (() -> Unit)?):
-         this(type, recordId, stepSamples, heartRateSamples, bloodPressureSamples, bloodGlucoseSamples, bodyTemperatureSamples, respiratoryRateSamples, bodyFatSamples, leanBodyMassSamples, basalBodyTemperatureSamples, restingHeartRateSamples, heartRateVariabilitySamples, distanceSamples, activeEnergyBurnedSamples, floorsClimbedSamples, oxygenSaturationSamples, heightSamples, vo2MaxSamples, sleepSamples, bodyMassSamples, workoutSamples, dummyNonEquatable?.let { Func_void_java(it) })
+  constructor(type: String, recordId: String, stepSamples: Array<NativeStepSample>?, heartRateSamples: Array<NativeHeartRateSample>?, bloodPressureSamples: Array<NativeBloodPressureSample>?, bloodGlucoseSamples: Array<NativeBloodGlucoseSample>?, bodyTemperatureSamples: Array<NativeBodyTemperatureSample>?, respiratoryRateSamples: Array<NativeRespiratoryRateSample>?, bodyFatSamples: Array<NativeBodyFatSample>?, leanBodyMassSamples: Array<NativeLeanBodyMassSample>?, basalBodyTemperatureSamples: Array<NativeBasalBodyTemperatureSample>?, restingHeartRateSamples: Array<NativeRestingHeartRateSample>?, heartRateVariabilitySamples: Array<NativeHeartRateVariabilitySample>?, distanceSamples: Array<NativeDistanceSample>?, activeEnergyBurnedSamples: Array<NativeActiveEnergyBurnedSample>?, hydrationSamples: Array<NativeHydrationSample>?, floorsClimbedSamples: Array<NativeFloorsClimbedSample>?, oxygenSaturationSamples: Array<NativeOxygenSaturationSample>?, heightSamples: Array<NativeHeightSample>?, vo2MaxSamples: Array<NativeVo2MaxSample>?, sleepSamples: Array<NativeSleepSample>?, bodyMassSamples: Array<NativeBodyMassSample>?, workoutSamples: Array<NativeWorkoutSample>?, dummyNonEquatable: (() -> Unit)?):
+         this(type, recordId, stepSamples, heartRateSamples, bloodPressureSamples, bloodGlucoseSamples, bodyTemperatureSamples, respiratoryRateSamples, bodyFatSamples, leanBodyMassSamples, basalBodyTemperatureSamples, restingHeartRateSamples, heartRateVariabilitySamples, distanceSamples, activeEnergyBurnedSamples, hydrationSamples, floorsClimbedSamples, oxygenSaturationSamples, heightSamples, vo2MaxSamples, sleepSamples, bodyMassSamples, workoutSamples, dummyNonEquatable?.let { Func_void_java(it) })
 
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
@@ -112,6 +115,7 @@ data class NativeHealthChange(
       && Objects.deepEquals(this.heartRateVariabilitySamples, other.heartRateVariabilitySamples)
       && Objects.deepEquals(this.distanceSamples, other.distanceSamples)
       && Objects.deepEquals(this.activeEnergyBurnedSamples, other.activeEnergyBurnedSamples)
+      && Objects.deepEquals(this.hydrationSamples, other.hydrationSamples)
       && Objects.deepEquals(this.floorsClimbedSamples, other.floorsClimbedSamples)
       && Objects.deepEquals(this.oxygenSaturationSamples, other.oxygenSaturationSamples)
       && Objects.deepEquals(this.heightSamples, other.heightSamples)
@@ -139,6 +143,7 @@ data class NativeHealthChange(
       heartRateVariabilitySamples,
       distanceSamples,
       activeEnergyBurnedSamples,
+      hydrationSamples,
       floorsClimbedSamples,
       oxygenSaturationSamples,
       heightSamples,
@@ -158,8 +163,8 @@ data class NativeHealthChange(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(type: String, recordId: String, stepSamples: Array<NativeStepSample>?, heartRateSamples: Array<NativeHeartRateSample>?, bloodPressureSamples: Array<NativeBloodPressureSample>?, bloodGlucoseSamples: Array<NativeBloodGlucoseSample>?, bodyTemperatureSamples: Array<NativeBodyTemperatureSample>?, respiratoryRateSamples: Array<NativeRespiratoryRateSample>?, bodyFatSamples: Array<NativeBodyFatSample>?, leanBodyMassSamples: Array<NativeLeanBodyMassSample>?, basalBodyTemperatureSamples: Array<NativeBasalBodyTemperatureSample>?, restingHeartRateSamples: Array<NativeRestingHeartRateSample>?, heartRateVariabilitySamples: Array<NativeHeartRateVariabilitySample>?, distanceSamples: Array<NativeDistanceSample>?, activeEnergyBurnedSamples: Array<NativeActiveEnergyBurnedSample>?, floorsClimbedSamples: Array<NativeFloorsClimbedSample>?, oxygenSaturationSamples: Array<NativeOxygenSaturationSample>?, heightSamples: Array<NativeHeightSample>?, vo2MaxSamples: Array<NativeVo2MaxSample>?, sleepSamples: Array<NativeSleepSample>?, bodyMassSamples: Array<NativeBodyMassSample>?, workoutSamples: Array<NativeWorkoutSample>?, dummyNonEquatable: Func_void?): NativeHealthChange {
-      return NativeHealthChange(type, recordId, stepSamples, heartRateSamples, bloodPressureSamples, bloodGlucoseSamples, bodyTemperatureSamples, respiratoryRateSamples, bodyFatSamples, leanBodyMassSamples, basalBodyTemperatureSamples, restingHeartRateSamples, heartRateVariabilitySamples, distanceSamples, activeEnergyBurnedSamples, floorsClimbedSamples, oxygenSaturationSamples, heightSamples, vo2MaxSamples, sleepSamples, bodyMassSamples, workoutSamples, dummyNonEquatable)
+    private fun fromCpp(type: String, recordId: String, stepSamples: Array<NativeStepSample>?, heartRateSamples: Array<NativeHeartRateSample>?, bloodPressureSamples: Array<NativeBloodPressureSample>?, bloodGlucoseSamples: Array<NativeBloodGlucoseSample>?, bodyTemperatureSamples: Array<NativeBodyTemperatureSample>?, respiratoryRateSamples: Array<NativeRespiratoryRateSample>?, bodyFatSamples: Array<NativeBodyFatSample>?, leanBodyMassSamples: Array<NativeLeanBodyMassSample>?, basalBodyTemperatureSamples: Array<NativeBasalBodyTemperatureSample>?, restingHeartRateSamples: Array<NativeRestingHeartRateSample>?, heartRateVariabilitySamples: Array<NativeHeartRateVariabilitySample>?, distanceSamples: Array<NativeDistanceSample>?, activeEnergyBurnedSamples: Array<NativeActiveEnergyBurnedSample>?, hydrationSamples: Array<NativeHydrationSample>?, floorsClimbedSamples: Array<NativeFloorsClimbedSample>?, oxygenSaturationSamples: Array<NativeOxygenSaturationSample>?, heightSamples: Array<NativeHeightSample>?, vo2MaxSamples: Array<NativeVo2MaxSample>?, sleepSamples: Array<NativeSleepSample>?, bodyMassSamples: Array<NativeBodyMassSample>?, workoutSamples: Array<NativeWorkoutSample>?, dummyNonEquatable: Func_void?): NativeHealthChange {
+      return NativeHealthChange(type, recordId, stepSamples, heartRateSamples, bloodPressureSamples, bloodGlucoseSamples, bodyTemperatureSamples, respiratoryRateSamples, bodyFatSamples, leanBodyMassSamples, basalBodyTemperatureSamples, restingHeartRateSamples, heartRateVariabilitySamples, distanceSamples, activeEnergyBurnedSamples, hydrationSamples, floorsClimbedSamples, oxygenSaturationSamples, heightSamples, vo2MaxSamples, sleepSamples, bodyMassSamples, workoutSamples, dummyNonEquatable)
     }
   }
 }
