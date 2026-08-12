@@ -2,6 +2,8 @@ import type { HybridObject } from 'react-native-nitro-modules'
 import type { BackgroundDeliveryFrequency } from '../BackgroundDeliveryFrequency'
 import type { NativeActiveEnergyBurnedSampleInput } from '../NativeActiveEnergyBurnedSampleInput'
 import type { NativeActiveEnergyBurnedSamplePage } from '../NativeActiveEnergyBurnedSamplePage'
+import type { NativeFloorsClimbedSampleInput } from '../NativeFloorsClimbedSampleInput'
+import type { NativeFloorsClimbedSamplePage } from '../NativeFloorsClimbedSamplePage'
 import type { NativeBackgroundChangesResult } from '../NativeBackgroundChangesResult'
 import type { NativeBasalBodyTemperatureSampleInput } from '../NativeBasalBodyTemperatureSampleInput'
 import type { NativeBasalBodyTemperatureSamplePage } from '../NativeBasalBodyTemperatureSamplePage'
@@ -84,6 +86,7 @@ export interface NitroHealth extends HybridObject<{ ios: 'swift'; android: 'kotl
   readActiveEnergyBurned(
     query: NativeHealthDateRangeQuery
   ): Promise<NativeActiveEnergyBurnedSamplePage>
+  readFloorsClimbed(query: NativeHealthDateRangeQuery): Promise<NativeFloorsClimbedSamplePage>
   readBodyMass(query: NativeHealthDateRangeQuery): Promise<NativeBodyMassSamplePage>
   readHeartRate(query: NativeHealthDateRangeQuery): Promise<NativeHeartRateSamplePage>
   readBloodPressure(query: NativeHealthDateRangeQuery): Promise<NativeBloodPressureSamplePage>
@@ -112,6 +115,7 @@ export interface NitroHealth extends HybridObject<{ ios: 'swift'; android: 'kotl
   saveSteps(samples: NativeStepSampleInput[]): Promise<void>
   saveDistance(samples: NativeDistanceSampleInput[]): Promise<NativeDistanceWriteResult>
   saveActiveEnergyBurned(samples: NativeActiveEnergyBurnedSampleInput[]): Promise<void>
+  saveFloorsClimbed(samples: NativeFloorsClimbedSampleInput[]): Promise<void>
   saveHeartRate(samples: NativeHeartRateSampleInput[]): Promise<void>
   saveBloodPressure(samples: NativeBloodPressureSampleInput[]): Promise<void>
   saveBloodGlucose(samples: NativeBloodGlucoseSampleInput[]): Promise<void>

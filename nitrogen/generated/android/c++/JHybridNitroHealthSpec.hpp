@@ -70,6 +70,7 @@ namespace margelo::nitro::nitrohealth {
     std::shared_ptr<Promise<NativeStepSamplePage>> readSteps(const NativeHealthDateRangeQuery& query) override;
     std::shared_ptr<Promise<NativeDistanceSamplePage>> readDistance(const NativeHealthDateRangeQuery& query) override;
     std::shared_ptr<Promise<NativeActiveEnergyBurnedSamplePage>> readActiveEnergyBurned(const NativeHealthDateRangeQuery& query) override;
+    std::shared_ptr<Promise<NativeFloorsClimbedSamplePage>> readFloorsClimbed(const NativeHealthDateRangeQuery& query) override;
     std::shared_ptr<Promise<NativeBodyMassSamplePage>> readBodyMass(const NativeHealthDateRangeQuery& query) override;
     std::shared_ptr<Promise<NativeHeartRateSamplePage>> readHeartRate(const NativeHealthDateRangeQuery& query) override;
     std::shared_ptr<Promise<NativeBloodPressureSamplePage>> readBloodPressure(const NativeHealthDateRangeQuery& query) override;
@@ -91,6 +92,7 @@ namespace margelo::nitro::nitrohealth {
     std::shared_ptr<Promise<void>> saveSteps(const std::vector<NativeStepSampleInput>& samples) override;
     std::shared_ptr<Promise<NativeDistanceWriteResult>> saveDistance(const std::vector<NativeDistanceSampleInput>& samples) override;
     std::shared_ptr<Promise<void>> saveActiveEnergyBurned(const std::vector<NativeActiveEnergyBurnedSampleInput>& samples) override;
+    std::shared_ptr<Promise<void>> saveFloorsClimbed(const std::vector<NativeFloorsClimbedSampleInput>& samples) override;
     std::shared_ptr<Promise<void>> saveHeartRate(const std::vector<NativeHeartRateSampleInput>& samples) override;
     std::shared_ptr<Promise<void>> saveBloodPressure(const std::vector<NativeBloodPressureSampleInput>& samples) override;
     std::shared_ptr<Promise<void>> saveBloodGlucose(const std::vector<NativeBloodGlucoseSampleInput>& samples) override;

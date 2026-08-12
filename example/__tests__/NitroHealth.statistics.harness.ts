@@ -4,6 +4,8 @@ import type { HealthStatistics, StatisticsMetric } from 'react-native-nitro-heal
 
 import {
   emptyRange,
+  floorsClimbedReadPermission,
+  floorsClimbedWritePermission,
   hasVerifiedPermissions,
   heartRateReadPermission,
   isInconclusiveRead,
@@ -221,6 +223,39 @@ describe('NitroHealth statistics (native)', () => {
       }
 
       expect(buckets.some((bucket) => (bucket.sum ?? 0) >= 321)).toBe(true)
+    })
+
+    it('round-trips saved floors climbed through readStatistics when authorized', async () => {
+      if (
+        !(await hasVerifiedPermissions([
+          ...floorsClimbedReadPermission,
+          ...floorsClimbedWritePermission,
+        ]))
+      ) {
+        return
+      }
+
+      await NitroHealth.deleteRecordsByTimeRange('floorsClimbed', saveReadRange)
+      try {
+        await NitroHealth.saveFloorsClimbed([
+          {
+            ...saveInterval,
+            floors: 12.5,
+            sync: { id: 'nitro-health-harness-floors-statistics', version: 1 },
+          },
+        ])
+
+        const buckets = await NitroHealth.readStatistics('floorsClimbed', {
+          ...saveReadRange,
+          bucket: 'day',
+          metrics: ['sum'],
+        })
+        if (isInconclusiveRead(buckets)) return
+
+        expect(buckets.some((bucket) => Math.abs((bucket.sum ?? 0) - 12.5) < 0.001)).toBe(true)
+      } finally {
+        await NitroHealth.deleteRecordsByTimeRange('floorsClimbed', saveReadRange)
+      }
     })
   })
 })

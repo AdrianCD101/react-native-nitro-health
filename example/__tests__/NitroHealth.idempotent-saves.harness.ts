@@ -7,6 +7,7 @@ import type {
   BloodPressureSample,
   BodyFatSample,
   BodyTemperatureSample,
+  FloorsClimbedSample,
   HealthPermission,
   HealthSampleIdentity,
   LeanBodyMassSample,
@@ -45,6 +46,10 @@ const respiratoryRateReadWritePermissions: HealthPermission[] = [
 const vo2MaxReadWritePermissions: HealthPermission[] = [
   { accessType: 'read', dataType: 'vo2Max' },
   { accessType: 'write', dataType: 'vo2Max' },
+]
+const floorsClimbedReadWritePermissions: HealthPermission[] = [
+  { accessType: 'read', dataType: 'floorsClimbed' },
+  { accessType: 'write', dataType: 'floorsClimbed' },
 ]
 const bodyFatReadWritePermissions: HealthPermission[] = [
   { accessType: 'read', dataType: 'bodyFat' },
@@ -158,6 +163,30 @@ async function readIdempotentVo2Max(
       expectedMillilitersPerKilogramPerMinute.some(
         (expected) => Math.abs(sample.millilitersPerKilogramPerMinute - expected) < 0.001
       )
+  )
+}
+
+async function readIdempotentFloorsClimbed(
+  expectedFloors: readonly number[]
+): Promise<FloorsClimbedSample[]> {
+  const samples: FloorsClimbedSample[] = []
+  let cursor: string | undefined
+
+  do {
+    const page = await NitroHealth.readFloorsClimbed({
+      ...idempotentReadRange,
+      limit: 1000,
+      ...(cursor === undefined ? {} : { cursor }),
+    })
+    samples.push(...page.samples)
+    cursor = page.nextCursor
+  } while (cursor !== undefined)
+
+  return samples.filter(
+    (sample) =>
+      sample.startDate.getTime() === idempotentInterval.startDate.getTime() &&
+      sample.endDate.getTime() === idempotentInterval.endDate.getTime() &&
+      expectedFloors.some((expected) => Math.abs(sample.floors - expected) < 0.001)
   )
 }
 
@@ -768,6 +797,85 @@ describe('NitroHealth idempotent saves (native)', () => {
       }
     } finally {
       await NitroHealth.deleteRecordsByTimeRange('vo2Max', idempotentReadRange)
+    }
+  })
+
+  it('keeps exactly one floors climbed interval when the same versioned save is retried', async () => {
+    if (!(await hasVerifiedPermissions(floorsClimbedReadWritePermissions))) {
+      return
+    }
+
+    await NitroHealth.deleteRecordsByTimeRange('floorsClimbed', idempotentReadRange)
+    try {
+      const sample = {
+        ...idempotentInterval,
+        floors: 11.5,
+        sync: { id: 'nitro-health-harness-floors-retry', version: 1 },
+      }
+
+      await NitroHealth.saveFloorsClimbed([sample])
+      await NitroHealth.saveFloorsClimbed([sample])
+
+      const samples = await readIdempotentFloorsClimbed([11.5])
+      if (Platform.OS === 'ios' && samples.length === 0) {
+        return
+      }
+
+      expect(samples).toHaveLength(1)
+    } finally {
+      await NitroHealth.deleteRecordsByTimeRange('floorsClimbed', idempotentReadRange)
+    }
+  })
+
+  it('replaces a floors climbed interval at a higher version with platform-specific identity', async () => {
+    if (!(await hasVerifiedPermissions(floorsClimbedReadWritePermissions))) {
+      return
+    }
+
+    await NitroHealth.deleteRecordsByTimeRange('floorsClimbed', idempotentReadRange)
+    try {
+      const syncId = 'nitro-health-harness-floors-higher-version'
+      await NitroHealth.saveFloorsClimbed([
+        {
+          ...idempotentInterval,
+          floors: 11.5,
+          sync: { id: syncId, version: 1 },
+        },
+      ])
+
+      const initial = await readIdempotentFloorsClimbed([11.5, 12.5])
+      if (Platform.OS === 'ios' && initial.length === 0) {
+        return
+      }
+      expect(initial).toHaveLength(1)
+      const initialSample = initial[0]
+      if (initialSample === undefined) {
+        return
+      }
+
+      await NitroHealth.saveFloorsClimbed([
+        {
+          ...idempotentInterval,
+          floors: 12.5,
+          sync: { id: syncId, version: 2 },
+        },
+      ])
+
+      const replacement = await readIdempotentFloorsClimbed([11.5, 12.5])
+      expect(replacement).toHaveLength(1)
+      const replacementSample = replacement[0]
+      if (replacementSample === undefined) {
+        return
+      }
+
+      expect(Math.abs(replacementSample.floors - 12.5)).toBeLessThan(0.001)
+      if (Platform.OS === 'android') {
+        expect(recordId(replacementSample.identity)).toBe(recordId(initialSample.identity))
+      } else if (Platform.OS === 'ios') {
+        expect(recordId(replacementSample.identity)).not.toBe(recordId(initialSample.identity))
+      }
+    } finally {
+      await NitroHealth.deleteRecordsByTimeRange('floorsClimbed', idempotentReadRange)
     }
   })
 

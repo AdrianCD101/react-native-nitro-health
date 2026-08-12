@@ -60,6 +60,7 @@ const STATISTICS_METRICS_BY_DATA_TYPE: Record<HealthDataType, readonly Statistic
   steps: ['sum'],
   distance: ['sum'],
   activeEnergyBurned: ['sum'],
+  floorsClimbed: ['sum'],
   heartRate: ['avg', 'min', 'max'],
   bloodPressure: [],
   bloodGlucose: [],

@@ -22,6 +22,7 @@ const readPermissions: Array<{ dataType: HealthDataType; label: string }> = [
   { dataType: 'steps', label: 'Steps' },
   { dataType: 'distance', label: 'Distance' },
   { dataType: 'activeEnergyBurned', label: 'Active Energy' },
+  { dataType: 'floorsClimbed', label: 'Floors Climbed' },
   { dataType: 'heartRate', label: 'Heart Rate' },
   { dataType: 'sleep', label: 'Sleep' },
   { dataType: 'bodyMass', label: 'Body Mass' },
@@ -32,6 +33,7 @@ const writableDataTypes: WritableHealthDataType[] = [
   'steps',
   'distance',
   'activeEnergyBurned',
+  'floorsClimbed',
   'heartRate',
   'bodyMass',
   'sleep',
@@ -169,6 +171,23 @@ const readCards: Partial<
             (bucket) =>
               `${bucket.startDate.toLocaleDateString()}: ${Math.round(bucket.sum ?? 0)} kcal`
           ),
+      ]
+    },
+  },
+  floorsClimbed: {
+    buttonLabel: 'Read daily floors climbed',
+    execute: async () => {
+      const buckets = await NitroHealth.readStatistics('floorsClimbed', {
+        ...lastDays(7),
+        bucket: 'day',
+        metrics: ['sum'],
+      })
+      return [
+        `Daily floors-climbed buckets: ${buckets.length}`,
+        ...buckets
+          .slice(-7)
+          .reverse()
+          .map((bucket) => `${bucket.startDate.toLocaleDateString()}: ${bucket.sum ?? 0}`),
       ]
     },
   },
@@ -495,6 +514,10 @@ function App(): React.JSX.Element {
         case 'activeEnergyBurned':
           await NitroHealth.saveActiveEnergyBurned([{ startDate, endDate, kilocalories: 45 }])
           message = 'Saved 45 kcal'
+          break
+        case 'floorsClimbed':
+          await NitroHealth.saveFloorsClimbed([{ startDate, endDate, floors: 3 }])
+          message = 'Saved 3 floors climbed'
           break
         case 'heartRate':
           await NitroHealth.saveHeartRate([{ date: endDate, bpm: 76 }])

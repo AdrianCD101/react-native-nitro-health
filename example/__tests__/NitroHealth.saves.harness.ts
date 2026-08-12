@@ -659,6 +659,53 @@ describe('NitroHealth saves (native)', () => {
     })
   })
 
+  describe('floors climbed', () => {
+    const syncId = 'nitro-health-harness-floors-round-trip'
+
+    it('rejects saving floors climbed when write permission is not granted', async () => {
+      if (await hasVerifiedPermissions([{ accessType: 'write', dataType: 'floorsClimbed' }])) {
+        return
+      }
+
+      await expect(
+        NitroHealth.saveFloorsClimbed([{ ...saveInterval, floors: 12.5 }])
+      ).rejects.toThrow(/permission/i)
+    })
+
+    it('round-trips a saved floors interval when authorized', async () => {
+      const authorized = await hasVerifiedPermissions([
+        { accessType: 'write', dataType: 'floorsClimbed' },
+        { accessType: 'read', dataType: 'floorsClimbed' },
+      ])
+
+      if (!authorized) {
+        return
+      }
+
+      await NitroHealth.deleteRecordsByTimeRange('floorsClimbed', saveReadRange)
+      try {
+        await NitroHealth.saveFloorsClimbed([
+          { ...saveInterval, floors: 12.5, sync: { id: syncId, version: 1 } },
+        ])
+
+        const page = await NitroHealth.readFloorsClimbed(saveReadRange)
+        if (isInconclusiveRead(page.samples)) return
+
+        const matches = page.samples.filter(
+          (sample) =>
+            Math.abs(sample.floors - 12.5) < 0.001 &&
+            sample.startDate.getTime() === saveInterval.startDate.getTime() &&
+            sample.endDate.getTime() === saveInterval.endDate.getTime()
+        )
+
+        expect(matches).toHaveLength(1)
+        expect(matches[0]?.identity.kind).toBe('record')
+      } finally {
+        await NitroHealth.deleteRecordsByTimeRange('floorsClimbed', saveReadRange)
+      }
+    })
+  })
+
   describe('body fat', () => {
     it('rejects saving body fat when write permission is not granted', async () => {
       if (await hasVerifiedPermissions([{ accessType: 'write', dataType: 'bodyFat' }])) {

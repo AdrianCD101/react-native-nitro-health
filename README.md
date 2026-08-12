@@ -137,7 +137,7 @@ if (capabilities.status === 'available' && capabilities.historyRead === 'not-gra
 
 ## Permissions
 
-Supported data types are `steps`, `heartRate`, `bloodPressure`, `bloodGlucose`, `bodyTemperature`, `respiratoryRate`, `bodyFat`, `leanBodyMass`, `basalBodyTemperature`, `restingHeartRate`, `heartRateVariability`, `distance`, `activeEnergyBurned`, `oxygenSaturation`, `height`, `vo2Max`, `sleep`, `bodyMass`, and `workout`.
+Supported data types are `steps`, `heartRate`, `bloodPressure`, `bloodGlucose`, `bodyTemperature`, `respiratoryRate`, `bodyFat`, `leanBodyMass`, `basalBodyTemperature`, `restingHeartRate`, `heartRateVariability`, `distance`, `activeEnergyBurned`, `floorsClimbed`, `oxygenSaturation`, `height`, `vo2Max`, `sleep`, `bodyMass`, and `workout`.
 
 ### Authorization
 
@@ -239,6 +239,7 @@ On Android, the consumer app must declare every Health Connect data permission i
 | `steps`                | `android.permission.health.READ_STEPS`                  | `android.permission.health.WRITE_STEPS`                  |
 | `distance`             | `android.permission.health.READ_DISTANCE`               | `android.permission.health.WRITE_DISTANCE`               |
 | `activeEnergyBurned`   | `android.permission.health.READ_ACTIVE_CALORIES_BURNED` | `android.permission.health.WRITE_ACTIVE_CALORIES_BURNED` |
+| `floorsClimbed`        | `android.permission.health.READ_FLOORS_CLIMBED`         | `android.permission.health.WRITE_FLOORS_CLIMBED`         |
 | `heartRate`            | `android.permission.health.READ_HEART_RATE`             | `android.permission.health.WRITE_HEART_RATE`             |
 | `bloodPressure`        | `android.permission.health.READ_BLOOD_PRESSURE`         | `android.permission.health.WRITE_BLOOD_PRESSURE`         |
 | `bloodGlucose`         | `android.permission.health.READ_BLOOD_GLUCOSE`          | `android.permission.health.WRITE_BLOOD_GLUCOSE`          |
@@ -321,6 +322,7 @@ All raw reads return `{ samples, nextCursor? }`. Every listed sample also includ
 | `readSteps`                | `startDate`, `endDate`, `count`                             |
 | `readDistance`             | `startDate`, `endDate`, `distanceMeters`, `scope`           |
 | `readActiveEnergyBurned`   | `startDate`, `endDate`, `kilocalories`                      |
+| `readFloorsClimbed`        | `startDate`, `endDate`, `floors`                            |
 | `readBodyMass`             | `startDate`, `endDate`, `kilograms`                         |
 | `readHeartRate`            | `date`, `bpm`                                               |
 | `readBloodPressure`        | `date`, `systolicMmHg`, `diastolicMmHg`                     |
@@ -337,6 +339,8 @@ All raw reads return `{ samples, nextCursor? }`. Every listed sample also includ
 | `readVo2Max`               | `date`, `millilitersPerKilogramPerMinute`                   |
 | `readSleepSamples`         | tagged session-envelope or stage fields                     |
 | `readWorkouts`             | workout duration, activity, labels, and metric availability |
+
+`floorsClimbed` is the portable API name. Android values come from Health Connect floors climbed; iOS values come from HealthKit flights climbed and are exposed unchanged as `floors`. A flight and a building floor are not guaranteed to be physically equivalent.
 
 ```ts
 const page = await NitroHealth.readSteps({
@@ -614,10 +618,13 @@ const heartRate = await NitroHealth.readStatistics('heartRate', {
 | `steps`              | `sum`               | count                |
 | `distance`           | `sum`               | meters, plus `scope` |
 | `activeEnergyBurned` | `sum`               | kcal                 |
+| `floorsClimbed`      | `sum`               | count                |
 | `heartRate`          | `avg`, `min`, `max` | bpm                  |
 | `restingHeartRate`   | `avg`, `min`, `max` | bpm                  |
 | `height`             | `avg`, `min`, `max` | meters               |
 | `bodyMass`           | `avg`, `min`, `max` | kg                   |
+
+On iOS, `floorsClimbed` statistics aggregate HealthKit flights climbed. See the raw-read portability note above.
 
 Sleep, HRV, oxygen saturation, blood pressure, blood glucose, body temperature, respiratory rate, body fat, lean body mass, basal body temperature, VO2 max, and workout statistics are not supported by `readStatistics()`. Invalid data-type/metric combinations reject before crossing the native boundary.
 
@@ -801,7 +808,7 @@ Each scheduled run should recheck availability, `getCapabilities()`, and relevan
 
 ## Writing Data
 
-Request write authorization before saving. Save methods exist for steps, distance, active energy, heart rate, blood pressure, blood glucose, body temperature, respiratory rate, body fat, lean body mass, basal body temperature, resting heart rate, oxygen saturation, height, VO2 max, body mass, sleep sessions, and completed workouts. HRV remains read-only.
+Request write authorization before saving. Save methods exist for steps, distance, active energy, floors climbed, heart rate, blood pressure, blood glucose, body temperature, respiratory rate, body fat, lean body mass, basal body temperature, resting heart rate, oxygen saturation, height, VO2 max, body mass, sleep sessions, and completed workouts. HRV remains read-only.
 
 ```ts
 const authorization = await NitroHealth.requestAuthorization([
@@ -829,6 +836,7 @@ The main value constraints are:
 - `saveSteps`: positive integer `count`, at most 1,000,000.
 - `saveDistance`: non-negative `distanceMeters`, at most 1,000,000, plus required scope intent.
 - `saveActiveEnergyBurned`: non-negative `kilocalories`, at most 1,000,000.
+- `saveFloorsClimbed`: non-negative `floors`, at most 1,000,000.
 - `saveHeartRate` and `saveRestingHeartRate`: `bpm` from 1 through 300. Android rounds to whole bpm.
 - `saveBloodPressure`: `systolicMmHg` from 20 through 200 and `diastolicMmHg` from 10 through 180.
 - `saveBloodGlucose`: `millimolesPerLiter` from 0.5 through 50.

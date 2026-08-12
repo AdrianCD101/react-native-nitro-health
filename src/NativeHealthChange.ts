@@ -1,4 +1,5 @@
 import type { NativeActiveEnergyBurnedSample } from './NativeActiveEnergyBurnedSample'
+import type { NativeFloorsClimbedSample } from './NativeFloorsClimbedSample'
 import type { NativeBasalBodyTemperatureSample } from './NativeBasalBodyTemperatureSample'
 import type { NativeBloodGlucoseSample } from './NativeBloodGlucoseSample'
 import type { NativeBloodPressureSample } from './NativeBloodPressureSample'
@@ -50,6 +51,8 @@ export interface NativeHealthChange {
   distanceSamples?: NativeDistanceSample[]
   /** Active-energy samples for an `activeEnergyBurned` upsert. */
   activeEnergyBurnedSamples?: NativeActiveEnergyBurnedSample[]
+  /** Floors-climbed samples for a `floorsClimbed` upsert. */
+  floorsClimbedSamples?: NativeFloorsClimbedSample[]
   /** Oxygen-saturation samples for an `oxygenSaturation` upsert. */
   oxygenSaturationSamples?: NativeOxygenSaturationSample[]
   /** Height samples for a `height` upsert. */

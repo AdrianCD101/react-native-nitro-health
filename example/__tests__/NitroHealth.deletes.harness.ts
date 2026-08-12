@@ -275,6 +275,42 @@ describe('NitroHealth deletes (native)', () => {
     )
   })
 
+  it('round-trips save, delete by record identity, and re-read for floors climbed', async () => {
+    const authorized = await hasVerifiedPermissions([
+      { accessType: 'write', dataType: 'floorsClimbed' },
+      { accessType: 'read', dataType: 'floorsClimbed' },
+    ])
+    if (!authorized) return
+
+    await NitroHealth.deleteRecordsByTimeRange('floorsClimbed', deleteReadRange)
+    await NitroHealth.saveFloorsClimbed([
+      {
+        ...deleteInterval,
+        floors: 13.5,
+        sync: { id: 'nitro-health-harness-floors-delete', version: 1 },
+      },
+    ])
+    const page = await NitroHealth.readFloorsClimbed(deleteReadRange)
+    if (isInconclusiveRead(page.samples)) return
+
+    const saved = page.samples.find(
+      (sample) =>
+        Math.abs(sample.floors - 13.5) < 0.001 &&
+        sample.startDate.getTime() === deleteInterval.startDate.getTime() &&
+        sample.endDate.getTime() === deleteInterval.endDate.getTime()
+    )
+    expect(saved).toBeDefined()
+    if (saved === undefined || saved.identity.kind !== 'record') return
+
+    const result = await NitroHealth.deleteRecordsByIds('floorsClimbed', [saved.identity])
+    assertCompletedIdentityDelete(result)
+
+    const afterDelete = await NitroHealth.readFloorsClimbed(deleteReadRange)
+    expect(afterDelete.samples.some((sample) => sample.identity.id === saved.identity.id)).toBe(
+      false
+    )
+  })
+
   it('round-trips save, delete by record identity, and re-read for body fat', async () => {
     const authorized = await hasVerifiedPermissions([
       { accessType: 'write', dataType: 'bodyFat' },

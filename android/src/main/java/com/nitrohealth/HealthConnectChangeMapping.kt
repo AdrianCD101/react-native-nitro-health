@@ -11,6 +11,7 @@ import androidx.health.connect.client.records.BodyFatRecord
 import androidx.health.connect.client.records.BodyTemperatureRecord
 import androidx.health.connect.client.records.DistanceRecord
 import androidx.health.connect.client.records.ExerciseSessionRecord
+import androidx.health.connect.client.records.FloorsClimbedRecord
 import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.HeartRateVariabilityRmssdRecord
 import androidx.health.connect.client.records.HeightRecord
@@ -33,6 +34,7 @@ import com.margelo.nitro.nitrohealth.NativeBodyMassSample
 import com.margelo.nitro.nitrohealth.NativeDistanceSample
 import com.margelo.nitro.nitrohealth.NativeDistanceScope
 import com.margelo.nitro.nitrohealth.NativeHealthChange
+import com.margelo.nitro.nitrohealth.NativeFloorsClimbedSample
 import com.margelo.nitro.nitrohealth.NativeHeartRateSample
 import com.margelo.nitro.nitrohealth.NativeHeartRateVariabilitySample
 import com.margelo.nitro.nitrohealth.NativeHeightSample
@@ -232,6 +234,19 @@ private fun makeNativeUpsertionChange(record: Record): NativeHealthChange {
                 )
             )
         )
+        is FloorsClimbedRecord -> makeNativeChange(
+            type = "upsert",
+            recordId = recordId,
+            floorsClimbedSamples = arrayOf(
+                NativeFloorsClimbedSample(
+                    identity = identity,
+                    origin = origin,
+                    startTimeMs = record.startTime.toEpochMilli().toDouble(),
+                    endTimeMs = record.endTime.toEpochMilli().toDouble(),
+                    floors = record.floors
+                )
+            )
+        )
         is OxygenSaturationRecord -> makeNativeChange(
             type = "upsert",
             recordId = recordId,
@@ -313,6 +328,7 @@ private fun makeNativeChange(
     heartRateVariabilitySamples: Array<NativeHeartRateVariabilitySample>? = null,
     distanceSamples: Array<NativeDistanceSample>? = null,
     activeEnergyBurnedSamples: Array<NativeActiveEnergyBurnedSample>? = null,
+    floorsClimbedSamples: Array<NativeFloorsClimbedSample>? = null,
     oxygenSaturationSamples: Array<NativeOxygenSaturationSample>? = null,
     heightSamples: Array<NativeHeightSample>? = null,
     vo2MaxSamples: Array<NativeVo2MaxSample>? = null,
@@ -336,6 +352,7 @@ private fun makeNativeChange(
         heartRateVariabilitySamples = heartRateVariabilitySamples,
         distanceSamples = distanceSamples,
         activeEnergyBurnedSamples = activeEnergyBurnedSamples,
+        floorsClimbedSamples = floorsClimbedSamples,
         oxygenSaturationSamples = oxygenSaturationSamples,
         heightSamples = heightSamples,
         vo2MaxSamples = vo2MaxSamples,

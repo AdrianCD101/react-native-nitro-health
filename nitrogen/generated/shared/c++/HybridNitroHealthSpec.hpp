@@ -39,6 +39,8 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthDateRangeQuery; }
 namespace margelo::nitro::nitrohealth { struct NativeDistanceSamplePage; }
 // Forward declaration of `NativeActiveEnergyBurnedSamplePage` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeActiveEnergyBurnedSamplePage; }
+// Forward declaration of `NativeFloorsClimbedSamplePage` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeFloorsClimbedSamplePage; }
 // Forward declaration of `NativeBodyMassSamplePage` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBodyMassSamplePage; }
 // Forward declaration of `NativeHeartRateSamplePage` to properly resolve imports.
@@ -87,6 +89,8 @@ namespace margelo::nitro::nitrohealth { struct NativeDistanceWriteResult; }
 namespace margelo::nitro::nitrohealth { struct NativeDistanceSampleInput; }
 // Forward declaration of `NativeActiveEnergyBurnedSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeActiveEnergyBurnedSampleInput; }
+// Forward declaration of `NativeFloorsClimbedSampleInput` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeFloorsClimbedSampleInput; }
 // Forward declaration of `NativeHeartRateSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHeartRateSampleInput; }
 // Forward declaration of `NativeBloodPressureSampleInput` to properly resolve imports.
@@ -144,6 +148,7 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthAuthorizationResult; 
 #include "NativeHealthDateRangeQuery.hpp"
 #include "NativeDistanceSamplePage.hpp"
 #include "NativeActiveEnergyBurnedSamplePage.hpp"
+#include "NativeFloorsClimbedSamplePage.hpp"
 #include "NativeBodyMassSamplePage.hpp"
 #include "NativeHeartRateSamplePage.hpp"
 #include "NativeBloodPressureSamplePage.hpp"
@@ -168,6 +173,7 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthAuthorizationResult; 
 #include "NativeDistanceWriteResult.hpp"
 #include "NativeDistanceSampleInput.hpp"
 #include "NativeActiveEnergyBurnedSampleInput.hpp"
+#include "NativeFloorsClimbedSampleInput.hpp"
 #include "NativeHeartRateSampleInput.hpp"
 #include "NativeBloodPressureSampleInput.hpp"
 #include "NativeBloodGlucoseSampleInput.hpp"
@@ -235,6 +241,7 @@ namespace margelo::nitro::nitrohealth {
       virtual std::shared_ptr<Promise<NativeStepSamplePage>> readSteps(const NativeHealthDateRangeQuery& query) = 0;
       virtual std::shared_ptr<Promise<NativeDistanceSamplePage>> readDistance(const NativeHealthDateRangeQuery& query) = 0;
       virtual std::shared_ptr<Promise<NativeActiveEnergyBurnedSamplePage>> readActiveEnergyBurned(const NativeHealthDateRangeQuery& query) = 0;
+      virtual std::shared_ptr<Promise<NativeFloorsClimbedSamplePage>> readFloorsClimbed(const NativeHealthDateRangeQuery& query) = 0;
       virtual std::shared_ptr<Promise<NativeBodyMassSamplePage>> readBodyMass(const NativeHealthDateRangeQuery& query) = 0;
       virtual std::shared_ptr<Promise<NativeHeartRateSamplePage>> readHeartRate(const NativeHealthDateRangeQuery& query) = 0;
       virtual std::shared_ptr<Promise<NativeBloodPressureSamplePage>> readBloodPressure(const NativeHealthDateRangeQuery& query) = 0;
@@ -256,6 +263,7 @@ namespace margelo::nitro::nitrohealth {
       virtual std::shared_ptr<Promise<void>> saveSteps(const std::vector<NativeStepSampleInput>& samples) = 0;
       virtual std::shared_ptr<Promise<NativeDistanceWriteResult>> saveDistance(const std::vector<NativeDistanceSampleInput>& samples) = 0;
       virtual std::shared_ptr<Promise<void>> saveActiveEnergyBurned(const std::vector<NativeActiveEnergyBurnedSampleInput>& samples) = 0;
+      virtual std::shared_ptr<Promise<void>> saveFloorsClimbed(const std::vector<NativeFloorsClimbedSampleInput>& samples) = 0;
       virtual std::shared_ptr<Promise<void>> saveHeartRate(const std::vector<NativeHeartRateSampleInput>& samples) = 0;
       virtual std::shared_ptr<Promise<void>> saveBloodPressure(const std::vector<NativeBloodPressureSampleInput>& samples) = 0;
       virtual std::shared_ptr<Promise<void>> saveBloodGlucose(const std::vector<NativeBloodGlucoseSampleInput>& samples) = 0;

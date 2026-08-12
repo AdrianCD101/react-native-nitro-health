@@ -1,6 +1,8 @@
 import { NitroModules } from 'react-native-nitro-modules'
 import type { ActiveEnergyBurnedSample } from './ActiveEnergyBurnedSample'
 import type { ActiveEnergyBurnedSampleInput } from './ActiveEnergyBurnedSampleInput'
+import type { FloorsClimbedSample } from './FloorsClimbedSample'
+import type { FloorsClimbedSampleInput } from './FloorsClimbedSampleInput'
 import type {
   BackgroundChangesConfiguration,
   BackgroundChangesConfigurationResult,
@@ -77,6 +79,7 @@ import {
 } from './internal/queryMapping'
 import {
   makeActiveEnergyBurnedSample,
+  makeFloorsClimbedSample,
   makeBasalBodyTemperatureSample,
   makeBloodGlucoseSample,
   makeBloodPressureSample,
@@ -94,6 +97,7 @@ import {
   makeVo2MaxSample,
   makeLeanBodyMassSample,
   makeNativeActiveEnergyBurnedSampleInput,
+  makeNativeFloorsClimbedSampleInput,
   makeNativeBasalBodyTemperatureSampleInput,
   makeNativeBloodGlucoseSampleInput,
   makeNativeBloodPressureSampleInput,
@@ -234,6 +238,8 @@ export interface NitroHealth {
   readActiveEnergyBurned(
     query: HealthDateRangeQuery
   ): Promise<HealthSamplePage<ActiveEnergyBurnedSample>>
+  /** Reads paginated floors-climbed intervals. iOS maps HealthKit flights climbed to `floors`. */
+  readFloorsClimbed(query: HealthDateRangeQuery): Promise<HealthSamplePage<FloorsClimbedSample>>
   readBodyMass(query: HealthDateRangeQuery): Promise<HealthSamplePage<BodyMassSample>>
   readHeartRate(query: HealthDateRangeQuery): Promise<HealthSamplePage<HeartRateSample>>
   readBloodPressure(query: HealthDateRangeQuery): Promise<HealthSamplePage<BloodPressureSample>>
@@ -266,6 +272,8 @@ export interface NitroHealth {
   saveSteps(samples: StepSampleInput[]): Promise<void>
   saveDistance(samples: DistanceSampleInput[]): Promise<DistanceWriteResult>
   saveActiveEnergyBurned(samples: ActiveEnergyBurnedSampleInput[]): Promise<void>
+  /** Saves floors-climbed intervals. iOS stores `floors` as HealthKit flights climbed. */
+  saveFloorsClimbed(samples: FloorsClimbedSampleInput[]): Promise<void>
   saveHeartRate(samples: HeartRateSampleInput[]): Promise<void>
   saveBloodPressure(samples: BloodPressureSampleInput[]): Promise<void>
   saveBloodGlucose(samples: BloodGlucoseSampleInput[]): Promise<void>
@@ -433,6 +441,12 @@ export const NitroHealth: NitroHealth = {
       makeActiveEnergyBurnedSample
     )
   },
+  async readFloorsClimbed(query) {
+    return makeSamplePage(
+      await NitroHealthNative.readFloorsClimbed(makeNativeSampleQuery(query)),
+      makeFloorsClimbedSample
+    )
+  },
   async readBodyMass(query) {
     return makeSamplePage(
       await NitroHealthNative.readBodyMass(makeNativeSampleQuery(query)),
@@ -558,6 +572,12 @@ export const NitroHealth: NitroHealth = {
     const nativeSamples = samples.map(makeNativeActiveEnergyBurnedSampleInput)
     assertUniqueSampleSyncIds(samples)
     return NitroHealthNative.saveActiveEnergyBurned(nativeSamples)
+  },
+  async saveFloorsClimbed(samples) {
+    assertNonEmptySamples(samples)
+    const nativeSamples = samples.map(makeNativeFloorsClimbedSampleInput)
+    assertUniqueSampleSyncIds(samples)
+    return NitroHealthNative.saveFloorsClimbed(nativeSamples)
   },
   async saveHeartRate(samples) {
     assertNonEmptySamples(samples)

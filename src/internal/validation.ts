@@ -16,6 +16,7 @@ const HEALTH_DATA_TYPES = new Set<HealthDataType>([
   'heartRateVariability',
   'distance',
   'activeEnergyBurned',
+  'floorsClimbed',
   'oxygenSaturation',
   'height',
   'vo2Max',

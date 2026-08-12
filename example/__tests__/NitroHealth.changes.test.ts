@@ -162,7 +162,7 @@ describe('NitroHealth changes contract', () => {
     })
   })
 
-  it('preserves distance, tagged sleep, and workout semantics in upserts', async () => {
+  it('preserves distance, floors climbed, tagged sleep, and workout semantics in upserts', async () => {
     const startTimeMs = Date.parse('2026-01-01T00:00:00.000Z')
     const endTimeMs = Date.parse('2026-01-01T08:00:00.000Z')
     type NativeChangesResult = Awaited<ReturnType<typeof mockNitroHealth.getChanges>>
@@ -185,6 +185,20 @@ describe('NitroHealth changes contract', () => {
               endTimeMs,
               distanceMeters: 5000,
               scope: 'walkingRunning',
+            },
+          ],
+        })
+      )
+      .mockResolvedValueOnce(
+        changePage({
+          type: 'upsert',
+          recordId: 'floors-record',
+          floorsClimbedSamples: [
+            {
+              ...nativeRecordMetadata('floors-record'),
+              startTimeMs,
+              endTimeMs,
+              floors: 12.5,
             },
           ],
         })
@@ -236,15 +250,31 @@ describe('NitroHealth changes contract', () => {
       )
 
     const distance = await NitroHealth.getChanges('distance', 'distance-token')
+    const floors = await NitroHealth.getChanges('floorsClimbed', 'floors-token')
     const sleep = await NitroHealth.getChanges('sleep', 'sleep-token')
     const workout = await NitroHealth.getChanges('workout', 'workout-token')
 
-    if (distance.tokenExpired || sleep.tokenExpired || workout.tokenExpired) {
+    if (
+      distance.tokenExpired ||
+      floors.tokenExpired ||
+      sleep.tokenExpired ||
+      workout.tokenExpired
+    ) {
       throw new Error('Expected successful change pages')
     }
     expect(distance.changes[0]).toMatchObject({
       record: { kind: 'record', id: 'distance-record' },
       samples: [{ scope: 'walking-running', distanceMeters: 5000 }],
+    })
+    expect(floors.changes[0]).toMatchObject({
+      record: { kind: 'record', id: 'floors-record' },
+      samples: [
+        {
+          floors: 12.5,
+          startDate: new Date(startTimeMs),
+          endDate: new Date(endTimeMs),
+        },
+      ],
     })
     expect(sleep.changes[0]).toMatchObject({
       record: { kind: 'record', id: 'sleep-record' },

@@ -16,6 +16,7 @@ import com.margelo.nitro.nitrohealth.NativeBodyTemperatureSampleInput
 import com.margelo.nitro.nitrohealth.NativeBodyMassSampleInput
 import com.margelo.nitro.nitrohealth.NativeDistanceSampleInput
 import com.margelo.nitro.nitrohealth.NativeDistanceScope
+import com.margelo.nitro.nitrohealth.NativeFloorsClimbedSampleInput
 import com.margelo.nitro.nitrohealth.NativeHeartRateSampleInput
 import com.margelo.nitro.nitrohealth.NativeHeightSampleInput
 import com.margelo.nitro.nitrohealth.NativeLeanBodyMassSampleInput
@@ -109,6 +110,28 @@ class SampleInputConvertersTest {
 
         assertEquals(1, records.size)
         assertEquals(215.25, records[0].energy.inKilocalories, 0.0)
+    }
+
+    @Test
+    fun toFloorsClimbedRecordsMapsIntervalFloors() {
+        val records = toFloorsClimbedRecords(
+            arrayOf(
+                NativeFloorsClimbedSampleInput(
+                    startTimeMs = startTimeMs,
+                    endTimeMs = endTimeMs,
+                    floors = 12.5,
+                    syncId = null,
+                    syncVersion = null
+                )
+            )
+        )
+
+        assertEquals(1, records.size)
+        assertEquals(Instant.ofEpochMilli(startTimeMs.toLong()), records[0].startTime)
+        assertEquals(Instant.ofEpochMilli(endTimeMs.toLong()), records[0].endTime)
+        assertNull(records[0].startZoneOffset)
+        assertNull(records[0].endZoneOffset)
+        assertEquals(12.5, records[0].floors, 0.0)
     }
 
     @Test
@@ -431,7 +454,7 @@ class SampleInputConvertersTest {
     fun allConvertersPreserveUnknownUnkeyedMetadata() {
         val metadata = metadataFromAllConverters(syncId = null, syncVersion = null)
 
-        assertEquals(16, metadata.size)
+        assertEquals(17, metadata.size)
         metadata.forEach {
             assertNull(it.clientRecordId)
             assertEquals(0L, it.clientRecordVersion)
@@ -443,7 +466,7 @@ class SampleInputConvertersTest {
     fun allConvertersMapVersionedSyncMetadata() {
         val metadata = metadataFromAllConverters(syncId = "sample-sync-id", syncVersion = 42.0)
 
-        assertEquals(16, metadata.size)
+        assertEquals(17, metadata.size)
         metadata.forEach {
             assertEquals("sample-sync-id", it.clientRecordId)
             assertEquals(42L, it.clientRecordVersion)
@@ -504,6 +527,17 @@ class SampleInputConvertersTest {
                         startTimeMs = startTimeMs,
                         endTimeMs = endTimeMs,
                         kilocalories = 215.25,
+                        syncId = syncId,
+                        syncVersion = syncVersion
+                    )
+                )
+            ).single().metadata,
+            toFloorsClimbedRecords(
+                arrayOf(
+                    NativeFloorsClimbedSampleInput(
+                        startTimeMs = startTimeMs,
+                        endTimeMs = endTimeMs,
+                        floors = 12.5,
                         syncId = syncId,
                         syncVersion = syncVersion
                     )

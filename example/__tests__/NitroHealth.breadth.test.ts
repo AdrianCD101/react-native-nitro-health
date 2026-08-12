@@ -449,6 +449,45 @@ describe('NitroHealth breadth data types contract', () => {
     })
   })
 
+  describe('readFloorsClimbed', () => {
+    it('maps one native sample and leaves the floors value untouched', async () => {
+      const startDate = new Date('2026-01-01T00:00:00.000Z')
+      const endDate = new Date('2026-01-02T00:00:00.000Z')
+      const startTimeMs = new Date('2026-01-01T09:00:00.000Z').getTime()
+      const endTimeMs = new Date('2026-01-01T09:30:00.000Z').getTime()
+      mockNitroHealth.readFloorsClimbed.mockResolvedValue({
+        samples: [
+          {
+            ...nativeRecordMetadata('floors-record', 'com.example.tracker', 'Example Tracker'),
+            startTimeMs,
+            endTimeMs,
+            floors: 12.5,
+          },
+        ],
+      })
+
+      const result = await NitroHealth.readFloorsClimbed({ startDate, endDate })
+
+      expect(mockNitroHealth.readFloorsClimbed).toHaveBeenCalledWith({
+        startTimeMs: startDate.getTime(),
+        endTimeMs: endDate.getTime(),
+        limit: 1000,
+        ascending: true,
+      })
+      expect(result.samples).toHaveLength(1)
+      expect(result.samples[0].identity).toEqual({ kind: 'record', id: 'floors-record' })
+      expect(result.samples[0].startDate).toBeInstanceOf(Date)
+      expect(result.samples[0].startDate.getTime()).toBe(startTimeMs)
+      expect(result.samples[0].endDate).toBeInstanceOf(Date)
+      expect(result.samples[0].endDate.getTime()).toBe(endTimeMs)
+      expect(result.samples[0].floors).toBe(12.5)
+      expect(result.samples[0].origin).toEqual({
+        identifier: 'com.example.tracker',
+        displayName: 'Example Tracker',
+      })
+    })
+  })
+
   describe('saveRestingHeartRate', () => {
     it('saves through the Nitro hybrid object', async () => {
       const date = new Date('2026-01-01T09:00:00.000Z')
@@ -953,6 +992,56 @@ describe('NitroHealth breadth data types contract', () => {
     })
   })
 
+  describe('saveFloorsClimbed', () => {
+    it('saves through the Nitro hybrid object', async () => {
+      const startDate = new Date('2026-01-01T09:00:00.000Z')
+      const endDate = new Date('2026-01-01T09:30:00.000Z')
+      mockNitroHealth.saveFloorsClimbed.mockResolvedValue(undefined)
+
+      await expect(
+        NitroHealth.saveFloorsClimbed([{ startDate, endDate, floors: 12.5 }])
+      ).resolves.toBeUndefined()
+
+      expect(mockNitroHealth.saveFloorsClimbed).toHaveBeenCalledWith([
+        { startTimeMs: startDate.getTime(), endTimeMs: endDate.getTime(), floors: 12.5 },
+      ])
+    })
+
+    it('rejects negative or non-finite floors before crossing the native boundary', async () => {
+      const startDate = new Date('2026-01-01T09:00:00.000Z')
+      const endDate = new Date('2026-01-01T09:30:00.000Z')
+
+      for (const floors of [-1, Number.NaN, Number.POSITIVE_INFINITY]) {
+        await expect(
+          NitroHealth.saveFloorsClimbed([{ startDate, endDate, floors }])
+        ).rejects.toThrow('samples[0]: floors must be a non-negative number')
+      }
+
+      expect(mockNitroHealth.saveFloorsClimbed).not.toHaveBeenCalled()
+    })
+
+    it('accepts a zero-floor interval', async () => {
+      const startDate = new Date('2026-01-01T09:00:00.000Z')
+      const endDate = new Date('2026-01-01T09:30:00.000Z')
+      mockNitroHealth.saveFloorsClimbed.mockResolvedValue(undefined)
+
+      await expect(
+        NitroHealth.saveFloorsClimbed([{ startDate, endDate, floors: 0 }])
+      ).resolves.toBeUndefined()
+    })
+
+    it('rejects an invalid sample interval before crossing the native boundary', async () => {
+      const startDate = new Date('2026-01-01T09:30:00.000Z')
+      const endDate = new Date('2026-01-01T09:00:00.000Z')
+
+      await expect(
+        NitroHealth.saveFloorsClimbed([{ startDate, endDate, floors: 12.5 }])
+      ).rejects.toThrow('samples[0]: startDate must be before endDate')
+
+      expect(mockNitroHealth.saveFloorsClimbed).not.toHaveBeenCalled()
+    })
+  })
+
   describe('readStatistics for the new data types', () => {
     it('accepts avg/min/max for restingHeartRate', async () => {
       const startDate = new Date('2026-01-01T00:00:00.000Z')
@@ -996,6 +1085,44 @@ describe('NitroHealth breadth data types contract', () => {
         bucket: 'week',
         metrics: ['avg'],
       })
+    })
+
+    it('accepts sum for floorsClimbed', async () => {
+      const startDate = new Date('2026-01-01T00:00:00.000Z')
+      const endDate = new Date('2026-01-08T00:00:00.000Z')
+      mockNitroHealth.readStatistics.mockResolvedValue([])
+
+      await expect(
+        NitroHealth.readStatistics('floorsClimbed', {
+          startDate,
+          endDate,
+          bucket: 'day',
+          metrics: ['sum'],
+        })
+      ).resolves.toEqual([])
+
+      expect(mockNitroHealth.readStatistics).toHaveBeenCalledWith('floorsClimbed', {
+        startTimeMs: startDate.getTime(),
+        endTimeMs: endDate.getTime(),
+        bucket: 'day',
+        metrics: ['sum'],
+      })
+    })
+
+    it("rejects 'avg' for floorsClimbed before crossing the native boundary", async () => {
+      const startDate = new Date('2026-01-01T00:00:00.000Z')
+      const endDate = new Date('2026-01-08T00:00:00.000Z')
+
+      await expect(
+        NitroHealth.readStatistics('floorsClimbed', {
+          startDate,
+          endDate,
+          bucket: 'day',
+          metrics: ['avg'],
+        })
+      ).rejects.toThrow(`Metric 'avg' is not supported for 'floorsClimbed' (supported: sum)`)
+
+      expect(mockNitroHealth.readStatistics).not.toHaveBeenCalled()
     })
 
     it('rejects heartRateVariability entirely before crossing the native boundary', async () => {

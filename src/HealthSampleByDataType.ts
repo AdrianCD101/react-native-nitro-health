@@ -8,6 +8,7 @@ import type { BodyTemperatureSample } from './BodyTemperatureSample'
 import type { DistanceSample } from './DistanceSample'
 import type { HeartRateSample } from './HeartRateSample'
 import type { HeartRateVariabilitySample } from './HeartRateVariabilitySample'
+import type { FloorsClimbedSample } from './FloorsClimbedSample'
 import type { HeightSample } from './HeightSample'
 import type { Vo2MaxSample } from './Vo2MaxSample'
 import type { LeanBodyMassSample } from './LeanBodyMassSample'
@@ -46,6 +47,8 @@ export interface HealthSampleByDataType {
   distance: DistanceSample
   /** Active-energy intervals. */
   activeEnergyBurned: ActiveEnergyBurnedSample
+  /** Floors climbed intervals. */
+  floorsClimbed: FloorsClimbedSample
   /** Oxygen-saturation readings. */
   oxygenSaturation: OxygenSaturationSample
   /** Height measurements. */

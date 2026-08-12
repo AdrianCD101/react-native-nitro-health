@@ -1,4 +1,6 @@
 import type { ActiveEnergyBurnedSample } from '../ActiveEnergyBurnedSample'
+import type { FloorsClimbedSample } from '../FloorsClimbedSample'
+import type { FloorsClimbedSampleInput } from '../FloorsClimbedSampleInput'
 import type { ActiveEnergyBurnedSampleInput } from '../ActiveEnergyBurnedSampleInput'
 import type { BodyMassSample } from '../BodyMassSample'
 import type { BodyMassSampleInput } from '../BodyMassSampleInput'
@@ -25,6 +27,8 @@ import type { HeightSampleInput } from '../HeightSampleInput'
 import type { Vo2MaxSample } from '../Vo2MaxSample'
 import type { Vo2MaxSampleInput } from '../Vo2MaxSampleInput'
 import type { NativeActiveEnergyBurnedSample } from '../NativeActiveEnergyBurnedSample'
+import type { NativeFloorsClimbedSample } from '../NativeFloorsClimbedSample'
+import type { NativeFloorsClimbedSampleInput } from '../NativeFloorsClimbedSampleInput'
 import type { NativeActiveEnergyBurnedSampleInput } from '../NativeActiveEnergyBurnedSampleInput'
 import type { NativeBodyMassSample } from '../NativeBodyMassSample'
 import type { NativeBodyMassSampleInput } from '../NativeBodyMassSampleInput'
@@ -118,6 +122,7 @@ import {
 const MAX_STEP_COUNT = 1_000_000
 const MAX_DISTANCE_METERS = 1_000_000
 const MAX_KILOCALORIES = 1_000_000
+const MAX_FLOORS = 1_000_000
 const MIN_BPM = 1
 const MAX_BPM = 300
 const MIN_SYSTOLIC_MMHG = 20
@@ -370,6 +375,23 @@ export function makeNativeActiveEnergyBurnedSampleInput(
     startTimeMs,
     endTimeMs,
     kilocalories: sample.kilocalories,
+    ...makeNativeSync(sample.sync, index),
+  }
+}
+
+export function makeNativeFloorsClimbedSampleInput(
+  sample: FloorsClimbedSampleInput,
+  index: number
+): NativeFloorsClimbedSampleInput {
+  const { startTimeMs, endTimeMs } = makeSampleInterval(sample, index)
+
+  assertSampleNonNegativeNumber(sample.floors, index, 'floors')
+  assertSampleMaxValue(sample.floors, MAX_FLOORS, index, 'floors')
+
+  return {
+    startTimeMs,
+    endTimeMs,
+    floors: sample.floors,
     ...makeNativeSync(sample.sync, index),
   }
 }
@@ -860,6 +882,16 @@ export function makeActiveEnergyBurnedSample(
   }
 }
 
+export function makeFloorsClimbedSample(sample: NativeFloorsClimbedSample): FloorsClimbedSample {
+  return {
+    identity: makeHealthSampleIdentity(sample.identity),
+    origin: makeHealthDataOrigin(sample.origin),
+    startDate: new Date(sample.startTimeMs),
+    endDate: new Date(sample.endTimeMs),
+    floors: sample.floors,
+  }
+}
+
 export function makeBodyMassSample(sample: NativeBodyMassSample): BodyMassSample {
   return {
     identity: makeHealthSampleIdentity(sample.identity),
@@ -1117,6 +1149,7 @@ const CHANGE_SAMPLE_FIELDS = [
   'heartRateVariabilitySamples',
   'distanceSamples',
   'activeEnergyBurnedSamples',
+  'floorsClimbedSamples',
   'oxygenSaturationSamples',
   'heightSamples',
   'vo2MaxSamples',
@@ -1207,6 +1240,11 @@ function makeUpsertSamples(
       if (change.activeEnergyBurnedSamples === undefined)
         throw new Error("Native 'activeEnergyBurned' upsert is missing samples")
       samples = change.activeEnergyBurnedSamples.map(makeActiveEnergyBurnedSample)
+      break
+    case 'floorsClimbed':
+      if (change.floorsClimbedSamples === undefined)
+        throw new Error("Native 'floorsClimbed' upsert is missing samples")
+      samples = change.floorsClimbedSamples.map(makeFloorsClimbedSample)
       break
     case 'oxygenSaturation':
       if (change.oxygenSaturationSamples === undefined)
