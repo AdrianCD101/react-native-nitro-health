@@ -20,6 +20,7 @@ const iosRuntime = process.env.RN_HARNESS_IOS_RUNTIME ?? '26.0'
 const config = {
   entryPoint: './index.js',
   appRegistryComponentName: 'NitroHealthExample',
+  permissions: true,
   defaultRunner: 'ios',
   runners: [
     applePlatform({

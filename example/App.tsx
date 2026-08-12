@@ -18,6 +18,8 @@ import type {
 } from 'react-native-nitro-health'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
+import { allHealthPermissions, writableDataTypes } from './healthPermissions'
+
 const readPermissions: Array<{ dataType: HealthDataType; label: string }> = [
   { dataType: 'steps', label: 'Steps' },
   { dataType: 'distance', label: 'Distance' },
@@ -27,17 +29,6 @@ const readPermissions: Array<{ dataType: HealthDataType; label: string }> = [
   { dataType: 'sleep', label: 'Sleep' },
   { dataType: 'bodyMass', label: 'Body Mass' },
   { dataType: 'workout', label: 'Workouts' },
-]
-
-const writableDataTypes: WritableHealthDataType[] = [
-  'steps',
-  'distance',
-  'activeEnergyBurned',
-  'floorsClimbed',
-  'heartRate',
-  'bodyMass',
-  'sleep',
-  'workout',
 ]
 
 function isWritableDataType(dataType: HealthDataType): dataType is WritableHealthDataType {
@@ -364,6 +355,14 @@ function App(): React.JSX.Element {
     })
   }
 
+  async function requestAllPermissions(): Promise<void> {
+    await runWorkflow('requestAllPermissions', async () => {
+      const result = await NitroHealth.requestAuthorization(allHealthPermissions)
+      setWorkflowMessage(`All health access: ${formatAuthorization(result)}`)
+      setCapabilities(await NitroHealth.getCapabilities())
+    })
+  }
+
   async function revokePermissions(): Promise<void> {
     await runWorkflow('revoke', async () => {
       const result = await NitroHealth.revokeAllPermissions()
@@ -637,6 +636,15 @@ function App(): React.JSX.Element {
               disabled={workflowActivity !== undefined}
               label="Manage permissions"
               onPress={managePermissions}
+            />
+            <ActionButton
+              disabled={!isAvailable || workflowActivity !== undefined}
+              label={
+                workflowActivity === 'requestAllPermissions'
+                  ? 'Requesting all access...'
+                  : 'Request all health access'
+              }
+              onPress={requestAllPermissions}
             />
             <ActionButton
               danger

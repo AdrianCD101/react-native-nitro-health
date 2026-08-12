@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'react-native-harness'
+import { describe, expect, it, waitUntil } from 'react-native-harness'
 import { NitroHealth } from 'react-native-nitro-health'
 import type { HealthStatistics, StatisticsMetric } from 'react-native-nitro-health'
 
@@ -7,16 +7,24 @@ import {
   floorsClimbedReadPermission,
   floorsClimbedWritePermission,
   hasVerifiedPermissions,
-  heartRateReadPermission,
-  isInconclusiveRead,
   last7DaysRange,
   lastDayRange,
-  saveInterval,
-  saveReadRange,
-  stepsReadPermission,
 } from './support/harnessSupport'
 
 const statisticsMetricKeys = ['sum', 'avg', 'min', 'max'] as const
+const statisticsRangeEnd = Date.now() - 60 * 60 * 1000
+const statisticsRange = {
+  startDate: new Date(statisticsRangeEnd - 48 * 60 * 60 * 1000),
+  endDate: new Date(statisticsRangeEnd),
+}
+const statisticsInterval = {
+  startDate: new Date(statisticsRangeEnd - 6 * 60 * 60 * 1000),
+  endDate: new Date(statisticsRangeEnd - 5.5 * 60 * 60 * 1000),
+}
+
+function sumStatistics(buckets: readonly HealthStatistics[]): number {
+  return buckets.reduce((sum, bucket) => sum + (bucket.sum ?? 0), 0)
+}
 
 function assertStatisticsEntry(
   entry: HealthStatistics,
@@ -37,89 +45,57 @@ function assertStatisticsEntry(
 
 describe('NitroHealth statistics (native)', () => {
   it('reads heart rate statistics from native code without crashing', async () => {
-    try {
-      const statistics = await NitroHealth.readHeartRateStatistics(emptyRange)
+    const statistics = await NitroHealth.readHeartRateStatistics(emptyRange)
 
-      for (const value of [statistics.average, statistics.min, statistics.max]) {
-        expect(['number', 'undefined']).toContain(typeof value)
-      }
-    } catch (error) {
-      expect(error).toBeInstanceOf(Error)
+    for (const value of [statistics.average, statistics.min, statistics.max]) {
+      expect(['number', 'undefined']).toContain(typeof value)
     }
-  })
-
-  it('rejects reading heart rate statistics when permission is reported not granted', async () => {
-    const result = await NitroHealth.getPermissionStatuses(heartRateReadPermission)
-    if (
-      result.status === 'unavailable' ||
-      !result.statuses.some(({ status }) => status === 'notGranted')
-    ) {
-      return
-    }
-
-    await expect(NitroHealth.readHeartRateStatistics(emptyRange)).rejects.toThrow(/permission/i)
   })
 
   describe('readStatistics', () => {
     it('reads statistics from native code without crashing', async () => {
-      try {
-        const dailySteps = await NitroHealth.readStatistics('steps', {
-          ...last7DaysRange,
-          bucket: 'day',
-          metrics: ['sum'],
-        })
+      const dailySteps = await NitroHealth.readStatistics('steps', {
+        ...last7DaysRange,
+        bucket: 'day',
+        metrics: ['sum'],
+      })
 
-        expect(Array.isArray(dailySteps)).toBe(true)
-        for (const entry of dailySteps) {
-          assertStatisticsEntry(entry, ['sum'])
-        }
-      } catch (error) {
-        expect(error).toBeInstanceOf(Error)
+      expect(Array.isArray(dailySteps)).toBe(true)
+      for (const entry of dailySteps) {
+        assertStatisticsEntry(entry, ['sum'])
       }
 
-      try {
-        const hourlyHeartRate = await NitroHealth.readStatistics('heartRate', {
-          ...lastDayRange,
-          bucket: 'hour',
-          metrics: ['avg', 'min', 'max'],
-        })
+      const hourlyHeartRate = await NitroHealth.readStatistics('heartRate', {
+        ...lastDayRange,
+        bucket: 'hour',
+        metrics: ['avg', 'min', 'max'],
+      })
 
-        expect(Array.isArray(hourlyHeartRate)).toBe(true)
-        for (const entry of hourlyHeartRate) {
-          assertStatisticsEntry(entry, ['avg', 'min', 'max'])
-        }
-      } catch (error) {
-        expect(error).toBeInstanceOf(Error)
+      expect(Array.isArray(hourlyHeartRate)).toBe(true)
+      for (const entry of hourlyHeartRate) {
+        assertStatisticsEntry(entry, ['avg', 'min', 'max'])
       }
 
-      try {
-        const dailyRestingHeartRate = await NitroHealth.readStatistics('restingHeartRate', {
-          ...last7DaysRange,
-          bucket: 'day',
-          metrics: ['avg', 'min', 'max'],
-        })
+      const dailyRestingHeartRate = await NitroHealth.readStatistics('restingHeartRate', {
+        ...last7DaysRange,
+        bucket: 'day',
+        metrics: ['avg', 'min', 'max'],
+      })
 
-        expect(Array.isArray(dailyRestingHeartRate)).toBe(true)
-        for (const entry of dailyRestingHeartRate) {
-          assertStatisticsEntry(entry, ['avg', 'min', 'max'])
-        }
-      } catch (error) {
-        expect(error).toBeInstanceOf(Error)
+      expect(Array.isArray(dailyRestingHeartRate)).toBe(true)
+      for (const entry of dailyRestingHeartRate) {
+        assertStatisticsEntry(entry, ['avg', 'min', 'max'])
       }
 
-      try {
-        const dailyHeight = await NitroHealth.readStatistics('height', {
-          ...last7DaysRange,
-          bucket: 'day',
-          metrics: ['avg', 'min', 'max'],
-        })
+      const dailyHeight = await NitroHealth.readStatistics('height', {
+        ...last7DaysRange,
+        bucket: 'day',
+        metrics: ['avg', 'min', 'max'],
+      })
 
-        expect(Array.isArray(dailyHeight)).toBe(true)
-        for (const entry of dailyHeight) {
-          assertStatisticsEntry(entry, ['avg', 'min', 'max'])
-        }
-      } catch (error) {
-        expect(error).toBeInstanceOf(Error)
+      expect(Array.isArray(dailyHeight)).toBe(true)
+      for (const entry of dailyHeight) {
+        assertStatisticsEntry(entry, ['avg', 'min', 'max'])
       }
     })
 
@@ -185,20 +161,6 @@ describe('NitroHealth statistics (native)', () => {
       ).rejects.toThrow('bucket must be one of: hour, day, week, month')
     })
 
-    it('rejects reading statistics when steps permission is reported not granted', async () => {
-      const result = await NitroHealth.getPermissionStatuses(stepsReadPermission)
-      if (
-        result.status === 'unavailable' ||
-        !result.statuses.some(({ status }) => status === 'notGranted')
-      ) {
-        return
-      }
-
-      await expect(
-        NitroHealth.readStatistics('steps', { ...emptyRange, bucket: 'day', metrics: ['sum'] })
-      ).rejects.toThrow(/permission/i)
-    })
-
     it('round-trips saved steps through readStatistics when authorized', async () => {
       const authorized = await hasVerifiedPermissions([
         { accessType: 'write', dataType: 'steps' },
@@ -209,20 +171,27 @@ describe('NitroHealth statistics (native)', () => {
         return
       }
 
-      await NitroHealth.saveSteps([{ ...saveInterval, count: 321 }])
+      await NitroHealth.deleteRecordsByTimeRange('steps', statisticsRange)
+      try {
+        const query = { ...statisticsRange, bucket: 'day' as const, metrics: ['sum' as const] }
+        const baseline = sumStatistics(await NitroHealth.readStatistics('steps', query))
 
-      const buckets = await NitroHealth.readStatistics('steps', {
-        startDate: saveReadRange.startDate,
-        endDate: saveReadRange.endDate,
-        bucket: 'day',
-        metrics: ['sum'],
-      })
+        await NitroHealth.saveSteps([
+          {
+            ...statisticsInterval,
+            count: 321,
+            sync: { id: 'nitro-health-harness-steps-statistics', version: 1 },
+          },
+        ])
 
-      if (isInconclusiveRead(buckets)) {
-        return
+        await waitUntil(
+          async () =>
+            sumStatistics(await NitroHealth.readStatistics('steps', query)) >= baseline + 321,
+          { interval: 250, timeout: 10_000 }
+        )
+      } finally {
+        await NitroHealth.deleteRecordsByTimeRange('steps', statisticsRange)
       }
-
-      expect(buckets.some((bucket) => (bucket.sum ?? 0) >= 321)).toBe(true)
     })
 
     it('round-trips saved floors climbed through readStatistics when authorized', async () => {
@@ -235,26 +204,27 @@ describe('NitroHealth statistics (native)', () => {
         return
       }
 
-      await NitroHealth.deleteRecordsByTimeRange('floorsClimbed', saveReadRange)
+      await NitroHealth.deleteRecordsByTimeRange('floorsClimbed', statisticsRange)
       try {
+        const query = { ...statisticsRange, bucket: 'day' as const, metrics: ['sum' as const] }
+        const baseline = sumStatistics(await NitroHealth.readStatistics('floorsClimbed', query))
+
         await NitroHealth.saveFloorsClimbed([
           {
-            ...saveInterval,
+            ...statisticsInterval,
             floors: 12.5,
             sync: { id: 'nitro-health-harness-floors-statistics', version: 1 },
           },
         ])
 
-        const buckets = await NitroHealth.readStatistics('floorsClimbed', {
-          ...saveReadRange,
-          bucket: 'day',
-          metrics: ['sum'],
-        })
-        if (isInconclusiveRead(buckets)) return
-
-        expect(buckets.some((bucket) => Math.abs((bucket.sum ?? 0) - 12.5) < 0.001)).toBe(true)
+        await waitUntil(
+          async () =>
+            sumStatistics(await NitroHealth.readStatistics('floorsClimbed', query)) >=
+            baseline + 12.5 - 0.001,
+          { interval: 250, timeout: 10_000 }
+        )
       } finally {
-        await NitroHealth.deleteRecordsByTimeRange('floorsClimbed', saveReadRange)
+        await NitroHealth.deleteRecordsByTimeRange('floorsClimbed', statisticsRange)
       }
     })
   })

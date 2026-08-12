@@ -1,23 +1,12 @@
-import { Platform } from 'react-native'
 import { describe, expect, it } from 'react-native-harness'
 import { NitroHealth } from 'react-native-nitro-health'
-import type {
-  HealthMetricValue,
-  HealthPermission,
-  HealthSample,
-  StepSample,
-} from 'react-native-nitro-health'
+import type { HealthMetricValue, HealthSample, StepSample } from 'react-native-nitro-health'
 
 import {
   emptyRange,
-  floorsClimbedReadPermission,
-  hasReadablePermission,
   hasVerifiedPermissions,
-  heartRateVariabilityReadPermission,
   isInconclusiveRead,
-  last7DaysRange,
   saveReadRange,
-  stepsReadPermission,
 } from './support/harnessSupport'
 
 function assertSampleIdentityAndOrigin(sample: HealthSample): void {
@@ -43,54 +32,23 @@ function assertMetric(metric: HealthMetricValue): void {
   }
 }
 
-async function assertReadRejectedWhenReportedDenied(
-  permissions: HealthPermission[],
-  operation: () => Promise<unknown>
-): Promise<void> {
-  const result = await NitroHealth.getPermissionStatuses(permissions)
-  if (
-    result.status === 'unavailable' ||
-    !result.statuses.some(({ status }) => status === 'notGranted')
-  ) {
-    return
-  }
-
-  await expect(operation()).rejects.toThrow(/permission/i)
-}
-
 describe('NitroHealth reads (native)', () => {
-  it('reads steps and reports denied reads through typed permission state', async () => {
-    try {
-      const page = await NitroHealth.readSteps(emptyRange)
-      expect(Array.isArray(page.samples)).toBe(true)
-      expect(['string', 'undefined']).toContain(typeof page.nextCursor)
-      page.samples.forEach(assertSampleIdentityAndOrigin)
-    } catch (error) {
-      expect(error).toBeInstanceOf(Error)
-    }
-
-    await assertReadRejectedWhenReportedDenied(stepsReadPermission, () =>
-      NitroHealth.readSteps(emptyRange)
-    )
+  it('reads steps through native code', async () => {
+    const page = await NitroHealth.readSteps(emptyRange)
+    expect(Array.isArray(page.samples)).toBe(true)
+    expect(['string', 'undefined']).toContain(typeof page.nextCursor)
+    page.samples.forEach(assertSampleIdentityAndOrigin)
   })
 
   it('reads distance with identity, source identifier, and semantic scope', async () => {
-    try {
-      const page = await NitroHealth.readDistance(emptyRange)
+    const page = await NitroHealth.readDistance(emptyRange)
 
-      expect(Array.isArray(page.samples)).toBe(true)
-      for (const sample of page.samples) {
-        assertSampleIdentityAndOrigin(sample)
-        expect(typeof sample.distanceMeters).toBe('number')
-        expect(['walking-running', 'activity-unspecified']).toContain(sample.scope)
-      }
-    } catch (error) {
-      expect(error).toBeInstanceOf(Error)
+    expect(Array.isArray(page.samples)).toBe(true)
+    for (const sample of page.samples) {
+      assertSampleIdentityAndOrigin(sample)
+      expect(typeof sample.distanceMeters).toBe('number')
+      expect(['walking-running', 'activity-unspecified']).toContain(sample.scope)
     }
-
-    await assertReadRejectedWhenReportedDenied([{ accessType: 'read', dataType: 'distance' }], () =>
-      NitroHealth.readDistance(emptyRange)
-    )
   })
 
   it('rejects invalid activity quantity ranges before crossing the native boundary', async () => {
@@ -108,225 +66,152 @@ describe('NitroHealth reads (native)', () => {
   })
 
   it('reads active energy, heart rate, and body mass with identity and origin', async () => {
-    try {
-      const page = await NitroHealth.readActiveEnergyBurned(emptyRange)
-      for (const sample of page.samples) {
-        assertSampleIdentityAndOrigin(sample)
-        expect(typeof sample.kilocalories).toBe('number')
-      }
-    } catch (error) {
-      expect(error).toBeInstanceOf(Error)
+    const energy = await NitroHealth.readActiveEnergyBurned(emptyRange)
+    for (const sample of energy.samples) {
+      assertSampleIdentityAndOrigin(sample)
+      expect(typeof sample.kilocalories).toBe('number')
     }
 
-    try {
-      const page = await NitroHealth.readHeartRate(emptyRange)
-      for (const sample of page.samples) {
-        assertSampleIdentityAndOrigin(sample)
-        expect(typeof sample.bpm).toBe('number')
-      }
-    } catch (error) {
-      expect(error).toBeInstanceOf(Error)
+    const heartRate = await NitroHealth.readHeartRate(emptyRange)
+    for (const sample of heartRate.samples) {
+      assertSampleIdentityAndOrigin(sample)
+      expect(typeof sample.bpm).toBe('number')
     }
 
-    try {
-      const page = await NitroHealth.readBodyMass(emptyRange)
-      for (const sample of page.samples) {
-        assertSampleIdentityAndOrigin(sample)
-        expect(typeof sample.kilograms).toBe('number')
-      }
-    } catch (error) {
-      expect(error).toBeInstanceOf(Error)
+    const bodyMass = await NitroHealth.readBodyMass(emptyRange)
+    for (const sample of bodyMass.samples) {
+      assertSampleIdentityAndOrigin(sample)
+      expect(typeof sample.kilograms).toBe('number')
     }
   })
 
   it('returns tagged stage-less sleep envelopes and explicit sleep stages', async () => {
-    try {
-      const page = await NitroHealth.readSleepSamples(emptyRange)
+    const page = await NitroHealth.readSleepSamples(emptyRange)
 
-      expect(Array.isArray(page.samples)).toBe(true)
-      for (const sample of page.samples) {
-        assertSampleIdentityAndOrigin(sample)
-        expect(sample.startDate).toBeInstanceOf(Date)
-        expect(sample.endDate).toBeInstanceOf(Date)
-        if (sample.kind === 'session-envelope') {
-          expect(['reported', 'not-reported', 'unverifiable']).toContain(sample.stageData)
-          expect('stage' in sample).toBe(false)
-        } else {
-          expect(typeof sample.stage).toBe('string')
-          if (sample.identity.kind === 'record-child') {
-            expect(sample.identity.record.id.length).toBeGreaterThan(0)
-          }
+    expect(Array.isArray(page.samples)).toBe(true)
+    for (const sample of page.samples) {
+      assertSampleIdentityAndOrigin(sample)
+      expect(sample.startDate).toBeInstanceOf(Date)
+      expect(sample.endDate).toBeInstanceOf(Date)
+      if (sample.kind === 'session-envelope') {
+        expect(['reported', 'not-reported', 'unverifiable']).toContain(sample.stageData)
+        expect('stage' in sample).toBe(false)
+      } else {
+        expect(typeof sample.stage).toBe('string')
+        if (sample.identity.kind === 'record-child') {
+          expect(sample.identity.record.id.length).toBeGreaterThan(0)
         }
       }
-    } catch (error) {
-      expect(error).toBeInstanceOf(Error)
     }
   })
 
   it('reads semantic workout activity, durations, metadata, and totals', async () => {
-    try {
-      const page = await NitroHealth.readWorkouts(emptyRange)
+    const page = await NitroHealth.readWorkouts(emptyRange)
 
-      expect(Array.isArray(page.samples)).toBe(true)
-      for (const workout of page.samples) {
-        assertSampleIdentityAndOrigin(workout)
-        expect(workout.startDate).toBeInstanceOf(Date)
-        expect(workout.endDate).toBeInstanceOf(Date)
-        expect(typeof workout.elapsedDurationSeconds).toBe('number')
-        expect(workout.elapsedDurationSeconds).toBeGreaterThanOrEqual(0)
-        assertMetric(workout.activeDuration)
-        if (workout.activity.status === 'known') {
-          expect(typeof workout.activity.type).toBe('string')
-          expect(['portable', 'read-only']).toContain(workout.activity.portability)
-          expect(['exact', 'broadened']).toContain(workout.activity.mapping)
-        } else {
-          expect(workout.activity).toEqual({ status: 'unknown' })
-        }
-        expect(['string', 'undefined']).toContain(typeof workout.title)
-        expect(['string', 'undefined']).toContain(typeof workout.brandName)
-        assertMetric(workout.totalDistance)
-        assertMetric(workout.totalActiveEnergyBurned)
+    expect(Array.isArray(page.samples)).toBe(true)
+    for (const workout of page.samples) {
+      assertSampleIdentityAndOrigin(workout)
+      expect(workout.startDate).toBeInstanceOf(Date)
+      expect(workout.endDate).toBeInstanceOf(Date)
+      expect(typeof workout.elapsedDurationSeconds).toBe('number')
+      expect(workout.elapsedDurationSeconds).toBeGreaterThanOrEqual(0)
+      assertMetric(workout.activeDuration)
+      if (workout.activity.status === 'known') {
+        expect(typeof workout.activity.type).toBe('string')
+        expect(['portable', 'read-only']).toContain(workout.activity.portability)
+        expect(['exact', 'broadened']).toContain(workout.activity.mapping)
+      } else {
+        expect(workout.activity).toEqual({ status: 'unknown' })
       }
-    } catch (error) {
-      expect(error).toBeInstanceOf(Error)
+      expect(['string', 'undefined']).toContain(typeof workout.title)
+      expect(['string', 'undefined']).toContain(typeof workout.brandName)
+      assertMetric(workout.totalDistance)
+      assertMetric(workout.totalActiveEnergyBurned)
     }
   })
 
   it('reads resting heart rate, HRV, oxygen saturation, and height with origins', async () => {
-    try {
-      const page = await NitroHealth.readRestingHeartRate(emptyRange)
-      for (const sample of page.samples) {
-        assertSampleIdentityAndOrigin(sample)
-        expect(typeof sample.bpm).toBe('number')
-      }
-    } catch (error) {
-      expect(error).toBeInstanceOf(Error)
+    const restingHeartRate = await NitroHealth.readRestingHeartRate(emptyRange)
+    for (const sample of restingHeartRate.samples) {
+      assertSampleIdentityAndOrigin(sample)
+      expect(typeof sample.bpm).toBe('number')
     }
 
-    try {
-      const page = await NitroHealth.readHeartRateVariability(emptyRange)
-      for (const sample of page.samples) {
-        assertSampleIdentityAndOrigin(sample)
-        expect(typeof sample.milliseconds).toBe('number')
-        expect(['sdnn', 'rmssd']).toContain(sample.method)
-      }
-    } catch (error) {
-      expect(error).toBeInstanceOf(Error)
+    const heartRateVariability = await NitroHealth.readHeartRateVariability(emptyRange)
+    for (const sample of heartRateVariability.samples) {
+      assertSampleIdentityAndOrigin(sample)
+      expect(typeof sample.milliseconds).toBe('number')
+      expect(['sdnn', 'rmssd']).toContain(sample.method)
     }
 
-    try {
-      const page = await NitroHealth.readOxygenSaturation(emptyRange)
-      for (const sample of page.samples) {
-        assertSampleIdentityAndOrigin(sample)
-        expect(sample.percentage).toBeGreaterThanOrEqual(0)
-        expect(sample.percentage).toBeLessThanOrEqual(100)
-      }
-    } catch (error) {
-      expect(error).toBeInstanceOf(Error)
+    const oxygenSaturation = await NitroHealth.readOxygenSaturation(emptyRange)
+    for (const sample of oxygenSaturation.samples) {
+      assertSampleIdentityAndOrigin(sample)
+      expect(sample.percentage).toBeGreaterThanOrEqual(0)
+      expect(sample.percentage).toBeLessThanOrEqual(100)
     }
 
-    try {
-      const page = await NitroHealth.readHeight(emptyRange)
-      for (const sample of page.samples) {
-        assertSampleIdentityAndOrigin(sample)
-        expect(typeof sample.meters).toBe('number')
-      }
-    } catch (error) {
-      expect(error).toBeInstanceOf(Error)
+    const height = await NitroHealth.readHeight(emptyRange)
+    for (const sample of height.samples) {
+      assertSampleIdentityAndOrigin(sample)
+      expect(typeof sample.meters).toBe('number')
     }
   })
 
   it('reads blood pressure as one sample carrying both values under a record identity', async () => {
-    try {
-      const page = await NitroHealth.readBloodPressure(emptyRange)
-      for (const sample of page.samples) {
-        assertSampleIdentityAndOrigin(sample)
-        // One record identity per reading on BOTH platforms: Android's BloodPressureRecord id,
-        // iOS's HKCorrelation uuid (never a member quantity sample uuid).
-        expect(sample.identity.kind).toBe('record')
-        expect(sample.systolicMmHg).toBeGreaterThanOrEqual(20)
-        expect(sample.systolicMmHg).toBeLessThanOrEqual(200)
-        expect(sample.diastolicMmHg).toBeGreaterThanOrEqual(10)
-        expect(sample.diastolicMmHg).toBeLessThanOrEqual(180)
-      }
-    } catch (error) {
-      expect(error).toBeInstanceOf(Error)
+    const page = await NitroHealth.readBloodPressure(emptyRange)
+    for (const sample of page.samples) {
+      assertSampleIdentityAndOrigin(sample)
+      expect(sample.identity.kind).toBe('record')
+      expect(sample.systolicMmHg).toBeGreaterThanOrEqual(20)
+      expect(sample.systolicMmHg).toBeLessThanOrEqual(200)
+      expect(sample.diastolicMmHg).toBeGreaterThanOrEqual(10)
+      expect(sample.diastolicMmHg).toBeLessThanOrEqual(180)
     }
   })
 
   it('reads blood glucose readings under a record identity with plausible mmol/L values', async () => {
-    try {
-      const page = await NitroHealth.readBloodGlucose(emptyRange)
-      for (const sample of page.samples) {
-        assertSampleIdentityAndOrigin(sample)
-        expect(sample.identity.kind).toBe('record')
-        expect(sample.millimolesPerLiter).toBeGreaterThanOrEqual(0.5)
-        expect(sample.millimolesPerLiter).toBeLessThanOrEqual(50)
-      }
-    } catch (error) {
-      expect(error).toBeInstanceOf(Error)
+    const page = await NitroHealth.readBloodGlucose(emptyRange)
+    for (const sample of page.samples) {
+      assertSampleIdentityAndOrigin(sample)
+      expect(sample.identity.kind).toBe('record')
+      expect(sample.millimolesPerLiter).toBeGreaterThanOrEqual(0.5)
+      expect(sample.millimolesPerLiter).toBeLessThanOrEqual(50)
     }
   })
 
   it('reads body temperature readings under a record identity with plausible celsius values', async () => {
-    try {
-      const page = await NitroHealth.readBodyTemperature(emptyRange)
-      for (const sample of page.samples) {
-        assertSampleIdentityAndOrigin(sample)
-        expect(sample.identity.kind).toBe('record')
-        expect(sample.celsius).toBeGreaterThanOrEqual(20)
-        expect(sample.celsius).toBeLessThanOrEqual(45)
-      }
-    } catch (error) {
-      expect(error).toBeInstanceOf(Error)
+    const page = await NitroHealth.readBodyTemperature(emptyRange)
+    for (const sample of page.samples) {
+      assertSampleIdentityAndOrigin(sample)
+      expect(sample.identity.kind).toBe('record')
+      expect(sample.celsius).toBeGreaterThanOrEqual(20)
+      expect(sample.celsius).toBeLessThanOrEqual(45)
     }
   })
 
   it('reads respiratory rate readings under a record identity with plausible values', async () => {
-    try {
-      const page = await NitroHealth.readRespiratoryRate(emptyRange)
-      for (const sample of page.samples) {
-        assertSampleIdentityAndOrigin(sample)
-        expect(sample.identity.kind).toBe('record')
-        expect(sample.breathsPerMinute).toBeGreaterThanOrEqual(0)
-        expect(sample.breathsPerMinute).toBeLessThanOrEqual(120)
-      }
-    } catch (error) {
-      expect(error).toBeInstanceOf(Error)
+    const page = await NitroHealth.readRespiratoryRate(emptyRange)
+    for (const sample of page.samples) {
+      assertSampleIdentityAndOrigin(sample)
+      expect(sample.identity.kind).toBe('record')
+      expect(sample.breathsPerMinute).toBeGreaterThanOrEqual(0)
+      expect(sample.breathsPerMinute).toBeLessThanOrEqual(120)
     }
   })
 
   it('reads VO2 max readings under a record identity with plausible values', async () => {
-    try {
-      const page = await NitroHealth.readVo2Max(emptyRange)
-      for (const sample of page.samples) {
-        assertSampleIdentityAndOrigin(sample)
-        expect(sample.identity.kind).toBe('record')
-        expect(sample.millilitersPerKilogramPerMinute).toBeGreaterThanOrEqual(0)
-        expect(sample.millilitersPerKilogramPerMinute).toBeLessThanOrEqual(100)
-      }
-    } catch (error) {
-      expect(error).toBeInstanceOf(Error)
+    const page = await NitroHealth.readVo2Max(emptyRange)
+    for (const sample of page.samples) {
+      assertSampleIdentityAndOrigin(sample)
+      expect(sample.identity.kind).toBe('record')
+      expect(sample.millilitersPerKilogramPerMinute).toBeGreaterThanOrEqual(0)
+      expect(sample.millilitersPerKilogramPerMinute).toBeLessThanOrEqual(100)
     }
   })
 
   it('reads floors climbed intervals under a record identity with plausible values', async () => {
-    if (!(await hasReadablePermission(floorsClimbedReadPermission))) return
-
-    let page: Awaited<ReturnType<typeof NitroHealth.readFloorsClimbed>>
-    try {
-      page = await NitroHealth.readFloorsClimbed(emptyRange)
-    } catch (error) {
-      if (
-        Platform.OS === 'ios' &&
-        error instanceof Error &&
-        /read authorization is not determined for floors climbed/i.test(error.message)
-      ) {
-        return
-      }
-      throw error
-    }
-
+    const page = await NitroHealth.readFloorsClimbed(emptyRange)
     for (const sample of page.samples) {
       assertSampleIdentityAndOrigin(sample)
       expect(sample.identity.kind).toBe('record')
@@ -336,67 +221,32 @@ describe('NitroHealth reads (native)', () => {
   })
 
   it('reads body fat readings under a record identity with plausible percentages', async () => {
-    try {
-      const page = await NitroHealth.readBodyFat(emptyRange)
-      for (const sample of page.samples) {
-        assertSampleIdentityAndOrigin(sample)
-        expect(sample.identity.kind).toBe('record')
-        expect(sample.percentage).toBeGreaterThanOrEqual(0)
-        expect(sample.percentage).toBeLessThanOrEqual(100)
-      }
-    } catch (error) {
-      expect(error).toBeInstanceOf(Error)
+    const page = await NitroHealth.readBodyFat(emptyRange)
+    for (const sample of page.samples) {
+      assertSampleIdentityAndOrigin(sample)
+      expect(sample.identity.kind).toBe('record')
+      expect(sample.percentage).toBeGreaterThanOrEqual(0)
+      expect(sample.percentage).toBeLessThanOrEqual(100)
     }
   })
 
   it('reads lean body mass readings under a record identity with plausible kilograms', async () => {
-    try {
-      const page = await NitroHealth.readLeanBodyMass(emptyRange)
-      for (const sample of page.samples) {
-        assertSampleIdentityAndOrigin(sample)
-        expect(sample.identity.kind).toBe('record')
-        expect(sample.kilograms).toBeGreaterThan(0)
-        expect(sample.kilograms).toBeLessThanOrEqual(1000)
-      }
-    } catch (error) {
-      expect(error).toBeInstanceOf(Error)
+    const page = await NitroHealth.readLeanBodyMass(emptyRange)
+    for (const sample of page.samples) {
+      assertSampleIdentityAndOrigin(sample)
+      expect(sample.identity.kind).toBe('record')
+      expect(sample.kilograms).toBeGreaterThan(0)
+      expect(sample.kilograms).toBeLessThanOrEqual(1000)
     }
   })
 
   it('reads basal body temperature readings under a record identity with plausible celsius values', async () => {
-    try {
-      const page = await NitroHealth.readBasalBodyTemperature(emptyRange)
-      for (const sample of page.samples) {
-        assertSampleIdentityAndOrigin(sample)
-        expect(sample.identity.kind).toBe('record')
-        expect(sample.celsius).toBeGreaterThanOrEqual(20)
-        expect(sample.celsius).toBeLessThanOrEqual(45)
-      }
-    } catch (error) {
-      expect(error).toBeInstanceOf(Error)
-    }
-  })
-
-  // SDNN and RMSSD are non-comparable, so this assertion intentionally verifies the native
-  // implementation detail for each platform after public permission state allows the read.
-  it('reports SDNN on iOS and RMSSD on Android when HRV samples are observable', async () => {
-    if (!(await hasReadablePermission(heartRateVariabilityReadPermission))) return
-
-    let page: Awaited<ReturnType<typeof NitroHealth.readHeartRateVariability>>
-    try {
-      page = await NitroHealth.readHeartRateVariability(last7DaysRange)
-    } catch (error) {
-      if (Platform.OS === 'ios') {
-        expect(error).toBeInstanceOf(Error)
-        return
-      }
-      throw error
-    }
-    if (isInconclusiveRead(page.samples)) return
-
-    const expectedMethod = Platform.OS === 'ios' ? 'sdnn' : 'rmssd'
+    const page = await NitroHealth.readBasalBodyTemperature(emptyRange)
     for (const sample of page.samples) {
-      expect(sample.method).toBe(expectedMethod)
+      assertSampleIdentityAndOrigin(sample)
+      expect(sample.identity.kind).toBe('record')
+      expect(sample.celsius).toBeGreaterThanOrEqual(20)
+      expect(sample.celsius).toBeLessThanOrEqual(45)
     }
   })
 
@@ -442,8 +292,6 @@ describe('NitroHealth reads (native)', () => {
     })
 
     it('rejects a garbage cursor with a descriptive error', async () => {
-      if (!(await hasReadablePermission(stepsReadPermission))) return
-
       await expect(
         NitroHealth.readSteps({ ...saveReadRange, cursor: 'not-a-real-cursor' })
       ).rejects.toThrow(/invalid cursor/i)

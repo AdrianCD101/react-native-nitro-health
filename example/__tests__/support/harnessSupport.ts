@@ -124,26 +124,49 @@ export const lastDayRange = {
   endDate: new Date(),
 }
 
-export async function hasReadablePermission(permissions: HealthPermission[]): Promise<boolean> {
+export async function requireVerifiedPermissions(permissions: HealthPermission[]): Promise<true> {
   const result = await NitroHealth.getPermissionStatuses(permissions)
-  if (result.status === 'unavailable') return false
+  if (result.status === 'unavailable') {
+    throw new Error('Harness prerequisite failed: health data is unavailable')
+  }
 
-  return result.statuses.every(
+  if (
+    result.statuses.length !== permissions.length ||
+    result.statuses.some(
+      ({ permission }, index) =>
+        permission.accessType !== permissions[index]?.accessType ||
+        permission.dataType !== permissions[index]?.dataType
+    )
+  ) {
+    throw new Error('Harness prerequisite failed: permission statuses did not match the request')
+  }
+
+  const unmet = result.statuses.filter(
     ({ permission, status }) =>
-      status === 'granted' || (permission.accessType === 'read' && status === 'unverifiable')
+      status !== 'granted' &&
+      !(Platform.OS === 'ios' && permission.accessType === 'read' && status === 'unverifiable')
   )
+  if (unmet.length > 0) {
+    const details = unmet
+      .map(({ permission, status }) => `${permission.accessType}:${permission.dataType}=${status}`)
+      .join(', ')
+    throw new Error(
+      `Harness prerequisite failed: required permissions are not granted (${details})`
+    )
+  }
+
+  return true
 }
 
-// HealthKit intentionally reports read permissions as unverifiable. Round-trip tests can still
-// prove writes when write access is granted; a denied HealthKit read safely returns no samples.
-export async function hasVerifiedPermissions(permissions: HealthPermission[]): Promise<boolean> {
-  return hasReadablePermission(permissions)
+export async function hasVerifiedPermissions(permissions: HealthPermission[]): Promise<true> {
+  return requireVerifiedPermissions(permissions)
 }
 
-// On iOS a denied read permission is indistinguishable from an empty store: HealthKit returns
-// no samples rather than an error. When a round-trip read comes back empty on iOS, treat the
-// result as inconclusive (read likely denied) instead of failing the assertion. On Android
-// read denials throw, so an empty read there is a real failure.
-export function isInconclusiveRead(samples: readonly unknown[]): boolean {
-  return Platform.OS === 'ios' && samples.length === 0
+export function isInconclusiveRead(samples: readonly unknown[]): false {
+  if (Platform.OS === 'ios' && samples.length === 0) {
+    throw new Error(
+      'Harness prerequisite failed: HealthKit returned no data after a write; verify read authorization'
+    )
+  }
+  return false
 }

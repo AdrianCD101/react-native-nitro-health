@@ -17,7 +17,7 @@ import type {
   WorkoutSample,
 } from 'react-native-nitro-health'
 
-import { hasVerifiedPermissions } from './support/harnessSupport'
+import { requireVerifiedPermissions } from './support/harnessSupport'
 
 const stepReadWritePermissions: HealthPermission[] = [
   { accessType: 'read', dataType: 'steps' },
@@ -238,9 +238,7 @@ async function readIdempotentWorkouts(
 
 describe('NitroHealth idempotent saves (native)', () => {
   it('keeps exactly one step record when the same versioned save is retried', async () => {
-    if (!(await hasVerifiedPermissions(stepReadWritePermissions))) {
-      return
-    }
+    await requireVerifiedPermissions(stepReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('steps', idempotentReadRange)
 
@@ -255,10 +253,6 @@ describe('NitroHealth idempotent saves (native)', () => {
       await NitroHealth.saveSteps([sample])
 
       const samples = await readIdempotentStepSamples([710_001])
-      if (Platform.OS === 'ios' && samples.length === 0) {
-        return
-      }
-
       expect(samples).toHaveLength(1)
       expect(samples[0]?.count).toBe(710_001)
     } finally {
@@ -267,9 +261,7 @@ describe('NitroHealth idempotent saves (native)', () => {
   })
 
   it('replaces a step record at a higher version with platform-specific identity', async () => {
-    if (!(await hasVerifiedPermissions(stepReadWritePermissions))) {
-      return
-    }
+    await requireVerifiedPermissions(stepReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('steps', idempotentReadRange)
 
@@ -283,10 +275,6 @@ describe('NitroHealth idempotent saves (native)', () => {
       ])
 
       const initialSamples = await readIdempotentStepSamples([720_001, 720_002])
-      if (Platform.OS === 'ios' && initialSamples.length === 0) {
-        return
-      }
-
       expect(initialSamples).toHaveLength(1)
       const initialSample = initialSamples[0]
       if (initialSample === undefined) {
@@ -321,9 +309,7 @@ describe('NitroHealth idempotent saves (native)', () => {
   })
 
   it('does not overwrite a step record with a lower version', async () => {
-    if (!(await hasVerifiedPermissions(stepReadWritePermissions))) {
-      return
-    }
+    await requireVerifiedPermissions(stepReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('steps', idempotentReadRange)
 
@@ -337,10 +323,6 @@ describe('NitroHealth idempotent saves (native)', () => {
       ])
 
       const currentSamples = await readIdempotentStepSamples([730_001, 730_002])
-      if (Platform.OS === 'ios' && currentSamples.length === 0) {
-        return
-      }
-
       expect(currentSamples).toHaveLength(1)
       const currentSample = currentSamples[0]
       if (currentSample === undefined) {
@@ -368,9 +350,7 @@ describe('NitroHealth idempotent saves (native)', () => {
   })
 
   it('keeps exactly one workout when the same versioned save is retried', async () => {
-    if (!(await hasVerifiedPermissions(workoutReadWritePermissions))) {
-      return
-    }
+    await requireVerifiedPermissions(workoutReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('workout', idempotentReadRange)
     try {
@@ -386,10 +366,6 @@ describe('NitroHealth idempotent saves (native)', () => {
       await NitroHealth.saveWorkout(workout)
 
       const workouts = await readIdempotentWorkouts(['Nitro Retry Workout'])
-      if (Platform.OS === 'ios' && workouts.length === 0) {
-        return
-      }
-
       expect(workouts).toHaveLength(1)
     } finally {
       await NitroHealth.deleteRecordsByTimeRange('workout', idempotentReadRange)
@@ -401,9 +377,7 @@ describe('NitroHealth idempotent saves (native)', () => {
   // second sample here. Member samples carry derived '<id>#systolic'/'#diastolic' identities
   // so the same save replaces them alongside the correlation.
   it('keeps exactly one blood pressure reading when the same versioned save is retried', async () => {
-    if (!(await hasVerifiedPermissions(bloodPressureReadWritePermissions))) {
-      return
-    }
+    await requireVerifiedPermissions(bloodPressureReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('bloodPressure', idempotentReadRange)
     try {
@@ -418,10 +392,6 @@ describe('NitroHealth idempotent saves (native)', () => {
       await NitroHealth.saveBloodPressure([sample])
 
       const samples = await readIdempotentBloodPressure([141])
-      if (Platform.OS === 'ios' && samples.length === 0) {
-        return
-      }
-
       expect(samples).toHaveLength(1)
       expect(samples[0]?.diastolicMmHg).toBe(91)
     } finally {
@@ -430,9 +400,7 @@ describe('NitroHealth idempotent saves (native)', () => {
   })
 
   it('replaces a blood pressure reading at a higher version with platform-specific identity', async () => {
-    if (!(await hasVerifiedPermissions(bloodPressureReadWritePermissions))) {
-      return
-    }
+    await requireVerifiedPermissions(bloodPressureReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('bloodPressure', idempotentReadRange)
     try {
@@ -447,9 +415,6 @@ describe('NitroHealth idempotent saves (native)', () => {
       ])
 
       const initial = await readIdempotentBloodPressure([142, 143])
-      if (Platform.OS === 'ios' && initial.length === 0) {
-        return
-      }
       expect(initial).toHaveLength(1)
       const initialSample = initial[0]
       if (initialSample === undefined) {
@@ -485,9 +450,7 @@ describe('NitroHealth idempotent saves (native)', () => {
   })
 
   it('keeps exactly one blood glucose reading when the same versioned save is retried', async () => {
-    if (!(await hasVerifiedPermissions(bloodGlucoseReadWritePermissions))) {
-      return
-    }
+    await requireVerifiedPermissions(bloodGlucoseReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('bloodGlucose', idempotentReadRange)
     try {
@@ -501,10 +464,6 @@ describe('NitroHealth idempotent saves (native)', () => {
       await NitroHealth.saveBloodGlucose([sample])
 
       const samples = await readIdempotentBloodGlucose([6.1])
-      if (Platform.OS === 'ios' && samples.length === 0) {
-        return
-      }
-
       expect(samples).toHaveLength(1)
     } finally {
       await NitroHealth.deleteRecordsByTimeRange('bloodGlucose', idempotentReadRange)
@@ -512,9 +471,7 @@ describe('NitroHealth idempotent saves (native)', () => {
   })
 
   it('replaces a blood glucose reading at a higher version with platform-specific identity', async () => {
-    if (!(await hasVerifiedPermissions(bloodGlucoseReadWritePermissions))) {
-      return
-    }
+    await requireVerifiedPermissions(bloodGlucoseReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('bloodGlucose', idempotentReadRange)
     try {
@@ -528,9 +485,6 @@ describe('NitroHealth idempotent saves (native)', () => {
       ])
 
       const initial = await readIdempotentBloodGlucose([6.2, 6.3])
-      if (Platform.OS === 'ios' && initial.length === 0) {
-        return
-      }
       expect(initial).toHaveLength(1)
       const initialSample = initial[0]
       if (initialSample === undefined) {
@@ -564,9 +518,7 @@ describe('NitroHealth idempotent saves (native)', () => {
   })
 
   it('keeps exactly one body temperature reading when the same versioned save is retried', async () => {
-    if (!(await hasVerifiedPermissions(bodyTemperatureReadWritePermissions))) {
-      return
-    }
+    await requireVerifiedPermissions(bodyTemperatureReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('bodyTemperature', idempotentReadRange)
     try {
@@ -580,10 +532,6 @@ describe('NitroHealth idempotent saves (native)', () => {
       await NitroHealth.saveBodyTemperature([sample])
 
       const samples = await readIdempotentBodyTemperature([37.1])
-      if (Platform.OS === 'ios' && samples.length === 0) {
-        return
-      }
-
       expect(samples).toHaveLength(1)
     } finally {
       await NitroHealth.deleteRecordsByTimeRange('bodyTemperature', idempotentReadRange)
@@ -591,9 +539,7 @@ describe('NitroHealth idempotent saves (native)', () => {
   })
 
   it('replaces a body temperature reading at a higher version with platform-specific identity', async () => {
-    if (!(await hasVerifiedPermissions(bodyTemperatureReadWritePermissions))) {
-      return
-    }
+    await requireVerifiedPermissions(bodyTemperatureReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('bodyTemperature', idempotentReadRange)
     try {
@@ -607,9 +553,6 @@ describe('NitroHealth idempotent saves (native)', () => {
       ])
 
       const initial = await readIdempotentBodyTemperature([37.1, 37.2])
-      if (Platform.OS === 'ios' && initial.length === 0) {
-        return
-      }
       expect(initial).toHaveLength(1)
       const initialSample = initial[0]
       if (initialSample === undefined) {
@@ -643,9 +586,7 @@ describe('NitroHealth idempotent saves (native)', () => {
   })
 
   it('keeps exactly one respiratory rate reading when the same versioned save is retried', async () => {
-    if (!(await hasVerifiedPermissions(respiratoryRateReadWritePermissions))) {
-      return
-    }
+    await requireVerifiedPermissions(respiratoryRateReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('respiratoryRate', idempotentReadRange)
     try {
@@ -659,10 +600,6 @@ describe('NitroHealth idempotent saves (native)', () => {
       await NitroHealth.saveRespiratoryRate([sample])
 
       const samples = await readIdempotentRespiratoryRate([16.5])
-      if (Platform.OS === 'ios' && samples.length === 0) {
-        return
-      }
-
       expect(samples).toHaveLength(1)
     } finally {
       await NitroHealth.deleteRecordsByTimeRange('respiratoryRate', idempotentReadRange)
@@ -670,9 +607,7 @@ describe('NitroHealth idempotent saves (native)', () => {
   })
 
   it('replaces a respiratory rate reading at a higher version with platform-specific identity', async () => {
-    if (!(await hasVerifiedPermissions(respiratoryRateReadWritePermissions))) {
-      return
-    }
+    await requireVerifiedPermissions(respiratoryRateReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('respiratoryRate', idempotentReadRange)
     try {
@@ -686,9 +621,6 @@ describe('NitroHealth idempotent saves (native)', () => {
       ])
 
       const initial = await readIdempotentRespiratoryRate([16.5, 17.5])
-      if (Platform.OS === 'ios' && initial.length === 0) {
-        return
-      }
       expect(initial).toHaveLength(1)
       const initialSample = initial[0]
       if (initialSample === undefined) {
@@ -722,9 +654,7 @@ describe('NitroHealth idempotent saves (native)', () => {
   })
 
   it('keeps exactly one VO2 max reading when the same versioned save is retried', async () => {
-    if (!(await hasVerifiedPermissions(vo2MaxReadWritePermissions))) {
-      return
-    }
+    await requireVerifiedPermissions(vo2MaxReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('vo2Max', idempotentReadRange)
     try {
@@ -738,10 +668,6 @@ describe('NitroHealth idempotent saves (native)', () => {
       await NitroHealth.saveVo2Max([sample])
 
       const samples = await readIdempotentVo2Max([42.5])
-      if (Platform.OS === 'ios' && samples.length === 0) {
-        return
-      }
-
       expect(samples).toHaveLength(1)
     } finally {
       await NitroHealth.deleteRecordsByTimeRange('vo2Max', idempotentReadRange)
@@ -749,9 +675,7 @@ describe('NitroHealth idempotent saves (native)', () => {
   })
 
   it('replaces a VO2 max reading at a higher version with platform-specific identity', async () => {
-    if (!(await hasVerifiedPermissions(vo2MaxReadWritePermissions))) {
-      return
-    }
+    await requireVerifiedPermissions(vo2MaxReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('vo2Max', idempotentReadRange)
     try {
@@ -765,9 +689,6 @@ describe('NitroHealth idempotent saves (native)', () => {
       ])
 
       const initial = await readIdempotentVo2Max([42.5, 43.5])
-      if (Platform.OS === 'ios' && initial.length === 0) {
-        return
-      }
       expect(initial).toHaveLength(1)
       const initialSample = initial[0]
       if (initialSample === undefined) {
@@ -801,9 +722,7 @@ describe('NitroHealth idempotent saves (native)', () => {
   })
 
   it('keeps exactly one floors climbed interval when the same versioned save is retried', async () => {
-    if (!(await hasVerifiedPermissions(floorsClimbedReadWritePermissions))) {
-      return
-    }
+    await requireVerifiedPermissions(floorsClimbedReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('floorsClimbed', idempotentReadRange)
     try {
@@ -817,10 +736,6 @@ describe('NitroHealth idempotent saves (native)', () => {
       await NitroHealth.saveFloorsClimbed([sample])
 
       const samples = await readIdempotentFloorsClimbed([11.5])
-      if (Platform.OS === 'ios' && samples.length === 0) {
-        return
-      }
-
       expect(samples).toHaveLength(1)
     } finally {
       await NitroHealth.deleteRecordsByTimeRange('floorsClimbed', idempotentReadRange)
@@ -828,9 +743,7 @@ describe('NitroHealth idempotent saves (native)', () => {
   })
 
   it('replaces a floors climbed interval at a higher version with platform-specific identity', async () => {
-    if (!(await hasVerifiedPermissions(floorsClimbedReadWritePermissions))) {
-      return
-    }
+    await requireVerifiedPermissions(floorsClimbedReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('floorsClimbed', idempotentReadRange)
     try {
@@ -844,9 +757,6 @@ describe('NitroHealth idempotent saves (native)', () => {
       ])
 
       const initial = await readIdempotentFloorsClimbed([11.5, 12.5])
-      if (Platform.OS === 'ios' && initial.length === 0) {
-        return
-      }
       expect(initial).toHaveLength(1)
       const initialSample = initial[0]
       if (initialSample === undefined) {
@@ -880,9 +790,7 @@ describe('NitroHealth idempotent saves (native)', () => {
   })
 
   it('keeps exactly one body fat reading when the same versioned save is retried', async () => {
-    if (!(await hasVerifiedPermissions(bodyFatReadWritePermissions))) {
-      return
-    }
+    await requireVerifiedPermissions(bodyFatReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('bodyFat', idempotentReadRange)
     try {
@@ -896,10 +804,6 @@ describe('NitroHealth idempotent saves (native)', () => {
       await NitroHealth.saveBodyFat([sample])
 
       const samples = await readIdempotentBodyFat([18.5])
-      if (Platform.OS === 'ios' && samples.length === 0) {
-        return
-      }
-
       expect(samples).toHaveLength(1)
     } finally {
       await NitroHealth.deleteRecordsByTimeRange('bodyFat', idempotentReadRange)
@@ -907,9 +811,7 @@ describe('NitroHealth idempotent saves (native)', () => {
   })
 
   it('replaces a body fat reading at a higher version with platform-specific identity', async () => {
-    if (!(await hasVerifiedPermissions(bodyFatReadWritePermissions))) {
-      return
-    }
+    await requireVerifiedPermissions(bodyFatReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('bodyFat', idempotentReadRange)
     try {
@@ -923,9 +825,6 @@ describe('NitroHealth idempotent saves (native)', () => {
       ])
 
       const initial = await readIdempotentBodyFat([18.5, 19.5])
-      if (Platform.OS === 'ios' && initial.length === 0) {
-        return
-      }
       expect(initial).toHaveLength(1)
       const initialSample = initial[0]
       if (initialSample === undefined) {
@@ -959,9 +858,7 @@ describe('NitroHealth idempotent saves (native)', () => {
   })
 
   it('keeps exactly one lean body mass reading when the same versioned save is retried', async () => {
-    if (!(await hasVerifiedPermissions(leanBodyMassReadWritePermissions))) {
-      return
-    }
+    await requireVerifiedPermissions(leanBodyMassReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('leanBodyMass', idempotentReadRange)
     try {
@@ -975,10 +872,6 @@ describe('NitroHealth idempotent saves (native)', () => {
       await NitroHealth.saveLeanBodyMass([sample])
 
       const samples = await readIdempotentLeanBodyMass([55.4])
-      if (Platform.OS === 'ios' && samples.length === 0) {
-        return
-      }
-
       expect(samples).toHaveLength(1)
     } finally {
       await NitroHealth.deleteRecordsByTimeRange('leanBodyMass', idempotentReadRange)
@@ -986,9 +879,7 @@ describe('NitroHealth idempotent saves (native)', () => {
   })
 
   it('replaces a lean body mass reading at a higher version with platform-specific identity', async () => {
-    if (!(await hasVerifiedPermissions(leanBodyMassReadWritePermissions))) {
-      return
-    }
+    await requireVerifiedPermissions(leanBodyMassReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('leanBodyMass', idempotentReadRange)
     try {
@@ -1002,9 +893,6 @@ describe('NitroHealth idempotent saves (native)', () => {
       ])
 
       const initial = await readIdempotentLeanBodyMass([55.4, 56.4])
-      if (Platform.OS === 'ios' && initial.length === 0) {
-        return
-      }
       expect(initial).toHaveLength(1)
       const initialSample = initial[0]
       if (initialSample === undefined) {
@@ -1038,9 +926,7 @@ describe('NitroHealth idempotent saves (native)', () => {
   })
 
   it('keeps exactly one basal body temperature reading when the same versioned save is retried', async () => {
-    if (!(await hasVerifiedPermissions(basalBodyTemperatureReadWritePermissions))) {
-      return
-    }
+    await requireVerifiedPermissions(basalBodyTemperatureReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('basalBodyTemperature', idempotentReadRange)
     try {
@@ -1054,10 +940,6 @@ describe('NitroHealth idempotent saves (native)', () => {
       await NitroHealth.saveBasalBodyTemperature([sample])
 
       const samples = await readIdempotentBasalBodyTemperature([36.4])
-      if (Platform.OS === 'ios' && samples.length === 0) {
-        return
-      }
-
       expect(samples).toHaveLength(1)
     } finally {
       await NitroHealth.deleteRecordsByTimeRange('basalBodyTemperature', idempotentReadRange)
@@ -1065,9 +947,7 @@ describe('NitroHealth idempotent saves (native)', () => {
   })
 
   it('replaces a basal body temperature reading at a higher version with platform-specific identity', async () => {
-    if (!(await hasVerifiedPermissions(basalBodyTemperatureReadWritePermissions))) {
-      return
-    }
+    await requireVerifiedPermissions(basalBodyTemperatureReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('basalBodyTemperature', idempotentReadRange)
     try {
@@ -1081,9 +961,6 @@ describe('NitroHealth idempotent saves (native)', () => {
       ])
 
       const initial = await readIdempotentBasalBodyTemperature([36.4, 36.5])
-      if (Platform.OS === 'ios' && initial.length === 0) {
-        return
-      }
       expect(initial).toHaveLength(1)
       const initialSample = initial[0]
       if (initialSample === undefined) {
@@ -1117,9 +994,7 @@ describe('NitroHealth idempotent saves (native)', () => {
   })
 
   it('replaces a workout at a higher version with platform-specific identity', async () => {
-    if (!(await hasVerifiedPermissions(workoutReadWritePermissions))) {
-      return
-    }
+    await requireVerifiedPermissions(workoutReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('workout', idempotentReadRange)
     try {
@@ -1135,9 +1010,6 @@ describe('NitroHealth idempotent saves (native)', () => {
         'Nitro Workout Version 1',
         'Nitro Workout Version 2',
       ])
-      if (Platform.OS === 'ios' && initial.length === 0) {
-        return
-      }
       expect(initial).toHaveLength(1)
 
       await NitroHealth.saveWorkout({

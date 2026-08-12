@@ -1,0 +1,123 @@
+diff --git a/xctest-agent/HarnessXCTestAgentUITests/HarnessXCTestAgentUITests.swift b/xctest-agent/HarnessXCTestAgentUITests/HarnessXCTestAgentUITests.swift
+index b1fca637cba95ae5e9d1dc64e154e9764ca32fe2..bf84abcc32d2cdbf7d4b996f32e863162c4e1f07 100644
+--- a/xctest-agent/HarnessXCTestAgentUITests/HarnessXCTestAgentUITests.swift
++++ b/xctest-agent/HarnessXCTestAgentUITests/HarnessXCTestAgentUITests.swift
+@@ -309,7 +309,8 @@ final class HarnessXCTestAgentUITests: XCTestCase {
+     capabilities = [
+       PermissionPromptWatchdog(
+         state: state,
+-        springboard: springboard
++        springboard: springboard,
++        targetApplication: makeTargetApplication()
+       )
+     ]
+ 
+diff --git a/xctest-agent/HarnessXCTestAgentUITests/PermissionPromptWatchdog.swift b/xctest-agent/HarnessXCTestAgentUITests/PermissionPromptWatchdog.swift
+index 8a732266c52c7d19dc86b012f59c3906063b72d0..b93d7a8d36dec6cef38dcd416bb1bc02d54bfa59 100644
+--- a/xctest-agent/HarnessXCTestAgentUITests/PermissionPromptWatchdog.swift
++++ b/xctest-agent/HarnessXCTestAgentUITests/PermissionPromptWatchdog.swift
+@@ -16,6 +16,15 @@ struct PermissionPromptConfiguration: Codable {
+ 
+ final class PermissionPromptWatchdog: AgentCapability {
+   private enum Constants {
++    static let healthKitPromptLabels = [
++      "Health Access",
++      "Health Data Access",
++      "Allow Access to Health Data"
++    ]
++    static let healthKitSelectAllLabels = [
++      "Turn On All",
++      "Allow All"
++    ]
+     static let knownPositiveButtonLabels = [
+       "Allow",
+       "OK",
+@@ -32,20 +41,76 @@ final class PermissionPromptWatchdog: AgentCapability {
+   }
+ 
+   private let springboard: XCUIApplication
++  private let targetApplication: XCUIApplication?
+   private let state: HarnessXCTestAgentState
++  private var isHandlingHealthKitPrompt = false
+ 
+   private func log(_ message: String) {
+     NSLog("[HarnessXCTestAgent][PermissionPromptWatchdog] %@", message)
+   }
+ 
+-  init(state: HarnessXCTestAgentState, springboard: XCUIApplication) {
++  init(
++    state: HarnessXCTestAgentState,
++    springboard: XCUIApplication,
++    targetApplication: XCUIApplication?
++  ) {
+     self.state = state
+     self.springboard = springboard
++    self.targetApplication = targetApplication
++  }
++
++  private var applications: [XCUIApplication] {
++    return [targetApplication, springboard].compactMap { $0 }
++  }
++
++  private func findElement(labels: [String], buttonsOnly: Bool = false) -> XCUIElement? {
++    for application in applications {
++      for label in labels {
++        let element = buttonsOnly
++          ? application.buttons[label].firstMatch
++          : application.descendants(matching: .any)[label].firstMatch
++
++        if element.exists && element.isHittable {
++          return element
++        }
++      }
++    }
++
++    return nil
++  }
++
++  private func handleHealthKitPrompt() -> Bool {
++    if let selectAll = findElement(labels: Constants.healthKitSelectAllLabels) {
++      log("HealthKit: selecting all requested data types")
++      selectAll.tap()
++      isHandlingHealthKitPrompt = true
++      return true
++    }
++
++    if isHandlingHealthKitPrompt,
++       let allow = findElement(labels: ["Allow"], buttonsOnly: true) {
++      log("HealthKit: confirming selected data types")
++      allow.tap()
++      isHandlingHealthKitPrompt = false
++      return true
++    }
++
++    if findElement(labels: Constants.healthKitPromptLabels) != nil {
++      log("HealthKit prompt detected, but requested data types are not selected")
++      return true
++    }
++
++    return isHandlingHealthKitPrompt
+   }
+ 
+   func setUp() throws {
+     if state.permissions.autoAcceptPermissions {
+       log("permission prompt watchdog enabled")
++
++      if let targetApplication {
++        log("resetting HealthKit authorization for target application")
++        targetApplication.resetAuthorizationStatus(for: .health)
++      }
+     }
+   }
+ 
+@@ -54,6 +119,10 @@ final class PermissionPromptWatchdog: AgentCapability {
+       return
+     }
+ 
++    if handleHealthKitPrompt() {
++      return
++    }
++
+     let guardQuery = springboard.buttons.matching(
+       NSPredicate(format: "label IN %@", Constants.knownPositiveButtonLabels)
+     ).firstMatch

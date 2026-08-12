@@ -1,0 +1,55 @@
+import type {
+  HealthDataType,
+  HealthPermission,
+  WritableHealthDataType,
+} from 'react-native-nitro-health'
+
+export const healthDataTypes: HealthDataType[] = [
+  'steps',
+  'heartRate',
+  'bloodPressure',
+  'bloodGlucose',
+  'bodyTemperature',
+  'respiratoryRate',
+  'bodyFat',
+  'leanBodyMass',
+  'basalBodyTemperature',
+  'restingHeartRate',
+  'heartRateVariability',
+  'distance',
+  'activeEnergyBurned',
+  'floorsClimbed',
+  'oxygenSaturation',
+  'height',
+  'vo2Max',
+  'sleep',
+  'bodyMass',
+  'workout',
+]
+
+export const writableDataTypes: WritableHealthDataType[] = [
+  'steps',
+  'heartRate',
+  'bloodPressure',
+  'bloodGlucose',
+  'bodyTemperature',
+  'respiratoryRate',
+  'bodyFat',
+  'leanBodyMass',
+  'basalBodyTemperature',
+  'restingHeartRate',
+  'distance',
+  'activeEnergyBurned',
+  'floorsClimbed',
+  'oxygenSaturation',
+  'height',
+  'vo2Max',
+  'sleep',
+  'bodyMass',
+  'workout',
+]
+
+export const allHealthPermissions: HealthPermission[] = [
+  ...healthDataTypes.map((dataType) => ({ accessType: 'read' as const, dataType })),
+  ...writableDataTypes.map((dataType) => ({ accessType: 'write' as const, dataType })),
+]
