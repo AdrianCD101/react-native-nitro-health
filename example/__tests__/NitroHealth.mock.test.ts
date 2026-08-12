@@ -70,6 +70,7 @@ describe('NitroHealth Jest mock', () => {
       hasMore: false,
     })
     await expect(NitroHealth.readActiveEnergyBurned(range)).resolves.toEqual({ samples: [] })
+    await expect(NitroHealth.readFloorsClimbed(range)).resolves.toEqual({ samples: [] })
     await expect(NitroHealth.readSteps(range)).resolves.toEqual({ samples: [] })
     await expect(NitroHealth.readDistance(range)).resolves.toEqual({ samples: [] })
     await expect(NitroHealth.readBodyMass(range)).resolves.toEqual({ samples: [] })
@@ -100,6 +101,9 @@ describe('NitroHealth Jest mock', () => {
     }
     await expect(NitroHealth.saveSteps([stepInput])).resolves.toBeUndefined()
     expect(NitroHealth.saveSteps).toHaveBeenCalledWith([stepInput])
+    const floorsInput = { ...range, floors: 12.5 }
+    await expect(NitroHealth.saveFloorsClimbed([floorsInput])).resolves.toBeUndefined()
+    expect(NitroHealth.saveFloorsClimbed).toHaveBeenCalledWith([floorsInput])
     await expect(
       NitroHealth.saveDistance([{ ...range, scope: 'walking-running', distanceMeters: 1000 }])
     ).resolves.toEqual({ status: 'completed', storedScope: 'activity-unspecified' })

@@ -118,6 +118,14 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     };
   }
   
+  // pragma MARK: std::function<void(const NativeFloorsClimbedSamplePage& /* result */)>
+  Func_void_NativeFloorsClimbedSamplePage create_Func_void_NativeFloorsClimbedSamplePage(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroHealth::Func_void_NativeFloorsClimbedSamplePage::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const NativeFloorsClimbedSamplePage& result) mutable -> void {
+      swiftClosure.call(result);
+    };
+  }
+
   // pragma MARK: std::function<void(const NativeBodyMassSamplePage& /* result */)>
   Func_void_NativeBodyMassSamplePage create_Func_void_NativeBodyMassSamplePage(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = NitroHealth::Func_void_NativeBodyMassSamplePage::fromUnsafe(swiftClosureWrapper);

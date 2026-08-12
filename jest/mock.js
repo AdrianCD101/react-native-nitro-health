@@ -19,6 +19,7 @@ const healthDataTypes = new Set([
   'heartRateVariability',
   'distance',
   'activeEnergyBurned',
+  'floorsClimbed',
   'oxygenSaturation',
   'height',
   'vo2Max',
@@ -254,6 +255,7 @@ function createNitroHealthMock(options = {}) {
       })
     ),
     readActiveEnergyBurned: createMockFunction(() => rejectWhenUnavailable({ samples: [] })),
+    readFloorsClimbed: createMockFunction(() => rejectWhenUnavailable({ samples: [] })),
     readSteps: createMockFunction(() => rejectWhenUnavailable({ samples: [] })),
     readDistance: createMockFunction(() => rejectWhenUnavailable({ samples: [] })),
     readBodyMass: createMockFunction(() => rejectWhenUnavailable({ samples: [] })),
@@ -282,6 +284,7 @@ function createNitroHealthMock(options = {}) {
       })
     ),
     saveActiveEnergyBurned: createMockFunction((samples) => saveSamples(samples, undefined)),
+    saveFloorsClimbed: createMockFunction((samples) => saveSamples(samples, undefined)),
     saveHeartRate: createMockFunction((samples) => saveSamples(samples, undefined)),
     saveBloodPressure: createMockFunction((samples) => saveSamples(samples, undefined)),
     saveBloodGlucose: createMockFunction((samples) => saveSamples(samples, undefined)),

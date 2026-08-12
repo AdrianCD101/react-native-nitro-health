@@ -15,6 +15,7 @@ import androidx.health.connect.client.records.BodyFatRecord
 import androidx.health.connect.client.records.BodyTemperatureRecord
 import androidx.health.connect.client.records.DistanceRecord
 import androidx.health.connect.client.records.ExerciseSessionRecord
+import androidx.health.connect.client.records.FloorsClimbedRecord
 import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.HeartRateVariabilityRmssdRecord
 import androidx.health.connect.client.records.HeightRecord
@@ -67,6 +68,9 @@ import com.margelo.nitro.nitrohealth.NativeDistanceWriteResult
 import com.margelo.nitro.nitrohealth.NativeBackgroundChangesMode
 import com.margelo.nitro.nitrohealth.NativeBackgroundChangesResult
 import com.margelo.nitro.nitrohealth.NativeBackgroundChangesResultStatus
+import com.margelo.nitro.nitrohealth.NativeFloorsClimbedSample
+import com.margelo.nitro.nitrohealth.NativeFloorsClimbedSampleInput
+import com.margelo.nitro.nitrohealth.NativeFloorsClimbedSamplePage
 import com.margelo.nitro.nitrohealth.NativeHealthAdditionalAccessStatus
 import com.margelo.nitro.nitrohealth.NativeHealthAuthorizationResult
 import com.margelo.nitro.nitrohealth.NativeHealthAuthorizationStatus
@@ -480,6 +484,45 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                     )
                 }.toTypedArray(),
                 nextCursor = response.pageToken?.let { encodeSampleCursor("activeEnergyBurned", query, it) }
+            )
+        }
+    }
+
+    override fun readFloorsClimbed(query: NativeHealthDateRangeQuery): Promise<NativeFloorsClimbedSamplePage> {
+        return Promise.async {
+            val context = NitroModules.applicationContext
+                ?: throw IllegalStateException("Android application context is unavailable")
+
+            if (getAvailability().status != NativeHealthAvailabilityStatus.AVAILABLE) {
+                throw IllegalStateException("Health Connect is not available")
+            }
+
+            val client = HealthConnectClient.getOrCreate(context)
+            requireReadPermission(client, "floorsClimbed")
+
+            val request = ReadRecordsRequest(
+                recordType = FloorsClimbedRecord::class,
+                timeRangeFilter = TimeRangeFilter.between(
+                    Instant.ofEpochMilli(query.startTimeMs.toLong()),
+                    Instant.ofEpochMilli(query.endTimeMs.toLong())
+                ),
+                ascendingOrder = query.ascending,
+                pageSize = query.limit.toInt(),
+                pageToken = query.cursor?.let { decodeSampleCursor(it, "floorsClimbed", query) }
+            )
+            val response = client.readRecords(request)
+
+            NativeFloorsClimbedSamplePage(
+                samples = response.records.map { record ->
+                    NativeFloorsClimbedSample(
+                        identity = makeRecordIdentity(record.metadata.id),
+                        origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
+                        startTimeMs = record.startTime.toEpochMilli().toDouble(),
+                        endTimeMs = record.endTime.toEpochMilli().toDouble(),
+                        floors = record.floors
+                    )
+                }.toTypedArray(),
+                nextCursor = response.pageToken?.let { encodeSampleCursor("floorsClimbed", query, it) }
             )
         }
     }
@@ -1056,6 +1099,14 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         return Promise.async {
             val client = requireWritableClient("activeEnergyBurned")
             client.insertRecords(toActiveCaloriesBurnedRecords(samples))
+            Unit
+        }
+    }
+
+    override fun saveFloorsClimbed(samples: Array<NativeFloorsClimbedSampleInput>): Promise<Unit> {
+        return Promise.async {
+            val client = requireWritableClient("floorsClimbed")
+            client.insertRecords(toFloorsClimbedRecords(samples))
             Unit
         }
     }

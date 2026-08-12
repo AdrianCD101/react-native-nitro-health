@@ -43,6 +43,25 @@ async function drainStepChanges(changesToken: string): Promise<{
   throw new Error('Step changes did not drain within 20 pages')
 }
 
+async function drainFloorsClimbedChanges(changesToken: string): Promise<{
+  changes: HealthRecordChange<'floorsClimbed'>[]
+  changesToken: string
+}> {
+  const changes: HealthRecordChange<'floorsClimbed'>[] = []
+  let currentToken = changesToken
+
+  for (let pageIndex = 0; pageIndex < 20; pageIndex += 1) {
+    const result = await NitroHealth.getChanges('floorsClimbed', currentToken)
+    if (result.tokenExpired) throw new Error('Fresh changes token expired unexpectedly')
+
+    changes.push(...result.changes)
+    currentToken = result.nextChangesToken
+    if (!result.hasMore) return { changes, changesToken: currentToken }
+  }
+
+  throw new Error('Floors-climbed changes did not drain within 20 pages')
+}
+
 describe('NitroHealth changes (native)', () => {
   it('observes a saved and then deleted step record', async () => {
     const authorized = await hasVerifiedPermissions([
@@ -169,6 +188,61 @@ describe('NitroHealth changes (native)', () => {
       }
     } finally {
       await NitroHealth.deleteRecordsByTimeRange('steps', replacementChangeRange)
+    }
+  })
+
+  it('observes a saved and then deleted floors-climbed record', async () => {
+    const permissions = [
+      { accessType: 'read' as const, dataType: 'floorsClimbed' as const },
+      { accessType: 'write' as const, dataType: 'floorsClimbed' as const },
+    ]
+    if (!(await hasVerifiedPermissions(permissions))) return
+
+    const range = {
+      startDate: new Date('2003-06-03T00:00:00.000Z'),
+      endDate: new Date('2003-06-04T00:00:00.000Z'),
+    }
+    const interval = {
+      startDate: new Date('2003-06-03T09:00:00.000Z'),
+      endDate: new Date('2003-06-03T09:30:00.000Z'),
+    }
+
+    await NitroHealth.deleteRecordsByTimeRange('floorsClimbed', range)
+    try {
+      const baselineToken = await NitroHealth.createChangesToken('floorsClimbed')
+      await NitroHealth.saveFloorsClimbed([
+        {
+          ...interval,
+          floors: 14.5,
+          sync: { id: 'nitro-health-harness-floors-changes', version: 1 },
+        },
+      ])
+
+      const afterSave = await drainFloorsClimbedChanges(baselineToken)
+      const upsert = afterSave.changes.find(
+        (change) =>
+          change.type === 'upsert' &&
+          change.samples.some(
+            (sample) =>
+              Math.abs(sample.floors - 14.5) < 0.001 &&
+              sample.startDate.getTime() === interval.startDate.getTime() &&
+              sample.endDate.getTime() === interval.endDate.getTime()
+          )
+      )
+      if (Platform.OS === 'ios' && upsert === undefined) return
+
+      expect(upsert).toBeDefined()
+      if (upsert === undefined || upsert.type !== 'upsert') return
+
+      await NitroHealth.deleteRecordsByIds('floorsClimbed', [upsert.record])
+      const afterDelete = await drainFloorsClimbedChanges(afterSave.changesToken)
+      expect(
+        afterDelete.changes.some(
+          (change) => change.type === 'delete' && change.record.id === upsert.record.id
+        )
+      ).toBe(true)
+    } finally {
+      await NitroHealth.deleteRecordsByTimeRange('floorsClimbed', range)
     }
   })
 

@@ -10,6 +10,7 @@ import androidx.health.connect.client.records.BodyFatRecord
 import androidx.health.connect.client.records.BodyTemperatureRecord
 import androidx.health.connect.client.records.DistanceRecord
 import androidx.health.connect.client.records.ExerciseSessionRecord
+import androidx.health.connect.client.records.FloorsClimbedRecord
 import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.HeartRateVariabilityRmssdRecord
 import androidx.health.connect.client.records.HeightRecord
@@ -81,6 +82,16 @@ internal fun healthDataTypeDescriptorFor(dataType: String): HealthDataTypeDescri
                     extract = { result ->
                         result[ActiveCaloriesBurnedRecord.ACTIVE_CALORIES_TOTAL]?.inKilocalories
                     }
+                )
+            )
+        )
+        "floorsClimbed" -> HealthDataTypeDescriptor(
+            recordType = FloorsClimbedRecord::class,
+            permissionLabel = "floors climbed",
+            statisticsMetrics = mapOf(
+                "sum" to StatisticsMetricBinding(
+                    metric = FloorsClimbedRecord.FLOORS_CLIMBED_TOTAL,
+                    extract = { result -> result[FloorsClimbedRecord.FLOORS_CLIMBED_TOTAL] }
                 )
             )
         )

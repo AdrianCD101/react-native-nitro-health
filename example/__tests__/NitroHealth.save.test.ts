@@ -71,6 +71,24 @@ describe('NitroHealth save contract', () => {
     ])
   })
 
+  it('saves floors climbed through the Nitro hybrid object', async () => {
+    const startDate = new Date('2026-01-01T09:00:00.000Z')
+    const endDate = new Date('2026-01-01T09:30:00.000Z')
+    mockNitroHealth.saveFloorsClimbed.mockResolvedValue(undefined)
+
+    await expect(
+      NitroHealth.saveFloorsClimbed([{ startDate, endDate, floors: 12.5 }])
+    ).resolves.toBeUndefined()
+
+    expect(mockNitroHealth.saveFloorsClimbed).toHaveBeenCalledWith([
+      {
+        startTimeMs: startDate.getTime(),
+        endTimeMs: endDate.getTime(),
+        floors: 12.5,
+      },
+    ])
+  })
+
   it('saves heart rate through the Nitro hybrid object', async () => {
     const date = new Date('2026-01-01T09:00:00.000Z')
     mockNitroHealth.saveHeartRate.mockResolvedValue(undefined)
@@ -110,6 +128,7 @@ describe('NitroHealth save contract', () => {
       { scope: 'walking-running', startDate, endDate, distanceMeters: 1250.5, sync },
     ])
     await NitroHealth.saveActiveEnergyBurned([{ startDate, endDate, kilocalories: 215, sync }])
+    await NitroHealth.saveFloorsClimbed([{ startDate, endDate, floors: 12.5, sync }])
     await NitroHealth.saveHeartRate([{ date: startDate, bpm: 72, sync }])
     await NitroHealth.saveBloodPressure([
       { date: startDate, systolicMmHg: 118, diastolicMmHg: 76, sync },
@@ -143,6 +162,14 @@ describe('NitroHealth save contract', () => {
         startTimeMs: startDate.getTime(),
         endTimeMs: endDate.getTime(),
         kilocalories: 215,
+        ...nativeSync,
+      },
+    ])
+    expect(mockNitroHealth.saveFloorsClimbed).toHaveBeenCalledWith([
+      {
+        startTimeMs: startDate.getTime(),
+        endTimeMs: endDate.getTime(),
+        floors: 12.5,
         ...nativeSync,
       },
     ])
@@ -291,12 +318,16 @@ describe('NitroHealth save contract', () => {
     await expect(NitroHealth.saveActiveEnergyBurned([])).rejects.toThrow(
       'At least one sample is required'
     )
+    await expect(NitroHealth.saveFloorsClimbed([])).rejects.toThrow(
+      'At least one sample is required'
+    )
     await expect(NitroHealth.saveHeartRate([])).rejects.toThrow('At least one sample is required')
     await expect(NitroHealth.saveBodyMass([])).rejects.toThrow('At least one sample is required')
 
     expect(mockNitroHealth.saveSteps).not.toHaveBeenCalled()
     expect(mockNitroHealth.saveDistance).not.toHaveBeenCalled()
     expect(mockNitroHealth.saveActiveEnergyBurned).not.toHaveBeenCalled()
+    expect(mockNitroHealth.saveFloorsClimbed).not.toHaveBeenCalled()
     expect(mockNitroHealth.saveHeartRate).not.toHaveBeenCalled()
     expect(mockNitroHealth.saveBodyMass).not.toHaveBeenCalled()
   })
@@ -338,10 +369,20 @@ describe('NitroHealth save contract', () => {
         { startDate: new Date(Number.NaN), endDate, kilocalories: 10 },
       ])
     ).rejects.toThrow('samples[0]: a valid startDate is required')
+    await expect(
+      NitroHealth.saveFloorsClimbed([
+        {
+          startDate: new Date('2026-01-01T09:00:00.000Z'),
+          endDate: new Date(Number.NaN),
+          floors: 1,
+        },
+      ])
+    ).rejects.toThrow('samples[0]: a valid endDate is required')
 
     expect(mockNitroHealth.saveSteps).not.toHaveBeenCalled()
     expect(mockNitroHealth.saveDistance).not.toHaveBeenCalled()
     expect(mockNitroHealth.saveActiveEnergyBurned).not.toHaveBeenCalled()
+    expect(mockNitroHealth.saveFloorsClimbed).not.toHaveBeenCalled()
   })
 
   it('rejects inverted or empty sample intervals before crossing the native boundary', async () => {
@@ -354,8 +395,12 @@ describe('NitroHealth save contract', () => {
     await expect(
       NitroHealth.saveSteps([{ startDate, endDate: startDate, count: 100 }])
     ).rejects.toThrow('samples[0]: startDate must be before endDate')
+    await expect(
+      NitroHealth.saveFloorsClimbed([{ startDate, endDate: startDate, floors: 1 }])
+    ).rejects.toThrow('samples[0]: startDate must be before endDate')
 
     expect(mockNitroHealth.saveSteps).not.toHaveBeenCalled()
+    expect(mockNitroHealth.saveFloorsClimbed).not.toHaveBeenCalled()
   })
 
   it('rejects invalid point-in-time sample dates before crossing the native boundary', async () => {
@@ -390,6 +435,11 @@ describe('NitroHealth save contract', () => {
         NitroHealth.saveActiveEnergyBurned([{ startDate, endDate, kilocalories }])
       ).rejects.toThrow('samples[0]: kilocalories must be a non-negative number')
     }
+    for (const floors of [-1, Number.NaN, Number.POSITIVE_INFINITY]) {
+      await expect(NitroHealth.saveFloorsClimbed([{ startDate, endDate, floors }])).rejects.toThrow(
+        'samples[0]: floors must be a non-negative number'
+      )
+    }
     for (const bpm of [0, -1, 0.5, 301, Number.NaN, Number.POSITIVE_INFINITY]) {
       await expect(NitroHealth.saveHeartRate([{ date, bpm }])).rejects.toThrow(
         'samples[0]: bpm must be between 1 and 300'
@@ -404,6 +454,7 @@ describe('NitroHealth save contract', () => {
     expect(mockNitroHealth.saveSteps).not.toHaveBeenCalled()
     expect(mockNitroHealth.saveDistance).not.toHaveBeenCalled()
     expect(mockNitroHealth.saveActiveEnergyBurned).not.toHaveBeenCalled()
+    expect(mockNitroHealth.saveFloorsClimbed).not.toHaveBeenCalled()
     expect(mockNitroHealth.saveHeartRate).not.toHaveBeenCalled()
     expect(mockNitroHealth.saveBodyMass).not.toHaveBeenCalled()
   })
@@ -431,6 +482,9 @@ describe('NitroHealth save contract', () => {
     await expect(
       NitroHealth.saveActiveEnergyBurned([{ startDate, endDate, kilocalories: 1_000_001 }])
     ).rejects.toThrow('samples[0]: kilocalories must not exceed 1000000')
+    await expect(
+      NitroHealth.saveFloorsClimbed([{ startDate, endDate, floors: 1_000_001 }])
+    ).rejects.toThrow('samples[0]: floors must not exceed 1000000')
     await expect(NitroHealth.saveBodyMass([{ date, kilograms: 1_000.5 }])).rejects.toThrow(
       'samples[0]: kilograms must not exceed 1000'
     )
@@ -438,6 +492,7 @@ describe('NitroHealth save contract', () => {
     expect(mockNitroHealth.saveSteps).not.toHaveBeenCalled()
     expect(mockNitroHealth.saveDistance).not.toHaveBeenCalled()
     expect(mockNitroHealth.saveActiveEnergyBurned).not.toHaveBeenCalled()
+    expect(mockNitroHealth.saveFloorsClimbed).not.toHaveBeenCalled()
     expect(mockNitroHealth.saveHeartRate).not.toHaveBeenCalled()
     expect(mockNitroHealth.saveBodyMass).not.toHaveBeenCalled()
   })

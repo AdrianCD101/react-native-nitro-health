@@ -327,6 +327,19 @@ extension HybridNitroHealth {
                     kilocalories: quantitySample.quantity.doubleValue(for: HKUnit.kilocalorie())
                 )]
             )
+        case "floorsClimbed":
+            let quantitySample = try requireQuantitySample(sample, dataType: dataType)
+            return makeNativeHealthChange(
+                type: "upsert",
+                recordId: uuid,
+                floorsClimbedSamples: [NativeFloorsClimbedSample(
+                    identity: quantitySample.nativeHealthSampleIdentity,
+                    origin: quantitySample.nativeHealthDataOrigin,
+                    startTimeMs: startTimeMs,
+                    endTimeMs: endTimeMs,
+                    floors: quantitySample.quantity.doubleValue(for: HKUnit.count())
+                )]
+            )
         case "oxygenSaturation":
             let quantitySample = try requireQuantitySample(sample, dataType: dataType)
             return makeNativeHealthChange(
@@ -455,6 +468,7 @@ extension HybridNitroHealth {
         heartRateVariabilitySamples: [NativeHeartRateVariabilitySample]? = nil,
         distanceSamples: [NativeDistanceSample]? = nil,
         activeEnergyBurnedSamples: [NativeActiveEnergyBurnedSample]? = nil,
+        floorsClimbedSamples: [NativeFloorsClimbedSample]? = nil,
         oxygenSaturationSamples: [NativeOxygenSaturationSample]? = nil,
         heightSamples: [NativeHeightSample]? = nil,
         vo2MaxSamples: [NativeVo2MaxSample]? = nil,
@@ -478,6 +492,7 @@ extension HybridNitroHealth {
             heartRateVariabilitySamples: heartRateVariabilitySamples,
             distanceSamples: distanceSamples,
             activeEnergyBurnedSamples: activeEnergyBurnedSamples,
+            floorsClimbedSamples: floorsClimbedSamples,
             oxygenSaturationSamples: oxygenSaturationSamples,
             heightSamples: heightSamples,
             vo2MaxSamples: vo2MaxSamples,

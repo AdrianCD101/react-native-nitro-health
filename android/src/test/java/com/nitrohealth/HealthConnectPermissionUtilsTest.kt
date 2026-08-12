@@ -9,6 +9,7 @@ import androidx.health.connect.client.records.BodyFatRecord
 import androidx.health.connect.client.records.BodyTemperatureRecord
 import androidx.health.connect.client.records.DistanceRecord
 import androidx.health.connect.client.records.ExerciseSessionRecord
+import androidx.health.connect.client.records.FloorsClimbedRecord
 import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.HeartRateVariabilityRmssdRecord
 import androidx.health.connect.client.records.HeightRecord
@@ -55,6 +56,10 @@ class HealthConnectPermissionUtilsTest {
             ActiveCaloriesBurnedRecord::class,
             healthConnectRecordTypeForDataType("activeEnergyBurned")
         )
+        assertEquals(
+            FloorsClimbedRecord::class,
+            healthConnectRecordTypeForDataType("floorsClimbed")
+        )
         assertEquals(SleepSessionRecord::class, healthConnectRecordTypeForDataType("sleep"))
         assertEquals(WeightRecord::class, healthConnectRecordTypeForDataType("bodyMass"))
         assertEquals(
@@ -90,6 +95,10 @@ class HealthConnectPermissionUtilsTest {
         assertEquals(
             HealthPermission.getReadPermission(ActiveCaloriesBurnedRecord::class),
             toHealthConnectPermission("activeEnergyBurned", "read")
+        )
+        assertEquals(
+            HealthPermission.getReadPermission(FloorsClimbedRecord::class),
+            toHealthConnectPermission("floorsClimbed", "read")
         )
         assertEquals(
             HealthPermission.getReadPermission(HeartRateRecord::class),
@@ -170,6 +179,10 @@ class HealthConnectPermissionUtilsTest {
         assertEquals(
             HealthPermission.getWritePermission(ActiveCaloriesBurnedRecord::class),
             toHealthConnectPermission("activeEnergyBurned", "write")
+        )
+        assertEquals(
+            HealthPermission.getWritePermission(FloorsClimbedRecord::class),
+            toHealthConnectPermission("floorsClimbed", "write")
         )
         assertEquals(
             HealthPermission.getWritePermission(HeartRateRecord::class),

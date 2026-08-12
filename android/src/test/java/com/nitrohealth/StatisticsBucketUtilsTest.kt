@@ -1,5 +1,6 @@
 package com.nitrohealth
 
+import androidx.health.connect.client.records.FloorsClimbedRecord
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -64,6 +65,18 @@ class StatisticsBucketUtilsTest {
         val descriptor = healthDataTypeDescriptorFor("activeEnergyBurned")
 
         assertEquals(setOf("sum"), descriptor.statisticsMetrics.keys)
+    }
+
+    @Test
+    fun descriptorForFloorsClimbedOnlySupportsSum() {
+        val descriptor = healthDataTypeDescriptorFor("floorsClimbed")
+
+        assertEquals(FloorsClimbedRecord::class, descriptor.recordType)
+        assertEquals(setOf("sum"), descriptor.statisticsMetrics.keys)
+        assertEquals(
+            FloorsClimbedRecord.FLOORS_CLIMBED_TOTAL,
+            descriptor.statisticsMetrics.getValue("sum").metric
+        )
     }
 
     @Test

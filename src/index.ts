@@ -32,6 +32,8 @@ export type {
   RequestHealthAdditionalAccessResult,
   UnavailableHealthAdditionalAccessResult,
 } from './HealthCapabilities'
+export type { FloorsClimbedSample } from './FloorsClimbedSample'
+export type { FloorsClimbedSampleInput } from './FloorsClimbedSampleInput'
 export type { HealthAuthorizationResult } from './HealthAuthorizationResult'
 export type { HealthChangesResult } from './HealthChangesResult'
 export type { HealthChangeNotification } from './HealthChangeNotification'

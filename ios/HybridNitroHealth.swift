@@ -116,6 +116,38 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         }
     }
 
+    // Note: like readSteps, HealthKit resolves with an empty array when read access is denied.
+    func readFloorsClimbed(query: NativeHealthDateRangeQuery) throws -> Promise<NativeFloorsClimbedSamplePage> {
+        if !HKHealthStore.isHealthDataAvailable() {
+            throw permissionError("Health data is not available")
+        }
+
+        let quantityType = try makeHealthKitQuantityType(dataType: "floorsClimbed")
+
+        return Promise<NativeFloorsClimbedSamplePage>.async {
+            let page = try await self.queryPagedSamples(
+                sampleType: quantityType,
+                dataType: "floorsClimbed",
+                query: query,
+                authorizationLabel: "floors climbed"
+            ) { sample -> NativeFloorsClimbedSample? in
+                guard let quantitySample = sample as? HKQuantitySample else {
+                    return nil
+                }
+
+                return NativeFloorsClimbedSample(
+                    identity: quantitySample.nativeHealthSampleIdentity,
+                    origin: quantitySample.nativeHealthDataOrigin,
+                    startTimeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
+                    endTimeMs: quantitySample.endDate.timeIntervalSince1970 * 1000,
+                    floors: quantitySample.quantity.doubleValue(for: HKUnit.count())
+                )
+            }
+
+            return NativeFloorsClimbedSamplePage(samples: page.samples, nextCursor: page.nextCursor)
+        }
+    }
+
     // Note: like readSteps, HealthKit resolves with an empty array when read access is denied
     // (read-permission denial is not detectable). Heart rate is read in beats per minute.
     func readHeartRate(query: NativeHealthDateRangeQuery) throws -> Promise<NativeHeartRateSamplePage> {
@@ -326,6 +358,12 @@ class HybridNitroHealth: HybridNitroHealthSpec {
     func saveActiveEnergyBurned(samples: [NativeActiveEnergyBurnedSampleInput]) throws -> Promise<Void> {
         return try saveQuantitySamples(dataType: "activeEnergyBurned", label: "active energy burned") { quantityType in
             try makeActiveEnergyBurnedQuantitySamples(samples: samples, quantityType: quantityType)
+        }
+    }
+
+    func saveFloorsClimbed(samples: [NativeFloorsClimbedSampleInput]) throws -> Promise<Void> {
+        return try saveQuantitySamples(dataType: "floorsClimbed", label: "floors climbed") { quantityType in
+            try makeFloorsClimbedQuantitySamples(samples: samples, quantityType: quantityType)
         }
     }
 

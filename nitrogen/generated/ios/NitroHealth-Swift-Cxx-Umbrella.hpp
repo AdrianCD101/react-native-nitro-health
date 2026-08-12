@@ -74,6 +74,12 @@ namespace margelo::nitro::nitrohealth { struct NativeDistanceSample; }
 namespace margelo::nitro::nitrohealth { enum class NativeDistanceScope; }
 // Forward declaration of `NativeDistanceWriteResult` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeDistanceWriteResult; }
+// Forward declaration of `NativeFloorsClimbedSampleInput` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeFloorsClimbedSampleInput; }
+// Forward declaration of `NativeFloorsClimbedSamplePage` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeFloorsClimbedSamplePage; }
+// Forward declaration of `NativeFloorsClimbedSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeFloorsClimbedSample; }
 // Forward declaration of `NativeHealthAdditionalAccessStatus` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class NativeHealthAdditionalAccessStatus; }
 // Forward declaration of `NativeHealthAuthorizationResult` to properly resolve imports.
@@ -245,6 +251,9 @@ namespace margelo::nitro::nitrohealth { struct NativeWorkoutSample; }
 #include "NativeDistanceSamplePage.hpp"
 #include "NativeDistanceScope.hpp"
 #include "NativeDistanceWriteResult.hpp"
+#include "NativeFloorsClimbedSample.hpp"
+#include "NativeFloorsClimbedSampleInput.hpp"
+#include "NativeFloorsClimbedSamplePage.hpp"
 #include "NativeHealthAdditionalAccessStatus.hpp"
 #include "NativeHealthAuthorizationResult.hpp"
 #include "NativeHealthAuthorizationStatus.hpp"

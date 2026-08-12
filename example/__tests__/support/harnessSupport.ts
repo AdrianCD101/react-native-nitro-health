@@ -16,6 +16,12 @@ export const distanceReadPermission: HealthPermission[] = [
 export const activeEnergyReadPermission: HealthPermission[] = [
   { accessType: 'read', dataType: 'activeEnergyBurned' },
 ]
+export const floorsClimbedReadPermission: HealthPermission[] = [
+  { accessType: 'read', dataType: 'floorsClimbed' },
+]
+export const floorsClimbedWritePermission: HealthPermission[] = [
+  { accessType: 'write', dataType: 'floorsClimbed' },
+]
 export const heartRateReadPermission: HealthPermission[] = [
   { accessType: 'read', dataType: 'heartRate' },
 ]

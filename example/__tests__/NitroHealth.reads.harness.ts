@@ -10,6 +10,7 @@ import type {
 
 import {
   emptyRange,
+  floorsClimbedReadPermission,
   hasReadablePermission,
   hasVerifiedPermissions,
   heartRateVariabilityReadPermission,
@@ -306,6 +307,31 @@ describe('NitroHealth reads (native)', () => {
       }
     } catch (error) {
       expect(error).toBeInstanceOf(Error)
+    }
+  })
+
+  it('reads floors climbed intervals under a record identity with plausible values', async () => {
+    if (!(await hasReadablePermission(floorsClimbedReadPermission))) return
+
+    let page: Awaited<ReturnType<typeof NitroHealth.readFloorsClimbed>>
+    try {
+      page = await NitroHealth.readFloorsClimbed(emptyRange)
+    } catch (error) {
+      if (
+        Platform.OS === 'ios' &&
+        error instanceof Error &&
+        /read authorization is not determined for floors climbed/i.test(error.message)
+      ) {
+        return
+      }
+      throw error
+    }
+
+    for (const sample of page.samples) {
+      assertSampleIdentityAndOrigin(sample)
+      expect(sample.identity.kind).toBe('record')
+      expect(sample.floors).toBeGreaterThanOrEqual(0)
+      expect(sample.endDate.getTime()).toBeGreaterThan(sample.startDate.getTime())
     }
   })
 

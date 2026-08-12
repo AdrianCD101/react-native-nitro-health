@@ -19,6 +19,7 @@ export type HealthDataType =
   | 'heartRateVariability'
   | 'distance'
   | 'activeEnergyBurned'
+  | 'floorsClimbed'
   | 'oxygenSaturation'
   | 'height'
   | 'vo2Max'

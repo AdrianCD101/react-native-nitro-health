@@ -8,6 +8,7 @@ import androidx.health.connect.client.records.BodyFatRecord
 import androidx.health.connect.client.records.BodyTemperatureMeasurementLocation
 import androidx.health.connect.client.records.BodyTemperatureRecord
 import androidx.health.connect.client.records.DistanceRecord
+import androidx.health.connect.client.records.FloorsClimbedRecord
 import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.MealType
 import androidx.health.connect.client.records.HeightRecord
@@ -35,6 +36,7 @@ import com.margelo.nitro.nitrohealth.NativeBodyMassSampleInput
 import com.margelo.nitro.nitrohealth.NativeBodyTemperatureSampleInput
 import com.margelo.nitro.nitrohealth.NativeDistanceSampleInput
 import com.margelo.nitro.nitrohealth.NativeDistanceScope
+import com.margelo.nitro.nitrohealth.NativeFloorsClimbedSampleInput
 import com.margelo.nitro.nitrohealth.NativeHeartRateSampleInput
 import com.margelo.nitro.nitrohealth.NativeHeightSampleInput
 import com.margelo.nitro.nitrohealth.NativeOxygenSaturationSampleInput
@@ -84,6 +86,21 @@ internal fun toActiveCaloriesBurnedRecords(
             endTime = Instant.ofEpochMilli(sample.endTimeMs.toLong()),
             endZoneOffset = null,
             energy = Energy.kilocalories(sample.kilocalories),
+            metadata = makeSampleMetadata(sample.syncId, sample.syncVersion)
+        )
+    }
+}
+
+internal fun toFloorsClimbedRecords(
+    samples: Array<NativeFloorsClimbedSampleInput>
+): List<FloorsClimbedRecord> {
+    return samples.map { sample ->
+        FloorsClimbedRecord(
+            startTime = Instant.ofEpochMilli(sample.startTimeMs.toLong()),
+            startZoneOffset = null,
+            endTime = Instant.ofEpochMilli(sample.endTimeMs.toLong()),
+            endZoneOffset = null,
+            floors = sample.floors,
             metadata = makeSampleMetadata(sample.syncId, sample.syncVersion)
         )
     }

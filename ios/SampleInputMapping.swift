@@ -79,6 +79,24 @@ func makeActiveEnergyBurnedQuantitySamples(
     }
 }
 
+func makeFloorsClimbedQuantitySamples(
+    samples: [NativeFloorsClimbedSampleInput],
+    quantityType: HKQuantityType
+) throws -> [HKQuantitySample] {
+    return try samples.map { sample in
+        HKQuantitySample(
+            type: quantityType,
+            quantity: HKQuantity(unit: HKUnit.count(), doubleValue: sample.floors),
+            start: Date(timeIntervalSince1970: sample.startTimeMs / 1000),
+            end: Date(timeIntervalSince1970: sample.endTimeMs / 1000),
+            metadata: try makeHealthKitSyncMetadata(
+                syncId: sample.syncId,
+                syncVersion: sample.syncVersion
+            )
+        )
+    }
+}
+
 func makeHeartRateQuantitySamples(
     samples: [NativeHeartRateSampleInput],
     quantityType: HKQuantityType

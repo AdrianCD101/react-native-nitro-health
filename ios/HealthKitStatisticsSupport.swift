@@ -39,6 +39,13 @@ func makeHealthDataTypeDescriptor(dataType: String) throws -> HealthDataTypeDesc
             label: "active energy burned",
             isCumulative: true
         )
+    case "floorsClimbed":
+        return HealthDataTypeDescriptor(
+            identifier: .flightsClimbed,
+            unit: HKUnit.count(),
+            label: "floors climbed",
+            isCumulative: true
+        )
     case "heartRate":
         return HealthDataTypeDescriptor(
             identifier: .heartRate,
