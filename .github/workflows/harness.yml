@@ -63,7 +63,6 @@ jobs:
     if: ${{ github.event_name != 'workflow_dispatch' || inputs.platform == 'android' || inputs.platform == 'all' }}
     env:
       RN_HARNESS_ANDROID_DISK_SIZE: 1G
-      RN_HARNESS_PROFILE: authorized
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -129,7 +128,6 @@ jobs:
     env:
       RN_HARNESS_IOS_SIMULATOR: iPhone 16 Pro
       RN_HARNESS_IOS_RUNTIME: '18.5'
-      RN_HARNESS_PROFILE: manual
       USE_CCACHE: 1
     steps:
       - name: Checkout

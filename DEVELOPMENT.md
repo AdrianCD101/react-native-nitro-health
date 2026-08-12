@@ -219,9 +219,9 @@ bun run harness:ios
 
 The automation currently depends on the English accessibility labels listed in the patch. If authorization setup times out after an iOS update, inspect the XCTest agent log and the target-app/SpringBoard accessibility trees before adding labels. Do not work around the failure with conditional passing returns, `--forceExit`, or manual pre-grant instructions.
 
-The authorized Harness profile intentionally does not test denied HealthKit reads or writes. HealthKit conceals read denial, making it observable only as empty data, and denied writes require a separate mutually exclusive authorization state. Denied/unavailable and callback-error branches belong in focused native tests or a future dedicated denied profile rather than the positive integration suite. Platform-only Harness cases remain conditional, so one skip on each platform is expected: the Android-only post-request permission-status test on iOS, and the iOS-only observer-delivery test on Android.
+The iOS Harness run intentionally does not test denied HealthKit reads or writes. HealthKit conceals read denial, making it observable only as empty data, and denied writes require a separate mutually exclusive authorization state. Denied/unavailable and callback-error branches belong in focused native tests or a future dedicated denied run rather than the positive integration suite. Platform-specific setup is derived directly from `--harnessRunner`; there is no separate profile environment variable. Platform-only Harness cases remain conditional, so one skip on each platform is expected: the Android-only post-request permission-status test on iOS, and the iOS-only observer-delivery test on Android.
 
-The GitHub Actions Harness workflow runs Android runtime validation for relevant pull requests and `main` pushes. iOS is manual. Use workflow dispatch when CI device coverage is needed.
+The GitHub Actions Harness workflow runs Android runtime validation for relevant pull requests and `main` pushes. iOS authorization is automated, but the iOS job runs only through workflow dispatch. Use workflow dispatch when CI device coverage is needed.
 
 ## Manual Device Cases
 

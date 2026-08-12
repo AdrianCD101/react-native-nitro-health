@@ -9,7 +9,7 @@ describe('NitroHealth authorized harness prerequisites', () => {
   it('has every permission required by positive integration tests', async () => {
     if (Platform.OS !== 'android') {
       throw new Error(
-        'The authorized Harness profile is Android-only; use the manual iOS HealthKit workflow'
+        'The Android Harness prerequisite test cannot run with the iOS Harness runner'
       )
     }
 

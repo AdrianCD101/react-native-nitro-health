@@ -6,21 +6,24 @@ try {
   // .env is optional.
 }
 
-const harnessProfile = process.env.RN_HARNESS_PROFILE ?? 'manual'
-const harnessProfiles = new Set(['authorized', 'manual'])
+const runnerOptionIndex = process.argv.findIndex((argument) => argument === '--harnessRunner')
+const harnessRunner =
+  process.argv.find((argument) => argument.startsWith('--harnessRunner='))?.split('=', 2)[1] ??
+  (runnerOptionIndex >= 0 ? process.argv[runnerOptionIndex + 1] : undefined) ??
+  'ios'
 
-if (!harnessProfiles.has(harnessProfile)) {
-  throw new Error(`Unsupported RN_HARNESS_PROFILE: ${harnessProfile}`)
+if (harnessRunner !== 'android' && harnessRunner !== 'ios') {
+  throw new Error(`Unsupported Harness runner: ${harnessRunner}`)
 }
 
 export default {
   preset: 'react-native-harness',
   testMatch: ['**/__tests__/**/*.harness.{js,ts,tsx}'],
   setupFilesAfterEnv:
-    harnessProfile === 'manual' ? ['<rootDir>/__tests__/support/harnessAuthorizationSetup.ts'] : [],
+    harnessRunner === 'ios' ? ['<rootDir>/__tests__/support/harnessAuthorizationSetup.ts'] : [],
   testPathIgnorePatterns: [
     '/node_modules/',
-    ...(harnessProfile === 'manual'
+    ...(harnessRunner === 'ios'
       ? ['/NitroHealth[.]authorized-prerequisites[.]harness[.][jt]sx?$']
       : []),
   ],

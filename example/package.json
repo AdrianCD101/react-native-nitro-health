@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "android": "react-native run-android",
-    "harness:android": "RN_HARNESS_PROFILE=authorized react-native-harness --config jest.harness.config.mjs --harnessRunner android",
-    "harness:ios": "RN_HARNESS_PROFILE=manual react-native-harness --config jest.harness.config.mjs --harnessRunner ios",
+    "harness:android": "react-native-harness --config jest.harness.config.mjs --harnessRunner android",
+    "harness:ios": "react-native-harness --config jest.harness.config.mjs --harnessRunner ios",
     "ios": "react-native run-ios --simulator='iPhone 17 Pro'",
     "lint": "oxlint .",
     "start": "react-native start --reset-cache",
