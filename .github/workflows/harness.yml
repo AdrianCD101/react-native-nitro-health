@@ -7,10 +7,13 @@ on:
     paths:
       - '.github/workflows/harness.yml'
       - 'android/**'
+      - 'cpp/**'
       - 'example/__tests__/**'
       - 'example/android/**'
       - 'example/ios/**'
       - 'example/App.tsx'
+      - 'example/Gemfile'
+      - 'example/Gemfile.lock'
       - 'example/index.js'
       - 'example/jest.harness.config.mjs'
       - 'example/package.json'
@@ -20,6 +23,9 @@ on:
       - 'nitrogen/generated/shared/**'
       - 'ios/**'
       - 'src/**'
+      - '**/*.podspec'
+      - '**/Podfile.lock'
+      - '**/react-native.config.js'
       - 'bun.lock'
       - 'nitro.json'
       - 'package.json'
@@ -27,10 +33,13 @@ on:
     paths:
       - '.github/workflows/harness.yml'
       - 'android/**'
+      - 'cpp/**'
       - 'example/__tests__/**'
       - 'example/android/**'
       - 'example/ios/**'
       - 'example/App.tsx'
+      - 'example/Gemfile'
+      - 'example/Gemfile.lock'
       - 'example/index.js'
       - 'example/jest.harness.config.mjs'
       - 'example/package.json'
@@ -40,33 +49,25 @@ on:
       - 'nitrogen/generated/shared/**'
       - 'ios/**'
       - 'src/**'
+      - '**/*.podspec'
+      - '**/Podfile.lock'
+      - '**/react-native.config.js'
       - 'bun.lock'
       - 'nitro.json'
       - 'package.json'
   workflow_dispatch:
-    inputs:
-      platform:
-        description: Platform to test
-        required: true
-        default: android
-        type: choice
-        options:
-          - android
-          - ios
-          - all
 
 permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}-${{ github.event.inputs.platform || 'android' }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   harness-android:
     name: Harness Android
     runs-on: ubuntu-latest
-    if: ${{ github.event_name != 'workflow_dispatch' || inputs.platform == 'android' || inputs.platform == 'all' }}
     env:
       RN_HARNESS_ANDROID_DISK_SIZE: 1G
     steps:
@@ -130,7 +131,6 @@ jobs:
   harness-ios:
     name: Harness iOS
     runs-on: macOS-15
-    if: ${{ github.event_name != 'workflow_dispatch' || inputs.platform == 'ios' || inputs.platform == 'all' }}
     env:
       RN_HARNESS_IOS_SIMULATOR: iPhone 16 Pro
       RN_HARNESS_IOS_RUNTIME: '18.5'
