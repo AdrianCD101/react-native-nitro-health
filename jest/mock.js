@@ -29,6 +29,8 @@ const healthDataTypes = new Set([
   'workout',
 ])
 
+const aggregateOnlyDataTypes = new Set(['basalEnergyBurned', 'totalEnergyBurned'])
+
 function validateDataTypes(values, label) {
   for (const [index, value] of values.entries()) {
     if (!healthDataTypes.has(value)) {
@@ -46,12 +48,18 @@ function validatePermissions(permissions) {
       typeof permission !== 'object' ||
       permission === null ||
       (permission.accessType !== 'read' && permission.accessType !== 'write') ||
-      !healthDataTypes.has(permission.dataType)
+      (!healthDataTypes.has(permission.dataType) &&
+        !aggregateOnlyDataTypes.has(permission.dataType))
     ) {
       return new Error(`permissions[${index}]: a supported read or write permission is required`)
     }
     if (permission.accessType === 'write' && permission.dataType === 'heartRateVariability') {
       return new Error(`permissions[${index}]: heartRateVariability is read-only`)
+    }
+    if (permission.accessType === 'write' && aggregateOnlyDataTypes.has(permission.dataType)) {
+      return new Error(
+        `permissions[${index}]: ${permission.dataType} is an aggregate-only read type`
+      )
     }
   }
 }

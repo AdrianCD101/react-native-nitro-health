@@ -7,9 +7,9 @@ import type {
   HealthAuthorizationResult,
   HealthCapabilitiesResult,
   HealthDataOrigin,
-  HealthDataType,
   HealthMetricValue,
   HealthPermission,
+  HealthPermissionDataType,
   HealthPermissionStatusResult,
   HealthSampleIdentity,
   ListenerSubscription,
@@ -20,10 +20,12 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { allHealthPermissions, writableDataTypes } from './healthPermissions'
 
-const readPermissions: Array<{ dataType: HealthDataType; label: string }> = [
+const readPermissions: Array<{ dataType: HealthPermissionDataType; label: string }> = [
   { dataType: 'steps', label: 'Steps' },
   { dataType: 'distance', label: 'Distance' },
   { dataType: 'activeEnergyBurned', label: 'Active Energy' },
+  { dataType: 'basalEnergyBurned', label: 'Basal Energy' },
+  { dataType: 'totalEnergyBurned', label: 'Total Energy' },
   { dataType: 'hydration', label: 'Hydration' },
   { dataType: 'floorsClimbed', label: 'Floors Climbed' },
   { dataType: 'heartRate', label: 'Heart Rate' },
@@ -32,7 +34,9 @@ const readPermissions: Array<{ dataType: HealthDataType; label: string }> = [
   { dataType: 'workout', label: 'Workouts' },
 ]
 
-function isWritableDataType(dataType: HealthDataType): dataType is WritableHealthDataType {
+function isWritableDataType(
+  dataType: HealthPermissionDataType
+): dataType is WritableHealthDataType {
   return writableDataTypes.includes(dataType as WritableHealthDataType)
 }
 
@@ -110,7 +114,7 @@ function getErrorMessage(error: unknown): string {
 }
 
 const readCards: Partial<
-  Record<HealthDataType, { buttonLabel: string; execute: () => Promise<string[]> }>
+  Record<HealthPermissionDataType, { buttonLabel: string; execute: () => Promise<string[]> }>
 > = {
   steps: {
     buttonLabel: 'Read daily step totals',
@@ -156,6 +160,46 @@ const readCards: Partial<
       })
       return [
         `Daily active-energy buckets: ${buckets.length}`,
+        ...buckets
+          .slice(-7)
+          .reverse()
+          .map(
+            (bucket) =>
+              `${bucket.startDate.toLocaleDateString()}: ${Math.round(bucket.sum ?? 0)} kcal`
+          ),
+      ]
+    },
+  },
+  basalEnergyBurned: {
+    buttonLabel: 'Read daily basal energy totals',
+    execute: async () => {
+      const buckets = await NitroHealth.readStatistics('basalEnergyBurned', {
+        ...lastDays(7),
+        bucket: 'day',
+        metrics: ['sum'],
+      })
+      return [
+        `Daily basal-energy buckets: ${buckets.length}`,
+        ...buckets
+          .slice(-7)
+          .reverse()
+          .map(
+            (bucket) =>
+              `${bucket.startDate.toLocaleDateString()}: ${Math.round(bucket.sum ?? 0)} kcal`
+          ),
+      ]
+    },
+  },
+  totalEnergyBurned: {
+    buttonLabel: 'Read daily total energy totals',
+    execute: async () => {
+      const buckets = await NitroHealth.readStatistics('totalEnergyBurned', {
+        ...lastDays(7),
+        bucket: 'day',
+        metrics: ['sum'],
+      })
+      return [
+        `Daily total-energy buckets: ${buckets.length}`,
         ...buckets
           .slice(-7)
           .reverse()
@@ -284,8 +328,10 @@ function App(): React.JSX.Element {
   const availability = NitroHealth.getAvailability()
   const isAvailable = availability.status === 'available'
   const [capabilities, setCapabilities] = useState<HealthCapabilitiesResult>()
-  const [cards, setCards] = useState<Partial<Record<HealthDataType, CardState>>>({})
-  const [readResults, setReadResults] = useState<Partial<Record<HealthDataType, string[]>>>({})
+  const [cards, setCards] = useState<Partial<Record<HealthPermissionDataType, CardState>>>({})
+  const [readResults, setReadResults] = useState<
+    Partial<Record<HealthPermissionDataType, string[]>>
+  >({})
   const [workflowActivity, setWorkflowActivity] = useState<string>()
   const [workflowMessage, setWorkflowMessage] = useState<string>()
   const [workflowError, setWorkflowError] = useState<string>()
@@ -307,7 +353,7 @@ function App(): React.JSX.Element {
     }
   }, [])
 
-  function updateCard(dataType: HealthDataType, patch: Partial<CardState>): void {
+  function updateCard(dataType: HealthPermissionDataType, patch: Partial<CardState>): void {
     setCards((current) => ({ ...current, [dataType]: { ...current[dataType], ...patch } }))
   }
 
@@ -431,7 +477,7 @@ function App(): React.JSX.Element {
     })
   }
 
-  async function checkPermission(dataType: HealthDataType): Promise<void> {
+  async function checkPermission(dataType: HealthPermissionDataType): Promise<void> {
     const permission: HealthPermission[] = [{ accessType: 'read', dataType }]
     updateCard(dataType, { activity: 'checking', feedback: undefined })
     try {
@@ -446,7 +492,7 @@ function App(): React.JSX.Element {
   }
 
   async function requestPermission(
-    dataType: HealthDataType,
+    dataType: HealthPermissionDataType,
     accessType: 'read' | 'write'
   ): Promise<void> {
     updateCard(dataType, {
@@ -474,7 +520,7 @@ function App(): React.JSX.Element {
     }
   }
 
-  async function runReadCard(dataType: HealthDataType): Promise<void> {
+  async function runReadCard(dataType: HealthPermissionDataType): Promise<void> {
     const readCard = readCards[dataType]
     if (!readCard) return
 

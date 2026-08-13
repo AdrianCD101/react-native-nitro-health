@@ -36,7 +36,7 @@ import type {
 import type { HealthAuthorizationResult } from './HealthAuthorizationResult'
 import type { HealthChangeNotification } from './HealthChangeNotification'
 import type { HealthChangesResult } from './HealthChangesResult'
-import type { HealthDataType } from './HealthDataType'
+import type { HealthDataType, HealthStatisticsDataType } from './HealthDataType'
 import type { HealthDateRangeQuery } from './HealthDateRangeQuery'
 import type { HealthIdentityDeleteResult, HealthTimeRangeDeleteResult } from './HealthDeleteResult'
 import type { HealthPermission } from './HealthPermission'
@@ -269,7 +269,14 @@ export interface NitroHealth {
   ): Promise<HealthSamplePage<OxygenSaturationSample>>
   readHeight(query: HealthDateRangeQuery): Promise<HealthSamplePage<HeightSample>>
   readVo2Max(query: HealthDateRangeQuery): Promise<HealthSamplePage<Vo2MaxSample>>
-  readStatistics<T extends HealthDataType>(
+  /**
+   * Reads bucketed aggregates. Besides the raw-readable types, accepts the aggregate-only
+   * energy types: `basalEnergyBurned` (iOS resting-energy sums; Android integrates stored
+   * metabolic rates, estimating one from body metrics when none exist) and `totalEnergyBurned`
+   * (Android stored totals; iOS composes active + basal and omits buckets without basal data).
+   * Missing buckets mean "no data", never zero.
+   */
+  readStatistics<T extends HealthStatisticsDataType>(
     dataType: T,
     query: HealthStatisticsQuery
   ): Promise<Array<HealthStatisticsByDataType<T>>>

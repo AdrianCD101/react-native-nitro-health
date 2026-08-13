@@ -1,4 +1,5 @@
 import type {
+  AggregateOnlyHealthDataType,
   HealthDataType,
   HealthPermission,
   WritableHealthDataType,
@@ -28,6 +29,12 @@ export const healthDataTypes: HealthDataType[] = [
   'workout',
 ]
 
+// Read-only aggregate energy concepts; no raw reads or writes exist for these.
+export const aggregateOnlyDataTypes: AggregateOnlyHealthDataType[] = [
+  'basalEnergyBurned',
+  'totalEnergyBurned',
+]
+
 export const writableDataTypes: WritableHealthDataType[] = [
   'steps',
   'heartRate',
@@ -53,5 +60,6 @@ export const writableDataTypes: WritableHealthDataType[] = [
 
 export const allHealthPermissions: HealthPermission[] = [
   ...healthDataTypes.map((dataType) => ({ accessType: 'read' as const, dataType })),
+  ...aggregateOnlyDataTypes.map((dataType) => ({ accessType: 'read' as const, dataType })),
   ...writableDataTypes.map((dataType) => ({ accessType: 'write' as const, dataType })),
 ]

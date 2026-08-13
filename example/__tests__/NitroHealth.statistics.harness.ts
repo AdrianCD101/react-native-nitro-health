@@ -2,7 +2,12 @@ import { describe, expect, it, waitUntil } from 'react-native-harness'
 import { NitroHealth } from 'react-native-nitro-health'
 import type { HealthStatistics, StatisticsMetric } from 'react-native-nitro-health'
 
+import { Platform } from 'react-native'
+
 import {
+  activeEnergyReadPermission,
+  activeEnergyWritePermission,
+  basalEnergyReadPermission,
   emptyRange,
   floorsClimbedReadPermission,
   floorsClimbedWritePermission,
@@ -11,6 +16,7 @@ import {
   hasVerifiedPermissions,
   last7DaysRange,
   lastDayRange,
+  totalEnergyReadPermission,
 } from './support/harnessSupport'
 
 const statisticsMetricKeys = ['sum', 'avg', 'min', 'max'] as const
@@ -258,6 +264,82 @@ describe('NitroHealth statistics (native)', () => {
         )
       } finally {
         await NitroHealth.deleteRecordsByTimeRange('hydration', statisticsRange)
+      }
+    })
+
+    it('reads basal energy statistics from native code without crashing', async () => {
+      if (!(await hasVerifiedPermissions(basalEnergyReadPermission))) {
+        return
+      }
+
+      const dailyBasalEnergy = await NitroHealth.readStatistics('basalEnergyBurned', {
+        ...last7DaysRange,
+        bucket: 'day',
+        metrics: ['sum'],
+      })
+
+      expect(Array.isArray(dailyBasalEnergy)).toBe(true)
+      for (const entry of dailyBasalEnergy) {
+        assertStatisticsEntry(entry, ['sum'])
+        expect(entry.sum ?? 0).toBeGreaterThanOrEqual(0)
+      }
+    })
+
+    // Total energy has no HealthKit type: iOS composes active + basal and must omit buckets
+    // whose basal half is missing, while Health Connect derives totals from components (plus a
+    // metabolic-rate estimate) when no stored total-energy record covers the window. A saved
+    // active-energy record on a date island with no basal data pins both behaviors.
+    it('composes total energy from components per platform policy', async () => {
+      if (
+        !(await hasVerifiedPermissions([
+          ...activeEnergyReadPermission,
+          ...activeEnergyWritePermission,
+          ...totalEnergyReadPermission,
+        ]))
+      ) {
+        return
+      }
+
+      const energyIslandRange = {
+        startDate: new Date('2006-06-01T00:00:00.000Z'),
+        endDate: new Date('2006-06-02T00:00:00.000Z'),
+      }
+      const energyIslandInterval = {
+        startDate: new Date('2006-06-01T09:00:00.000Z'),
+        endDate: new Date('2006-06-01T09:30:00.000Z'),
+      }
+      const query = { ...energyIslandRange, bucket: 'day' as const, metrics: ['sum' as const] }
+
+      await NitroHealth.deleteRecordsByTimeRange('activeEnergyBurned', energyIslandRange)
+      try {
+        await NitroHealth.saveActiveEnergyBurned([
+          {
+            ...energyIslandInterval,
+            kilocalories: 250,
+            sync: { id: 'nitro-health-harness-total-energy-statistics', version: 1 },
+          },
+        ])
+
+        await waitUntil(
+          async () =>
+            sumStatistics(await NitroHealth.readStatistics('activeEnergyBurned', query)) >=
+            250 - 0.001,
+          { interval: 250, timeout: 10_000 }
+        )
+
+        if (Platform.OS === 'ios') {
+          // No basal data exists on this island, so no bucket may pose as a "total".
+          expect(await NitroHealth.readStatistics('totalEnergyBurned', query)).toEqual([])
+        } else {
+          await waitUntil(
+            async () =>
+              sumStatistics(await NitroHealth.readStatistics('totalEnergyBurned', query)) >=
+              250 - 0.001,
+            { interval: 250, timeout: 10_000 }
+          )
+        }
+      } finally {
+        await NitroHealth.deleteRecordsByTimeRange('activeEnergyBurned', energyIslandRange)
       }
     })
   })

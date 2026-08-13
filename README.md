@@ -137,7 +137,7 @@ if (capabilities.status === 'available' && capabilities.historyRead === 'not-gra
 
 ## Permissions
 
-Supported data types are `steps`, `heartRate`, `bloodPressure`, `bloodGlucose`, `bodyTemperature`, `respiratoryRate`, `bodyFat`, `leanBodyMass`, `basalBodyTemperature`, `restingHeartRate`, `heartRateVariability`, `distance`, `activeEnergyBurned`, `hydration`, `floorsClimbed`, `oxygenSaturation`, `height`, `vo2Max`, `sleep`, `bodyMass`, and `workout`.
+Supported data types are `steps`, `heartRate`, `bloodPressure`, `bloodGlucose`, `bodyTemperature`, `respiratoryRate`, `bodyFat`, `leanBodyMass`, `basalBodyTemperature`, `restingHeartRate`, `heartRateVariability`, `distance`, `activeEnergyBurned`, `hydration`, `floorsClimbed`, `oxygenSaturation`, `height`, `vo2Max`, `sleep`, `bodyMass`, and `workout`. Read permissions additionally accept the aggregate-only energy types `basalEnergyBurned` and `totalEnergyBurned` (see [Basal and Total Energy](#basal-and-total-energy)); write permissions for them are rejected in JS.
 
 ### Authorization
 
@@ -239,6 +239,8 @@ On Android, the consumer app must declare every Health Connect data permission i
 | `steps`                | `android.permission.health.READ_STEPS`                  | `android.permission.health.WRITE_STEPS`                  |
 | `distance`             | `android.permission.health.READ_DISTANCE`               | `android.permission.health.WRITE_DISTANCE`               |
 | `activeEnergyBurned`   | `android.permission.health.READ_ACTIVE_CALORIES_BURNED` | `android.permission.health.WRITE_ACTIVE_CALORIES_BURNED` |
+| `basalEnergyBurned`    | `android.permission.health.READ_BASAL_METABOLIC_RATE`   | Not supported                                            |
+| `totalEnergyBurned`    | `android.permission.health.READ_TOTAL_CALORIES_BURNED`  | Not supported                                            |
 | `hydration`            | `android.permission.health.READ_HYDRATION`              | `android.permission.health.WRITE_HYDRATION`              |
 | `floorsClimbed`        | `android.permission.health.READ_FLOORS_CLIMBED`         | `android.permission.health.WRITE_FLOORS_CLIMBED`         |
 | `heartRate`            | `android.permission.health.READ_HEART_RATE`             | `android.permission.health.WRITE_HEART_RATE`             |
@@ -620,6 +622,8 @@ const heartRate = await NitroHealth.readStatistics('heartRate', {
 | `steps`              | `sum`               | count                |
 | `distance`           | `sum`               | meters, plus `scope` |
 | `activeEnergyBurned` | `sum`               | kcal                 |
+| `basalEnergyBurned`  | `sum`               | kcal                 |
+| `totalEnergyBurned`  | `sum`               | kcal                 |
 | `hydration`          | `sum`               | mL                   |
 | `floorsClimbed`      | `sum`               | count                |
 | `heartRate`          | `avg`, `min`, `max` | bpm                  |
@@ -630,6 +634,19 @@ const heartRate = await NitroHealth.readStatistics('heartRate', {
 On iOS, `floorsClimbed` statistics aggregate HealthKit flights climbed. See the raw-read portability note above.
 
 Sleep, HRV, oxygen saturation, blood pressure, blood glucose, body temperature, respiratory rate, body fat, lean body mass, basal body temperature, VO2 max, and workout statistics are not supported by `readStatistics()`. Invalid data-type/metric combinations reject before crossing the native boundary.
+
+### Basal and Total Energy
+
+`basalEnergyBurned` and `totalEnergyBurned` are aggregate-only (`AggregateOnlyHealthDataType`): they are accepted by `readStatistics()` and read permissions, and nothing else. There are no raw reads, writes, deletes, or change tracking, because the underlying stores disagree about what the raw data is — HealthKit stores basal energy as interval samples and has no total-energy type at all, while Health Connect stores basal metabolic rate (an instantaneous kcal/day rate) and has a first-class total-energy record.
+
+Bucketed sums are portable, with per-platform semantics worth knowing before charting them:
+
+- **`basalEnergyBurned`** — iOS sums stored resting-energy samples, so a device with no basal-energy source returns no buckets. Android integrates stored metabolic-rate records over each bucket; when the user has no stored rate, Health Connect estimates one from body measurements, falling back to demographic defaults — a confident-looking number can be a population estimate rather than a reading about this user, and Android will practically always answer where iOS reports nothing.
+- **`totalEnergyBurned`** — Android reads stored total-energy records, deriving from components where none exist. iOS has no total-energy type, so each bucket is composed from active plus basal energy, and a bucket is emitted only when its basal half is present: a setup where an app writes workout energy but nothing writes resting energy returns no buckets rather than passing off the active half as the whole total.
+
+Do not compare energy totals across platforms bucket-for-bucket; compare trends within one device. A missing bucket means "no data for this window", never "zero energy burned" — do not backfill it with `0`.
+
+On iOS a `totalEnergyBurned` read permission authorizes both component quantity types (active and basal energy), the same way blood pressure authorizes its two members. On Android the permissions are `READ_BASAL_METABOLIC_RATE` and `READ_TOTAL_CALORIES_BURNED`; see the permission table above.
 
 Buckets anchor at `startDate`. Use local midnight for calendar-day buckets. `week` is a rolling seven-day interval from that anchor. The final bucket is clamped to `endDate`, empty buckets are omitted, and results are ascending. Hour buckets are fixed 3600-second intervals; day, week, and month buckets follow the device calendar and local time zone.
 
