@@ -443,23 +443,40 @@ One `BloodGlucoseSample` carries the concentration in millimoles per liter (mult
 interface BloodGlucoseSample extends HealthSample {
   date: Date
   millimolesPerLiter: number
+  metadata?: {
+    android?: {
+      specimenSource?:
+        | 'unknown'
+        | 'interstitial_fluid'
+        | 'capillary_blood'
+        | 'plasma'
+        | 'serum'
+        | 'tears'
+        | 'whole_blood'
+      mealType?: 'unknown' | 'breakfast' | 'lunch' | 'dinner' | 'snack'
+      relationToMeal?: 'unknown' | 'general' | 'fasting' | 'before_meal' | 'after_meal'
+    }
+    ios?: {
+      mealTime?: 'preprandial' | 'postprandial'
+    }
+  }
 }
 ```
 
-Android maps a Health Connect `BloodGlucoseRecord` one-to-one; iOS stores an `HKQuantitySample` in a composed mmol/L unit, so neither platform converts the value in JavaScript. Health Connect's extra fields (`specimenSource`, `mealType`, `relationToMeal`) and HealthKit's `HKMetadataKeyBloodGlucoseMealTime` are intentionally not modeled — they have no clean cross-platform mapping and are tracked for delivery through metadata passthrough in [#69](https://github.com/AdrianCD101/react-native-nitro-health/issues/69). Android writes store the explicit `*_UNKNOWN` constants. Blood glucose statistics are not supported by `readStatistics()`.
-
-### Blood Glucose
-
-One `BloodGlucoseSample` carries the concentration in millimoles per liter (multiply by 18.0182 for mg/dL):
+Android maps a Health Connect `BloodGlucoseRecord` one-to-one; iOS stores an `HKQuantitySample` in a composed mmol/L unit, so neither platform converts the value in JavaScript. Their nonportable fields live under typed platform scopes: Health Connect exposes `specimenSource`, `mealType`, and `relationToMeal`, while HealthKit exposes only `mealTime`. Android reads and change upserts return all three Android values, including explicit `unknown`; omitted Android write values use Health Connect's `*_UNKNOWN` constants. iOS returns `metadata.ios` only when HealthKit stored its meal-time key. Each platform ignores the other platform's explicitly scoped write fields. Blood glucose statistics are not supported by `readStatistics()`.
 
 ```ts
-interface BloodGlucoseSample extends HealthSample {
-  date: Date
-  millimolesPerLiter: number
-}
+await NitroHealth.saveBloodGlucose([
+  {
+    date: new Date(),
+    millimolesPerLiter: 4.9,
+    metadata: {
+      android: { relationToMeal: 'fasting', specimenSource: 'capillary_blood' },
+      ios: { mealTime: 'preprandial' },
+    },
+  },
+])
 ```
-
-Android maps a Health Connect `BloodGlucoseRecord` one-to-one; iOS stores an `HKQuantitySample` in a composed mmol/L unit, so neither platform converts the value in JavaScript. Health Connect's extra fields (`specimenSource`, `mealType`, `relationToMeal`) and HealthKit's `HKMetadataKeyBloodGlucoseMealTime` are intentionally not modeled — they have no clean cross-platform mapping and are tracked for delivery through metadata passthrough in [#69](https://github.com/AdrianCD101/react-native-nitro-health/issues/69). Android writes store the explicit `*_UNKNOWN` constants. Blood glucose statistics are not supported by `readStatistics()`.
 
 ### Body Temperature
 

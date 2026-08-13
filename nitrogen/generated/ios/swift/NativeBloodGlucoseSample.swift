@@ -18,8 +18,32 @@ public extension NativeBloodGlucoseSample {
   /**
    * Create a new instance of `NativeBloodGlucoseSample`.
    */
-  init(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, timeMs: Double, millimolesPerLiter: Double) {
-    self.init(identity, origin, timeMs, millimolesPerLiter)
+  init(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, timeMs: Double, millimolesPerLiter: Double, androidSpecimenSource: NativeBloodGlucoseSpecimenSource?, androidMealType: NativeBloodGlucoseMealType?, androidRelationToMeal: NativeBloodGlucoseRelationToMeal?, iosMealTime: NativeBloodGlucoseMealTime?) {
+    self.init(identity, origin, timeMs, millimolesPerLiter, { () -> bridge.std__optional_NativeBloodGlucoseSpecimenSource_ in
+      if let __unwrappedValue = androidSpecimenSource {
+        return bridge.create_std__optional_NativeBloodGlucoseSpecimenSource_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_NativeBloodGlucoseMealType_ in
+      if let __unwrappedValue = androidMealType {
+        return bridge.create_std__optional_NativeBloodGlucoseMealType_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_NativeBloodGlucoseRelationToMeal_ in
+      if let __unwrappedValue = androidRelationToMeal {
+        return bridge.create_std__optional_NativeBloodGlucoseRelationToMeal_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_NativeBloodGlucoseMealTime_ in
+      if let __unwrappedValue = iosMealTime {
+        return bridge.create_std__optional_NativeBloodGlucoseMealTime_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }())
   }
 
   @inline(__always)
@@ -40,5 +64,25 @@ public extension NativeBloodGlucoseSample {
   @inline(__always)
   var millimolesPerLiter: Double {
     return self.__millimolesPerLiter
+  }
+  
+  @inline(__always)
+  var androidSpecimenSource: NativeBloodGlucoseSpecimenSource? {
+    return self.__androidSpecimenSource.value
+  }
+  
+  @inline(__always)
+  var androidMealType: NativeBloodGlucoseMealType? {
+    return self.__androidMealType.value
+  }
+  
+  @inline(__always)
+  var androidRelationToMeal: NativeBloodGlucoseRelationToMeal? {
+    return self.__androidRelationToMeal.value
+  }
+  
+  @inline(__always)
+  var iosMealTime: NativeBloodGlucoseMealTime? {
+    return self.__iosMealTime.value
   }
 }

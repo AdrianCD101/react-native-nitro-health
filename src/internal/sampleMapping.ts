@@ -81,6 +81,12 @@ import type { NativeWorkoutSampleInput } from '../NativeWorkoutSampleInput'
 import type { NativeWorkoutActivity } from '../NativeWorkoutActivity'
 import type { BloodGlucoseSample } from '../BloodGlucoseSample'
 import type { BloodGlucoseSampleInput } from '../BloodGlucoseSampleInput'
+import type {
+  AndroidBloodGlucoseMealType,
+  AndroidBloodGlucoseRelationToMeal,
+  AndroidBloodGlucoseSpecimenSource,
+  IOSBloodGlucoseMealTime,
+} from '../BloodGlucoseMetadata'
 import type { BloodPressureSample } from '../BloodPressureSample'
 import type { BloodPressureSampleInput } from '../BloodPressureSampleInput'
 import type {
@@ -412,6 +418,142 @@ function makeNativeBloodPressureMetadata(
   }
 }
 
+function makeNativeBloodGlucoseSpecimenSource(
+  value: AndroidBloodGlucoseSpecimenSource | undefined,
+  index: number
+): NativeBloodGlucoseSampleInput['androidSpecimenSource'] {
+  switch (value) {
+    case undefined:
+      return undefined
+    case 'unknown':
+      return 'unspecified'
+    case 'interstitial_fluid':
+      return 'interstitialFluid'
+    case 'capillary_blood':
+      return 'capillaryBlood'
+    case 'plasma':
+    case 'serum':
+    case 'tears':
+      return value
+    case 'whole_blood':
+      return 'wholeBlood'
+    default:
+      throw new Error(`samples[${index}]: metadata.android.specimenSource is unsupported`)
+  }
+}
+
+function makeNativeBloodGlucoseMealType(
+  value: AndroidBloodGlucoseMealType | undefined,
+  index: number
+): NativeBloodGlucoseSampleInput['androidMealType'] {
+  switch (value) {
+    case undefined:
+      return undefined
+    case 'unknown':
+      return 'unspecified'
+    case 'breakfast':
+    case 'lunch':
+    case 'dinner':
+    case 'snack':
+      return value
+    default:
+      throw new Error(`samples[${index}]: metadata.android.mealType is unsupported`)
+  }
+}
+
+function makeNativeBloodGlucoseRelationToMeal(
+  value: AndroidBloodGlucoseRelationToMeal | undefined,
+  index: number
+): NativeBloodGlucoseSampleInput['androidRelationToMeal'] {
+  switch (value) {
+    case undefined:
+      return undefined
+    case 'unknown':
+      return 'unspecified'
+    case 'general':
+    case 'fasting':
+      return value
+    case 'before_meal':
+      return 'beforeMeal'
+    case 'after_meal':
+      return 'afterMeal'
+    default:
+      throw new Error(`samples[${index}]: metadata.android.relationToMeal is unsupported`)
+  }
+}
+
+function makeNativeBloodGlucoseMealTime(
+  value: IOSBloodGlucoseMealTime | undefined,
+  index: number
+): NativeBloodGlucoseSampleInput['iosMealTime'] {
+  switch (value) {
+    case undefined:
+      return undefined
+    case 'preprandial':
+    case 'postprandial':
+      return value
+    default:
+      throw new Error(`samples[${index}]: metadata.ios.mealTime is unsupported`)
+  }
+}
+
+function makeNativeBloodGlucoseMetadata(
+  metadata: BloodGlucoseSampleInput['metadata'],
+  index: number
+): Partial<NativeBloodGlucoseSampleInput> {
+  if (metadata === undefined) return {}
+  if (typeof metadata !== 'object' || metadata === null || Array.isArray(metadata)) {
+    throw new Error(`samples[${index}]: metadata must be an object`)
+  }
+  const supportedPlatforms = new Set(['android', 'ios'])
+  const unsupportedPlatform = Object.keys(metadata).find((key) => !supportedPlatforms.has(key))
+  if (unsupportedPlatform !== undefined) {
+    throw new Error(`samples[${index}]: metadata.${unsupportedPlatform} is unsupported`)
+  }
+
+  const result: Partial<NativeBloodGlucoseSampleInput> = {}
+  const android = metadata.android
+  if (android !== undefined) {
+    if (typeof android !== 'object' || android === null || Array.isArray(android)) {
+      throw new Error(`samples[${index}]: metadata.android must be an object`)
+    }
+    const supportedKeys = new Set(['specimenSource', 'mealType', 'relationToMeal'])
+    const unsupportedKey = Object.keys(android).find((key) => !supportedKeys.has(key))
+    if (unsupportedKey !== undefined) {
+      throw new Error(`samples[${index}]: metadata.android.${unsupportedKey} is unsupported`)
+    }
+
+    const androidSpecimenSource = makeNativeBloodGlucoseSpecimenSource(
+      android.specimenSource,
+      index
+    )
+    const androidMealType = makeNativeBloodGlucoseMealType(android.mealType, index)
+    const androidRelationToMeal = makeNativeBloodGlucoseRelationToMeal(
+      android.relationToMeal,
+      index
+    )
+    if (androidSpecimenSource !== undefined) result.androidSpecimenSource = androidSpecimenSource
+    if (androidMealType !== undefined) result.androidMealType = androidMealType
+    if (androidRelationToMeal !== undefined) result.androidRelationToMeal = androidRelationToMeal
+  }
+
+  const ios = metadata.ios
+  if (ios !== undefined) {
+    if (typeof ios !== 'object' || ios === null || Array.isArray(ios)) {
+      throw new Error(`samples[${index}]: metadata.ios must be an object`)
+    }
+    const unsupportedKey = Object.keys(ios).find((key) => key !== 'mealTime')
+    if (unsupportedKey !== undefined) {
+      throw new Error(`samples[${index}]: metadata.ios.${unsupportedKey} is unsupported`)
+    }
+
+    const iosMealTime = makeNativeBloodGlucoseMealTime(ios.mealTime, index)
+    if (iosMealTime !== undefined) result.iosMealTime = iosMealTime
+  }
+
+  return result
+}
+
 function makeBloodPressureBodyPosition(
   value: NonNullable<NativeBloodPressureSample['androidBodyPosition']>
 ): AndroidBloodPressureBodyPosition {
@@ -632,6 +774,7 @@ export function makeNativeBloodGlucoseSampleInput(
   return {
     timeMs,
     millimolesPerLiter: sample.millimolesPerLiter,
+    ...makeNativeBloodGlucoseMetadata(sample.metadata, index),
     ...makeNativeSync(sample.sync, index),
   }
 }
@@ -1121,11 +1264,63 @@ export function makeBloodPressureSample(sample: NativeBloodPressureSample): Bloo
 }
 
 export function makeBloodGlucoseSample(sample: NativeBloodGlucoseSample): BloodGlucoseSample {
+  const androidFields = [
+    sample.androidSpecimenSource,
+    sample.androidMealType,
+    sample.androidRelationToMeal,
+  ]
+  const androidFieldCount = androidFields.filter((field) => field !== undefined).length
+  if (androidFieldCount !== 0 && androidFieldCount !== androidFields.length) {
+    throw new Error('Native blood glucose Android metadata is incomplete')
+  }
+
+  let metadata: BloodGlucoseSample['metadata']
+  if (
+    sample.androidSpecimenSource !== undefined &&
+    sample.androidMealType !== undefined &&
+    sample.androidRelationToMeal !== undefined
+  ) {
+    const specimenSource = {
+      unspecified: 'unknown',
+      interstitialFluid: 'interstitial_fluid',
+      capillaryBlood: 'capillary_blood',
+      plasma: 'plasma',
+      serum: 'serum',
+      tears: 'tears',
+      wholeBlood: 'whole_blood',
+    } as const
+    const mealType = {
+      unspecified: 'unknown',
+      breakfast: 'breakfast',
+      lunch: 'lunch',
+      dinner: 'dinner',
+      snack: 'snack',
+    } as const
+    const relationToMeal = {
+      unspecified: 'unknown',
+      general: 'general',
+      fasting: 'fasting',
+      beforeMeal: 'before_meal',
+      afterMeal: 'after_meal',
+    } as const
+    metadata = {
+      android: {
+        specimenSource: specimenSource[sample.androidSpecimenSource],
+        mealType: mealType[sample.androidMealType],
+        relationToMeal: relationToMeal[sample.androidRelationToMeal],
+      },
+    }
+  }
+  if (sample.iosMealTime !== undefined) {
+    metadata = { ...metadata, ios: { mealTime: sample.iosMealTime } }
+  }
+
   return {
     identity: makeHealthSampleIdentity(sample.identity),
     origin: makeHealthDataOrigin(sample.origin),
     date: new Date(sample.timeMs),
     millimolesPerLiter: sample.millimolesPerLiter,
+    ...(metadata === undefined ? {} : { metadata }),
   }
 }
 

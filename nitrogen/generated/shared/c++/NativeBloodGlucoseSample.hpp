@@ -32,9 +32,22 @@
 namespace margelo::nitro::nitrohealth { struct NativeHealthSampleIdentity; }
 // Forward declaration of `NativeHealthDataOrigin` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthDataOrigin; }
+// Forward declaration of `NativeBloodGlucoseSpecimenSource` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeBloodGlucoseSpecimenSource; }
+// Forward declaration of `NativeBloodGlucoseMealType` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeBloodGlucoseMealType; }
+// Forward declaration of `NativeBloodGlucoseRelationToMeal` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeBloodGlucoseRelationToMeal; }
+// Forward declaration of `NativeBloodGlucoseMealTime` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeBloodGlucoseMealTime; }
 
 #include "NativeHealthSampleIdentity.hpp"
 #include "NativeHealthDataOrigin.hpp"
+#include "NativeBloodGlucoseSpecimenSource.hpp"
+#include <optional>
+#include "NativeBloodGlucoseMealType.hpp"
+#include "NativeBloodGlucoseRelationToMeal.hpp"
+#include "NativeBloodGlucoseMealTime.hpp"
 
 namespace margelo::nitro::nitrohealth {
 
@@ -47,10 +60,14 @@ namespace margelo::nitro::nitrohealth {
     NativeHealthDataOrigin origin     SWIFT_PRIVATE;
     double timeMs     SWIFT_PRIVATE;
     double millimolesPerLiter     SWIFT_PRIVATE;
+    std::optional<NativeBloodGlucoseSpecimenSource> androidSpecimenSource     SWIFT_PRIVATE;
+    std::optional<NativeBloodGlucoseMealType> androidMealType     SWIFT_PRIVATE;
+    std::optional<NativeBloodGlucoseRelationToMeal> androidRelationToMeal     SWIFT_PRIVATE;
+    std::optional<NativeBloodGlucoseMealTime> iosMealTime     SWIFT_PRIVATE;
 
   public:
     NativeBloodGlucoseSample() = default;
-    explicit NativeBloodGlucoseSample(NativeHealthSampleIdentity identity, NativeHealthDataOrigin origin, double timeMs, double millimolesPerLiter): identity(identity), origin(origin), timeMs(timeMs), millimolesPerLiter(millimolesPerLiter) {}
+    explicit NativeBloodGlucoseSample(NativeHealthSampleIdentity identity, NativeHealthDataOrigin origin, double timeMs, double millimolesPerLiter, std::optional<NativeBloodGlucoseSpecimenSource> androidSpecimenSource, std::optional<NativeBloodGlucoseMealType> androidMealType, std::optional<NativeBloodGlucoseRelationToMeal> androidRelationToMeal, std::optional<NativeBloodGlucoseMealTime> iosMealTime): identity(identity), origin(origin), timeMs(timeMs), millimolesPerLiter(millimolesPerLiter), androidSpecimenSource(androidSpecimenSource), androidMealType(androidMealType), androidRelationToMeal(androidRelationToMeal), iosMealTime(iosMealTime) {}
 
   public:
     friend bool operator==(const NativeBloodGlucoseSample& lhs, const NativeBloodGlucoseSample& rhs) = default;
@@ -69,7 +86,11 @@ namespace margelo::nitro {
         JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleIdentity>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "identity"))),
         JSIConverter<margelo::nitro::nitrohealth::NativeHealthDataOrigin>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "origin"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeMs"))),
-        JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "millimolesPerLiter")))
+        JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "millimolesPerLiter"))),
+        JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeBloodGlucoseSpecimenSource>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "androidSpecimenSource"))),
+        JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeBloodGlucoseMealType>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "androidMealType"))),
+        JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeBloodGlucoseRelationToMeal>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "androidRelationToMeal"))),
+        JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeBloodGlucoseMealTime>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "iosMealTime")))
       );
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::nitrohealth::NativeBloodGlucoseSample& arg) {
@@ -78,6 +99,10 @@ namespace margelo::nitro {
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "origin"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthDataOrigin>::toJSI(runtime, arg.origin));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "timeMs"), JSIConverter<double>::toJSI(runtime, arg.timeMs));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "millimolesPerLiter"), JSIConverter<double>::toJSI(runtime, arg.millimolesPerLiter));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "androidSpecimenSource"), JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeBloodGlucoseSpecimenSource>>::toJSI(runtime, arg.androidSpecimenSource));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "androidMealType"), JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeBloodGlucoseMealType>>::toJSI(runtime, arg.androidMealType));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "androidRelationToMeal"), JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeBloodGlucoseRelationToMeal>>::toJSI(runtime, arg.androidRelationToMeal));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "iosMealTime"), JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeBloodGlucoseMealTime>>::toJSI(runtime, arg.iosMealTime));
       return obj;
     }
     static inline bool canConvert(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -92,6 +117,10 @@ namespace margelo::nitro {
       if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthDataOrigin>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "origin")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeMs")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "millimolesPerLiter")))) return false;
+      if (!JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeBloodGlucoseSpecimenSource>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "androidSpecimenSource")))) return false;
+      if (!JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeBloodGlucoseMealType>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "androidMealType")))) return false;
+      if (!JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeBloodGlucoseRelationToMeal>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "androidRelationToMeal")))) return false;
+      if (!JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeBloodGlucoseMealTime>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "iosMealTime")))) return false;
       return true;
     }
   };

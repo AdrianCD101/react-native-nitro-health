@@ -200,14 +200,7 @@ extension HybridNitroHealth {
             return makeNativeHealthChange(
                 type: "upsert",
                 recordId: uuid,
-                bloodGlucoseSamples: [NativeBloodGlucoseSample(
-                    identity: quantitySample.nativeHealthSampleIdentity,
-                    origin: quantitySample.nativeHealthDataOrigin,
-                    timeMs: startTimeMs,
-                    millimolesPerLiter: quantitySample.quantity.doubleValue(
-                        for: bloodGlucoseMmolPerLiterUnit
-                    )
-                )]
+                bloodGlucoseSamples: [try quantitySample.nativeBloodGlucoseSample()]
             )
         case "bodyTemperature":
             let quantitySample = try requireQuantitySample(sample, dataType: dataType)

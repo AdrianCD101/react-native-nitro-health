@@ -29,7 +29,19 @@ data class NativeBloodGlucoseSample(
   val timeMs: Double,
   @DoNotStrip
   @Keep
-  val millimolesPerLiter: Double
+  val millimolesPerLiter: Double,
+  @DoNotStrip
+  @Keep
+  val androidSpecimenSource: NativeBloodGlucoseSpecimenSource?,
+  @DoNotStrip
+  @Keep
+  val androidMealType: NativeBloodGlucoseMealType?,
+  @DoNotStrip
+  @Keep
+  val androidRelationToMeal: NativeBloodGlucoseRelationToMeal?,
+  @DoNotStrip
+  @Keep
+  val iosMealTime: NativeBloodGlucoseMealTime?
 ) {
   /* primary constructor */
 
@@ -40,6 +52,10 @@ data class NativeBloodGlucoseSample(
       && Objects.deepEquals(this.origin, other.origin)
       && Objects.deepEquals(this.timeMs, other.timeMs)
       && Objects.deepEquals(this.millimolesPerLiter, other.millimolesPerLiter)
+      && Objects.deepEquals(this.androidSpecimenSource, other.androidSpecimenSource)
+      && Objects.deepEquals(this.androidMealType, other.androidMealType)
+      && Objects.deepEquals(this.androidRelationToMeal, other.androidRelationToMeal)
+      && Objects.deepEquals(this.iosMealTime, other.iosMealTime)
   }
 
   override fun hashCode(): Int {
@@ -47,7 +63,11 @@ data class NativeBloodGlucoseSample(
       identity,
       origin,
       timeMs,
-      millimolesPerLiter
+      millimolesPerLiter,
+      androidSpecimenSource,
+      androidMealType,
+      androidRelationToMeal,
+      iosMealTime
     ).contentDeepHashCode()
   }
 
@@ -59,8 +79,8 @@ data class NativeBloodGlucoseSample(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, timeMs: Double, millimolesPerLiter: Double): NativeBloodGlucoseSample {
-      return NativeBloodGlucoseSample(identity, origin, timeMs, millimolesPerLiter)
+    private fun fromCpp(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, timeMs: Double, millimolesPerLiter: Double, androidSpecimenSource: NativeBloodGlucoseSpecimenSource?, androidMealType: NativeBloodGlucoseMealType?, androidRelationToMeal: NativeBloodGlucoseRelationToMeal?, iosMealTime: NativeBloodGlucoseMealTime?): NativeBloodGlucoseSample {
+      return NativeBloodGlucoseSample(identity, origin, timeMs, millimolesPerLiter, androidSpecimenSource, androidMealType, androidRelationToMeal, iosMealTime)
     }
   }
 }

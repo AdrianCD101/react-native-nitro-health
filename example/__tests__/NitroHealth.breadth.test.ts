@@ -166,6 +166,9 @@ describe('NitroHealth breadth data types contract', () => {
             ...nativeRecordMetadata('bg-record', 'com.example.meter', 'Example Meter'),
             timeMs,
             millimolesPerLiter: 5.4,
+            androidSpecimenSource: 'capillaryBlood',
+            androidMealType: 'breakfast',
+            androidRelationToMeal: 'beforeMeal',
           },
         ],
       })
@@ -183,6 +186,13 @@ describe('NitroHealth breadth data types contract', () => {
       expect(result.samples[0].date).toBeInstanceOf(Date)
       expect(result.samples[0].date.getTime()).toBe(timeMs)
       expect(result.samples[0].millimolesPerLiter).toBe(5.4)
+      expect(result.samples[0].metadata).toEqual({
+        android: {
+          specimenSource: 'capillary_blood',
+          mealType: 'breakfast',
+          relationToMeal: 'before_meal',
+        },
+      })
       expect(result.samples[0].origin).toEqual({
         identifier: 'com.example.meter',
         displayName: 'Example Meter',
@@ -701,6 +711,53 @@ describe('NitroHealth breadth data types contract', () => {
       expect(mockNitroHealth.saveBloodGlucose).toHaveBeenCalledWith([
         { timeMs: date.getTime(), millimolesPerLiter: 5.4 },
       ])
+    })
+
+    it('maps both platform metadata scopes through the native transport', async () => {
+      const date = new Date('2026-01-01T09:00:00.000Z')
+      mockNitroHealth.saveBloodGlucose.mockResolvedValue(undefined)
+
+      await NitroHealth.saveBloodGlucose([
+        {
+          date,
+          millimolesPerLiter: 5.4,
+          metadata: {
+            android: {
+              specimenSource: 'capillary_blood',
+              mealType: 'breakfast',
+              relationToMeal: 'before_meal',
+            },
+            ios: { mealTime: 'preprandial' },
+          },
+        },
+      ])
+
+      expect(mockNitroHealth.saveBloodGlucose).toHaveBeenCalledWith([
+        {
+          timeMs: date.getTime(),
+          millimolesPerLiter: 5.4,
+          androidSpecimenSource: 'capillaryBlood',
+          androidMealType: 'breakfast',
+          androidRelationToMeal: 'beforeMeal',
+          iosMealTime: 'preprandial',
+        },
+      ])
+    })
+
+    it('rejects unsupported platform metadata before crossing the native boundary', async () => {
+      const date = new Date('2026-01-01T09:00:00.000Z')
+
+      await expect(
+        NitroHealth.saveBloodGlucose([
+          {
+            date,
+            millimolesPerLiter: 5.4,
+            metadata: { android: { relationToMeal: 'during_meal' } },
+          } as never,
+        ])
+      ).rejects.toThrow('samples[0]: metadata.android.relationToMeal is unsupported')
+
+      expect(mockNitroHealth.saveBloodGlucose).not.toHaveBeenCalled()
     })
 
     it('rejects millimolesPerLiter outside 0.5-50 before crossing the native boundary', async () => {

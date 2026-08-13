@@ -9,6 +9,9 @@ import androidx.health.connect.client.records.MealType
 import androidx.health.connect.client.records.Vo2MaxRecord
 import com.margelo.nitro.nitrohealth.NativeActiveEnergyBurnedSampleInput
 import com.margelo.nitro.nitrohealth.NativeBloodGlucoseSampleInput
+import com.margelo.nitro.nitrohealth.NativeBloodGlucoseMealType
+import com.margelo.nitro.nitrohealth.NativeBloodGlucoseRelationToMeal
+import com.margelo.nitro.nitrohealth.NativeBloodGlucoseSpecimenSource
 import com.margelo.nitro.nitrohealth.NativeBloodPressureBodyPosition
 import com.margelo.nitro.nitrohealth.NativeBloodPressureMeasurementLocation
 import com.margelo.nitro.nitrohealth.NativeBloodPressureSampleInput
@@ -327,6 +330,10 @@ class SampleInputConvertersTest {
                 NativeBloodGlucoseSampleInput(
                     timeMs = startTimeMs,
                     millimolesPerLiter = 5.4,
+                    androidSpecimenSource = null,
+                    androidMealType = null,
+                    androidRelationToMeal = null,
+                    iosMealTime = null,
                     syncId = null,
                     syncVersion = null
                 )
@@ -340,6 +347,28 @@ class SampleInputConvertersTest {
         assertEquals(BloodGlucoseRecord.SPECIMEN_SOURCE_UNKNOWN, records[0].specimenSource)
         assertEquals(MealType.MEAL_TYPE_UNKNOWN, records[0].mealType)
         assertEquals(BloodGlucoseRecord.RELATION_TO_MEAL_UNKNOWN, records[0].relationToMeal)
+    }
+
+    @Test
+    fun toBloodGlucoseRecordsMapsAndroidMetadataFields() {
+        val record = toBloodGlucoseRecords(
+            arrayOf(
+                NativeBloodGlucoseSampleInput(
+                    timeMs = startTimeMs,
+                    millimolesPerLiter = 5.4,
+                    androidSpecimenSource = NativeBloodGlucoseSpecimenSource.CAPILLARYBLOOD,
+                    androidMealType = NativeBloodGlucoseMealType.BREAKFAST,
+                    androidRelationToMeal = NativeBloodGlucoseRelationToMeal.BEFOREMEAL,
+                    iosMealTime = null,
+                    syncId = null,
+                    syncVersion = null
+                )
+            )
+        ).single()
+
+        assertEquals(BloodGlucoseRecord.SPECIMEN_SOURCE_CAPILLARY_BLOOD, record.specimenSource)
+        assertEquals(MealType.MEAL_TYPE_BREAKFAST, record.mealType)
+        assertEquals(BloodGlucoseRecord.RELATION_TO_MEAL_BEFORE_MEAL, record.relationToMeal)
     }
 
     @Test
@@ -642,6 +671,10 @@ class SampleInputConvertersTest {
                     NativeBloodGlucoseSampleInput(
                         timeMs = startTimeMs,
                         millimolesPerLiter = 5.4,
+                        androidSpecimenSource = null,
+                        androidMealType = null,
+                        androidRelationToMeal = null,
+                        iosMealTime = null,
                         syncId = syncId,
                         syncVersion = syncVersion
                     )
