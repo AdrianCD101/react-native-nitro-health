@@ -405,12 +405,35 @@ interface BloodPressureSample extends HealthSample {
   date: Date
   systolicMmHg: number
   diastolicMmHg: number
+  metadata?: {
+    android?: {
+      bodyPosition?: 'unknown' | 'standing_up' | 'sitting_down' | 'lying_down' | 'reclining'
+      measurementLocation?:
+        'unknown' | 'left_wrist' | 'right_wrist' | 'left_upper_arm' | 'right_upper_arm'
+    }
+  }
 }
 ```
 
 Android maps a Health Connect `BloodPressureRecord` one-to-one. On iOS a reading is stored as an `HKCorrelation` containing separate systolic and diastolic `HKQuantitySample` members: `saveBloodPressure()` writes the correlation and both members in one atomic call, `readBloodPressure()` returns one sample per correlation, and `identity` is the correlation record on both platforms (`kind: 'record'`). Other HealthKit consumers can see the member samples as individual systolic/diastolic readings — that is how HealthKit models blood pressure, not a duplicate write.
 
-A malformed third-party correlation (missing or duplicated member samples) rejects the read rather than fabricating a value. Deletion by identity or time range removes the correlation together with the member samples this app wrote. Health Connect's `bodyPosition` and `measurementLocation` have no HealthKit counterpart and are intentionally not modeled — Android writes store the explicit `*_UNKNOWN` constants, tracked for metadata passthrough in [#70](https://github.com/AdrianCD101/react-native-nitro-health/issues/70). Blood pressure statistics are not supported by `readStatistics()` yet.
+A malformed third-party correlation (missing or duplicated member samples) rejects the read rather than fabricating a value. Deletion by identity or time range removes the correlation together with the member samples this app wrote. Health Connect's `bodyPosition` and `measurementLocation` have no HealthKit counterpart, so they live under the typed `metadata.android` scope instead of portable top-level fields. Android reads and change upserts return both values, including explicit `unknown`; omitted write values use Health Connect's `*_UNKNOWN` constants. iOS omits this metadata and ignores Android-scoped write fields. Blood pressure statistics are not supported by `readStatistics()` yet.
+
+```ts
+await NitroHealth.saveBloodPressure([
+  {
+    date: new Date(),
+    systolicMmHg: 118,
+    diastolicMmHg: 76,
+    metadata: {
+      android: {
+        bodyPosition: 'sitting_down',
+        measurementLocation: 'left_upper_arm',
+      },
+    },
+  },
+])
+```
 
 ### Blood Glucose
 

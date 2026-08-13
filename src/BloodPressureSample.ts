@@ -1,4 +1,5 @@
 import type { HealthSample } from './HealthSample'
+import type { BloodPressureMetadata } from './BloodPressureMetadata'
 
 /**
  * Blood pressure reading returned by {@linkcode NitroHealth.readBloodPressure}.
@@ -14,4 +15,6 @@ export interface BloodPressureSample extends HealthSample {
   systolicMmHg: number
   /** Diastolic pressure in millimeters of mercury. */
   diastolicMmHg: number
+  /** Platform-scoped fields retained by the native health store. */
+  metadata?: BloodPressureMetadata
 }

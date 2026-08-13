@@ -41,7 +41,9 @@ extension HKCorrelation {
             origin: nativeHealthDataOrigin,
             timeMs: startDate.timeIntervalSince1970 * 1000,
             systolicMmHg: systolic.quantity.doubleValue(for: bloodPressureMmHgUnit),
-            diastolicMmHg: diastolic.quantity.doubleValue(for: bloodPressureMmHgUnit)
+            diastolicMmHg: diastolic.quantity.doubleValue(for: bloodPressureMmHgUnit),
+            androidBodyPosition: nil,
+            androidMeasurementLocation: nil
         )
     }
 }

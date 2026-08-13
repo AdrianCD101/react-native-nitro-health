@@ -10,10 +10,14 @@
 #include <fbjni/fbjni.h>
 #include "NativeBloodPressureSamplePage.hpp"
 
+#include "JNativeBloodPressureBodyPosition.hpp"
+#include "JNativeBloodPressureMeasurementLocation.hpp"
 #include "JNativeBloodPressureSample.hpp"
 #include "JNativeHealthDataOrigin.hpp"
 #include "JNativeHealthSampleIdentity.hpp"
 #include "JNativeHealthSampleIdentityKind.hpp"
+#include "NativeBloodPressureBodyPosition.hpp"
+#include "NativeBloodPressureMeasurementLocation.hpp"
 #include "NativeBloodPressureSample.hpp"
 #include "NativeHealthDataOrigin.hpp"
 #include "NativeHealthSampleIdentity.hpp"

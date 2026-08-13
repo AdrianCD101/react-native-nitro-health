@@ -38,6 +38,10 @@ namespace margelo::nitro::nitrohealth { struct NativeBloodGlucoseSampleInput; }
 namespace margelo::nitro::nitrohealth { struct NativeBloodGlucoseSamplePage; }
 // Forward declaration of `NativeBloodGlucoseSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBloodGlucoseSample; }
+// Forward declaration of `NativeBloodPressureBodyPosition` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeBloodPressureBodyPosition; }
+// Forward declaration of `NativeBloodPressureMeasurementLocation` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeBloodPressureMeasurementLocation; }
 // Forward declaration of `NativeBloodPressureSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBloodPressureSampleInput; }
 // Forward declaration of `NativeBloodPressureSamplePage` to properly resolve imports.
@@ -239,6 +243,8 @@ namespace margelo::nitro::nitrohealth { struct NativeWorkoutSample; }
 #include "NativeBloodGlucoseSample.hpp"
 #include "NativeBloodGlucoseSampleInput.hpp"
 #include "NativeBloodGlucoseSamplePage.hpp"
+#include "NativeBloodPressureBodyPosition.hpp"
+#include "NativeBloodPressureMeasurementLocation.hpp"
 #include "NativeBloodPressureSample.hpp"
 #include "NativeBloodPressureSampleInput.hpp"
 #include "NativeBloodPressureSamplePage.hpp"

@@ -122,6 +122,8 @@ describe('NitroHealth breadth data types contract', () => {
             timeMs,
             systolicMmHg: 118,
             diastolicMmHg: 76,
+            androidBodyPosition: 'sittingDown',
+            androidMeasurementLocation: 'leftUpperArm',
           },
         ],
       })
@@ -140,6 +142,12 @@ describe('NitroHealth breadth data types contract', () => {
       expect(result.samples[0].date.getTime()).toBe(timeMs)
       expect(result.samples[0].systolicMmHg).toBe(118)
       expect(result.samples[0].diastolicMmHg).toBe(76)
+      expect(result.samples[0].metadata).toEqual({
+        android: {
+          bodyPosition: 'sitting_down',
+          measurementLocation: 'left_upper_arm',
+        },
+      })
       expect(result.samples[0].origin).toEqual({
         identifier: 'com.example.cuff',
         displayName: 'Example Cuff',
@@ -541,6 +549,97 @@ describe('NitroHealth breadth data types contract', () => {
       expect(mockNitroHealth.saveBloodPressure).toHaveBeenCalledWith([
         { timeMs: date.getTime(), systolicMmHg: 118, diastolicMmHg: 76 },
       ])
+    })
+
+    it('maps typed Android metadata through the native transport', async () => {
+      const date = new Date('2026-01-01T09:00:00.000Z')
+      mockNitroHealth.saveBloodPressure.mockResolvedValue(undefined)
+
+      await NitroHealth.saveBloodPressure([
+        {
+          date,
+          systolicMmHg: 118,
+          diastolicMmHg: 76,
+          metadata: {
+            android: {
+              bodyPosition: 'sitting_down',
+              measurementLocation: 'left_upper_arm',
+            },
+          },
+        },
+      ])
+
+      expect(mockNitroHealth.saveBloodPressure).toHaveBeenCalledWith([
+        {
+          timeMs: date.getTime(),
+          systolicMmHg: 118,
+          diastolicMmHg: 76,
+          androidBodyPosition: 'sittingDown',
+          androidMeasurementLocation: 'leftUpperArm',
+        },
+      ])
+    })
+
+    it('accepts partial Android metadata and leaves the other field absent', async () => {
+      const date = new Date('2026-01-01T09:00:00.000Z')
+      mockNitroHealth.saveBloodPressure.mockResolvedValue(undefined)
+
+      await NitroHealth.saveBloodPressure([
+        {
+          date,
+          systolicMmHg: 118,
+          diastolicMmHg: 76,
+          metadata: { android: { bodyPosition: 'standing_up' } },
+        },
+      ])
+
+      expect(mockNitroHealth.saveBloodPressure).toHaveBeenCalledWith([
+        {
+          timeMs: date.getTime(),
+          systolicMmHg: 118,
+          diastolicMmHg: 76,
+          androidBodyPosition: 'standingUp',
+        },
+      ])
+    })
+
+    it('rejects incomplete native metadata instead of fabricating a read value', async () => {
+      const timeMs = new Date('2026-01-01T09:00:00.000Z').getTime()
+      mockNitroHealth.readBloodPressure.mockResolvedValue({
+        samples: [
+          {
+            ...nativeRecordMetadata('bp-record'),
+            timeMs,
+            systolicMmHg: 118,
+            diastolicMmHg: 76,
+            androidBodyPosition: 'standingUp',
+          },
+        ],
+      })
+
+      await expect(
+        NitroHealth.readBloodPressure({
+          startDate: new Date('2026-01-01T00:00:00.000Z'),
+          endDate: new Date('2026-01-02T00:00:00.000Z'),
+        })
+      ).rejects.toThrow('Native blood pressure metadata is incomplete')
+    })
+
+    it('rejects unsupported Android metadata before crossing the native boundary', async () => {
+      const date = new Date('2026-01-01T09:00:00.000Z')
+
+      await expect(
+        NitroHealth.saveBloodPressure([
+          {
+            date,
+            systolicMmHg: 118,
+            diastolicMmHg: 76,
+            metadata: { android: { bodyPosition: 'upside_down' } },
+          } as never,
+        ])
+      ).rejects.toThrow('samples[0]: metadata.android.bodyPosition is unsupported')
+
+      expect(mockNitroHealth.saveBloodPressure).not.toHaveBeenCalled()
     })
 
     it('rejects systolicMmHg outside 20-200 before crossing the native boundary', async () => {

@@ -413,7 +413,17 @@ describe('NitroHealth saves (native)', () => {
       }
 
       await NitroHealth.saveBloodPressure([
-        { date: saveInterval.startDate, systolicMmHg: 118, diastolicMmHg: 76 },
+        {
+          date: saveInterval.startDate,
+          systolicMmHg: 118,
+          diastolicMmHg: 76,
+          metadata: {
+            android: {
+              bodyPosition: 'sitting_down',
+              measurementLocation: 'left_upper_arm',
+            },
+          },
+        },
       ])
 
       const page = await NitroHealth.readBloodPressure(saveReadRange)
@@ -428,6 +438,16 @@ describe('NitroHealth saves (native)', () => {
 
       expect(matches.length).toBeGreaterThanOrEqual(1)
       expect(matches[0]?.identity.kind).toBe('record')
+      if (Platform.OS === 'android') {
+        expect(matches[0]?.metadata).toEqual({
+          android: {
+            bodyPosition: 'sitting_down',
+            measurementLocation: 'left_upper_arm',
+          },
+        })
+      } else {
+        expect(matches[0]?.metadata).toBeUndefined()
+      }
     })
   })
 

@@ -36,6 +36,10 @@ namespace margelo::nitro::nitrohealth { struct NativeBloodGlucoseSampleInput; }
 namespace margelo::nitro::nitrohealth { struct NativeBloodGlucoseSamplePage; }
 // Forward declaration of `NativeBloodGlucoseSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBloodGlucoseSample; }
+// Forward declaration of `NativeBloodPressureBodyPosition` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeBloodPressureBodyPosition; }
+// Forward declaration of `NativeBloodPressureMeasurementLocation` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeBloodPressureMeasurementLocation; }
 // Forward declaration of `NativeBloodPressureSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBloodPressureSampleInput; }
 // Forward declaration of `NativeBloodPressureSamplePage` to properly resolve imports.
@@ -232,6 +236,8 @@ namespace NitroHealth { class HybridNitroHealthSpec_cxx; }
 #include "NativeBloodGlucoseSample.hpp"
 #include "NativeBloodGlucoseSampleInput.hpp"
 #include "NativeBloodGlucoseSamplePage.hpp"
+#include "NativeBloodPressureBodyPosition.hpp"
+#include "NativeBloodPressureMeasurementLocation.hpp"
 #include "NativeBloodPressureSample.hpp"
 #include "NativeBloodPressureSampleInput.hpp"
 #include "NativeBloodPressureSamplePage.hpp"
@@ -749,6 +755,36 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return optional.has_value();
   }
   inline std::vector<NativeHeartRateSample> get_std__optional_std__vector_NativeHeartRateSample__(const std::optional<std::vector<NativeHeartRateSample>>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::optional<NativeBloodPressureBodyPosition>
+  /**
+   * Specialized version of `std::optional<NativeBloodPressureBodyPosition>`.
+   */
+  using std__optional_NativeBloodPressureBodyPosition_ = std::optional<NativeBloodPressureBodyPosition>;
+  inline std::optional<NativeBloodPressureBodyPosition> create_std__optional_NativeBloodPressureBodyPosition_(const NativeBloodPressureBodyPosition& value) noexcept {
+    return std::optional<NativeBloodPressureBodyPosition>(value);
+  }
+  inline bool has_value_std__optional_NativeBloodPressureBodyPosition_(const std::optional<NativeBloodPressureBodyPosition>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline NativeBloodPressureBodyPosition get_std__optional_NativeBloodPressureBodyPosition_(const std::optional<NativeBloodPressureBodyPosition>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::optional<NativeBloodPressureMeasurementLocation>
+  /**
+   * Specialized version of `std::optional<NativeBloodPressureMeasurementLocation>`.
+   */
+  using std__optional_NativeBloodPressureMeasurementLocation_ = std::optional<NativeBloodPressureMeasurementLocation>;
+  inline std::optional<NativeBloodPressureMeasurementLocation> create_std__optional_NativeBloodPressureMeasurementLocation_(const NativeBloodPressureMeasurementLocation& value) noexcept {
+    return std::optional<NativeBloodPressureMeasurementLocation>(value);
+  }
+  inline bool has_value_std__optional_NativeBloodPressureMeasurementLocation_(const std::optional<NativeBloodPressureMeasurementLocation>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline NativeBloodPressureMeasurementLocation get_std__optional_NativeBloodPressureMeasurementLocation_(const std::optional<NativeBloodPressureMeasurementLocation>& optional) noexcept {
     return optional.value();
   }
   

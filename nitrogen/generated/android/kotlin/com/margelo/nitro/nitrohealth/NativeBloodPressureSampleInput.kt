@@ -29,6 +29,12 @@ data class NativeBloodPressureSampleInput(
   val diastolicMmHg: Double,
   @DoNotStrip
   @Keep
+  val androidBodyPosition: NativeBloodPressureBodyPosition?,
+  @DoNotStrip
+  @Keep
+  val androidMeasurementLocation: NativeBloodPressureMeasurementLocation?,
+  @DoNotStrip
+  @Keep
   val syncId: String?,
   @DoNotStrip
   @Keep
@@ -42,6 +48,8 @@ data class NativeBloodPressureSampleInput(
     return Objects.deepEquals(this.timeMs, other.timeMs)
       && Objects.deepEquals(this.systolicMmHg, other.systolicMmHg)
       && Objects.deepEquals(this.diastolicMmHg, other.diastolicMmHg)
+      && Objects.deepEquals(this.androidBodyPosition, other.androidBodyPosition)
+      && Objects.deepEquals(this.androidMeasurementLocation, other.androidMeasurementLocation)
       && Objects.deepEquals(this.syncId, other.syncId)
       && Objects.deepEquals(this.syncVersion, other.syncVersion)
   }
@@ -51,6 +59,8 @@ data class NativeBloodPressureSampleInput(
       timeMs,
       systolicMmHg,
       diastolicMmHg,
+      androidBodyPosition,
+      androidMeasurementLocation,
       syncId,
       syncVersion
     ).contentDeepHashCode()
@@ -64,8 +74,8 @@ data class NativeBloodPressureSampleInput(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(timeMs: Double, systolicMmHg: Double, diastolicMmHg: Double, syncId: String?, syncVersion: Double?): NativeBloodPressureSampleInput {
-      return NativeBloodPressureSampleInput(timeMs, systolicMmHg, diastolicMmHg, syncId, syncVersion)
+    private fun fromCpp(timeMs: Double, systolicMmHg: Double, diastolicMmHg: Double, androidBodyPosition: NativeBloodPressureBodyPosition?, androidMeasurementLocation: NativeBloodPressureMeasurementLocation?, syncId: String?, syncVersion: Double?): NativeBloodPressureSampleInput {
+      return NativeBloodPressureSampleInput(timeMs, systolicMmHg, diastolicMmHg, androidBodyPosition, androidMeasurementLocation, syncId, syncVersion)
     }
   }
 }
