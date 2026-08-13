@@ -157,10 +157,10 @@ internal fun toBloodPressureRecords(
             zoneOffset = null,
             systolic = Pressure.millimetersOfMercury(sample.systolicMmHg),
             diastolic = Pressure.millimetersOfMercury(sample.diastolicMmHg),
-            // Deferred to metadata passthrough (issue #70); HealthKit cannot represent these
-            // Android-only enum fields, so store the explicit unknown constants.
-            bodyPosition = BloodPressureRecord.BODY_POSITION_UNKNOWN,
-            measurementLocation = BloodPressureRecord.MEASUREMENT_LOCATION_UNKNOWN,
+            bodyPosition = healthConnectBloodPressureBodyPosition(sample.androidBodyPosition),
+            measurementLocation = healthConnectBloodPressureMeasurementLocation(
+                sample.androidMeasurementLocation
+            ),
             metadata = makeSampleMetadata(sample.syncId, sample.syncVersion)
         )
     }

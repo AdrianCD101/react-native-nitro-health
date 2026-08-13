@@ -18,8 +18,20 @@ public extension NativeBloodPressureSample {
   /**
    * Create a new instance of `NativeBloodPressureSample`.
    */
-  init(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, timeMs: Double, systolicMmHg: Double, diastolicMmHg: Double) {
-    self.init(identity, origin, timeMs, systolicMmHg, diastolicMmHg)
+  init(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, timeMs: Double, systolicMmHg: Double, diastolicMmHg: Double, androidBodyPosition: NativeBloodPressureBodyPosition?, androidMeasurementLocation: NativeBloodPressureMeasurementLocation?) {
+    self.init(identity, origin, timeMs, systolicMmHg, diastolicMmHg, { () -> bridge.std__optional_NativeBloodPressureBodyPosition_ in
+      if let __unwrappedValue = androidBodyPosition {
+        return bridge.create_std__optional_NativeBloodPressureBodyPosition_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_NativeBloodPressureMeasurementLocation_ in
+      if let __unwrappedValue = androidMeasurementLocation {
+        return bridge.create_std__optional_NativeBloodPressureMeasurementLocation_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }())
   }
 
   @inline(__always)
@@ -45,5 +57,15 @@ public extension NativeBloodPressureSample {
   @inline(__always)
   var diastolicMmHg: Double {
     return self.__diastolicMmHg
+  }
+  
+  @inline(__always)
+  var androidBodyPosition: NativeBloodPressureBodyPosition? {
+    return self.__androidBodyPosition.value
+  }
+  
+  @inline(__always)
+  var androidMeasurementLocation: NativeBloodPressureMeasurementLocation? {
+    return self.__androidMeasurementLocation.value
   }
 }

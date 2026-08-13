@@ -32,7 +32,13 @@ data class NativeBloodPressureSample(
   val systolicMmHg: Double,
   @DoNotStrip
   @Keep
-  val diastolicMmHg: Double
+  val diastolicMmHg: Double,
+  @DoNotStrip
+  @Keep
+  val androidBodyPosition: NativeBloodPressureBodyPosition?,
+  @DoNotStrip
+  @Keep
+  val androidMeasurementLocation: NativeBloodPressureMeasurementLocation?
 ) {
   /* primary constructor */
 
@@ -44,6 +50,8 @@ data class NativeBloodPressureSample(
       && Objects.deepEquals(this.timeMs, other.timeMs)
       && Objects.deepEquals(this.systolicMmHg, other.systolicMmHg)
       && Objects.deepEquals(this.diastolicMmHg, other.diastolicMmHg)
+      && Objects.deepEquals(this.androidBodyPosition, other.androidBodyPosition)
+      && Objects.deepEquals(this.androidMeasurementLocation, other.androidMeasurementLocation)
   }
 
   override fun hashCode(): Int {
@@ -52,7 +60,9 @@ data class NativeBloodPressureSample(
       origin,
       timeMs,
       systolicMmHg,
-      diastolicMmHg
+      diastolicMmHg,
+      androidBodyPosition,
+      androidMeasurementLocation
     ).contentDeepHashCode()
   }
 
@@ -64,8 +74,8 @@ data class NativeBloodPressureSample(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, timeMs: Double, systolicMmHg: Double, diastolicMmHg: Double): NativeBloodPressureSample {
-      return NativeBloodPressureSample(identity, origin, timeMs, systolicMmHg, diastolicMmHg)
+    private fun fromCpp(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, timeMs: Double, systolicMmHg: Double, diastolicMmHg: Double, androidBodyPosition: NativeBloodPressureBodyPosition?, androidMeasurementLocation: NativeBloodPressureMeasurementLocation?): NativeBloodPressureSample {
+      return NativeBloodPressureSample(identity, origin, timeMs, systolicMmHg, diastolicMmHg, androidBodyPosition, androidMeasurementLocation)
     }
   }
 }

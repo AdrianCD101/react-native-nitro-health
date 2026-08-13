@@ -102,15 +102,7 @@ private fun makeNativeUpsertionChange(record: Record): NativeHealthChange {
         is BloodPressureRecord -> makeNativeChange(
             type = "upsert",
             recordId = recordId,
-            bloodPressureSamples = arrayOf(
-                NativeBloodPressureSample(
-                    identity = identity,
-                    origin = origin,
-                    timeMs = record.time.toEpochMilli().toDouble(),
-                    systolicMmHg = record.systolic.inMillimetersOfMercury,
-                    diastolicMmHg = record.diastolic.inMillimetersOfMercury
-                )
-            )
+            bloodPressureSamples = arrayOf(makeNativeBloodPressureSample(record))
         )
         is BloodGlucoseRecord -> makeNativeChange(
             type = "upsert",

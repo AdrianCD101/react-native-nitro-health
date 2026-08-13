@@ -32,9 +32,16 @@
 namespace margelo::nitro::nitrohealth { struct NativeHealthSampleIdentity; }
 // Forward declaration of `NativeHealthDataOrigin` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthDataOrigin; }
+// Forward declaration of `NativeBloodPressureBodyPosition` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeBloodPressureBodyPosition; }
+// Forward declaration of `NativeBloodPressureMeasurementLocation` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeBloodPressureMeasurementLocation; }
 
 #include "NativeHealthSampleIdentity.hpp"
 #include "NativeHealthDataOrigin.hpp"
+#include "NativeBloodPressureBodyPosition.hpp"
+#include <optional>
+#include "NativeBloodPressureMeasurementLocation.hpp"
 
 namespace margelo::nitro::nitrohealth {
 
@@ -48,10 +55,12 @@ namespace margelo::nitro::nitrohealth {
     double timeMs     SWIFT_PRIVATE;
     double systolicMmHg     SWIFT_PRIVATE;
     double diastolicMmHg     SWIFT_PRIVATE;
+    std::optional<NativeBloodPressureBodyPosition> androidBodyPosition     SWIFT_PRIVATE;
+    std::optional<NativeBloodPressureMeasurementLocation> androidMeasurementLocation     SWIFT_PRIVATE;
 
   public:
     NativeBloodPressureSample() = default;
-    explicit NativeBloodPressureSample(NativeHealthSampleIdentity identity, NativeHealthDataOrigin origin, double timeMs, double systolicMmHg, double diastolicMmHg): identity(identity), origin(origin), timeMs(timeMs), systolicMmHg(systolicMmHg), diastolicMmHg(diastolicMmHg) {}
+    explicit NativeBloodPressureSample(NativeHealthSampleIdentity identity, NativeHealthDataOrigin origin, double timeMs, double systolicMmHg, double diastolicMmHg, std::optional<NativeBloodPressureBodyPosition> androidBodyPosition, std::optional<NativeBloodPressureMeasurementLocation> androidMeasurementLocation): identity(identity), origin(origin), timeMs(timeMs), systolicMmHg(systolicMmHg), diastolicMmHg(diastolicMmHg), androidBodyPosition(androidBodyPosition), androidMeasurementLocation(androidMeasurementLocation) {}
 
   public:
     friend bool operator==(const NativeBloodPressureSample& lhs, const NativeBloodPressureSample& rhs) = default;
@@ -71,7 +80,9 @@ namespace margelo::nitro {
         JSIConverter<margelo::nitro::nitrohealth::NativeHealthDataOrigin>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "origin"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeMs"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "systolicMmHg"))),
-        JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "diastolicMmHg")))
+        JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "diastolicMmHg"))),
+        JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeBloodPressureBodyPosition>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "androidBodyPosition"))),
+        JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeBloodPressureMeasurementLocation>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "androidMeasurementLocation")))
       );
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::nitrohealth::NativeBloodPressureSample& arg) {
@@ -81,6 +92,8 @@ namespace margelo::nitro {
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "timeMs"), JSIConverter<double>::toJSI(runtime, arg.timeMs));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "systolicMmHg"), JSIConverter<double>::toJSI(runtime, arg.systolicMmHg));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "diastolicMmHg"), JSIConverter<double>::toJSI(runtime, arg.diastolicMmHg));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "androidBodyPosition"), JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeBloodPressureBodyPosition>>::toJSI(runtime, arg.androidBodyPosition));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "androidMeasurementLocation"), JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeBloodPressureMeasurementLocation>>::toJSI(runtime, arg.androidMeasurementLocation));
       return obj;
     }
     static inline bool canConvert(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -96,6 +109,8 @@ namespace margelo::nitro {
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeMs")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "systolicMmHg")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "diastolicMmHg")))) return false;
+      if (!JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeBloodPressureBodyPosition>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "androidBodyPosition")))) return false;
+      if (!JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeBloodPressureMeasurementLocation>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "androidMeasurementLocation")))) return false;
       return true;
     }
   };

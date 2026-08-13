@@ -55,7 +55,6 @@ import com.margelo.nitro.nitrohealth.NativeBodyFatSamplePage
 import com.margelo.nitro.nitrohealth.NativeBodyTemperatureSample
 import com.margelo.nitro.nitrohealth.NativeBodyTemperatureSampleInput
 import com.margelo.nitro.nitrohealth.NativeBodyTemperatureSamplePage
-import com.margelo.nitro.nitrohealth.NativeBloodPressureSample
 import com.margelo.nitro.nitrohealth.NativeBloodPressureSampleInput
 import com.margelo.nitro.nitrohealth.NativeBloodPressureSamplePage
 import com.margelo.nitro.nitrohealth.NativeBodyMassSample
@@ -679,15 +678,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         return Promise.async {
             val response = readInstantRecords<BloodPressureRecord>("bloodPressure", query)
             NativeBloodPressureSamplePage(
-                samples = response.records.map { record ->
-                    NativeBloodPressureSample(
-                        identity = makeRecordIdentity(record.metadata.id),
-                        origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
-                        timeMs = record.time.toEpochMilli().toDouble(),
-                        systolicMmHg = record.systolic.inMillimetersOfMercury,
-                        diastolicMmHg = record.diastolic.inMillimetersOfMercury
-                    )
-                }.toTypedArray(),
+                samples = response.records.map(::makeNativeBloodPressureSample).toTypedArray(),
                 nextCursor = response.pageToken?.let { encodeSampleCursor("bloodPressure", query, it) }
             )
         }

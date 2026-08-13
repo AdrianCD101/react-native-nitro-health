@@ -83,6 +83,10 @@ import type { BloodGlucoseSample } from '../BloodGlucoseSample'
 import type { BloodGlucoseSampleInput } from '../BloodGlucoseSampleInput'
 import type { BloodPressureSample } from '../BloodPressureSample'
 import type { BloodPressureSampleInput } from '../BloodPressureSampleInput'
+import type {
+  AndroidBloodPressureBodyPosition,
+  AndroidBloodPressureMeasurementLocation,
+} from '../BloodPressureMetadata'
 import type { BodyTemperatureSample } from '../BodyTemperatureSample'
 import type { BodyTemperatureSampleInput } from '../BodyTemperatureSampleInput'
 import type { BasalBodyTemperatureSample } from '../BasalBodyTemperatureSample'
@@ -329,6 +333,123 @@ function makeNativeSync(
   return { syncId: sync.id, syncVersion: sync.version }
 }
 
+function makeNativeBloodPressureBodyPosition(
+  value: AndroidBloodPressureBodyPosition | undefined,
+  index: number
+): NativeBloodPressureSampleInput['androidBodyPosition'] {
+  switch (value) {
+    case undefined:
+      return undefined
+    case 'unknown':
+      return 'unspecified'
+    case 'standing_up':
+      return 'standingUp'
+    case 'sitting_down':
+      return 'sittingDown'
+    case 'lying_down':
+      return 'lyingDown'
+    case 'reclining':
+      return 'reclining'
+    default:
+      throw new Error(`samples[${index}]: metadata.android.bodyPosition is unsupported`)
+  }
+}
+
+function makeNativeBloodPressureMeasurementLocation(
+  value: AndroidBloodPressureMeasurementLocation | undefined,
+  index: number
+): NativeBloodPressureSampleInput['androidMeasurementLocation'] {
+  switch (value) {
+    case undefined:
+      return undefined
+    case 'unknown':
+      return 'unspecified'
+    case 'left_wrist':
+      return 'leftWrist'
+    case 'right_wrist':
+      return 'rightWrist'
+    case 'left_upper_arm':
+      return 'leftUpperArm'
+    case 'right_upper_arm':
+      return 'rightUpperArm'
+    default:
+      throw new Error(`samples[${index}]: metadata.android.measurementLocation is unsupported`)
+  }
+}
+
+function makeNativeBloodPressureMetadata(
+  metadata: BloodPressureSampleInput['metadata'],
+  index: number
+): Pick<NativeBloodPressureSampleInput, 'androidBodyPosition' | 'androidMeasurementLocation'> {
+  if (metadata === undefined) return {}
+  if (typeof metadata !== 'object' || metadata === null || Array.isArray(metadata)) {
+    throw new Error(`samples[${index}]: metadata must be an object`)
+  }
+  const unsupportedPlatform = Object.keys(metadata).find((key) => key !== 'android')
+  if (unsupportedPlatform !== undefined) {
+    throw new Error(`samples[${index}]: metadata.${unsupportedPlatform} is unsupported`)
+  }
+
+  const android = metadata.android
+  if (android === undefined) return {}
+  if (typeof android !== 'object' || android === null || Array.isArray(android)) {
+    throw new Error(`samples[${index}]: metadata.android must be an object`)
+  }
+  const supportedKeys = new Set(['bodyPosition', 'measurementLocation'])
+  const unsupportedKey = Object.keys(android).find((key) => !supportedKeys.has(key))
+  if (unsupportedKey !== undefined) {
+    throw new Error(`samples[${index}]: metadata.android.${unsupportedKey} is unsupported`)
+  }
+
+  const androidBodyPosition = makeNativeBloodPressureBodyPosition(android.bodyPosition, index)
+  const androidMeasurementLocation = makeNativeBloodPressureMeasurementLocation(
+    android.measurementLocation,
+    index
+  )
+  return {
+    ...(androidBodyPosition === undefined ? {} : { androidBodyPosition }),
+    ...(androidMeasurementLocation === undefined ? {} : { androidMeasurementLocation }),
+  }
+}
+
+function makeBloodPressureBodyPosition(
+  value: NonNullable<NativeBloodPressureSample['androidBodyPosition']>
+): AndroidBloodPressureBodyPosition {
+  switch (value) {
+    case 'unspecified':
+      return 'unknown'
+    case 'standingUp':
+      return 'standing_up'
+    case 'sittingDown':
+      return 'sitting_down'
+    case 'lyingDown':
+      return 'lying_down'
+    case 'reclining':
+      return 'reclining'
+    default:
+      throw new Error(`Unsupported native blood pressure body position: ${value}`)
+  }
+}
+
+function makeBloodPressureMeasurementLocation(
+  value: NonNullable<NativeBloodPressureSample['androidMeasurementLocation']>
+): AndroidBloodPressureMeasurementLocation {
+  switch (value) {
+    case 'unspecified':
+      return 'unknown'
+    case 'leftWrist':
+      return 'left_wrist'
+    case 'rightWrist':
+      return 'right_wrist'
+    case 'leftUpperArm':
+      return 'left_upper_arm'
+    case 'rightUpperArm':
+      return 'right_upper_arm'
+    default:
+      throw new Error(`Unsupported native blood pressure measurement location: ${value}`)
+  }
+}
+
 export function makeNativeStepSampleInput(
   sample: StepSampleInput,
   index: number
@@ -489,6 +610,7 @@ export function makeNativeBloodPressureSampleInput(
     timeMs,
     systolicMmHg: sample.systolicMmHg,
     diastolicMmHg: sample.diastolicMmHg,
+    ...makeNativeBloodPressureMetadata(sample.metadata, index),
     ...makeNativeSync(sample.sync, index),
   }
 }
@@ -970,12 +1092,31 @@ export function makeHeartRateVariabilitySample(
 }
 
 export function makeBloodPressureSample(sample: NativeBloodPressureSample): BloodPressureSample {
+  const hasBodyPosition = sample.androidBodyPosition !== undefined
+  const hasMeasurementLocation = sample.androidMeasurementLocation !== undefined
+  if (hasBodyPosition !== hasMeasurementLocation) {
+    throw new Error('Native blood pressure metadata is incomplete')
+  }
+
+  let metadata: BloodPressureSample['metadata']
+  if (sample.androidBodyPosition !== undefined && sample.androidMeasurementLocation !== undefined) {
+    metadata = {
+      android: {
+        bodyPosition: makeBloodPressureBodyPosition(sample.androidBodyPosition),
+        measurementLocation: makeBloodPressureMeasurementLocation(
+          sample.androidMeasurementLocation
+        ),
+      },
+    }
+  }
+
   return {
     identity: makeHealthSampleIdentity(sample.identity),
     origin: makeHealthDataOrigin(sample.origin),
     date: new Date(sample.timeMs),
     systolicMmHg: sample.systolicMmHg,
     diastolicMmHg: sample.diastolicMmHg,
+    ...(metadata === undefined ? {} : { metadata }),
   }
 }
 

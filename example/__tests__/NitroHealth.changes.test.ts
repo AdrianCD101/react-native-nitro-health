@@ -134,6 +134,48 @@ describe('NitroHealth changes contract', () => {
     ])
   })
 
+  it('maps Android blood pressure metadata on upserts', async () => {
+    const timeMs = Date.parse('2026-01-01T09:00:00.000Z')
+    mockNitroHealth.getChanges.mockResolvedValue({
+      changes: [
+        {
+          type: 'upsert',
+          recordId: 'bp-record',
+          bloodPressureSamples: [
+            {
+              ...nativeRecordMetadata('bp-record'),
+              timeMs,
+              systolicMmHg: 118,
+              diastolicMmHg: 76,
+              androidBodyPosition: 'sittingDown',
+              androidMeasurementLocation: 'leftUpperArm',
+            },
+          ],
+        },
+      ],
+      nextChangesToken: 'next-token',
+      hasMore: false,
+      tokenExpired: false,
+    })
+
+    const result = await NitroHealth.getChanges('bloodPressure', 'current-token')
+    if (result.tokenExpired) throw new Error('Expected a successful changes result')
+
+    expect(result.changes[0]).toMatchObject({
+      type: 'upsert',
+      samples: [
+        {
+          metadata: {
+            android: {
+              bodyPosition: 'sitting_down',
+              measurementLocation: 'left_upper_arm',
+            },
+          },
+        },
+      ],
+    })
+  })
+
   it('preserves an empty heart-rate upsert so cached children can be cleared', async () => {
     mockNitroHealth.getChanges.mockResolvedValue({
       changes: [

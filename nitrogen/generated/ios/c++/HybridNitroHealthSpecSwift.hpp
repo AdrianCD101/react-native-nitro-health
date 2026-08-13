@@ -56,6 +56,10 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthDataOrigin; }
 namespace margelo::nitro::nitrohealth { struct NativeHeartRateSample; }
 // Forward declaration of `NativeBloodPressureSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBloodPressureSample; }
+// Forward declaration of `NativeBloodPressureBodyPosition` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeBloodPressureBodyPosition; }
+// Forward declaration of `NativeBloodPressureMeasurementLocation` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeBloodPressureMeasurementLocation; }
 // Forward declaration of `NativeBloodGlucoseSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBloodGlucoseSample; }
 // Forward declaration of `NativeBodyTemperatureSample` to properly resolve imports.
@@ -252,6 +256,8 @@ namespace margelo::nitro::nitrohealth { enum class NativeHealthAuthorizationStat
 #include "NativeHealthDataOrigin.hpp"
 #include "NativeHeartRateSample.hpp"
 #include "NativeBloodPressureSample.hpp"
+#include "NativeBloodPressureBodyPosition.hpp"
+#include "NativeBloodPressureMeasurementLocation.hpp"
 #include "NativeBloodGlucoseSample.hpp"
 #include "NativeBodyTemperatureSample.hpp"
 #include "NativeRespiratoryRateSample.hpp"

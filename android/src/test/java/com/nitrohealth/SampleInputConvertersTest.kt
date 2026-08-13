@@ -9,6 +9,8 @@ import androidx.health.connect.client.records.MealType
 import androidx.health.connect.client.records.Vo2MaxRecord
 import com.margelo.nitro.nitrohealth.NativeActiveEnergyBurnedSampleInput
 import com.margelo.nitro.nitrohealth.NativeBloodGlucoseSampleInput
+import com.margelo.nitro.nitrohealth.NativeBloodPressureBodyPosition
+import com.margelo.nitro.nitrohealth.NativeBloodPressureMeasurementLocation
 import com.margelo.nitro.nitrohealth.NativeBloodPressureSampleInput
 import com.margelo.nitro.nitrohealth.NativeBasalBodyTemperatureSampleInput
 import com.margelo.nitro.nitrohealth.NativeBodyFatSampleInput
@@ -270,13 +272,15 @@ class SampleInputConvertersTest {
     }
 
     @Test
-    fun toBloodPressureRecordsMapsPointInTimeValuesWithUnknownEnumFields() {
+    fun toBloodPressureRecordsMapsPointInTimeValuesWithUnknownEnumFieldsByDefault() {
         val records = toBloodPressureRecords(
             arrayOf(
                 NativeBloodPressureSampleInput(
                     timeMs = startTimeMs,
                     systolicMmHg = 118.0,
                     diastolicMmHg = 76.0,
+                    androidBodyPosition = null,
+                    androidMeasurementLocation = null,
                     syncId = null,
                     syncVersion = null
                 )
@@ -290,6 +294,30 @@ class SampleInputConvertersTest {
         assertEquals(76.0, records[0].diastolic.inMillimetersOfMercury, 0.0)
         assertEquals(BloodPressureRecord.BODY_POSITION_UNKNOWN, records[0].bodyPosition)
         assertEquals(BloodPressureRecord.MEASUREMENT_LOCATION_UNKNOWN, records[0].measurementLocation)
+    }
+
+    @Test
+    fun toBloodPressureRecordsMapsAndroidMetadataFields() {
+        val record = toBloodPressureRecords(
+            arrayOf(
+                NativeBloodPressureSampleInput(
+                    timeMs = startTimeMs,
+                    systolicMmHg = 118.0,
+                    diastolicMmHg = 76.0,
+                    androidBodyPosition = NativeBloodPressureBodyPosition.SITTINGDOWN,
+                    androidMeasurementLocation =
+                        NativeBloodPressureMeasurementLocation.LEFTUPPERARM,
+                    syncId = null,
+                    syncVersion = null
+                )
+            )
+        ).single()
+
+        assertEquals(BloodPressureRecord.BODY_POSITION_SITTING_DOWN, record.bodyPosition)
+        assertEquals(
+            BloodPressureRecord.MEASUREMENT_LOCATION_LEFT_UPPER_ARM,
+            record.measurementLocation
+        )
     }
 
     @Test
@@ -602,6 +630,8 @@ class SampleInputConvertersTest {
                         timeMs = startTimeMs,
                         systolicMmHg = 118.0,
                         diastolicMmHg = 76.0,
+                        androidBodyPosition = null,
+                        androidMeasurementLocation = null,
                         syncId = syncId,
                         syncVersion = syncVersion
                     )

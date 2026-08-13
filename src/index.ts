@@ -10,6 +10,12 @@ export type { BloodGlucoseSample } from './BloodGlucoseSample'
 export type { BloodGlucoseSampleInput } from './BloodGlucoseSampleInput'
 export type { BloodPressureSample } from './BloodPressureSample'
 export type { BloodPressureSampleInput } from './BloodPressureSampleInput'
+export type {
+  AndroidBloodPressureBodyPosition,
+  AndroidBloodPressureMeasurementLocation,
+  AndroidBloodPressureMetadata,
+  BloodPressureMetadata,
+} from './BloodPressureMetadata'
 export type { BodyTemperatureSample } from './BodyTemperatureSample'
 export type { BodyTemperatureSampleInput } from './BodyTemperatureSampleInput'
 export type { BodyMassSample } from './BodyMassSample'
