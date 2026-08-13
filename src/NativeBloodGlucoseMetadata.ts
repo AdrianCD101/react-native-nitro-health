@@ -7,12 +7,7 @@ export type NativeBloodGlucoseSpecimenSource =
   | 'tears'
   | 'wholeBlood'
 
-export type NativeBloodGlucoseMealType =
-  | 'unspecified'
-  | 'breakfast'
-  | 'lunch'
-  | 'dinner'
-  | 'snack'
+export type NativeBloodGlucoseMealType = 'unspecified' | 'breakfast' | 'lunch' | 'dinner' | 'snack'
 
 export type NativeBloodGlucoseRelationToMeal =
   | 'unspecified'

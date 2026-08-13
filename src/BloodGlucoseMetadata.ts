@@ -9,12 +9,7 @@ export type AndroidBloodGlucoseSpecimenSource =
   | 'whole_blood'
 
 /** Meal type retained by {@linkcode AndroidBloodGlucoseMetadata.mealType}. */
-export type AndroidBloodGlucoseMealType =
-  | 'unknown'
-  | 'breakfast'
-  | 'lunch'
-  | 'dinner'
-  | 'snack'
+export type AndroidBloodGlucoseMealType = 'unknown' | 'breakfast' | 'lunch' | 'dinner' | 'snack'
 
 /** Meal relationship retained by {@linkcode AndroidBloodGlucoseMetadata.relationToMeal}. */
 export type AndroidBloodGlucoseRelationToMeal =
