@@ -8,6 +8,15 @@ export type {
 export type { BackgroundDeliveryFrequency } from './BackgroundDeliveryFrequency'
 export type { BloodGlucoseSample } from './BloodGlucoseSample'
 export type { BloodGlucoseSampleInput } from './BloodGlucoseSampleInput'
+export type {
+  AndroidBloodGlucoseMealType,
+  AndroidBloodGlucoseMetadata,
+  AndroidBloodGlucoseRelationToMeal,
+  AndroidBloodGlucoseSpecimenSource,
+  BloodGlucoseMetadata,
+  IOSBloodGlucoseMealTime,
+  IOSBloodGlucoseMetadata,
+} from './BloodGlucoseMetadata'
 export type { BloodPressureSample } from './BloodPressureSample'
 export type { BloodPressureSampleInput } from './BloodPressureSampleInput'
 export type {

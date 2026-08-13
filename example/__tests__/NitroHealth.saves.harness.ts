@@ -462,23 +462,51 @@ describe('NitroHealth saves (native)', () => {
         return
       }
 
-      await NitroHealth.saveBloodGlucose([
-        { date: saveInterval.startDate, millimolesPerLiter: 5.4 },
-      ])
+      await NitroHealth.deleteRecordsByTimeRange('bloodGlucose', saveReadRange)
 
-      const page = await NitroHealth.readBloodGlucose(saveReadRange)
+      try {
+        await NitroHealth.saveBloodGlucose([
+          {
+            date: saveInterval.startDate,
+            millimolesPerLiter: 5.4,
+            metadata: {
+              android: {
+                specimenSource: 'capillary_blood',
+                mealType: 'breakfast',
+                relationToMeal: 'before_meal',
+              },
+              ios: { mealTime: 'preprandial' },
+            },
+          },
+        ])
 
-      if (isInconclusiveRead(page.samples)) {
-        return
+        const page = await NitroHealth.readBloodGlucose(saveReadRange)
+
+        if (isInconclusiveRead(page.samples)) {
+          return
+        }
+
+        // HealthKit stores glucose in its composed mole unit, so allow float round-tripping.
+        const matches = page.samples.filter(
+          (sample) => Math.abs(sample.millimolesPerLiter - 5.4) < 0.001
+        )
+
+        expect(matches.length).toBe(1)
+        expect(matches[0]?.identity.kind).toBe('record')
+        if (Platform.OS === 'android') {
+          expect(matches[0]?.metadata).toEqual({
+            android: {
+              specimenSource: 'capillary_blood',
+              mealType: 'breakfast',
+              relationToMeal: 'before_meal',
+            },
+          })
+        } else {
+          expect(matches[0]?.metadata).toEqual({ ios: { mealTime: 'preprandial' } })
+        }
+      } finally {
+        await NitroHealth.deleteRecordsByTimeRange('bloodGlucose', saveReadRange)
       }
-
-      // HealthKit stores glucose in its composed mole unit, so allow float round-tripping.
-      const matches = page.samples.filter(
-        (sample) => Math.abs(sample.millimolesPerLiter - 5.4) < 0.001
-      )
-
-      expect(matches.length).toBeGreaterThanOrEqual(1)
-      expect(matches[0]?.identity.kind).toBe('record')
     })
   })
 

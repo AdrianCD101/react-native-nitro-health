@@ -55,6 +55,14 @@ namespace margelo::nitro::nitrohealth { enum class NativeBloodPressureBodyPositi
 namespace margelo::nitro::nitrohealth { enum class NativeBloodPressureMeasurementLocation; }
 // Forward declaration of `NativeBloodGlucoseSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBloodGlucoseSample; }
+// Forward declaration of `NativeBloodGlucoseSpecimenSource` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeBloodGlucoseSpecimenSource; }
+// Forward declaration of `NativeBloodGlucoseMealType` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeBloodGlucoseMealType; }
+// Forward declaration of `NativeBloodGlucoseRelationToMeal` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeBloodGlucoseRelationToMeal; }
+// Forward declaration of `NativeBloodGlucoseMealTime` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeBloodGlucoseMealTime; }
 // Forward declaration of `NativeBodyTemperatureSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBodyTemperatureSample; }
 // Forward declaration of `NativeRespiratoryRateSample` to properly resolve imports.
@@ -277,6 +285,14 @@ namespace margelo::nitro::nitrohealth { struct NativeWorkoutSampleInput; }
 #include "JNativeBloodPressureMeasurementLocation.hpp"
 #include "NativeBloodGlucoseSample.hpp"
 #include "JNativeBloodGlucoseSample.hpp"
+#include "NativeBloodGlucoseSpecimenSource.hpp"
+#include "JNativeBloodGlucoseSpecimenSource.hpp"
+#include "NativeBloodGlucoseMealType.hpp"
+#include "JNativeBloodGlucoseMealType.hpp"
+#include "NativeBloodGlucoseRelationToMeal.hpp"
+#include "JNativeBloodGlucoseRelationToMeal.hpp"
+#include "NativeBloodGlucoseMealTime.hpp"
+#include "JNativeBloodGlucoseMealTime.hpp"
 #include "NativeBodyTemperatureSample.hpp"
 #include "JNativeBodyTemperatureSample.hpp"
 #include "NativeRespiratoryRateSample.hpp"

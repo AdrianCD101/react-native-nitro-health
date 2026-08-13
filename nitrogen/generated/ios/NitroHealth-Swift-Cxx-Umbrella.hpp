@@ -32,12 +32,20 @@ namespace margelo::nitro::nitrohealth { struct NativeBasalBodyTemperatureSampleI
 namespace margelo::nitro::nitrohealth { struct NativeBasalBodyTemperatureSamplePage; }
 // Forward declaration of `NativeBasalBodyTemperatureSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBasalBodyTemperatureSample; }
+// Forward declaration of `NativeBloodGlucoseMealTime` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeBloodGlucoseMealTime; }
+// Forward declaration of `NativeBloodGlucoseMealType` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeBloodGlucoseMealType; }
+// Forward declaration of `NativeBloodGlucoseRelationToMeal` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeBloodGlucoseRelationToMeal; }
 // Forward declaration of `NativeBloodGlucoseSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBloodGlucoseSampleInput; }
 // Forward declaration of `NativeBloodGlucoseSamplePage` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBloodGlucoseSamplePage; }
 // Forward declaration of `NativeBloodGlucoseSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBloodGlucoseSample; }
+// Forward declaration of `NativeBloodGlucoseSpecimenSource` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeBloodGlucoseSpecimenSource; }
 // Forward declaration of `NativeBloodPressureBodyPosition` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class NativeBloodPressureBodyPosition; }
 // Forward declaration of `NativeBloodPressureMeasurementLocation` to properly resolve imports.
@@ -240,9 +248,13 @@ namespace margelo::nitro::nitrohealth { struct NativeWorkoutSample; }
 #include "NativeBasalBodyTemperatureSample.hpp"
 #include "NativeBasalBodyTemperatureSampleInput.hpp"
 #include "NativeBasalBodyTemperatureSamplePage.hpp"
+#include "NativeBloodGlucoseMealTime.hpp"
+#include "NativeBloodGlucoseMealType.hpp"
+#include "NativeBloodGlucoseRelationToMeal.hpp"
 #include "NativeBloodGlucoseSample.hpp"
 #include "NativeBloodGlucoseSampleInput.hpp"
 #include "NativeBloodGlucoseSamplePage.hpp"
+#include "NativeBloodGlucoseSpecimenSource.hpp"
 #include "NativeBloodPressureBodyPosition.hpp"
 #include "NativeBloodPressureMeasurementLocation.hpp"
 #include "NativeBloodPressureSample.hpp"

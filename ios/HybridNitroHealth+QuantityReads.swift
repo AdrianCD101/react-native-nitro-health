@@ -23,7 +23,7 @@ extension HybridNitroHealth {
     func readInstantQuantitySamplePage<T>(
         dataType: String,
         query: NativeHealthDateRangeQuery,
-        map: (HKQuantitySample, HKUnit) -> T
+        map: (HKQuantitySample, HKUnit) throws -> T
     ) async throws -> (samples: [T], nextCursor: String?) {
         let descriptor = try makeHealthDataTypeDescriptor(dataType: dataType)
         let quantityType = try makeHealthKitQuantityType(dataType: dataType)
@@ -39,7 +39,7 @@ extension HybridNitroHealth {
                 return nil
             }
 
-            return map(quantitySample, unit)
+            return try map(quantitySample, unit)
         }
     }
 
@@ -112,13 +112,8 @@ extension HybridNitroHealth {
         }
 
         return Promise<NativeBloodGlucoseSamplePage>.async {
-            let page = try await self.readInstantQuantitySamplePage(dataType: "bloodGlucose", query: query) { quantitySample, unit in
-                NativeBloodGlucoseSample(
-                    identity: quantitySample.nativeHealthSampleIdentity,
-                    origin: quantitySample.nativeHealthDataOrigin,
-                    timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
-                    millimolesPerLiter: quantitySample.quantity.doubleValue(for: unit)
-                )
+            let page = try await self.readInstantQuantitySamplePage(dataType: "bloodGlucose", query: query) { quantitySample, _ in
+                try quantitySample.nativeBloodGlucoseSample()
             }
 
             return NativeBloodGlucoseSamplePage(samples: page.samples, nextCursor: page.nextCursor)

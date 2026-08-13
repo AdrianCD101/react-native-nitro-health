@@ -10,9 +10,17 @@
 #include <fbjni/fbjni.h>
 #include "NativeBloodGlucoseSample.hpp"
 
+#include "JNativeBloodGlucoseMealTime.hpp"
+#include "JNativeBloodGlucoseMealType.hpp"
+#include "JNativeBloodGlucoseRelationToMeal.hpp"
+#include "JNativeBloodGlucoseSpecimenSource.hpp"
 #include "JNativeHealthDataOrigin.hpp"
 #include "JNativeHealthSampleIdentity.hpp"
 #include "JNativeHealthSampleIdentityKind.hpp"
+#include "NativeBloodGlucoseMealTime.hpp"
+#include "NativeBloodGlucoseMealType.hpp"
+#include "NativeBloodGlucoseRelationToMeal.hpp"
+#include "NativeBloodGlucoseSpecimenSource.hpp"
 #include "NativeHealthDataOrigin.hpp"
 #include "NativeHealthSampleIdentity.hpp"
 #include "NativeHealthSampleIdentityKind.hpp"
@@ -46,11 +54,23 @@ namespace margelo::nitro::nitrohealth {
       double timeMs = this->getFieldValue(fieldTimeMs);
       static const auto fieldMillimolesPerLiter = clazz->getField<double>("millimolesPerLiter");
       double millimolesPerLiter = this->getFieldValue(fieldMillimolesPerLiter);
+      static const auto fieldAndroidSpecimenSource = clazz->getField<JNativeBloodGlucoseSpecimenSource>("androidSpecimenSource");
+      jni::local_ref<JNativeBloodGlucoseSpecimenSource> androidSpecimenSource = this->getFieldValue(fieldAndroidSpecimenSource);
+      static const auto fieldAndroidMealType = clazz->getField<JNativeBloodGlucoseMealType>("androidMealType");
+      jni::local_ref<JNativeBloodGlucoseMealType> androidMealType = this->getFieldValue(fieldAndroidMealType);
+      static const auto fieldAndroidRelationToMeal = clazz->getField<JNativeBloodGlucoseRelationToMeal>("androidRelationToMeal");
+      jni::local_ref<JNativeBloodGlucoseRelationToMeal> androidRelationToMeal = this->getFieldValue(fieldAndroidRelationToMeal);
+      static const auto fieldIosMealTime = clazz->getField<JNativeBloodGlucoseMealTime>("iosMealTime");
+      jni::local_ref<JNativeBloodGlucoseMealTime> iosMealTime = this->getFieldValue(fieldIosMealTime);
       return NativeBloodGlucoseSample(
         identity->toCpp(),
         origin->toCpp(),
         timeMs,
-        millimolesPerLiter
+        millimolesPerLiter,
+        androidSpecimenSource != nullptr ? std::make_optional(androidSpecimenSource->toCpp()) : std::nullopt,
+        androidMealType != nullptr ? std::make_optional(androidMealType->toCpp()) : std::nullopt,
+        androidRelationToMeal != nullptr ? std::make_optional(androidRelationToMeal->toCpp()) : std::nullopt,
+        iosMealTime != nullptr ? std::make_optional(iosMealTime->toCpp()) : std::nullopt
       );
     }
 
@@ -60,7 +80,7 @@ namespace margelo::nitro::nitrohealth {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeBloodGlucoseSample::javaobject> fromCpp(const NativeBloodGlucoseSample& value) {
-      using JSignature = JNativeBloodGlucoseSample(jni::alias_ref<JNativeHealthSampleIdentity>, jni::alias_ref<JNativeHealthDataOrigin>, double, double);
+      using JSignature = JNativeBloodGlucoseSample(jni::alias_ref<JNativeHealthSampleIdentity>, jni::alias_ref<JNativeHealthDataOrigin>, double, double, jni::alias_ref<JNativeBloodGlucoseSpecimenSource>, jni::alias_ref<JNativeBloodGlucoseMealType>, jni::alias_ref<JNativeBloodGlucoseRelationToMeal>, jni::alias_ref<JNativeBloodGlucoseMealTime>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
@@ -68,7 +88,11 @@ namespace margelo::nitro::nitrohealth {
         JNativeHealthSampleIdentity::fromCpp(value.identity),
         JNativeHealthDataOrigin::fromCpp(value.origin),
         value.timeMs,
-        value.millimolesPerLiter
+        value.millimolesPerLiter,
+        value.androidSpecimenSource.has_value() ? JNativeBloodGlucoseSpecimenSource::fromCpp(value.androidSpecimenSource.value()) : nullptr,
+        value.androidMealType.has_value() ? JNativeBloodGlucoseMealType::fromCpp(value.androidMealType.value()) : nullptr,
+        value.androidRelationToMeal.has_value() ? JNativeBloodGlucoseRelationToMeal::fromCpp(value.androidRelationToMeal.value()) : nullptr,
+        value.iosMealTime.has_value() ? JNativeBloodGlucoseMealTime::fromCpp(value.iosMealTime.value()) : nullptr
       );
     }
   };

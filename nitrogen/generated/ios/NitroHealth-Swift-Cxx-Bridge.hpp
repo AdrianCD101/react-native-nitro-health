@@ -30,12 +30,20 @@ namespace margelo::nitro::nitrohealth { struct NativeBasalBodyTemperatureSampleI
 namespace margelo::nitro::nitrohealth { struct NativeBasalBodyTemperatureSamplePage; }
 // Forward declaration of `NativeBasalBodyTemperatureSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBasalBodyTemperatureSample; }
+// Forward declaration of `NativeBloodGlucoseMealTime` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeBloodGlucoseMealTime; }
+// Forward declaration of `NativeBloodGlucoseMealType` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeBloodGlucoseMealType; }
+// Forward declaration of `NativeBloodGlucoseRelationToMeal` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeBloodGlucoseRelationToMeal; }
 // Forward declaration of `NativeBloodGlucoseSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBloodGlucoseSampleInput; }
 // Forward declaration of `NativeBloodGlucoseSamplePage` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBloodGlucoseSamplePage; }
 // Forward declaration of `NativeBloodGlucoseSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeBloodGlucoseSample; }
+// Forward declaration of `NativeBloodGlucoseSpecimenSource` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeBloodGlucoseSpecimenSource; }
 // Forward declaration of `NativeBloodPressureBodyPosition` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class NativeBloodPressureBodyPosition; }
 // Forward declaration of `NativeBloodPressureMeasurementLocation` to properly resolve imports.
@@ -233,9 +241,13 @@ namespace NitroHealth { class HybridNitroHealthSpec_cxx; }
 #include "NativeBasalBodyTemperatureSample.hpp"
 #include "NativeBasalBodyTemperatureSampleInput.hpp"
 #include "NativeBasalBodyTemperatureSamplePage.hpp"
+#include "NativeBloodGlucoseMealTime.hpp"
+#include "NativeBloodGlucoseMealType.hpp"
+#include "NativeBloodGlucoseRelationToMeal.hpp"
 #include "NativeBloodGlucoseSample.hpp"
 #include "NativeBloodGlucoseSampleInput.hpp"
 #include "NativeBloodGlucoseSamplePage.hpp"
+#include "NativeBloodGlucoseSpecimenSource.hpp"
 #include "NativeBloodPressureBodyPosition.hpp"
 #include "NativeBloodPressureMeasurementLocation.hpp"
 #include "NativeBloodPressureSample.hpp"
@@ -811,6 +823,66 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return optional.has_value();
   }
   inline std::vector<NativeBloodPressureSample> get_std__optional_std__vector_NativeBloodPressureSample__(const std::optional<std::vector<NativeBloodPressureSample>>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::optional<NativeBloodGlucoseSpecimenSource>
+  /**
+   * Specialized version of `std::optional<NativeBloodGlucoseSpecimenSource>`.
+   */
+  using std__optional_NativeBloodGlucoseSpecimenSource_ = std::optional<NativeBloodGlucoseSpecimenSource>;
+  inline std::optional<NativeBloodGlucoseSpecimenSource> create_std__optional_NativeBloodGlucoseSpecimenSource_(const NativeBloodGlucoseSpecimenSource& value) noexcept {
+    return std::optional<NativeBloodGlucoseSpecimenSource>(value);
+  }
+  inline bool has_value_std__optional_NativeBloodGlucoseSpecimenSource_(const std::optional<NativeBloodGlucoseSpecimenSource>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline NativeBloodGlucoseSpecimenSource get_std__optional_NativeBloodGlucoseSpecimenSource_(const std::optional<NativeBloodGlucoseSpecimenSource>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::optional<NativeBloodGlucoseMealType>
+  /**
+   * Specialized version of `std::optional<NativeBloodGlucoseMealType>`.
+   */
+  using std__optional_NativeBloodGlucoseMealType_ = std::optional<NativeBloodGlucoseMealType>;
+  inline std::optional<NativeBloodGlucoseMealType> create_std__optional_NativeBloodGlucoseMealType_(const NativeBloodGlucoseMealType& value) noexcept {
+    return std::optional<NativeBloodGlucoseMealType>(value);
+  }
+  inline bool has_value_std__optional_NativeBloodGlucoseMealType_(const std::optional<NativeBloodGlucoseMealType>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline NativeBloodGlucoseMealType get_std__optional_NativeBloodGlucoseMealType_(const std::optional<NativeBloodGlucoseMealType>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::optional<NativeBloodGlucoseRelationToMeal>
+  /**
+   * Specialized version of `std::optional<NativeBloodGlucoseRelationToMeal>`.
+   */
+  using std__optional_NativeBloodGlucoseRelationToMeal_ = std::optional<NativeBloodGlucoseRelationToMeal>;
+  inline std::optional<NativeBloodGlucoseRelationToMeal> create_std__optional_NativeBloodGlucoseRelationToMeal_(const NativeBloodGlucoseRelationToMeal& value) noexcept {
+    return std::optional<NativeBloodGlucoseRelationToMeal>(value);
+  }
+  inline bool has_value_std__optional_NativeBloodGlucoseRelationToMeal_(const std::optional<NativeBloodGlucoseRelationToMeal>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline NativeBloodGlucoseRelationToMeal get_std__optional_NativeBloodGlucoseRelationToMeal_(const std::optional<NativeBloodGlucoseRelationToMeal>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::optional<NativeBloodGlucoseMealTime>
+  /**
+   * Specialized version of `std::optional<NativeBloodGlucoseMealTime>`.
+   */
+  using std__optional_NativeBloodGlucoseMealTime_ = std::optional<NativeBloodGlucoseMealTime>;
+  inline std::optional<NativeBloodGlucoseMealTime> create_std__optional_NativeBloodGlucoseMealTime_(const NativeBloodGlucoseMealTime& value) noexcept {
+    return std::optional<NativeBloodGlucoseMealTime>(value);
+  }
+  inline bool has_value_std__optional_NativeBloodGlucoseMealTime_(const std::optional<NativeBloodGlucoseMealTime>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline NativeBloodGlucoseMealTime get_std__optional_NativeBloodGlucoseMealTime_(const std::optional<NativeBloodGlucoseMealTime>& optional) noexcept {
     return optional.value();
   }
   

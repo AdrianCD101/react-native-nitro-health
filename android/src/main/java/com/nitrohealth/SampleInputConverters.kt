@@ -10,7 +10,6 @@ import androidx.health.connect.client.records.BodyTemperatureRecord
 import androidx.health.connect.client.records.DistanceRecord
 import androidx.health.connect.client.records.FloorsClimbedRecord
 import androidx.health.connect.client.records.HeartRateRecord
-import androidx.health.connect.client.records.MealType
 import androidx.health.connect.client.records.HeightRecord
 import androidx.health.connect.client.records.HydrationRecord
 import androidx.health.connect.client.records.LeanBodyMassRecord
@@ -175,11 +174,9 @@ internal fun toBloodGlucoseRecords(
             zoneOffset = null,
             metadata = makeSampleMetadata(sample.syncId, sample.syncVersion),
             level = BloodGlucose.millimolesPerLiter(sample.millimolesPerLiter),
-            // Deferred to metadata passthrough (issue #69); iOS has no counterpart for
-            // these fields, so store the explicit unknown constants.
-            specimenSource = BloodGlucoseRecord.SPECIMEN_SOURCE_UNKNOWN,
-            mealType = MealType.MEAL_TYPE_UNKNOWN,
-            relationToMeal = BloodGlucoseRecord.RELATION_TO_MEAL_UNKNOWN
+            specimenSource = healthConnectBloodGlucoseSpecimenSource(sample.androidSpecimenSource),
+            mealType = healthConnectBloodGlucoseMealType(sample.androidMealType),
+            relationToMeal = healthConnectBloodGlucoseRelationToMeal(sample.androidRelationToMeal)
         )
     }
 }

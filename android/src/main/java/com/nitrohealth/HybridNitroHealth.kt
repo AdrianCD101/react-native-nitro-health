@@ -43,7 +43,6 @@ import com.margelo.nitro.nitrohealth.HybridNitroHealthSpec
 import com.margelo.nitro.nitrohealth.NativeActiveEnergyBurnedSample
 import com.margelo.nitro.nitrohealth.NativeActiveEnergyBurnedSampleInput
 import com.margelo.nitro.nitrohealth.NativeActiveEnergyBurnedSamplePage
-import com.margelo.nitro.nitrohealth.NativeBloodGlucoseSample
 import com.margelo.nitro.nitrohealth.NativeBloodGlucoseSampleInput
 import com.margelo.nitro.nitrohealth.NativeBloodGlucoseSamplePage
 import com.margelo.nitro.nitrohealth.NativeBasalBodyTemperatureSample
@@ -690,14 +689,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         return Promise.async {
             val response = readInstantRecords<BloodGlucoseRecord>("bloodGlucose", query)
             NativeBloodGlucoseSamplePage(
-                samples = response.records.map { record ->
-                    NativeBloodGlucoseSample(
-                        identity = makeRecordIdentity(record.metadata.id),
-                        origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
-                        timeMs = record.time.toEpochMilli().toDouble(),
-                        millimolesPerLiter = record.level.inMillimolesPerLiter
-                    )
-                }.toTypedArray(),
+                samples = response.records.map(::makeNativeBloodGlucoseSample).toTypedArray(),
                 nextCursor = response.pageToken?.let { encodeSampleCursor("bloodGlucose", query, it) }
             )
         }
