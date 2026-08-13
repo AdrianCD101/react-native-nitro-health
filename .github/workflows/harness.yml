@@ -192,8 +192,7 @@ jobs:
             -sdk iphonesimulator \
             -configuration Debug \
             -destination 'generic/platform=iOS Simulator' \
-            build \
-            CODE_SIGNING_ALLOWED=NO | xcpretty
+            build | xcpretty
 
       - name: Run Harness iOS
         uses: callstackincubator/react-native-harness@v1.4.1
