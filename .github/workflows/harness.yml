@@ -9,13 +9,16 @@ on:
       - 'android/**'
       - 'example/__tests__/**'
       - 'example/android/**'
+      - 'example/ios/**'
       - 'example/App.tsx'
       - 'example/index.js'
       - 'example/jest.harness.config.mjs'
       - 'example/package.json'
       - 'example/rn-harness.config.mjs'
       - 'nitrogen/generated/android/**'
+      - 'nitrogen/generated/ios/**'
       - 'nitrogen/generated/shared/**'
+      - 'ios/**'
       - 'src/**'
       - 'bun.lock'
       - 'nitro.json'
@@ -26,13 +29,16 @@ on:
       - 'android/**'
       - 'example/__tests__/**'
       - 'example/android/**'
+      - 'example/ios/**'
       - 'example/App.tsx'
       - 'example/index.js'
       - 'example/jest.harness.config.mjs'
       - 'example/package.json'
       - 'example/rn-harness.config.mjs'
       - 'nitrogen/generated/android/**'
+      - 'nitrogen/generated/ios/**'
       - 'nitrogen/generated/shared/**'
+      - 'ios/**'
       - 'src/**'
       - 'bun.lock'
       - 'nitro.json'
@@ -124,7 +130,7 @@ jobs:
   harness-ios:
     name: Harness iOS
     runs-on: macOS-15
-    if: ${{ github.event_name == 'workflow_dispatch' && (inputs.platform == 'ios' || inputs.platform == 'all') }}
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.platform == 'ios' || inputs.platform == 'all' }}
     env:
       RN_HARNESS_IOS_SIMULATOR: iPhone 16 Pro
       RN_HARNESS_IOS_RUNTIME: '18.5'

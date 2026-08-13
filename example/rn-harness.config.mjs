@@ -21,6 +21,7 @@ const config = {
   entryPoint: './index.js',
   appRegistryComponentName: 'NitroHealthExample',
   permissions: true,
+  testTimeout: 30_000,
   defaultRunner: 'ios',
   runners: [
     applePlatform({
