@@ -1,7 +1,9 @@
 package com.nitrohealth
 
+import androidx.health.connect.client.records.BasalMetabolicRateRecord
 import androidx.health.connect.client.records.FloorsClimbedRecord
 import androidx.health.connect.client.records.HydrationRecord
+import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -76,6 +78,30 @@ class StatisticsBucketUtilsTest {
         assertEquals(setOf("sum"), descriptor.statisticsMetrics.keys)
         assertEquals(
             HydrationRecord.VOLUME_TOTAL,
+            descriptor.statisticsMetrics.getValue("sum").metric
+        )
+    }
+
+    @Test
+    fun descriptorForBasalEnergyBurnedAggregatesBasalCalories() {
+        val descriptor = healthDataTypeDescriptorFor("basalEnergyBurned")
+
+        assertEquals(BasalMetabolicRateRecord::class, descriptor.recordType)
+        assertEquals(setOf("sum"), descriptor.statisticsMetrics.keys)
+        assertEquals(
+            BasalMetabolicRateRecord.BASAL_CALORIES_TOTAL,
+            descriptor.statisticsMetrics.getValue("sum").metric
+        )
+    }
+
+    @Test
+    fun descriptorForTotalEnergyBurnedAggregatesEnergyTotal() {
+        val descriptor = healthDataTypeDescriptorFor("totalEnergyBurned")
+
+        assertEquals(TotalCaloriesBurnedRecord::class, descriptor.recordType)
+        assertEquals(setOf("sum"), descriptor.statisticsMetrics.keys)
+        assertEquals(
+            TotalCaloriesBurnedRecord.ENERGY_TOTAL,
             descriptor.statisticsMetrics.getValue("sum").metric
         )
     }

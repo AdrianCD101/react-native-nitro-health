@@ -1,4 +1,4 @@
-import type { HealthDataType } from '../HealthDataType'
+import type { HealthStatisticsDataType } from '../HealthDataType'
 import type { HealthDateRangeQuery } from '../HealthDateRangeQuery'
 import type { HealthStatisticsQuery } from '../HealthStatisticsQuery'
 import type { HealthTimeRangeQuery } from '../HealthTimeRangeQuery'
@@ -56,10 +56,15 @@ export function makeNativeTimeRangeQuery(query: HealthTimeRangeQuery): NativeHea
 
 const STATISTICS_BUCKETS: readonly StatisticsBucket[] = ['hour', 'day', 'week', 'month']
 
-const STATISTICS_METRICS_BY_DATA_TYPE: Record<HealthDataType, readonly StatisticsMetric[]> = {
+const STATISTICS_METRICS_BY_DATA_TYPE: Record<
+  HealthStatisticsDataType,
+  readonly StatisticsMetric[]
+> = {
   steps: ['sum'],
   distance: ['sum'],
   activeEnergyBurned: ['sum'],
+  basalEnergyBurned: ['sum'],
+  totalEnergyBurned: ['sum'],
   hydration: ['sum'],
   floorsClimbed: ['sum'],
   heartRate: ['avg', 'min', 'max'],
@@ -85,7 +90,7 @@ const STATISTICS_METRICS: readonly StatisticsMetric[] = Array.from(
 )
 
 export function makeNativeStatisticsQuery(
-  dataType: HealthDataType,
+  dataType: HealthStatisticsDataType,
   query: HealthStatisticsQuery
 ): NativeHealthStatisticsQuery {
   const { startTimeMs, endTimeMs } = makeTimeRange(query)

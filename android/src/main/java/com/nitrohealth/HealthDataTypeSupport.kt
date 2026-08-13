@@ -4,6 +4,7 @@ import androidx.health.connect.client.aggregate.AggregateMetric
 import androidx.health.connect.client.aggregate.AggregationResult
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
 import androidx.health.connect.client.records.BasalBodyTemperatureRecord
+import androidx.health.connect.client.records.BasalMetabolicRateRecord
 import androidx.health.connect.client.records.BloodGlucoseRecord
 import androidx.health.connect.client.records.BloodPressureRecord
 import androidx.health.connect.client.records.BodyFatRecord
@@ -22,6 +23,7 @@ import androidx.health.connect.client.records.RespiratoryRateRecord
 import androidx.health.connect.client.records.RestingHeartRateRecord
 import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.StepsRecord
+import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
 import androidx.health.connect.client.records.Vo2MaxRecord
 import androidx.health.connect.client.records.WeightRecord
 import kotlin.reflect.KClass
@@ -82,6 +84,34 @@ internal fun healthDataTypeDescriptorFor(dataType: String): HealthDataTypeDescri
                     metric = ActiveCaloriesBurnedRecord.ACTIVE_CALORIES_TOTAL,
                     extract = { result ->
                         result[ActiveCaloriesBurnedRecord.ACTIVE_CALORIES_TOTAL]?.inKilocalories
+                    }
+                )
+            )
+        )
+        // Aggregate-only energy concepts: JS only routes readStatistics and read permissions
+        // here. BasalMetabolicRateRecord stores an instantaneous kcal/day rate, so only its
+        // BASAL_CALORIES_TOTAL aggregate yields energy; Health Connect estimates a rate from
+        // body metrics (or demographic defaults) for sub-intervals without stored records.
+        "basalEnergyBurned" -> HealthDataTypeDescriptor(
+            recordType = BasalMetabolicRateRecord::class,
+            permissionLabel = "basal energy burned",
+            statisticsMetrics = mapOf(
+                "sum" to StatisticsMetricBinding(
+                    metric = BasalMetabolicRateRecord.BASAL_CALORIES_TOTAL,
+                    extract = { result ->
+                        result[BasalMetabolicRateRecord.BASAL_CALORIES_TOTAL]?.inKilocalories
+                    }
+                )
+            )
+        )
+        "totalEnergyBurned" -> HealthDataTypeDescriptor(
+            recordType = TotalCaloriesBurnedRecord::class,
+            permissionLabel = "total energy burned",
+            statisticsMetrics = mapOf(
+                "sum" to StatisticsMetricBinding(
+                    metric = TotalCaloriesBurnedRecord.ENERGY_TOTAL,
+                    extract = { result ->
+                        result[TotalCaloriesBurnedRecord.ENERGY_TOTAL]?.inKilocalories
                     }
                 )
             )

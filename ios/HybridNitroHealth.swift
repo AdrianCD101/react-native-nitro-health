@@ -271,6 +271,10 @@ class HybridNitroHealth: HybridNitroHealthSpec {
             throw permissionError("Health data is not available")
         }
 
+        if dataType == "totalEnergyBurned" {
+            return try readTotalEnergyBurnedStatistics(query: query)
+        }
+
         let descriptor = try makeHealthDataTypeDescriptor(dataType: dataType)
         let quantityType = try makeHealthKitQuantityType(dataType: dataType)
         let unit = descriptor.unit
@@ -322,6 +326,86 @@ class HybridNitroHealth: HybridNitroHealthSpec {
                     min: min,
                     max: max,
                     scope: dataType == "distance" ? .walkingrunning : nil
+                )
+            }
+        }
+    }
+
+    // HealthKit has no total-energy quantity type, so 'totalEnergyBurned' composes each bucket
+    // from active plus basal energy. Buckets without a basal sum are omitted rather than
+    // reporting the active half as if it were the whole total.
+    private func readTotalEnergyBurnedStatistics(
+        query: NativeHealthStatisticsQuery
+    ) throws -> Promise<[NativeHealthStatistics]> {
+        let activeType = try makeHealthKitQuantityType(dataType: "activeEnergyBurned")
+        let basalType = try makeHealthKitQuantityType(dataType: "basalEnergyBurned")
+        let options = try makeStatisticsOptions(
+            dataType: "totalEnergyBurned",
+            isCumulative: true,
+            metrics: query.metrics
+        )
+        guard let intervalComponents = makeBucketIntervalComponents(bucket: query.bucket) else {
+            throw permissionError("Unsupported statistics bucket: \(query.bucket)")
+        }
+
+        let unit = HKUnit.kilocalorie()
+        let startDate = Date(timeIntervalSince1970: query.startTimeMs / 1000)
+        let endDate = Date(timeIntervalSince1970: query.endTimeMs / 1000)
+        let predicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate, options: [])
+
+        return Promise<[NativeHealthStatistics]>.async {
+            try await self.requireDeterminedReadAuthorization(
+                for: [activeType, basalType] as Set<HKObjectType>,
+                label: "total energy burned"
+            )
+            let basalStatistics = try await self.queryHealthKitStatisticsCollection(
+                quantityType: basalType,
+                predicate: predicate,
+                options: options,
+                anchorDate: startDate,
+                intervalComponents: intervalComponents,
+                startDate: startDate,
+                endDate: endDate
+            )
+            let activeStatistics = try await self.queryHealthKitStatisticsCollection(
+                quantityType: activeType,
+                predicate: predicate,
+                options: options,
+                anchorDate: startDate,
+                intervalComponents: intervalComponents,
+                startDate: startDate,
+                endDate: endDate
+            )
+
+            // Both collections share one anchor and interval, so buckets pair by start time.
+            var activeSumsByBucketStart = [TimeInterval: Double]()
+            for statistic in activeStatistics {
+                if let sum = statistic.sumQuantity()?.doubleValue(for: unit) {
+                    activeSumsByBucketStart[statistic.startDate.timeIntervalSince1970] = sum
+                }
+            }
+
+            return basalStatistics.compactMap { statistic -> NativeHealthStatistics? in
+                guard let basalSum = statistic.sumQuantity()?.doubleValue(for: unit) else {
+                    return nil
+                }
+
+                let activeSum = activeSumsByBucketStart[statistic.startDate.timeIntervalSince1970] ?? 0
+                let range = clampDailyBucketRange(
+                    bucketStartTimeMs: statistic.startDate.timeIntervalSince1970 * 1000,
+                    bucketEndTimeMs: statistic.endDate.timeIntervalSince1970 * 1000,
+                    queryStartTimeMs: query.startTimeMs,
+                    queryEndTimeMs: query.endTimeMs
+                )
+
+                return NativeHealthStatistics(
+                    startTimeMs: range.startTimeMs,
+                    endTimeMs: range.endTimeMs,
+                    sum: basalSum + activeSum,
+                    avg: nil,
+                    min: nil,
+                    max: nil,
+                    scope: nil
                 )
             }
         }
@@ -762,6 +846,18 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         var toRead = Set<HKObjectType>()
 
         for permission in permissions {
+            // HealthKit has no total-energy type; a read authorizes both component quantity
+            // types. JS rejects write permissions for aggregate-only types before the bridge,
+            // so anything else arriving here is a contract violation worth failing loudly.
+            if permission.dataType == "totalEnergyBurned" {
+                guard permission.accessType == "read" else {
+                    throw permissionError("totalEnergyBurned is an aggregate-only read type")
+                }
+                toRead.insert(try makeHealthKitQuantityType(dataType: "activeEnergyBurned"))
+                toRead.insert(try makeHealthKitQuantityType(dataType: "basalEnergyBurned"))
+                continue
+            }
+
             // requestAuthorization rejects correlation types; blood pressure authorizes its
             // two member quantity types instead.
             if permission.dataType == "bloodPressure" {

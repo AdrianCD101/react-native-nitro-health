@@ -2,7 +2,12 @@ import { Platform } from 'react-native'
 import { describe, expect, it } from 'react-native-harness'
 import { NitroHealth } from 'react-native-nitro-health'
 
-import { sleepWritePermission, stepsReadPermission } from './support/harnessSupport'
+import {
+  basalEnergyReadPermission,
+  sleepWritePermission,
+  stepsReadPermission,
+  totalEnergyReadPermission,
+} from './support/harnessSupport'
 
 const permissionStatuses = ['granted', 'notGranted', 'notDetermined', 'unverifiable']
 
@@ -33,6 +38,21 @@ describe('NitroHealth permissions (native)', () => {
 
     if (Platform.OS === 'ios' && availability.status === 'unavailable') {
       expect(availability.reason).not.toBe('provider-install-or-update-required')
+    }
+  })
+
+  it('reports read states for aggregate-only energy permissions without prompting', async () => {
+    const permissions = [...basalEnergyReadPermission, ...totalEnergyReadPermission]
+    const result = await NitroHealth.getPermissionStatuses(permissions)
+
+    expect(result.statuses).toHaveLength(permissions.length)
+    expect(result.statuses.map((entry) => entry.permission)).toEqual(permissions)
+    expect(result.statuses.every((entry) => permissionStatuses.includes(entry.status))).toBe(true)
+
+    if (result.status === 'available' && Platform.OS === 'ios') {
+      // iOS read access is unverifiable by design; the call must still resolve both
+      // component quantity types without throwing.
+      expect(result.statuses.every((entry) => entry.status === 'unverifiable')).toBe(true)
     }
   })
 

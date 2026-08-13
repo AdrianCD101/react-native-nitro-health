@@ -16,6 +16,15 @@ export const distanceReadPermission: HealthPermission[] = [
 export const activeEnergyReadPermission: HealthPermission[] = [
   { accessType: 'read', dataType: 'activeEnergyBurned' },
 ]
+export const activeEnergyWritePermission: HealthPermission[] = [
+  { accessType: 'write', dataType: 'activeEnergyBurned' },
+]
+export const basalEnergyReadPermission: HealthPermission[] = [
+  { accessType: 'read', dataType: 'basalEnergyBurned' },
+]
+export const totalEnergyReadPermission: HealthPermission[] = [
+  { accessType: 'read', dataType: 'totalEnergyBurned' },
+]
 export const hydrationReadPermission: HealthPermission[] = [
   { accessType: 'read', dataType: 'hydration' },
 ]

@@ -1,4 +1,4 @@
-import type { HealthDataType, WritableHealthDataType } from './HealthDataType'
+import type { HealthPermissionDataType, WritableHealthDataType } from './HealthDataType'
 import type { HealthPermissionAccessType } from './HealthPermissionAccessType'
 
 /** Permission requested through {@linkcode NitroHealth.requestAuthorization}. */
@@ -6,8 +6,8 @@ export type HealthPermission =
   | {
       /** Requests read access. */
       accessType: Extract<HealthPermissionAccessType, 'read'>
-      /** Health data type to read. */
-      dataType: HealthDataType
+      /** Health data type to read, including aggregate-only energy concepts. */
+      dataType: HealthPermissionDataType
     }
   | {
       /** Requests write access. */

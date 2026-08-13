@@ -38,7 +38,13 @@ export type { HealthAuthorizationResult } from './HealthAuthorizationResult'
 export type { HealthChangesResult } from './HealthChangesResult'
 export type { HealthChangeNotification } from './HealthChangeNotification'
 export type { HealthDataOrigin } from './HealthDataOrigin'
-export type { HealthDataType, WritableHealthDataType } from './HealthDataType'
+export type {
+  AggregateOnlyHealthDataType,
+  HealthDataType,
+  HealthPermissionDataType,
+  HealthStatisticsDataType,
+  WritableHealthDataType,
+} from './HealthDataType'
 export type { HealthDateRangeQuery } from './HealthDateRangeQuery'
 export type {
   HealthDeletedCount,

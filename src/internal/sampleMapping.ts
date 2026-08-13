@@ -11,7 +11,7 @@ import type { HealthDataOrigin } from '../HealthDataOrigin'
 import type { HealthMetricValue } from '../HealthMetricValue'
 import type { HealthSamplePage } from '../HealthSamplePage'
 import type { HealthChangesResult } from '../HealthChangesResult'
-import type { HealthDataType } from '../HealthDataType'
+import type { HealthDataType, HealthStatisticsDataType } from '../HealthDataType'
 import type { HealthRecordChange } from '../HealthRecordChange'
 import type { HealthRecordSync } from '../HealthRecordSync'
 import type { HealthSampleByDataType } from '../HealthSampleByDataType'
@@ -1131,7 +1131,7 @@ export function makeHeartRateStatistics(
   }
 }
 
-export function makeHealthStatistics<T extends HealthDataType>(
+export function makeHealthStatistics<T extends HealthStatisticsDataType>(
   dataType: T,
   statistics: NativeHealthStatistics
 ): HealthStatisticsByDataType<T> {

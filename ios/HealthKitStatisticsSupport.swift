@@ -39,6 +39,16 @@ func makeHealthDataTypeDescriptor(dataType: String) throws -> HealthDataTypeDesc
             label: "active energy burned",
             isCumulative: true
         )
+    // Aggregate-only: JS routes only readStatistics and read permissions here. There is no
+    // "totalEnergyBurned" case on purpose — it spans two quantity types (active + basal), so
+    // it is composed in readStatistics and unknown-string lookups must keep throwing.
+    case "basalEnergyBurned":
+        return HealthDataTypeDescriptor(
+            identifier: .basalEnergyBurned,
+            unit: HKUnit.kilocalorie(),
+            label: "basal energy burned",
+            isCumulative: true
+        )
     case "hydration":
         return HealthDataTypeDescriptor(
             identifier: .dietaryWater,

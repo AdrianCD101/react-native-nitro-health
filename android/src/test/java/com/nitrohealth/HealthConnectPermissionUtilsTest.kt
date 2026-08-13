@@ -3,6 +3,7 @@ package com.nitrohealth
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.ActiveCaloriesBurnedRecord
 import androidx.health.connect.client.records.BasalBodyTemperatureRecord
+import androidx.health.connect.client.records.BasalMetabolicRateRecord
 import androidx.health.connect.client.records.BloodGlucoseRecord
 import androidx.health.connect.client.records.BloodPressureRecord
 import androidx.health.connect.client.records.BodyFatRecord
@@ -20,6 +21,7 @@ import androidx.health.connect.client.records.RespiratoryRateRecord
 import androidx.health.connect.client.records.RestingHeartRateRecord
 import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.StepsRecord
+import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
 import androidx.health.connect.client.records.Vo2MaxRecord
 import androidx.health.connect.client.records.WeightRecord
 import com.margelo.nitro.nitrohealth.HealthPermissionStatus
@@ -97,6 +99,14 @@ class HealthConnectPermissionUtilsTest {
         assertEquals(
             HealthPermission.getReadPermission(ActiveCaloriesBurnedRecord::class),
             toHealthConnectPermission("activeEnergyBurned", "read")
+        )
+        assertEquals(
+            HealthPermission.getReadPermission(BasalMetabolicRateRecord::class),
+            toHealthConnectPermission("basalEnergyBurned", "read")
+        )
+        assertEquals(
+            HealthPermission.getReadPermission(TotalCaloriesBurnedRecord::class),
+            toHealthConnectPermission("totalEnergyBurned", "read")
         )
         assertEquals(
             HealthPermission.getReadPermission(HydrationRecord::class),

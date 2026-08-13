@@ -1,4 +1,4 @@
-import type { HealthDataType } from '../HealthDataType'
+import type { AggregateOnlyHealthDataType, HealthDataType } from '../HealthDataType'
 import type { HealthPermission } from '../HealthPermission'
 import type { HealthRecordIdentity } from '../HealthSampleIdentity'
 
@@ -26,6 +26,11 @@ const HEALTH_DATA_TYPES = new Set<HealthDataType>([
   'workout',
 ])
 
+const AGGREGATE_ONLY_DATA_TYPES = new Set<AggregateOnlyHealthDataType>([
+  'basalEnergyBurned',
+  'totalEnergyBurned',
+])
+
 export function assertPermissions(permissions: HealthPermission[]): void {
   if (permissions.length === 0) {
     throw new Error('At least one health permission is required')
@@ -37,12 +42,19 @@ export function assertPermissions(permissions: HealthPermission[]): void {
       permission === null ||
       (candidate.accessType !== 'read' && candidate.accessType !== 'write') ||
       typeof candidate.dataType !== 'string' ||
-      !HEALTH_DATA_TYPES.has(candidate.dataType as HealthDataType)
+      (!HEALTH_DATA_TYPES.has(candidate.dataType as HealthDataType) &&
+        !AGGREGATE_ONLY_DATA_TYPES.has(candidate.dataType as AggregateOnlyHealthDataType))
     ) {
       throw new Error(`permissions[${index}]: a supported read or write permission is required`)
     }
     if (candidate.accessType === 'write' && candidate.dataType === 'heartRateVariability') {
       throw new Error('permissions[' + index + ']: heartRateVariability is read-only')
+    }
+    if (
+      candidate.accessType === 'write' &&
+      AGGREGATE_ONLY_DATA_TYPES.has(candidate.dataType as AggregateOnlyHealthDataType)
+    ) {
+      throw new Error(`permissions[${index}]: ${candidate.dataType} is an aggregate-only read type`)
     }
   })
 }
