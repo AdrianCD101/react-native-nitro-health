@@ -10,12 +10,16 @@
 #include <fbjni/fbjni.h>
 #include "NativeBodyTemperatureSample.hpp"
 
+#include "JNativeAndroidBodyTemperatureMeasurementLocation.hpp"
 #include "JNativeHealthDataOrigin.hpp"
 #include "JNativeHealthSampleIdentity.hpp"
 #include "JNativeHealthSampleIdentityKind.hpp"
+#include "JNativeIOSBodyTemperatureSensorLocation.hpp"
+#include "NativeAndroidBodyTemperatureMeasurementLocation.hpp"
 #include "NativeHealthDataOrigin.hpp"
 #include "NativeHealthSampleIdentity.hpp"
 #include "NativeHealthSampleIdentityKind.hpp"
+#include "NativeIOSBodyTemperatureSensorLocation.hpp"
 #include <optional>
 #include <string>
 
@@ -46,11 +50,17 @@ namespace margelo::nitro::nitrohealth {
       double timeMs = this->getFieldValue(fieldTimeMs);
       static const auto fieldCelsius = clazz->getField<double>("celsius");
       double celsius = this->getFieldValue(fieldCelsius);
+      static const auto fieldAndroidMeasurementLocation = clazz->getField<JNativeAndroidBodyTemperatureMeasurementLocation>("androidMeasurementLocation");
+      jni::local_ref<JNativeAndroidBodyTemperatureMeasurementLocation> androidMeasurementLocation = this->getFieldValue(fieldAndroidMeasurementLocation);
+      static const auto fieldIosSensorLocation = clazz->getField<JNativeIOSBodyTemperatureSensorLocation>("iosSensorLocation");
+      jni::local_ref<JNativeIOSBodyTemperatureSensorLocation> iosSensorLocation = this->getFieldValue(fieldIosSensorLocation);
       return NativeBodyTemperatureSample(
         identity->toCpp(),
         origin->toCpp(),
         timeMs,
-        celsius
+        celsius,
+        androidMeasurementLocation != nullptr ? std::make_optional(androidMeasurementLocation->toCpp()) : std::nullopt,
+        iosSensorLocation != nullptr ? std::make_optional(iosSensorLocation->toCpp()) : std::nullopt
       );
     }
 
@@ -60,7 +70,7 @@ namespace margelo::nitro::nitrohealth {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeBodyTemperatureSample::javaobject> fromCpp(const NativeBodyTemperatureSample& value) {
-      using JSignature = JNativeBodyTemperatureSample(jni::alias_ref<JNativeHealthSampleIdentity>, jni::alias_ref<JNativeHealthDataOrigin>, double, double);
+      using JSignature = JNativeBodyTemperatureSample(jni::alias_ref<JNativeHealthSampleIdentity>, jni::alias_ref<JNativeHealthDataOrigin>, double, double, jni::alias_ref<JNativeAndroidBodyTemperatureMeasurementLocation>, jni::alias_ref<JNativeIOSBodyTemperatureSensorLocation>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
@@ -68,7 +78,9 @@ namespace margelo::nitro::nitrohealth {
         JNativeHealthSampleIdentity::fromCpp(value.identity),
         JNativeHealthDataOrigin::fromCpp(value.origin),
         value.timeMs,
-        value.celsius
+        value.celsius,
+        value.androidMeasurementLocation.has_value() ? JNativeAndroidBodyTemperatureMeasurementLocation::fromCpp(value.androidMeasurementLocation.value()) : nullptr,
+        value.iosSensorLocation.has_value() ? JNativeIOSBodyTemperatureSensorLocation::fromCpp(value.iosSensorLocation.value()) : nullptr
       );
     }
   };

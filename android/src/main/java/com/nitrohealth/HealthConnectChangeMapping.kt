@@ -112,14 +112,7 @@ private fun makeNativeUpsertionChange(record: Record): NativeHealthChange {
         is BodyTemperatureRecord -> makeNativeChange(
             type = "upsert",
             recordId = recordId,
-            bodyTemperatureSamples = arrayOf(
-                NativeBodyTemperatureSample(
-                    identity = identity,
-                    origin = origin,
-                    timeMs = record.time.toEpochMilli().toDouble(),
-                    celsius = record.temperature.inCelsius
-                )
-            )
+            bodyTemperatureSamples = arrayOf(makeNativeBodyTemperatureSample(record))
         )
         is RespiratoryRateRecord -> makeNativeChange(
             type = "upsert",
@@ -160,14 +153,7 @@ private fun makeNativeUpsertionChange(record: Record): NativeHealthChange {
         is BasalBodyTemperatureRecord -> makeNativeChange(
             type = "upsert",
             recordId = recordId,
-            basalBodyTemperatureSamples = arrayOf(
-                NativeBasalBodyTemperatureSample(
-                    identity = identity,
-                    origin = origin,
-                    timeMs = record.time.toEpochMilli().toDouble(),
-                    celsius = record.temperature.inCelsius
-                )
-            )
+            basalBodyTemperatureSamples = arrayOf(makeNativeBasalBodyTemperatureSample(record))
         )
         is RestingHeartRateRecord -> makeNativeChange(
             type = "upsert",

@@ -207,12 +207,7 @@ extension HybridNitroHealth {
             return makeNativeHealthChange(
                 type: "upsert",
                 recordId: uuid,
-                bodyTemperatureSamples: [NativeBodyTemperatureSample(
-                    identity: quantitySample.nativeHealthSampleIdentity,
-                    origin: quantitySample.nativeHealthDataOrigin,
-                    timeMs: startTimeMs,
-                    celsius: quantitySample.quantity.doubleValue(for: HKUnit.degreeCelsius())
-                )]
+                bodyTemperatureSamples: [try quantitySample.nativeBodyTemperatureSample()]
             )
         case "respiratoryRate":
             let quantitySample = try requireQuantitySample(sample, dataType: dataType)
@@ -257,12 +252,7 @@ extension HybridNitroHealth {
             return makeNativeHealthChange(
                 type: "upsert",
                 recordId: uuid,
-                basalBodyTemperatureSamples: [NativeBasalBodyTemperatureSample(
-                    identity: quantitySample.nativeHealthSampleIdentity,
-                    origin: quantitySample.nativeHealthDataOrigin,
-                    timeMs: startTimeMs,
-                    celsius: quantitySample.quantity.doubleValue(for: HKUnit.degreeCelsius())
-                )]
+                basalBodyTemperatureSamples: [try quantitySample.nativeBasalBodyTemperatureSample()]
             )
         case "restingHeartRate":
             let quantitySample = try requireQuantitySample(sample, dataType: dataType)

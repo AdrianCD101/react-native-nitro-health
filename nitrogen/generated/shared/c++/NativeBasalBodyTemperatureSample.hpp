@@ -32,9 +32,16 @@
 namespace margelo::nitro::nitrohealth { struct NativeHealthSampleIdentity; }
 // Forward declaration of `NativeHealthDataOrigin` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthDataOrigin; }
+// Forward declaration of `NativeAndroidBodyTemperatureMeasurementLocation` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeAndroidBodyTemperatureMeasurementLocation; }
+// Forward declaration of `NativeIOSBodyTemperatureSensorLocation` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeIOSBodyTemperatureSensorLocation; }
 
 #include "NativeHealthSampleIdentity.hpp"
 #include "NativeHealthDataOrigin.hpp"
+#include "NativeAndroidBodyTemperatureMeasurementLocation.hpp"
+#include <optional>
+#include "NativeIOSBodyTemperatureSensorLocation.hpp"
 
 namespace margelo::nitro::nitrohealth {
 
@@ -47,10 +54,12 @@ namespace margelo::nitro::nitrohealth {
     NativeHealthDataOrigin origin     SWIFT_PRIVATE;
     double timeMs     SWIFT_PRIVATE;
     double celsius     SWIFT_PRIVATE;
+    std::optional<NativeAndroidBodyTemperatureMeasurementLocation> androidMeasurementLocation     SWIFT_PRIVATE;
+    std::optional<NativeIOSBodyTemperatureSensorLocation> iosSensorLocation     SWIFT_PRIVATE;
 
   public:
     NativeBasalBodyTemperatureSample() = default;
-    explicit NativeBasalBodyTemperatureSample(NativeHealthSampleIdentity identity, NativeHealthDataOrigin origin, double timeMs, double celsius): identity(identity), origin(origin), timeMs(timeMs), celsius(celsius) {}
+    explicit NativeBasalBodyTemperatureSample(NativeHealthSampleIdentity identity, NativeHealthDataOrigin origin, double timeMs, double celsius, std::optional<NativeAndroidBodyTemperatureMeasurementLocation> androidMeasurementLocation, std::optional<NativeIOSBodyTemperatureSensorLocation> iosSensorLocation): identity(identity), origin(origin), timeMs(timeMs), celsius(celsius), androidMeasurementLocation(androidMeasurementLocation), iosSensorLocation(iosSensorLocation) {}
 
   public:
     friend bool operator==(const NativeBasalBodyTemperatureSample& lhs, const NativeBasalBodyTemperatureSample& rhs) = default;
@@ -69,7 +78,9 @@ namespace margelo::nitro {
         JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleIdentity>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "identity"))),
         JSIConverter<margelo::nitro::nitrohealth::NativeHealthDataOrigin>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "origin"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeMs"))),
-        JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "celsius")))
+        JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "celsius"))),
+        JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeAndroidBodyTemperatureMeasurementLocation>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "androidMeasurementLocation"))),
+        JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeIOSBodyTemperatureSensorLocation>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "iosSensorLocation")))
       );
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::nitrohealth::NativeBasalBodyTemperatureSample& arg) {
@@ -78,6 +89,8 @@ namespace margelo::nitro {
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "origin"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthDataOrigin>::toJSI(runtime, arg.origin));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "timeMs"), JSIConverter<double>::toJSI(runtime, arg.timeMs));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "celsius"), JSIConverter<double>::toJSI(runtime, arg.celsius));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "androidMeasurementLocation"), JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeAndroidBodyTemperatureMeasurementLocation>>::toJSI(runtime, arg.androidMeasurementLocation));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "iosSensorLocation"), JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeIOSBodyTemperatureSensorLocation>>::toJSI(runtime, arg.iosSensorLocation));
       return obj;
     }
     static inline bool canConvert(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -92,6 +105,8 @@ namespace margelo::nitro {
       if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthDataOrigin>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "origin")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeMs")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "celsius")))) return false;
+      if (!JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeAndroidBodyTemperatureMeasurementLocation>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "androidMeasurementLocation")))) return false;
+      if (!JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeIOSBodyTemperatureSensorLocation>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "iosSensorLocation")))) return false;
       return true;
     }
   };

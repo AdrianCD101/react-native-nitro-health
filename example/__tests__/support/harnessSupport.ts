@@ -177,11 +177,10 @@ export async function hasVerifiedPermissions(permissions: HealthPermission[]): P
   return requireVerifiedPermissions(permissions)
 }
 
-export function isInconclusiveRead(samples: readonly unknown[]): false {
+export function assertConclusiveRead(samples: readonly unknown[]): void {
   if (Platform.OS === 'ios' && samples.length === 0) {
     throw new Error(
       'Harness prerequisite failed: HealthKit returned no data after a write; verify read authorization'
     )
   }
-  return false
 }

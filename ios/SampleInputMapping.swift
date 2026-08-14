@@ -258,10 +258,7 @@ func makeBodyTemperatureQuantitySamples(
             quantity: HKQuantity(unit: HKUnit.degreeCelsius(), doubleValue: sample.celsius),
             start: date,
             end: date,
-            metadata: try makeHealthKitSyncMetadata(
-                syncId: sample.syncId,
-                syncVersion: sample.syncVersion
-            )
+            metadata: try sample.healthKitMetadata()
         )
     }
 }
@@ -344,10 +341,7 @@ func makeBasalBodyTemperatureQuantitySamples(
             quantity: HKQuantity(unit: HKUnit.degreeCelsius(), doubleValue: sample.celsius),
             start: date,
             end: date,
-            metadata: try makeHealthKitSyncMetadata(
-                syncId: sample.syncId,
-                syncVersion: sample.syncVersion
-            )
+            metadata: try sample.healthKitMetadata()
         )
     }
 }

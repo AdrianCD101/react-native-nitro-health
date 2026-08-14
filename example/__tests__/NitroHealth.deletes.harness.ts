@@ -7,7 +7,7 @@ import {
   deleteReadRange,
   emptyRange,
   hasVerifiedPermissions,
-  isInconclusiveRead,
+  assertConclusiveRead,
 } from './support/harnessSupport'
 
 const nonexistentRecord: HealthRecordIdentity = {
@@ -85,7 +85,7 @@ describe('NitroHealth deletes (native)', () => {
 
     await NitroHealth.saveSteps([{ ...deleteInterval, count: 4321 }])
     const page = await NitroHealth.readSteps(deleteReadRange)
-    if (isInconclusiveRead(page.samples)) return
+    assertConclusiveRead(page.samples)
 
     const saved = page.samples.find((sample) => sample.count === 4321)
     expect(saved).toBeDefined()
@@ -109,7 +109,7 @@ describe('NitroHealth deletes (native)', () => {
 
     await NitroHealth.saveSteps([{ ...deleteInterval, count: 4322 }])
     const page = await NitroHealth.readSteps(deleteReadRange)
-    if (isInconclusiveRead(page.samples)) return
+    assertConclusiveRead(page.samples)
     expect(page.samples.some((sample) => sample.count === 4322)).toBe(true)
 
     const result = await NitroHealth.deleteRecordsByTimeRange('steps', deleteReadRange)
@@ -135,7 +135,7 @@ describe('NitroHealth deletes (native)', () => {
       { date: deleteInterval.startDate, systolicMmHg: 133, diastolicMmHg: 87 },
     ])
     const page = await NitroHealth.readBloodPressure(deleteReadRange)
-    if (isInconclusiveRead(page.samples)) return
+    assertConclusiveRead(page.samples)
 
     const saved = page.samples.find(
       (sample) => sample.systolicMmHg === 133 && sample.diastolicMmHg === 87
@@ -163,7 +163,7 @@ describe('NitroHealth deletes (native)', () => {
       { date: deleteInterval.startDate, millimolesPerLiter: 7.7 },
     ])
     const page = await NitroHealth.readBloodGlucose(deleteReadRange)
-    if (isInconclusiveRead(page.samples)) return
+    assertConclusiveRead(page.samples)
 
     const saved = page.samples.find((sample) => Math.abs(sample.millimolesPerLiter - 7.7) < 0.001)
     expect(saved).toBeDefined()
@@ -187,7 +187,7 @@ describe('NitroHealth deletes (native)', () => {
 
     await NitroHealth.saveBodyTemperature([{ date: deleteInterval.startDate, celsius: 38.5 }])
     const page = await NitroHealth.readBodyTemperature(deleteReadRange)
-    if (isInconclusiveRead(page.samples)) return
+    assertConclusiveRead(page.samples)
 
     const saved = page.samples.find((sample) => Math.abs(sample.celsius - 38.5) < 0.001)
     expect(saved).toBeDefined()
@@ -213,7 +213,7 @@ describe('NitroHealth deletes (native)', () => {
       { date: deleteInterval.startDate, breathsPerMinute: 22.5 },
     ])
     const page = await NitroHealth.readRespiratoryRate(deleteReadRange)
-    if (isInconclusiveRead(page.samples)) return
+    assertConclusiveRead(page.samples)
 
     const saved = page.samples.find((sample) => Math.abs(sample.breathsPerMinute - 22.5) < 0.001)
     expect(saved).toBeDefined()
@@ -239,7 +239,7 @@ describe('NitroHealth deletes (native)', () => {
       { date: deleteInterval.startDate, millilitersPerKilogramPerMinute: 43.5 },
     ])
     const page = await NitroHealth.readVo2Max(deleteReadRange)
-    if (isInconclusiveRead(page.samples)) return
+    assertConclusiveRead(page.samples)
 
     const saved = page.samples.find(
       (sample) => Math.abs(sample.millilitersPerKilogramPerMinute - 43.5) < 0.001
@@ -272,7 +272,7 @@ describe('NitroHealth deletes (native)', () => {
       },
     ])
     const page = await NitroHealth.readFloorsClimbed(deleteReadRange)
-    if (isInconclusiveRead(page.samples)) return
+    assertConclusiveRead(page.samples)
 
     const saved = page.samples.find(
       (sample) =>
@@ -309,7 +309,7 @@ describe('NitroHealth deletes (native)', () => {
         },
       ])
       const page = await NitroHealth.readHydration(deleteReadRange)
-      if (isInconclusiveRead(page.samples)) return
+      assertConclusiveRead(page.samples)
 
       const saved = page.samples.find((sample) => Math.abs(sample.milliliters - 525.5) < 0.001)
       expect(saved).toBeDefined()
@@ -336,7 +336,7 @@ describe('NitroHealth deletes (native)', () => {
 
     await NitroHealth.saveBodyFat([{ date: deleteInterval.startDate, percentage: 27.5 }])
     const page = await NitroHealth.readBodyFat(deleteReadRange)
-    if (isInconclusiveRead(page.samples)) return
+    assertConclusiveRead(page.samples)
 
     const saved = page.samples.find((sample) => Math.abs(sample.percentage - 27.5) < 0.001)
     expect(saved).toBeDefined()
@@ -360,7 +360,7 @@ describe('NitroHealth deletes (native)', () => {
 
     await NitroHealth.saveLeanBodyMass([{ date: deleteInterval.startDate, kilograms: 48.5 }])
     const page = await NitroHealth.readLeanBodyMass(deleteReadRange)
-    if (isInconclusiveRead(page.samples)) return
+    assertConclusiveRead(page.samples)
 
     const saved = page.samples.find((sample) => Math.abs(sample.kilograms - 48.5) < 0.001)
     expect(saved).toBeDefined()
@@ -384,7 +384,7 @@ describe('NitroHealth deletes (native)', () => {
 
     await NitroHealth.saveBasalBodyTemperature([{ date: deleteInterval.startDate, celsius: 35.9 }])
     const page = await NitroHealth.readBasalBodyTemperature(deleteReadRange)
-    if (isInconclusiveRead(page.samples)) return
+    assertConclusiveRead(page.samples)
 
     const saved = page.samples.find((sample) => Math.abs(sample.celsius - 35.9) < 0.001)
     expect(saved).toBeDefined()
@@ -413,7 +413,7 @@ describe('NitroHealth deletes (native)', () => {
     ])
 
     const page = await NitroHealth.readHeartRate(deleteReadRange)
-    if (isInconclusiveRead(page.samples)) return
+    assertConclusiveRead(page.samples)
     const target = page.samples.find((sample) => sample.bpm === 124)
     expect(target).toBeDefined()
     if (target === undefined) return

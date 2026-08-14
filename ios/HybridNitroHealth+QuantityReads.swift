@@ -126,13 +126,8 @@ extension HybridNitroHealth {
         }
 
         return Promise<NativeBodyTemperatureSamplePage>.async {
-            let page = try await self.readInstantQuantitySamplePage(dataType: "bodyTemperature", query: query) { quantitySample, unit in
-                NativeBodyTemperatureSample(
-                    identity: quantitySample.nativeHealthSampleIdentity,
-                    origin: quantitySample.nativeHealthDataOrigin,
-                    timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
-                    celsius: quantitySample.quantity.doubleValue(for: unit)
-                )
+            let page = try await self.readInstantQuantitySamplePage(dataType: "bodyTemperature", query: query) { quantitySample, _ in
+                try quantitySample.nativeBodyTemperatureSample()
             }
 
             return NativeBodyTemperatureSamplePage(samples: page.samples, nextCursor: page.nextCursor)
@@ -204,13 +199,8 @@ extension HybridNitroHealth {
         }
 
         return Promise<NativeBasalBodyTemperatureSamplePage>.async {
-            let page = try await self.readInstantQuantitySamplePage(dataType: "basalBodyTemperature", query: query) { quantitySample, unit in
-                NativeBasalBodyTemperatureSample(
-                    identity: quantitySample.nativeHealthSampleIdentity,
-                    origin: quantitySample.nativeHealthDataOrigin,
-                    timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
-                    celsius: quantitySample.quantity.doubleValue(for: unit)
-                )
+            let page = try await self.readInstantQuantitySamplePage(dataType: "basalBodyTemperature", query: query) { quantitySample, _ in
+                try quantitySample.nativeBasalBodyTemperatureSample()
             }
 
             return NativeBasalBodyTemperatureSamplePage(samples: page.samples, nextCursor: page.nextCursor)

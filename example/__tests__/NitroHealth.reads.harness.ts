@@ -5,7 +5,7 @@ import type { HealthMetricValue, HealthSample, StepSample } from 'react-native-n
 import {
   emptyRange,
   hasVerifiedPermissions,
-  isInconclusiveRead,
+  assertConclusiveRead,
   saveReadRange,
 } from './support/harnessSupport'
 
@@ -278,7 +278,7 @@ describe('NitroHealth reads (native)', () => {
       )
 
       const fullPage = await NitroHealth.readSteps({ ...saveReadRange, limit: 1000 })
-      if (isInconclusiveRead(fullPage.samples)) return
+      assertConclusiveRead(fullPage.samples)
 
       expect(fullPage.nextCursor).toBeUndefined()
       expect(fullPage.samples.length).toBeGreaterThanOrEqual(pagingIntervals.length)
