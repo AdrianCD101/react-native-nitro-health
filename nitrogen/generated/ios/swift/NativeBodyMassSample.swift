@@ -18,8 +18,8 @@ public extension NativeBodyMassSample {
   /**
    * Create a new instance of `NativeBodyMassSample`.
    */
-  init(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, startTimeMs: Double, endTimeMs: Double, kilograms: Double) {
-    self.init(identity, origin, startTimeMs, endTimeMs, kilograms)
+  init(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, recordingMethod: NativeHealthRecordingMethod, startTimeMs: Double, endTimeMs: Double, kilograms: Double) {
+    self.init(identity, origin, recordingMethod, startTimeMs, endTimeMs, kilograms)
   }
 
   @inline(__always)
@@ -30,6 +30,11 @@ public extension NativeBodyMassSample {
   @inline(__always)
   var origin: NativeHealthDataOrigin {
     return self.__origin
+  }
+  
+  @inline(__always)
+  var recordingMethod: NativeHealthRecordingMethod {
+    return self.__recordingMethod
   }
   
   @inline(__always)

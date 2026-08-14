@@ -134,6 +134,8 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthPermissionStatusEntry
 namespace margelo::nitro::nitrohealth { struct NativeHealthPermissionStatusResult; }
 // Forward declaration of `NativeHealthPermission` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthPermission; }
+// Forward declaration of `NativeHealthRecordingMethod` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeHealthRecordingMethod; }
 // Forward declaration of `NativeHealthSampleIdentityKind` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class NativeHealthSampleIdentityKind; }
 // Forward declaration of `NativeHealthSampleIdentity` to properly resolve imports.
@@ -144,6 +146,8 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthStatisticsQuery; }
 namespace margelo::nitro::nitrohealth { struct NativeHealthStatistics; }
 // Forward declaration of `NativeHealthTimeRangeQuery` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthTimeRangeQuery; }
+// Forward declaration of `NativeHealthWriteResult` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthWriteResult; }
 // Forward declaration of `NativeHeartRateSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHeartRateSampleInput; }
 // Forward declaration of `NativeHeartRateSamplePage` to properly resolve imports.
@@ -307,11 +311,13 @@ namespace margelo::nitro::nitrohealth { struct NativeWorkoutSample; }
 #include "NativeHealthPermission.hpp"
 #include "NativeHealthPermissionStatusEntry.hpp"
 #include "NativeHealthPermissionStatusResult.hpp"
+#include "NativeHealthRecordingMethod.hpp"
 #include "NativeHealthSampleIdentity.hpp"
 #include "NativeHealthSampleIdentityKind.hpp"
 #include "NativeHealthStatistics.hpp"
 #include "NativeHealthStatisticsQuery.hpp"
 #include "NativeHealthTimeRangeQuery.hpp"
+#include "NativeHealthWriteResult.hpp"
 #include "NativeHeartRateSample.hpp"
 #include "NativeHeartRateSampleInput.hpp"
 #include "NativeHeartRateSamplePage.hpp"

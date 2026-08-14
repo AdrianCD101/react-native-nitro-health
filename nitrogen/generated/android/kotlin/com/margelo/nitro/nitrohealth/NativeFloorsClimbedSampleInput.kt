@@ -29,6 +29,9 @@ data class NativeFloorsClimbedSampleInput(
   val floors: Double,
   @DoNotStrip
   @Keep
+  val recordingMethod: NativeHealthRecordingMethod?,
+  @DoNotStrip
+  @Keep
   val syncId: String?,
   @DoNotStrip
   @Keep
@@ -42,6 +45,7 @@ data class NativeFloorsClimbedSampleInput(
     return Objects.deepEquals(this.startTimeMs, other.startTimeMs)
       && Objects.deepEquals(this.endTimeMs, other.endTimeMs)
       && Objects.deepEquals(this.floors, other.floors)
+      && Objects.deepEquals(this.recordingMethod, other.recordingMethod)
       && Objects.deepEquals(this.syncId, other.syncId)
       && Objects.deepEquals(this.syncVersion, other.syncVersion)
   }
@@ -51,6 +55,7 @@ data class NativeFloorsClimbedSampleInput(
       startTimeMs,
       endTimeMs,
       floors,
+      recordingMethod,
       syncId,
       syncVersion
     ).contentDeepHashCode()
@@ -64,8 +69,8 @@ data class NativeFloorsClimbedSampleInput(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(startTimeMs: Double, endTimeMs: Double, floors: Double, syncId: String?, syncVersion: Double?): NativeFloorsClimbedSampleInput {
-      return NativeFloorsClimbedSampleInput(startTimeMs, endTimeMs, floors, syncId, syncVersion)
+    private fun fromCpp(startTimeMs: Double, endTimeMs: Double, floors: Double, recordingMethod: NativeHealthRecordingMethod?, syncId: String?, syncVersion: Double?): NativeFloorsClimbedSampleInput {
+      return NativeFloorsClimbedSampleInput(startTimeMs, endTimeMs, floors, recordingMethod, syncId, syncVersion)
     }
   }
 }

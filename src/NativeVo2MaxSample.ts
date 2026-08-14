@@ -1,4 +1,5 @@
 import type { NativeHealthDataOrigin } from './NativeHealthDataOrigin'
+import type { NativeHealthRecordingMethod } from './NativeHealthRecordingMethod'
 import type { NativeHealthSampleIdentity } from './NativeHealthSampleIdentity'
 import type {
   NativeAndroidVo2MaxMeasurementMethod,
@@ -9,6 +10,7 @@ import type {
 export interface NativeVo2MaxSample {
   identity: NativeHealthSampleIdentity
   origin: NativeHealthDataOrigin
+  recordingMethod: NativeHealthRecordingMethod
   timeMs: number
   millilitersPerKilogramPerMinute: number
   androidMeasurementMethod?: NativeAndroidVo2MaxMeasurementMethod

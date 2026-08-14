@@ -1,5 +1,6 @@
 import type { NitroHealth as NitroHealthSpec } from '../../../src/specs/nitro-health.nitro'
 import type { NativeHealthDataOrigin } from '../../../src/NativeHealthDataOrigin'
+import type { NativeHealthRecordingMethod } from '../../../src/NativeHealthRecordingMethod'
 import type { NativeHealthSampleIdentity } from '../../../src/NativeHealthSampleIdentity'
 
 type NativeMethod = (...args: any[]) => any
@@ -7,6 +8,7 @@ type NativeMethod = (...args: any[]) => any
 interface NativeRecordMetadata {
   identity: NativeHealthSampleIdentity
   origin: NativeHealthDataOrigin
+  recordingMethod: NativeHealthRecordingMethod
 }
 
 function mockNativeMethod<T extends NativeMethod>(): jest.Mock<ReturnType<T>, Parameters<T>> {
@@ -56,26 +58,79 @@ export const mockNitroHealth = {
   readStatistics: mockNativeMethod<NitroHealthSpec['readStatistics']>(),
   readSleepSamples: mockNativeMethod<NitroHealthSpec['readSleepSamples']>(),
   readWorkouts: mockNativeMethod<NitroHealthSpec['readWorkouts']>(),
-  saveSteps: mockNativeMethod<NitroHealthSpec['saveSteps']>(),
-  saveDistance: mockNativeMethod<NitroHealthSpec['saveDistance']>(),
-  saveActiveEnergyBurned: mockNativeMethod<NitroHealthSpec['saveActiveEnergyBurned']>(),
-  saveHydration: mockNativeMethod<NitroHealthSpec['saveHydration']>(),
-  saveFloorsClimbed: mockNativeMethod<NitroHealthSpec['saveFloorsClimbed']>(),
-  saveHeartRate: mockNativeMethod<NitroHealthSpec['saveHeartRate']>(),
-  saveBloodPressure: mockNativeMethod<NitroHealthSpec['saveBloodPressure']>(),
-  saveBloodGlucose: mockNativeMethod<NitroHealthSpec['saveBloodGlucose']>(),
-  saveBodyTemperature: mockNativeMethod<NitroHealthSpec['saveBodyTemperature']>(),
-  saveRespiratoryRate: mockNativeMethod<NitroHealthSpec['saveRespiratoryRate']>(),
-  saveBodyFat: mockNativeMethod<NitroHealthSpec['saveBodyFat']>(),
-  saveLeanBodyMass: mockNativeMethod<NitroHealthSpec['saveLeanBodyMass']>(),
-  saveBasalBodyTemperature: mockNativeMethod<NitroHealthSpec['saveBasalBodyTemperature']>(),
-  saveBodyMass: mockNativeMethod<NitroHealthSpec['saveBodyMass']>(),
-  saveRestingHeartRate: mockNativeMethod<NitroHealthSpec['saveRestingHeartRate']>(),
-  saveOxygenSaturation: mockNativeMethod<NitroHealthSpec['saveOxygenSaturation']>(),
-  saveHeight: mockNativeMethod<NitroHealthSpec['saveHeight']>(),
-  saveVo2Max: mockNativeMethod<NitroHealthSpec['saveVo2Max']>(),
-  saveSleepSessions: mockNativeMethod<NitroHealthSpec['saveSleepSessions']>(),
-  saveWorkout: mockNativeMethod<NitroHealthSpec['saveWorkout']>(),
+  saveSteps: mockNativeMethod<NitroHealthSpec['saveSteps']>().mockResolvedValue({
+    storedRecordingMethods: ['unknown'],
+  }),
+  saveDistance: mockNativeMethod<NitroHealthSpec['saveDistance']>().mockResolvedValue({
+    storedScope: 'walkingRunning',
+    storedRecordingMethods: ['unknown'],
+  }),
+  saveActiveEnergyBurned: mockNativeMethod<
+    NitroHealthSpec['saveActiveEnergyBurned']
+  >().mockResolvedValue({
+    storedRecordingMethods: ['unknown'],
+  }),
+  saveHydration: mockNativeMethod<NitroHealthSpec['saveHydration']>().mockResolvedValue({
+    storedRecordingMethods: ['unknown'],
+  }),
+  saveFloorsClimbed: mockNativeMethod<NitroHealthSpec['saveFloorsClimbed']>().mockResolvedValue({
+    storedRecordingMethods: ['unknown'],
+  }),
+  saveHeartRate: mockNativeMethod<NitroHealthSpec['saveHeartRate']>().mockResolvedValue({
+    storedRecordingMethods: ['unknown'],
+  }),
+  saveBloodPressure: mockNativeMethod<NitroHealthSpec['saveBloodPressure']>().mockResolvedValue({
+    storedRecordingMethods: ['unknown'],
+  }),
+  saveBloodGlucose: mockNativeMethod<NitroHealthSpec['saveBloodGlucose']>().mockResolvedValue({
+    storedRecordingMethods: ['unknown'],
+  }),
+  saveBodyTemperature: mockNativeMethod<NitroHealthSpec['saveBodyTemperature']>().mockResolvedValue(
+    {
+      storedRecordingMethods: ['unknown'],
+    }
+  ),
+  saveRespiratoryRate: mockNativeMethod<NitroHealthSpec['saveRespiratoryRate']>().mockResolvedValue(
+    {
+      storedRecordingMethods: ['unknown'],
+    }
+  ),
+  saveBodyFat: mockNativeMethod<NitroHealthSpec['saveBodyFat']>().mockResolvedValue({
+    storedRecordingMethods: ['unknown'],
+  }),
+  saveLeanBodyMass: mockNativeMethod<NitroHealthSpec['saveLeanBodyMass']>().mockResolvedValue({
+    storedRecordingMethods: ['unknown'],
+  }),
+  saveBasalBodyTemperature: mockNativeMethod<
+    NitroHealthSpec['saveBasalBodyTemperature']
+  >().mockResolvedValue({
+    storedRecordingMethods: ['unknown'],
+  }),
+  saveBodyMass: mockNativeMethod<NitroHealthSpec['saveBodyMass']>().mockResolvedValue({
+    storedRecordingMethods: ['unknown'],
+  }),
+  saveRestingHeartRate: mockNativeMethod<
+    NitroHealthSpec['saveRestingHeartRate']
+  >().mockResolvedValue({
+    storedRecordingMethods: ['unknown'],
+  }),
+  saveOxygenSaturation: mockNativeMethod<
+    NitroHealthSpec['saveOxygenSaturation']
+  >().mockResolvedValue({
+    storedRecordingMethods: ['unknown'],
+  }),
+  saveHeight: mockNativeMethod<NitroHealthSpec['saveHeight']>().mockResolvedValue({
+    storedRecordingMethods: ['unknown'],
+  }),
+  saveVo2Max: mockNativeMethod<NitroHealthSpec['saveVo2Max']>().mockResolvedValue({
+    storedRecordingMethods: ['unknown'],
+  }),
+  saveSleepSessions: mockNativeMethod<NitroHealthSpec['saveSleepSessions']>().mockResolvedValue({
+    storedRecordingMethods: ['unknown'],
+  }),
+  saveWorkout: mockNativeMethod<NitroHealthSpec['saveWorkout']>().mockResolvedValue({
+    storedRecordingMethods: ['unknown'],
+  }),
   deleteRecordsByIds: mockNativeMethod<NitroHealthSpec['deleteRecordsByIds']>(),
   deleteRecordsByTimeRange: mockNativeMethod<NitroHealthSpec['deleteRecordsByTimeRange']>(),
   getPermissionStatuses: mockNativeMethod<NitroHealthSpec['getPermissionStatuses']>(),
@@ -85,11 +140,13 @@ export const mockNitroHealth = {
 export function nativeRecordMetadata(
   id: string,
   identifier = 'com.example.health',
-  displayName?: string
+  displayName?: string,
+  recordingMethod: NativeHealthRecordingMethod = 'unknown'
 ): NativeRecordMetadata {
   return {
     identity: { kind: 'record' as const, id, recordId: id },
     origin: displayName === undefined ? { identifier } : { identifier, displayName },
+    recordingMethod,
   }
 }
 
@@ -97,10 +154,12 @@ export function nativeRecordChildMetadata(
   id: string,
   recordId: string,
   identifier = 'com.example.health',
-  displayName?: string
+  displayName?: string,
+  recordingMethod: NativeHealthRecordingMethod = 'unknown'
 ): NativeRecordMetadata {
   return {
     identity: { kind: 'recordChild' as const, id, recordId },
     origin: displayName === undefined ? { identifier } : { identifier, displayName },
+    recordingMethod,
   }
 }

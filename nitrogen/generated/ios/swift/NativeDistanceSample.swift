@@ -18,8 +18,8 @@ public extension NativeDistanceSample {
   /**
    * Create a new instance of `NativeDistanceSample`.
    */
-  init(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, startTimeMs: Double, endTimeMs: Double, distanceMeters: Double, scope: NativeDistanceScope) {
-    self.init(identity, origin, startTimeMs, endTimeMs, distanceMeters, scope)
+  init(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, recordingMethod: NativeHealthRecordingMethod, startTimeMs: Double, endTimeMs: Double, distanceMeters: Double, scope: NativeDistanceScope) {
+    self.init(identity, origin, recordingMethod, startTimeMs, endTimeMs, distanceMeters, scope)
   }
 
   @inline(__always)
@@ -30,6 +30,11 @@ public extension NativeDistanceSample {
   @inline(__always)
   var origin: NativeHealthDataOrigin {
     return self.__origin
+  }
+  
+  @inline(__always)
+  var recordingMethod: NativeHealthRecordingMethod {
+    return self.__recordingMethod
   }
   
   @inline(__always)

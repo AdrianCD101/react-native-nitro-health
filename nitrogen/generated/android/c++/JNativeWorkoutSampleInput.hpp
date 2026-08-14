@@ -10,6 +10,8 @@
 #include <fbjni/fbjni.h>
 #include "NativeWorkoutSampleInput.hpp"
 
+#include "JNativeHealthRecordingMethod.hpp"
+#include "NativeHealthRecordingMethod.hpp"
 #include <optional>
 #include <string>
 
@@ -42,6 +44,8 @@ namespace margelo::nitro::nitrohealth {
       jni::local_ref<jni::JString> displayName = this->getFieldValue(fieldDisplayName);
       static const auto fieldTimeZone = clazz->getField<jni::JString>("timeZone");
       jni::local_ref<jni::JString> timeZone = this->getFieldValue(fieldTimeZone);
+      static const auto fieldRecordingMethod = clazz->getField<JNativeHealthRecordingMethod>("recordingMethod");
+      jni::local_ref<JNativeHealthRecordingMethod> recordingMethod = this->getFieldValue(fieldRecordingMethod);
       static const auto fieldSyncId = clazz->getField<jni::JString>("syncId");
       jni::local_ref<jni::JString> syncId = this->getFieldValue(fieldSyncId);
       static const auto fieldSyncVersion = clazz->getField<jni::JDouble>("syncVersion");
@@ -52,6 +56,7 @@ namespace margelo::nitro::nitrohealth {
         activityType->toStdString(),
         displayName != nullptr ? std::make_optional(displayName->toStdString()) : std::nullopt,
         timeZone != nullptr ? std::make_optional(timeZone->toStdString()) : std::nullopt,
+        recordingMethod != nullptr ? std::make_optional(recordingMethod->toCpp()) : std::nullopt,
         syncId != nullptr ? std::make_optional(syncId->toStdString()) : std::nullopt,
         syncVersion != nullptr ? std::make_optional(syncVersion->value()) : std::nullopt
       );
@@ -63,7 +68,7 @@ namespace margelo::nitro::nitrohealth {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeWorkoutSampleInput::javaobject> fromCpp(const NativeWorkoutSampleInput& value) {
-      using JSignature = JNativeWorkoutSampleInput(double, double, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JDouble>);
+      using JSignature = JNativeWorkoutSampleInput(double, double, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<JNativeHealthRecordingMethod>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JDouble>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
@@ -73,6 +78,7 @@ namespace margelo::nitro::nitrohealth {
         jni::make_jstring(value.activityType),
         value.displayName.has_value() ? jni::make_jstring(value.displayName.value()) : nullptr,
         value.timeZone.has_value() ? jni::make_jstring(value.timeZone.value()) : nullptr,
+        value.recordingMethod.has_value() ? JNativeHealthRecordingMethod::fromCpp(value.recordingMethod.value()) : nullptr,
         value.syncId.has_value() ? jni::make_jstring(value.syncId.value()) : nullptr,
         value.syncVersion.has_value() ? jni::JDouble::valueOf(value.syncVersion.value()) : nullptr
       );

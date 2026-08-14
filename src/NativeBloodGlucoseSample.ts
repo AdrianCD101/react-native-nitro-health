@@ -1,4 +1,5 @@
 import type { NativeHealthDataOrigin } from './NativeHealthDataOrigin'
+import type { NativeHealthRecordingMethod } from './NativeHealthRecordingMethod'
 import type { NativeHealthSampleIdentity } from './NativeHealthSampleIdentity'
 import type {
   NativeBloodGlucoseMealTime,
@@ -11,6 +12,7 @@ import type {
 export interface NativeBloodGlucoseSample {
   identity: NativeHealthSampleIdentity
   origin: NativeHealthDataOrigin
+  recordingMethod: NativeHealthRecordingMethod
   timeMs: number
   millimolesPerLiter: number
   androidSpecimenSource?: NativeBloodGlucoseSpecimenSource

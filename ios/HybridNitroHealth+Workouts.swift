@@ -37,12 +37,12 @@ extension HybridNitroHealth {
         }
     }
 
-    func saveWorkout(workout: NativeWorkoutSampleInput) throws -> Promise<Void> {
+    func saveWorkout(workout: NativeWorkoutSampleInput) throws -> Promise<NativeHealthWriteResult> {
         if !HKHealthStore.isHealthDataAvailable() {
             throw permissionError("Health data is not available")
         }
 
-        return Promise<Void>.async {
+        return Promise<NativeHealthWriteResult>.async {
             let workoutType = HKObjectType.workoutType()
             try self.requireWriteAuthorization(for: workoutType, label: "workouts")
             let input = try makeWorkoutBuilderInput(workout: workout)
@@ -61,7 +61,14 @@ extension HybridNitroHealth {
                 throw error
             }
 
-            _ = try await builder.finishWorkout()
+            let finishedWorkout = try await builder.finishWorkout()
+            let storedRecordingMethods: [NativeHealthRecordingMethod]
+            if let finishedWorkout {
+                storedRecordingMethods = await self.storedRecordingMethods(for: [finishedWorkout])
+            } else {
+                storedRecordingMethods = [makeNativeHealthRecordingMethod(metadata: input.metadata)]
+            }
+            return NativeHealthWriteResult(storedRecordingMethods: storedRecordingMethods)
         }
     }
 }

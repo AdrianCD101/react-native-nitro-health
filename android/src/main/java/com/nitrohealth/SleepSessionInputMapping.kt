@@ -1,7 +1,6 @@
 package com.nitrohealth
 
 import androidx.health.connect.client.records.SleepSessionRecord
-import androidx.health.connect.client.records.metadata.Metadata
 import com.margelo.nitro.nitrohealth.NativeSleepSessionInput
 import com.margelo.nitro.nitrohealth.NativeSleepSessionStageInput
 import java.time.Instant
@@ -20,7 +19,11 @@ internal fun toSleepSessionRecords(
             endTime = endTime,
             endZoneOffset = zoneId.rules.getOffset(endTime),
             stages = session.stages.map(::toSleepSessionStage),
-            metadata = Metadata.unknownRecordingMethod()
+            metadata = makeSampleMetadata(
+                syncId = null,
+                syncVersion = null,
+                recordingMethod = session.recordingMethod
+            )
         )
     }
 }

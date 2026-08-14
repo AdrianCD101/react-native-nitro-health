@@ -45,12 +45,12 @@ extension HybridNitroHealth {
         }
     }
 
-    func saveBloodPressure(samples: [NativeBloodPressureSampleInput]) throws -> Promise<Void> {
+    func saveBloodPressure(samples: [NativeBloodPressureSampleInput]) throws -> Promise<NativeHealthWriteResult> {
         if !HKHealthStore.isHealthDataAvailable() {
             throw permissionError("Health data is not available")
         }
 
-        return Promise<Void>.async {
+        return Promise<NativeHealthWriteResult>.async {
             try self.requireBloodPressureWriteAuthorization()
 
             let correlations = try makeBloodPressureCorrelations(
@@ -61,6 +61,9 @@ extension HybridNitroHealth {
             // One save call persists each correlation together with its member samples, so
             // a reading can never be stored half-written.
             try await self.saveHealthKitSamples(correlations)
+            return NativeHealthWriteResult(
+                storedRecordingMethods: await self.storedRecordingMethods(for: correlations)
+            )
         }
     }
 

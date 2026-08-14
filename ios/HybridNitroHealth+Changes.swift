@@ -158,6 +158,7 @@ extension HybridNitroHealth {
                 stepSamples: [NativeStepSample(
                     identity: quantitySample.nativeHealthSampleIdentity,
                     origin: quantitySample.nativeHealthDataOrigin,
+                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
                     startTimeMs: startTimeMs,
                     endTimeMs: endTimeMs,
                     count: quantitySample.quantity.doubleValue(for: HKUnit.count())
@@ -171,6 +172,7 @@ extension HybridNitroHealth {
                 heartRateSamples: [NativeHeartRateSample(
                     identity: quantitySample.nativeHealthSampleIdentity,
                     origin: quantitySample.nativeHealthDataOrigin,
+                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
                     timeMs: startTimeMs,
                     bpm: quantitySample.quantity.doubleValue(
                         for: HKUnit.count().unitDivided(by: HKUnit.minute())
@@ -217,6 +219,7 @@ extension HybridNitroHealth {
                 respiratoryRateSamples: [NativeRespiratoryRateSample(
                     identity: quantitySample.nativeHealthSampleIdentity,
                     origin: quantitySample.nativeHealthDataOrigin,
+                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
                     timeMs: startTimeMs,
                     breathsPerMinute: quantitySample.quantity.doubleValue(
                         for: HKUnit.count().unitDivided(by: HKUnit.minute())
@@ -231,6 +234,7 @@ extension HybridNitroHealth {
                 bodyFatSamples: [NativeBodyFatSample(
                     identity: quantitySample.nativeHealthSampleIdentity,
                     origin: quantitySample.nativeHealthDataOrigin,
+                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
                     timeMs: startTimeMs,
                     percentage: quantitySample.quantity.doubleValue(for: HKUnit.percent()) * 100
                 )]
@@ -243,6 +247,7 @@ extension HybridNitroHealth {
                 leanBodyMassSamples: [NativeLeanBodyMassSample(
                     identity: quantitySample.nativeHealthSampleIdentity,
                     origin: quantitySample.nativeHealthDataOrigin,
+                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
                     timeMs: startTimeMs,
                     kilograms: quantitySample.quantity.doubleValue(for: HKUnit.gramUnit(with: .kilo))
                 )]
@@ -262,6 +267,7 @@ extension HybridNitroHealth {
                 restingHeartRateSamples: [NativeRestingHeartRateSample(
                     identity: quantitySample.nativeHealthSampleIdentity,
                     origin: quantitySample.nativeHealthDataOrigin,
+                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
                     timeMs: startTimeMs,
                     bpm: quantitySample.quantity.doubleValue(
                         for: HKUnit.count().unitDivided(by: HKUnit.minute())
@@ -276,6 +282,7 @@ extension HybridNitroHealth {
                 heartRateVariabilitySamples: [NativeHeartRateVariabilitySample(
                     identity: quantitySample.nativeHealthSampleIdentity,
                     origin: quantitySample.nativeHealthDataOrigin,
+                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
                     timeMs: startTimeMs,
                     milliseconds: quantitySample.quantity.doubleValue(
                         for: HKUnit.secondUnit(with: .milli)
@@ -291,6 +298,7 @@ extension HybridNitroHealth {
                 distanceSamples: [NativeDistanceSample(
                     identity: quantitySample.nativeHealthSampleIdentity,
                     origin: quantitySample.nativeHealthDataOrigin,
+                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
                     startTimeMs: startTimeMs,
                     endTimeMs: endTimeMs,
                     distanceMeters: quantitySample.quantity.doubleValue(for: HKUnit.meter()),
@@ -305,6 +313,7 @@ extension HybridNitroHealth {
                 activeEnergyBurnedSamples: [NativeActiveEnergyBurnedSample(
                     identity: quantitySample.nativeHealthSampleIdentity,
                     origin: quantitySample.nativeHealthDataOrigin,
+                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
                     startTimeMs: startTimeMs,
                     endTimeMs: endTimeMs,
                     kilocalories: quantitySample.quantity.doubleValue(for: HKUnit.kilocalorie())
@@ -318,6 +327,7 @@ extension HybridNitroHealth {
                 hydrationSamples: [NativeHydrationSample(
                     identity: quantitySample.nativeHealthSampleIdentity,
                     origin: quantitySample.nativeHealthDataOrigin,
+                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
                     startTimeMs: startTimeMs,
                     endTimeMs: endTimeMs,
                     milliliters: quantitySample.quantity.doubleValue(
@@ -333,6 +343,7 @@ extension HybridNitroHealth {
                 floorsClimbedSamples: [NativeFloorsClimbedSample(
                     identity: quantitySample.nativeHealthSampleIdentity,
                     origin: quantitySample.nativeHealthDataOrigin,
+                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
                     startTimeMs: startTimeMs,
                     endTimeMs: endTimeMs,
                     floors: quantitySample.quantity.doubleValue(for: HKUnit.count())
@@ -346,6 +357,7 @@ extension HybridNitroHealth {
                 oxygenSaturationSamples: [NativeOxygenSaturationSample(
                     identity: quantitySample.nativeHealthSampleIdentity,
                     origin: quantitySample.nativeHealthDataOrigin,
+                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
                     timeMs: startTimeMs,
                     percentage: quantitySample.quantity.doubleValue(for: HKUnit.percent()) * 100
                 )]
@@ -358,6 +370,7 @@ extension HybridNitroHealth {
                 heightSamples: [NativeHeightSample(
                     identity: quantitySample.nativeHealthSampleIdentity,
                     origin: quantitySample.nativeHealthDataOrigin,
+                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
                     timeMs: startTimeMs,
                     meters: quantitySample.quantity.doubleValue(for: HKUnit.meter())
                 )]
@@ -394,6 +407,7 @@ extension HybridNitroHealth {
                 bodyMassSamples: [NativeBodyMassSample(
                     identity: quantitySample.nativeHealthSampleIdentity,
                     origin: quantitySample.nativeHealthDataOrigin,
+                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
                     startTimeMs: startTimeMs,
                     endTimeMs: endTimeMs,
                     kilograms: quantitySample.quantity.doubleValue(for: HKUnit.gramUnit(with: .kilo))

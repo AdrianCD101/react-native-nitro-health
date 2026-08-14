@@ -345,6 +345,7 @@ describe('NitroHealth workflow and permission contract', () => {
         {
           identity: { kind: 'record', id: 'record-1' },
           origin: { identifier: 'com.example.health', displayName: 'Example Health' },
+          recordingMethod: 'unknown',
           startDate,
           endDate,
           count: 123,
@@ -356,6 +357,7 @@ describe('NitroHealth workflow and permission contract', () => {
         {
           identity: { kind: 'record', id: 'record-1' },
           origin: { identifier: 'com.example.health', displayName: 'Example Health' },
+          recordingMethod: 'unknown',
           startDate,
           endDate,
           distanceMeters: 1234,
@@ -398,6 +400,7 @@ describe('NitroHealth workflow and permission contract', () => {
             record: { kind: 'record', id: 'heart-record' },
           },
           origin: { identifier: 'com.example.watch', displayName: 'Example Watch' },
+          recordingMethod: 'unknown',
           date: startDate,
           bpm: 72,
         },
@@ -435,6 +438,7 @@ describe('NitroHealth workflow and permission contract', () => {
     expect(energy.samples[0]).toEqual({
       identity: { kind: 'record', id: 'energy-record' },
       origin: { identifier: 'com.example.phone', displayName: 'Example Phone' },
+      recordingMethod: 'unknown',
       startDate,
       endDate,
       kilocalories: 321,
@@ -442,6 +446,7 @@ describe('NitroHealth workflow and permission contract', () => {
     expect(bodyMass.samples[0]).toEqual({
       identity: { kind: 'record', id: 'mass-record' },
       origin: { identifier: 'com.example.scale', displayName: 'Example Scale' },
+      recordingMethod: 'unknown',
       startDate,
       endDate,
       kilograms: 72.5,
@@ -481,6 +486,7 @@ describe('NitroHealth workflow and permission contract', () => {
         {
           identity: { kind: 'record', id: 'sleep-session' },
           origin: { identifier: 'com.example.sleep', displayName: 'Sleep App' },
+          recordingMethod: 'unknown',
           kind: 'session-envelope',
           startDate,
           endDate,
@@ -493,6 +499,7 @@ describe('NitroHealth workflow and permission contract', () => {
             record: { kind: 'record', id: 'sleep-session' },
           },
           origin: { identifier: 'com.example.sleep', displayName: 'Sleep App' },
+          recordingMethod: 'unknown',
           kind: 'stage',
           startDate: stageDate,
           endDate,

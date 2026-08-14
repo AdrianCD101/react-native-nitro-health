@@ -2,6 +2,7 @@ package com.nitrohealth
 
 import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.health.connect.client.records.metadata.Metadata
+import com.margelo.nitro.nitrohealth.NativeHealthRecordingMethod
 import com.margelo.nitro.nitrohealth.NativeWorkoutSampleInput
 import java.time.Instant
 import java.time.ZoneOffset
@@ -22,6 +23,7 @@ class WorkoutSampleInputMappingTest {
                 activityType = "running",
                 displayName = "Morning Run",
                 timeZone = "America/New_York",
+                recordingMethod = NativeHealthRecordingMethod.ACTIVELYRECORDED,
                 syncId = "workout-1",
                 syncVersion = 2.0
             )
@@ -35,7 +37,7 @@ class WorkoutSampleInputMappingTest {
         assertEquals("Morning Run", record.title)
         assertEquals("workout-1", record.metadata.clientRecordId)
         assertEquals(2L, record.metadata.clientRecordVersion)
-        assertEquals(Metadata.RECORDING_METHOD_UNKNOWN, record.metadata.recordingMethod)
+        assertEquals(Metadata.RECORDING_METHOD_ACTIVELY_RECORDED, record.metadata.recordingMethod)
     }
 
     @Test
@@ -48,6 +50,7 @@ class WorkoutSampleInputMappingTest {
                     activityType = "running",
                     displayName = null,
                     timeZone = "UTC",
+                    recordingMethod = null,
                     syncId = null,
                     syncVersion = null
                 )
@@ -61,6 +64,7 @@ class WorkoutSampleInputMappingTest {
                     activityType = "archery",
                     displayName = null,
                     timeZone = "UTC",
+                    recordingMethod = null,
                     syncId = null,
                     syncVersion = null
                 )

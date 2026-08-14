@@ -2,6 +2,7 @@ package com.nitrohealth
 
 import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.metadata.Metadata
+import com.margelo.nitro.nitrohealth.NativeHealthRecordingMethod
 import com.margelo.nitro.nitrohealth.NativeSleepSessionInput
 import com.margelo.nitro.nitrohealth.NativeSleepSessionStageInput
 import java.time.Instant
@@ -32,7 +33,8 @@ class SleepSessionInputMappingTest {
                             stage = "asleepCore"
                         )
                     ),
-                    timeZone = "America/New_York"
+                    timeZone = "America/New_York",
+                    recordingMethod = NativeHealthRecordingMethod.AUTOMATICALLYRECORDED
                 )
             )
         ).single()
@@ -41,7 +43,10 @@ class SleepSessionInputMappingTest {
         assertEquals(endTime, record.endTime)
         assertEquals(ZoneOffset.of("-05:00"), record.startZoneOffset)
         assertEquals(ZoneOffset.of("-05:00"), record.endZoneOffset)
-        assertEquals(Metadata.RECORDING_METHOD_UNKNOWN, record.metadata.recordingMethod)
+        assertEquals(
+            Metadata.RECORDING_METHOD_AUTOMATICALLY_RECORDED,
+            record.metadata.recordingMethod
+        )
         assertNull(record.metadata.clientRecordId)
         assertEquals(1, record.stages.size)
         assertEquals(stageStart, record.stages.single().startTime)
@@ -66,7 +71,8 @@ class SleepSessionInputMappingTest {
                     startTimeMs = startTime.toEpochMilli().toDouble(),
                     endTimeMs = endTime.toEpochMilli().toDouble(),
                     stages = emptyArray(),
-                    timeZone = "UTC"
+                    timeZone = "UTC",
+                    recordingMethod = null
                 )
             )
         ).single()
@@ -86,7 +92,8 @@ class SleepSessionInputMappingTest {
                     startTimeMs = dstStart.toEpochMilli().toDouble(),
                     endTimeMs = dstEnd.toEpochMilli().toDouble(),
                     stages = emptyArray(),
-                    timeZone = "America/New_York"
+                    timeZone = "America/New_York",
+                    recordingMethod = null
                 )
             )
         ).single()
@@ -104,7 +111,8 @@ class SleepSessionInputMappingTest {
                         startTimeMs = startTime.toEpochMilli().toDouble(),
                         endTimeMs = endTime.toEpochMilli().toDouble(),
                         stages = emptyArray(),
-                        timeZone = "Not/A_Zone"
+                        timeZone = "Not/A_Zone",
+                        recordingMethod = null
                     )
                 )
             )
@@ -121,7 +129,8 @@ class SleepSessionInputMappingTest {
                         startTimeMs = startTime.toEpochMilli().toDouble(),
                         endTimeMs = endTime.toEpochMilli().toDouble(),
                         stages = emptyArray(),
-                        timeZone = "+01:00"
+                        timeZone = "+01:00",
+                        recordingMethod = null
                     )
                 )
             )

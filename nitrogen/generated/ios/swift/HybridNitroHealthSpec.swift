@@ -49,26 +49,26 @@ public protocol HybridNitroHealthSpec_protocol: HybridObject {
   func readStatistics(dataType: String, query: NativeHealthStatisticsQuery) throws -> Promise<[NativeHealthStatistics]>
   func readSleepSamples(query: NativeHealthDateRangeQuery) throws -> Promise<NativeSleepSamplePage>
   func readWorkouts(query: NativeHealthDateRangeQuery) throws -> Promise<NativeWorkoutSamplePage>
-  func saveSteps(samples: [NativeStepSampleInput]) throws -> Promise<Void>
+  func saveSteps(samples: [NativeStepSampleInput]) throws -> Promise<NativeHealthWriteResult>
   func saveDistance(samples: [NativeDistanceSampleInput]) throws -> Promise<NativeDistanceWriteResult>
-  func saveActiveEnergyBurned(samples: [NativeActiveEnergyBurnedSampleInput]) throws -> Promise<Void>
-  func saveHydration(samples: [NativeHydrationSampleInput]) throws -> Promise<Void>
-  func saveFloorsClimbed(samples: [NativeFloorsClimbedSampleInput]) throws -> Promise<Void>
-  func saveHeartRate(samples: [NativeHeartRateSampleInput]) throws -> Promise<Void>
-  func saveBloodPressure(samples: [NativeBloodPressureSampleInput]) throws -> Promise<Void>
-  func saveBloodGlucose(samples: [NativeBloodGlucoseSampleInput]) throws -> Promise<Void>
-  func saveBodyTemperature(samples: [NativeBodyTemperatureSampleInput]) throws -> Promise<Void>
-  func saveRespiratoryRate(samples: [NativeRespiratoryRateSampleInput]) throws -> Promise<Void>
-  func saveBodyFat(samples: [NativeBodyFatSampleInput]) throws -> Promise<Void>
-  func saveLeanBodyMass(samples: [NativeLeanBodyMassSampleInput]) throws -> Promise<Void>
-  func saveBasalBodyTemperature(samples: [NativeBasalBodyTemperatureSampleInput]) throws -> Promise<Void>
-  func saveBodyMass(samples: [NativeBodyMassSampleInput]) throws -> Promise<Void>
-  func saveRestingHeartRate(samples: [NativeRestingHeartRateSampleInput]) throws -> Promise<Void>
-  func saveOxygenSaturation(samples: [NativeOxygenSaturationSampleInput]) throws -> Promise<Void>
-  func saveHeight(samples: [NativeHeightSampleInput]) throws -> Promise<Void>
-  func saveVo2Max(samples: [NativeVo2MaxSampleInput]) throws -> Promise<Void>
-  func saveSleepSessions(sessions: [NativeSleepSessionInput]) throws -> Promise<Void>
-  func saveWorkout(workout: NativeWorkoutSampleInput) throws -> Promise<Void>
+  func saveActiveEnergyBurned(samples: [NativeActiveEnergyBurnedSampleInput]) throws -> Promise<NativeHealthWriteResult>
+  func saveHydration(samples: [NativeHydrationSampleInput]) throws -> Promise<NativeHealthWriteResult>
+  func saveFloorsClimbed(samples: [NativeFloorsClimbedSampleInput]) throws -> Promise<NativeHealthWriteResult>
+  func saveHeartRate(samples: [NativeHeartRateSampleInput]) throws -> Promise<NativeHealthWriteResult>
+  func saveBloodPressure(samples: [NativeBloodPressureSampleInput]) throws -> Promise<NativeHealthWriteResult>
+  func saveBloodGlucose(samples: [NativeBloodGlucoseSampleInput]) throws -> Promise<NativeHealthWriteResult>
+  func saveBodyTemperature(samples: [NativeBodyTemperatureSampleInput]) throws -> Promise<NativeHealthWriteResult>
+  func saveRespiratoryRate(samples: [NativeRespiratoryRateSampleInput]) throws -> Promise<NativeHealthWriteResult>
+  func saveBodyFat(samples: [NativeBodyFatSampleInput]) throws -> Promise<NativeHealthWriteResult>
+  func saveLeanBodyMass(samples: [NativeLeanBodyMassSampleInput]) throws -> Promise<NativeHealthWriteResult>
+  func saveBasalBodyTemperature(samples: [NativeBasalBodyTemperatureSampleInput]) throws -> Promise<NativeHealthWriteResult>
+  func saveBodyMass(samples: [NativeBodyMassSampleInput]) throws -> Promise<NativeHealthWriteResult>
+  func saveRestingHeartRate(samples: [NativeRestingHeartRateSampleInput]) throws -> Promise<NativeHealthWriteResult>
+  func saveOxygenSaturation(samples: [NativeOxygenSaturationSampleInput]) throws -> Promise<NativeHealthWriteResult>
+  func saveHeight(samples: [NativeHeightSampleInput]) throws -> Promise<NativeHealthWriteResult>
+  func saveVo2Max(samples: [NativeVo2MaxSampleInput]) throws -> Promise<NativeHealthWriteResult>
+  func saveSleepSessions(sessions: [NativeSleepSessionInput]) throws -> Promise<NativeHealthWriteResult>
+  func saveWorkout(workout: NativeWorkoutSampleInput) throws -> Promise<NativeHealthWriteResult>
   func deleteRecordsByIds(dataType: String, recordIds: [String]) throws -> Promise<NativeHealthDeleteResult>
   func deleteRecordsByTimeRange(dataType: String, query: NativeHealthTimeRangeQuery) throws -> Promise<NativeHealthDeleteResult>
   func getPermissionStatuses(permissions: [NativeHealthPermission]) throws -> Promise<NativeHealthPermissionStatusResult>

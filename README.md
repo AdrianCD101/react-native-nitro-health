@@ -266,7 +266,7 @@ Background and extended-history declarations are documented in [Background Synch
 
 ## Raw Sample Model
 
-Every raw sample returned by a `read*` method or a change upsert has `identity` and `origin`.
+Every raw sample returned by a `read*` method or a change upsert has required `identity`, `origin`, and `recordingMethod` fields.
 
 ### Data Origin
 
@@ -280,6 +280,19 @@ interface HealthDataOrigin {
 `origin.identifier` is the stable application identifier supplied by the health service: an iOS bundle identifier or Android package name. `origin.displayName` is a human-readable app name when available. HealthKit supplies the source name; Health Connect currently supplies only the package name, so Android `displayName` is normally absent.
 
 Do not use a display name as a database key. Use `origin.identifier` for stable source grouping.
+
+### Recording Method
+
+`recordingMethod` describes how a sample was captured. Read samples always include it; write inputs may omit it, which requests `unknown`.
+
+| Public value             | Meaning                       | Health Connect read/write mapping                 | HealthKit write mapping                | HealthKit read mapping                         |
+| ------------------------ | ----------------------------- | ------------------------------------------------- | -------------------------------------- | ---------------------------------------------- |
+| `manual`                 | User-entered data             | `RECORDING_METHOD_MANUAL_ENTRY` exactly           | `HKMetadataKeyWasUserEntered = true`   | `true` -> `manual`                             |
+| `actively-recorded`      | User-initiated capture        | `RECORDING_METHOD_ACTIVELY_RECORDED` exactly      | No `HKMetadataKeyWasUserEntered` value | Not distinguishable; false/absent -> `unknown` |
+| `automatically-recorded` | Passive capture               | `RECORDING_METHOD_AUTOMATICALLY_RECORDED` exactly | No `HKMetadataKeyWasUserEntered` value | Not distinguishable; false/absent -> `unknown` |
+| `unknown`                | No more specific method known | `RECORDING_METHOD_UNKNOWN` exactly                | No `HKMetadataKeyWasUserEntered` value | false/absent -> `unknown`                      |
+
+Health Connect therefore preserves all four public values on writes and reads. HealthKit only exposes positive manual-entry metadata: `false`, an absent key, or any active/automatic write reads as `unknown`. Omitting `recordingMethod` from any save input defaults to `unknown`; on iOS, requested `actively-recorded` and `automatically-recorded` also degrade to stored `unknown`.
 
 ### Record And Child Identity
 
@@ -318,7 +331,7 @@ Selecting a child sample's `identity.record` for deletion explicitly selects its
 
 ## Reading Data
 
-All raw reads return `{ samples, nextCursor? }`. Every listed sample also includes the common `identity` and `origin` fields.
+All raw reads return `{ samples, nextCursor? }`. Every listed sample also includes the common required `identity`, `origin`, and `recordingMethod` fields.
 
 | Method                     | Data-specific sample fields                                 |
 | -------------------------- | ----------------------------------------------------------- |
@@ -355,7 +368,7 @@ const page = await NitroHealth.readSteps({
 })
 
 for (const sample of page.samples) {
-  console.log(sample.count, sample.identity, sample.origin)
+  console.log(sample.count, sample.identity, sample.origin, sample.recordingMethod)
 }
 ```
 
@@ -953,22 +966,28 @@ const stepsWrite = authorization.statuses.find(
 )
 
 if (stepsWrite?.status === 'granted') {
-  await NitroHealth.saveSteps([
+  const result = await NitroHealth.saveSteps([
     {
       startDate: new Date('2026-01-01T09:00:00.000Z'),
       endDate: new Date('2026-01-01T09:30:00.000Z'),
       count: 512,
+      recordingMethod: 'actively-recorded',
       sync: { id: 'morning-walk', version: 1 },
     },
   ])
+
+  console.log(result.status, result.storedRecordingMethods[0])
 }
 ```
+
+Every save resolves to `{ status: 'completed', storedRecordingMethods }` when the native operation succeeds. `storedRecordingMethods` has one entry per top-level input in the same order, reporting what the native store retained rather than merely echoing the request. For versioned writes, the native implementation reads the retained record back when read access is available; with write-only access, it reports the platform-normalized submitted method because neither platform exposes the retained lower-version record through its save response. `saveWorkout()` accepts one top-level workout, so its array always has length one. `saveDistance()` adds `storedScope` beside the same `storedRecordingMethods` array.
 
 The main value constraints are:
 
 - `saveSteps`: positive integer `count`, at most 1,000,000.
 - `saveDistance`: non-negative `distanceMeters`, at most 1,000,000, plus required scope intent.
 - `saveActiveEnergyBurned`: non-negative `kilocalories`, at most 1,000,000.
+- `saveHydration`: non-negative `milliliters`, at most 100,000.
 - `saveFloorsClimbed`: non-negative `floors`, at most 1,000,000.
 - `saveHeartRate` and `saveRestingHeartRate`: `bpm` from 1 through 300. Android rounds to whole bpm.
 - `saveBloodPressure`: `systolicMmHg` from 20 through 200 and `diastolicMmHg` from 10 through 180.
@@ -1000,14 +1019,15 @@ const result = await NitroHealth.saveDistance([
     startDate,
     endDate,
     distanceMeters: 1250,
+    recordingMethod: 'manual',
     sync: { id: 'walk-2026-01-01', version: 1 },
   },
 ])
 
-console.log(result.status, result.storedScope)
+console.log(result.status, result.storedScope, result.storedRecordingMethods[0])
 ```
 
-The only accepted input scope is `walking-running`. The returned `{ status: 'completed', storedScope }` reports what the native store retained. HealthKit stores walking/running distance and returns `walking-running`. Health Connect stores a general `DistanceRecord` without activity scope and returns `activity-unspecified`. The result makes this loss of specificity explicit.
+The only accepted input scope is `walking-running`. The returned `{ status: 'completed', storedScope, storedRecordingMethods }` reports what the native store retained. HealthKit stores walking/running distance and returns `walking-running`. Health Connect stores a general `DistanceRecord` without activity scope and returns `activity-unspecified`. The result makes this loss of specificity explicit.
 
 ### Write Sleep Sessions
 
@@ -1040,14 +1060,17 @@ Android writes one session record with nested stages. iOS writes one `inBed` cat
 ### Write Workouts
 
 ```ts
-await NitroHealth.saveWorkout({
+const workoutResult = await NitroHealth.saveWorkout({
   startDate: new Date('2026-08-04T10:00:00.000Z'),
   endDate: new Date('2026-08-04T10:45:00.000Z'),
   activityType: 'running',
   displayName: 'Morning run',
   timeZone: 'America/New_York',
+  recordingMethod: 'automatically-recorded',
   sync: { id: 'workout-2026-08-04-morning', version: 1 },
 })
+
+console.log(workoutResult.storedRecordingMethods[0])
 ```
 
 `activityType` accepts `WritableWorkoutActivityType`, the portable subset that reads back with the same normalized meaning. Read-only and unknown activities reject rather than silently changing meaning. Canonical writes choose one native subtype where reads broaden several variants.
@@ -1127,8 +1150,8 @@ module.exports = {
 
 Three profiles are available:
 
-- `polling` (default): available service, app-owned polling, background/history access `not-granted`, direct revocation, and distance writes stored as `activity-unspecified`.
-- `observer`: available service, observer frequencies, included background/history access, observer subscriptions, manual permission management/revocation, and walking/running distance storage.
+- `polling` (default): available service, app-owned polling, background/history access `not-granted`, direct revocation, Health Connect-style recording-method preservation, and distance writes stored as `activity-unspecified`.
+- `observer`: available service, observer frequencies, included background/history access, observer subscriptions, manual permission management/revocation, HealthKit-style active/automatic degradation to `unknown`, and walking/running distance storage.
 - `unavailable`: `not-supported` availability, unsupported additional access, unavailable permission/background outcomes, and polling capability shape.
 
 Reset the exported singleton for each test and select the workflow under test:
@@ -1162,7 +1185,9 @@ resetNitroHealthMock({
 
 `createNitroHealthMock(options)` creates an independent mock object for dependency injection. `resetNitroHealthMock(options)` mutates and returns the exported `NitroHealth` mock used by the package mock. Overrides are applied after profile defaults.
 
-Default reads return empty pages, statistics return empty results, `createChangesToken()` returns `mock-changes-token`, and `getChanges()` returns an empty successful page. The mock enforces workflow-level requirements such as non-empty permission, background, write, and deletion inputs, but deliberately does not duplicate every sample-field validator from the facade. It is stateless: writes and deletes do not modify subsequent reads or emulate version replacement, native ownership, or token history.
+The mock is stateful for its basic save/read path: saves append samples, later matching reads return them with generated identities and profile-specific stored recording methods, and pagination operates over that in-memory storage. It is intentionally append-only: it does not emulate sync-version replacement or change-token history, and its delete methods are workflow stubs rather than a native ownership model, so they do not remove stored samples. `resetNitroHealthMock()` creates fresh storage and clears previously saved samples.
+
+Default reads start as empty pages, statistics return empty results, `createChangesToken()` returns `mock-changes-token`, and `getChanges()` returns an empty successful page. The mock enforces workflow-level requirements such as non-empty permission, background, write, and deletion inputs, but deliberately does not duplicate every sample-field validator from the facade.
 
 ## Breaking Migration
 
@@ -1177,6 +1202,8 @@ This API replaces the previous surface; removed names and shapes are not compati
 - Replace `getBackgroundReadAuthorizationStatus()` and `requestBackgroundReadAuthorization()` with `getCapabilities()` and `requestAdditionalAccess('background-read')`; history access uses `'history-read'`.
 - Replace `enableBackgroundDelivery`, `disableBackgroundDelivery`, and `addOnChangeNotificationListener` with `configureBackgroundChanges`, `disableBackgroundChanges`, and `subscribeToBackgroundChanges`.
 - Replace sample `uuid`, `recordUuid`, and optional `source` with tagged `identity` and required `origin`.
+- Every raw read sample and change upsert now has required `recordingMethod`; handle `unknown` rather than treating the field as optional.
+- Save methods no longer resolve `void`; consume or deliberately ignore their `completed` result and ordered `storedRecordingMethods` (`saveDistance()` also returns `storedScope`).
 - Replace `deleteSamplesByUuids` and `deleteSamplesByTimeRange` with `deleteRecordsByIds` and `deleteRecordsByTimeRange`; both now return typed outcomes.
 - Sleep results are now `session-envelope` or `stage` records. Stage-less sessions no longer produce a synthetic `asleep` interval.
 - Workout `durationSeconds`, `activityType`, `totalDistanceMeters`, and `totalEnergyBurnedKcal` are now `elapsedDurationSeconds`, `activity`, `totalDistance`, and `totalActiveEnergyBurned`. `activeDuration`, `brandName`, and metric availability are explicit. Workout write `title` is now `displayName` intent.

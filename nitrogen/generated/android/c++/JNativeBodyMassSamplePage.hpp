@@ -12,10 +12,12 @@
 
 #include "JNativeBodyMassSample.hpp"
 #include "JNativeHealthDataOrigin.hpp"
+#include "JNativeHealthRecordingMethod.hpp"
 #include "JNativeHealthSampleIdentity.hpp"
 #include "JNativeHealthSampleIdentityKind.hpp"
 #include "NativeBodyMassSample.hpp"
 #include "NativeHealthDataOrigin.hpp"
+#include "NativeHealthRecordingMethod.hpp"
 #include "NativeHealthSampleIdentity.hpp"
 #include "NativeHealthSampleIdentityKind.hpp"
 #include <optional>

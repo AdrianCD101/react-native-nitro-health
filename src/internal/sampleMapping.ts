@@ -14,10 +14,12 @@ import type { HealthChangesResult } from '../HealthChangesResult'
 import type { HealthDataType, HealthStatisticsDataType } from '../HealthDataType'
 import type { HealthRecordChange } from '../HealthRecordChange'
 import type { HealthRecordSync } from '../HealthRecordSync'
+import type { HealthRecordingMethod } from '../HealthRecordingMethod'
 import type { HealthSampleByDataType } from '../HealthSampleByDataType'
 import type { HealthSampleIdentity, HealthRecordIdentity } from '../HealthSampleIdentity'
 import type { HealthStatistics } from '../HealthStatistics'
 import type { HealthStatisticsByDataType } from '../HealthStatisticsByDataType'
+import type { HealthWriteResult } from '../HealthWriteResult'
 import type { HeartRateSample } from '../HeartRateSample'
 import type { HeartRateSampleInput } from '../HeartRateSampleInput'
 import type { HeartRateStatistics } from '../HeartRateStatistics'
@@ -52,7 +54,9 @@ import type { NativeDistanceSampleInput } from '../NativeDistanceSampleInput'
 import type { NativeDistanceWriteResult } from '../NativeDistanceWriteResult'
 import type { NativeHealthDataOrigin } from '../NativeHealthDataOrigin'
 import type { NativeHealthMetricValue } from '../NativeHealthMetricValue'
+import type { NativeHealthRecordingMethod } from '../NativeHealthRecordingMethod'
 import type { NativeHealthSampleIdentity } from '../NativeHealthSampleIdentity'
+import type { NativeHealthWriteResult } from '../NativeHealthWriteResult'
 import type { NativeHealthStatistics } from '../NativeHealthStatistics'
 import type { NativeHealthChange } from '../NativeHealthChange'
 import type { NativeHealthChangesResult } from '../NativeHealthChangesResult'
@@ -342,6 +346,41 @@ function makeNativeSync(
   }
 
   return { syncId: sync.id, syncVersion: sync.version }
+}
+
+function makeNativeRecordingMethod(
+  recordingMethod: HealthRecordingMethod | undefined,
+  indexOrPrefix: number | string
+): NativeHealthRecordingMethod | undefined {
+  switch (recordingMethod) {
+    case undefined:
+    case 'manual':
+    case 'unknown':
+      return recordingMethod
+    case 'actively-recorded':
+      return 'activelyRecorded'
+    case 'automatically-recorded':
+      return 'automaticallyRecorded'
+    default:
+      const prefix = typeof indexOrPrefix === 'number' ? `samples[${indexOrPrefix}]` : indexOrPrefix
+      throw new Error(`${prefix}: unsupported recording method '${recordingMethod}'`)
+  }
+}
+
+function makeHealthRecordingMethod(
+  recordingMethod: NativeHealthRecordingMethod
+): HealthRecordingMethod {
+  switch (recordingMethod) {
+    case 'manual':
+    case 'unknown':
+      return recordingMethod
+    case 'activelyRecorded':
+      return 'actively-recorded'
+    case 'automaticallyRecorded':
+      return 'automatically-recorded'
+    default:
+      throw new Error(`Unsupported native recording method: ${recordingMethod}`)
+  }
 }
 
 function makeNativeBloodPressureBodyPosition(
@@ -878,6 +917,7 @@ export function makeNativeStepSampleInput(
     startTimeMs,
     endTimeMs,
     count: sample.count,
+    recordingMethod: makeNativeRecordingMethod(sample.recordingMethod, index),
     ...makeNativeSync(sample.sync, index),
   }
 }
@@ -899,6 +939,7 @@ export function makeNativeDistanceSampleInput(
     endTimeMs,
     distanceMeters: sample.distanceMeters,
     scope: 'walkingRunning',
+    recordingMethod: makeNativeRecordingMethod(sample.recordingMethod, index),
     ...makeNativeSync(sample.sync, index),
   }
 }
@@ -916,6 +957,7 @@ export function makeNativeActiveEnergyBurnedSampleInput(
     startTimeMs,
     endTimeMs,
     kilocalories: sample.kilocalories,
+    recordingMethod: makeNativeRecordingMethod(sample.recordingMethod, index),
     ...makeNativeSync(sample.sync, index),
   }
 }
@@ -933,6 +975,7 @@ export function makeNativeHydrationSampleInput(
     startTimeMs,
     endTimeMs,
     milliliters: sample.milliliters,
+    recordingMethod: makeNativeRecordingMethod(sample.recordingMethod, index),
     ...makeNativeSync(sample.sync, index),
   }
 }
@@ -950,6 +993,7 @@ export function makeNativeFloorsClimbedSampleInput(
     startTimeMs,
     endTimeMs,
     floors: sample.floors,
+    recordingMethod: makeNativeRecordingMethod(sample.recordingMethod, index),
     ...makeNativeSync(sample.sync, index),
   }
 }
@@ -965,6 +1009,7 @@ export function makeNativeHeartRateSampleInput(
   return {
     timeMs,
     bpm: sample.bpm,
+    recordingMethod: makeNativeRecordingMethod(sample.recordingMethod, index),
     ...makeNativeSync(sample.sync, index),
   }
 }
@@ -981,6 +1026,7 @@ export function makeNativeBodyMassSampleInput(
   return {
     timeMs,
     kilograms: sample.kilograms,
+    recordingMethod: makeNativeRecordingMethod(sample.recordingMethod, index),
     ...makeNativeSync(sample.sync, index),
   }
 }
@@ -996,6 +1042,7 @@ export function makeNativeRestingHeartRateSampleInput(
   return {
     timeMs,
     bpm: sample.bpm,
+    recordingMethod: makeNativeRecordingMethod(sample.recordingMethod, index),
     ...makeNativeSync(sample.sync, index),
   }
 }
@@ -1025,6 +1072,7 @@ export function makeNativeBloodPressureSampleInput(
     timeMs,
     systolicMmHg: sample.systolicMmHg,
     diastolicMmHg: sample.diastolicMmHg,
+    recordingMethod: makeNativeRecordingMethod(sample.recordingMethod, index),
     ...makeNativeBloodPressureMetadata(sample.metadata, index),
     ...makeNativeSync(sample.sync, index),
   }
@@ -1047,6 +1095,7 @@ export function makeNativeBloodGlucoseSampleInput(
   return {
     timeMs,
     millimolesPerLiter: sample.millimolesPerLiter,
+    recordingMethod: makeNativeRecordingMethod(sample.recordingMethod, index),
     ...makeNativeBloodGlucoseMetadata(sample.metadata, index),
     ...makeNativeSync(sample.sync, index),
   }
@@ -1063,6 +1112,7 @@ export function makeNativeBodyTemperatureSampleInput(
   return {
     timeMs,
     celsius: sample.celsius,
+    recordingMethod: makeNativeRecordingMethod(sample.recordingMethod, index),
     ...makeNativeBodyTemperatureMetadata(sample.metadata, index),
     ...makeNativeSync(sample.sync, index),
   }
@@ -1085,6 +1135,7 @@ export function makeNativeRespiratoryRateSampleInput(
   return {
     timeMs,
     breathsPerMinute: sample.breathsPerMinute,
+    recordingMethod: makeNativeRecordingMethod(sample.recordingMethod, index),
     ...makeNativeSync(sample.sync, index),
   }
 }
@@ -1100,6 +1151,7 @@ export function makeNativeBodyFatSampleInput(
   return {
     timeMs,
     percentage: sample.percentage,
+    recordingMethod: makeNativeRecordingMethod(sample.recordingMethod, index),
     ...makeNativeSync(sample.sync, index),
   }
 }
@@ -1116,6 +1168,7 @@ export function makeNativeLeanBodyMassSampleInput(
   return {
     timeMs,
     kilograms: sample.kilograms,
+    recordingMethod: makeNativeRecordingMethod(sample.recordingMethod, index),
     ...makeNativeSync(sample.sync, index),
   }
 }
@@ -1131,6 +1184,7 @@ export function makeNativeBasalBodyTemperatureSampleInput(
   return {
     timeMs,
     celsius: sample.celsius,
+    recordingMethod: makeNativeRecordingMethod(sample.recordingMethod, index),
     ...makeNativeBodyTemperatureMetadata(sample.metadata, index),
     ...makeNativeSync(sample.sync, index),
   }
@@ -1147,6 +1201,7 @@ export function makeNativeOxygenSaturationSampleInput(
   return {
     timeMs,
     percentage: sample.percentage,
+    recordingMethod: makeNativeRecordingMethod(sample.recordingMethod, index),
     ...makeNativeSync(sample.sync, index),
   }
 }
@@ -1163,6 +1218,7 @@ export function makeNativeHeightSampleInput(
   return {
     timeMs,
     meters: sample.meters,
+    recordingMethod: makeNativeRecordingMethod(sample.recordingMethod, index),
     ...makeNativeSync(sample.sync, index),
   }
 }
@@ -1184,6 +1240,7 @@ export function makeNativeVo2MaxSampleInput(
   return {
     timeMs,
     millilitersPerKilogramPerMinute: sample.millilitersPerKilogramPerMinute,
+    recordingMethod: makeNativeRecordingMethod(sample.recordingMethod, index),
     ...makeNativeVo2MaxMetadata(sample.metadata, index),
     ...makeNativeSync(sample.sync, index),
   }
@@ -1261,6 +1318,10 @@ export function makeNativeSleepSessionInput(
     endTimeMs,
     stages: indexedStages.map(({ nativeStage }) => nativeStage),
     timeZone: session.timeZone,
+    recordingMethod: makeNativeRecordingMethod(
+      session.recordingMethod,
+      `sessions[${sessionIndex}]`
+    ),
   }
 }
 
@@ -1297,6 +1358,7 @@ export function makeNativeWorkoutSampleInput(
     activityType: workout.activityType,
     displayName: workout.displayName,
     timeZone: workout.timeZone,
+    recordingMethod: makeNativeRecordingMethod(workout.recordingMethod, 'workout'),
     ...makeNativeSync(workout.sync, 'workout'),
   }
 }
@@ -1416,6 +1478,7 @@ export function makeStepSample(sample: NativeStepSample): StepSample {
   return {
     identity: makeHealthSampleIdentity(sample.identity),
     origin: makeHealthDataOrigin(sample.origin),
+    recordingMethod: makeHealthRecordingMethod(sample.recordingMethod),
     startDate: new Date(sample.startTimeMs),
     endDate: new Date(sample.endTimeMs),
     count: sample.count,
@@ -1426,6 +1489,7 @@ export function makeDistanceSample(sample: NativeDistanceSample): DistanceSample
   return {
     identity: makeHealthSampleIdentity(sample.identity),
     origin: makeHealthDataOrigin(sample.origin),
+    recordingMethod: makeHealthRecordingMethod(sample.recordingMethod),
     startDate: new Date(sample.startTimeMs),
     endDate: new Date(sample.endTimeMs),
     distanceMeters: sample.distanceMeters,
@@ -1439,6 +1503,7 @@ export function makeActiveEnergyBurnedSample(
   return {
     identity: makeHealthSampleIdentity(sample.identity),
     origin: makeHealthDataOrigin(sample.origin),
+    recordingMethod: makeHealthRecordingMethod(sample.recordingMethod),
     startDate: new Date(sample.startTimeMs),
     endDate: new Date(sample.endTimeMs),
     kilocalories: sample.kilocalories,
@@ -1449,6 +1514,7 @@ export function makeHydrationSample(sample: NativeHydrationSample): HydrationSam
   return {
     identity: makeHealthSampleIdentity(sample.identity),
     origin: makeHealthDataOrigin(sample.origin),
+    recordingMethod: makeHealthRecordingMethod(sample.recordingMethod),
     startDate: new Date(sample.startTimeMs),
     endDate: new Date(sample.endTimeMs),
     milliliters: sample.milliliters,
@@ -1459,6 +1525,7 @@ export function makeFloorsClimbedSample(sample: NativeFloorsClimbedSample): Floo
   return {
     identity: makeHealthSampleIdentity(sample.identity),
     origin: makeHealthDataOrigin(sample.origin),
+    recordingMethod: makeHealthRecordingMethod(sample.recordingMethod),
     startDate: new Date(sample.startTimeMs),
     endDate: new Date(sample.endTimeMs),
     floors: sample.floors,
@@ -1469,6 +1536,7 @@ export function makeBodyMassSample(sample: NativeBodyMassSample): BodyMassSample
   return {
     identity: makeHealthSampleIdentity(sample.identity),
     origin: makeHealthDataOrigin(sample.origin),
+    recordingMethod: makeHealthRecordingMethod(sample.recordingMethod),
     startDate: new Date(sample.startTimeMs),
     endDate: new Date(sample.endTimeMs),
     kilograms: sample.kilograms,
@@ -1479,6 +1547,7 @@ export function makeHeartRateSample(sample: NativeHeartRateSample): HeartRateSam
   return {
     identity: makeHealthSampleIdentity(sample.identity),
     origin: makeHealthDataOrigin(sample.origin),
+    recordingMethod: makeHealthRecordingMethod(sample.recordingMethod),
     date: new Date(sample.timeMs),
     bpm: sample.bpm,
   }
@@ -1490,6 +1559,7 @@ export function makeRestingHeartRateSample(
   return {
     identity: makeHealthSampleIdentity(sample.identity),
     origin: makeHealthDataOrigin(sample.origin),
+    recordingMethod: makeHealthRecordingMethod(sample.recordingMethod),
     date: new Date(sample.timeMs),
     bpm: sample.bpm,
   }
@@ -1504,6 +1574,7 @@ export function makeHeartRateVariabilitySample(
   return {
     identity: makeHealthSampleIdentity(sample.identity),
     origin: makeHealthDataOrigin(sample.origin),
+    recordingMethod: makeHealthRecordingMethod(sample.recordingMethod),
     date: new Date(sample.timeMs),
     milliseconds: sample.milliseconds,
     method: sample.method,
@@ -1532,6 +1603,7 @@ export function makeBloodPressureSample(sample: NativeBloodPressureSample): Bloo
   return {
     identity: makeHealthSampleIdentity(sample.identity),
     origin: makeHealthDataOrigin(sample.origin),
+    recordingMethod: makeHealthRecordingMethod(sample.recordingMethod),
     date: new Date(sample.timeMs),
     systolicMmHg: sample.systolicMmHg,
     diastolicMmHg: sample.diastolicMmHg,
@@ -1594,6 +1666,7 @@ export function makeBloodGlucoseSample(sample: NativeBloodGlucoseSample): BloodG
   return {
     identity: makeHealthSampleIdentity(sample.identity),
     origin: makeHealthDataOrigin(sample.origin),
+    recordingMethod: makeHealthRecordingMethod(sample.recordingMethod),
     date: new Date(sample.timeMs),
     millimolesPerLiter: sample.millimolesPerLiter,
     ...(metadata === undefined ? {} : { metadata }),
@@ -1607,6 +1680,7 @@ export function makeBodyTemperatureSample(
   return {
     identity: makeHealthSampleIdentity(sample.identity),
     origin: makeHealthDataOrigin(sample.origin),
+    recordingMethod: makeHealthRecordingMethod(sample.recordingMethod),
     date: new Date(sample.timeMs),
     celsius: sample.celsius,
     ...(metadata === undefined ? {} : { metadata }),
@@ -1619,6 +1693,7 @@ export function makeRespiratoryRateSample(
   return {
     identity: makeHealthSampleIdentity(sample.identity),
     origin: makeHealthDataOrigin(sample.origin),
+    recordingMethod: makeHealthRecordingMethod(sample.recordingMethod),
     date: new Date(sample.timeMs),
     breathsPerMinute: sample.breathsPerMinute,
   }
@@ -1628,6 +1703,7 @@ export function makeBodyFatSample(sample: NativeBodyFatSample): BodyFatSample {
   return {
     identity: makeHealthSampleIdentity(sample.identity),
     origin: makeHealthDataOrigin(sample.origin),
+    recordingMethod: makeHealthRecordingMethod(sample.recordingMethod),
     date: new Date(sample.timeMs),
     percentage: sample.percentage,
   }
@@ -1637,6 +1713,7 @@ export function makeLeanBodyMassSample(sample: NativeLeanBodyMassSample): LeanBo
   return {
     identity: makeHealthSampleIdentity(sample.identity),
     origin: makeHealthDataOrigin(sample.origin),
+    recordingMethod: makeHealthRecordingMethod(sample.recordingMethod),
     date: new Date(sample.timeMs),
     kilograms: sample.kilograms,
   }
@@ -1649,6 +1726,7 @@ export function makeBasalBodyTemperatureSample(
   return {
     identity: makeHealthSampleIdentity(sample.identity),
     origin: makeHealthDataOrigin(sample.origin),
+    recordingMethod: makeHealthRecordingMethod(sample.recordingMethod),
     date: new Date(sample.timeMs),
     celsius: sample.celsius,
     ...(metadata === undefined ? {} : { metadata }),
@@ -1661,6 +1739,7 @@ export function makeOxygenSaturationSample(
   return {
     identity: makeHealthSampleIdentity(sample.identity),
     origin: makeHealthDataOrigin(sample.origin),
+    recordingMethod: makeHealthRecordingMethod(sample.recordingMethod),
     date: new Date(sample.timeMs),
     percentage: sample.percentage,
   }
@@ -1670,6 +1749,7 @@ export function makeHeightSample(sample: NativeHeightSample): HeightSample {
   return {
     identity: makeHealthSampleIdentity(sample.identity),
     origin: makeHealthDataOrigin(sample.origin),
+    recordingMethod: makeHealthRecordingMethod(sample.recordingMethod),
     date: new Date(sample.timeMs),
     meters: sample.meters,
   }
@@ -1705,6 +1785,7 @@ export function makeVo2MaxSample(sample: NativeVo2MaxSample): Vo2MaxSample {
   return {
     identity: makeHealthSampleIdentity(sample.identity),
     origin: makeHealthDataOrigin(sample.origin),
+    recordingMethod: makeHealthRecordingMethod(sample.recordingMethod),
     date: new Date(sample.timeMs),
     millilitersPerKilogramPerMinute: sample.millilitersPerKilogramPerMinute,
     ...(metadata === undefined ? {} : { metadata }),
@@ -1716,6 +1797,7 @@ export function makeSleepSample(sample: NativeSleepSample): SleepSample {
   const base = {
     identity,
     origin: makeHealthDataOrigin(sample.origin),
+    recordingMethod: makeHealthRecordingMethod(sample.recordingMethod),
     startDate: new Date(sample.startTimeMs),
     endDate: new Date(sample.endTimeMs),
   }
@@ -1752,6 +1834,7 @@ export function makeWorkoutSample(sample: NativeWorkoutSample): WorkoutSample {
   return {
     identity: makeHealthSampleIdentity(sample.identity),
     origin: makeHealthDataOrigin(sample.origin),
+    recordingMethod: makeHealthRecordingMethod(sample.recordingMethod),
     startDate: new Date(sample.startTimeMs),
     endDate: new Date(sample.endTimeMs),
     elapsedDurationSeconds: sample.elapsedDurationSeconds,
@@ -1803,9 +1886,27 @@ export function makeHealthStatistics<T extends HealthStatisticsDataType>(
   return result as HealthStatisticsByDataType<T>
 }
 
-export function makeDistanceWriteResult(result: NativeDistanceWriteResult): DistanceWriteResult {
+export function makeHealthWriteResult(
+  result: NativeHealthWriteResult,
+  expectedCount: number
+): HealthWriteResult {
+  if (result.storedRecordingMethods.length !== expectedCount) {
+    throw new Error(
+      `Native write returned ${result.storedRecordingMethods.length} recording methods for ${expectedCount} inputs`
+    )
+  }
   return {
     status: 'completed',
+    storedRecordingMethods: result.storedRecordingMethods.map(makeHealthRecordingMethod),
+  }
+}
+
+export function makeDistanceWriteResult(
+  result: NativeDistanceWriteResult,
+  expectedCount: number
+): DistanceWriteResult {
+  return {
+    ...makeHealthWriteResult(result, expectedCount),
     storedScope: makeDistanceScope(result.storedScope),
   }
 }

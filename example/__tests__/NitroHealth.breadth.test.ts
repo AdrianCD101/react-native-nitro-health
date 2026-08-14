@@ -12,6 +12,12 @@ jest.mock('react-native-nitro-modules', () => ({
 
 import { NitroHealth } from 'react-native-nitro-health'
 
+const nativeUnknownWriteResult = { storedRecordingMethods: ['unknown' as const] }
+const unknownWriteResult = {
+  status: 'completed' as const,
+  storedRecordingMethods: ['unknown' as const],
+}
+
 describe('NitroHealth breadth data types contract', () => {
   beforeEach(() => {
     jest.clearAllMocks()
@@ -52,6 +58,55 @@ describe('NitroHealth breadth data types contract', () => {
         identifier: 'com.example.watch',
         displayName: 'Example Watch',
       })
+    })
+
+    it('maps every native recording method to its public value in sample order', async () => {
+      const startDate = new Date('2026-01-01T00:00:00.000Z')
+      const endDate = new Date('2026-01-02T00:00:00.000Z')
+      const timeMs = new Date('2026-01-01T09:00:00.000Z').getTime()
+      mockNitroHealth.readRestingHeartRate.mockResolvedValue({
+        samples: [
+          {
+            ...nativeRecordMetadata('manual-record', 'com.example.health', undefined, 'manual'),
+            timeMs,
+            bpm: 58,
+          },
+          {
+            ...nativeRecordMetadata(
+              'active-record',
+              'com.example.health',
+              undefined,
+              'activelyRecorded'
+            ),
+            timeMs,
+            bpm: 59,
+          },
+          {
+            ...nativeRecordMetadata(
+              'automatic-record',
+              'com.example.health',
+              undefined,
+              'automaticallyRecorded'
+            ),
+            timeMs,
+            bpm: 60,
+          },
+          {
+            ...nativeRecordMetadata('unknown-record', 'com.example.health', undefined, 'unknown'),
+            timeMs,
+            bpm: 61,
+          },
+        ],
+      })
+
+      const result = await NitroHealth.readRestingHeartRate({ startDate, endDate })
+
+      expect(result.samples.map(({ recordingMethod }) => recordingMethod)).toEqual([
+        'manual',
+        'actively-recorded',
+        'automatically-recorded',
+        'unknown',
+      ])
     })
   })
 
@@ -525,9 +580,11 @@ describe('NitroHealth breadth data types contract', () => {
   describe('saveRestingHeartRate', () => {
     it('saves through the Nitro hybrid object', async () => {
       const date = new Date('2026-01-01T09:00:00.000Z')
-      mockNitroHealth.saveRestingHeartRate.mockResolvedValue(undefined)
+      mockNitroHealth.saveRestingHeartRate.mockResolvedValue(nativeUnknownWriteResult)
 
-      await expect(NitroHealth.saveRestingHeartRate([{ date, bpm: 58 }])).resolves.toBeUndefined()
+      await expect(NitroHealth.saveRestingHeartRate([{ date, bpm: 58 }])).resolves.toEqual(
+        unknownWriteResult
+      )
 
       expect(mockNitroHealth.saveRestingHeartRate).toHaveBeenCalledWith([
         { timeMs: date.getTime(), bpm: 58 },
@@ -566,11 +623,11 @@ describe('NitroHealth breadth data types contract', () => {
   describe('saveBloodPressure', () => {
     it('saves through the Nitro hybrid object', async () => {
       const date = new Date('2026-01-01T09:00:00.000Z')
-      mockNitroHealth.saveBloodPressure.mockResolvedValue(undefined)
+      mockNitroHealth.saveBloodPressure.mockResolvedValue(nativeUnknownWriteResult)
 
       await expect(
         NitroHealth.saveBloodPressure([{ date, systolicMmHg: 118, diastolicMmHg: 76 }])
-      ).resolves.toBeUndefined()
+      ).resolves.toEqual(unknownWriteResult)
 
       expect(mockNitroHealth.saveBloodPressure).toHaveBeenCalledWith([
         { timeMs: date.getTime(), systolicMmHg: 118, diastolicMmHg: 76 },
@@ -579,7 +636,7 @@ describe('NitroHealth breadth data types contract', () => {
 
     it('maps typed Android metadata through the native transport', async () => {
       const date = new Date('2026-01-01T09:00:00.000Z')
-      mockNitroHealth.saveBloodPressure.mockResolvedValue(undefined)
+      mockNitroHealth.saveBloodPressure.mockResolvedValue(nativeUnknownWriteResult)
 
       await NitroHealth.saveBloodPressure([
         {
@@ -608,7 +665,7 @@ describe('NitroHealth breadth data types contract', () => {
 
     it('accepts partial Android metadata and leaves the other field absent', async () => {
       const date = new Date('2026-01-01T09:00:00.000Z')
-      mockNitroHealth.saveBloodPressure.mockResolvedValue(undefined)
+      mockNitroHealth.saveBloodPressure.mockResolvedValue(nativeUnknownWriteResult)
 
       await NitroHealth.saveBloodPressure([
         {
@@ -694,14 +751,14 @@ describe('NitroHealth breadth data types contract', () => {
 
     it('accepts the inclusive bound values', async () => {
       const date = new Date('2026-01-01T09:00:00.000Z')
-      mockNitroHealth.saveBloodPressure.mockResolvedValue(undefined)
+      mockNitroHealth.saveBloodPressure.mockResolvedValue(nativeUnknownWriteResult)
 
       await expect(
         NitroHealth.saveBloodPressure([{ date, systolicMmHg: 20, diastolicMmHg: 10 }])
-      ).resolves.toBeUndefined()
+      ).resolves.toEqual(unknownWriteResult)
       await expect(
         NitroHealth.saveBloodPressure([{ date, systolicMmHg: 200, diastolicMmHg: 180 }])
-      ).resolves.toBeUndefined()
+      ).resolves.toEqual(unknownWriteResult)
     })
 
     it('rejects an invalid sample date before crossing the native boundary', async () => {
@@ -718,11 +775,11 @@ describe('NitroHealth breadth data types contract', () => {
   describe('saveBloodGlucose', () => {
     it('saves through the Nitro hybrid object', async () => {
       const date = new Date('2026-01-01T09:00:00.000Z')
-      mockNitroHealth.saveBloodGlucose.mockResolvedValue(undefined)
+      mockNitroHealth.saveBloodGlucose.mockResolvedValue(nativeUnknownWriteResult)
 
       await expect(
         NitroHealth.saveBloodGlucose([{ date, millimolesPerLiter: 5.4 }])
-      ).resolves.toBeUndefined()
+      ).resolves.toEqual(unknownWriteResult)
 
       expect(mockNitroHealth.saveBloodGlucose).toHaveBeenCalledWith([
         { timeMs: date.getTime(), millimolesPerLiter: 5.4 },
@@ -731,7 +788,7 @@ describe('NitroHealth breadth data types contract', () => {
 
     it('maps both platform metadata scopes through the native transport', async () => {
       const date = new Date('2026-01-01T09:00:00.000Z')
-      mockNitroHealth.saveBloodGlucose.mockResolvedValue(undefined)
+      mockNitroHealth.saveBloodGlucose.mockResolvedValue(nativeUnknownWriteResult)
 
       await NitroHealth.saveBloodGlucose([
         {
@@ -790,14 +847,14 @@ describe('NitroHealth breadth data types contract', () => {
 
     it('accepts the inclusive bound values', async () => {
       const date = new Date('2026-01-01T09:00:00.000Z')
-      mockNitroHealth.saveBloodGlucose.mockResolvedValue(undefined)
+      mockNitroHealth.saveBloodGlucose.mockResolvedValue(nativeUnknownWriteResult)
 
       await expect(
         NitroHealth.saveBloodGlucose([{ date, millimolesPerLiter: 0.5 }])
-      ).resolves.toBeUndefined()
+      ).resolves.toEqual(unknownWriteResult)
       await expect(
         NitroHealth.saveBloodGlucose([{ date, millimolesPerLiter: 50 }])
-      ).resolves.toBeUndefined()
+      ).resolves.toEqual(unknownWriteResult)
     })
 
     it('rejects an invalid sample date before crossing the native boundary', async () => {
@@ -812,11 +869,11 @@ describe('NitroHealth breadth data types contract', () => {
   describe('saveBodyTemperature', () => {
     it('saves through the Nitro hybrid object', async () => {
       const date = new Date('2026-01-01T09:00:00.000Z')
-      mockNitroHealth.saveBodyTemperature.mockResolvedValue(undefined)
+      mockNitroHealth.saveBodyTemperature.mockResolvedValue(nativeUnknownWriteResult)
 
-      await expect(
-        NitroHealth.saveBodyTemperature([{ date, celsius: 36.6 }])
-      ).resolves.toBeUndefined()
+      await expect(NitroHealth.saveBodyTemperature([{ date, celsius: 36.6 }])).resolves.toEqual(
+        unknownWriteResult
+      )
 
       expect(mockNitroHealth.saveBodyTemperature).toHaveBeenCalledWith([
         { timeMs: date.getTime(), celsius: 36.6 },
@@ -825,7 +882,7 @@ describe('NitroHealth breadth data types contract', () => {
 
     it('maps both platform metadata scopes through the native transport', async () => {
       const date = new Date('2026-01-01T09:00:00.000Z')
-      mockNitroHealth.saveBodyTemperature.mockResolvedValue(undefined)
+      mockNitroHealth.saveBodyTemperature.mockResolvedValue(nativeUnknownWriteResult)
 
       await NitroHealth.saveBodyTemperature([
         {
@@ -878,14 +935,14 @@ describe('NitroHealth breadth data types contract', () => {
 
     it('accepts the inclusive bound values', async () => {
       const date = new Date('2026-01-01T09:00:00.000Z')
-      mockNitroHealth.saveBodyTemperature.mockResolvedValue(undefined)
+      mockNitroHealth.saveBodyTemperature.mockResolvedValue(nativeUnknownWriteResult)
 
-      await expect(
-        NitroHealth.saveBodyTemperature([{ date, celsius: 20 }])
-      ).resolves.toBeUndefined()
-      await expect(
-        NitroHealth.saveBodyTemperature([{ date, celsius: 45 }])
-      ).resolves.toBeUndefined()
+      await expect(NitroHealth.saveBodyTemperature([{ date, celsius: 20 }])).resolves.toEqual(
+        unknownWriteResult
+      )
+      await expect(NitroHealth.saveBodyTemperature([{ date, celsius: 45 }])).resolves.toEqual(
+        unknownWriteResult
+      )
     })
 
     it('rejects an invalid sample date before crossing the native boundary', async () => {
@@ -900,11 +957,11 @@ describe('NitroHealth breadth data types contract', () => {
   describe('saveRespiratoryRate', () => {
     it('saves through the Nitro hybrid object', async () => {
       const date = new Date('2026-01-01T09:00:00.000Z')
-      mockNitroHealth.saveRespiratoryRate.mockResolvedValue(undefined)
+      mockNitroHealth.saveRespiratoryRate.mockResolvedValue(nativeUnknownWriteResult)
 
       await expect(
         NitroHealth.saveRespiratoryRate([{ date, breathsPerMinute: 16.5 }])
-      ).resolves.toBeUndefined()
+      ).resolves.toEqual(unknownWriteResult)
 
       expect(mockNitroHealth.saveRespiratoryRate).toHaveBeenCalledWith([
         { timeMs: date.getTime(), breathsPerMinute: 16.5 },
@@ -925,14 +982,14 @@ describe('NitroHealth breadth data types contract', () => {
 
     it('accepts the inclusive bound values', async () => {
       const date = new Date('2026-01-01T09:00:00.000Z')
-      mockNitroHealth.saveRespiratoryRate.mockResolvedValue(undefined)
+      mockNitroHealth.saveRespiratoryRate.mockResolvedValue(nativeUnknownWriteResult)
 
       await expect(
         NitroHealth.saveRespiratoryRate([{ date, breathsPerMinute: 0 }])
-      ).resolves.toBeUndefined()
+      ).resolves.toEqual(unknownWriteResult)
       await expect(
         NitroHealth.saveRespiratoryRate([{ date, breathsPerMinute: 120 }])
-      ).resolves.toBeUndefined()
+      ).resolves.toEqual(unknownWriteResult)
     })
 
     it('rejects an invalid sample date before crossing the native boundary', async () => {
@@ -947,9 +1004,11 @@ describe('NitroHealth breadth data types contract', () => {
   describe('saveBodyFat', () => {
     it('saves through the Nitro hybrid object', async () => {
       const date = new Date('2026-01-01T09:00:00.000Z')
-      mockNitroHealth.saveBodyFat.mockResolvedValue(undefined)
+      mockNitroHealth.saveBodyFat.mockResolvedValue(nativeUnknownWriteResult)
 
-      await expect(NitroHealth.saveBodyFat([{ date, percentage: 18.5 }])).resolves.toBeUndefined()
+      await expect(NitroHealth.saveBodyFat([{ date, percentage: 18.5 }])).resolves.toEqual(
+        unknownWriteResult
+      )
 
       expect(mockNitroHealth.saveBodyFat).toHaveBeenCalledWith([
         { timeMs: date.getTime(), percentage: 18.5 },
@@ -970,10 +1029,14 @@ describe('NitroHealth breadth data types contract', () => {
 
     it('accepts the inclusive bound values', async () => {
       const date = new Date('2026-01-01T09:00:00.000Z')
-      mockNitroHealth.saveBodyFat.mockResolvedValue(undefined)
+      mockNitroHealth.saveBodyFat.mockResolvedValue(nativeUnknownWriteResult)
 
-      await expect(NitroHealth.saveBodyFat([{ date, percentage: 0 }])).resolves.toBeUndefined()
-      await expect(NitroHealth.saveBodyFat([{ date, percentage: 100 }])).resolves.toBeUndefined()
+      await expect(NitroHealth.saveBodyFat([{ date, percentage: 0 }])).resolves.toEqual(
+        unknownWriteResult
+      )
+      await expect(NitroHealth.saveBodyFat([{ date, percentage: 100 }])).resolves.toEqual(
+        unknownWriteResult
+      )
     })
 
     it('rejects an invalid sample date before crossing the native boundary', async () => {
@@ -988,11 +1051,11 @@ describe('NitroHealth breadth data types contract', () => {
   describe('saveLeanBodyMass', () => {
     it('saves through the Nitro hybrid object', async () => {
       const date = new Date('2026-01-01T09:00:00.000Z')
-      mockNitroHealth.saveLeanBodyMass.mockResolvedValue(undefined)
+      mockNitroHealth.saveLeanBodyMass.mockResolvedValue(nativeUnknownWriteResult)
 
-      await expect(
-        NitroHealth.saveLeanBodyMass([{ date, kilograms: 55.4 }])
-      ).resolves.toBeUndefined()
+      await expect(NitroHealth.saveLeanBodyMass([{ date, kilograms: 55.4 }])).resolves.toEqual(
+        unknownWriteResult
+      )
 
       expect(mockNitroHealth.saveLeanBodyMass).toHaveBeenCalledWith([
         { timeMs: date.getTime(), kilograms: 55.4 },
@@ -1033,11 +1096,11 @@ describe('NitroHealth breadth data types contract', () => {
   describe('saveBasalBodyTemperature', () => {
     it('saves through the Nitro hybrid object', async () => {
       const date = new Date('2026-01-01T06:30:00.000Z')
-      mockNitroHealth.saveBasalBodyTemperature.mockResolvedValue(undefined)
+      mockNitroHealth.saveBasalBodyTemperature.mockResolvedValue(nativeUnknownWriteResult)
 
       await expect(
         NitroHealth.saveBasalBodyTemperature([{ date, celsius: 36.4 }])
-      ).resolves.toBeUndefined()
+      ).resolves.toEqual(unknownWriteResult)
 
       expect(mockNitroHealth.saveBasalBodyTemperature).toHaveBeenCalledWith([
         { timeMs: date.getTime(), celsius: 36.4 },
@@ -1046,7 +1109,7 @@ describe('NitroHealth breadth data types contract', () => {
 
     it('maps temperature metadata through the same native transport', async () => {
       const date = new Date('2026-01-01T06:30:00.000Z')
-      mockNitroHealth.saveBasalBodyTemperature.mockResolvedValue(undefined)
+      mockNitroHealth.saveBasalBodyTemperature.mockResolvedValue(nativeUnknownWriteResult)
 
       await NitroHealth.saveBasalBodyTemperature([
         {
@@ -1083,14 +1146,14 @@ describe('NitroHealth breadth data types contract', () => {
 
     it('accepts the inclusive bound values', async () => {
       const date = new Date('2026-01-01T06:30:00.000Z')
-      mockNitroHealth.saveBasalBodyTemperature.mockResolvedValue(undefined)
+      mockNitroHealth.saveBasalBodyTemperature.mockResolvedValue(nativeUnknownWriteResult)
 
-      await expect(
-        NitroHealth.saveBasalBodyTemperature([{ date, celsius: 20 }])
-      ).resolves.toBeUndefined()
-      await expect(
-        NitroHealth.saveBasalBodyTemperature([{ date, celsius: 45 }])
-      ).resolves.toBeUndefined()
+      await expect(NitroHealth.saveBasalBodyTemperature([{ date, celsius: 20 }])).resolves.toEqual(
+        unknownWriteResult
+      )
+      await expect(NitroHealth.saveBasalBodyTemperature([{ date, celsius: 45 }])).resolves.toEqual(
+        unknownWriteResult
+      )
     })
 
     it('rejects an invalid sample date before crossing the native boundary', async () => {
@@ -1105,11 +1168,11 @@ describe('NitroHealth breadth data types contract', () => {
   describe('saveOxygenSaturation', () => {
     it('saves through the Nitro hybrid object', async () => {
       const date = new Date('2026-01-01T09:00:00.000Z')
-      mockNitroHealth.saveOxygenSaturation.mockResolvedValue(undefined)
+      mockNitroHealth.saveOxygenSaturation.mockResolvedValue(nativeUnknownWriteResult)
 
-      await expect(
-        NitroHealth.saveOxygenSaturation([{ date, percentage: 97.5 }])
-      ).resolves.toBeUndefined()
+      await expect(NitroHealth.saveOxygenSaturation([{ date, percentage: 97.5 }])).resolves.toEqual(
+        unknownWriteResult
+      )
 
       expect(mockNitroHealth.saveOxygenSaturation).toHaveBeenCalledWith([
         { timeMs: date.getTime(), percentage: 97.5 },
@@ -1130,23 +1193,25 @@ describe('NitroHealth breadth data types contract', () => {
 
     it('accepts the inclusive 0 and 100 boundaries', async () => {
       const date = new Date('2026-01-01T09:00:00.000Z')
-      mockNitroHealth.saveOxygenSaturation.mockResolvedValue(undefined)
+      mockNitroHealth.saveOxygenSaturation.mockResolvedValue(nativeUnknownWriteResult)
 
-      await expect(
-        NitroHealth.saveOxygenSaturation([{ date, percentage: 0 }])
-      ).resolves.toBeUndefined()
-      await expect(
-        NitroHealth.saveOxygenSaturation([{ date, percentage: 100 }])
-      ).resolves.toBeUndefined()
+      await expect(NitroHealth.saveOxygenSaturation([{ date, percentage: 0 }])).resolves.toEqual(
+        unknownWriteResult
+      )
+      await expect(NitroHealth.saveOxygenSaturation([{ date, percentage: 100 }])).resolves.toEqual(
+        unknownWriteResult
+      )
     })
   })
 
   describe('saveHeight', () => {
     it('saves through the Nitro hybrid object', async () => {
       const date = new Date('2026-01-01T09:00:00.000Z')
-      mockNitroHealth.saveHeight.mockResolvedValue(undefined)
+      mockNitroHealth.saveHeight.mockResolvedValue(nativeUnknownWriteResult)
 
-      await expect(NitroHealth.saveHeight([{ date, meters: 1.78 }])).resolves.toBeUndefined()
+      await expect(NitroHealth.saveHeight([{ date, meters: 1.78 }])).resolves.toEqual(
+        unknownWriteResult
+      )
 
       expect(mockNitroHealth.saveHeight).toHaveBeenCalledWith([
         { timeMs: date.getTime(), meters: 1.78 },
@@ -1179,11 +1244,11 @@ describe('NitroHealth breadth data types contract', () => {
   describe('saveVo2Max', () => {
     it('saves through the Nitro hybrid object', async () => {
       const date = new Date('2026-01-01T09:00:00.000Z')
-      mockNitroHealth.saveVo2Max.mockResolvedValue(undefined)
+      mockNitroHealth.saveVo2Max.mockResolvedValue(nativeUnknownWriteResult)
 
       await expect(
         NitroHealth.saveVo2Max([{ date, millilitersPerKilogramPerMinute: 42.5 }])
-      ).resolves.toBeUndefined()
+      ).resolves.toEqual(unknownWriteResult)
 
       expect(mockNitroHealth.saveVo2Max).toHaveBeenCalledWith([
         { timeMs: date.getTime(), millilitersPerKilogramPerMinute: 42.5 },
@@ -1209,7 +1274,7 @@ describe('NitroHealth breadth data types contract', () => {
 
     it('maps both platform metadata scopes through the native transport', async () => {
       const date = new Date('2026-01-01T09:00:00.000Z')
-      mockNitroHealth.saveVo2Max.mockResolvedValue(undefined)
+      mockNitroHealth.saveVo2Max.mockResolvedValue(nativeUnknownWriteResult)
 
       await NitroHealth.saveVo2Max([
         {
@@ -1250,14 +1315,14 @@ describe('NitroHealth breadth data types contract', () => {
 
     it('accepts the inclusive bound values', async () => {
       const date = new Date('2026-01-01T09:00:00.000Z')
-      mockNitroHealth.saveVo2Max.mockResolvedValue(undefined)
+      mockNitroHealth.saveVo2Max.mockResolvedValue(nativeUnknownWriteResult)
 
       await expect(
         NitroHealth.saveVo2Max([{ date, millilitersPerKilogramPerMinute: 0 }])
-      ).resolves.toBeUndefined()
+      ).resolves.toEqual(unknownWriteResult)
       await expect(
         NitroHealth.saveVo2Max([{ date, millilitersPerKilogramPerMinute: 100 }])
-      ).resolves.toBeUndefined()
+      ).resolves.toEqual(unknownWriteResult)
     })
 
     it('rejects an invalid sample date before crossing the native boundary', async () => {
@@ -1275,11 +1340,11 @@ describe('NitroHealth breadth data types contract', () => {
     it('saves through the Nitro hybrid object', async () => {
       const startDate = new Date('2026-01-01T09:00:00.000Z')
       const endDate = new Date('2026-01-01T09:30:00.000Z')
-      mockNitroHealth.saveFloorsClimbed.mockResolvedValue(undefined)
+      mockNitroHealth.saveFloorsClimbed.mockResolvedValue(nativeUnknownWriteResult)
 
       await expect(
         NitroHealth.saveFloorsClimbed([{ startDate, endDate, floors: 12.5 }])
-      ).resolves.toBeUndefined()
+      ).resolves.toEqual(unknownWriteResult)
 
       expect(mockNitroHealth.saveFloorsClimbed).toHaveBeenCalledWith([
         { startTimeMs: startDate.getTime(), endTimeMs: endDate.getTime(), floors: 12.5 },
@@ -1302,11 +1367,11 @@ describe('NitroHealth breadth data types contract', () => {
     it('accepts a zero-floor interval', async () => {
       const startDate = new Date('2026-01-01T09:00:00.000Z')
       const endDate = new Date('2026-01-01T09:30:00.000Z')
-      mockNitroHealth.saveFloorsClimbed.mockResolvedValue(undefined)
+      mockNitroHealth.saveFloorsClimbed.mockResolvedValue(nativeUnknownWriteResult)
 
       await expect(
         NitroHealth.saveFloorsClimbed([{ startDate, endDate, floors: 0 }])
-      ).resolves.toBeUndefined()
+      ).resolves.toEqual(unknownWriteResult)
     })
 
     it('rejects an invalid sample interval before crossing the native boundary', async () => {

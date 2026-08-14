@@ -26,6 +26,9 @@ data class NativeWorkoutSample(
   val origin: NativeHealthDataOrigin,
   @DoNotStrip
   @Keep
+  val recordingMethod: NativeHealthRecordingMethod,
+  @DoNotStrip
+  @Keep
   val startTimeMs: Double,
   @DoNotStrip
   @Keep
@@ -59,6 +62,7 @@ data class NativeWorkoutSample(
     if (other !is NativeWorkoutSample) return false
     return Objects.deepEquals(this.identity, other.identity)
       && Objects.deepEquals(this.origin, other.origin)
+      && Objects.deepEquals(this.recordingMethod, other.recordingMethod)
       && Objects.deepEquals(this.startTimeMs, other.startTimeMs)
       && Objects.deepEquals(this.endTimeMs, other.endTimeMs)
       && Objects.deepEquals(this.elapsedDurationSeconds, other.elapsedDurationSeconds)
@@ -74,6 +78,7 @@ data class NativeWorkoutSample(
     return arrayOf<Any?>(
       identity,
       origin,
+      recordingMethod,
       startTimeMs,
       endTimeMs,
       elapsedDurationSeconds,
@@ -94,8 +99,8 @@ data class NativeWorkoutSample(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, startTimeMs: Double, endTimeMs: Double, elapsedDurationSeconds: Double, activeDuration: NativeHealthMetricValue, activity: NativeWorkoutActivity, title: String?, brandName: String?, totalDistance: NativeHealthMetricValue, totalActiveEnergyBurned: NativeHealthMetricValue): NativeWorkoutSample {
-      return NativeWorkoutSample(identity, origin, startTimeMs, endTimeMs, elapsedDurationSeconds, activeDuration, activity, title, brandName, totalDistance, totalActiveEnergyBurned)
+    private fun fromCpp(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, recordingMethod: NativeHealthRecordingMethod, startTimeMs: Double, endTimeMs: Double, elapsedDurationSeconds: Double, activeDuration: NativeHealthMetricValue, activity: NativeWorkoutActivity, title: String?, brandName: String?, totalDistance: NativeHealthMetricValue, totalActiveEnergyBurned: NativeHealthMetricValue): NativeWorkoutSample {
+      return NativeWorkoutSample(identity, origin, recordingMethod, startTimeMs, endTimeMs, elapsedDurationSeconds, activeDuration, activity, title, brandName, totalDistance, totalActiveEnergyBurned)
     }
   }
 }

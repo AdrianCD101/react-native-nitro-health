@@ -11,7 +11,9 @@
 #include "NativeDistanceSampleInput.hpp"
 
 #include "JNativeDistanceScope.hpp"
+#include "JNativeHealthRecordingMethod.hpp"
 #include "NativeDistanceScope.hpp"
+#include "NativeHealthRecordingMethod.hpp"
 #include <optional>
 #include <string>
 
@@ -42,6 +44,8 @@ namespace margelo::nitro::nitrohealth {
       double distanceMeters = this->getFieldValue(fieldDistanceMeters);
       static const auto fieldScope = clazz->getField<JNativeDistanceScope>("scope");
       jni::local_ref<JNativeDistanceScope> scope = this->getFieldValue(fieldScope);
+      static const auto fieldRecordingMethod = clazz->getField<JNativeHealthRecordingMethod>("recordingMethod");
+      jni::local_ref<JNativeHealthRecordingMethod> recordingMethod = this->getFieldValue(fieldRecordingMethod);
       static const auto fieldSyncId = clazz->getField<jni::JString>("syncId");
       jni::local_ref<jni::JString> syncId = this->getFieldValue(fieldSyncId);
       static const auto fieldSyncVersion = clazz->getField<jni::JDouble>("syncVersion");
@@ -51,6 +55,7 @@ namespace margelo::nitro::nitrohealth {
         endTimeMs,
         distanceMeters,
         scope->toCpp(),
+        recordingMethod != nullptr ? std::make_optional(recordingMethod->toCpp()) : std::nullopt,
         syncId != nullptr ? std::make_optional(syncId->toStdString()) : std::nullopt,
         syncVersion != nullptr ? std::make_optional(syncVersion->value()) : std::nullopt
       );
@@ -62,7 +67,7 @@ namespace margelo::nitro::nitrohealth {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeDistanceSampleInput::javaobject> fromCpp(const NativeDistanceSampleInput& value) {
-      using JSignature = JNativeDistanceSampleInput(double, double, double, jni::alias_ref<JNativeDistanceScope>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JDouble>);
+      using JSignature = JNativeDistanceSampleInput(double, double, double, jni::alias_ref<JNativeDistanceScope>, jni::alias_ref<JNativeHealthRecordingMethod>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JDouble>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
@@ -71,6 +76,7 @@ namespace margelo::nitro::nitrohealth {
         value.endTimeMs,
         value.distanceMeters,
         JNativeDistanceScope::fromCpp(value.scope),
+        value.recordingMethod.has_value() ? JNativeHealthRecordingMethod::fromCpp(value.recordingMethod.value()) : nullptr,
         value.syncId.has_value() ? jni::make_jstring(value.syncId.value()) : nullptr,
         value.syncVersion.has_value() ? jni::JDouble::valueOf(value.syncVersion.value()) : nullptr
       );

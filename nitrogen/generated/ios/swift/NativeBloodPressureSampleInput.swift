@@ -18,8 +18,14 @@ public extension NativeBloodPressureSampleInput {
   /**
    * Create a new instance of `NativeBloodPressureSampleInput`.
    */
-  init(timeMs: Double, systolicMmHg: Double, diastolicMmHg: Double, androidBodyPosition: NativeBloodPressureBodyPosition?, androidMeasurementLocation: NativeBloodPressureMeasurementLocation?, syncId: String?, syncVersion: Double?) {
-    self.init(timeMs, systolicMmHg, diastolicMmHg, { () -> bridge.std__optional_NativeBloodPressureBodyPosition_ in
+  init(timeMs: Double, systolicMmHg: Double, diastolicMmHg: Double, recordingMethod: NativeHealthRecordingMethod?, androidBodyPosition: NativeBloodPressureBodyPosition?, androidMeasurementLocation: NativeBloodPressureMeasurementLocation?, syncId: String?, syncVersion: Double?) {
+    self.init(timeMs, systolicMmHg, diastolicMmHg, { () -> bridge.std__optional_NativeHealthRecordingMethod_ in
+      if let __unwrappedValue = recordingMethod {
+        return bridge.create_std__optional_NativeHealthRecordingMethod_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_NativeBloodPressureBodyPosition_ in
       if let __unwrappedValue = androidBodyPosition {
         return bridge.create_std__optional_NativeBloodPressureBodyPosition_(__unwrappedValue)
       } else {
@@ -59,6 +65,11 @@ public extension NativeBloodPressureSampleInput {
   @inline(__always)
   var diastolicMmHg: Double {
     return self.__diastolicMmHg
+  }
+  
+  @inline(__always)
+  var recordingMethod: NativeHealthRecordingMethod? {
+    return self.__recordingMethod.value
   }
   
   @inline(__always)

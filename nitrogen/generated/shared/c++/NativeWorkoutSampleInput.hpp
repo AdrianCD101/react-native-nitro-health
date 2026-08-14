@@ -28,10 +28,12 @@
 #error NitroModules cannot be found! Are you sure you installed NitroModules properly?
 #endif
 
-
+// Forward declaration of `NativeHealthRecordingMethod` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeHealthRecordingMethod; }
 
 #include <string>
 #include <optional>
+#include "NativeHealthRecordingMethod.hpp"
 
 namespace margelo::nitro::nitrohealth {
 
@@ -45,12 +47,13 @@ namespace margelo::nitro::nitrohealth {
     std::string activityType     SWIFT_PRIVATE;
     std::optional<std::string> displayName     SWIFT_PRIVATE;
     std::optional<std::string> timeZone     SWIFT_PRIVATE;
+    std::optional<NativeHealthRecordingMethod> recordingMethod     SWIFT_PRIVATE;
     std::optional<std::string> syncId     SWIFT_PRIVATE;
     std::optional<double> syncVersion     SWIFT_PRIVATE;
 
   public:
     NativeWorkoutSampleInput() = default;
-    explicit NativeWorkoutSampleInput(double startTimeMs, double endTimeMs, std::string activityType, std::optional<std::string> displayName, std::optional<std::string> timeZone, std::optional<std::string> syncId, std::optional<double> syncVersion): startTimeMs(startTimeMs), endTimeMs(endTimeMs), activityType(activityType), displayName(displayName), timeZone(timeZone), syncId(syncId), syncVersion(syncVersion) {}
+    explicit NativeWorkoutSampleInput(double startTimeMs, double endTimeMs, std::string activityType, std::optional<std::string> displayName, std::optional<std::string> timeZone, std::optional<NativeHealthRecordingMethod> recordingMethod, std::optional<std::string> syncId, std::optional<double> syncVersion): startTimeMs(startTimeMs), endTimeMs(endTimeMs), activityType(activityType), displayName(displayName), timeZone(timeZone), recordingMethod(recordingMethod), syncId(syncId), syncVersion(syncVersion) {}
 
   public:
     friend bool operator==(const NativeWorkoutSampleInput& lhs, const NativeWorkoutSampleInput& rhs) = default;
@@ -71,6 +74,7 @@ namespace margelo::nitro {
         JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "activityType"))),
         JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "displayName"))),
         JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeZone"))),
+        JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeHealthRecordingMethod>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "recordingMethod"))),
         JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "syncId"))),
         JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "syncVersion")))
       );
@@ -82,6 +86,7 @@ namespace margelo::nitro {
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "activityType"), JSIConverter<std::string>::toJSI(runtime, arg.activityType));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "displayName"), JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.displayName));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "timeZone"), JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.timeZone));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "recordingMethod"), JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeHealthRecordingMethod>>::toJSI(runtime, arg.recordingMethod));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "syncId"), JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.syncId));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "syncVersion"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.syncVersion));
       return obj;
@@ -99,6 +104,7 @@ namespace margelo::nitro {
       if (!JSIConverter<std::string>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "activityType")))) return false;
       if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "displayName")))) return false;
       if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeZone")))) return false;
+      if (!JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeHealthRecordingMethod>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "recordingMethod")))) return false;
       if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "syncId")))) return false;
       if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "syncVersion")))) return false;
       return true;

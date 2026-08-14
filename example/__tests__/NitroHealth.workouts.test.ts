@@ -152,7 +152,9 @@ describe('NitroHealth workouts contract', () => {
     const endDate = new Date('2026-01-02T07:45:00.000Z')
 
     it('maps a portable workout through the Nitro hybrid object', async () => {
-      mockNitroHealth.saveWorkout.mockResolvedValue(undefined)
+      mockNitroHealth.saveWorkout.mockResolvedValue({
+        storedRecordingMethods: ['automaticallyRecorded'],
+      })
 
       await expect(
         NitroHealth.saveWorkout({
@@ -161,9 +163,13 @@ describe('NitroHealth workouts contract', () => {
           activityType: 'running',
           displayName: 'Morning Run',
           timeZone: 'America/New_York',
+          recordingMethod: 'manual',
           sync: { id: 'workout-1', version: 2 },
         })
-      ).resolves.toBeUndefined()
+      ).resolves.toEqual({
+        status: 'completed',
+        storedRecordingMethods: ['automatically-recorded'],
+      })
 
       expect(mockNitroHealth.saveWorkout).toHaveBeenCalledWith({
         startTimeMs: startDate.getTime(),
@@ -171,6 +177,7 @@ describe('NitroHealth workouts contract', () => {
         activityType: 'running',
         displayName: 'Morning Run',
         timeZone: 'America/New_York',
+        recordingMethod: 'manual',
         syncId: 'workout-1',
         syncVersion: 2,
       })

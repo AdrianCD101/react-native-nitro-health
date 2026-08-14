@@ -1,11 +1,55 @@
 package com.nitrohealth
 
+import androidx.health.connect.client.records.metadata.Device
 import androidx.health.connect.client.records.metadata.Metadata
+import com.margelo.nitro.nitrohealth.NativeHealthRecordingMethod
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertThrows
 import org.junit.Test
 
 class SampleMetadataTest {
+    @Test
+    fun mapsEveryRecordingMethodWithAndWithoutSyncMetadata() {
+        val values = listOf(
+            NativeHealthRecordingMethod.MANUAL to Metadata.RECORDING_METHOD_MANUAL_ENTRY,
+            NativeHealthRecordingMethod.ACTIVELYRECORDED to
+                Metadata.RECORDING_METHOD_ACTIVELY_RECORDED,
+            NativeHealthRecordingMethod.AUTOMATICALLYRECORDED to
+                Metadata.RECORDING_METHOD_AUTOMATICALLY_RECORDED,
+            NativeHealthRecordingMethod.UNKNOWN to Metadata.RECORDING_METHOD_UNKNOWN
+        )
+
+        values.forEach { (native, healthConnect) ->
+            val unkeyed = makeSampleMetadata(null, null, native)
+            val keyed = makeSampleMetadata("sample-sync-id", 3.0, native)
+
+            assertEquals(healthConnect, unkeyed.recordingMethod)
+            assertEquals(healthConnect, keyed.recordingMethod)
+            assertEquals("sample-sync-id", keyed.clientRecordId)
+            assertEquals(3L, keyed.clientRecordVersion)
+            if (
+                native == NativeHealthRecordingMethod.ACTIVELYRECORDED ||
+                native == NativeHealthRecordingMethod.AUTOMATICALLYRECORDED
+            ) {
+                val device = unkeyed.device!!
+                assertEquals(Device.TYPE_UNKNOWN, device.type)
+                assertNull(device.manufacturer)
+                assertNull(device.model)
+            } else {
+                assertNull(unkeyed.device)
+            }
+        }
+    }
+
+    @Test
+    fun defaultsRecordingMethodToUnknown() {
+        assertEquals(
+            Metadata.RECORDING_METHOD_UNKNOWN,
+            makeSampleMetadata(syncId = null, syncVersion = null).recordingMethod
+        )
+    }
+
     @Test
     fun rejectsSyncIdWithoutVersion() {
         val error = assertThrows(IllegalArgumentException::class.java) {

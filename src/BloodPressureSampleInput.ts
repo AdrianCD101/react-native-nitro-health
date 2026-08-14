@@ -1,5 +1,6 @@
 import type { BloodPressureMetadata } from './BloodPressureMetadata'
 import type { HealthRecordSync } from './HealthRecordSync'
+import type { HealthRecordingMethod } from './HealthRecordingMethod'
 
 /** Blood pressure reading accepted by {@linkcode NitroHealth.saveBloodPressure}. */
 export interface BloodPressureSampleInput {
@@ -11,6 +12,11 @@ export interface BloodPressureSampleInput {
   diastolicMmHg: number
   /** Platform-scoped fields retained by the native health store. */
   metadata?: BloodPressureMetadata
+  /**
+   * Requested recording method. On iOS, active and automatic recording degrade to `unknown`.
+   * @default 'unknown'
+   */
+  recordingMethod?: HealthRecordingMethod
   /** Optional logical identity that makes retries idempotent and higher versions replace. */
   sync?: HealthRecordSync
 }

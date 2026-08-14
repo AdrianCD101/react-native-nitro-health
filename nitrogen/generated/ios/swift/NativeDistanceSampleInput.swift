@@ -18,8 +18,14 @@ public extension NativeDistanceSampleInput {
   /**
    * Create a new instance of `NativeDistanceSampleInput`.
    */
-  init(startTimeMs: Double, endTimeMs: Double, distanceMeters: Double, scope: NativeDistanceScope, syncId: String?, syncVersion: Double?) {
-    self.init(startTimeMs, endTimeMs, distanceMeters, scope, { () -> bridge.std__optional_std__string_ in
+  init(startTimeMs: Double, endTimeMs: Double, distanceMeters: Double, scope: NativeDistanceScope, recordingMethod: NativeHealthRecordingMethod?, syncId: String?, syncVersion: Double?) {
+    self.init(startTimeMs, endTimeMs, distanceMeters, scope, { () -> bridge.std__optional_NativeHealthRecordingMethod_ in
+      if let __unwrappedValue = recordingMethod {
+        return bridge.create_std__optional_NativeHealthRecordingMethod_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_std__string_ in
       if let __unwrappedValue = syncId {
         return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
       } else {
@@ -52,6 +58,11 @@ public extension NativeDistanceSampleInput {
   @inline(__always)
   var scope: NativeDistanceScope {
     return self.__scope
+  }
+  
+  @inline(__always)
+  var recordingMethod: NativeHealthRecordingMethod? {
+    return self.__recordingMethod.value
   }
   
   @inline(__always)

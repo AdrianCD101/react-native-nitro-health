@@ -35,6 +35,9 @@ data class NativeWorkoutSampleInput(
   val timeZone: String?,
   @DoNotStrip
   @Keep
+  val recordingMethod: NativeHealthRecordingMethod?,
+  @DoNotStrip
+  @Keep
   val syncId: String?,
   @DoNotStrip
   @Keep
@@ -50,6 +53,7 @@ data class NativeWorkoutSampleInput(
       && Objects.deepEquals(this.activityType, other.activityType)
       && Objects.deepEquals(this.displayName, other.displayName)
       && Objects.deepEquals(this.timeZone, other.timeZone)
+      && Objects.deepEquals(this.recordingMethod, other.recordingMethod)
       && Objects.deepEquals(this.syncId, other.syncId)
       && Objects.deepEquals(this.syncVersion, other.syncVersion)
   }
@@ -61,6 +65,7 @@ data class NativeWorkoutSampleInput(
       activityType,
       displayName,
       timeZone,
+      recordingMethod,
       syncId,
       syncVersion
     ).contentDeepHashCode()
@@ -74,8 +79,8 @@ data class NativeWorkoutSampleInput(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(startTimeMs: Double, endTimeMs: Double, activityType: String, displayName: String?, timeZone: String?, syncId: String?, syncVersion: Double?): NativeWorkoutSampleInput {
-      return NativeWorkoutSampleInput(startTimeMs, endTimeMs, activityType, displayName, timeZone, syncId, syncVersion)
+    private fun fromCpp(startTimeMs: Double, endTimeMs: Double, activityType: String, displayName: String?, timeZone: String?, recordingMethod: NativeHealthRecordingMethod?, syncId: String?, syncVersion: Double?): NativeWorkoutSampleInput {
+      return NativeWorkoutSampleInput(startTimeMs, endTimeMs, activityType, displayName, timeZone, recordingMethod, syncId, syncVersion)
     }
   }
 }

@@ -18,8 +18,8 @@ public extension NativeBloodGlucoseSample {
   /**
    * Create a new instance of `NativeBloodGlucoseSample`.
    */
-  init(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, timeMs: Double, millimolesPerLiter: Double, androidSpecimenSource: NativeBloodGlucoseSpecimenSource?, androidMealType: NativeBloodGlucoseMealType?, androidRelationToMeal: NativeBloodGlucoseRelationToMeal?, iosMealTime: NativeBloodGlucoseMealTime?) {
-    self.init(identity, origin, timeMs, millimolesPerLiter, { () -> bridge.std__optional_NativeBloodGlucoseSpecimenSource_ in
+  init(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, recordingMethod: NativeHealthRecordingMethod, timeMs: Double, millimolesPerLiter: Double, androidSpecimenSource: NativeBloodGlucoseSpecimenSource?, androidMealType: NativeBloodGlucoseMealType?, androidRelationToMeal: NativeBloodGlucoseRelationToMeal?, iosMealTime: NativeBloodGlucoseMealTime?) {
+    self.init(identity, origin, recordingMethod, timeMs, millimolesPerLiter, { () -> bridge.std__optional_NativeBloodGlucoseSpecimenSource_ in
       if let __unwrappedValue = androidSpecimenSource {
         return bridge.create_std__optional_NativeBloodGlucoseSpecimenSource_(__unwrappedValue)
       } else {
@@ -54,6 +54,11 @@ public extension NativeBloodGlucoseSample {
   @inline(__always)
   var origin: NativeHealthDataOrigin {
     return self.__origin
+  }
+  
+  @inline(__always)
+  var recordingMethod: NativeHealthRecordingMethod {
+    return self.__recordingMethod
   }
   
   @inline(__always)

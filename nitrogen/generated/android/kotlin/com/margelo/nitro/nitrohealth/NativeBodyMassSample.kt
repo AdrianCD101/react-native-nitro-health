@@ -26,6 +26,9 @@ data class NativeBodyMassSample(
   val origin: NativeHealthDataOrigin,
   @DoNotStrip
   @Keep
+  val recordingMethod: NativeHealthRecordingMethod,
+  @DoNotStrip
+  @Keep
   val startTimeMs: Double,
   @DoNotStrip
   @Keep
@@ -41,6 +44,7 @@ data class NativeBodyMassSample(
     if (other !is NativeBodyMassSample) return false
     return Objects.deepEquals(this.identity, other.identity)
       && Objects.deepEquals(this.origin, other.origin)
+      && Objects.deepEquals(this.recordingMethod, other.recordingMethod)
       && Objects.deepEquals(this.startTimeMs, other.startTimeMs)
       && Objects.deepEquals(this.endTimeMs, other.endTimeMs)
       && Objects.deepEquals(this.kilograms, other.kilograms)
@@ -50,6 +54,7 @@ data class NativeBodyMassSample(
     return arrayOf<Any?>(
       identity,
       origin,
+      recordingMethod,
       startTimeMs,
       endTimeMs,
       kilograms
@@ -64,8 +69,8 @@ data class NativeBodyMassSample(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, startTimeMs: Double, endTimeMs: Double, kilograms: Double): NativeBodyMassSample {
-      return NativeBodyMassSample(identity, origin, startTimeMs, endTimeMs, kilograms)
+    private fun fromCpp(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, recordingMethod: NativeHealthRecordingMethod, startTimeMs: Double, endTimeMs: Double, kilograms: Double): NativeBodyMassSample {
+      return NativeBodyMassSample(identity, origin, recordingMethod, startTimeMs, endTimeMs, kilograms)
     }
   }
 }

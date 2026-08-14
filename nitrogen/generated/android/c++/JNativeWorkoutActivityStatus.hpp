@@ -42,12 +42,12 @@ namespace margelo::nitro::nitrohealth {
     static jni::alias_ref<JNativeWorkoutActivityStatus> fromCpp(NativeWorkoutActivityStatus value) {
       static const auto clazz = javaClassStatic();
       switch (value) {
-        case NativeWorkoutActivityStatus::KNOWN:
-          static const auto fieldKNOWN = clazz->getStaticField<JNativeWorkoutActivityStatus>("KNOWN");
-          return clazz->getStaticFieldValue(fieldKNOWN);
         case NativeWorkoutActivityStatus::UNKNOWN:
           static const auto fieldUNKNOWN = clazz->getStaticField<JNativeWorkoutActivityStatus>("UNKNOWN");
           return clazz->getStaticFieldValue(fieldUNKNOWN);
+        case NativeWorkoutActivityStatus::KNOWN:
+          static const auto fieldKNOWN = clazz->getStaticField<JNativeWorkoutActivityStatus>("KNOWN");
+          return clazz->getStaticFieldValue(fieldKNOWN);
         default:
           std::string stringValue = std::to_string(static_cast<int>(value));
           throw std::invalid_argument("Invalid enum value (" + stringValue + "!");

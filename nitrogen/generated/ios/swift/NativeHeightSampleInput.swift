@@ -18,8 +18,14 @@ public extension NativeHeightSampleInput {
   /**
    * Create a new instance of `NativeHeightSampleInput`.
    */
-  init(timeMs: Double, meters: Double, syncId: String?, syncVersion: Double?) {
-    self.init(timeMs, meters, { () -> bridge.std__optional_std__string_ in
+  init(timeMs: Double, meters: Double, recordingMethod: NativeHealthRecordingMethod?, syncId: String?, syncVersion: Double?) {
+    self.init(timeMs, meters, { () -> bridge.std__optional_NativeHealthRecordingMethod_ in
+      if let __unwrappedValue = recordingMethod {
+        return bridge.create_std__optional_NativeHealthRecordingMethod_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_std__string_ in
       if let __unwrappedValue = syncId {
         return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
       } else {
@@ -42,6 +48,11 @@ public extension NativeHeightSampleInput {
   @inline(__always)
   var meters: Double {
     return self.__meters
+  }
+  
+  @inline(__always)
+  var recordingMethod: NativeHealthRecordingMethod? {
+    return self.__recordingMethod.value
   }
   
   @inline(__always)

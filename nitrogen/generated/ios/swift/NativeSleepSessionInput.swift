@@ -18,7 +18,7 @@ public extension NativeSleepSessionInput {
   /**
    * Create a new instance of `NativeSleepSessionInput`.
    */
-  init(startTimeMs: Double, endTimeMs: Double, stages: [NativeSleepSessionStageInput], timeZone: String?) {
+  init(startTimeMs: Double, endTimeMs: Double, stages: [NativeSleepSessionStageInput], timeZone: String?, recordingMethod: NativeHealthRecordingMethod?) {
     self.init(startTimeMs, endTimeMs, { () -> bridge.std__vector_NativeSleepSessionStageInput_ in
       var __vector = bridge.create_std__vector_NativeSleepSessionStageInput_(stages.count)
       for __item in stages {
@@ -28,6 +28,12 @@ public extension NativeSleepSessionInput {
     }(), { () -> bridge.std__optional_std__string_ in
       if let __unwrappedValue = timeZone {
         return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_NativeHealthRecordingMethod_ in
+      if let __unwrappedValue = recordingMethod {
+        return bridge.create_std__optional_NativeHealthRecordingMethod_(__unwrappedValue)
       } else {
         return .init()
       }
@@ -59,5 +65,10 @@ public extension NativeSleepSessionInput {
         return nil
       }
     }()
+  }
+  
+  @inline(__always)
+  var recordingMethod: NativeHealthRecordingMethod? {
+    return self.__recordingMethod.value
   }
 }

@@ -29,6 +29,9 @@ data class NativeActiveEnergyBurnedSampleInput(
   val kilocalories: Double,
   @DoNotStrip
   @Keep
+  val recordingMethod: NativeHealthRecordingMethod?,
+  @DoNotStrip
+  @Keep
   val syncId: String?,
   @DoNotStrip
   @Keep
@@ -42,6 +45,7 @@ data class NativeActiveEnergyBurnedSampleInput(
     return Objects.deepEquals(this.startTimeMs, other.startTimeMs)
       && Objects.deepEquals(this.endTimeMs, other.endTimeMs)
       && Objects.deepEquals(this.kilocalories, other.kilocalories)
+      && Objects.deepEquals(this.recordingMethod, other.recordingMethod)
       && Objects.deepEquals(this.syncId, other.syncId)
       && Objects.deepEquals(this.syncVersion, other.syncVersion)
   }
@@ -51,6 +55,7 @@ data class NativeActiveEnergyBurnedSampleInput(
       startTimeMs,
       endTimeMs,
       kilocalories,
+      recordingMethod,
       syncId,
       syncVersion
     ).contentDeepHashCode()
@@ -64,8 +69,8 @@ data class NativeActiveEnergyBurnedSampleInput(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(startTimeMs: Double, endTimeMs: Double, kilocalories: Double, syncId: String?, syncVersion: Double?): NativeActiveEnergyBurnedSampleInput {
-      return NativeActiveEnergyBurnedSampleInput(startTimeMs, endTimeMs, kilocalories, syncId, syncVersion)
+    private fun fromCpp(startTimeMs: Double, endTimeMs: Double, kilocalories: Double, recordingMethod: NativeHealthRecordingMethod?, syncId: String?, syncVersion: Double?): NativeActiveEnergyBurnedSampleInput {
+      return NativeActiveEnergyBurnedSampleInput(startTimeMs, endTimeMs, kilocalories, recordingMethod, syncId, syncVersion)
     }
   }
 }

@@ -83,6 +83,8 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthStatisticsQuery; }
 namespace margelo::nitro::nitrohealth { struct NativeSleepSamplePage; }
 // Forward declaration of `NativeWorkoutSamplePage` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeWorkoutSamplePage; }
+// Forward declaration of `NativeHealthWriteResult` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthWriteResult; }
 // Forward declaration of `NativeStepSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeStepSampleInput; }
 // Forward declaration of `NativeDistanceWriteResult` to properly resolve imports.
@@ -174,6 +176,7 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthAuthorizationResult; 
 #include "NativeHealthStatisticsQuery.hpp"
 #include "NativeSleepSamplePage.hpp"
 #include "NativeWorkoutSamplePage.hpp"
+#include "NativeHealthWriteResult.hpp"
 #include "NativeStepSampleInput.hpp"
 #include "NativeDistanceWriteResult.hpp"
 #include "NativeDistanceSampleInput.hpp"
@@ -267,26 +270,26 @@ namespace margelo::nitro::nitrohealth {
       virtual std::shared_ptr<Promise<std::vector<NativeHealthStatistics>>> readStatistics(const std::string& dataType, const NativeHealthStatisticsQuery& query) = 0;
       virtual std::shared_ptr<Promise<NativeSleepSamplePage>> readSleepSamples(const NativeHealthDateRangeQuery& query) = 0;
       virtual std::shared_ptr<Promise<NativeWorkoutSamplePage>> readWorkouts(const NativeHealthDateRangeQuery& query) = 0;
-      virtual std::shared_ptr<Promise<void>> saveSteps(const std::vector<NativeStepSampleInput>& samples) = 0;
+      virtual std::shared_ptr<Promise<NativeHealthWriteResult>> saveSteps(const std::vector<NativeStepSampleInput>& samples) = 0;
       virtual std::shared_ptr<Promise<NativeDistanceWriteResult>> saveDistance(const std::vector<NativeDistanceSampleInput>& samples) = 0;
-      virtual std::shared_ptr<Promise<void>> saveActiveEnergyBurned(const std::vector<NativeActiveEnergyBurnedSampleInput>& samples) = 0;
-      virtual std::shared_ptr<Promise<void>> saveHydration(const std::vector<NativeHydrationSampleInput>& samples) = 0;
-      virtual std::shared_ptr<Promise<void>> saveFloorsClimbed(const std::vector<NativeFloorsClimbedSampleInput>& samples) = 0;
-      virtual std::shared_ptr<Promise<void>> saveHeartRate(const std::vector<NativeHeartRateSampleInput>& samples) = 0;
-      virtual std::shared_ptr<Promise<void>> saveBloodPressure(const std::vector<NativeBloodPressureSampleInput>& samples) = 0;
-      virtual std::shared_ptr<Promise<void>> saveBloodGlucose(const std::vector<NativeBloodGlucoseSampleInput>& samples) = 0;
-      virtual std::shared_ptr<Promise<void>> saveBodyTemperature(const std::vector<NativeBodyTemperatureSampleInput>& samples) = 0;
-      virtual std::shared_ptr<Promise<void>> saveRespiratoryRate(const std::vector<NativeRespiratoryRateSampleInput>& samples) = 0;
-      virtual std::shared_ptr<Promise<void>> saveBodyFat(const std::vector<NativeBodyFatSampleInput>& samples) = 0;
-      virtual std::shared_ptr<Promise<void>> saveLeanBodyMass(const std::vector<NativeLeanBodyMassSampleInput>& samples) = 0;
-      virtual std::shared_ptr<Promise<void>> saveBasalBodyTemperature(const std::vector<NativeBasalBodyTemperatureSampleInput>& samples) = 0;
-      virtual std::shared_ptr<Promise<void>> saveBodyMass(const std::vector<NativeBodyMassSampleInput>& samples) = 0;
-      virtual std::shared_ptr<Promise<void>> saveRestingHeartRate(const std::vector<NativeRestingHeartRateSampleInput>& samples) = 0;
-      virtual std::shared_ptr<Promise<void>> saveOxygenSaturation(const std::vector<NativeOxygenSaturationSampleInput>& samples) = 0;
-      virtual std::shared_ptr<Promise<void>> saveHeight(const std::vector<NativeHeightSampleInput>& samples) = 0;
-      virtual std::shared_ptr<Promise<void>> saveVo2Max(const std::vector<NativeVo2MaxSampleInput>& samples) = 0;
-      virtual std::shared_ptr<Promise<void>> saveSleepSessions(const std::vector<NativeSleepSessionInput>& sessions) = 0;
-      virtual std::shared_ptr<Promise<void>> saveWorkout(const NativeWorkoutSampleInput& workout) = 0;
+      virtual std::shared_ptr<Promise<NativeHealthWriteResult>> saveActiveEnergyBurned(const std::vector<NativeActiveEnergyBurnedSampleInput>& samples) = 0;
+      virtual std::shared_ptr<Promise<NativeHealthWriteResult>> saveHydration(const std::vector<NativeHydrationSampleInput>& samples) = 0;
+      virtual std::shared_ptr<Promise<NativeHealthWriteResult>> saveFloorsClimbed(const std::vector<NativeFloorsClimbedSampleInput>& samples) = 0;
+      virtual std::shared_ptr<Promise<NativeHealthWriteResult>> saveHeartRate(const std::vector<NativeHeartRateSampleInput>& samples) = 0;
+      virtual std::shared_ptr<Promise<NativeHealthWriteResult>> saveBloodPressure(const std::vector<NativeBloodPressureSampleInput>& samples) = 0;
+      virtual std::shared_ptr<Promise<NativeHealthWriteResult>> saveBloodGlucose(const std::vector<NativeBloodGlucoseSampleInput>& samples) = 0;
+      virtual std::shared_ptr<Promise<NativeHealthWriteResult>> saveBodyTemperature(const std::vector<NativeBodyTemperatureSampleInput>& samples) = 0;
+      virtual std::shared_ptr<Promise<NativeHealthWriteResult>> saveRespiratoryRate(const std::vector<NativeRespiratoryRateSampleInput>& samples) = 0;
+      virtual std::shared_ptr<Promise<NativeHealthWriteResult>> saveBodyFat(const std::vector<NativeBodyFatSampleInput>& samples) = 0;
+      virtual std::shared_ptr<Promise<NativeHealthWriteResult>> saveLeanBodyMass(const std::vector<NativeLeanBodyMassSampleInput>& samples) = 0;
+      virtual std::shared_ptr<Promise<NativeHealthWriteResult>> saveBasalBodyTemperature(const std::vector<NativeBasalBodyTemperatureSampleInput>& samples) = 0;
+      virtual std::shared_ptr<Promise<NativeHealthWriteResult>> saveBodyMass(const std::vector<NativeBodyMassSampleInput>& samples) = 0;
+      virtual std::shared_ptr<Promise<NativeHealthWriteResult>> saveRestingHeartRate(const std::vector<NativeRestingHeartRateSampleInput>& samples) = 0;
+      virtual std::shared_ptr<Promise<NativeHealthWriteResult>> saveOxygenSaturation(const std::vector<NativeOxygenSaturationSampleInput>& samples) = 0;
+      virtual std::shared_ptr<Promise<NativeHealthWriteResult>> saveHeight(const std::vector<NativeHeightSampleInput>& samples) = 0;
+      virtual std::shared_ptr<Promise<NativeHealthWriteResult>> saveVo2Max(const std::vector<NativeVo2MaxSampleInput>& samples) = 0;
+      virtual std::shared_ptr<Promise<NativeHealthWriteResult>> saveSleepSessions(const std::vector<NativeSleepSessionInput>& sessions) = 0;
+      virtual std::shared_ptr<Promise<NativeHealthWriteResult>> saveWorkout(const NativeWorkoutSampleInput& workout) = 0;
       virtual std::shared_ptr<Promise<NativeHealthDeleteResult>> deleteRecordsByIds(const std::string& dataType, const std::vector<std::string>& recordIds) = 0;
       virtual std::shared_ptr<Promise<NativeHealthDeleteResult>> deleteRecordsByTimeRange(const std::string& dataType, const NativeHealthTimeRangeQuery& query) = 0;
       virtual std::shared_ptr<Promise<NativeHealthPermissionStatusResult>> getPermissionStatuses(const std::vector<NativeHealthPermission>& permissions) = 0;

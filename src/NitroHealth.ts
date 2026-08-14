@@ -50,6 +50,7 @@ import type { HealthRecordIdentity } from './HealthSampleIdentity'
 import type { HealthStatisticsByDataType } from './HealthStatisticsByDataType'
 import type { HealthStatisticsQuery } from './HealthStatisticsQuery'
 import type { HealthTimeRangeQuery } from './HealthTimeRangeQuery'
+import type { HealthWriteResult } from './HealthWriteResult'
 import type { HeartRateSample } from './HeartRateSample'
 import type { HeartRateSampleInput } from './HeartRateSampleInput'
 import type { HeartRateStatistics } from './HeartRateStatistics'
@@ -91,6 +92,7 @@ import {
   makeDistanceSample,
   makeDistanceWriteResult,
   makeHealthChangesResult,
+  makeHealthWriteResult,
   makeHealthStatistics,
   makeHeartRateSample,
   makeHeartRateStatistics,
@@ -282,28 +284,29 @@ export interface NitroHealth {
   ): Promise<Array<HealthStatisticsByDataType<T>>>
   readSleepSamples(query: HealthDateRangeQuery): Promise<HealthSamplePage<SleepSample>>
   readWorkouts(query: HealthDateRangeQuery): Promise<HealthSamplePage<WorkoutSample>>
-  saveSteps(samples: StepSampleInput[]): Promise<void>
+  saveSteps(samples: StepSampleInput[]): Promise<HealthWriteResult>
   saveDistance(samples: DistanceSampleInput[]): Promise<DistanceWriteResult>
-  saveActiveEnergyBurned(samples: ActiveEnergyBurnedSampleInput[]): Promise<void>
+  saveActiveEnergyBurned(samples: ActiveEnergyBurnedSampleInput[]): Promise<HealthWriteResult>
   /** Saves hydration intervals in milliliters. */
-  saveHydration(samples: HydrationSampleInput[]): Promise<void>
+  saveHydration(samples: HydrationSampleInput[]): Promise<HealthWriteResult>
   /** Saves floors-climbed intervals. iOS stores `floors` as HealthKit flights climbed. */
-  saveFloorsClimbed(samples: FloorsClimbedSampleInput[]): Promise<void>
-  saveHeartRate(samples: HeartRateSampleInput[]): Promise<void>
-  saveBloodPressure(samples: BloodPressureSampleInput[]): Promise<void>
-  saveBloodGlucose(samples: BloodGlucoseSampleInput[]): Promise<void>
-  saveBodyTemperature(samples: BodyTemperatureSampleInput[]): Promise<void>
-  saveRespiratoryRate(samples: RespiratoryRateSampleInput[]): Promise<void>
-  saveBodyFat(samples: BodyFatSampleInput[]): Promise<void>
-  saveLeanBodyMass(samples: LeanBodyMassSampleInput[]): Promise<void>
-  saveBasalBodyTemperature(samples: BasalBodyTemperatureSampleInput[]): Promise<void>
-  saveBodyMass(samples: BodyMassSampleInput[]): Promise<void>
-  saveRestingHeartRate(samples: RestingHeartRateSampleInput[]): Promise<void>
-  saveOxygenSaturation(samples: OxygenSaturationSampleInput[]): Promise<void>
-  saveHeight(samples: HeightSampleInput[]): Promise<void>
-  saveVo2Max(samples: Vo2MaxSampleInput[]): Promise<void>
-  saveSleepSessions(sessions: SleepSessionInput[]): Promise<void>
-  saveWorkout(workout: WorkoutSampleInput): Promise<void>
+  saveFloorsClimbed(samples: FloorsClimbedSampleInput[]): Promise<HealthWriteResult>
+  saveHeartRate(samples: HeartRateSampleInput[]): Promise<HealthWriteResult>
+  saveBloodPressure(samples: BloodPressureSampleInput[]): Promise<HealthWriteResult>
+  saveBloodGlucose(samples: BloodGlucoseSampleInput[]): Promise<HealthWriteResult>
+  saveBodyTemperature(samples: BodyTemperatureSampleInput[]): Promise<HealthWriteResult>
+  saveRespiratoryRate(samples: RespiratoryRateSampleInput[]): Promise<HealthWriteResult>
+  saveBodyFat(samples: BodyFatSampleInput[]): Promise<HealthWriteResult>
+  saveLeanBodyMass(samples: LeanBodyMassSampleInput[]): Promise<HealthWriteResult>
+  saveBasalBodyTemperature(samples: BasalBodyTemperatureSampleInput[]): Promise<HealthWriteResult>
+  saveBodyMass(samples: BodyMassSampleInput[]): Promise<HealthWriteResult>
+  saveRestingHeartRate(samples: RestingHeartRateSampleInput[]): Promise<HealthWriteResult>
+  saveOxygenSaturation(samples: OxygenSaturationSampleInput[]): Promise<HealthWriteResult>
+  saveHeight(samples: HeightSampleInput[]): Promise<HealthWriteResult>
+  saveVo2Max(samples: Vo2MaxSampleInput[]): Promise<HealthWriteResult>
+  saveSleepSessions(sessions: SleepSessionInput[]): Promise<HealthWriteResult>
+  /** Saves one workout and returns exactly one stored recording method. */
+  saveWorkout(workout: WorkoutSampleInput): Promise<HealthWriteResult>
   /** Deletes independently deletable records by physical identity. */
   deleteRecordsByIds(
     dataType: HealthDataType,
@@ -580,116 +583,164 @@ export const NitroHealth: NitroHealth = {
     assertNonEmptySamples(samples)
     const nativeSamples = samples.map(makeNativeStepSampleInput)
     assertUniqueSampleSyncIds(samples)
-    return NitroHealthNative.saveSteps(nativeSamples)
+    return makeHealthWriteResult(await NitroHealthNative.saveSteps(nativeSamples), samples.length)
   },
   async saveDistance(samples) {
     assertNonEmptySamples(samples)
     const nativeSamples = samples.map(makeNativeDistanceSampleInput)
     assertUniqueSampleSyncIds(samples)
-    return makeDistanceWriteResult(await NitroHealthNative.saveDistance(nativeSamples))
+    return makeDistanceWriteResult(
+      await NitroHealthNative.saveDistance(nativeSamples),
+      samples.length
+    )
   },
   async saveActiveEnergyBurned(samples) {
     assertNonEmptySamples(samples)
     const nativeSamples = samples.map(makeNativeActiveEnergyBurnedSampleInput)
     assertUniqueSampleSyncIds(samples)
-    return NitroHealthNative.saveActiveEnergyBurned(nativeSamples)
+    return makeHealthWriteResult(
+      await NitroHealthNative.saveActiveEnergyBurned(nativeSamples),
+      samples.length
+    )
   },
   async saveHydration(samples) {
     assertNonEmptySamples(samples)
     const nativeSamples = samples.map(makeNativeHydrationSampleInput)
     assertUniqueSampleSyncIds(samples)
-    return NitroHealthNative.saveHydration(nativeSamples)
+    return makeHealthWriteResult(
+      await NitroHealthNative.saveHydration(nativeSamples),
+      samples.length
+    )
   },
   async saveFloorsClimbed(samples) {
     assertNonEmptySamples(samples)
     const nativeSamples = samples.map(makeNativeFloorsClimbedSampleInput)
     assertUniqueSampleSyncIds(samples)
-    return NitroHealthNative.saveFloorsClimbed(nativeSamples)
+    return makeHealthWriteResult(
+      await NitroHealthNative.saveFloorsClimbed(nativeSamples),
+      samples.length
+    )
   },
   async saveHeartRate(samples) {
     assertNonEmptySamples(samples)
     const nativeSamples = samples.map(makeNativeHeartRateSampleInput)
     assertUniqueSampleSyncIds(samples)
-    return NitroHealthNative.saveHeartRate(nativeSamples)
+    return makeHealthWriteResult(
+      await NitroHealthNative.saveHeartRate(nativeSamples),
+      samples.length
+    )
   },
   async saveBloodPressure(samples) {
     assertNonEmptySamples(samples)
     const nativeSamples = samples.map(makeNativeBloodPressureSampleInput)
     assertUniqueSampleSyncIds(samples)
-    return NitroHealthNative.saveBloodPressure(nativeSamples)
+    return makeHealthWriteResult(
+      await NitroHealthNative.saveBloodPressure(nativeSamples),
+      samples.length
+    )
   },
   async saveBloodGlucose(samples) {
     assertNonEmptySamples(samples)
     const nativeSamples = samples.map(makeNativeBloodGlucoseSampleInput)
     assertUniqueSampleSyncIds(samples)
-    return NitroHealthNative.saveBloodGlucose(nativeSamples)
+    return makeHealthWriteResult(
+      await NitroHealthNative.saveBloodGlucose(nativeSamples),
+      samples.length
+    )
   },
   async saveBodyTemperature(samples) {
     assertNonEmptySamples(samples)
     const nativeSamples = samples.map(makeNativeBodyTemperatureSampleInput)
     assertUniqueSampleSyncIds(samples)
-    return NitroHealthNative.saveBodyTemperature(nativeSamples)
+    return makeHealthWriteResult(
+      await NitroHealthNative.saveBodyTemperature(nativeSamples),
+      samples.length
+    )
   },
   async saveRespiratoryRate(samples) {
     assertNonEmptySamples(samples)
     const nativeSamples = samples.map(makeNativeRespiratoryRateSampleInput)
     assertUniqueSampleSyncIds(samples)
-    return NitroHealthNative.saveRespiratoryRate(nativeSamples)
+    return makeHealthWriteResult(
+      await NitroHealthNative.saveRespiratoryRate(nativeSamples),
+      samples.length
+    )
   },
   async saveBodyFat(samples) {
     assertNonEmptySamples(samples)
     const nativeSamples = samples.map(makeNativeBodyFatSampleInput)
     assertUniqueSampleSyncIds(samples)
-    return NitroHealthNative.saveBodyFat(nativeSamples)
+    return makeHealthWriteResult(await NitroHealthNative.saveBodyFat(nativeSamples), samples.length)
   },
   async saveLeanBodyMass(samples) {
     assertNonEmptySamples(samples)
     const nativeSamples = samples.map(makeNativeLeanBodyMassSampleInput)
     assertUniqueSampleSyncIds(samples)
-    return NitroHealthNative.saveLeanBodyMass(nativeSamples)
+    return makeHealthWriteResult(
+      await NitroHealthNative.saveLeanBodyMass(nativeSamples),
+      samples.length
+    )
   },
   async saveBasalBodyTemperature(samples) {
     assertNonEmptySamples(samples)
     const nativeSamples = samples.map(makeNativeBasalBodyTemperatureSampleInput)
     assertUniqueSampleSyncIds(samples)
-    return NitroHealthNative.saveBasalBodyTemperature(nativeSamples)
+    return makeHealthWriteResult(
+      await NitroHealthNative.saveBasalBodyTemperature(nativeSamples),
+      samples.length
+    )
   },
   async saveBodyMass(samples) {
     assertNonEmptySamples(samples)
     const nativeSamples = samples.map(makeNativeBodyMassSampleInput)
     assertUniqueSampleSyncIds(samples)
-    return NitroHealthNative.saveBodyMass(nativeSamples)
+    return makeHealthWriteResult(
+      await NitroHealthNative.saveBodyMass(nativeSamples),
+      samples.length
+    )
   },
   async saveRestingHeartRate(samples) {
     assertNonEmptySamples(samples)
     const nativeSamples = samples.map(makeNativeRestingHeartRateSampleInput)
     assertUniqueSampleSyncIds(samples)
-    return NitroHealthNative.saveRestingHeartRate(nativeSamples)
+    return makeHealthWriteResult(
+      await NitroHealthNative.saveRestingHeartRate(nativeSamples),
+      samples.length
+    )
   },
   async saveOxygenSaturation(samples) {
     assertNonEmptySamples(samples)
     const nativeSamples = samples.map(makeNativeOxygenSaturationSampleInput)
     assertUniqueSampleSyncIds(samples)
-    return NitroHealthNative.saveOxygenSaturation(nativeSamples)
+    return makeHealthWriteResult(
+      await NitroHealthNative.saveOxygenSaturation(nativeSamples),
+      samples.length
+    )
   },
   async saveHeight(samples) {
     assertNonEmptySamples(samples)
     const nativeSamples = samples.map(makeNativeHeightSampleInput)
     assertUniqueSampleSyncIds(samples)
-    return NitroHealthNative.saveHeight(nativeSamples)
+    return makeHealthWriteResult(await NitroHealthNative.saveHeight(nativeSamples), samples.length)
   },
   async saveVo2Max(samples) {
     assertNonEmptySamples(samples)
     const nativeSamples = samples.map(makeNativeVo2MaxSampleInput)
     assertUniqueSampleSyncIds(samples)
-    return NitroHealthNative.saveVo2Max(nativeSamples)
+    return makeHealthWriteResult(await NitroHealthNative.saveVo2Max(nativeSamples), samples.length)
   },
   async saveSleepSessions(sessions) {
     assertNonEmptySessions(sessions)
-    return NitroHealthNative.saveSleepSessions(sessions.map(makeNativeSleepSessionInput))
+    return makeHealthWriteResult(
+      await NitroHealthNative.saveSleepSessions(sessions.map(makeNativeSleepSessionInput)),
+      sessions.length
+    )
   },
   async saveWorkout(workout) {
-    return NitroHealthNative.saveWorkout(makeNativeWorkoutSampleInput(workout))
+    return makeHealthWriteResult(
+      await NitroHealthNative.saveWorkout(makeNativeWorkoutSampleInput(workout)),
+      1
+    )
   },
   async deleteRecordsByIds(dataType, records) {
     assertRecordIdentities(records)

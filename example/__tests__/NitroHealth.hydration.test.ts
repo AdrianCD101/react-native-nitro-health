@@ -33,6 +33,7 @@ describe('NitroHealth hydration contract', () => {
         {
           identity: { kind: 'record', id: 'hydration-1' },
           origin: { identifier: 'com.example.health' },
+          recordingMethod: 'unknown',
           startDate,
           endDate,
           milliliters: 250.5,

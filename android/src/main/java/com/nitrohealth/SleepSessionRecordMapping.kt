@@ -8,9 +8,11 @@ import com.margelo.nitro.nitrohealth.NativeSleepStageData
 internal fun makeNativeSleepSamples(record: SleepSessionRecord): Array<NativeSleepSample> {
     val recordId = record.metadata.id
     val origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName)
+    val recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod)
     val envelope = NativeSleepSample(
         identity = makeRecordIdentity(recordId),
         origin = origin,
+        recordingMethod = recordingMethod,
         kind = NativeSleepSampleKind.SESSIONENVELOPE,
         startTimeMs = record.startTime.toEpochMilli().toDouble(),
         endTimeMs = record.endTime.toEpochMilli().toDouble(),
@@ -25,6 +27,7 @@ internal fun makeNativeSleepSamples(record: SleepSessionRecord): Array<NativeSle
         NativeSleepSample(
             identity = makeRecordChildIdentity(recordId, index),
             origin = origin,
+            recordingMethod = recordingMethod,
             kind = NativeSleepSampleKind.STAGE,
             startTimeMs = stage.startTime.toEpochMilli().toDouble(),
             endTimeMs = stage.endTime.toEpochMilli().toDouble(),

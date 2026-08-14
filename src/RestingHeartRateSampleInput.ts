@@ -1,4 +1,5 @@
 import type { HealthRecordSync } from './HealthRecordSync'
+import type { HealthRecordingMethod } from './HealthRecordingMethod'
 
 /** Resting heart rate sample accepted by {@linkcode NitroHealth.saveRestingHeartRate}. */
 export interface RestingHeartRateSampleInput {
@@ -10,6 +11,11 @@ export interface RestingHeartRateSampleInput {
    * nearest integer there; iOS stores the exact value.
    */
   bpm: number
+  /**
+   * Requested recording method. On iOS, active and automatic recording degrade to `unknown`.
+   * @default 'unknown'
+   */
+  recordingMethod?: HealthRecordingMethod
   /** Optional logical identity that makes retries idempotent and higher versions replace. */
   sync?: HealthRecordSync
 }

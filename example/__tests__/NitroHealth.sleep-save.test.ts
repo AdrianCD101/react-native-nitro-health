@@ -28,6 +28,9 @@ describe('NitroHealth sleep session save contract', () => {
       stage: 'asleepCore' as const,
     }
     const stages = [laterStage, earlierStage]
+    mockNitroHealth.saveSleepSessions.mockResolvedValueOnce({
+      storedRecordingMethods: ['manual'],
+    })
 
     await expect(
       NitroHealth.saveSleepSessions([
@@ -35,10 +38,11 @@ describe('NitroHealth sleep session save contract', () => {
           startDate: sessionStart,
           endDate: sessionEnd,
           timeZone: 'America/New_York',
+          recordingMethod: 'automatically-recorded',
           stages,
         },
       ])
-    ).resolves.toBeUndefined()
+    ).resolves.toEqual({ status: 'completed', storedRecordingMethods: ['manual'] })
 
     expect(stages).toEqual([laterStage, earlierStage])
     expect(mockNitroHealth.saveSleepSessions).toHaveBeenCalledWith([
@@ -46,6 +50,7 @@ describe('NitroHealth sleep session save contract', () => {
         startTimeMs: sessionStart.getTime(),
         endTimeMs: sessionEnd.getTime(),
         timeZone: 'America/New_York',
+        recordingMethod: 'automaticallyRecorded',
         stages: [
           {
             startTimeMs: earlierStage.startDate.getTime(),
@@ -63,6 +68,10 @@ describe('NitroHealth sleep session save contract', () => {
   })
 
   it('accepts stage-less sessions and adjacent stages', async () => {
+    mockNitroHealth.saveSleepSessions.mockResolvedValueOnce({
+      storedRecordingMethods: ['unknown', 'unknown'],
+    })
+
     await NitroHealth.saveSleepSessions([
       { startDate: sessionStart, endDate: sessionEnd },
       {

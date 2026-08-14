@@ -18,12 +18,23 @@ public extension NativeDistanceWriteResult {
   /**
    * Create a new instance of `NativeDistanceWriteResult`.
    */
-  init(storedScope: NativeDistanceScope) {
-    self.init(storedScope)
+  init(storedScope: NativeDistanceScope, storedRecordingMethods: [NativeHealthRecordingMethod]) {
+    self.init(storedScope, { () -> bridge.std__vector_NativeHealthRecordingMethod_ in
+      var __vector = bridge.create_std__vector_NativeHealthRecordingMethod_(storedRecordingMethods.count)
+      for __item in storedRecordingMethods {
+        __vector.push_back(__item)
+      }
+      return __vector
+    }())
   }
 
   @inline(__always)
   var storedScope: NativeDistanceScope {
     return self.__storedScope
+  }
+  
+  @inline(__always)
+  var storedRecordingMethods: [NativeHealthRecordingMethod] {
+    return self.__storedRecordingMethods.map({ __item in __item })
   }
 }

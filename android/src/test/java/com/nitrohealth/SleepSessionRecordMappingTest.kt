@@ -1,7 +1,7 @@
 package com.nitrohealth
 
 import androidx.health.connect.client.records.SleepSessionRecord
-import androidx.health.connect.client.records.metadata.Metadata
+import com.margelo.nitro.nitrohealth.NativeHealthRecordingMethod
 import com.margelo.nitro.nitrohealth.NativeHealthSampleIdentityKind
 import com.margelo.nitro.nitrohealth.NativeSleepSampleKind
 import com.margelo.nitro.nitrohealth.NativeSleepStageData
@@ -42,6 +42,7 @@ class SleepSessionRecordMappingTest {
         assertNull(envelope.stage)
         assertEquals(record.metadata.dataOrigin.packageName, envelope.origin.identifier)
         assertNull(envelope.origin.displayName)
+        assertEquals(NativeHealthRecordingMethod.AUTOMATICALLYRECORDED, envelope.recordingMethod)
 
         val stage = samples[1]
         assertEquals(NativeSleepSampleKind.STAGE, stage.kind)
@@ -53,6 +54,7 @@ class SleepSessionRecordMappingTest {
         assertEquals("asleepCore", stage.stage)
         assertNull(stage.stageData)
         assertEquals(envelope.origin, stage.origin)
+        assertEquals(envelope.recordingMethod, stage.recordingMethod)
     }
 
     @Test
@@ -76,7 +78,11 @@ class SleepSessionRecordMappingTest {
             endTime = sessionEnd,
             endZoneOffset = null,
             stages = stages,
-            metadata = Metadata.unknownRecordingMethod()
+            metadata = makeSampleMetadata(
+                syncId = null,
+                syncVersion = null,
+                recordingMethod = NativeHealthRecordingMethod.AUTOMATICALLYRECORDED
+            )
         )
     }
 }

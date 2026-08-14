@@ -18,8 +18,8 @@ public extension NativeActiveEnergyBurnedSample {
   /**
    * Create a new instance of `NativeActiveEnergyBurnedSample`.
    */
-  init(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, startTimeMs: Double, endTimeMs: Double, kilocalories: Double) {
-    self.init(identity, origin, startTimeMs, endTimeMs, kilocalories)
+  init(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, recordingMethod: NativeHealthRecordingMethod, startTimeMs: Double, endTimeMs: Double, kilocalories: Double) {
+    self.init(identity, origin, recordingMethod, startTimeMs, endTimeMs, kilocalories)
   }
 
   @inline(__always)
@@ -30,6 +30,11 @@ public extension NativeActiveEnergyBurnedSample {
   @inline(__always)
   var origin: NativeHealthDataOrigin {
     return self.__origin
+  }
+  
+  @inline(__always)
+  var recordingMethod: NativeHealthRecordingMethod {
+    return self.__recordingMethod
   }
   
   @inline(__always)

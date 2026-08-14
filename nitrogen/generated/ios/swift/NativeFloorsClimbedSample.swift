@@ -18,8 +18,8 @@ public extension NativeFloorsClimbedSample {
   /**
    * Create a new instance of `NativeFloorsClimbedSample`.
    */
-  init(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, startTimeMs: Double, endTimeMs: Double, floors: Double) {
-    self.init(identity, origin, startTimeMs, endTimeMs, floors)
+  init(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, recordingMethod: NativeHealthRecordingMethod, startTimeMs: Double, endTimeMs: Double, floors: Double) {
+    self.init(identity, origin, recordingMethod, startTimeMs, endTimeMs, floors)
   }
 
   @inline(__always)
@@ -30,6 +30,11 @@ public extension NativeFloorsClimbedSample {
   @inline(__always)
   var origin: NativeHealthDataOrigin {
     return self.__origin
+  }
+  
+  @inline(__always)
+  var recordingMethod: NativeHealthRecordingMethod {
+    return self.__recordingMethod
   }
   
   @inline(__always)

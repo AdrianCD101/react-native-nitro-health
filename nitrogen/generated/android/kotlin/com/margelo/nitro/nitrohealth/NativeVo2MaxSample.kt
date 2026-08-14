@@ -26,6 +26,9 @@ data class NativeVo2MaxSample(
   val origin: NativeHealthDataOrigin,
   @DoNotStrip
   @Keep
+  val recordingMethod: NativeHealthRecordingMethod,
+  @DoNotStrip
+  @Keep
   val timeMs: Double,
   @DoNotStrip
   @Keep
@@ -44,6 +47,7 @@ data class NativeVo2MaxSample(
     if (other !is NativeVo2MaxSample) return false
     return Objects.deepEquals(this.identity, other.identity)
       && Objects.deepEquals(this.origin, other.origin)
+      && Objects.deepEquals(this.recordingMethod, other.recordingMethod)
       && Objects.deepEquals(this.timeMs, other.timeMs)
       && Objects.deepEquals(this.millilitersPerKilogramPerMinute, other.millilitersPerKilogramPerMinute)
       && Objects.deepEquals(this.androidMeasurementMethod, other.androidMeasurementMethod)
@@ -54,6 +58,7 @@ data class NativeVo2MaxSample(
     return arrayOf<Any?>(
       identity,
       origin,
+      recordingMethod,
       timeMs,
       millilitersPerKilogramPerMinute,
       androidMeasurementMethod,
@@ -69,8 +74,8 @@ data class NativeVo2MaxSample(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, timeMs: Double, millilitersPerKilogramPerMinute: Double, androidMeasurementMethod: NativeAndroidVo2MaxMeasurementMethod?, iosTestType: NativeIOSVo2MaxTestType?): NativeVo2MaxSample {
-      return NativeVo2MaxSample(identity, origin, timeMs, millilitersPerKilogramPerMinute, androidMeasurementMethod, iosTestType)
+    private fun fromCpp(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, recordingMethod: NativeHealthRecordingMethod, timeMs: Double, millilitersPerKilogramPerMinute: Double, androidMeasurementMethod: NativeAndroidVo2MaxMeasurementMethod?, iosTestType: NativeIOSVo2MaxTestType?): NativeVo2MaxSample {
+      return NativeVo2MaxSample(identity, origin, recordingMethod, timeMs, millilitersPerKilogramPerMinute, androidMeasurementMethod, iosTestType)
     }
   }
 }

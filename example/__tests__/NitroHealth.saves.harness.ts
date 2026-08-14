@@ -20,6 +20,21 @@ function getWorkoutDisplayName(workout: WorkoutSample): string | undefined {
   return workout.title ?? workout.brandName
 }
 
+const recordingMethodReadRange = {
+  startDate: new Date('2001-06-01T10:00:00.000Z'),
+  endDate: new Date('2001-06-01T12:00:00.000Z'),
+}
+
+const manualRecordingInterval = {
+  startDate: new Date('2001-06-01T10:03:17.000Z'),
+  endDate: new Date('2001-06-01T10:09:41.000Z'),
+}
+
+const automaticRecordingInterval = {
+  startDate: new Date('2001-06-01T11:13:17.000Z'),
+  endDate: new Date('2001-06-01T11:19:41.000Z'),
+}
+
 describe('NitroHealth saves (native)', () => {
   it('rejects empty save sample arrays before crossing the native boundary', async () => {
     await expect(NitroHealth.saveSteps([])).rejects.toThrow('At least one sample is required')
@@ -112,6 +127,71 @@ describe('NitroHealth saves (native)', () => {
     expect(page.samples.some((sample) => sample.count === 321)).toBe(true)
   })
 
+  it('round-trips manual and automatic step recording methods with platform fidelity', async () => {
+    const authorized = await hasVerifiedPermissions([
+      { accessType: 'write', dataType: 'steps' },
+      { accessType: 'read', dataType: 'steps' },
+    ])
+    if (!authorized) return
+
+    const manualCount = 654321
+    const automaticCount = 654322
+
+    await NitroHealth.deleteRecordsByTimeRange('steps', recordingMethodReadRange)
+    try {
+      const manualResult = await NitroHealth.saveSteps([
+        {
+          ...manualRecordingInterval,
+          count: manualCount,
+          recordingMethod: 'manual',
+          sync: { id: 'nitro-health-harness-recording-method-manual', version: 1 },
+        },
+      ])
+      expect(manualResult).toEqual({
+        status: 'completed',
+        storedRecordingMethods: ['manual'],
+      })
+
+      const manualPage = await NitroHealth.readSteps(recordingMethodReadRange)
+      assertConclusiveRead(manualPage.samples)
+      const manualMatches = manualPage.samples.filter(
+        (sample) =>
+          sample.count === manualCount &&
+          sample.startDate.getTime() === manualRecordingInterval.startDate.getTime() &&
+          sample.endDate.getTime() === manualRecordingInterval.endDate.getTime()
+      )
+      expect(manualMatches).toHaveLength(1)
+      expect(manualMatches[0]?.recordingMethod).toBe('manual')
+
+      const automaticResult = await NitroHealth.saveSteps([
+        {
+          ...automaticRecordingInterval,
+          count: automaticCount,
+          recordingMethod: 'automatically-recorded',
+          sync: { id: 'nitro-health-harness-recording-method-automatic', version: 1 },
+        },
+      ])
+      const expectedAutomaticMethod = Platform.OS === 'ios' ? 'unknown' : 'automatically-recorded'
+      expect(automaticResult).toEqual({
+        status: 'completed',
+        storedRecordingMethods: [expectedAutomaticMethod],
+      })
+
+      const automaticPage = await NitroHealth.readSteps(recordingMethodReadRange)
+      assertConclusiveRead(automaticPage.samples)
+      const automaticMatches = automaticPage.samples.filter(
+        (sample) =>
+          sample.count === automaticCount &&
+          sample.startDate.getTime() === automaticRecordingInterval.startDate.getTime() &&
+          sample.endDate.getTime() === automaticRecordingInterval.endDate.getTime()
+      )
+      expect(automaticMatches).toHaveLength(1)
+      expect(automaticMatches[0]?.recordingMethod).toBe(expectedAutomaticMethod)
+    } finally {
+      await NitroHealth.deleteRecordsByTimeRange('steps', recordingMethodReadRange)
+    }
+  })
+
   it('round-trips walking/running distance and reports its storage scope', async () => {
     const authorized = await hasVerifiedPermissions([
       { accessType: 'write', dataType: 'distance' },
@@ -124,7 +204,11 @@ describe('NitroHealth saves (native)', () => {
     ])
 
     const expectedStoredScope = Platform.OS === 'ios' ? 'walking-running' : 'activity-unspecified'
-    expect(result).toEqual({ status: 'completed', storedScope: expectedStoredScope })
+    expect(result).toEqual({
+      status: 'completed',
+      storedScope: expectedStoredScope,
+      storedRecordingMethods: ['unknown'],
+    })
     const page = await NitroHealth.readDistance(saveReadRange)
     assertConclusiveRead(page.samples)
 

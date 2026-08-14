@@ -83,6 +83,7 @@ import com.margelo.nitro.nitrohealth.NativeHealthPermissionStatusResult
 import com.margelo.nitro.nitrohealth.NativeHealthStatistics
 import com.margelo.nitro.nitrohealth.NativeHealthStatisticsQuery
 import com.margelo.nitro.nitrohealth.NativeHealthTimeRangeQuery
+import com.margelo.nitro.nitrohealth.NativeHealthWriteResult
 import com.margelo.nitro.nitrohealth.NativeHeartRateSampleInput
 import com.margelo.nitro.nitrohealth.NativeHeartRateSamplePage
 import com.margelo.nitro.nitrohealth.NativeHeartRateStatistics
@@ -398,6 +399,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                     NativeStepSample(
                         identity = makeRecordIdentity(record.metadata.id),
                         origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
+                        recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
                         startTimeMs = record.startTime.toEpochMilli().toDouble(),
                         endTimeMs = record.endTime.toEpochMilli().toDouble(),
                         count = record.count.toDouble()
@@ -437,6 +439,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                     NativeDistanceSample(
                         identity = makeRecordIdentity(record.metadata.id),
                         origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
+                        recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
                         startTimeMs = record.startTime.toEpochMilli().toDouble(),
                         endTimeMs = record.endTime.toEpochMilli().toDouble(),
                         distanceMeters = record.distance.inMeters,
@@ -477,6 +480,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                     NativeActiveEnergyBurnedSample(
                         identity = makeRecordIdentity(record.metadata.id),
                         origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
+                        recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
                         startTimeMs = record.startTime.toEpochMilli().toDouble(),
                         endTimeMs = record.endTime.toEpochMilli().toDouble(),
                         kilocalories = record.energy.inKilocalories
@@ -516,6 +520,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                     NativeHydrationSample(
                         identity = makeRecordIdentity(record.metadata.id),
                         origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
+                        recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
                         startTimeMs = record.startTime.toEpochMilli().toDouble(),
                         endTimeMs = record.endTime.toEpochMilli().toDouble(),
                         milliliters = record.volume.inMilliliters
@@ -555,6 +560,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                     NativeFloorsClimbedSample(
                         identity = makeRecordIdentity(record.metadata.id),
                         origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
+                        recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
                         startTimeMs = record.startTime.toEpochMilli().toDouble(),
                         endTimeMs = record.endTime.toEpochMilli().toDouble(),
                         floors = record.floors
@@ -620,6 +626,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                     NativeBodyMassSample(
                         identity = makeRecordIdentity(record.metadata.id),
                         origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
+                        recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
                         startTimeMs = record.time.toEpochMilli().toDouble(),
                         endTimeMs = record.time.toEpochMilli().toDouble(),
                         kilograms = record.weight.inKilograms
@@ -714,6 +721,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                     NativeRespiratoryRateSample(
                         identity = makeRecordIdentity(record.metadata.id),
                         origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
+                        recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
                         timeMs = record.time.toEpochMilli().toDouble(),
                         breathsPerMinute = record.rate
                     )
@@ -733,6 +741,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                     NativeBodyFatSample(
                         identity = makeRecordIdentity(record.metadata.id),
                         origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
+                        recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
                         timeMs = record.time.toEpochMilli().toDouble(),
                         percentage = record.percentage.value
                     )
@@ -752,6 +761,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                     NativeLeanBodyMassSample(
                         identity = makeRecordIdentity(record.metadata.id),
                         origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
+                        recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
                         timeMs = record.time.toEpochMilli().toDouble(),
                         kilograms = record.mass.inKilograms
                     )
@@ -783,6 +793,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                     NativeRestingHeartRateSample(
                         identity = makeRecordIdentity(record.metadata.id),
                         origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
+                        recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
                         timeMs = record.time.toEpochMilli().toDouble(),
                         bpm = record.beatsPerMinute.toDouble()
                     )
@@ -802,6 +813,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                     NativeHeartRateVariabilitySample(
                         identity = makeRecordIdentity(record.metadata.id),
                         origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
+                        recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
                         timeMs = record.time.toEpochMilli().toDouble(),
                         milliseconds = record.heartRateVariabilityMillis,
                         method = "rmssd"
@@ -822,6 +834,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                     NativeOxygenSaturationSample(
                         identity = makeRecordIdentity(record.metadata.id),
                         origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
+                        recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
                         timeMs = record.time.toEpochMilli().toDouble(),
                         percentage = record.percentage.value
                     )
@@ -839,6 +852,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                     NativeHeightSample(
                         identity = makeRecordIdentity(record.metadata.id),
                         origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
+                        recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
                         timeMs = record.time.toEpochMilli().toDouble(),
                         meters = record.height.inMeters
                     )
@@ -1076,11 +1090,12 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         }
     }
 
-    override fun saveSteps(samples: Array<NativeStepSampleInput>): Promise<Unit> {
+    override fun saveSteps(samples: Array<NativeStepSampleInput>): Promise<NativeHealthWriteResult> {
         return Promise.async {
+            val records = toStepsRecords(samples)
             val client = requireWritableClient("steps")
-            client.insertRecords(toStepsRecords(samples))
-            Unit
+            val response = client.insertRecords(records)
+            makeHealthWriteResult(client, records, response.recordIdsList)
         }
     }
 
@@ -1090,150 +1105,211 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         return Promise.async {
             val records = toDistanceRecords(samples)
             val client = requireWritableClient("distance")
-            client.insertRecords(records)
-            NativeDistanceWriteResult(storedScope = NativeDistanceScope.ACTIVITYUNSPECIFIED)
+            val response = client.insertRecords(records)
+            NativeDistanceWriteResult(
+                storedScope = NativeDistanceScope.ACTIVITYUNSPECIFIED,
+                storedRecordingMethods = storedHealthRecordingMethods(
+                    client,
+                    records,
+                    response.recordIdsList
+                )
+            )
         }
     }
 
     override fun saveActiveEnergyBurned(
         samples: Array<NativeActiveEnergyBurnedSampleInput>
-    ): Promise<Unit> {
+    ): Promise<NativeHealthWriteResult> {
         return Promise.async {
+            val records = toActiveCaloriesBurnedRecords(samples)
             val client = requireWritableClient("activeEnergyBurned")
-            client.insertRecords(toActiveCaloriesBurnedRecords(samples))
-            Unit
+            val response = client.insertRecords(records)
+            makeHealthWriteResult(client, records, response.recordIdsList)
         }
     }
 
-    override fun saveHydration(samples: Array<NativeHydrationSampleInput>): Promise<Unit> {
+    override fun saveHydration(
+        samples: Array<NativeHydrationSampleInput>
+    ): Promise<NativeHealthWriteResult> {
         return Promise.async {
+            val records = toHydrationRecords(samples)
             val client = requireWritableClient("hydration")
-            client.insertRecords(toHydrationRecords(samples))
-            Unit
+            val response = client.insertRecords(records)
+            makeHealthWriteResult(client, records, response.recordIdsList)
         }
     }
 
-    override fun saveFloorsClimbed(samples: Array<NativeFloorsClimbedSampleInput>): Promise<Unit> {
+    override fun saveFloorsClimbed(
+        samples: Array<NativeFloorsClimbedSampleInput>
+    ): Promise<NativeHealthWriteResult> {
         return Promise.async {
+            val records = toFloorsClimbedRecords(samples)
             val client = requireWritableClient("floorsClimbed")
-            client.insertRecords(toFloorsClimbedRecords(samples))
-            Unit
+            val response = client.insertRecords(records)
+            makeHealthWriteResult(client, records, response.recordIdsList)
         }
     }
 
-    override fun saveHeartRate(samples: Array<NativeHeartRateSampleInput>): Promise<Unit> {
+    override fun saveHeartRate(
+        samples: Array<NativeHeartRateSampleInput>
+    ): Promise<NativeHealthWriteResult> {
         return Promise.async {
+            val records = toHeartRateRecords(samples)
             val client = requireWritableClient("heartRate")
-            client.insertRecords(toHeartRateRecords(samples))
-            Unit
+            val response = client.insertRecords(records)
+            makeHealthWriteResult(client, records, response.recordIdsList)
         }
     }
 
-    override fun saveBloodPressure(samples: Array<NativeBloodPressureSampleInput>): Promise<Unit> {
+    override fun saveBloodPressure(
+        samples: Array<NativeBloodPressureSampleInput>
+    ): Promise<NativeHealthWriteResult> {
         return Promise.async {
+            val records = toBloodPressureRecords(samples)
             val client = requireWritableClient("bloodPressure")
-            client.insertRecords(toBloodPressureRecords(samples))
-            Unit
+            val response = client.insertRecords(records)
+            makeHealthWriteResult(client, records, response.recordIdsList)
         }
     }
 
-    override fun saveBloodGlucose(samples: Array<NativeBloodGlucoseSampleInput>): Promise<Unit> {
+    override fun saveBloodGlucose(
+        samples: Array<NativeBloodGlucoseSampleInput>
+    ): Promise<NativeHealthWriteResult> {
         return Promise.async {
+            val records = toBloodGlucoseRecords(samples)
             val client = requireWritableClient("bloodGlucose")
-            client.insertRecords(toBloodGlucoseRecords(samples))
-            Unit
+            val response = client.insertRecords(records)
+            makeHealthWriteResult(client, records, response.recordIdsList)
         }
     }
 
-    override fun saveBodyTemperature(samples: Array<NativeBodyTemperatureSampleInput>): Promise<Unit> {
+    override fun saveBodyTemperature(
+        samples: Array<NativeBodyTemperatureSampleInput>
+    ): Promise<NativeHealthWriteResult> {
         return Promise.async {
+            val records = toBodyTemperatureRecords(samples)
             val client = requireWritableClient("bodyTemperature")
-            client.insertRecords(toBodyTemperatureRecords(samples))
-            Unit
+            val response = client.insertRecords(records)
+            makeHealthWriteResult(client, records, response.recordIdsList)
         }
     }
 
-    override fun saveBodyMass(samples: Array<NativeBodyMassSampleInput>): Promise<Unit> {
+    override fun saveBodyMass(
+        samples: Array<NativeBodyMassSampleInput>
+    ): Promise<NativeHealthWriteResult> {
         return Promise.async {
+            val records = toWeightRecords(samples)
             val client = requireWritableClient("bodyMass")
-            client.insertRecords(toWeightRecords(samples))
-            Unit
+            val response = client.insertRecords(records)
+            makeHealthWriteResult(client, records, response.recordIdsList)
         }
     }
 
-    override fun saveRespiratoryRate(samples: Array<NativeRespiratoryRateSampleInput>): Promise<Unit> {
+    override fun saveRespiratoryRate(
+        samples: Array<NativeRespiratoryRateSampleInput>
+    ): Promise<NativeHealthWriteResult> {
         return Promise.async {
+            val records = toRespiratoryRateRecords(samples)
             val client = requireWritableClient("respiratoryRate")
-            client.insertRecords(toRespiratoryRateRecords(samples))
+            val response = client.insertRecords(records)
+            makeHealthWriteResult(client, records, response.recordIdsList)
         }
     }
 
-    override fun saveBodyFat(samples: Array<NativeBodyFatSampleInput>): Promise<Unit> {
+    override fun saveBodyFat(
+        samples: Array<NativeBodyFatSampleInput>
+    ): Promise<NativeHealthWriteResult> {
         return Promise.async {
+            val records = toBodyFatRecords(samples)
             val client = requireWritableClient("bodyFat")
-            client.insertRecords(toBodyFatRecords(samples))
+            val response = client.insertRecords(records)
+            makeHealthWriteResult(client, records, response.recordIdsList)
         }
     }
 
-    override fun saveLeanBodyMass(samples: Array<NativeLeanBodyMassSampleInput>): Promise<Unit> {
+    override fun saveLeanBodyMass(
+        samples: Array<NativeLeanBodyMassSampleInput>
+    ): Promise<NativeHealthWriteResult> {
         return Promise.async {
+            val records = toLeanBodyMassRecords(samples)
             val client = requireWritableClient("leanBodyMass")
-            client.insertRecords(toLeanBodyMassRecords(samples))
+            val response = client.insertRecords(records)
+            makeHealthWriteResult(client, records, response.recordIdsList)
         }
     }
 
-    override fun saveBasalBodyTemperature(samples: Array<NativeBasalBodyTemperatureSampleInput>): Promise<Unit> {
+    override fun saveBasalBodyTemperature(
+        samples: Array<NativeBasalBodyTemperatureSampleInput>
+    ): Promise<NativeHealthWriteResult> {
         return Promise.async {
+            val records = toBasalBodyTemperatureRecords(samples)
             val client = requireWritableClient("basalBodyTemperature")
-            client.insertRecords(toBasalBodyTemperatureRecords(samples))
+            val response = client.insertRecords(records)
+            makeHealthWriteResult(client, records, response.recordIdsList)
         }
     }
 
-    override fun saveRestingHeartRate(samples: Array<NativeRestingHeartRateSampleInput>): Promise<Unit> {
+    override fun saveRestingHeartRate(
+        samples: Array<NativeRestingHeartRateSampleInput>
+    ): Promise<NativeHealthWriteResult> {
         return Promise.async {
+            val records = toRestingHeartRateRecords(samples)
             val client = requireWritableClient("restingHeartRate")
-            client.insertRecords(toRestingHeartRateRecords(samples))
-            Unit
+            val response = client.insertRecords(records)
+            makeHealthWriteResult(client, records, response.recordIdsList)
         }
     }
 
-    override fun saveOxygenSaturation(samples: Array<NativeOxygenSaturationSampleInput>): Promise<Unit> {
+    override fun saveOxygenSaturation(
+        samples: Array<NativeOxygenSaturationSampleInput>
+    ): Promise<NativeHealthWriteResult> {
         return Promise.async {
+            val records = toOxygenSaturationRecords(samples)
             val client = requireWritableClient("oxygenSaturation")
-            client.insertRecords(toOxygenSaturationRecords(samples))
-            Unit
+            val response = client.insertRecords(records)
+            makeHealthWriteResult(client, records, response.recordIdsList)
         }
     }
 
-    override fun saveHeight(samples: Array<NativeHeightSampleInput>): Promise<Unit> {
+    override fun saveHeight(
+        samples: Array<NativeHeightSampleInput>
+    ): Promise<NativeHealthWriteResult> {
         return Promise.async {
+            val records = toHeightRecords(samples)
             val client = requireWritableClient("height")
-            client.insertRecords(toHeightRecords(samples))
-            Unit
+            val response = client.insertRecords(records)
+            makeHealthWriteResult(client, records, response.recordIdsList)
         }
     }
 
-    override fun saveVo2Max(samples: Array<NativeVo2MaxSampleInput>): Promise<Unit> {
+    override fun saveVo2Max(
+        samples: Array<NativeVo2MaxSampleInput>
+    ): Promise<NativeHealthWriteResult> {
         return Promise.async {
+            val records = toVo2MaxRecords(samples)
             val client = requireWritableClient("vo2Max")
-            client.insertRecords(toVo2MaxRecords(samples))
-            Unit
+            val response = client.insertRecords(records)
+            makeHealthWriteResult(client, records, response.recordIdsList)
         }
     }
 
-    override fun saveSleepSessions(sessions: Array<NativeSleepSessionInput>): Promise<Unit> {
+    override fun saveSleepSessions(
+        sessions: Array<NativeSleepSessionInput>
+    ): Promise<NativeHealthWriteResult> {
         return Promise.async {
+            val records = toSleepSessionRecords(sessions)
             val client = requireWritableClient("sleep")
-            client.insertRecords(toSleepSessionRecords(sessions))
-            Unit
+            val response = client.insertRecords(records)
+            makeHealthWriteResult(client, records, response.recordIdsList)
         }
     }
 
-    override fun saveWorkout(workout: NativeWorkoutSampleInput): Promise<Unit> {
+    override fun saveWorkout(workout: NativeWorkoutSampleInput): Promise<NativeHealthWriteResult> {
         return Promise.async {
+            val records = listOf(toExerciseSessionRecord(workout))
             val client = requireWritableClient("workout")
-            client.insertRecords(listOf(toExerciseSessionRecord(workout)))
-            Unit
+            val response = client.insertRecords(records)
+            makeHealthWriteResult(client, records, response.recordIdsList)
         }
     }
 

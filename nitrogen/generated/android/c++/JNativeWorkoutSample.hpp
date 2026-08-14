@@ -13,6 +13,7 @@
 #include "JNativeHealthDataOrigin.hpp"
 #include "JNativeHealthMetricValue.hpp"
 #include "JNativeHealthMetricValueStatus.hpp"
+#include "JNativeHealthRecordingMethod.hpp"
 #include "JNativeHealthSampleIdentity.hpp"
 #include "JNativeHealthSampleIdentityKind.hpp"
 #include "JNativeWorkoutActivity.hpp"
@@ -22,6 +23,7 @@
 #include "NativeHealthDataOrigin.hpp"
 #include "NativeHealthMetricValue.hpp"
 #include "NativeHealthMetricValueStatus.hpp"
+#include "NativeHealthRecordingMethod.hpp"
 #include "NativeHealthSampleIdentity.hpp"
 #include "NativeHealthSampleIdentityKind.hpp"
 #include "NativeWorkoutActivity.hpp"
@@ -54,6 +56,8 @@ namespace margelo::nitro::nitrohealth {
       jni::local_ref<JNativeHealthSampleIdentity> identity = this->getFieldValue(fieldIdentity);
       static const auto fieldOrigin = clazz->getField<JNativeHealthDataOrigin>("origin");
       jni::local_ref<JNativeHealthDataOrigin> origin = this->getFieldValue(fieldOrigin);
+      static const auto fieldRecordingMethod = clazz->getField<JNativeHealthRecordingMethod>("recordingMethod");
+      jni::local_ref<JNativeHealthRecordingMethod> recordingMethod = this->getFieldValue(fieldRecordingMethod);
       static const auto fieldStartTimeMs = clazz->getField<double>("startTimeMs");
       double startTimeMs = this->getFieldValue(fieldStartTimeMs);
       static const auto fieldEndTimeMs = clazz->getField<double>("endTimeMs");
@@ -75,6 +79,7 @@ namespace margelo::nitro::nitrohealth {
       return NativeWorkoutSample(
         identity->toCpp(),
         origin->toCpp(),
+        recordingMethod->toCpp(),
         startTimeMs,
         endTimeMs,
         elapsedDurationSeconds,
@@ -93,13 +98,14 @@ namespace margelo::nitro::nitrohealth {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeWorkoutSample::javaobject> fromCpp(const NativeWorkoutSample& value) {
-      using JSignature = JNativeWorkoutSample(jni::alias_ref<JNativeHealthSampleIdentity>, jni::alias_ref<JNativeHealthDataOrigin>, double, double, double, jni::alias_ref<JNativeHealthMetricValue>, jni::alias_ref<JNativeWorkoutActivity>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<JNativeHealthMetricValue>, jni::alias_ref<JNativeHealthMetricValue>);
+      using JSignature = JNativeWorkoutSample(jni::alias_ref<JNativeHealthSampleIdentity>, jni::alias_ref<JNativeHealthDataOrigin>, jni::alias_ref<JNativeHealthRecordingMethod>, double, double, double, jni::alias_ref<JNativeHealthMetricValue>, jni::alias_ref<JNativeWorkoutActivity>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<JNativeHealthMetricValue>, jni::alias_ref<JNativeHealthMetricValue>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
         clazz,
         JNativeHealthSampleIdentity::fromCpp(value.identity),
         JNativeHealthDataOrigin::fromCpp(value.origin),
+        JNativeHealthRecordingMethod::fromCpp(value.recordingMethod),
         value.startTimeMs,
         value.endTimeMs,
         value.elapsedDurationSeconds,

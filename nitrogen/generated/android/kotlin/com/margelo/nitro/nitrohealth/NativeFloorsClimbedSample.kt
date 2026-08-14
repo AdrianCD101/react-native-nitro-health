@@ -26,6 +26,9 @@ data class NativeFloorsClimbedSample(
   val origin: NativeHealthDataOrigin,
   @DoNotStrip
   @Keep
+  val recordingMethod: NativeHealthRecordingMethod,
+  @DoNotStrip
+  @Keep
   val startTimeMs: Double,
   @DoNotStrip
   @Keep
@@ -41,6 +44,7 @@ data class NativeFloorsClimbedSample(
     if (other !is NativeFloorsClimbedSample) return false
     return Objects.deepEquals(this.identity, other.identity)
       && Objects.deepEquals(this.origin, other.origin)
+      && Objects.deepEquals(this.recordingMethod, other.recordingMethod)
       && Objects.deepEquals(this.startTimeMs, other.startTimeMs)
       && Objects.deepEquals(this.endTimeMs, other.endTimeMs)
       && Objects.deepEquals(this.floors, other.floors)
@@ -50,6 +54,7 @@ data class NativeFloorsClimbedSample(
     return arrayOf<Any?>(
       identity,
       origin,
+      recordingMethod,
       startTimeMs,
       endTimeMs,
       floors
@@ -64,8 +69,8 @@ data class NativeFloorsClimbedSample(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, startTimeMs: Double, endTimeMs: Double, floors: Double): NativeFloorsClimbedSample {
-      return NativeFloorsClimbedSample(identity, origin, startTimeMs, endTimeMs, floors)
+    private fun fromCpp(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, recordingMethod: NativeHealthRecordingMethod, startTimeMs: Double, endTimeMs: Double, floors: Double): NativeFloorsClimbedSample {
+      return NativeFloorsClimbedSample(identity, origin, recordingMethod, startTimeMs, endTimeMs, floors)
     }
   }
 }

@@ -17,10 +17,10 @@ public extension NativeWorkoutActivityStatus {
    */
   init?(fromString string: String) {
     switch string {
-      case "known":
-        self = .known
       case "unknown":
         self = .unknown
+      case "known":
+        self = .known
       default:
         return nil
     }
@@ -31,10 +31,10 @@ public extension NativeWorkoutActivityStatus {
    */
   var stringValue: String {
     switch self {
-      case .known:
-        return "known"
       case .unknown:
         return "unknown"
+      case .known:
+        return "known"
     }
   }
 }
