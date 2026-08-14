@@ -27,6 +27,13 @@ export type {
 } from './BloodPressureMetadata'
 export type { BodyTemperatureSample } from './BodyTemperatureSample'
 export type { BodyTemperatureSampleInput } from './BodyTemperatureSampleInput'
+export type {
+  AndroidBodyTemperatureMeasurementLocation,
+  AndroidBodyTemperatureMetadata,
+  BodyTemperatureMetadata,
+  IOSBodyTemperatureMetadata,
+  IOSBodyTemperatureSensorLocation,
+} from './BodyTemperatureMetadata'
 export type { BodyMassSample } from './BodyMassSample'
 export type { BodyMassSampleInput } from './BodyMassSampleInput'
 export type { DistanceSample } from './DistanceSample'

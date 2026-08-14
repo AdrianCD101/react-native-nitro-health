@@ -20,6 +20,8 @@ namespace margelo::nitro::nitrohealth { struct NativeActiveEnergyBurnedSampleInp
 namespace margelo::nitro::nitrohealth { struct NativeActiveEnergyBurnedSamplePage; }
 // Forward declaration of `NativeActiveEnergyBurnedSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeActiveEnergyBurnedSample; }
+// Forward declaration of `NativeAndroidBodyTemperatureMeasurementLocation` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeAndroidBodyTemperatureMeasurementLocation; }
 // Forward declaration of `NativeBackgroundChangesMode` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class NativeBackgroundChangesMode; }
 // Forward declaration of `NativeBackgroundChangesResultStatus` to properly resolve imports.
@@ -164,6 +166,8 @@ namespace margelo::nitro::nitrohealth { struct NativeHydrationSampleInput; }
 namespace margelo::nitro::nitrohealth { struct NativeHydrationSamplePage; }
 // Forward declaration of `NativeHydrationSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHydrationSample; }
+// Forward declaration of `NativeIOSBodyTemperatureSensorLocation` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeIOSBodyTemperatureSensorLocation; }
 // Forward declaration of `NativeLeanBodyMassSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeLeanBodyMassSampleInput; }
 // Forward declaration of `NativeLeanBodyMassSamplePage` to properly resolve imports.
@@ -242,6 +246,7 @@ namespace margelo::nitro::nitrohealth { struct NativeWorkoutSample; }
 #include "NativeActiveEnergyBurnedSample.hpp"
 #include "NativeActiveEnergyBurnedSampleInput.hpp"
 #include "NativeActiveEnergyBurnedSamplePage.hpp"
+#include "NativeAndroidBodyTemperatureMeasurementLocation.hpp"
 #include "NativeBackgroundChangesMode.hpp"
 #include "NativeBackgroundChangesResult.hpp"
 #include "NativeBackgroundChangesResultStatus.hpp"
@@ -314,6 +319,7 @@ namespace margelo::nitro::nitrohealth { struct NativeWorkoutSample; }
 #include "NativeHydrationSample.hpp"
 #include "NativeHydrationSampleInput.hpp"
 #include "NativeHydrationSamplePage.hpp"
+#include "NativeIOSBodyTemperatureSensorLocation.hpp"
 #include "NativeLeanBodyMassSample.hpp"
 #include "NativeLeanBodyMassSampleInput.hpp"
 #include "NativeLeanBodyMassSamplePage.hpp"

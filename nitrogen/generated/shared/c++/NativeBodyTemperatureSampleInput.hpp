@@ -28,10 +28,15 @@
 #error NitroModules cannot be found! Are you sure you installed NitroModules properly?
 #endif
 
+// Forward declaration of `NativeAndroidBodyTemperatureMeasurementLocation` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeAndroidBodyTemperatureMeasurementLocation; }
+// Forward declaration of `NativeIOSBodyTemperatureSensorLocation` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeIOSBodyTemperatureSensorLocation; }
 
-
-#include <string>
+#include "NativeAndroidBodyTemperatureMeasurementLocation.hpp"
 #include <optional>
+#include "NativeIOSBodyTemperatureSensorLocation.hpp"
+#include <string>
 
 namespace margelo::nitro::nitrohealth {
 
@@ -42,12 +47,14 @@ namespace margelo::nitro::nitrohealth {
   public:
     double timeMs     SWIFT_PRIVATE;
     double celsius     SWIFT_PRIVATE;
+    std::optional<NativeAndroidBodyTemperatureMeasurementLocation> androidMeasurementLocation     SWIFT_PRIVATE;
+    std::optional<NativeIOSBodyTemperatureSensorLocation> iosSensorLocation     SWIFT_PRIVATE;
     std::optional<std::string> syncId     SWIFT_PRIVATE;
     std::optional<double> syncVersion     SWIFT_PRIVATE;
 
   public:
     NativeBodyTemperatureSampleInput() = default;
-    explicit NativeBodyTemperatureSampleInput(double timeMs, double celsius, std::optional<std::string> syncId, std::optional<double> syncVersion): timeMs(timeMs), celsius(celsius), syncId(syncId), syncVersion(syncVersion) {}
+    explicit NativeBodyTemperatureSampleInput(double timeMs, double celsius, std::optional<NativeAndroidBodyTemperatureMeasurementLocation> androidMeasurementLocation, std::optional<NativeIOSBodyTemperatureSensorLocation> iosSensorLocation, std::optional<std::string> syncId, std::optional<double> syncVersion): timeMs(timeMs), celsius(celsius), androidMeasurementLocation(androidMeasurementLocation), iosSensorLocation(iosSensorLocation), syncId(syncId), syncVersion(syncVersion) {}
 
   public:
     friend bool operator==(const NativeBodyTemperatureSampleInput& lhs, const NativeBodyTemperatureSampleInput& rhs) = default;
@@ -65,6 +72,8 @@ namespace margelo::nitro {
       return margelo::nitro::nitrohealth::NativeBodyTemperatureSampleInput(
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeMs"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "celsius"))),
+        JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeAndroidBodyTemperatureMeasurementLocation>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "androidMeasurementLocation"))),
+        JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeIOSBodyTemperatureSensorLocation>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "iosSensorLocation"))),
         JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "syncId"))),
         JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "syncVersion")))
       );
@@ -73,6 +82,8 @@ namespace margelo::nitro {
       jsi::Object obj(runtime);
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "timeMs"), JSIConverter<double>::toJSI(runtime, arg.timeMs));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "celsius"), JSIConverter<double>::toJSI(runtime, arg.celsius));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "androidMeasurementLocation"), JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeAndroidBodyTemperatureMeasurementLocation>>::toJSI(runtime, arg.androidMeasurementLocation));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "iosSensorLocation"), JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeIOSBodyTemperatureSensorLocation>>::toJSI(runtime, arg.iosSensorLocation));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "syncId"), JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.syncId));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "syncVersion"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.syncVersion));
       return obj;
@@ -87,6 +98,8 @@ namespace margelo::nitro {
       }
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeMs")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "celsius")))) return false;
+      if (!JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeAndroidBodyTemperatureMeasurementLocation>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "androidMeasurementLocation")))) return false;
+      if (!JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeIOSBodyTemperatureSensorLocation>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "iosSensorLocation")))) return false;
       if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "syncId")))) return false;
       if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "syncVersion")))) return false;
       return true;

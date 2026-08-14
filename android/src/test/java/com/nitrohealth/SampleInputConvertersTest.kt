@@ -378,6 +378,8 @@ class SampleInputConvertersTest {
                 NativeBodyTemperatureSampleInput(
                     timeMs = startTimeMs,
                     celsius = 36.6,
+                    androidMeasurementLocation = null,
+                    iosSensorLocation = null,
                     syncId = null,
                     syncVersion = null
                 )
@@ -458,6 +460,8 @@ class SampleInputConvertersTest {
                 NativeBasalBodyTemperatureSampleInput(
                     timeMs = startTimeMs,
                     celsius = 36.4,
+                    androidMeasurementLocation = null,
+                    iosSensorLocation = null,
                     syncId = null,
                     syncVersion = null
                 )
@@ -685,6 +689,8 @@ class SampleInputConvertersTest {
                     NativeBodyTemperatureSampleInput(
                         timeMs = startTimeMs,
                         celsius = 36.6,
+                        androidMeasurementLocation = null,
+                        iosSensorLocation = null,
                         syncId = syncId,
                         syncVersion = syncVersion
                     )
@@ -725,6 +731,8 @@ class SampleInputConvertersTest {
                     NativeBasalBodyTemperatureSampleInput(
                         timeMs = startTimeMs,
                         celsius = 36.4,
+                        androidMeasurementLocation = null,
+                        iosSensorLocation = null,
                         syncId = syncId,
                         syncVersion = syncVersion
                     )

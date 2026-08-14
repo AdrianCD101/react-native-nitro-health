@@ -5,7 +5,6 @@ import androidx.health.connect.client.records.BasalBodyTemperatureRecord
 import androidx.health.connect.client.records.BloodGlucoseRecord
 import androidx.health.connect.client.records.BloodPressureRecord
 import androidx.health.connect.client.records.BodyFatRecord
-import androidx.health.connect.client.records.BodyTemperatureMeasurementLocation
 import androidx.health.connect.client.records.BodyTemperatureRecord
 import androidx.health.connect.client.records.DistanceRecord
 import androidx.health.connect.client.records.FloorsClimbedRecord
@@ -190,9 +189,8 @@ internal fun toBodyTemperatureRecords(
             zoneOffset = null,
             metadata = makeSampleMetadata(sample.syncId, sample.syncVersion),
             temperature = Temperature.celsius(sample.celsius),
-            // Deferred to metadata passthrough (issue #73); strongest promotion candidate
-            // since HealthKit has a matching sensor-location metadata key.
-            measurementLocation = BodyTemperatureMeasurementLocation.MEASUREMENT_LOCATION_UNKNOWN
+            measurementLocation = sample.androidMeasurementLocation
+                .toHealthConnectBodyTemperatureMeasurementLocation()
         )
     }
 }
@@ -232,8 +230,8 @@ internal fun toBasalBodyTemperatureRecords(
             zoneOffset = null,
             metadata = makeSampleMetadata(sample.syncId, sample.syncVersion),
             temperature = Temperature.celsius(sample.celsius),
-            // Deferred to metadata passthrough (issue #73), same as body temperature.
-            measurementLocation = BodyTemperatureMeasurementLocation.MEASUREMENT_LOCATION_UNKNOWN
+            measurementLocation = sample.androidMeasurementLocation
+                .toHealthConnectBodyTemperatureMeasurementLocation()
         )
     }
 }

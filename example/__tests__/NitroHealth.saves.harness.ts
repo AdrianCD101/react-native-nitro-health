@@ -5,7 +5,7 @@ import type { HealthSample, WorkoutSample } from 'react-native-nitro-health'
 
 import {
   hasVerifiedPermissions,
-  isInconclusiveRead,
+  assertConclusiveRead,
   saveInterval,
   saveReadRange,
 } from './support/harnessSupport'
@@ -107,9 +107,7 @@ describe('NitroHealth saves (native)', () => {
 
     const page = await NitroHealth.readSteps(saveReadRange)
 
-    if (isInconclusiveRead(page.samples)) {
-      return
-    }
+    assertConclusiveRead(page.samples)
 
     expect(page.samples.some((sample) => sample.count === 321)).toBe(true)
   })
@@ -128,7 +126,7 @@ describe('NitroHealth saves (native)', () => {
     const expectedStoredScope = Platform.OS === 'ios' ? 'walking-running' : 'activity-unspecified'
     expect(result).toEqual({ status: 'completed', storedScope: expectedStoredScope })
     const page = await NitroHealth.readDistance(saveReadRange)
-    if (isInconclusiveRead(page.samples)) return
+    assertConclusiveRead(page.samples)
 
     const saved = page.samples.find(
       (sample) => sample.distanceMeters === 1234 && sample.scope === expectedStoredScope
@@ -151,9 +149,7 @@ describe('NitroHealth saves (native)', () => {
 
     const page = await NitroHealth.readBodyMass(saveReadRange)
 
-    if (isInconclusiveRead(page.samples)) {
-      return
-    }
+    assertConclusiveRead(page.samples)
 
     expect(page.samples.some((sample) => sample.kilograms === 72.5)).toBe(true)
   })
@@ -175,7 +171,7 @@ describe('NitroHealth saves (native)', () => {
         },
       ])
       const page = await NitroHealth.readHydration(saveReadRange)
-      if (isInconclusiveRead(page.samples)) return
+      assertConclusiveRead(page.samples)
 
       const saved = page.samples.find(
         (sample) =>
@@ -204,9 +200,7 @@ describe('NitroHealth saves (native)', () => {
 
     const page = await NitroHealth.readHeartRate(saveReadRange)
 
-    if (isInconclusiveRead(page.samples)) {
-      return
-    }
+    assertConclusiveRead(page.samples)
 
     expect(page.samples.some((sample) => sample.bpm === 123)).toBe(true)
   })
@@ -248,9 +242,7 @@ describe('NitroHealth saves (native)', () => {
       ])
 
       const page = await NitroHealth.readSleepSamples(saveReadRange)
-      if (isInconclusiveRead(page.samples)) {
-        return
-      }
+      assertConclusiveRead(page.samples)
 
       const envelope = page.samples.find(
         (sample) =>
@@ -310,9 +302,7 @@ describe('NitroHealth saves (native)', () => {
       })
 
       const page = await NitroHealth.readWorkouts(saveReadRange)
-      if (isInconclusiveRead(page.samples)) {
-        return
-      }
+      assertConclusiveRead(page.samples)
 
       const saved = page.samples.find(
         (sample) =>
@@ -354,9 +344,7 @@ describe('NitroHealth saves (native)', () => {
 
       const page = await NitroHealth.readRestingHeartRate(saveReadRange)
 
-      if (isInconclusiveRead(page.samples)) {
-        return
-      }
+      assertConclusiveRead(page.samples)
 
       expect(page.samples.some((sample) => sample.bpm === 58)).toBe(true)
     })
@@ -384,9 +372,7 @@ describe('NitroHealth saves (native)', () => {
 
       const page = await NitroHealth.readOxygenSaturation(saveReadRange)
 
-      if (isInconclusiveRead(page.samples)) {
-        return
-      }
+      assertConclusiveRead(page.samples)
 
       const match = page.samples.find(
         (sample) => Math.abs(sample.percentage - savedPercentage) < 0.01
@@ -428,9 +414,7 @@ describe('NitroHealth saves (native)', () => {
 
       const page = await NitroHealth.readBloodPressure(saveReadRange)
 
-      if (isInconclusiveRead(page.samples)) {
-        return
-      }
+      assertConclusiveRead(page.samples)
 
       const matches = page.samples.filter(
         (sample) => sample.systolicMmHg === 118 && sample.diastolicMmHg === 76
@@ -482,9 +466,7 @@ describe('NitroHealth saves (native)', () => {
 
         const page = await NitroHealth.readBloodGlucose(saveReadRange)
 
-        if (isInconclusiveRead(page.samples)) {
-          return
-        }
+        assertConclusiveRead(page.samples)
 
         // HealthKit stores glucose in its composed mole unit, so allow float round-tripping.
         const matches = page.samples.filter(
@@ -521,19 +503,39 @@ describe('NitroHealth saves (native)', () => {
         return
       }
 
-      await NitroHealth.saveBodyTemperature([{ date: saveInterval.startDate, celsius: 36.6 }])
+      await NitroHealth.deleteRecordsByTimeRange('bodyTemperature', saveReadRange)
 
-      const page = await NitroHealth.readBodyTemperature(saveReadRange)
+      try {
+        await NitroHealth.saveBodyTemperature([
+          {
+            date: saveInterval.startDate,
+            celsius: 36.6,
+            metadata: {
+              android: { measurementLocation: 'mouth' },
+              ios: { sensorLocation: 'mouth' },
+            },
+          },
+        ])
 
-      if (isInconclusiveRead(page.samples)) {
-        return
+        const page = await NitroHealth.readBodyTemperature(saveReadRange)
+
+        assertConclusiveRead(page.samples)
+
+        // HealthKit stores temperature canonically, so allow float round-tripping.
+        const matches = page.samples.filter((sample) => Math.abs(sample.celsius - 36.6) < 0.001)
+
+        expect(matches.length).toBe(1)
+        expect(matches[0]?.identity.kind).toBe('record')
+        if (Platform.OS === 'android') {
+          expect(matches[0]?.metadata).toEqual({
+            android: { measurementLocation: 'mouth' },
+          })
+        } else {
+          expect(matches[0]?.metadata).toEqual({ ios: { sensorLocation: 'mouth' } })
+        }
+      } finally {
+        await NitroHealth.deleteRecordsByTimeRange('bodyTemperature', saveReadRange)
       }
-
-      // HealthKit stores temperature canonically, so allow float round-tripping.
-      const matches = page.samples.filter((sample) => Math.abs(sample.celsius - 36.6) < 0.001)
-
-      expect(matches.length).toBeGreaterThanOrEqual(1)
-      expect(matches[0]?.identity.kind).toBe('record')
     })
   })
 
@@ -554,9 +556,7 @@ describe('NitroHealth saves (native)', () => {
 
       const page = await NitroHealth.readRespiratoryRate(saveReadRange)
 
-      if (isInconclusiveRead(page.samples)) {
-        return
-      }
+      assertConclusiveRead(page.samples)
 
       const matches = page.samples.filter(
         (sample) => Math.abs(sample.breathsPerMinute - 16.5) < 0.001
@@ -584,9 +584,7 @@ describe('NitroHealth saves (native)', () => {
 
       const page = await NitroHealth.readVo2Max(saveReadRange)
 
-      if (isInconclusiveRead(page.samples)) {
-        return
-      }
+      assertConclusiveRead(page.samples)
 
       const matches = page.samples.filter(
         (sample) => Math.abs(sample.millilitersPerKilogramPerMinute - 42.5) < 0.001
@@ -617,7 +615,7 @@ describe('NitroHealth saves (native)', () => {
         ])
 
         const page = await NitroHealth.readFloorsClimbed(saveReadRange)
-        if (isInconclusiveRead(page.samples)) return
+        assertConclusiveRead(page.samples)
 
         const matches = page.samples.filter(
           (sample) =>
@@ -649,9 +647,7 @@ describe('NitroHealth saves (native)', () => {
 
       const page = await NitroHealth.readBodyFat(saveReadRange)
 
-      if (isInconclusiveRead(page.samples)) {
-        return
-      }
+      assertConclusiveRead(page.samples)
 
       // HealthKit stores body fat as a fraction (0-1); a matching 18.5 read back pins the
       // native *100 / /100 conversion pair.
@@ -677,9 +673,7 @@ describe('NitroHealth saves (native)', () => {
 
       const page = await NitroHealth.readLeanBodyMass(saveReadRange)
 
-      if (isInconclusiveRead(page.samples)) {
-        return
-      }
+      assertConclusiveRead(page.samples)
 
       const matches = page.samples.filter((sample) => Math.abs(sample.kilograms - 55.4) < 0.001)
 
@@ -699,18 +693,36 @@ describe('NitroHealth saves (native)', () => {
         return
       }
 
-      await NitroHealth.saveBasalBodyTemperature([{ date: saveInterval.startDate, celsius: 36.4 }])
+      await NitroHealth.deleteRecordsByTimeRange('basalBodyTemperature', saveReadRange)
 
-      const page = await NitroHealth.readBasalBodyTemperature(saveReadRange)
+      try {
+        await NitroHealth.saveBasalBodyTemperature([
+          {
+            date: saveInterval.startDate,
+            celsius: 36.4,
+            metadata: {
+              android: { measurementLocation: 'ear' },
+              ios: { sensorLocation: 'ear' },
+            },
+          },
+        ])
 
-      if (isInconclusiveRead(page.samples)) {
-        return
+        const page = await NitroHealth.readBasalBodyTemperature(saveReadRange)
+
+        assertConclusiveRead(page.samples)
+
+        const matches = page.samples.filter((sample) => Math.abs(sample.celsius - 36.4) < 0.001)
+
+        expect(matches.length).toBe(1)
+        expect(matches[0]?.identity.kind).toBe('record')
+        if (Platform.OS === 'android') {
+          expect(matches[0]?.metadata).toEqual({ android: { measurementLocation: 'ear' } })
+        } else {
+          expect(matches[0]?.metadata).toEqual({ ios: { sensorLocation: 'ear' } })
+        }
+      } finally {
+        await NitroHealth.deleteRecordsByTimeRange('basalBodyTemperature', saveReadRange)
       }
-
-      const matches = page.samples.filter((sample) => Math.abs(sample.celsius - 36.4) < 0.001)
-
-      expect(matches.length).toBeGreaterThanOrEqual(1)
-      expect(matches[0]?.identity.kind).toBe('record')
     })
   })
 
@@ -729,9 +741,7 @@ describe('NitroHealth saves (native)', () => {
 
       const page = await NitroHealth.readHeight(saveReadRange)
 
-      if (isInconclusiveRead(page.samples)) {
-        return
-      }
+      assertConclusiveRead(page.samples)
 
       expect(page.samples.some((sample) => sample.meters === 1.78)).toBe(true)
     })

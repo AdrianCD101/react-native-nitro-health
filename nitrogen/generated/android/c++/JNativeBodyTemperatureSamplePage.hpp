@@ -10,14 +10,18 @@
 #include <fbjni/fbjni.h>
 #include "NativeBodyTemperatureSamplePage.hpp"
 
+#include "JNativeAndroidBodyTemperatureMeasurementLocation.hpp"
 #include "JNativeBodyTemperatureSample.hpp"
 #include "JNativeHealthDataOrigin.hpp"
 #include "JNativeHealthSampleIdentity.hpp"
 #include "JNativeHealthSampleIdentityKind.hpp"
+#include "JNativeIOSBodyTemperatureSensorLocation.hpp"
+#include "NativeAndroidBodyTemperatureMeasurementLocation.hpp"
 #include "NativeBodyTemperatureSample.hpp"
 #include "NativeHealthDataOrigin.hpp"
 #include "NativeHealthSampleIdentity.hpp"
 #include "NativeHealthSampleIdentityKind.hpp"
+#include "NativeIOSBodyTemperatureSensorLocation.hpp"
 #include <optional>
 #include <string>
 #include <vector>

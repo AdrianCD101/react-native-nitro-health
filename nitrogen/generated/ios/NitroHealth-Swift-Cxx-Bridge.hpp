@@ -18,6 +18,8 @@ namespace margelo::nitro::nitrohealth { struct NativeActiveEnergyBurnedSampleInp
 namespace margelo::nitro::nitrohealth { struct NativeActiveEnergyBurnedSamplePage; }
 // Forward declaration of `NativeActiveEnergyBurnedSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeActiveEnergyBurnedSample; }
+// Forward declaration of `NativeAndroidBodyTemperatureMeasurementLocation` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeAndroidBodyTemperatureMeasurementLocation; }
 // Forward declaration of `NativeBackgroundChangesMode` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class NativeBackgroundChangesMode; }
 // Forward declaration of `NativeBackgroundChangesResultStatus` to properly resolve imports.
@@ -156,6 +158,8 @@ namespace margelo::nitro::nitrohealth { struct NativeHydrationSampleInput; }
 namespace margelo::nitro::nitrohealth { struct NativeHydrationSamplePage; }
 // Forward declaration of `NativeHydrationSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHydrationSample; }
+// Forward declaration of `NativeIOSBodyTemperatureSensorLocation` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeIOSBodyTemperatureSensorLocation; }
 // Forward declaration of `NativeLeanBodyMassSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeLeanBodyMassSampleInput; }
 // Forward declaration of `NativeLeanBodyMassSamplePage` to properly resolve imports.
@@ -235,6 +239,7 @@ namespace NitroHealth { class HybridNitroHealthSpec_cxx; }
 #include "NativeActiveEnergyBurnedSample.hpp"
 #include "NativeActiveEnergyBurnedSampleInput.hpp"
 #include "NativeActiveEnergyBurnedSamplePage.hpp"
+#include "NativeAndroidBodyTemperatureMeasurementLocation.hpp"
 #include "NativeBackgroundChangesMode.hpp"
 #include "NativeBackgroundChangesResult.hpp"
 #include "NativeBackgroundChangesResultStatus.hpp"
@@ -304,6 +309,7 @@ namespace NitroHealth { class HybridNitroHealthSpec_cxx; }
 #include "NativeHydrationSample.hpp"
 #include "NativeHydrationSampleInput.hpp"
 #include "NativeHydrationSamplePage.hpp"
+#include "NativeIOSBodyTemperatureSensorLocation.hpp"
 #include "NativeLeanBodyMassSample.hpp"
 #include "NativeLeanBodyMassSampleInput.hpp"
 #include "NativeLeanBodyMassSamplePage.hpp"
@@ -909,6 +915,36 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return optional.has_value();
   }
   inline std::vector<NativeBloodGlucoseSample> get_std__optional_std__vector_NativeBloodGlucoseSample__(const std::optional<std::vector<NativeBloodGlucoseSample>>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::optional<NativeAndroidBodyTemperatureMeasurementLocation>
+  /**
+   * Specialized version of `std::optional<NativeAndroidBodyTemperatureMeasurementLocation>`.
+   */
+  using std__optional_NativeAndroidBodyTemperatureMeasurementLocation_ = std::optional<NativeAndroidBodyTemperatureMeasurementLocation>;
+  inline std::optional<NativeAndroidBodyTemperatureMeasurementLocation> create_std__optional_NativeAndroidBodyTemperatureMeasurementLocation_(const NativeAndroidBodyTemperatureMeasurementLocation& value) noexcept {
+    return std::optional<NativeAndroidBodyTemperatureMeasurementLocation>(value);
+  }
+  inline bool has_value_std__optional_NativeAndroidBodyTemperatureMeasurementLocation_(const std::optional<NativeAndroidBodyTemperatureMeasurementLocation>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline NativeAndroidBodyTemperatureMeasurementLocation get_std__optional_NativeAndroidBodyTemperatureMeasurementLocation_(const std::optional<NativeAndroidBodyTemperatureMeasurementLocation>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::optional<NativeIOSBodyTemperatureSensorLocation>
+  /**
+   * Specialized version of `std::optional<NativeIOSBodyTemperatureSensorLocation>`.
+   */
+  using std__optional_NativeIOSBodyTemperatureSensorLocation_ = std::optional<NativeIOSBodyTemperatureSensorLocation>;
+  inline std::optional<NativeIOSBodyTemperatureSensorLocation> create_std__optional_NativeIOSBodyTemperatureSensorLocation_(const NativeIOSBodyTemperatureSensorLocation& value) noexcept {
+    return std::optional<NativeIOSBodyTemperatureSensorLocation>(value);
+  }
+  inline bool has_value_std__optional_NativeIOSBodyTemperatureSensorLocation_(const std::optional<NativeIOSBodyTemperatureSensorLocation>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline NativeIOSBodyTemperatureSensorLocation get_std__optional_NativeIOSBodyTemperatureSensorLocation_(const std::optional<NativeIOSBodyTemperatureSensorLocation>& optional) noexcept {
     return optional.value();
   }
   

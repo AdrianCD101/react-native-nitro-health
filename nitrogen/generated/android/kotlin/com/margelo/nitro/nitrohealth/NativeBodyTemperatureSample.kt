@@ -29,7 +29,13 @@ data class NativeBodyTemperatureSample(
   val timeMs: Double,
   @DoNotStrip
   @Keep
-  val celsius: Double
+  val celsius: Double,
+  @DoNotStrip
+  @Keep
+  val androidMeasurementLocation: NativeAndroidBodyTemperatureMeasurementLocation?,
+  @DoNotStrip
+  @Keep
+  val iosSensorLocation: NativeIOSBodyTemperatureSensorLocation?
 ) {
   /* primary constructor */
 
@@ -40,6 +46,8 @@ data class NativeBodyTemperatureSample(
       && Objects.deepEquals(this.origin, other.origin)
       && Objects.deepEquals(this.timeMs, other.timeMs)
       && Objects.deepEquals(this.celsius, other.celsius)
+      && Objects.deepEquals(this.androidMeasurementLocation, other.androidMeasurementLocation)
+      && Objects.deepEquals(this.iosSensorLocation, other.iosSensorLocation)
   }
 
   override fun hashCode(): Int {
@@ -47,7 +55,9 @@ data class NativeBodyTemperatureSample(
       identity,
       origin,
       timeMs,
-      celsius
+      celsius,
+      androidMeasurementLocation,
+      iosSensorLocation
     ).contentDeepHashCode()
   }
 
@@ -59,8 +69,8 @@ data class NativeBodyTemperatureSample(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, timeMs: Double, celsius: Double): NativeBodyTemperatureSample {
-      return NativeBodyTemperatureSample(identity, origin, timeMs, celsius)
+    private fun fromCpp(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, timeMs: Double, celsius: Double, androidMeasurementLocation: NativeAndroidBodyTemperatureMeasurementLocation?, iosSensorLocation: NativeIOSBodyTemperatureSensorLocation?): NativeBodyTemperatureSample {
+      return NativeBodyTemperatureSample(identity, origin, timeMs, celsius, androidMeasurementLocation, iosSensorLocation)
     }
   }
 }

@@ -207,6 +207,37 @@ describe('NitroHealth changes contract', () => {
     })
   })
 
+  it('maps body temperature metadata on upserts', async () => {
+    const timeMs = Date.parse('2026-01-01T09:00:00.000Z')
+    mockNitroHealth.getChanges.mockResolvedValue({
+      changes: [
+        {
+          type: 'upsert',
+          recordId: 'bt-record',
+          bodyTemperatureSamples: [
+            {
+              ...nativeRecordMetadata('bt-record'),
+              timeMs,
+              celsius: 36.6,
+              iosSensorLocation: 'temporalArtery',
+            },
+          ],
+        },
+      ],
+      nextChangesToken: 'next-token',
+      hasMore: false,
+      tokenExpired: false,
+    })
+
+    const result = await NitroHealth.getChanges('bodyTemperature', 'current-token')
+    if (result.tokenExpired) throw new Error('Expected a successful changes result')
+
+    expect(result.changes[0]).toMatchObject({
+      type: 'upsert',
+      samples: [{ metadata: { ios: { sensorLocation: 'temporal_artery' } } }],
+    })
+  })
+
   it('preserves an empty heart-rate upsert so cached children can be cleared', async () => {
     mockNitroHealth.getChanges.mockResolvedValue({
       changes: [

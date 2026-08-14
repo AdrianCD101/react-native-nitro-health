@@ -95,6 +95,10 @@ import type {
 } from '../BloodPressureMetadata'
 import type { BodyTemperatureSample } from '../BodyTemperatureSample'
 import type { BodyTemperatureSampleInput } from '../BodyTemperatureSampleInput'
+import type {
+  AndroidBodyTemperatureMeasurementLocation,
+  IOSBodyTemperatureSensorLocation,
+} from '../BodyTemperatureMetadata'
 import type { BasalBodyTemperatureSample } from '../BasalBodyTemperatureSample'
 import type { BasalBodyTemperatureSampleInput } from '../BasalBodyTemperatureSampleInput'
 import type { BodyFatSample } from '../BodyFatSample'
@@ -554,6 +558,115 @@ function makeNativeBloodGlucoseMetadata(
   return result
 }
 
+function makeNativeAndroidBodyTemperatureMeasurementLocation(
+  value: AndroidBodyTemperatureMeasurementLocation | undefined,
+  index: number
+): NativeBodyTemperatureSampleInput['androidMeasurementLocation'] {
+  switch (value) {
+    case undefined:
+      return undefined
+    case 'unknown':
+      return 'unspecified'
+    case 'armpit':
+    case 'finger':
+    case 'forehead':
+    case 'mouth':
+    case 'rectum':
+    case 'toe':
+    case 'ear':
+    case 'wrist':
+    case 'vagina':
+      return value
+    case 'temporal_artery':
+      return 'temporalArtery'
+    default:
+      throw new Error(`samples[${index}]: metadata.android.measurementLocation is unsupported`)
+  }
+}
+
+function makeNativeIOSBodyTemperatureSensorLocation(
+  value: IOSBodyTemperatureSensorLocation | undefined,
+  index: number
+): NativeBodyTemperatureSampleInput['iosSensorLocation'] {
+  switch (value) {
+    case undefined:
+      return undefined
+    case 'other':
+    case 'armpit':
+    case 'body':
+    case 'ear':
+    case 'finger':
+    case 'mouth':
+    case 'rectum':
+    case 'toe':
+    case 'forehead':
+      return value
+    case 'gastro_intestinal':
+      return 'gastroIntestinal'
+    case 'ear_drum':
+      return 'earDrum'
+    case 'temporal_artery':
+      return 'temporalArtery'
+    default:
+      throw new Error(`samples[${index}]: metadata.ios.sensorLocation is unsupported`)
+  }
+}
+
+function makeNativeBodyTemperatureMetadata(
+  metadata: BodyTemperatureSampleInput['metadata'],
+  index: number
+): Pick<NativeBodyTemperatureSampleInput, 'androidMeasurementLocation' | 'iosSensorLocation'> {
+  if (metadata === undefined) return {}
+  if (typeof metadata !== 'object' || metadata === null || Array.isArray(metadata)) {
+    throw new Error(`samples[${index}]: metadata must be an object`)
+  }
+  const supportedPlatforms = new Set(['android', 'ios'])
+  const unsupportedPlatform = Object.keys(metadata).find((key) => !supportedPlatforms.has(key))
+  if (unsupportedPlatform !== undefined) {
+    throw new Error(`samples[${index}]: metadata.${unsupportedPlatform} is unsupported`)
+  }
+
+  const result: Pick<
+    NativeBodyTemperatureSampleInput,
+    'androidMeasurementLocation' | 'iosSensorLocation'
+  > = {}
+  const android = metadata.android
+  if (android !== undefined) {
+    if (typeof android !== 'object' || android === null || Array.isArray(android)) {
+      throw new Error(`samples[${index}]: metadata.android must be an object`)
+    }
+    const unsupportedKey = Object.keys(android).find((key) => key !== 'measurementLocation')
+    if (unsupportedKey !== undefined) {
+      throw new Error(`samples[${index}]: metadata.android.${unsupportedKey} is unsupported`)
+    }
+    const androidMeasurementLocation = makeNativeAndroidBodyTemperatureMeasurementLocation(
+      android.measurementLocation,
+      index
+    )
+    if (androidMeasurementLocation !== undefined) {
+      result.androidMeasurementLocation = androidMeasurementLocation
+    }
+  }
+
+  const ios = metadata.ios
+  if (ios !== undefined) {
+    if (typeof ios !== 'object' || ios === null || Array.isArray(ios)) {
+      throw new Error(`samples[${index}]: metadata.ios must be an object`)
+    }
+    const unsupportedKey = Object.keys(ios).find((key) => key !== 'sensorLocation')
+    if (unsupportedKey !== undefined) {
+      throw new Error(`samples[${index}]: metadata.ios.${unsupportedKey} is unsupported`)
+    }
+    const iosSensorLocation = makeNativeIOSBodyTemperatureSensorLocation(
+      ios.sensorLocation,
+      index
+    )
+    if (iosSensorLocation !== undefined) result.iosSensorLocation = iosSensorLocation
+  }
+
+  return result
+}
+
 function makeBloodPressureBodyPosition(
   value: NonNullable<NativeBloodPressureSample['androidBodyPosition']>
 ): AndroidBloodPressureBodyPosition {
@@ -590,6 +703,76 @@ function makeBloodPressureMeasurementLocation(
     default:
       throw new Error(`Unsupported native blood pressure measurement location: ${value}`)
   }
+}
+
+function makeAndroidBodyTemperatureMeasurementLocation(
+  value: NonNullable<NativeBodyTemperatureSample['androidMeasurementLocation']>
+): AndroidBodyTemperatureMeasurementLocation {
+  switch (value) {
+    case 'unspecified':
+      return 'unknown'
+    case 'armpit':
+    case 'finger':
+    case 'forehead':
+    case 'mouth':
+    case 'rectum':
+    case 'toe':
+    case 'ear':
+    case 'wrist':
+    case 'vagina':
+      return value
+    case 'temporalArtery':
+      return 'temporal_artery'
+    default:
+      throw new Error(`Unsupported native body temperature measurement location: ${value}`)
+  }
+}
+
+function makeIOSBodyTemperatureSensorLocation(
+  value: NonNullable<NativeBodyTemperatureSample['iosSensorLocation']>
+): IOSBodyTemperatureSensorLocation {
+  switch (value) {
+    case 'other':
+    case 'armpit':
+    case 'body':
+    case 'ear':
+    case 'finger':
+    case 'mouth':
+    case 'rectum':
+    case 'toe':
+    case 'forehead':
+      return value
+    case 'gastroIntestinal':
+      return 'gastro_intestinal'
+    case 'earDrum':
+      return 'ear_drum'
+    case 'temporalArtery':
+      return 'temporal_artery'
+    default:
+      throw new Error(`Unsupported native body temperature sensor location: ${value}`)
+  }
+}
+
+function makeBodyTemperatureMetadata(
+  sample: Pick<NativeBodyTemperatureSample, 'androidMeasurementLocation' | 'iosSensorLocation'>
+): BodyTemperatureSample['metadata'] {
+  let metadata: BodyTemperatureSample['metadata']
+  if (sample.androidMeasurementLocation !== undefined) {
+    metadata = {
+      android: {
+        measurementLocation: makeAndroidBodyTemperatureMeasurementLocation(
+          sample.androidMeasurementLocation
+        ),
+      },
+    }
+  }
+  if (sample.iosSensorLocation !== undefined) {
+    metadata = {
+      ...metadata,
+      ios: { sensorLocation: makeIOSBodyTemperatureSensorLocation(sample.iosSensorLocation) },
+    }
+  }
+  return metadata
 }
 
 export function makeNativeStepSampleInput(
@@ -790,6 +973,7 @@ export function makeNativeBodyTemperatureSampleInput(
   return {
     timeMs,
     celsius: sample.celsius,
+    ...makeNativeBodyTemperatureMetadata(sample.metadata, index),
     ...makeNativeSync(sample.sync, index),
   }
 }
@@ -857,6 +1041,7 @@ export function makeNativeBasalBodyTemperatureSampleInput(
   return {
     timeMs,
     celsius: sample.celsius,
+    ...makeNativeBodyTemperatureMetadata(sample.metadata, index),
     ...makeNativeSync(sample.sync, index),
   }
 }
@@ -1327,11 +1512,13 @@ export function makeBloodGlucoseSample(sample: NativeBloodGlucoseSample): BloodG
 export function makeBodyTemperatureSample(
   sample: NativeBodyTemperatureSample
 ): BodyTemperatureSample {
+  const metadata = makeBodyTemperatureMetadata(sample)
   return {
     identity: makeHealthSampleIdentity(sample.identity),
     origin: makeHealthDataOrigin(sample.origin),
     date: new Date(sample.timeMs),
     celsius: sample.celsius,
+    ...(metadata === undefined ? {} : { metadata }),
   }
 }
 
@@ -1367,11 +1554,13 @@ export function makeLeanBodyMassSample(sample: NativeLeanBodyMassSample): LeanBo
 export function makeBasalBodyTemperatureSample(
   sample: NativeBasalBodyTemperatureSample
 ): BasalBodyTemperatureSample {
+  const metadata = makeBodyTemperatureMetadata(sample)
   return {
     identity: makeHealthSampleIdentity(sample.identity),
     origin: makeHealthDataOrigin(sample.origin),
     date: new Date(sample.timeMs),
     celsius: sample.celsius,
+    ...(metadata === undefined ? {} : { metadata }),
   }
 }
 

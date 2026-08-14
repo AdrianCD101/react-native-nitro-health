@@ -45,13 +45,11 @@ import com.margelo.nitro.nitrohealth.NativeActiveEnergyBurnedSampleInput
 import com.margelo.nitro.nitrohealth.NativeActiveEnergyBurnedSamplePage
 import com.margelo.nitro.nitrohealth.NativeBloodGlucoseSampleInput
 import com.margelo.nitro.nitrohealth.NativeBloodGlucoseSamplePage
-import com.margelo.nitro.nitrohealth.NativeBasalBodyTemperatureSample
 import com.margelo.nitro.nitrohealth.NativeBasalBodyTemperatureSampleInput
 import com.margelo.nitro.nitrohealth.NativeBasalBodyTemperatureSamplePage
 import com.margelo.nitro.nitrohealth.NativeBodyFatSample
 import com.margelo.nitro.nitrohealth.NativeBodyFatSampleInput
 import com.margelo.nitro.nitrohealth.NativeBodyFatSamplePage
-import com.margelo.nitro.nitrohealth.NativeBodyTemperatureSample
 import com.margelo.nitro.nitrohealth.NativeBodyTemperatureSampleInput
 import com.margelo.nitro.nitrohealth.NativeBodyTemperatureSamplePage
 import com.margelo.nitro.nitrohealth.NativeBloodPressureSampleInput
@@ -701,14 +699,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         return Promise.async {
             val response = readInstantRecords<BodyTemperatureRecord>("bodyTemperature", query)
             NativeBodyTemperatureSamplePage(
-                samples = response.records.map { record ->
-                    NativeBodyTemperatureSample(
-                        identity = makeRecordIdentity(record.metadata.id),
-                        origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
-                        timeMs = record.time.toEpochMilli().toDouble(),
-                        celsius = record.temperature.inCelsius
-                    )
-                }.toTypedArray(),
+                samples = response.records.map(::makeNativeBodyTemperatureSample).toTypedArray(),
                 nextCursor = response.pageToken?.let { encodeSampleCursor("bodyTemperature", query, it) }
             )
         }
@@ -777,14 +768,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         return Promise.async {
             val response = readInstantRecords<BasalBodyTemperatureRecord>("basalBodyTemperature", query)
             NativeBasalBodyTemperatureSamplePage(
-                samples = response.records.map { record ->
-                    NativeBasalBodyTemperatureSample(
-                        identity = makeRecordIdentity(record.metadata.id),
-                        origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
-                        timeMs = record.time.toEpochMilli().toDouble(),
-                        celsius = record.temperature.inCelsius
-                    )
-                }.toTypedArray(),
+                samples = response.records.map(::makeNativeBasalBodyTemperatureSample).toTypedArray(),
                 nextCursor = response.pageToken?.let { encodeSampleCursor("basalBodyTemperature", query, it) }
             )
         }
