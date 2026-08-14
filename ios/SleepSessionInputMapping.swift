@@ -4,8 +4,8 @@ import HealthKit
 func makeSleepCategorySamples(
     sessions: [NativeSleepSessionInput],
     categoryType: HKCategoryType
-) throws -> [HKCategorySample] {
-    return try sessions.enumerated().flatMap { sessionIndex, session in
+) throws -> [(envelope: HKCategorySample, samples: [HKCategorySample])] {
+    return try sessions.enumerated().map { sessionIndex, session in
         let startDate = Date(timeIntervalSince1970: session.startTimeMs / 1000)
         let endDate = Date(timeIntervalSince1970: session.endTimeMs / 1000)
         guard startDate < endDate else {
@@ -16,7 +16,10 @@ func makeSleepCategorySamples(
             session.timeZone,
             errorPrefix: "sessions[\(sessionIndex)]"
         )
-        let metadata: [String: Any] = [HKMetadataKeyTimeZone: timeZone.identifier]
+        var metadata: [String: Any] = [HKMetadataKeyTimeZone: timeZone.identifier]
+        if let wasUserEntered = session.recordingMethod?.healthKitWasUserEntered {
+            metadata[HKMetadataKeyWasUserEntered] = wasUserEntered
+        }
         let indexedStages = session.stages.enumerated().map { stageIndex, stage in
             (
                 stageIndex: stageIndex,
@@ -35,15 +38,14 @@ func makeSleepCategorySamples(
         }
 
         var previousStage: (stageIndex: Int, endDate: Date)?
-        var samples = [
-            HKCategorySample(
-                type: categoryType,
-                value: HKCategoryValueSleepAnalysis.inBed.rawValue,
-                start: startDate,
-                end: endDate,
-                metadata: metadata
-            )
-        ]
+        let envelope = HKCategorySample(
+            type: categoryType,
+            value: HKCategoryValueSleepAnalysis.inBed.rawValue,
+            start: startDate,
+            end: endDate,
+            metadata: metadata
+        )
+        var samples = [envelope]
 
         for indexedStage in indexedStages {
             let stagePrefix = "sessions[\(sessionIndex)].stages[\(indexedStage.stageIndex)]: "
@@ -71,7 +73,7 @@ func makeSleepCategorySamples(
             previousStage = (stageIndex: indexedStage.stageIndex, endDate: indexedStage.endDate)
         }
 
-        return samples
+        return (envelope: envelope, samples: samples)
     }
 }
 

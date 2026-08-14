@@ -29,8 +29,8 @@ namespace margelo::nitro::nitrohealth {
    * An enum which can be represented as a JavaScript union (NativeWorkoutActivityStatus).
    */
   enum class NativeWorkoutActivityStatus {
-    KNOWN      SWIFT_NAME(known) = 0,
-    UNKNOWN      SWIFT_NAME(unknown) = 1,
+    UNKNOWN      SWIFT_NAME(unknown) = 0,
+    KNOWN      SWIFT_NAME(known) = 1,
   } CLOSED_ENUM;
 
 } // namespace margelo::nitro::nitrohealth
@@ -43,16 +43,16 @@ namespace margelo::nitro {
     static inline margelo::nitro::nitrohealth::NativeWorkoutActivityStatus fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       std::string unionValue = JSIConverter<std::string>::fromJSI(runtime, arg);
       switch (hashString(unionValue.c_str(), unionValue.size())) {
-        case hashString("known"): return margelo::nitro::nitrohealth::NativeWorkoutActivityStatus::KNOWN;
         case hashString("unknown"): return margelo::nitro::nitrohealth::NativeWorkoutActivityStatus::UNKNOWN;
+        case hashString("known"): return margelo::nitro::nitrohealth::NativeWorkoutActivityStatus::KNOWN;
         default: [[unlikely]]
           throw std::invalid_argument("Cannot convert \"" + unionValue + "\" to enum NativeWorkoutActivityStatus - invalid value!");
       }
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, margelo::nitro::nitrohealth::NativeWorkoutActivityStatus arg) {
       switch (arg) {
-        case margelo::nitro::nitrohealth::NativeWorkoutActivityStatus::KNOWN: return JSIConverter<std::string>::toJSI(runtime, "known");
         case margelo::nitro::nitrohealth::NativeWorkoutActivityStatus::UNKNOWN: return JSIConverter<std::string>::toJSI(runtime, "unknown");
+        case margelo::nitro::nitrohealth::NativeWorkoutActivityStatus::KNOWN: return JSIConverter<std::string>::toJSI(runtime, "known");
         default: [[unlikely]]
           throw std::invalid_argument("Cannot convert NativeWorkoutActivityStatus to JS - invalid value: "
                                     + std::to_string(static_cast<int>(arg)) + "!");
@@ -64,8 +64,8 @@ namespace margelo::nitro {
       }
       std::string unionValue = JSIConverter<std::string>::fromJSI(runtime, value);
       switch (hashString(unionValue.c_str(), unionValue.size())) {
-        case hashString("known"):
         case hashString("unknown"):
+        case hashString("known"):
           return true;
         default:
           return false;

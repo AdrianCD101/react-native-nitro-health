@@ -1,4 +1,5 @@
 import type { NativeHealthDataOrigin } from './NativeHealthDataOrigin'
+import type { NativeHealthRecordingMethod } from './NativeHealthRecordingMethod'
 import type { NativeHealthSampleIdentity } from './NativeHealthSampleIdentity'
 import type {
   NativeBloodPressureBodyPosition,
@@ -9,6 +10,7 @@ import type {
 export interface NativeBloodPressureSample {
   identity: NativeHealthSampleIdentity
   origin: NativeHealthDataOrigin
+  recordingMethod: NativeHealthRecordingMethod
   timeMs: number
   systolicMmHg: number
   diastolicMmHg: number

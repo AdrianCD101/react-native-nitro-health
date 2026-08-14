@@ -11,9 +11,11 @@
 #include "NativeLeanBodyMassSample.hpp"
 
 #include "JNativeHealthDataOrigin.hpp"
+#include "JNativeHealthRecordingMethod.hpp"
 #include "JNativeHealthSampleIdentity.hpp"
 #include "JNativeHealthSampleIdentityKind.hpp"
 #include "NativeHealthDataOrigin.hpp"
+#include "NativeHealthRecordingMethod.hpp"
 #include "NativeHealthSampleIdentity.hpp"
 #include "NativeHealthSampleIdentityKind.hpp"
 #include <optional>
@@ -42,6 +44,8 @@ namespace margelo::nitro::nitrohealth {
       jni::local_ref<JNativeHealthSampleIdentity> identity = this->getFieldValue(fieldIdentity);
       static const auto fieldOrigin = clazz->getField<JNativeHealthDataOrigin>("origin");
       jni::local_ref<JNativeHealthDataOrigin> origin = this->getFieldValue(fieldOrigin);
+      static const auto fieldRecordingMethod = clazz->getField<JNativeHealthRecordingMethod>("recordingMethod");
+      jni::local_ref<JNativeHealthRecordingMethod> recordingMethod = this->getFieldValue(fieldRecordingMethod);
       static const auto fieldTimeMs = clazz->getField<double>("timeMs");
       double timeMs = this->getFieldValue(fieldTimeMs);
       static const auto fieldKilograms = clazz->getField<double>("kilograms");
@@ -49,6 +53,7 @@ namespace margelo::nitro::nitrohealth {
       return NativeLeanBodyMassSample(
         identity->toCpp(),
         origin->toCpp(),
+        recordingMethod->toCpp(),
         timeMs,
         kilograms
       );
@@ -60,13 +65,14 @@ namespace margelo::nitro::nitrohealth {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeLeanBodyMassSample::javaobject> fromCpp(const NativeLeanBodyMassSample& value) {
-      using JSignature = JNativeLeanBodyMassSample(jni::alias_ref<JNativeHealthSampleIdentity>, jni::alias_ref<JNativeHealthDataOrigin>, double, double);
+      using JSignature = JNativeLeanBodyMassSample(jni::alias_ref<JNativeHealthSampleIdentity>, jni::alias_ref<JNativeHealthDataOrigin>, jni::alias_ref<JNativeHealthRecordingMethod>, double, double);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
         clazz,
         JNativeHealthSampleIdentity::fromCpp(value.identity),
         JNativeHealthDataOrigin::fromCpp(value.origin),
+        JNativeHealthRecordingMethod::fromCpp(value.recordingMethod),
         value.timeMs,
         value.kilograms
       );

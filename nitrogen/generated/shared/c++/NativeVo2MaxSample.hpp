@@ -32,6 +32,8 @@
 namespace margelo::nitro::nitrohealth { struct NativeHealthSampleIdentity; }
 // Forward declaration of `NativeHealthDataOrigin` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthDataOrigin; }
+// Forward declaration of `NativeHealthRecordingMethod` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeHealthRecordingMethod; }
 // Forward declaration of `NativeAndroidVo2MaxMeasurementMethod` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class NativeAndroidVo2MaxMeasurementMethod; }
 // Forward declaration of `NativeIOSVo2MaxTestType` to properly resolve imports.
@@ -39,6 +41,7 @@ namespace margelo::nitro::nitrohealth { enum class NativeIOSVo2MaxTestType; }
 
 #include "NativeHealthSampleIdentity.hpp"
 #include "NativeHealthDataOrigin.hpp"
+#include "NativeHealthRecordingMethod.hpp"
 #include "NativeAndroidVo2MaxMeasurementMethod.hpp"
 #include <optional>
 #include "NativeIOSVo2MaxTestType.hpp"
@@ -52,6 +55,7 @@ namespace margelo::nitro::nitrohealth {
   public:
     NativeHealthSampleIdentity identity     SWIFT_PRIVATE;
     NativeHealthDataOrigin origin     SWIFT_PRIVATE;
+    NativeHealthRecordingMethod recordingMethod     SWIFT_PRIVATE;
     double timeMs     SWIFT_PRIVATE;
     double millilitersPerKilogramPerMinute     SWIFT_PRIVATE;
     std::optional<NativeAndroidVo2MaxMeasurementMethod> androidMeasurementMethod     SWIFT_PRIVATE;
@@ -59,7 +63,7 @@ namespace margelo::nitro::nitrohealth {
 
   public:
     NativeVo2MaxSample() = default;
-    explicit NativeVo2MaxSample(NativeHealthSampleIdentity identity, NativeHealthDataOrigin origin, double timeMs, double millilitersPerKilogramPerMinute, std::optional<NativeAndroidVo2MaxMeasurementMethod> androidMeasurementMethod, std::optional<NativeIOSVo2MaxTestType> iosTestType): identity(identity), origin(origin), timeMs(timeMs), millilitersPerKilogramPerMinute(millilitersPerKilogramPerMinute), androidMeasurementMethod(androidMeasurementMethod), iosTestType(iosTestType) {}
+    explicit NativeVo2MaxSample(NativeHealthSampleIdentity identity, NativeHealthDataOrigin origin, NativeHealthRecordingMethod recordingMethod, double timeMs, double millilitersPerKilogramPerMinute, std::optional<NativeAndroidVo2MaxMeasurementMethod> androidMeasurementMethod, std::optional<NativeIOSVo2MaxTestType> iosTestType): identity(identity), origin(origin), recordingMethod(recordingMethod), timeMs(timeMs), millilitersPerKilogramPerMinute(millilitersPerKilogramPerMinute), androidMeasurementMethod(androidMeasurementMethod), iosTestType(iosTestType) {}
 
   public:
     friend bool operator==(const NativeVo2MaxSample& lhs, const NativeVo2MaxSample& rhs) = default;
@@ -77,6 +81,7 @@ namespace margelo::nitro {
       return margelo::nitro::nitrohealth::NativeVo2MaxSample(
         JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleIdentity>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "identity"))),
         JSIConverter<margelo::nitro::nitrohealth::NativeHealthDataOrigin>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "origin"))),
+        JSIConverter<margelo::nitro::nitrohealth::NativeHealthRecordingMethod>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "recordingMethod"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeMs"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "millilitersPerKilogramPerMinute"))),
         JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeAndroidVo2MaxMeasurementMethod>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "androidMeasurementMethod"))),
@@ -87,6 +92,7 @@ namespace margelo::nitro {
       jsi::Object obj(runtime);
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "identity"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleIdentity>::toJSI(runtime, arg.identity));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "origin"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthDataOrigin>::toJSI(runtime, arg.origin));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "recordingMethod"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthRecordingMethod>::toJSI(runtime, arg.recordingMethod));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "timeMs"), JSIConverter<double>::toJSI(runtime, arg.timeMs));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "millilitersPerKilogramPerMinute"), JSIConverter<double>::toJSI(runtime, arg.millilitersPerKilogramPerMinute));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "androidMeasurementMethod"), JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeAndroidVo2MaxMeasurementMethod>>::toJSI(runtime, arg.androidMeasurementMethod));
@@ -103,6 +109,7 @@ namespace margelo::nitro {
       }
       if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleIdentity>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "identity")))) return false;
       if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthDataOrigin>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "origin")))) return false;
+      if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthRecordingMethod>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "recordingMethod")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeMs")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "millilitersPerKilogramPerMinute")))) return false;
       if (!JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeAndroidVo2MaxMeasurementMethod>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "androidMeasurementMethod")))) return false;

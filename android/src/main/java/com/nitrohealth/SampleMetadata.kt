@@ -1,12 +1,28 @@
 package com.nitrohealth
 
+import androidx.health.connect.client.records.metadata.Device
 import androidx.health.connect.client.records.metadata.Metadata
+import com.margelo.nitro.nitrohealth.NativeHealthRecordingMethod
 
 private const val MAX_SAFE_INTEGER = 9_007_199_254_740_991.0
 
-internal fun makeSampleMetadata(syncId: String?, syncVersion: Double?): Metadata {
+internal fun makeSampleMetadata(
+    syncId: String?,
+    syncVersion: Double?,
+    recordingMethod: NativeHealthRecordingMethod? = null
+): Metadata {
+    val method = recordingMethod ?: NativeHealthRecordingMethod.UNKNOWN
     if (syncId == null && syncVersion == null) {
-        return Metadata.unknownRecordingMethod()
+        return when (method) {
+            NativeHealthRecordingMethod.MANUAL -> Metadata.manualEntry()
+            NativeHealthRecordingMethod.ACTIVELYRECORDED -> Metadata.activelyRecorded(
+                device = Device(type = Device.TYPE_UNKNOWN)
+            )
+            NativeHealthRecordingMethod.AUTOMATICALLYRECORDED -> Metadata.autoRecorded(
+                device = Device(type = Device.TYPE_UNKNOWN)
+            )
+            NativeHealthRecordingMethod.UNKNOWN -> Metadata.unknownRecordingMethod()
+        }
     }
 
     require(syncId != null && syncVersion != null) {
@@ -22,8 +38,25 @@ internal fun makeSampleMetadata(syncId: String?, syncVersion: Double?): Metadata
         "syncVersion must be a non-negative safe integer"
     }
 
-    return Metadata.unknownRecordingMethod(
-        clientRecordId = syncId,
-        clientRecordVersion = syncVersion.toLong()
-    )
+    val version = syncVersion.toLong()
+    return when (method) {
+        NativeHealthRecordingMethod.MANUAL -> Metadata.manualEntry(
+            clientRecordId = syncId,
+            clientRecordVersion = version
+        )
+        NativeHealthRecordingMethod.ACTIVELYRECORDED -> Metadata.activelyRecorded(
+            clientRecordId = syncId,
+            clientRecordVersion = version,
+            device = Device(type = Device.TYPE_UNKNOWN)
+        )
+        NativeHealthRecordingMethod.AUTOMATICALLYRECORDED -> Metadata.autoRecorded(
+            clientRecordId = syncId,
+            clientRecordVersion = version,
+            device = Device(type = Device.TYPE_UNKNOWN)
+        )
+        NativeHealthRecordingMethod.UNKNOWN -> Metadata.unknownRecordingMethod(
+            clientRecordId = syncId,
+            clientRecordVersion = version
+        )
+    }
 }

@@ -68,6 +68,34 @@ function validateNonEmpty(values, message) {
   return !Array.isArray(values) || values.length === 0 ? new Error(message) : undefined
 }
 
+const writableDataTypes = [
+  'steps',
+  'distance',
+  'activeEnergyBurned',
+  'hydration',
+  'floorsClimbed',
+  'bodyMass',
+  'heartRate',
+  'bloodPressure',
+  'bloodGlucose',
+  'bodyTemperature',
+  'respiratoryRate',
+  'bodyFat',
+  'leanBodyMass',
+  'basalBodyTemperature',
+  'restingHeartRate',
+  'oxygenSaturation',
+  'height',
+  'vo2Max',
+  'sleep',
+  'workout',
+]
+
+const mockOrigin = {
+  identifier: 'react-native-nitro-health.mock',
+  displayName: 'Nitro Health Jest Mock',
+}
+
 function createProfile(profile) {
   if (profile === 'observer') {
     return {
@@ -111,6 +139,8 @@ function createProfile(profile) {
 function createNitroHealthMock(options = {}) {
   const profileName = options.profile || 'polling'
   const profile = createProfile(profileName)
+  const storedSamples = Object.fromEntries(writableDataTypes.map((dataType) => [dataType, []]))
+  const identityCounters = Object.fromEntries(writableDataTypes.map((dataType) => [dataType, 0]))
   let mock
   const currentAvailability = () => mock.getAvailability()
   const unavailableAvailability = () => {
@@ -142,11 +172,97 @@ function createNitroHealthMock(options = {}) {
     }
     return Promise.resolve({ status: 'available', statuses })
   }
-  const saveSamples = (samples, result) => {
+  const storedRecordingMethod = (recordingMethod) => {
+    if (profileName === 'observer') {
+      return recordingMethod === 'manual' ? 'manual' : 'unknown'
+    }
+    return recordingMethod || 'unknown'
+  }
+  const nextIdentity = (dataType) => {
+    identityCounters[dataType] += 1
+    const recordId = `mock-${dataType}-${identityCounters[dataType]}`
+    if (profileName === 'polling' && dataType === 'heartRate') {
+      return {
+        kind: 'record-child',
+        id: `${recordId}#0`,
+        record: { kind: 'record', id: recordId },
+      }
+    }
+    return { kind: 'record', id: recordId }
+  }
+  const makeStoredSample = (dataType, recordingMethod, fields) => ({
+    identity: nextIdentity(dataType),
+    origin: { ...mockOrigin },
+    recordingMethod,
+    ...fields,
+  })
+  const defaultStoredFields = (sample) => {
+    const fields = { ...sample }
+    delete fields.recordingMethod
+    delete fields.sync
+    return fields
+  }
+  const saveSamples = (dataType, samples, makeFields = defaultStoredFields, extraResult = {}) => {
     const validationError = validateNonEmpty(samples, 'At least one sample is required')
-    return validationError === undefined
-      ? rejectWhenUnavailable(result)
-      : Promise.reject(validationError)
+    if (validationError !== undefined) return Promise.reject(validationError)
+    if (unavailableAvailability() !== undefined) {
+      return Promise.reject(new Error('Health data is not available'))
+    }
+
+    const storedRecordingMethods = samples.map((sample) =>
+      storedRecordingMethod(sample.recordingMethod)
+    )
+    const publicSamples = samples.map((sample, index) =>
+      makeStoredSample(
+        dataType,
+        storedRecordingMethods[index],
+        makeFields(sample, storedRecordingMethods[index])
+      )
+    )
+    storedSamples[dataType].push(...publicSamples)
+    return Promise.resolve({ status: 'completed', storedRecordingMethods, ...extraResult })
+  }
+  const sampleBounds = (sample) => {
+    if (sample.date instanceof Date) {
+      const time = sample.date.getTime()
+      return { start: time, end: time, instant: true }
+    }
+    const start = sample.startDate instanceof Date ? sample.startDate.getTime() : undefined
+    const end = sample.endDate instanceof Date ? sample.endDate.getTime() : start
+    return { start, end, instant: start === end }
+  }
+  const makeSamplePage = (dataType, query = {}) => {
+    const queryStart = query.startDate instanceof Date ? query.startDate.getTime() : -Infinity
+    const queryEnd = query.endDate instanceof Date ? query.endDate.getTime() : Infinity
+    const ascending = query.ascending !== false
+    const filtered = storedSamples[dataType]
+      .filter((sample) => {
+        const { start, end, instant } = sampleBounds(sample)
+        if (start === undefined || end === undefined) return true
+        return instant
+          ? start >= queryStart && start < queryEnd
+          : end > queryStart && start < queryEnd
+      })
+      .sort((left, right) => {
+        const leftStart = sampleBounds(left).start || 0
+        const rightStart = sampleBounds(right).start || 0
+        return ascending ? leftStart - rightStart : rightStart - leftStart
+      })
+    const cursorMatch =
+      typeof query.cursor === 'string' ? /^mock:(\d+)$/.exec(query.cursor) : undefined
+    const offset = cursorMatch === null || cursorMatch === undefined ? 0 : Number(cursorMatch[1])
+    const limit = Number.isInteger(query.limit) && query.limit > 0 ? query.limit : filtered.length
+    const samples = filtered.slice(offset, offset + limit)
+    const nextOffset = offset + samples.length
+
+    return nextOffset < filtered.length
+      ? { samples, nextCursor: `mock:${nextOffset}` }
+      : { samples }
+  }
+  const readSamples = (dataType, query) => rejectWhenUnavailable(makeSamplePage(dataType, query))
+  const makeBodyMassFields = (sample) => {
+    const { date, kilograms } = sample
+    return { startDate: date, endDate: date, kilograms }
   }
   mock = {
     getAvailability: createMockFunction(() => profile.availability),
@@ -263,59 +379,103 @@ function createNitroHealthMock(options = {}) {
         hasMore: false,
       })
     ),
-    readActiveEnergyBurned: createMockFunction(() => rejectWhenUnavailable({ samples: [] })),
-    readHydration: createMockFunction(() => rejectWhenUnavailable({ samples: [] })),
-    readFloorsClimbed: createMockFunction(() => rejectWhenUnavailable({ samples: [] })),
-    readSteps: createMockFunction(() => rejectWhenUnavailable({ samples: [] })),
-    readDistance: createMockFunction(() => rejectWhenUnavailable({ samples: [] })),
-    readBodyMass: createMockFunction(() => rejectWhenUnavailable({ samples: [] })),
-    readHeartRate: createMockFunction(() => rejectWhenUnavailable({ samples: [] })),
-    readBloodPressure: createMockFunction(() => rejectWhenUnavailable({ samples: [] })),
-    readBloodGlucose: createMockFunction(() => rejectWhenUnavailable({ samples: [] })),
-    readBodyTemperature: createMockFunction(() => rejectWhenUnavailable({ samples: [] })),
-    readRespiratoryRate: createMockFunction(() => rejectWhenUnavailable({ samples: [] })),
-    readBodyFat: createMockFunction(() => rejectWhenUnavailable({ samples: [] })),
-    readLeanBodyMass: createMockFunction(() => rejectWhenUnavailable({ samples: [] })),
-    readBasalBodyTemperature: createMockFunction(() => rejectWhenUnavailable({ samples: [] })),
-    readHeartRateStatistics: createMockFunction(() => rejectWhenUnavailable({})),
-    readRestingHeartRate: createMockFunction(() => rejectWhenUnavailable({ samples: [] })),
-    readHeartRateVariability: createMockFunction(() => rejectWhenUnavailable({ samples: [] })),
-    readOxygenSaturation: createMockFunction(() => rejectWhenUnavailable({ samples: [] })),
-    readHeight: createMockFunction(() => rejectWhenUnavailable({ samples: [] })),
-    readVo2Max: createMockFunction(() => rejectWhenUnavailable({ samples: [] })),
-    readStatistics: createMockFunction(() => rejectWhenUnavailable([])),
-    readSleepSamples: createMockFunction(() => rejectWhenUnavailable({ samples: [] })),
-    readWorkouts: createMockFunction(() => rejectWhenUnavailable({ samples: [] })),
-    saveSteps: createMockFunction((samples) => saveSamples(samples, undefined)),
-    saveDistance: createMockFunction((samples) =>
-      saveSamples(samples, {
-        status: 'completed',
-        storedScope: profileName === 'observer' ? 'walking-running' : 'activity-unspecified',
-      })
+    readActiveEnergyBurned: createMockFunction((query) => readSamples('activeEnergyBurned', query)),
+    readHydration: createMockFunction((query) => readSamples('hydration', query)),
+    readFloorsClimbed: createMockFunction((query) => readSamples('floorsClimbed', query)),
+    readSteps: createMockFunction((query) => readSamples('steps', query)),
+    readDistance: createMockFunction((query) => readSamples('distance', query)),
+    readBodyMass: createMockFunction((query) => readSamples('bodyMass', query)),
+    readHeartRate: createMockFunction((query) => readSamples('heartRate', query)),
+    readBloodPressure: createMockFunction((query) => readSamples('bloodPressure', query)),
+    readBloodGlucose: createMockFunction((query) => readSamples('bloodGlucose', query)),
+    readBodyTemperature: createMockFunction((query) => readSamples('bodyTemperature', query)),
+    readRespiratoryRate: createMockFunction((query) => readSamples('respiratoryRate', query)),
+    readBodyFat: createMockFunction((query) => readSamples('bodyFat', query)),
+    readLeanBodyMass: createMockFunction((query) => readSamples('leanBodyMass', query)),
+    readBasalBodyTemperature: createMockFunction((query) =>
+      readSamples('basalBodyTemperature', query)
     ),
-    saveActiveEnergyBurned: createMockFunction((samples) => saveSamples(samples, undefined)),
-    saveHydration: createMockFunction((samples) => saveSamples(samples, undefined)),
-    saveFloorsClimbed: createMockFunction((samples) => saveSamples(samples, undefined)),
-    saveHeartRate: createMockFunction((samples) => saveSamples(samples, undefined)),
-    saveBloodPressure: createMockFunction((samples) => saveSamples(samples, undefined)),
-    saveBloodGlucose: createMockFunction((samples) => saveSamples(samples, undefined)),
-    saveBodyTemperature: createMockFunction((samples) => saveSamples(samples, undefined)),
-    saveRespiratoryRate: createMockFunction((samples) => saveSamples(samples, undefined)),
-    saveBodyFat: createMockFunction((samples) => saveSamples(samples, undefined)),
-    saveLeanBodyMass: createMockFunction((samples) => saveSamples(samples, undefined)),
-    saveBasalBodyTemperature: createMockFunction((samples) => saveSamples(samples, undefined)),
-    saveBodyMass: createMockFunction((samples) => saveSamples(samples, undefined)),
-    saveRestingHeartRate: createMockFunction((samples) => saveSamples(samples, undefined)),
-    saveOxygenSaturation: createMockFunction((samples) => saveSamples(samples, undefined)),
-    saveHeight: createMockFunction((samples) => saveSamples(samples, undefined)),
-    saveVo2Max: createMockFunction((samples) => saveSamples(samples, undefined)),
+    readHeartRateStatistics: createMockFunction(() => rejectWhenUnavailable({})),
+    readRestingHeartRate: createMockFunction((query) => readSamples('restingHeartRate', query)),
+    readHeartRateVariability: createMockFunction(() => rejectWhenUnavailable({ samples: [] })),
+    readOxygenSaturation: createMockFunction((query) => readSamples('oxygenSaturation', query)),
+    readHeight: createMockFunction((query) => readSamples('height', query)),
+    readVo2Max: createMockFunction((query) => readSamples('vo2Max', query)),
+    readStatistics: createMockFunction(() => rejectWhenUnavailable([])),
+    readSleepSamples: createMockFunction((query) => readSamples('sleep', query)),
+    readWorkouts: createMockFunction((query) => readSamples('workout', query)),
+    saveSteps: createMockFunction((samples) => saveSamples('steps', samples)),
+    saveDistance: createMockFunction((samples) =>
+      saveSamples(
+        'distance',
+        samples,
+        (sample) => {
+          const fields = { ...sample }
+          delete fields.recordingMethod
+          delete fields.sync
+          delete fields.scope
+          return {
+            ...fields,
+            scope: profileName === 'observer' ? 'walking-running' : 'activity-unspecified',
+          }
+        },
+        { storedScope: profileName === 'observer' ? 'walking-running' : 'activity-unspecified' }
+      )
+    ),
+    saveActiveEnergyBurned: createMockFunction((samples) =>
+      saveSamples('activeEnergyBurned', samples)
+    ),
+    saveHydration: createMockFunction((samples) => saveSamples('hydration', samples)),
+    saveFloorsClimbed: createMockFunction((samples) => saveSamples('floorsClimbed', samples)),
+    saveHeartRate: createMockFunction((samples) => saveSamples('heartRate', samples)),
+    saveBloodPressure: createMockFunction((samples) => saveSamples('bloodPressure', samples)),
+    saveBloodGlucose: createMockFunction((samples) => saveSamples('bloodGlucose', samples)),
+    saveBodyTemperature: createMockFunction((samples) => saveSamples('bodyTemperature', samples)),
+    saveRespiratoryRate: createMockFunction((samples) => saveSamples('respiratoryRate', samples)),
+    saveBodyFat: createMockFunction((samples) => saveSamples('bodyFat', samples)),
+    saveLeanBodyMass: createMockFunction((samples) => saveSamples('leanBodyMass', samples)),
+    saveBasalBodyTemperature: createMockFunction((samples) =>
+      saveSamples('basalBodyTemperature', samples)
+    ),
+    saveBodyMass: createMockFunction((samples) =>
+      saveSamples('bodyMass', samples, makeBodyMassFields)
+    ),
+    saveRestingHeartRate: createMockFunction((samples) => saveSamples('restingHeartRate', samples)),
+    saveOxygenSaturation: createMockFunction((samples) => saveSamples('oxygenSaturation', samples)),
+    saveHeight: createMockFunction((samples) => saveSamples('height', samples)),
+    saveVo2Max: createMockFunction((samples) => saveSamples('vo2Max', samples)),
     saveSleepSessions: createMockFunction((sessions) => {
       const validationError = validateNonEmpty(sessions, 'At least one sleep session is required')
-      return validationError === undefined
-        ? rejectWhenUnavailable(undefined)
-        : Promise.reject(validationError)
+      if (validationError !== undefined) return Promise.reject(validationError)
+      return saveSamples('sleep', sessions, (session) => ({
+        kind: 'session-envelope',
+        startDate: session.startDate,
+        endDate: session.endDate,
+        stageData:
+          Array.isArray(session.stages) && session.stages.length > 0 ? 'reported' : 'not-reported',
+      }))
     }),
-    saveWorkout: createMockFunction(() => rejectWhenUnavailable(undefined)),
+    saveWorkout: createMockFunction((workout) =>
+      saveSamples('workout', [workout], (sample) => ({
+        startDate: sample.startDate,
+        endDate: sample.endDate,
+        elapsedDurationSeconds: (sample.endDate.getTime() - sample.startDate.getTime()) / 1000,
+        activeDuration: { status: 'not-reported' },
+        activity: {
+          status: 'known',
+          type: sample.activityType,
+          portability: 'portable',
+          mapping: 'exact',
+        },
+        ...(sample.displayName === undefined
+          ? {}
+          : profileName === 'observer'
+            ? { brandName: sample.displayName }
+            : { title: sample.displayName }),
+        totalDistance: { status: 'not-reported' },
+        totalActiveEnergyBurned: { status: 'not-reported' },
+      }))
+    ),
     deleteRecordsByIds: createMockFunction((_dataType, records) => {
       if (records.length === 0) {
         return Promise.reject(new Error('At least one record identity is required'))

@@ -18,8 +18,8 @@ public extension NativeHeightSample {
   /**
    * Create a new instance of `NativeHeightSample`.
    */
-  init(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, timeMs: Double, meters: Double) {
-    self.init(identity, origin, timeMs, meters)
+  init(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, recordingMethod: NativeHealthRecordingMethod, timeMs: Double, meters: Double) {
+    self.init(identity, origin, recordingMethod, timeMs, meters)
   }
 
   @inline(__always)
@@ -30,6 +30,11 @@ public extension NativeHeightSample {
   @inline(__always)
   var origin: NativeHealthDataOrigin {
     return self.__origin
+  }
+  
+  @inline(__always)
+  var recordingMethod: NativeHealthRecordingMethod {
+    return self.__recordingMethod
   }
   
   @inline(__always)

@@ -26,6 +26,9 @@ data class NativeLeanBodyMassSampleInput(
   val kilograms: Double,
   @DoNotStrip
   @Keep
+  val recordingMethod: NativeHealthRecordingMethod?,
+  @DoNotStrip
+  @Keep
   val syncId: String?,
   @DoNotStrip
   @Keep
@@ -38,6 +41,7 @@ data class NativeLeanBodyMassSampleInput(
     if (other !is NativeLeanBodyMassSampleInput) return false
     return Objects.deepEquals(this.timeMs, other.timeMs)
       && Objects.deepEquals(this.kilograms, other.kilograms)
+      && Objects.deepEquals(this.recordingMethod, other.recordingMethod)
       && Objects.deepEquals(this.syncId, other.syncId)
       && Objects.deepEquals(this.syncVersion, other.syncVersion)
   }
@@ -46,6 +50,7 @@ data class NativeLeanBodyMassSampleInput(
     return arrayOf<Any?>(
       timeMs,
       kilograms,
+      recordingMethod,
       syncId,
       syncVersion
     ).contentDeepHashCode()
@@ -59,8 +64,8 @@ data class NativeLeanBodyMassSampleInput(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(timeMs: Double, kilograms: Double, syncId: String?, syncVersion: Double?): NativeLeanBodyMassSampleInput {
-      return NativeLeanBodyMassSampleInput(timeMs, kilograms, syncId, syncVersion)
+    private fun fromCpp(timeMs: Double, kilograms: Double, recordingMethod: NativeHealthRecordingMethod?, syncId: String?, syncVersion: Double?): NativeLeanBodyMassSampleInput {
+      return NativeLeanBodyMassSampleInput(timeMs, kilograms, recordingMethod, syncId, syncVersion)
     }
   }
 }

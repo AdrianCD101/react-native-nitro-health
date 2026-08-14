@@ -28,9 +28,10 @@ func makeWorkoutBuilderInput(
     configuration.activityType = activityType
 
     let timeZone = try resolveIanaTimeZone(workout.timeZone, errorPrefix: "workout")
-    var metadata = try makeHealthKitSyncMetadata(
+    var metadata = try makeHealthKitMetadata(
         syncId: workout.syncId,
-        syncVersion: workout.syncVersion
+        syncVersion: workout.syncVersion,
+        recordingMethod: workout.recordingMethod
     ) ?? [:]
     metadata[HKMetadataKeyTimeZone] = timeZone.identifier
     if let displayName = workout.displayName {

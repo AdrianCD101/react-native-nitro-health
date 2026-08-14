@@ -29,6 +29,9 @@ data class NativeBloodPressureSampleInput(
   val diastolicMmHg: Double,
   @DoNotStrip
   @Keep
+  val recordingMethod: NativeHealthRecordingMethod?,
+  @DoNotStrip
+  @Keep
   val androidBodyPosition: NativeBloodPressureBodyPosition?,
   @DoNotStrip
   @Keep
@@ -48,6 +51,7 @@ data class NativeBloodPressureSampleInput(
     return Objects.deepEquals(this.timeMs, other.timeMs)
       && Objects.deepEquals(this.systolicMmHg, other.systolicMmHg)
       && Objects.deepEquals(this.diastolicMmHg, other.diastolicMmHg)
+      && Objects.deepEquals(this.recordingMethod, other.recordingMethod)
       && Objects.deepEquals(this.androidBodyPosition, other.androidBodyPosition)
       && Objects.deepEquals(this.androidMeasurementLocation, other.androidMeasurementLocation)
       && Objects.deepEquals(this.syncId, other.syncId)
@@ -59,6 +63,7 @@ data class NativeBloodPressureSampleInput(
       timeMs,
       systolicMmHg,
       diastolicMmHg,
+      recordingMethod,
       androidBodyPosition,
       androidMeasurementLocation,
       syncId,
@@ -74,8 +79,8 @@ data class NativeBloodPressureSampleInput(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(timeMs: Double, systolicMmHg: Double, diastolicMmHg: Double, androidBodyPosition: NativeBloodPressureBodyPosition?, androidMeasurementLocation: NativeBloodPressureMeasurementLocation?, syncId: String?, syncVersion: Double?): NativeBloodPressureSampleInput {
-      return NativeBloodPressureSampleInput(timeMs, systolicMmHg, diastolicMmHg, androidBodyPosition, androidMeasurementLocation, syncId, syncVersion)
+    private fun fromCpp(timeMs: Double, systolicMmHg: Double, diastolicMmHg: Double, recordingMethod: NativeHealthRecordingMethod?, androidBodyPosition: NativeBloodPressureBodyPosition?, androidMeasurementLocation: NativeBloodPressureMeasurementLocation?, syncId: String?, syncVersion: Double?): NativeBloodPressureSampleInput {
+      return NativeBloodPressureSampleInput(timeMs, systolicMmHg, diastolicMmHg, recordingMethod, androidBodyPosition, androidMeasurementLocation, syncId, syncVersion)
     }
   }
 }

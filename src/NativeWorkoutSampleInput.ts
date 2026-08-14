@@ -1,3 +1,5 @@
+import type { NativeHealthRecordingMethod } from './NativeHealthRecordingMethod'
+
 /** Native workout input using epoch-millisecond timestamps. */
 export interface NativeWorkoutSampleInput {
   startTimeMs: number
@@ -5,6 +7,7 @@ export interface NativeWorkoutSampleInput {
   activityType: string
   displayName?: string
   timeZone?: string
+  recordingMethod?: NativeHealthRecordingMethod
   syncId?: string
   syncVersion?: number
 }

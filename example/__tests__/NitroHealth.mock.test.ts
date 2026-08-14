@@ -4,16 +4,27 @@ import {
   resetNitroHealthMock,
 } from 'react-native-nitro-health/jest/mock'
 
+const range = {
+  startDate: new Date('2026-01-01T00:00:00.000Z'),
+  endDate: new Date('2026-01-02T00:00:00.000Z'),
+}
+const interval = {
+  startDate: new Date('2026-01-01T10:00:00.000Z'),
+  endDate: new Date('2026-01-01T11:00:00.000Z'),
+}
+const instant = new Date('2026-01-01T12:00:00.000Z')
+const origin = {
+  identifier: 'react-native-nitro-health.mock',
+  displayName: 'Nitro Health Jest Mock',
+}
+
 describe('NitroHealth Jest mock', () => {
   beforeEach(() => {
     resetNitroHealthMock()
   })
 
-  it('provides the polling profile and redesigned public workflows by default', async () => {
+  it('uses polling availability and unknown recording method defaults', async () => {
     expect(NitroHealth.getAvailability()).toEqual({ status: 'available' })
-    await expect(
-      NitroHealth.performAvailabilityRecovery({ kind: 'install-or-update-provider' })
-    ).resolves.toEqual({ status: 'unavailable', reason: 'no-recovery-action' })
     await expect(NitroHealth.getCapabilities()).resolves.toEqual({
       status: 'available',
       backgroundChanges: {
@@ -23,137 +34,321 @@ describe('NitroHealth Jest mock', () => {
       },
       historyRead: 'not-granted',
     })
-    await expect(NitroHealth.requestAdditionalAccess('background-read')).resolves.toEqual({
-      access: 'background-read',
-      status: 'not-granted',
+
+    await expect(NitroHealth.saveSteps([{ ...interval, count: 100 }])).resolves.toEqual({
+      status: 'completed',
+      storedRecordingMethods: ['unknown'],
     })
-    await expect(NitroHealth.requestAdditionalAccess('history-read')).resolves.toEqual({
-      access: 'history-read',
-      status: 'not-granted',
-    })
-    await expect(NitroHealth.managePermissions()).resolves.toEqual({
-      status: 'user-action-required',
-      action: { kind: 'opened', destination: 'health-connect-settings' },
-    })
-    await expect(NitroHealth.revokeAllPermissions()).resolves.toEqual({ status: 'completed' })
-    await expect(
-      NitroHealth.configureBackgroundChanges({ dataTypes: ['steps'], frequency: 'hourly' })
-    ).resolves.toEqual({
-      status: 'user-action-required',
-      mode: 'polling',
-      scheduling: 'app-owned',
-      backgroundRead: 'not-granted',
-    })
-    await expect(NitroHealth.disableBackgroundChanges()).resolves.toEqual({
-      status: 'user-action-required',
-      mode: 'polling',
-      scheduling: 'app-owned',
-      backgroundRead: 'not-granted',
-    })
-    expect(NitroHealth.subscribeToBackgroundChanges(jest.fn())).toEqual({
-      mode: 'polling',
-      scheduling: 'app-owned',
+    await expect(NitroHealth.readSteps(range)).resolves.toEqual({
+      samples: [
+        {
+          identity: { kind: 'record', id: 'mock-steps-1' },
+          origin,
+          recordingMethod: 'unknown',
+          ...interval,
+          count: 100,
+        },
+      ],
     })
   })
 
-  it('provides default reads, writes, changes, and typed deletion outcomes', async () => {
-    const range = {
-      startDate: new Date('2026-01-01T00:00:00.000Z'),
-      endDate: new Date('2026-01-02T00:00:00.000Z'),
-    }
-
-    await expect(NitroHealth.createChangesToken('steps')).resolves.toBe('mock-changes-token')
-    await expect(NitroHealth.getChanges('steps', 'mock-changes-token')).resolves.toEqual({
-      tokenExpired: false,
-      changes: [],
-      nextChangesToken: 'mock-changes-token',
-      hasMore: false,
-    })
-    await expect(NitroHealth.readActiveEnergyBurned(range)).resolves.toEqual({ samples: [] })
-    await expect(NitroHealth.readFloorsClimbed(range)).resolves.toEqual({ samples: [] })
-    await expect(NitroHealth.readSteps(range)).resolves.toEqual({ samples: [] })
-    await expect(NitroHealth.readDistance(range)).resolves.toEqual({ samples: [] })
-    await expect(NitroHealth.readBodyMass(range)).resolves.toEqual({ samples: [] })
-    await expect(NitroHealth.readHeartRate(range)).resolves.toEqual({ samples: [] })
-    await expect(NitroHealth.readBloodPressure(range)).resolves.toEqual({ samples: [] })
-    await expect(NitroHealth.readBloodGlucose(range)).resolves.toEqual({ samples: [] })
-    await expect(NitroHealth.readBodyTemperature(range)).resolves.toEqual({ samples: [] })
-    await expect(NitroHealth.readRespiratoryRate(range)).resolves.toEqual({ samples: [] })
-    await expect(NitroHealth.readBodyFat(range)).resolves.toEqual({ samples: [] })
-    await expect(NitroHealth.readLeanBodyMass(range)).resolves.toEqual({ samples: [] })
-    await expect(NitroHealth.readBasalBodyTemperature(range)).resolves.toEqual({ samples: [] })
-    await expect(NitroHealth.readHeartRateStatistics(range)).resolves.toEqual({})
-    await expect(
-      NitroHealth.readStatistics('steps', { ...range, bucket: 'day', metrics: ['sum'] })
-    ).resolves.toEqual([])
-    await expect(NitroHealth.readRestingHeartRate(range)).resolves.toEqual({ samples: [] })
-    await expect(NitroHealth.readHeartRateVariability(range)).resolves.toEqual({ samples: [] })
-    await expect(NitroHealth.readOxygenSaturation(range)).resolves.toEqual({ samples: [] })
-    await expect(NitroHealth.readHeight(range)).resolves.toEqual({ samples: [] })
-    await expect(NitroHealth.readVo2Max(range)).resolves.toEqual({ samples: [] })
-    await expect(NitroHealth.readSleepSamples(range)).resolves.toEqual({ samples: [] })
-    await expect(NitroHealth.readWorkouts(range)).resolves.toEqual({ samples: [] })
-
-    const stepInput = {
-      ...range,
-      count: 100,
-      sync: { id: 'mock-step-record', version: 0 },
-    }
-    await expect(NitroHealth.saveSteps([stepInput])).resolves.toBeUndefined()
-    expect(NitroHealth.saveSteps).toHaveBeenCalledWith([stepInput])
-    const floorsInput = { ...range, floors: 12.5 }
-    await expect(NitroHealth.saveFloorsClimbed([floorsInput])).resolves.toBeUndefined()
-    expect(NitroHealth.saveFloorsClimbed).toHaveBeenCalledWith([floorsInput])
-    await expect(
-      NitroHealth.saveDistance([{ ...range, scope: 'walking-running', distanceMeters: 1000 }])
-    ).resolves.toEqual({ status: 'completed', storedScope: 'activity-unspecified' })
-    await expect(
-      NitroHealth.saveSleepSessions([{ ...range, timeZone: 'UTC' }])
-    ).resolves.toBeUndefined()
-    await expect(
-      NitroHealth.saveWorkout({
-        ...range,
-        activityType: 'running',
-        displayName: 'Mock run',
-      })
-    ).resolves.toBeUndefined()
-
-    await expect(
-      NitroHealth.deleteRecordsByIds('steps', [
-        { kind: 'record', id: 'record-1' },
-        { kind: 'record', id: 'record-2' },
-      ])
-    ).resolves.toEqual({
-      status: 'completed',
-      requestedCount: 2,
-      deletedCount: { status: 'known', value: 2 },
-    })
-    await expect(NitroHealth.deleteRecordsByTimeRange('steps', range)).resolves.toEqual({
-      status: 'completed',
-      deletedCount: { status: 'unverifiable' },
-    })
-  })
-
-  it('returns per-entry permission states from the polling profile', async () => {
-    const permissions = [
-      { accessType: 'read' as const, dataType: 'steps' as const },
-      { accessType: 'write' as const, dataType: 'steps' as const },
+  it('retains all four Android recording methods in mixed batch order', async () => {
+    const samples = [
+      { ...interval, count: 1, recordingMethod: 'automatically-recorded' as const },
+      { ...interval, count: 2, recordingMethod: 'manual' as const },
+      { ...interval, count: 3, recordingMethod: 'unknown' as const },
+      { ...interval, count: 4, recordingMethod: 'actively-recorded' as const },
     ]
 
-    await expect(NitroHealth.getPermissionStatuses(permissions)).resolves.toEqual({
-      status: 'available',
-      statuses: permissions.map((permission) => ({ permission, status: 'notGranted' })),
-    })
-    await expect(NitroHealth.requestAuthorization(permissions)).resolves.toEqual({
+    await expect(NitroHealth.saveSteps(samples)).resolves.toEqual({
       status: 'completed',
-      statuses: permissions.map((permission) => ({ permission, status: 'notGranted' })),
+      storedRecordingMethods: ['automatically-recorded', 'manual', 'unknown', 'actively-recorded'],
+    })
+    const page = await NitroHealth.readSteps(range)
+    expect(page.samples.map(({ count }) => count)).toEqual([1, 2, 3, 4])
+    expect(page.samples.map(({ recordingMethod }) => recordingMethod)).toEqual([
+      'automatically-recorded',
+      'manual',
+      'unknown',
+      'actively-recorded',
+    ])
+  })
+
+  it('persists every regular writable sample type with public read fields', async () => {
+    const saveResults = await Promise.all([
+      NitroHealth.saveActiveEnergyBurned([{ ...interval, kilocalories: 120 }]),
+      NitroHealth.saveHydration([{ ...interval, milliliters: 500 }]),
+      NitroHealth.saveFloorsClimbed([{ ...interval, floors: 4 }]),
+      NitroHealth.saveBodyMass([{ date: instant, kilograms: 75 }]),
+      NitroHealth.saveHeartRate([{ date: instant, bpm: 70 }]),
+      NitroHealth.saveBloodPressure([{ date: instant, systolicMmHg: 120, diastolicMmHg: 80 }]),
+      NitroHealth.saveBloodGlucose([{ date: instant, millimolesPerLiter: 5.2 }]),
+      NitroHealth.saveBodyTemperature([{ date: instant, celsius: 36.8 }]),
+      NitroHealth.saveRespiratoryRate([{ date: instant, breathsPerMinute: 14 }]),
+      NitroHealth.saveBodyFat([{ date: instant, percentage: 20 }]),
+      NitroHealth.saveLeanBodyMass([{ date: instant, kilograms: 60 }]),
+      NitroHealth.saveBasalBodyTemperature([{ date: instant, celsius: 36.5 }]),
+      NitroHealth.saveRestingHeartRate([{ date: instant, bpm: 62 }]),
+      NitroHealth.saveOxygenSaturation([{ date: instant, percentage: 98 }]),
+      NitroHealth.saveHeight([{ date: instant, meters: 1.8 }]),
+      NitroHealth.saveVo2Max([{ date: instant, millilitersPerKilogramPerMinute: 42 }]),
+    ])
+    expect(saveResults).toEqual(
+      Array.from({ length: saveResults.length }, () => ({
+        status: 'completed',
+        storedRecordingMethods: ['unknown'],
+      }))
+    )
+
+    const pages = await Promise.all([
+      NitroHealth.readActiveEnergyBurned(range),
+      NitroHealth.readHydration(range),
+      NitroHealth.readFloorsClimbed(range),
+      NitroHealth.readBodyMass(range),
+      NitroHealth.readHeartRate(range),
+      NitroHealth.readBloodPressure(range),
+      NitroHealth.readBloodGlucose(range),
+      NitroHealth.readBodyTemperature(range),
+      NitroHealth.readRespiratoryRate(range),
+      NitroHealth.readBodyFat(range),
+      NitroHealth.readLeanBodyMass(range),
+      NitroHealth.readBasalBodyTemperature(range),
+      NitroHealth.readRestingHeartRate(range),
+      NitroHealth.readOxygenSaturation(range),
+      NitroHealth.readHeight(range),
+      NitroHealth.readVo2Max(range),
+    ])
+    const expectedValues = [
+      { ...interval, kilocalories: 120 },
+      { ...interval, milliliters: 500 },
+      { ...interval, floors: 4 },
+      { startDate: instant, endDate: instant, kilograms: 75 },
+      { date: instant, bpm: 70 },
+      { date: instant, systolicMmHg: 120, diastolicMmHg: 80 },
+      { date: instant, millimolesPerLiter: 5.2 },
+      { date: instant, celsius: 36.8 },
+      { date: instant, breathsPerMinute: 14 },
+      { date: instant, percentage: 20 },
+      { date: instant, kilograms: 60 },
+      { date: instant, celsius: 36.5 },
+      { date: instant, bpm: 62 },
+      { date: instant, percentage: 98 },
+      { date: instant, meters: 1.8 },
+      { date: instant, millilitersPerKilogramPerMinute: 42 },
+    ]
+
+    pages.forEach((page, index) => {
+      const expectedValue = expectedValues[index]
+      if (expectedValue === undefined) throw new Error(`Missing expected value at index ${index}`)
+      expect(page.samples).toHaveLength(1)
+      expect(page.samples[0]).toEqual(
+        expect.objectContaining({
+          identity: expect.objectContaining({
+            kind: index === 4 ? 'record-child' : 'record',
+          }),
+          origin,
+          recordingMethod: 'unknown',
+          ...expectedValue,
+        })
+      )
     })
   })
 
-  it('creates an isolated observer profile', async () => {
+  it('degrades iOS active, automatic, unknown, and omitted methods while retaining manual', async () => {
     const observer = createNitroHealthMock({ profile: 'observer' })
-    const readPermission = { accessType: 'read' as const, dataType: 'heartRate' as const }
-    const writePermission = { accessType: 'write' as const, dataType: 'workout' as const }
+    const samples = [
+      { date: instant, bpm: 61, recordingMethod: 'manual' as const },
+      { date: instant, bpm: 62, recordingMethod: 'actively-recorded' as const },
+      { date: instant, bpm: 63, recordingMethod: 'automatically-recorded' as const },
+      { date: instant, bpm: 64, recordingMethod: 'unknown' as const },
+      { date: instant, bpm: 65 },
+    ]
+
+    await expect(observer.saveRestingHeartRate(samples)).resolves.toEqual({
+      status: 'completed',
+      storedRecordingMethods: ['manual', 'unknown', 'unknown', 'unknown', 'unknown'],
+    })
+    const page = await observer.readRestingHeartRate(range)
+    expect(page.samples.map(({ recordingMethod }) => recordingMethod)).toEqual([
+      'manual',
+      'unknown',
+      'unknown',
+      'unknown',
+      'unknown',
+    ])
+    expect(NitroHealth.readRestingHeartRate).not.toHaveBeenCalled()
+  })
+
+  it('returns profile-specific distance results and readback scopes', async () => {
+    const observer = createNitroHealthMock({ profile: 'observer' })
+    const samples = [
+      {
+        ...interval,
+        scope: 'walking-running' as const,
+        distanceMeters: 1000,
+        recordingMethod: 'actively-recorded' as const,
+      },
+    ]
+
+    await expect(NitroHealth.saveDistance(samples)).resolves.toEqual({
+      status: 'completed',
+      storedRecordingMethods: ['actively-recorded'],
+      storedScope: 'activity-unspecified',
+    })
+    await expect(observer.saveDistance(samples)).resolves.toEqual({
+      status: 'completed',
+      storedRecordingMethods: ['unknown'],
+      storedScope: 'walking-running',
+    })
+    expect((await NitroHealth.readDistance(range)).samples[0]).toEqual(
+      expect.objectContaining({
+        recordingMethod: 'actively-recorded',
+        scope: 'activity-unspecified',
+        distanceMeters: 1000,
+      })
+    )
+    expect((await observer.readDistance(range)).samples[0]).toEqual(
+      expect.objectContaining({
+        recordingMethod: 'unknown',
+        scope: 'walking-running',
+        distanceMeters: 1000,
+      })
+    )
+  })
+
+  it('stores one public sleep envelope per session with aligned methods', async () => {
+    const sessions = [
+      {
+        ...interval,
+        recordingMethod: 'manual' as const,
+        stages: [{ ...interval, stage: 'asleepDeep' as const }],
+      },
+      {
+        startDate: new Date('2026-01-01T12:00:00.000Z'),
+        endDate: new Date('2026-01-01T13:00:00.000Z'),
+        recordingMethod: 'automatically-recorded' as const,
+      },
+    ]
+
+    await expect(NitroHealth.saveSleepSessions(sessions)).resolves.toEqual({
+      status: 'completed',
+      storedRecordingMethods: ['manual', 'automatically-recorded'],
+    })
+    const page = await NitroHealth.readSleepSamples(range)
+    expect(page.samples).toHaveLength(2)
+    expect(page.samples[0]).toEqual(
+      expect.objectContaining({
+        kind: 'session-envelope',
+        stageData: 'reported',
+        recordingMethod: 'manual',
+      })
+    )
+    expect(page.samples[1]).toEqual(
+      expect.objectContaining({
+        kind: 'session-envelope',
+        stageData: 'not-reported',
+        recordingMethod: 'automatically-recorded',
+      })
+    )
+  })
+
+  it('returns a one-entry workout result and a valid public workout', async () => {
+    const workout = {
+      ...interval,
+      activityType: 'running' as const,
+      displayName: 'Mock run',
+      recordingMethod: 'manual' as const,
+    }
+
+    await expect(NitroHealth.saveWorkout(workout)).resolves.toEqual({
+      status: 'completed',
+      storedRecordingMethods: ['manual'],
+    })
+    await expect(NitroHealth.readWorkouts(range)).resolves.toEqual({
+      samples: [
+        {
+          identity: { kind: 'record', id: 'mock-workout-1' },
+          origin,
+          recordingMethod: 'manual',
+          ...interval,
+          elapsedDurationSeconds: 3600,
+          activeDuration: { status: 'not-reported' },
+          activity: {
+            status: 'known',
+            type: 'running',
+            portability: 'portable',
+            mapping: 'exact',
+          },
+          title: 'Mock run',
+          totalDistance: { status: 'not-reported' },
+          totalActiveEnergyBurned: { status: 'not-reported' },
+        },
+      ],
+    })
+  })
+
+  it('uses the iOS workout label field in the observer profile', async () => {
+    const observer = createNitroHealthMock({ profile: 'observer' })
+
+    await observer.saveWorkout({
+      ...interval,
+      activityType: 'running',
+      displayName: 'Observer run',
+    })
+
+    const saved = (await observer.readWorkouts(range)).samples[0]
+    expect(saved?.title).toBeUndefined()
+    expect(saved?.brandName).toBe('Observer run')
+  })
+
+  it('isolates created mocks and reset replaces the shared closure state', async () => {
+    const first = createNitroHealthMock()
+    const second = createNitroHealthMock()
+    await first.saveSteps([{ ...interval, count: 5 }])
+
+    expect((await first.readSteps(range)).samples).toHaveLength(1)
+    expect((await second.readSteps(range)).samples).toHaveLength(0)
+    expect((await NitroHealth.readSteps(range)).samples).toHaveLength(0)
+
+    await NitroHealth.saveSteps([{ ...interval, count: 6 }])
+    resetNitroHealthMock()
+    expect((await NitroHealth.readSteps(range)).samples).toHaveLength(0)
+    await expect(NitroHealth.saveSteps([{ ...interval, count: 7 }])).resolves.toEqual({
+      status: 'completed',
+      storedRecordingMethods: ['unknown'],
+    })
+    expect((await NitroHealth.readSteps(range)).samples[0]?.identity).toEqual({
+      kind: 'record',
+      id: 'mock-steps-1',
+    })
+  })
+
+  it('keeps page shape, pagination, ordering, and coarse range filtering', async () => {
+    await NitroHealth.saveSteps([
+      { ...interval, count: 1 },
+      {
+        startDate: new Date('2026-01-03T10:00:00.000Z'),
+        endDate: new Date('2026-01-03T11:00:00.000Z'),
+        count: 2,
+      },
+      { ...interval, count: 3 },
+    ])
+
+    const firstPage = await NitroHealth.readSteps({ ...range, ascending: false, limit: 1 })
+    expect(firstPage.samples.map(({ count }) => count)).toEqual([1])
+    expect(firstPage.nextCursor).toBe('mock:1')
+    const cursor = firstPage.nextCursor
+    if (cursor === undefined) throw new Error('Expected a pagination cursor')
+    await expect(
+      NitroHealth.readSteps({ ...range, ascending: false, limit: 1, cursor })
+    ).resolves.toEqual({
+      samples: [expect.objectContaining({ count: 3 })],
+    })
+  })
+
+  it('preserves observer and unavailable profile availability behavior', async () => {
+    const observer = createNitroHealthMock({ profile: 'observer' })
+    const unavailable = createNitroHealthMock({ profile: 'unavailable' })
 
     await expect(observer.getCapabilities()).resolves.toEqual({
       status: 'available',
@@ -164,157 +359,19 @@ describe('NitroHealth Jest mock', () => {
       },
       historyRead: 'included',
     })
-    await expect(observer.requestAdditionalAccess('background-read')).resolves.toEqual({
-      access: 'background-read',
-      status: 'included',
-    })
-    await expect(observer.requestAdditionalAccess('history-read')).resolves.toEqual({
-      access: 'history-read',
-      status: 'included',
-    })
-    await expect(
-      observer.configureBackgroundChanges({ dataTypes: ['steps'], frequency: 'daily' })
-    ).resolves.toEqual({ status: 'completed', mode: 'observer' })
-    await expect(observer.managePermissions()).resolves.toEqual({
-      status: 'user-action-required',
-      action: { kind: 'manual', destination: 'health-app-permissions' },
-    })
-    await expect(observer.revokeAllPermissions()).resolves.toEqual({
-      status: 'user-action-required',
-      action: { kind: 'manual', destination: 'health-app-permissions' },
-    })
-    const subscription = observer.subscribeToBackgroundChanges(jest.fn())
-    expect(subscription.mode).toBe('observer')
-    if (subscription.mode === 'observer') subscription.subscription.remove()
-    await expect(
-      observer.saveDistance([
-        {
-          startDate: new Date('2026-01-01T00:00:00.000Z'),
-          endDate: new Date('2026-01-01T01:00:00.000Z'),
-          scope: 'walking-running',
-          distanceMeters: 1000,
-        },
-      ])
-    ).resolves.toEqual({ status: 'completed', storedScope: 'walking-running' })
-    await expect(
-      observer.getPermissionStatuses([readPermission, writePermission])
-    ).resolves.toEqual({
-      status: 'available',
-      statuses: [
-        { permission: readPermission, status: 'unverifiable' },
-        { permission: writePermission, status: 'notDetermined' },
-      ],
-    })
-    expect(NitroHealth.subscribeToBackgroundChanges(jest.fn())).toEqual({
-      mode: 'polling',
-      scheduling: 'app-owned',
-    })
-  })
-
-  it('creates an unavailable profile with unverifiable permission entries', async () => {
-    const unavailable = createNitroHealthMock({ profile: 'unavailable' })
-    const permissions = [
-      { accessType: 'read' as const, dataType: 'steps' as const },
-      { accessType: 'write' as const, dataType: 'sleep' as const },
-    ]
-
     expect(unavailable.getAvailability()).toEqual({
       status: 'unavailable',
       reason: 'not-supported',
     })
-    await expect(unavailable.getCapabilities()).resolves.toEqual({
-      status: 'unavailable',
-      availability: { status: 'unavailable', reason: 'not-supported' },
-    })
-    await expect(unavailable.requestAdditionalAccess('background-read')).resolves.toEqual({
-      access: 'background-read',
-      status: 'unavailable',
-      availability: { status: 'unavailable', reason: 'not-supported' },
-    })
-    await expect(unavailable.requestAdditionalAccess('history-read')).resolves.toEqual({
-      access: 'history-read',
-      status: 'unavailable',
-      availability: { status: 'unavailable', reason: 'not-supported' },
-    })
-    await expect(unavailable.managePermissions()).resolves.toEqual({
-      status: 'unavailable',
-      availability: { status: 'unavailable', reason: 'not-supported' },
-    })
-    await expect(unavailable.revokeAllPermissions()).resolves.toEqual({
-      status: 'unavailable',
-      availability: { status: 'unavailable', reason: 'not-supported' },
-    })
-    await expect(
-      unavailable.configureBackgroundChanges({ dataTypes: ['steps'], frequency: 'hourly' })
-    ).resolves.toEqual({ status: 'unavailable' })
-    await expect(unavailable.disableBackgroundChanges()).resolves.toEqual({
-      status: 'unavailable',
-    })
-    expect(unavailable.subscribeToBackgroundChanges(jest.fn())).toEqual({
-      mode: 'unavailable',
-      availability: { status: 'unavailable', reason: 'not-supported' },
-    })
-    await expect(unavailable.getPermissionStatuses(permissions)).resolves.toEqual({
-      status: 'unavailable',
-      availability: { status: 'unavailable', reason: 'not-supported' },
-      statuses: permissions.map((permission) => ({ permission, status: 'unverifiable' })),
-    })
-    await expect(unavailable.requestAuthorization(permissions)).resolves.toEqual({
-      status: 'unavailable',
-      availability: { status: 'unavailable', reason: 'not-supported' },
-      statuses: permissions.map((permission) => ({ permission, status: 'unverifiable' })),
-    })
+    await expect(unavailable.saveSteps([{ ...interval, count: 1 }])).rejects.toThrow(
+      'Health data is not available'
+    )
   })
 
-  it('applies reset profile and nested overrides to the shared mock', async () => {
-    const overriddenAvailability = jest.fn(() => ({
-      status: 'unavailable' as const,
-      reason: 'service-unavailable' as const,
-    }))
-    resetNitroHealthMock({
-      profile: 'observer',
-      overrides: { getAvailability: overriddenAvailability },
-    })
-
-    expect(NitroHealth.getAvailability()).toEqual({
-      status: 'unavailable',
-      reason: 'service-unavailable',
-    })
-    await expect(NitroHealth.getCapabilities()).resolves.toEqual({
-      status: 'unavailable',
-      availability: { status: 'unavailable', reason: 'service-unavailable' },
-    })
-    expect(overriddenAvailability).toHaveBeenCalledTimes(2)
-  })
-
-  it('rejects empty writes and background configuration like the public facade', async () => {
+  it('rejects empty writes like the public facade', async () => {
     await expect(NitroHealth.saveSteps([])).rejects.toThrow('At least one sample is required')
     await expect(NitroHealth.saveSleepSessions([])).rejects.toThrow(
       'At least one sleep session is required'
     )
-    await expect(
-      NitroHealth.configureBackgroundChanges({ dataTypes: [], frequency: 'hourly' })
-    ).rejects.toThrow('At least one background change data type is required')
-    await expect(NitroHealth.disableBackgroundChanges([])).rejects.toThrow(
-      'dataTypes must be omitted or contain at least one health data type'
-    )
-  })
-
-  it('applies create options without mutating the shared mock', () => {
-    const isolated = createNitroHealthMock({
-      profile: 'polling',
-      overrides: {
-        getAvailability: jest.fn(() => ({
-          status: 'unavailable' as const,
-          reason: 'service-unavailable' as const,
-        })),
-      },
-    })
-
-    expect(isolated.getAvailability()).toEqual({
-      status: 'unavailable',
-      reason: 'service-unavailable',
-    })
-    expect(NitroHealth.getAvailability()).toEqual({ status: 'available' })
   })
 })

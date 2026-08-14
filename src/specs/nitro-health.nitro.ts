@@ -33,6 +33,7 @@ import type {
 import type { NativeHealthChangesResult } from '../NativeHealthChangesResult'
 import type { NativeHealthDateRangeQuery } from '../NativeHealthDateRangeQuery'
 import type { NativeHealthDeleteResult } from '../NativeHealthDeleteResult'
+import type { NativeHealthWriteResult } from '../NativeHealthWriteResult'
 import type { NativeHealthStatistics } from '../NativeHealthStatistics'
 import type { NativeHealthStatisticsQuery } from '../NativeHealthStatisticsQuery'
 import type { NativeHealthTimeRangeQuery } from '../NativeHealthTimeRangeQuery'
@@ -115,26 +116,34 @@ export interface NitroHealth extends HybridObject<{ ios: 'swift'; android: 'kotl
   ): Promise<NativeHealthStatistics[]>
   readSleepSamples(query: NativeHealthDateRangeQuery): Promise<NativeSleepSamplePage>
   readWorkouts(query: NativeHealthDateRangeQuery): Promise<NativeWorkoutSamplePage>
-  saveSteps(samples: NativeStepSampleInput[]): Promise<void>
+  saveSteps(samples: NativeStepSampleInput[]): Promise<NativeHealthWriteResult>
   saveDistance(samples: NativeDistanceSampleInput[]): Promise<NativeDistanceWriteResult>
-  saveActiveEnergyBurned(samples: NativeActiveEnergyBurnedSampleInput[]): Promise<void>
-  saveHydration(samples: NativeHydrationSampleInput[]): Promise<void>
-  saveFloorsClimbed(samples: NativeFloorsClimbedSampleInput[]): Promise<void>
-  saveHeartRate(samples: NativeHeartRateSampleInput[]): Promise<void>
-  saveBloodPressure(samples: NativeBloodPressureSampleInput[]): Promise<void>
-  saveBloodGlucose(samples: NativeBloodGlucoseSampleInput[]): Promise<void>
-  saveBodyTemperature(samples: NativeBodyTemperatureSampleInput[]): Promise<void>
-  saveRespiratoryRate(samples: NativeRespiratoryRateSampleInput[]): Promise<void>
-  saveBodyFat(samples: NativeBodyFatSampleInput[]): Promise<void>
-  saveLeanBodyMass(samples: NativeLeanBodyMassSampleInput[]): Promise<void>
-  saveBasalBodyTemperature(samples: NativeBasalBodyTemperatureSampleInput[]): Promise<void>
-  saveBodyMass(samples: NativeBodyMassSampleInput[]): Promise<void>
-  saveRestingHeartRate(samples: NativeRestingHeartRateSampleInput[]): Promise<void>
-  saveOxygenSaturation(samples: NativeOxygenSaturationSampleInput[]): Promise<void>
-  saveHeight(samples: NativeHeightSampleInput[]): Promise<void>
-  saveVo2Max(samples: NativeVo2MaxSampleInput[]): Promise<void>
-  saveSleepSessions(sessions: NativeSleepSessionInput[]): Promise<void>
-  saveWorkout(workout: NativeWorkoutSampleInput): Promise<void>
+  saveActiveEnergyBurned(
+    samples: NativeActiveEnergyBurnedSampleInput[]
+  ): Promise<NativeHealthWriteResult>
+  saveHydration(samples: NativeHydrationSampleInput[]): Promise<NativeHealthWriteResult>
+  saveFloorsClimbed(samples: NativeFloorsClimbedSampleInput[]): Promise<NativeHealthWriteResult>
+  saveHeartRate(samples: NativeHeartRateSampleInput[]): Promise<NativeHealthWriteResult>
+  saveBloodPressure(samples: NativeBloodPressureSampleInput[]): Promise<NativeHealthWriteResult>
+  saveBloodGlucose(samples: NativeBloodGlucoseSampleInput[]): Promise<NativeHealthWriteResult>
+  saveBodyTemperature(samples: NativeBodyTemperatureSampleInput[]): Promise<NativeHealthWriteResult>
+  saveRespiratoryRate(samples: NativeRespiratoryRateSampleInput[]): Promise<NativeHealthWriteResult>
+  saveBodyFat(samples: NativeBodyFatSampleInput[]): Promise<NativeHealthWriteResult>
+  saveLeanBodyMass(samples: NativeLeanBodyMassSampleInput[]): Promise<NativeHealthWriteResult>
+  saveBasalBodyTemperature(
+    samples: NativeBasalBodyTemperatureSampleInput[]
+  ): Promise<NativeHealthWriteResult>
+  saveBodyMass(samples: NativeBodyMassSampleInput[]): Promise<NativeHealthWriteResult>
+  saveRestingHeartRate(
+    samples: NativeRestingHeartRateSampleInput[]
+  ): Promise<NativeHealthWriteResult>
+  saveOxygenSaturation(
+    samples: NativeOxygenSaturationSampleInput[]
+  ): Promise<NativeHealthWriteResult>
+  saveHeight(samples: NativeHeightSampleInput[]): Promise<NativeHealthWriteResult>
+  saveVo2Max(samples: NativeVo2MaxSampleInput[]): Promise<NativeHealthWriteResult>
+  saveSleepSessions(sessions: NativeSleepSessionInput[]): Promise<NativeHealthWriteResult>
+  saveWorkout(workout: NativeWorkoutSampleInput): Promise<NativeHealthWriteResult>
   deleteRecordsByIds(dataType: string, recordIds: string[]): Promise<NativeHealthDeleteResult>
   deleteRecordsByTimeRange(
     dataType: string,

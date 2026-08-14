@@ -32,6 +32,8 @@
 namespace margelo::nitro::nitrohealth { struct NativeHealthSampleIdentity; }
 // Forward declaration of `NativeHealthDataOrigin` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthDataOrigin; }
+// Forward declaration of `NativeHealthRecordingMethod` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeHealthRecordingMethod; }
 // Forward declaration of `NativeHealthMetricValue` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthMetricValue; }
 // Forward declaration of `NativeWorkoutActivity` to properly resolve imports.
@@ -39,6 +41,7 @@ namespace margelo::nitro::nitrohealth { struct NativeWorkoutActivity; }
 
 #include "NativeHealthSampleIdentity.hpp"
 #include "NativeHealthDataOrigin.hpp"
+#include "NativeHealthRecordingMethod.hpp"
 #include "NativeHealthMetricValue.hpp"
 #include "NativeWorkoutActivity.hpp"
 #include <string>
@@ -53,6 +56,7 @@ namespace margelo::nitro::nitrohealth {
   public:
     NativeHealthSampleIdentity identity     SWIFT_PRIVATE;
     NativeHealthDataOrigin origin     SWIFT_PRIVATE;
+    NativeHealthRecordingMethod recordingMethod     SWIFT_PRIVATE;
     double startTimeMs     SWIFT_PRIVATE;
     double endTimeMs     SWIFT_PRIVATE;
     double elapsedDurationSeconds     SWIFT_PRIVATE;
@@ -65,7 +69,7 @@ namespace margelo::nitro::nitrohealth {
 
   public:
     NativeWorkoutSample() = default;
-    explicit NativeWorkoutSample(NativeHealthSampleIdentity identity, NativeHealthDataOrigin origin, double startTimeMs, double endTimeMs, double elapsedDurationSeconds, NativeHealthMetricValue activeDuration, NativeWorkoutActivity activity, std::optional<std::string> title, std::optional<std::string> brandName, NativeHealthMetricValue totalDistance, NativeHealthMetricValue totalActiveEnergyBurned): identity(identity), origin(origin), startTimeMs(startTimeMs), endTimeMs(endTimeMs), elapsedDurationSeconds(elapsedDurationSeconds), activeDuration(activeDuration), activity(activity), title(title), brandName(brandName), totalDistance(totalDistance), totalActiveEnergyBurned(totalActiveEnergyBurned) {}
+    explicit NativeWorkoutSample(NativeHealthSampleIdentity identity, NativeHealthDataOrigin origin, NativeHealthRecordingMethod recordingMethod, double startTimeMs, double endTimeMs, double elapsedDurationSeconds, NativeHealthMetricValue activeDuration, NativeWorkoutActivity activity, std::optional<std::string> title, std::optional<std::string> brandName, NativeHealthMetricValue totalDistance, NativeHealthMetricValue totalActiveEnergyBurned): identity(identity), origin(origin), recordingMethod(recordingMethod), startTimeMs(startTimeMs), endTimeMs(endTimeMs), elapsedDurationSeconds(elapsedDurationSeconds), activeDuration(activeDuration), activity(activity), title(title), brandName(brandName), totalDistance(totalDistance), totalActiveEnergyBurned(totalActiveEnergyBurned) {}
 
   public:
     friend bool operator==(const NativeWorkoutSample& lhs, const NativeWorkoutSample& rhs) = default;
@@ -83,6 +87,7 @@ namespace margelo::nitro {
       return margelo::nitro::nitrohealth::NativeWorkoutSample(
         JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleIdentity>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "identity"))),
         JSIConverter<margelo::nitro::nitrohealth::NativeHealthDataOrigin>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "origin"))),
+        JSIConverter<margelo::nitro::nitrohealth::NativeHealthRecordingMethod>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "recordingMethod"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "startTimeMs"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "elapsedDurationSeconds"))),
@@ -98,6 +103,7 @@ namespace margelo::nitro {
       jsi::Object obj(runtime);
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "identity"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleIdentity>::toJSI(runtime, arg.identity));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "origin"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthDataOrigin>::toJSI(runtime, arg.origin));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "recordingMethod"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthRecordingMethod>::toJSI(runtime, arg.recordingMethod));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "startTimeMs"), JSIConverter<double>::toJSI(runtime, arg.startTimeMs));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs"), JSIConverter<double>::toJSI(runtime, arg.endTimeMs));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "elapsedDurationSeconds"), JSIConverter<double>::toJSI(runtime, arg.elapsedDurationSeconds));
@@ -119,6 +125,7 @@ namespace margelo::nitro {
       }
       if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleIdentity>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "identity")))) return false;
       if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthDataOrigin>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "origin")))) return false;
+      if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthRecordingMethod>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "recordingMethod")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "startTimeMs")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "elapsedDurationSeconds")))) return false;

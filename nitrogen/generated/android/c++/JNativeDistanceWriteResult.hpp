@@ -11,7 +11,10 @@
 #include "NativeDistanceWriteResult.hpp"
 
 #include "JNativeDistanceScope.hpp"
+#include "JNativeHealthRecordingMethod.hpp"
 #include "NativeDistanceScope.hpp"
+#include "NativeHealthRecordingMethod.hpp"
+#include <vector>
 
 namespace margelo::nitro::nitrohealth {
 
@@ -34,8 +37,20 @@ namespace margelo::nitro::nitrohealth {
       static const auto clazz = javaClassStatic();
       static const auto fieldStoredScope = clazz->getField<JNativeDistanceScope>("storedScope");
       jni::local_ref<JNativeDistanceScope> storedScope = this->getFieldValue(fieldStoredScope);
+      static const auto fieldStoredRecordingMethods = clazz->getField<jni::JArrayClass<JNativeHealthRecordingMethod>>("storedRecordingMethods");
+      jni::local_ref<jni::JArrayClass<JNativeHealthRecordingMethod>> storedRecordingMethods = this->getFieldValue(fieldStoredRecordingMethods);
       return NativeDistanceWriteResult(
-        storedScope->toCpp()
+        storedScope->toCpp(),
+        [&](auto&& __input) {
+          size_t __size = __input->size();
+          std::vector<NativeHealthRecordingMethod> __vector;
+          __vector.reserve(__size);
+          for (size_t __i = 0; __i < __size; __i++) {
+            auto __element = __input->getElement(__i);
+            __vector.push_back(__element->toCpp());
+          }
+          return __vector;
+        }(storedRecordingMethods)
       );
     }
 
@@ -45,12 +60,22 @@ namespace margelo::nitro::nitrohealth {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeDistanceWriteResult::javaobject> fromCpp(const NativeDistanceWriteResult& value) {
-      using JSignature = JNativeDistanceWriteResult(jni::alias_ref<JNativeDistanceScope>);
+      using JSignature = JNativeDistanceWriteResult(jni::alias_ref<JNativeDistanceScope>, jni::alias_ref<jni::JArrayClass<JNativeHealthRecordingMethod>>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
         clazz,
-        JNativeDistanceScope::fromCpp(value.storedScope)
+        JNativeDistanceScope::fromCpp(value.storedScope),
+        [&](auto&& __input) {
+          size_t __size = __input.size();
+          jni::local_ref<jni::JArrayClass<JNativeHealthRecordingMethod>> __array = jni::JArrayClass<JNativeHealthRecordingMethod>::newArray(__size);
+          for (size_t __i = 0; __i < __size; __i++) {
+            const auto& __element = __input[__i];
+            auto __elementJni = JNativeHealthRecordingMethod::fromCpp(__element);
+            __array->setElement(__i, *__elementJni);
+          }
+          return __array;
+        }(value.storedRecordingMethods)
       );
     }
   };

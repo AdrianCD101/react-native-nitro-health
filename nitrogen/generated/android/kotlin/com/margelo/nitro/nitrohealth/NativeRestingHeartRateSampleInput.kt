@@ -26,6 +26,9 @@ data class NativeRestingHeartRateSampleInput(
   val bpm: Double,
   @DoNotStrip
   @Keep
+  val recordingMethod: NativeHealthRecordingMethod?,
+  @DoNotStrip
+  @Keep
   val syncId: String?,
   @DoNotStrip
   @Keep
@@ -38,6 +41,7 @@ data class NativeRestingHeartRateSampleInput(
     if (other !is NativeRestingHeartRateSampleInput) return false
     return Objects.deepEquals(this.timeMs, other.timeMs)
       && Objects.deepEquals(this.bpm, other.bpm)
+      && Objects.deepEquals(this.recordingMethod, other.recordingMethod)
       && Objects.deepEquals(this.syncId, other.syncId)
       && Objects.deepEquals(this.syncVersion, other.syncVersion)
   }
@@ -46,6 +50,7 @@ data class NativeRestingHeartRateSampleInput(
     return arrayOf<Any?>(
       timeMs,
       bpm,
+      recordingMethod,
       syncId,
       syncVersion
     ).contentDeepHashCode()
@@ -59,8 +64,8 @@ data class NativeRestingHeartRateSampleInput(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(timeMs: Double, bpm: Double, syncId: String?, syncVersion: Double?): NativeRestingHeartRateSampleInput {
-      return NativeRestingHeartRateSampleInput(timeMs, bpm, syncId, syncVersion)
+    private fun fromCpp(timeMs: Double, bpm: Double, recordingMethod: NativeHealthRecordingMethod?, syncId: String?, syncVersion: Double?): NativeRestingHeartRateSampleInput {
+      return NativeRestingHeartRateSampleInput(timeMs, bpm, recordingMethod, syncId, syncVersion)
     }
   }
 }

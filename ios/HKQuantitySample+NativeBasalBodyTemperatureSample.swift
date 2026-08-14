@@ -6,6 +6,7 @@ extension HKQuantitySample {
         return NativeBasalBodyTemperatureSample(
             identity: nativeHealthSampleIdentity,
             origin: nativeHealthDataOrigin,
+            recordingMethod: nativeHealthRecordingMethod,
             timeMs: startDate.timeIntervalSince1970 * 1000,
             celsius: quantity.doubleValue(for: HKUnit.degreeCelsius()),
             androidMeasurementLocation: nil,

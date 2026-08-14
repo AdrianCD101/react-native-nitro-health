@@ -18,8 +18,8 @@ public extension NativeStepSample {
   /**
    * Create a new instance of `NativeStepSample`.
    */
-  init(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, startTimeMs: Double, endTimeMs: Double, count: Double) {
-    self.init(identity, origin, startTimeMs, endTimeMs, count)
+  init(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, recordingMethod: NativeHealthRecordingMethod, startTimeMs: Double, endTimeMs: Double, count: Double) {
+    self.init(identity, origin, recordingMethod, startTimeMs, endTimeMs, count)
   }
 
   @inline(__always)
@@ -30,6 +30,11 @@ public extension NativeStepSample {
   @inline(__always)
   var origin: NativeHealthDataOrigin {
     return self.__origin
+  }
+  
+  @inline(__always)
+  var recordingMethod: NativeHealthRecordingMethod {
+    return self.__recordingMethod
   }
   
   @inline(__always)

@@ -68,6 +68,7 @@ describe('NitroHealth changes contract', () => {
             {
               identity: { kind: 'record', id: 'record-1' },
               origin: { identifier: 'com.example.health', displayName: 'Example Health' },
+              recordingMethod: 'unknown',
               startDate: new Date(startTimeMs),
               endDate: new Date(endTimeMs),
               count: 123,

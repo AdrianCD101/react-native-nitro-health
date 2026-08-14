@@ -1,7 +1,7 @@
 package com.nitrohealth
 
 import androidx.health.connect.client.records.ExerciseSessionRecord
-import androidx.health.connect.client.records.metadata.Metadata
+import com.margelo.nitro.nitrohealth.NativeHealthRecordingMethod
 import com.margelo.nitro.nitrohealth.NativeHealthMetricValueStatus
 import com.margelo.nitro.nitrohealth.NativeHealthSampleIdentityKind
 import com.margelo.nitro.nitrohealth.NativeWorkoutActivityMapping
@@ -24,7 +24,11 @@ class ExerciseSessionRecordMappingTest {
             endZoneOffset = null,
             exerciseType = ExerciseSessionRecord.EXERCISE_TYPE_RUNNING_TREADMILL,
             title = "Morning Run",
-            metadata = Metadata.unknownRecordingMethod()
+            metadata = makeSampleMetadata(
+                syncId = null,
+                syncVersion = null,
+                recordingMethod = NativeHealthRecordingMethod.MANUAL
+            )
         )
 
         val sample = makeNativeWorkoutSample(record)
@@ -34,6 +38,7 @@ class ExerciseSessionRecordMappingTest {
         assertEquals(record.metadata.id, sample.identity.recordId)
         assertEquals(record.metadata.dataOrigin.packageName, sample.origin.identifier)
         assertNull(sample.origin.displayName)
+        assertEquals(NativeHealthRecordingMethod.MANUAL, sample.recordingMethod)
         assertEquals(3600.0, sample.elapsedDurationSeconds, 0.0)
         assertEquals(NativeHealthMetricValueStatus.UNSUPPORTED, sample.activeDuration.status)
         assertNull(sample.activeDuration.value)

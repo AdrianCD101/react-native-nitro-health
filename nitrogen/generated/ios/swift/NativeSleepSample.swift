@@ -18,8 +18,8 @@ public extension NativeSleepSample {
   /**
    * Create a new instance of `NativeSleepSample`.
    */
-  init(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, kind: NativeSleepSampleKind, startTimeMs: Double, endTimeMs: Double, stage: String?, stageData: NativeSleepStageData?) {
-    self.init(identity, origin, kind, startTimeMs, endTimeMs, { () -> bridge.std__optional_std__string_ in
+  init(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, recordingMethod: NativeHealthRecordingMethod, kind: NativeSleepSampleKind, startTimeMs: Double, endTimeMs: Double, stage: String?, stageData: NativeSleepStageData?) {
+    self.init(identity, origin, recordingMethod, kind, startTimeMs, endTimeMs, { () -> bridge.std__optional_std__string_ in
       if let __unwrappedValue = stage {
         return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
       } else {
@@ -42,6 +42,11 @@ public extension NativeSleepSample {
   @inline(__always)
   var origin: NativeHealthDataOrigin {
     return self.__origin
+  }
+  
+  @inline(__always)
+  var recordingMethod: NativeHealthRecordingMethod {
+    return self.__recordingMethod
   }
   
   @inline(__always)

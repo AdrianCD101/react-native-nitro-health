@@ -130,12 +130,16 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthPermissionStatusEntry
 namespace margelo::nitro::nitrohealth { struct NativeHealthPermissionStatusResult; }
 // Forward declaration of `NativeHealthPermission` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthPermission; }
+// Forward declaration of `NativeHealthRecordingMethod` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeHealthRecordingMethod; }
 // Forward declaration of `NativeHealthSampleIdentityKind` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class NativeHealthSampleIdentityKind; }
 // Forward declaration of `NativeHealthSampleIdentity` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthSampleIdentity; }
 // Forward declaration of `NativeHealthStatistics` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthStatistics; }
+// Forward declaration of `NativeHealthWriteResult` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthWriteResult; }
 // Forward declaration of `NativeHeartRateSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHeartRateSampleInput; }
 // Forward declaration of `NativeHeartRateSamplePage` to properly resolve imports.
@@ -299,9 +303,11 @@ namespace NitroHealth { class HybridNitroHealthSpec_cxx; }
 #include "NativeHealthPermission.hpp"
 #include "NativeHealthPermissionStatusEntry.hpp"
 #include "NativeHealthPermissionStatusResult.hpp"
+#include "NativeHealthRecordingMethod.hpp"
 #include "NativeHealthSampleIdentity.hpp"
 #include "NativeHealthSampleIdentityKind.hpp"
 #include "NativeHealthStatistics.hpp"
+#include "NativeHealthWriteResult.hpp"
 #include "NativeHeartRateSample.hpp"
 #include "NativeHeartRateSampleInput.hpp"
 #include "NativeHeartRateSamplePage.hpp"
@@ -2376,16 +2382,64 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return Func_void_NativeWorkoutSamplePage_Wrapper(std::move(value));
   }
   
-  // pragma MARK: std::shared_ptr<Promise<void>>
+  // pragma MARK: std::vector<NativeHealthRecordingMethod>
   /**
-   * Specialized version of `std::shared_ptr<Promise<void>>`.
+   * Specialized version of `std::vector<NativeHealthRecordingMethod>`.
    */
-  using std__shared_ptr_Promise_void__ = std::shared_ptr<Promise<void>>;
-  inline std::shared_ptr<Promise<void>> create_std__shared_ptr_Promise_void__() noexcept {
-    return Promise<void>::create();
+  using std__vector_NativeHealthRecordingMethod_ = std::vector<NativeHealthRecordingMethod>;
+  inline std::vector<NativeHealthRecordingMethod> create_std__vector_NativeHealthRecordingMethod_(size_t size) noexcept {
+    std::vector<NativeHealthRecordingMethod> vector;
+    vector.reserve(size);
+    return vector;
   }
-  inline PromiseHolder<void> wrap_std__shared_ptr_Promise_void__(std::shared_ptr<Promise<void>> promise) noexcept {
-    return PromiseHolder<void>(std::move(promise));
+  
+  // pragma MARK: std::shared_ptr<Promise<NativeHealthWriteResult>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<NativeHealthWriteResult>>`.
+   */
+  using std__shared_ptr_Promise_NativeHealthWriteResult__ = std::shared_ptr<Promise<NativeHealthWriteResult>>;
+  inline std::shared_ptr<Promise<NativeHealthWriteResult>> create_std__shared_ptr_Promise_NativeHealthWriteResult__() noexcept {
+    return Promise<NativeHealthWriteResult>::create();
+  }
+  inline PromiseHolder<NativeHealthWriteResult> wrap_std__shared_ptr_Promise_NativeHealthWriteResult__(std::shared_ptr<Promise<NativeHealthWriteResult>> promise) noexcept {
+    return PromiseHolder<NativeHealthWriteResult>(std::move(promise));
+  }
+  
+  // pragma MARK: std::function<void(const NativeHealthWriteResult& /* result */)>
+  /**
+   * Specialized version of `std::function<void(const NativeHealthWriteResult&)>`.
+   */
+  using Func_void_NativeHealthWriteResult = std::function<void(const NativeHealthWriteResult& /* result */)>;
+  /**
+   * Wrapper class for a `std::function<void(const NativeHealthWriteResult& / * result * /)>`, this can be used from Swift.
+   */
+  class Func_void_NativeHealthWriteResult_Wrapper final {
+  public:
+    explicit Func_void_NativeHealthWriteResult_Wrapper(std::function<void(const NativeHealthWriteResult& /* result */)>&& func): _function(std::make_unique<std::function<void(const NativeHealthWriteResult& /* result */)>>(std::move(func))) {}
+    inline void call(NativeHealthWriteResult result) const noexcept {
+      _function->operator()(result);
+    }
+  private:
+    std::unique_ptr<std::function<void(const NativeHealthWriteResult& /* result */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_NativeHealthWriteResult create_Func_void_NativeHealthWriteResult(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_NativeHealthWriteResult_Wrapper wrap_Func_void_NativeHealthWriteResult(Func_void_NativeHealthWriteResult value) noexcept {
+    return Func_void_NativeHealthWriteResult_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::optional<NativeHealthRecordingMethod>
+  /**
+   * Specialized version of `std::optional<NativeHealthRecordingMethod>`.
+   */
+  using std__optional_NativeHealthRecordingMethod_ = std::optional<NativeHealthRecordingMethod>;
+  inline std::optional<NativeHealthRecordingMethod> create_std__optional_NativeHealthRecordingMethod_(const NativeHealthRecordingMethod& value) noexcept {
+    return std::optional<NativeHealthRecordingMethod>(value);
+  }
+  inline bool has_value_std__optional_NativeHealthRecordingMethod_(const std::optional<NativeHealthRecordingMethod>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline NativeHealthRecordingMethod get_std__optional_NativeHealthRecordingMethod_(const std::optional<NativeHealthRecordingMethod>& optional) noexcept {
+    return optional.value();
   }
   
   // pragma MARK: std::vector<NativeStepSampleInput>
@@ -3075,13 +3129,13 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return Result<std::shared_ptr<Promise<NativeWorkoutSamplePage>>>::withError(error);
   }
   
-  // pragma MARK: Result<std::shared_ptr<Promise<void>>>
-  using Result_std__shared_ptr_Promise_void___ = Result<std::shared_ptr<Promise<void>>>;
-  inline Result_std__shared_ptr_Promise_void___ create_Result_std__shared_ptr_Promise_void___(const std::shared_ptr<Promise<void>>& value) noexcept {
-    return Result<std::shared_ptr<Promise<void>>>::withValue(value);
+  // pragma MARK: Result<std::shared_ptr<Promise<NativeHealthWriteResult>>>
+  using Result_std__shared_ptr_Promise_NativeHealthWriteResult___ = Result<std::shared_ptr<Promise<NativeHealthWriteResult>>>;
+  inline Result_std__shared_ptr_Promise_NativeHealthWriteResult___ create_Result_std__shared_ptr_Promise_NativeHealthWriteResult___(const std::shared_ptr<Promise<NativeHealthWriteResult>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<NativeHealthWriteResult>>>::withValue(value);
   }
-  inline Result_std__shared_ptr_Promise_void___ create_Result_std__shared_ptr_Promise_void___(const std::exception_ptr& error) noexcept {
-    return Result<std::shared_ptr<Promise<void>>>::withError(error);
+  inline Result_std__shared_ptr_Promise_NativeHealthWriteResult___ create_Result_std__shared_ptr_Promise_NativeHealthWriteResult___(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<NativeHealthWriteResult>>>::withError(error);
   }
   
   // pragma MARK: Result<std::shared_ptr<Promise<NativeDistanceWriteResult>>>

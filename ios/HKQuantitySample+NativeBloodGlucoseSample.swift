@@ -36,6 +36,7 @@ extension HKQuantitySample {
         return NativeBloodGlucoseSample(
             identity: nativeHealthSampleIdentity,
             origin: nativeHealthDataOrigin,
+            recordingMethod: nativeHealthRecordingMethod,
             timeMs: startDate.timeIntervalSince1970 * 1000,
             millimolesPerLiter: quantity.doubleValue(for: bloodGlucoseMmolPerLiterUnit),
             androidSpecimenSource: nil,

@@ -26,6 +26,9 @@ data class NativeOxygenSaturationSample(
   val origin: NativeHealthDataOrigin,
   @DoNotStrip
   @Keep
+  val recordingMethod: NativeHealthRecordingMethod,
+  @DoNotStrip
+  @Keep
   val timeMs: Double,
   @DoNotStrip
   @Keep
@@ -38,6 +41,7 @@ data class NativeOxygenSaturationSample(
     if (other !is NativeOxygenSaturationSample) return false
     return Objects.deepEquals(this.identity, other.identity)
       && Objects.deepEquals(this.origin, other.origin)
+      && Objects.deepEquals(this.recordingMethod, other.recordingMethod)
       && Objects.deepEquals(this.timeMs, other.timeMs)
       && Objects.deepEquals(this.percentage, other.percentage)
   }
@@ -46,6 +50,7 @@ data class NativeOxygenSaturationSample(
     return arrayOf<Any?>(
       identity,
       origin,
+      recordingMethod,
       timeMs,
       percentage
     ).contentDeepHashCode()
@@ -59,8 +64,8 @@ data class NativeOxygenSaturationSample(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, timeMs: Double, percentage: Double): NativeOxygenSaturationSample {
-      return NativeOxygenSaturationSample(identity, origin, timeMs, percentage)
+    private fun fromCpp(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, recordingMethod: NativeHealthRecordingMethod, timeMs: Double, percentage: Double): NativeOxygenSaturationSample {
+      return NativeOxygenSaturationSample(identity, origin, recordingMethod, timeMs, percentage)
     }
   }
 }

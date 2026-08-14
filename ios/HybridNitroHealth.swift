@@ -41,6 +41,7 @@ class HybridNitroHealth: HybridNitroHealthSpec {
                 return NativeStepSample(
                     identity: quantitySample.nativeHealthSampleIdentity,
                     origin: quantitySample.nativeHealthDataOrigin,
+                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
                     startTimeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
                     endTimeMs: quantitySample.endDate.timeIntervalSince1970 * 1000,
                     count: quantitySample.quantity.doubleValue(for: HKUnit.count())
@@ -73,6 +74,7 @@ class HybridNitroHealth: HybridNitroHealthSpec {
                 return NativeDistanceSample(
                     identity: quantitySample.nativeHealthSampleIdentity,
                     origin: quantitySample.nativeHealthDataOrigin,
+                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
                     startTimeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
                     endTimeMs: quantitySample.endDate.timeIntervalSince1970 * 1000,
                     distanceMeters: quantitySample.quantity.doubleValue(for: HKUnit.meter()),
@@ -106,6 +108,7 @@ class HybridNitroHealth: HybridNitroHealthSpec {
                 return NativeActiveEnergyBurnedSample(
                     identity: quantitySample.nativeHealthSampleIdentity,
                     origin: quantitySample.nativeHealthDataOrigin,
+                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
                     startTimeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
                     endTimeMs: quantitySample.endDate.timeIntervalSince1970 * 1000,
                     kilocalories: quantitySample.quantity.doubleValue(for: HKUnit.kilocalorie())
@@ -139,6 +142,7 @@ class HybridNitroHealth: HybridNitroHealthSpec {
                 return NativeHydrationSample(
                     identity: quantitySample.nativeHealthSampleIdentity,
                     origin: quantitySample.nativeHealthDataOrigin,
+                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
                     startTimeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
                     endTimeMs: quantitySample.endDate.timeIntervalSince1970 * 1000,
                     milliliters: quantitySample.quantity.doubleValue(for: unit)
@@ -171,6 +175,7 @@ class HybridNitroHealth: HybridNitroHealthSpec {
                 return NativeFloorsClimbedSample(
                     identity: quantitySample.nativeHealthSampleIdentity,
                     origin: quantitySample.nativeHealthDataOrigin,
+                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
                     startTimeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
                     endTimeMs: quantitySample.endDate.timeIntervalSince1970 * 1000,
                     floors: quantitySample.quantity.doubleValue(for: HKUnit.count())
@@ -205,6 +210,7 @@ class HybridNitroHealth: HybridNitroHealthSpec {
                 return NativeHeartRateSample(
                     identity: quantitySample.nativeHealthSampleIdentity,
                     origin: quantitySample.nativeHealthDataOrigin,
+                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
                     timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
                     bpm: quantitySample.quantity.doubleValue(for: bpmUnit)
                 )
@@ -225,6 +231,7 @@ class HybridNitroHealth: HybridNitroHealthSpec {
                 NativeBodyMassSample(
                     identity: quantitySample.nativeHealthSampleIdentity,
                     origin: quantitySample.nativeHealthDataOrigin,
+                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
                     startTimeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
                     endTimeMs: quantitySample.endDate.timeIntervalSince1970 * 1000,
                     kilograms: quantitySample.quantity.doubleValue(for: unit)
@@ -442,7 +449,7 @@ class HybridNitroHealth: HybridNitroHealthSpec {
 
     // Note: unlike reads, HealthKit can verify write authorization, so save methods throw a
     // permission error when sharing is not authorized (including when not yet determined).
-    func saveSteps(samples: [NativeStepSampleInput]) throws -> Promise<Void> {
+    func saveSteps(samples: [NativeStepSampleInput]) throws -> Promise<NativeHealthWriteResult> {
         return try saveQuantitySamples(dataType: "steps", label: "steps") { quantityType in
             try makeStepQuantitySamples(samples: samples, quantityType: quantityType)
         }
@@ -468,35 +475,38 @@ class HybridNitroHealth: HybridNitroHealthSpec {
                 quantityType: quantityType
             )
             try await self.saveHealthKitSamples(healthKitSamples)
-            return NativeDistanceWriteResult(storedScope: .walkingrunning)
+            return NativeDistanceWriteResult(
+                storedScope: .walkingrunning,
+                storedRecordingMethods: await self.storedRecordingMethods(for: healthKitSamples)
+            )
         }
     }
 
-    func saveActiveEnergyBurned(samples: [NativeActiveEnergyBurnedSampleInput]) throws -> Promise<Void> {
+    func saveActiveEnergyBurned(samples: [NativeActiveEnergyBurnedSampleInput]) throws -> Promise<NativeHealthWriteResult> {
         return try saveQuantitySamples(dataType: "activeEnergyBurned", label: "active energy burned") { quantityType in
             try makeActiveEnergyBurnedQuantitySamples(samples: samples, quantityType: quantityType)
         }
     }
 
-    func saveHydration(samples: [NativeHydrationSampleInput]) throws -> Promise<Void> {
+    func saveHydration(samples: [NativeHydrationSampleInput]) throws -> Promise<NativeHealthWriteResult> {
         return try saveQuantitySamples(dataType: "hydration", label: "hydration") { quantityType in
             try makeHydrationQuantitySamples(samples: samples, quantityType: quantityType)
         }
     }
 
-    func saveFloorsClimbed(samples: [NativeFloorsClimbedSampleInput]) throws -> Promise<Void> {
+    func saveFloorsClimbed(samples: [NativeFloorsClimbedSampleInput]) throws -> Promise<NativeHealthWriteResult> {
         return try saveQuantitySamples(dataType: "floorsClimbed", label: "floors climbed") { quantityType in
             try makeFloorsClimbedQuantitySamples(samples: samples, quantityType: quantityType)
         }
     }
 
-    func saveHeartRate(samples: [NativeHeartRateSampleInput]) throws -> Promise<Void> {
+    func saveHeartRate(samples: [NativeHeartRateSampleInput]) throws -> Promise<NativeHealthWriteResult> {
         return try saveQuantitySamples(dataType: "heartRate", label: "heart rate") { quantityType in
             try makeHeartRateQuantitySamples(samples: samples, quantityType: quantityType)
         }
     }
 
-    func saveBodyMass(samples: [NativeBodyMassSampleInput]) throws -> Promise<Void> {
+    func saveBodyMass(samples: [NativeBodyMassSampleInput]) throws -> Promise<NativeHealthWriteResult> {
         return try saveQuantitySamples(dataType: "bodyMass", label: "body mass") { quantityType in
             try makeBodyMassQuantitySamples(samples: samples, quantityType: quantityType)
         }
@@ -511,16 +521,19 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         dataType: String,
         label: String,
         makeSamples: @escaping (HKQuantityType) throws -> [HKQuantitySample]
-    ) throws -> Promise<Void> {
+    ) throws -> Promise<NativeHealthWriteResult> {
         if !HKHealthStore.isHealthDataAvailable() {
             throw permissionError("Health data is not available")
         }
 
-        return Promise<Void>.async {
+        return Promise<NativeHealthWriteResult>.async {
             let quantityType = try makeHealthKitQuantityType(dataType: dataType)
             try self.requireWriteAuthorization(for: quantityType, label: label)
             let samples = try makeSamples(quantityType)
             try await self.saveHealthKitSamples(samples)
+            return NativeHealthWriteResult(
+                storedRecordingMethods: await self.storedRecordingMethods(for: samples)
+            )
         }
     }
 
@@ -648,9 +661,16 @@ class HybridNitroHealth: HybridNitroHealthSpec {
     // Internal so sleep writes can save their envelope and stages in the same atomic call.
     func saveHealthKitSamples(_ samples: [HKSample]) async throws {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-            healthStore.save(samples) { _, error in
+            healthStore.save(samples) { success, error in
                 if let error = error {
                     continuation.resume(throwing: error)
+                    return
+                }
+
+                guard success else {
+                    continuation.resume(
+                        throwing: permissionError("HealthKit did not complete the save")
+                    )
                     return
                 }
 

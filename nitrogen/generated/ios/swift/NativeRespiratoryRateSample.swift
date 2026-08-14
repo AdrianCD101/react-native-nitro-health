@@ -18,8 +18,8 @@ public extension NativeRespiratoryRateSample {
   /**
    * Create a new instance of `NativeRespiratoryRateSample`.
    */
-  init(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, timeMs: Double, breathsPerMinute: Double) {
-    self.init(identity, origin, timeMs, breathsPerMinute)
+  init(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, recordingMethod: NativeHealthRecordingMethod, timeMs: Double, breathsPerMinute: Double) {
+    self.init(identity, origin, recordingMethod, timeMs, breathsPerMinute)
   }
 
   @inline(__always)
@@ -30,6 +30,11 @@ public extension NativeRespiratoryRateSample {
   @inline(__always)
   var origin: NativeHealthDataOrigin {
     return self.__origin
+  }
+  
+  @inline(__always)
+  var recordingMethod: NativeHealthRecordingMethod {
+    return self.__recordingMethod
   }
   
   @inline(__always)

@@ -26,6 +26,9 @@ data class NativeBodyFatSampleInput(
   val percentage: Double,
   @DoNotStrip
   @Keep
+  val recordingMethod: NativeHealthRecordingMethod?,
+  @DoNotStrip
+  @Keep
   val syncId: String?,
   @DoNotStrip
   @Keep
@@ -38,6 +41,7 @@ data class NativeBodyFatSampleInput(
     if (other !is NativeBodyFatSampleInput) return false
     return Objects.deepEquals(this.timeMs, other.timeMs)
       && Objects.deepEquals(this.percentage, other.percentage)
+      && Objects.deepEquals(this.recordingMethod, other.recordingMethod)
       && Objects.deepEquals(this.syncId, other.syncId)
       && Objects.deepEquals(this.syncVersion, other.syncVersion)
   }
@@ -46,6 +50,7 @@ data class NativeBodyFatSampleInput(
     return arrayOf<Any?>(
       timeMs,
       percentage,
+      recordingMethod,
       syncId,
       syncVersion
     ).contentDeepHashCode()
@@ -59,8 +64,8 @@ data class NativeBodyFatSampleInput(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(timeMs: Double, percentage: Double, syncId: String?, syncVersion: Double?): NativeBodyFatSampleInput {
-      return NativeBodyFatSampleInput(timeMs, percentage, syncId, syncVersion)
+    private fun fromCpp(timeMs: Double, percentage: Double, recordingMethod: NativeHealthRecordingMethod?, syncId: String?, syncVersion: Double?): NativeBodyFatSampleInput {
+      return NativeBodyFatSampleInput(timeMs, percentage, recordingMethod, syncId, syncVersion)
     }
   }
 }

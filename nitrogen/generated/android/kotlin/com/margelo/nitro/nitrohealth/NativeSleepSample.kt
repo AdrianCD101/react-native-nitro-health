@@ -26,6 +26,9 @@ data class NativeSleepSample(
   val origin: NativeHealthDataOrigin,
   @DoNotStrip
   @Keep
+  val recordingMethod: NativeHealthRecordingMethod,
+  @DoNotStrip
+  @Keep
   val kind: NativeSleepSampleKind,
   @DoNotStrip
   @Keep
@@ -47,6 +50,7 @@ data class NativeSleepSample(
     if (other !is NativeSleepSample) return false
     return Objects.deepEquals(this.identity, other.identity)
       && Objects.deepEquals(this.origin, other.origin)
+      && Objects.deepEquals(this.recordingMethod, other.recordingMethod)
       && Objects.deepEquals(this.kind, other.kind)
       && Objects.deepEquals(this.startTimeMs, other.startTimeMs)
       && Objects.deepEquals(this.endTimeMs, other.endTimeMs)
@@ -58,6 +62,7 @@ data class NativeSleepSample(
     return arrayOf<Any?>(
       identity,
       origin,
+      recordingMethod,
       kind,
       startTimeMs,
       endTimeMs,
@@ -74,8 +79,8 @@ data class NativeSleepSample(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, kind: NativeSleepSampleKind, startTimeMs: Double, endTimeMs: Double, stage: String?, stageData: NativeSleepStageData?): NativeSleepSample {
-      return NativeSleepSample(identity, origin, kind, startTimeMs, endTimeMs, stage, stageData)
+    private fun fromCpp(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, recordingMethod: NativeHealthRecordingMethod, kind: NativeSleepSampleKind, startTimeMs: Double, endTimeMs: Double, stage: String?, stageData: NativeSleepStageData?): NativeSleepSample {
+      return NativeSleepSample(identity, origin, recordingMethod, kind, startTimeMs, endTimeMs, stage, stageData)
     }
   }
 }

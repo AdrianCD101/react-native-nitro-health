@@ -16,6 +16,7 @@
 #include "JNativeBloodGlucoseSample.hpp"
 #include "JNativeBloodGlucoseSpecimenSource.hpp"
 #include "JNativeHealthDataOrigin.hpp"
+#include "JNativeHealthRecordingMethod.hpp"
 #include "JNativeHealthSampleIdentity.hpp"
 #include "JNativeHealthSampleIdentityKind.hpp"
 #include "NativeBloodGlucoseMealTime.hpp"
@@ -24,6 +25,7 @@
 #include "NativeBloodGlucoseSample.hpp"
 #include "NativeBloodGlucoseSpecimenSource.hpp"
 #include "NativeHealthDataOrigin.hpp"
+#include "NativeHealthRecordingMethod.hpp"
 #include "NativeHealthSampleIdentity.hpp"
 #include "NativeHealthSampleIdentityKind.hpp"
 #include <optional>

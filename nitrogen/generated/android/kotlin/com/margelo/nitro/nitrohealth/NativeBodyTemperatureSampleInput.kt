@@ -26,6 +26,9 @@ data class NativeBodyTemperatureSampleInput(
   val celsius: Double,
   @DoNotStrip
   @Keep
+  val recordingMethod: NativeHealthRecordingMethod?,
+  @DoNotStrip
+  @Keep
   val androidMeasurementLocation: NativeAndroidBodyTemperatureMeasurementLocation?,
   @DoNotStrip
   @Keep
@@ -44,6 +47,7 @@ data class NativeBodyTemperatureSampleInput(
     if (other !is NativeBodyTemperatureSampleInput) return false
     return Objects.deepEquals(this.timeMs, other.timeMs)
       && Objects.deepEquals(this.celsius, other.celsius)
+      && Objects.deepEquals(this.recordingMethod, other.recordingMethod)
       && Objects.deepEquals(this.androidMeasurementLocation, other.androidMeasurementLocation)
       && Objects.deepEquals(this.iosSensorLocation, other.iosSensorLocation)
       && Objects.deepEquals(this.syncId, other.syncId)
@@ -54,6 +58,7 @@ data class NativeBodyTemperatureSampleInput(
     return arrayOf<Any?>(
       timeMs,
       celsius,
+      recordingMethod,
       androidMeasurementLocation,
       iosSensorLocation,
       syncId,
@@ -69,8 +74,8 @@ data class NativeBodyTemperatureSampleInput(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(timeMs: Double, celsius: Double, androidMeasurementLocation: NativeAndroidBodyTemperatureMeasurementLocation?, iosSensorLocation: NativeIOSBodyTemperatureSensorLocation?, syncId: String?, syncVersion: Double?): NativeBodyTemperatureSampleInput {
-      return NativeBodyTemperatureSampleInput(timeMs, celsius, androidMeasurementLocation, iosSensorLocation, syncId, syncVersion)
+    private fun fromCpp(timeMs: Double, celsius: Double, recordingMethod: NativeHealthRecordingMethod?, androidMeasurementLocation: NativeAndroidBodyTemperatureMeasurementLocation?, iosSensorLocation: NativeIOSBodyTemperatureSensorLocation?, syncId: String?, syncVersion: Double?): NativeBodyTemperatureSampleInput {
+      return NativeBodyTemperatureSampleInput(timeMs, celsius, recordingMethod, androidMeasurementLocation, iosSensorLocation, syncId, syncVersion)
     }
   }
 }

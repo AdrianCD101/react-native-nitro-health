@@ -16,8 +16,8 @@ import com.facebook.proguard.annotations.DoNotStrip
 @DoNotStrip
 @Keep
 enum class NativeWorkoutActivityStatus(@DoNotStrip @Keep val value: Int) {
-  KNOWN(0),
-  UNKNOWN(1);
+  UNKNOWN(0),
+  KNOWN(1);
 
   companion object
 }

@@ -52,6 +52,8 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthSampleIdentity; }
 namespace margelo::nitro::nitrohealth { enum class NativeHealthSampleIdentityKind; }
 // Forward declaration of `NativeHealthDataOrigin` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthDataOrigin; }
+// Forward declaration of `NativeHealthRecordingMethod` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeHealthRecordingMethod; }
 // Forward declaration of `NativeHeartRateSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHeartRateSample; }
 // Forward declaration of `NativeBloodPressureSample` to properly resolve imports.
@@ -182,6 +184,8 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthStatisticsQuery; }
 namespace margelo::nitro::nitrohealth { struct NativeSleepSamplePage; }
 // Forward declaration of `NativeWorkoutSamplePage` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeWorkoutSamplePage; }
+// Forward declaration of `NativeHealthWriteResult` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthWriteResult; }
 // Forward declaration of `NativeStepSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeStepSampleInput; }
 // Forward declaration of `NativeDistanceWriteResult` to properly resolve imports.
@@ -270,6 +274,7 @@ namespace margelo::nitro::nitrohealth { enum class NativeHealthAuthorizationStat
 #include "NativeHealthSampleIdentity.hpp"
 #include "NativeHealthSampleIdentityKind.hpp"
 #include "NativeHealthDataOrigin.hpp"
+#include "NativeHealthRecordingMethod.hpp"
 #include "NativeHeartRateSample.hpp"
 #include "NativeBloodPressureSample.hpp"
 #include "NativeBloodPressureBodyPosition.hpp"
@@ -335,6 +340,7 @@ namespace margelo::nitro::nitrohealth { enum class NativeHealthAuthorizationStat
 #include "NativeHealthStatisticsQuery.hpp"
 #include "NativeSleepSamplePage.hpp"
 #include "NativeWorkoutSamplePage.hpp"
+#include "NativeHealthWriteResult.hpp"
 #include "NativeStepSampleInput.hpp"
 #include "NativeDistanceWriteResult.hpp"
 #include "NativeDistanceSampleInput.hpp"
@@ -705,7 +711,7 @@ namespace margelo::nitro::nitrohealth {
       auto __value = std::move(__result.value());
       return __value;
     }
-    inline std::shared_ptr<Promise<void>> saveSteps(const std::vector<NativeStepSampleInput>& samples) override {
+    inline std::shared_ptr<Promise<NativeHealthWriteResult>> saveSteps(const std::vector<NativeStepSampleInput>& samples) override {
       auto __result = _swiftPart.saveSteps(samples);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
@@ -721,7 +727,7 @@ namespace margelo::nitro::nitrohealth {
       auto __value = std::move(__result.value());
       return __value;
     }
-    inline std::shared_ptr<Promise<void>> saveActiveEnergyBurned(const std::vector<NativeActiveEnergyBurnedSampleInput>& samples) override {
+    inline std::shared_ptr<Promise<NativeHealthWriteResult>> saveActiveEnergyBurned(const std::vector<NativeActiveEnergyBurnedSampleInput>& samples) override {
       auto __result = _swiftPart.saveActiveEnergyBurned(samples);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
@@ -729,7 +735,7 @@ namespace margelo::nitro::nitrohealth {
       auto __value = std::move(__result.value());
       return __value;
     }
-    inline std::shared_ptr<Promise<void>> saveHydration(const std::vector<NativeHydrationSampleInput>& samples) override {
+    inline std::shared_ptr<Promise<NativeHealthWriteResult>> saveHydration(const std::vector<NativeHydrationSampleInput>& samples) override {
       auto __result = _swiftPart.saveHydration(samples);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
@@ -737,7 +743,7 @@ namespace margelo::nitro::nitrohealth {
       auto __value = std::move(__result.value());
       return __value;
     }
-    inline std::shared_ptr<Promise<void>> saveFloorsClimbed(const std::vector<NativeFloorsClimbedSampleInput>& samples) override {
+    inline std::shared_ptr<Promise<NativeHealthWriteResult>> saveFloorsClimbed(const std::vector<NativeFloorsClimbedSampleInput>& samples) override {
       auto __result = _swiftPart.saveFloorsClimbed(samples);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
@@ -745,7 +751,7 @@ namespace margelo::nitro::nitrohealth {
       auto __value = std::move(__result.value());
       return __value;
     }
-    inline std::shared_ptr<Promise<void>> saveHeartRate(const std::vector<NativeHeartRateSampleInput>& samples) override {
+    inline std::shared_ptr<Promise<NativeHealthWriteResult>> saveHeartRate(const std::vector<NativeHeartRateSampleInput>& samples) override {
       auto __result = _swiftPart.saveHeartRate(samples);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
@@ -753,7 +759,7 @@ namespace margelo::nitro::nitrohealth {
       auto __value = std::move(__result.value());
       return __value;
     }
-    inline std::shared_ptr<Promise<void>> saveBloodPressure(const std::vector<NativeBloodPressureSampleInput>& samples) override {
+    inline std::shared_ptr<Promise<NativeHealthWriteResult>> saveBloodPressure(const std::vector<NativeBloodPressureSampleInput>& samples) override {
       auto __result = _swiftPart.saveBloodPressure(samples);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
@@ -761,7 +767,7 @@ namespace margelo::nitro::nitrohealth {
       auto __value = std::move(__result.value());
       return __value;
     }
-    inline std::shared_ptr<Promise<void>> saveBloodGlucose(const std::vector<NativeBloodGlucoseSampleInput>& samples) override {
+    inline std::shared_ptr<Promise<NativeHealthWriteResult>> saveBloodGlucose(const std::vector<NativeBloodGlucoseSampleInput>& samples) override {
       auto __result = _swiftPart.saveBloodGlucose(samples);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
@@ -769,7 +775,7 @@ namespace margelo::nitro::nitrohealth {
       auto __value = std::move(__result.value());
       return __value;
     }
-    inline std::shared_ptr<Promise<void>> saveBodyTemperature(const std::vector<NativeBodyTemperatureSampleInput>& samples) override {
+    inline std::shared_ptr<Promise<NativeHealthWriteResult>> saveBodyTemperature(const std::vector<NativeBodyTemperatureSampleInput>& samples) override {
       auto __result = _swiftPart.saveBodyTemperature(samples);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
@@ -777,7 +783,7 @@ namespace margelo::nitro::nitrohealth {
       auto __value = std::move(__result.value());
       return __value;
     }
-    inline std::shared_ptr<Promise<void>> saveRespiratoryRate(const std::vector<NativeRespiratoryRateSampleInput>& samples) override {
+    inline std::shared_ptr<Promise<NativeHealthWriteResult>> saveRespiratoryRate(const std::vector<NativeRespiratoryRateSampleInput>& samples) override {
       auto __result = _swiftPart.saveRespiratoryRate(samples);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
@@ -785,7 +791,7 @@ namespace margelo::nitro::nitrohealth {
       auto __value = std::move(__result.value());
       return __value;
     }
-    inline std::shared_ptr<Promise<void>> saveBodyFat(const std::vector<NativeBodyFatSampleInput>& samples) override {
+    inline std::shared_ptr<Promise<NativeHealthWriteResult>> saveBodyFat(const std::vector<NativeBodyFatSampleInput>& samples) override {
       auto __result = _swiftPart.saveBodyFat(samples);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
@@ -793,7 +799,7 @@ namespace margelo::nitro::nitrohealth {
       auto __value = std::move(__result.value());
       return __value;
     }
-    inline std::shared_ptr<Promise<void>> saveLeanBodyMass(const std::vector<NativeLeanBodyMassSampleInput>& samples) override {
+    inline std::shared_ptr<Promise<NativeHealthWriteResult>> saveLeanBodyMass(const std::vector<NativeLeanBodyMassSampleInput>& samples) override {
       auto __result = _swiftPart.saveLeanBodyMass(samples);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
@@ -801,7 +807,7 @@ namespace margelo::nitro::nitrohealth {
       auto __value = std::move(__result.value());
       return __value;
     }
-    inline std::shared_ptr<Promise<void>> saveBasalBodyTemperature(const std::vector<NativeBasalBodyTemperatureSampleInput>& samples) override {
+    inline std::shared_ptr<Promise<NativeHealthWriteResult>> saveBasalBodyTemperature(const std::vector<NativeBasalBodyTemperatureSampleInput>& samples) override {
       auto __result = _swiftPart.saveBasalBodyTemperature(samples);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
@@ -809,7 +815,7 @@ namespace margelo::nitro::nitrohealth {
       auto __value = std::move(__result.value());
       return __value;
     }
-    inline std::shared_ptr<Promise<void>> saveBodyMass(const std::vector<NativeBodyMassSampleInput>& samples) override {
+    inline std::shared_ptr<Promise<NativeHealthWriteResult>> saveBodyMass(const std::vector<NativeBodyMassSampleInput>& samples) override {
       auto __result = _swiftPart.saveBodyMass(samples);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
@@ -817,7 +823,7 @@ namespace margelo::nitro::nitrohealth {
       auto __value = std::move(__result.value());
       return __value;
     }
-    inline std::shared_ptr<Promise<void>> saveRestingHeartRate(const std::vector<NativeRestingHeartRateSampleInput>& samples) override {
+    inline std::shared_ptr<Promise<NativeHealthWriteResult>> saveRestingHeartRate(const std::vector<NativeRestingHeartRateSampleInput>& samples) override {
       auto __result = _swiftPart.saveRestingHeartRate(samples);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
@@ -825,7 +831,7 @@ namespace margelo::nitro::nitrohealth {
       auto __value = std::move(__result.value());
       return __value;
     }
-    inline std::shared_ptr<Promise<void>> saveOxygenSaturation(const std::vector<NativeOxygenSaturationSampleInput>& samples) override {
+    inline std::shared_ptr<Promise<NativeHealthWriteResult>> saveOxygenSaturation(const std::vector<NativeOxygenSaturationSampleInput>& samples) override {
       auto __result = _swiftPart.saveOxygenSaturation(samples);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
@@ -833,7 +839,7 @@ namespace margelo::nitro::nitrohealth {
       auto __value = std::move(__result.value());
       return __value;
     }
-    inline std::shared_ptr<Promise<void>> saveHeight(const std::vector<NativeHeightSampleInput>& samples) override {
+    inline std::shared_ptr<Promise<NativeHealthWriteResult>> saveHeight(const std::vector<NativeHeightSampleInput>& samples) override {
       auto __result = _swiftPart.saveHeight(samples);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
@@ -841,7 +847,7 @@ namespace margelo::nitro::nitrohealth {
       auto __value = std::move(__result.value());
       return __value;
     }
-    inline std::shared_ptr<Promise<void>> saveVo2Max(const std::vector<NativeVo2MaxSampleInput>& samples) override {
+    inline std::shared_ptr<Promise<NativeHealthWriteResult>> saveVo2Max(const std::vector<NativeVo2MaxSampleInput>& samples) override {
       auto __result = _swiftPart.saveVo2Max(samples);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
@@ -849,7 +855,7 @@ namespace margelo::nitro::nitrohealth {
       auto __value = std::move(__result.value());
       return __value;
     }
-    inline std::shared_ptr<Promise<void>> saveSleepSessions(const std::vector<NativeSleepSessionInput>& sessions) override {
+    inline std::shared_ptr<Promise<NativeHealthWriteResult>> saveSleepSessions(const std::vector<NativeSleepSessionInput>& sessions) override {
       auto __result = _swiftPart.saveSleepSessions(sessions);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
@@ -857,7 +863,7 @@ namespace margelo::nitro::nitrohealth {
       auto __value = std::move(__result.value());
       return __value;
     }
-    inline std::shared_ptr<Promise<void>> saveWorkout(const NativeWorkoutSampleInput& workout) override {
+    inline std::shared_ptr<Promise<NativeHealthWriteResult>> saveWorkout(const NativeWorkoutSampleInput& workout) override {
       auto __result = _swiftPart.saveWorkout(std::forward<decltype(workout)>(workout));
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());

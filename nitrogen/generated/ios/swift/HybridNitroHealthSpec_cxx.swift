@@ -812,21 +812,21 @@ open class HybridNitroHealthSpec_cxx {
   }
   
   @inline(__always)
-  public final func saveSteps(samples: bridge.std__vector_NativeStepSampleInput_) -> bridge.Result_std__shared_ptr_Promise_void___ {
+  public final func saveSteps(samples: bridge.std__vector_NativeStepSampleInput_) -> bridge.Result_std__shared_ptr_Promise_NativeHealthWriteResult___ {
     do {
       let __result = try self.__implementation.saveSteps(samples: samples.map({ __item in __item }))
-      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_void__ in
-        let __promise = bridge.create_std__shared_ptr_Promise_void__()
-        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_void__(__promise)
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_NativeHealthWriteResult__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_NativeHealthWriteResult__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_NativeHealthWriteResult__(__promise)
         __result
-          .then({ __result in __promiseHolder.resolve() })
+          .then({ __result in __promiseHolder.resolve(__result) })
           .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
         return __promise
       }()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__resultCpp)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthWriteResult___(__resultCpp)
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthWriteResult___(__exceptionPtr)
     }
   }
   
@@ -850,344 +850,344 @@ open class HybridNitroHealthSpec_cxx {
   }
   
   @inline(__always)
-  public final func saveActiveEnergyBurned(samples: bridge.std__vector_NativeActiveEnergyBurnedSampleInput_) -> bridge.Result_std__shared_ptr_Promise_void___ {
+  public final func saveActiveEnergyBurned(samples: bridge.std__vector_NativeActiveEnergyBurnedSampleInput_) -> bridge.Result_std__shared_ptr_Promise_NativeHealthWriteResult___ {
     do {
       let __result = try self.__implementation.saveActiveEnergyBurned(samples: samples.map({ __item in __item }))
-      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_void__ in
-        let __promise = bridge.create_std__shared_ptr_Promise_void__()
-        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_void__(__promise)
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_NativeHealthWriteResult__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_NativeHealthWriteResult__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_NativeHealthWriteResult__(__promise)
         __result
-          .then({ __result in __promiseHolder.resolve() })
+          .then({ __result in __promiseHolder.resolve(__result) })
           .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
         return __promise
       }()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__resultCpp)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthWriteResult___(__resultCpp)
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthWriteResult___(__exceptionPtr)
     }
   }
   
   @inline(__always)
-  public final func saveHydration(samples: bridge.std__vector_NativeHydrationSampleInput_) -> bridge.Result_std__shared_ptr_Promise_void___ {
+  public final func saveHydration(samples: bridge.std__vector_NativeHydrationSampleInput_) -> bridge.Result_std__shared_ptr_Promise_NativeHealthWriteResult___ {
     do {
       let __result = try self.__implementation.saveHydration(samples: samples.map({ __item in __item }))
-      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_void__ in
-        let __promise = bridge.create_std__shared_ptr_Promise_void__()
-        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_void__(__promise)
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_NativeHealthWriteResult__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_NativeHealthWriteResult__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_NativeHealthWriteResult__(__promise)
         __result
-          .then({ __result in __promiseHolder.resolve() })
+          .then({ __result in __promiseHolder.resolve(__result) })
           .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
         return __promise
       }()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__resultCpp)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthWriteResult___(__resultCpp)
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthWriteResult___(__exceptionPtr)
     }
   }
   
   @inline(__always)
-  public final func saveFloorsClimbed(samples: bridge.std__vector_NativeFloorsClimbedSampleInput_) -> bridge.Result_std__shared_ptr_Promise_void___ {
+  public final func saveFloorsClimbed(samples: bridge.std__vector_NativeFloorsClimbedSampleInput_) -> bridge.Result_std__shared_ptr_Promise_NativeHealthWriteResult___ {
     do {
       let __result = try self.__implementation.saveFloorsClimbed(samples: samples.map({ __item in __item }))
-      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_void__ in
-        let __promise = bridge.create_std__shared_ptr_Promise_void__()
-        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_void__(__promise)
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_NativeHealthWriteResult__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_NativeHealthWriteResult__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_NativeHealthWriteResult__(__promise)
         __result
-          .then({ __result in __promiseHolder.resolve() })
+          .then({ __result in __promiseHolder.resolve(__result) })
           .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
         return __promise
       }()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__resultCpp)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthWriteResult___(__resultCpp)
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthWriteResult___(__exceptionPtr)
     }
   }
   
   @inline(__always)
-  public final func saveHeartRate(samples: bridge.std__vector_NativeHeartRateSampleInput_) -> bridge.Result_std__shared_ptr_Promise_void___ {
+  public final func saveHeartRate(samples: bridge.std__vector_NativeHeartRateSampleInput_) -> bridge.Result_std__shared_ptr_Promise_NativeHealthWriteResult___ {
     do {
       let __result = try self.__implementation.saveHeartRate(samples: samples.map({ __item in __item }))
-      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_void__ in
-        let __promise = bridge.create_std__shared_ptr_Promise_void__()
-        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_void__(__promise)
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_NativeHealthWriteResult__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_NativeHealthWriteResult__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_NativeHealthWriteResult__(__promise)
         __result
-          .then({ __result in __promiseHolder.resolve() })
+          .then({ __result in __promiseHolder.resolve(__result) })
           .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
         return __promise
       }()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__resultCpp)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthWriteResult___(__resultCpp)
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthWriteResult___(__exceptionPtr)
     }
   }
   
   @inline(__always)
-  public final func saveBloodPressure(samples: bridge.std__vector_NativeBloodPressureSampleInput_) -> bridge.Result_std__shared_ptr_Promise_void___ {
+  public final func saveBloodPressure(samples: bridge.std__vector_NativeBloodPressureSampleInput_) -> bridge.Result_std__shared_ptr_Promise_NativeHealthWriteResult___ {
     do {
       let __result = try self.__implementation.saveBloodPressure(samples: samples.map({ __item in __item }))
-      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_void__ in
-        let __promise = bridge.create_std__shared_ptr_Promise_void__()
-        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_void__(__promise)
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_NativeHealthWriteResult__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_NativeHealthWriteResult__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_NativeHealthWriteResult__(__promise)
         __result
-          .then({ __result in __promiseHolder.resolve() })
+          .then({ __result in __promiseHolder.resolve(__result) })
           .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
         return __promise
       }()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__resultCpp)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthWriteResult___(__resultCpp)
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthWriteResult___(__exceptionPtr)
     }
   }
   
   @inline(__always)
-  public final func saveBloodGlucose(samples: bridge.std__vector_NativeBloodGlucoseSampleInput_) -> bridge.Result_std__shared_ptr_Promise_void___ {
+  public final func saveBloodGlucose(samples: bridge.std__vector_NativeBloodGlucoseSampleInput_) -> bridge.Result_std__shared_ptr_Promise_NativeHealthWriteResult___ {
     do {
       let __result = try self.__implementation.saveBloodGlucose(samples: samples.map({ __item in __item }))
-      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_void__ in
-        let __promise = bridge.create_std__shared_ptr_Promise_void__()
-        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_void__(__promise)
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_NativeHealthWriteResult__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_NativeHealthWriteResult__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_NativeHealthWriteResult__(__promise)
         __result
-          .then({ __result in __promiseHolder.resolve() })
+          .then({ __result in __promiseHolder.resolve(__result) })
           .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
         return __promise
       }()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__resultCpp)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthWriteResult___(__resultCpp)
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthWriteResult___(__exceptionPtr)
     }
   }
   
   @inline(__always)
-  public final func saveBodyTemperature(samples: bridge.std__vector_NativeBodyTemperatureSampleInput_) -> bridge.Result_std__shared_ptr_Promise_void___ {
+  public final func saveBodyTemperature(samples: bridge.std__vector_NativeBodyTemperatureSampleInput_) -> bridge.Result_std__shared_ptr_Promise_NativeHealthWriteResult___ {
     do {
       let __result = try self.__implementation.saveBodyTemperature(samples: samples.map({ __item in __item }))
-      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_void__ in
-        let __promise = bridge.create_std__shared_ptr_Promise_void__()
-        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_void__(__promise)
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_NativeHealthWriteResult__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_NativeHealthWriteResult__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_NativeHealthWriteResult__(__promise)
         __result
-          .then({ __result in __promiseHolder.resolve() })
+          .then({ __result in __promiseHolder.resolve(__result) })
           .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
         return __promise
       }()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__resultCpp)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthWriteResult___(__resultCpp)
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthWriteResult___(__exceptionPtr)
     }
   }
   
   @inline(__always)
-  public final func saveRespiratoryRate(samples: bridge.std__vector_NativeRespiratoryRateSampleInput_) -> bridge.Result_std__shared_ptr_Promise_void___ {
+  public final func saveRespiratoryRate(samples: bridge.std__vector_NativeRespiratoryRateSampleInput_) -> bridge.Result_std__shared_ptr_Promise_NativeHealthWriteResult___ {
     do {
       let __result = try self.__implementation.saveRespiratoryRate(samples: samples.map({ __item in __item }))
-      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_void__ in
-        let __promise = bridge.create_std__shared_ptr_Promise_void__()
-        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_void__(__promise)
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_NativeHealthWriteResult__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_NativeHealthWriteResult__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_NativeHealthWriteResult__(__promise)
         __result
-          .then({ __result in __promiseHolder.resolve() })
+          .then({ __result in __promiseHolder.resolve(__result) })
           .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
         return __promise
       }()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__resultCpp)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthWriteResult___(__resultCpp)
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthWriteResult___(__exceptionPtr)
     }
   }
   
   @inline(__always)
-  public final func saveBodyFat(samples: bridge.std__vector_NativeBodyFatSampleInput_) -> bridge.Result_std__shared_ptr_Promise_void___ {
+  public final func saveBodyFat(samples: bridge.std__vector_NativeBodyFatSampleInput_) -> bridge.Result_std__shared_ptr_Promise_NativeHealthWriteResult___ {
     do {
       let __result = try self.__implementation.saveBodyFat(samples: samples.map({ __item in __item }))
-      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_void__ in
-        let __promise = bridge.create_std__shared_ptr_Promise_void__()
-        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_void__(__promise)
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_NativeHealthWriteResult__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_NativeHealthWriteResult__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_NativeHealthWriteResult__(__promise)
         __result
-          .then({ __result in __promiseHolder.resolve() })
+          .then({ __result in __promiseHolder.resolve(__result) })
           .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
         return __promise
       }()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__resultCpp)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthWriteResult___(__resultCpp)
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthWriteResult___(__exceptionPtr)
     }
   }
   
   @inline(__always)
-  public final func saveLeanBodyMass(samples: bridge.std__vector_NativeLeanBodyMassSampleInput_) -> bridge.Result_std__shared_ptr_Promise_void___ {
+  public final func saveLeanBodyMass(samples: bridge.std__vector_NativeLeanBodyMassSampleInput_) -> bridge.Result_std__shared_ptr_Promise_NativeHealthWriteResult___ {
     do {
       let __result = try self.__implementation.saveLeanBodyMass(samples: samples.map({ __item in __item }))
-      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_void__ in
-        let __promise = bridge.create_std__shared_ptr_Promise_void__()
-        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_void__(__promise)
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_NativeHealthWriteResult__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_NativeHealthWriteResult__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_NativeHealthWriteResult__(__promise)
         __result
-          .then({ __result in __promiseHolder.resolve() })
+          .then({ __result in __promiseHolder.resolve(__result) })
           .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
         return __promise
       }()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__resultCpp)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthWriteResult___(__resultCpp)
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthWriteResult___(__exceptionPtr)
     }
   }
   
   @inline(__always)
-  public final func saveBasalBodyTemperature(samples: bridge.std__vector_NativeBasalBodyTemperatureSampleInput_) -> bridge.Result_std__shared_ptr_Promise_void___ {
+  public final func saveBasalBodyTemperature(samples: bridge.std__vector_NativeBasalBodyTemperatureSampleInput_) -> bridge.Result_std__shared_ptr_Promise_NativeHealthWriteResult___ {
     do {
       let __result = try self.__implementation.saveBasalBodyTemperature(samples: samples.map({ __item in __item }))
-      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_void__ in
-        let __promise = bridge.create_std__shared_ptr_Promise_void__()
-        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_void__(__promise)
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_NativeHealthWriteResult__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_NativeHealthWriteResult__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_NativeHealthWriteResult__(__promise)
         __result
-          .then({ __result in __promiseHolder.resolve() })
+          .then({ __result in __promiseHolder.resolve(__result) })
           .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
         return __promise
       }()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__resultCpp)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthWriteResult___(__resultCpp)
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthWriteResult___(__exceptionPtr)
     }
   }
   
   @inline(__always)
-  public final func saveBodyMass(samples: bridge.std__vector_NativeBodyMassSampleInput_) -> bridge.Result_std__shared_ptr_Promise_void___ {
+  public final func saveBodyMass(samples: bridge.std__vector_NativeBodyMassSampleInput_) -> bridge.Result_std__shared_ptr_Promise_NativeHealthWriteResult___ {
     do {
       let __result = try self.__implementation.saveBodyMass(samples: samples.map({ __item in __item }))
-      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_void__ in
-        let __promise = bridge.create_std__shared_ptr_Promise_void__()
-        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_void__(__promise)
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_NativeHealthWriteResult__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_NativeHealthWriteResult__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_NativeHealthWriteResult__(__promise)
         __result
-          .then({ __result in __promiseHolder.resolve() })
+          .then({ __result in __promiseHolder.resolve(__result) })
           .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
         return __promise
       }()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__resultCpp)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthWriteResult___(__resultCpp)
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthWriteResult___(__exceptionPtr)
     }
   }
   
   @inline(__always)
-  public final func saveRestingHeartRate(samples: bridge.std__vector_NativeRestingHeartRateSampleInput_) -> bridge.Result_std__shared_ptr_Promise_void___ {
+  public final func saveRestingHeartRate(samples: bridge.std__vector_NativeRestingHeartRateSampleInput_) -> bridge.Result_std__shared_ptr_Promise_NativeHealthWriteResult___ {
     do {
       let __result = try self.__implementation.saveRestingHeartRate(samples: samples.map({ __item in __item }))
-      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_void__ in
-        let __promise = bridge.create_std__shared_ptr_Promise_void__()
-        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_void__(__promise)
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_NativeHealthWriteResult__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_NativeHealthWriteResult__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_NativeHealthWriteResult__(__promise)
         __result
-          .then({ __result in __promiseHolder.resolve() })
+          .then({ __result in __promiseHolder.resolve(__result) })
           .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
         return __promise
       }()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__resultCpp)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthWriteResult___(__resultCpp)
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthWriteResult___(__exceptionPtr)
     }
   }
   
   @inline(__always)
-  public final func saveOxygenSaturation(samples: bridge.std__vector_NativeOxygenSaturationSampleInput_) -> bridge.Result_std__shared_ptr_Promise_void___ {
+  public final func saveOxygenSaturation(samples: bridge.std__vector_NativeOxygenSaturationSampleInput_) -> bridge.Result_std__shared_ptr_Promise_NativeHealthWriteResult___ {
     do {
       let __result = try self.__implementation.saveOxygenSaturation(samples: samples.map({ __item in __item }))
-      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_void__ in
-        let __promise = bridge.create_std__shared_ptr_Promise_void__()
-        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_void__(__promise)
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_NativeHealthWriteResult__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_NativeHealthWriteResult__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_NativeHealthWriteResult__(__promise)
         __result
-          .then({ __result in __promiseHolder.resolve() })
+          .then({ __result in __promiseHolder.resolve(__result) })
           .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
         return __promise
       }()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__resultCpp)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthWriteResult___(__resultCpp)
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthWriteResult___(__exceptionPtr)
     }
   }
   
   @inline(__always)
-  public final func saveHeight(samples: bridge.std__vector_NativeHeightSampleInput_) -> bridge.Result_std__shared_ptr_Promise_void___ {
+  public final func saveHeight(samples: bridge.std__vector_NativeHeightSampleInput_) -> bridge.Result_std__shared_ptr_Promise_NativeHealthWriteResult___ {
     do {
       let __result = try self.__implementation.saveHeight(samples: samples.map({ __item in __item }))
-      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_void__ in
-        let __promise = bridge.create_std__shared_ptr_Promise_void__()
-        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_void__(__promise)
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_NativeHealthWriteResult__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_NativeHealthWriteResult__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_NativeHealthWriteResult__(__promise)
         __result
-          .then({ __result in __promiseHolder.resolve() })
+          .then({ __result in __promiseHolder.resolve(__result) })
           .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
         return __promise
       }()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__resultCpp)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthWriteResult___(__resultCpp)
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthWriteResult___(__exceptionPtr)
     }
   }
   
   @inline(__always)
-  public final func saveVo2Max(samples: bridge.std__vector_NativeVo2MaxSampleInput_) -> bridge.Result_std__shared_ptr_Promise_void___ {
+  public final func saveVo2Max(samples: bridge.std__vector_NativeVo2MaxSampleInput_) -> bridge.Result_std__shared_ptr_Promise_NativeHealthWriteResult___ {
     do {
       let __result = try self.__implementation.saveVo2Max(samples: samples.map({ __item in __item }))
-      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_void__ in
-        let __promise = bridge.create_std__shared_ptr_Promise_void__()
-        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_void__(__promise)
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_NativeHealthWriteResult__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_NativeHealthWriteResult__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_NativeHealthWriteResult__(__promise)
         __result
-          .then({ __result in __promiseHolder.resolve() })
+          .then({ __result in __promiseHolder.resolve(__result) })
           .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
         return __promise
       }()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__resultCpp)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthWriteResult___(__resultCpp)
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthWriteResult___(__exceptionPtr)
     }
   }
   
   @inline(__always)
-  public final func saveSleepSessions(sessions: bridge.std__vector_NativeSleepSessionInput_) -> bridge.Result_std__shared_ptr_Promise_void___ {
+  public final func saveSleepSessions(sessions: bridge.std__vector_NativeSleepSessionInput_) -> bridge.Result_std__shared_ptr_Promise_NativeHealthWriteResult___ {
     do {
       let __result = try self.__implementation.saveSleepSessions(sessions: sessions.map({ __item in __item }))
-      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_void__ in
-        let __promise = bridge.create_std__shared_ptr_Promise_void__()
-        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_void__(__promise)
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_NativeHealthWriteResult__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_NativeHealthWriteResult__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_NativeHealthWriteResult__(__promise)
         __result
-          .then({ __result in __promiseHolder.resolve() })
+          .then({ __result in __promiseHolder.resolve(__result) })
           .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
         return __promise
       }()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__resultCpp)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthWriteResult___(__resultCpp)
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthWriteResult___(__exceptionPtr)
     }
   }
   
   @inline(__always)
-  public final func saveWorkout(workout: NativeWorkoutSampleInput) -> bridge.Result_std__shared_ptr_Promise_void___ {
+  public final func saveWorkout(workout: NativeWorkoutSampleInput) -> bridge.Result_std__shared_ptr_Promise_NativeHealthWriteResult___ {
     do {
       let __result = try self.__implementation.saveWorkout(workout: workout)
-      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_void__ in
-        let __promise = bridge.create_std__shared_ptr_Promise_void__()
-        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_void__(__promise)
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_NativeHealthWriteResult__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_NativeHealthWriteResult__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_NativeHealthWriteResult__(__promise)
         __result
-          .then({ __result in __promiseHolder.resolve() })
+          .then({ __result in __promiseHolder.resolve(__result) })
           .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
         return __promise
       }()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__resultCpp)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthWriteResult___(__resultCpp)
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
+      return bridge.create_Result_std__shared_ptr_Promise_NativeHealthWriteResult___(__exceptionPtr)
     }
   }
   

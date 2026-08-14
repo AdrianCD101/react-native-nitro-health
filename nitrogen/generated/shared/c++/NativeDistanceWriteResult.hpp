@@ -30,8 +30,12 @@
 
 // Forward declaration of `NativeDistanceScope` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class NativeDistanceScope; }
+// Forward declaration of `NativeHealthRecordingMethod` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeHealthRecordingMethod; }
 
 #include "NativeDistanceScope.hpp"
+#include "NativeHealthRecordingMethod.hpp"
+#include <vector>
 
 namespace margelo::nitro::nitrohealth {
 
@@ -41,10 +45,11 @@ namespace margelo::nitro::nitrohealth {
   struct NativeDistanceWriteResult final {
   public:
     NativeDistanceScope storedScope     SWIFT_PRIVATE;
+    std::vector<NativeHealthRecordingMethod> storedRecordingMethods     SWIFT_PRIVATE;
 
   public:
     NativeDistanceWriteResult() = default;
-    explicit NativeDistanceWriteResult(NativeDistanceScope storedScope): storedScope(storedScope) {}
+    explicit NativeDistanceWriteResult(NativeDistanceScope storedScope, std::vector<NativeHealthRecordingMethod> storedRecordingMethods): storedScope(storedScope), storedRecordingMethods(storedRecordingMethods) {}
 
   public:
     friend bool operator==(const NativeDistanceWriteResult& lhs, const NativeDistanceWriteResult& rhs) = default;
@@ -60,12 +65,14 @@ namespace margelo::nitro {
     static inline margelo::nitro::nitrohealth::NativeDistanceWriteResult fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       jsi::Object obj = arg.asObject(runtime);
       return margelo::nitro::nitrohealth::NativeDistanceWriteResult(
-        JSIConverter<margelo::nitro::nitrohealth::NativeDistanceScope>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "storedScope")))
+        JSIConverter<margelo::nitro::nitrohealth::NativeDistanceScope>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "storedScope"))),
+        JSIConverter<std::vector<margelo::nitro::nitrohealth::NativeHealthRecordingMethod>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "storedRecordingMethods")))
       );
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::nitrohealth::NativeDistanceWriteResult& arg) {
       jsi::Object obj(runtime);
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "storedScope"), JSIConverter<margelo::nitro::nitrohealth::NativeDistanceScope>::toJSI(runtime, arg.storedScope));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "storedRecordingMethods"), JSIConverter<std::vector<margelo::nitro::nitrohealth::NativeHealthRecordingMethod>>::toJSI(runtime, arg.storedRecordingMethods));
       return obj;
     }
     static inline bool canConvert(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -77,6 +84,7 @@ namespace margelo::nitro {
         return false;
       }
       if (!JSIConverter<margelo::nitro::nitrohealth::NativeDistanceScope>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "storedScope")))) return false;
+      if (!JSIConverter<std::vector<margelo::nitro::nitrohealth::NativeHealthRecordingMethod>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "storedRecordingMethods")))) return false;
       return true;
     }
   };

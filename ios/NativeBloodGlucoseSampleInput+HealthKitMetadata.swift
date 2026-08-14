@@ -3,9 +3,10 @@ import HealthKit
 
 extension NativeBloodGlucoseSampleInput {
     func healthKitMetadata() throws -> [String: Any]? {
-        var metadata = try makeHealthKitSyncMetadata(
+        var metadata = try makeHealthKitMetadata(
             syncId: syncId,
-            syncVersion: syncVersion
+            syncVersion: syncVersion,
+            recordingMethod: recordingMethod
         ) ?? [:]
 
         if let mealTime = iosMealTime {

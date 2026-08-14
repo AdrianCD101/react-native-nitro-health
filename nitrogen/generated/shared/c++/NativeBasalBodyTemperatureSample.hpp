@@ -32,6 +32,8 @@
 namespace margelo::nitro::nitrohealth { struct NativeHealthSampleIdentity; }
 // Forward declaration of `NativeHealthDataOrigin` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthDataOrigin; }
+// Forward declaration of `NativeHealthRecordingMethod` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeHealthRecordingMethod; }
 // Forward declaration of `NativeAndroidBodyTemperatureMeasurementLocation` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class NativeAndroidBodyTemperatureMeasurementLocation; }
 // Forward declaration of `NativeIOSBodyTemperatureSensorLocation` to properly resolve imports.
@@ -39,6 +41,7 @@ namespace margelo::nitro::nitrohealth { enum class NativeIOSBodyTemperatureSenso
 
 #include "NativeHealthSampleIdentity.hpp"
 #include "NativeHealthDataOrigin.hpp"
+#include "NativeHealthRecordingMethod.hpp"
 #include "NativeAndroidBodyTemperatureMeasurementLocation.hpp"
 #include <optional>
 #include "NativeIOSBodyTemperatureSensorLocation.hpp"
@@ -52,6 +55,7 @@ namespace margelo::nitro::nitrohealth {
   public:
     NativeHealthSampleIdentity identity     SWIFT_PRIVATE;
     NativeHealthDataOrigin origin     SWIFT_PRIVATE;
+    NativeHealthRecordingMethod recordingMethod     SWIFT_PRIVATE;
     double timeMs     SWIFT_PRIVATE;
     double celsius     SWIFT_PRIVATE;
     std::optional<NativeAndroidBodyTemperatureMeasurementLocation> androidMeasurementLocation     SWIFT_PRIVATE;
@@ -59,7 +63,7 @@ namespace margelo::nitro::nitrohealth {
 
   public:
     NativeBasalBodyTemperatureSample() = default;
-    explicit NativeBasalBodyTemperatureSample(NativeHealthSampleIdentity identity, NativeHealthDataOrigin origin, double timeMs, double celsius, std::optional<NativeAndroidBodyTemperatureMeasurementLocation> androidMeasurementLocation, std::optional<NativeIOSBodyTemperatureSensorLocation> iosSensorLocation): identity(identity), origin(origin), timeMs(timeMs), celsius(celsius), androidMeasurementLocation(androidMeasurementLocation), iosSensorLocation(iosSensorLocation) {}
+    explicit NativeBasalBodyTemperatureSample(NativeHealthSampleIdentity identity, NativeHealthDataOrigin origin, NativeHealthRecordingMethod recordingMethod, double timeMs, double celsius, std::optional<NativeAndroidBodyTemperatureMeasurementLocation> androidMeasurementLocation, std::optional<NativeIOSBodyTemperatureSensorLocation> iosSensorLocation): identity(identity), origin(origin), recordingMethod(recordingMethod), timeMs(timeMs), celsius(celsius), androidMeasurementLocation(androidMeasurementLocation), iosSensorLocation(iosSensorLocation) {}
 
   public:
     friend bool operator==(const NativeBasalBodyTemperatureSample& lhs, const NativeBasalBodyTemperatureSample& rhs) = default;
@@ -77,6 +81,7 @@ namespace margelo::nitro {
       return margelo::nitro::nitrohealth::NativeBasalBodyTemperatureSample(
         JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleIdentity>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "identity"))),
         JSIConverter<margelo::nitro::nitrohealth::NativeHealthDataOrigin>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "origin"))),
+        JSIConverter<margelo::nitro::nitrohealth::NativeHealthRecordingMethod>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "recordingMethod"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeMs"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "celsius"))),
         JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeAndroidBodyTemperatureMeasurementLocation>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "androidMeasurementLocation"))),
@@ -87,6 +92,7 @@ namespace margelo::nitro {
       jsi::Object obj(runtime);
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "identity"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleIdentity>::toJSI(runtime, arg.identity));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "origin"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthDataOrigin>::toJSI(runtime, arg.origin));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "recordingMethod"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthRecordingMethod>::toJSI(runtime, arg.recordingMethod));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "timeMs"), JSIConverter<double>::toJSI(runtime, arg.timeMs));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "celsius"), JSIConverter<double>::toJSI(runtime, arg.celsius));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "androidMeasurementLocation"), JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeAndroidBodyTemperatureMeasurementLocation>>::toJSI(runtime, arg.androidMeasurementLocation));
@@ -103,6 +109,7 @@ namespace margelo::nitro {
       }
       if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleIdentity>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "identity")))) return false;
       if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthDataOrigin>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "origin")))) return false;
+      if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthRecordingMethod>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "recordingMethod")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeMs")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "celsius")))) return false;
       if (!JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeAndroidBodyTemperatureMeasurementLocation>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "androidMeasurementLocation")))) return false;

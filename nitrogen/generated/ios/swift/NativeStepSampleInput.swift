@@ -18,8 +18,14 @@ public extension NativeStepSampleInput {
   /**
    * Create a new instance of `NativeStepSampleInput`.
    */
-  init(startTimeMs: Double, endTimeMs: Double, count: Double, syncId: String?, syncVersion: Double?) {
-    self.init(startTimeMs, endTimeMs, count, { () -> bridge.std__optional_std__string_ in
+  init(startTimeMs: Double, endTimeMs: Double, count: Double, recordingMethod: NativeHealthRecordingMethod?, syncId: String?, syncVersion: Double?) {
+    self.init(startTimeMs, endTimeMs, count, { () -> bridge.std__optional_NativeHealthRecordingMethod_ in
+      if let __unwrappedValue = recordingMethod {
+        return bridge.create_std__optional_NativeHealthRecordingMethod_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_std__string_ in
       if let __unwrappedValue = syncId {
         return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
       } else {
@@ -47,6 +53,11 @@ public extension NativeStepSampleInput {
   @inline(__always)
   var count: Double {
     return self.__count
+  }
+  
+  @inline(__always)
+  var recordingMethod: NativeHealthRecordingMethod? {
+    return self.__recordingMethod.value
   }
   
   @inline(__always)

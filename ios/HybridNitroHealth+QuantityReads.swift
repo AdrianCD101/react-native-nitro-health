@@ -53,6 +53,7 @@ extension HybridNitroHealth {
                 NativeRestingHeartRateSample(
                     identity: quantitySample.nativeHealthSampleIdentity,
                     origin: quantitySample.nativeHealthDataOrigin,
+                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
                     timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
                     bpm: quantitySample.quantity.doubleValue(for: unit)
                 )
@@ -74,6 +75,7 @@ extension HybridNitroHealth {
                 NativeHeartRateVariabilitySample(
                     identity: quantitySample.nativeHealthSampleIdentity,
                     origin: quantitySample.nativeHealthDataOrigin,
+                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
                     timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
                     milliseconds: quantitySample.quantity.doubleValue(for: unit),
                     method: "sdnn"
@@ -97,6 +99,7 @@ extension HybridNitroHealth {
                 NativeOxygenSaturationSample(
                     identity: quantitySample.nativeHealthSampleIdentity,
                     origin: quantitySample.nativeHealthDataOrigin,
+                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
                     timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
                     percentage: quantitySample.quantity.doubleValue(for: unit) * 100
                 )
@@ -144,6 +147,7 @@ extension HybridNitroHealth {
                 NativeRespiratoryRateSample(
                     identity: quantitySample.nativeHealthSampleIdentity,
                     origin: quantitySample.nativeHealthDataOrigin,
+                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
                     timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
                     breathsPerMinute: quantitySample.quantity.doubleValue(for: unit)
                 )
@@ -165,6 +169,7 @@ extension HybridNitroHealth {
                 NativeBodyFatSample(
                     identity: quantitySample.nativeHealthSampleIdentity,
                     origin: quantitySample.nativeHealthDataOrigin,
+                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
                     timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
                     percentage: quantitySample.quantity.doubleValue(for: unit) * 100
                 )
@@ -184,6 +189,7 @@ extension HybridNitroHealth {
                 NativeLeanBodyMassSample(
                     identity: quantitySample.nativeHealthSampleIdentity,
                     origin: quantitySample.nativeHealthDataOrigin,
+                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
                     timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
                     kilograms: quantitySample.quantity.doubleValue(for: unit)
                 )
@@ -217,6 +223,7 @@ extension HybridNitroHealth {
                 NativeHeightSample(
                     identity: quantitySample.nativeHealthSampleIdentity,
                     origin: quantitySample.nativeHealthDataOrigin,
+                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
                     timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
                     meters: quantitySample.quantity.doubleValue(for: unit)
                 )
@@ -240,61 +247,61 @@ extension HybridNitroHealth {
         }
     }
 
-    func saveRestingHeartRate(samples: [NativeRestingHeartRateSampleInput]) throws -> Promise<Void> {
+    func saveRestingHeartRate(samples: [NativeRestingHeartRateSampleInput]) throws -> Promise<NativeHealthWriteResult> {
         return try saveQuantitySamples(dataType: "restingHeartRate", label: "resting heart rate") { quantityType in
             try makeRestingHeartRateQuantitySamples(samples: samples, quantityType: quantityType)
         }
     }
 
-    func saveBloodGlucose(samples: [NativeBloodGlucoseSampleInput]) throws -> Promise<Void> {
+    func saveBloodGlucose(samples: [NativeBloodGlucoseSampleInput]) throws -> Promise<NativeHealthWriteResult> {
         return try saveQuantitySamples(dataType: "bloodGlucose", label: "blood glucose") { quantityType in
             try makeBloodGlucoseQuantitySamples(samples: samples, quantityType: quantityType)
         }
     }
 
-    func saveBodyTemperature(samples: [NativeBodyTemperatureSampleInput]) throws -> Promise<Void> {
+    func saveBodyTemperature(samples: [NativeBodyTemperatureSampleInput]) throws -> Promise<NativeHealthWriteResult> {
         return try saveQuantitySamples(dataType: "bodyTemperature", label: "body temperature") { quantityType in
             try makeBodyTemperatureQuantitySamples(samples: samples, quantityType: quantityType)
         }
     }
 
-    func saveRespiratoryRate(samples: [NativeRespiratoryRateSampleInput]) throws -> Promise<Void> {
+    func saveRespiratoryRate(samples: [NativeRespiratoryRateSampleInput]) throws -> Promise<NativeHealthWriteResult> {
         return try saveQuantitySamples(dataType: "respiratoryRate", label: "respiratory rate") { quantityType in
             try makeRespiratoryRateQuantitySamples(samples: samples, quantityType: quantityType)
         }
     }
 
-    func saveBodyFat(samples: [NativeBodyFatSampleInput]) throws -> Promise<Void> {
+    func saveBodyFat(samples: [NativeBodyFatSampleInput]) throws -> Promise<NativeHealthWriteResult> {
         return try saveQuantitySamples(dataType: "bodyFat", label: "body fat") { quantityType in
             try makeBodyFatQuantitySamples(samples: samples, quantityType: quantityType)
         }
     }
 
-    func saveLeanBodyMass(samples: [NativeLeanBodyMassSampleInput]) throws -> Promise<Void> {
+    func saveLeanBodyMass(samples: [NativeLeanBodyMassSampleInput]) throws -> Promise<NativeHealthWriteResult> {
         return try saveQuantitySamples(dataType: "leanBodyMass", label: "lean body mass") { quantityType in
             try makeLeanBodyMassQuantitySamples(samples: samples, quantityType: quantityType)
         }
     }
 
-    func saveBasalBodyTemperature(samples: [NativeBasalBodyTemperatureSampleInput]) throws -> Promise<Void> {
+    func saveBasalBodyTemperature(samples: [NativeBasalBodyTemperatureSampleInput]) throws -> Promise<NativeHealthWriteResult> {
         return try saveQuantitySamples(dataType: "basalBodyTemperature", label: "basal body temperature") { quantityType in
             try makeBasalBodyTemperatureQuantitySamples(samples: samples, quantityType: quantityType)
         }
     }
 
-    func saveOxygenSaturation(samples: [NativeOxygenSaturationSampleInput]) throws -> Promise<Void> {
+    func saveOxygenSaturation(samples: [NativeOxygenSaturationSampleInput]) throws -> Promise<NativeHealthWriteResult> {
         return try saveQuantitySamples(dataType: "oxygenSaturation", label: "oxygen saturation") { quantityType in
             try makeOxygenSaturationQuantitySamples(samples: samples, quantityType: quantityType)
         }
     }
 
-    func saveHeight(samples: [NativeHeightSampleInput]) throws -> Promise<Void> {
+    func saveHeight(samples: [NativeHeightSampleInput]) throws -> Promise<NativeHealthWriteResult> {
         return try saveQuantitySamples(dataType: "height", label: "height") { quantityType in
             try makeHeightQuantitySamples(samples: samples, quantityType: quantityType)
         }
     }
 
-    func saveVo2Max(samples: [NativeVo2MaxSampleInput]) throws -> Promise<Void> {
+    func saveVo2Max(samples: [NativeVo2MaxSampleInput]) throws -> Promise<NativeHealthWriteResult> {
         return try saveQuantitySamples(dataType: "vo2Max", label: "VO2 max") { quantityType in
             try makeVo2MaxQuantitySamples(samples: samples, quantityType: quantityType)
         }

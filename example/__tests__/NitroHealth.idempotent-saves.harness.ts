@@ -331,13 +331,15 @@ describe('NitroHealth idempotent saves (native)', () => {
     await NitroHealth.deleteRecordsByTimeRange('steps', idempotentReadRange)
 
     try {
-      await NitroHealth.saveSteps([
+      const currentResult = await NitroHealth.saveSteps([
         {
           ...idempotentInterval,
           count: 730_002,
+          recordingMethod: 'manual',
           sync: { id: 'nitro-health-harness-lower-version', version: 2 },
         },
       ])
+      expect(currentResult.storedRecordingMethods).toEqual(['manual'])
 
       const currentSamples = await readIdempotentStepSamples([730_001, 730_002])
       expect(currentSamples).toHaveLength(1)
@@ -346,10 +348,11 @@ describe('NitroHealth idempotent saves (native)', () => {
         return
       }
 
-      await NitroHealth.saveSteps([
+      const lowerVersionResult = await NitroHealth.saveSteps([
         {
           ...idempotentInterval,
           count: 730_001,
+          recordingMethod: 'automatically-recorded',
           sync: { id: 'nitro-health-harness-lower-version', version: 1 },
         },
       ])
@@ -358,6 +361,8 @@ describe('NitroHealth idempotent saves (native)', () => {
 
       expect(afterLowerVersion).toHaveLength(1)
       expect(afterLowerVersion[0]?.count).toBe(730_002)
+      expect(afterLowerVersion[0]?.recordingMethod).toBe('manual')
+      expect(lowerVersionResult.storedRecordingMethods).toEqual(['manual'])
       expect(afterLowerVersion[0] ? recordId(afterLowerVersion[0].identity) : undefined).toBe(
         recordId(currentSample.identity)
       )

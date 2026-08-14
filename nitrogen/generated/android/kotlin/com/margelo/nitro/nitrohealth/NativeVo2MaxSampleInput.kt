@@ -26,6 +26,9 @@ data class NativeVo2MaxSampleInput(
   val millilitersPerKilogramPerMinute: Double,
   @DoNotStrip
   @Keep
+  val recordingMethod: NativeHealthRecordingMethod?,
+  @DoNotStrip
+  @Keep
   val androidMeasurementMethod: NativeAndroidVo2MaxMeasurementMethod?,
   @DoNotStrip
   @Keep
@@ -44,6 +47,7 @@ data class NativeVo2MaxSampleInput(
     if (other !is NativeVo2MaxSampleInput) return false
     return Objects.deepEquals(this.timeMs, other.timeMs)
       && Objects.deepEquals(this.millilitersPerKilogramPerMinute, other.millilitersPerKilogramPerMinute)
+      && Objects.deepEquals(this.recordingMethod, other.recordingMethod)
       && Objects.deepEquals(this.androidMeasurementMethod, other.androidMeasurementMethod)
       && Objects.deepEquals(this.iosTestType, other.iosTestType)
       && Objects.deepEquals(this.syncId, other.syncId)
@@ -54,6 +58,7 @@ data class NativeVo2MaxSampleInput(
     return arrayOf<Any?>(
       timeMs,
       millilitersPerKilogramPerMinute,
+      recordingMethod,
       androidMeasurementMethod,
       iosTestType,
       syncId,
@@ -69,8 +74,8 @@ data class NativeVo2MaxSampleInput(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(timeMs: Double, millilitersPerKilogramPerMinute: Double, androidMeasurementMethod: NativeAndroidVo2MaxMeasurementMethod?, iosTestType: NativeIOSVo2MaxTestType?, syncId: String?, syncVersion: Double?): NativeVo2MaxSampleInput {
-      return NativeVo2MaxSampleInput(timeMs, millilitersPerKilogramPerMinute, androidMeasurementMethod, iosTestType, syncId, syncVersion)
+    private fun fromCpp(timeMs: Double, millilitersPerKilogramPerMinute: Double, recordingMethod: NativeHealthRecordingMethod?, androidMeasurementMethod: NativeAndroidVo2MaxMeasurementMethod?, iosTestType: NativeIOSVo2MaxTestType?, syncId: String?, syncVersion: Double?): NativeVo2MaxSampleInput {
+      return NativeVo2MaxSampleInput(timeMs, millilitersPerKilogramPerMinute, recordingMethod, androidMeasurementMethod, iosTestType, syncId, syncVersion)
     }
   }
 }

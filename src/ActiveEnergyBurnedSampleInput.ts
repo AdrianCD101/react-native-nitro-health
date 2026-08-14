@@ -1,4 +1,5 @@
 import type { HealthRecordSync } from './HealthRecordSync'
+import type { HealthRecordingMethod } from './HealthRecordingMethod'
 
 /** Active energy sample accepted by {@linkcode NitroHealth.saveActiveEnergyBurned}. */
 export interface ActiveEnergyBurnedSampleInput {
@@ -8,6 +9,11 @@ export interface ActiveEnergyBurnedSampleInput {
   endDate: Date
   /** Active energy burned during the sample range, in kilocalories (0 to 1,000,000). */
   kilocalories: number
+  /**
+   * Requested recording method. On iOS, active and automatic recording degrade to `unknown`.
+   * @default 'unknown'
+   */
+  recordingMethod?: HealthRecordingMethod
   /** Optional logical identity that makes retries idempotent and higher versions replace. */
   sync?: HealthRecordSync
 }

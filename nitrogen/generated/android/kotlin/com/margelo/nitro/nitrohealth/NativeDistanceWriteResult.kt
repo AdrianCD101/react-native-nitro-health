@@ -20,7 +20,10 @@ import java.util.Objects
 data class NativeDistanceWriteResult(
   @DoNotStrip
   @Keep
-  val storedScope: NativeDistanceScope
+  val storedScope: NativeDistanceScope,
+  @DoNotStrip
+  @Keep
+  val storedRecordingMethods: Array<NativeHealthRecordingMethod>
 ) {
   /* primary constructor */
 
@@ -28,11 +31,13 @@ data class NativeDistanceWriteResult(
     if (this === other) return true
     if (other !is NativeDistanceWriteResult) return false
     return Objects.deepEquals(this.storedScope, other.storedScope)
+      && Objects.deepEquals(this.storedRecordingMethods, other.storedRecordingMethods)
   }
 
   override fun hashCode(): Int {
     return arrayOf<Any?>(
-      storedScope
+      storedScope,
+      storedRecordingMethods
     ).contentDeepHashCode()
   }
 
@@ -44,8 +49,8 @@ data class NativeDistanceWriteResult(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(storedScope: NativeDistanceScope): NativeDistanceWriteResult {
-      return NativeDistanceWriteResult(storedScope)
+    private fun fromCpp(storedScope: NativeDistanceScope, storedRecordingMethods: Array<NativeHealthRecordingMethod>): NativeDistanceWriteResult {
+      return NativeDistanceWriteResult(storedScope, storedRecordingMethods)
     }
   }
 }

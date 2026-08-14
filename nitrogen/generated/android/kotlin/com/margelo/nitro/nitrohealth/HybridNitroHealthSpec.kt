@@ -181,7 +181,7 @@ abstract class HybridNitroHealthSpec: HybridObject() {
   
   @DoNotStrip
   @Keep
-  abstract fun saveSteps(samples: Array<NativeStepSampleInput>): Promise<Unit>
+  abstract fun saveSteps(samples: Array<NativeStepSampleInput>): Promise<NativeHealthWriteResult>
   
   @DoNotStrip
   @Keep
@@ -189,75 +189,75 @@ abstract class HybridNitroHealthSpec: HybridObject() {
   
   @DoNotStrip
   @Keep
-  abstract fun saveActiveEnergyBurned(samples: Array<NativeActiveEnergyBurnedSampleInput>): Promise<Unit>
+  abstract fun saveActiveEnergyBurned(samples: Array<NativeActiveEnergyBurnedSampleInput>): Promise<NativeHealthWriteResult>
   
   @DoNotStrip
   @Keep
-  abstract fun saveHydration(samples: Array<NativeHydrationSampleInput>): Promise<Unit>
+  abstract fun saveHydration(samples: Array<NativeHydrationSampleInput>): Promise<NativeHealthWriteResult>
   
   @DoNotStrip
   @Keep
-  abstract fun saveFloorsClimbed(samples: Array<NativeFloorsClimbedSampleInput>): Promise<Unit>
+  abstract fun saveFloorsClimbed(samples: Array<NativeFloorsClimbedSampleInput>): Promise<NativeHealthWriteResult>
   
   @DoNotStrip
   @Keep
-  abstract fun saveHeartRate(samples: Array<NativeHeartRateSampleInput>): Promise<Unit>
+  abstract fun saveHeartRate(samples: Array<NativeHeartRateSampleInput>): Promise<NativeHealthWriteResult>
   
   @DoNotStrip
   @Keep
-  abstract fun saveBloodPressure(samples: Array<NativeBloodPressureSampleInput>): Promise<Unit>
+  abstract fun saveBloodPressure(samples: Array<NativeBloodPressureSampleInput>): Promise<NativeHealthWriteResult>
   
   @DoNotStrip
   @Keep
-  abstract fun saveBloodGlucose(samples: Array<NativeBloodGlucoseSampleInput>): Promise<Unit>
+  abstract fun saveBloodGlucose(samples: Array<NativeBloodGlucoseSampleInput>): Promise<NativeHealthWriteResult>
   
   @DoNotStrip
   @Keep
-  abstract fun saveBodyTemperature(samples: Array<NativeBodyTemperatureSampleInput>): Promise<Unit>
+  abstract fun saveBodyTemperature(samples: Array<NativeBodyTemperatureSampleInput>): Promise<NativeHealthWriteResult>
   
   @DoNotStrip
   @Keep
-  abstract fun saveRespiratoryRate(samples: Array<NativeRespiratoryRateSampleInput>): Promise<Unit>
+  abstract fun saveRespiratoryRate(samples: Array<NativeRespiratoryRateSampleInput>): Promise<NativeHealthWriteResult>
   
   @DoNotStrip
   @Keep
-  abstract fun saveBodyFat(samples: Array<NativeBodyFatSampleInput>): Promise<Unit>
+  abstract fun saveBodyFat(samples: Array<NativeBodyFatSampleInput>): Promise<NativeHealthWriteResult>
   
   @DoNotStrip
   @Keep
-  abstract fun saveLeanBodyMass(samples: Array<NativeLeanBodyMassSampleInput>): Promise<Unit>
+  abstract fun saveLeanBodyMass(samples: Array<NativeLeanBodyMassSampleInput>): Promise<NativeHealthWriteResult>
   
   @DoNotStrip
   @Keep
-  abstract fun saveBasalBodyTemperature(samples: Array<NativeBasalBodyTemperatureSampleInput>): Promise<Unit>
+  abstract fun saveBasalBodyTemperature(samples: Array<NativeBasalBodyTemperatureSampleInput>): Promise<NativeHealthWriteResult>
   
   @DoNotStrip
   @Keep
-  abstract fun saveBodyMass(samples: Array<NativeBodyMassSampleInput>): Promise<Unit>
+  abstract fun saveBodyMass(samples: Array<NativeBodyMassSampleInput>): Promise<NativeHealthWriteResult>
   
   @DoNotStrip
   @Keep
-  abstract fun saveRestingHeartRate(samples: Array<NativeRestingHeartRateSampleInput>): Promise<Unit>
+  abstract fun saveRestingHeartRate(samples: Array<NativeRestingHeartRateSampleInput>): Promise<NativeHealthWriteResult>
   
   @DoNotStrip
   @Keep
-  abstract fun saveOxygenSaturation(samples: Array<NativeOxygenSaturationSampleInput>): Promise<Unit>
+  abstract fun saveOxygenSaturation(samples: Array<NativeOxygenSaturationSampleInput>): Promise<NativeHealthWriteResult>
   
   @DoNotStrip
   @Keep
-  abstract fun saveHeight(samples: Array<NativeHeightSampleInput>): Promise<Unit>
+  abstract fun saveHeight(samples: Array<NativeHeightSampleInput>): Promise<NativeHealthWriteResult>
   
   @DoNotStrip
   @Keep
-  abstract fun saveVo2Max(samples: Array<NativeVo2MaxSampleInput>): Promise<Unit>
+  abstract fun saveVo2Max(samples: Array<NativeVo2MaxSampleInput>): Promise<NativeHealthWriteResult>
   
   @DoNotStrip
   @Keep
-  abstract fun saveSleepSessions(sessions: Array<NativeSleepSessionInput>): Promise<Unit>
+  abstract fun saveSleepSessions(sessions: Array<NativeSleepSessionInput>): Promise<NativeHealthWriteResult>
   
   @DoNotStrip
   @Keep
-  abstract fun saveWorkout(workout: NativeWorkoutSampleInput): Promise<Unit>
+  abstract fun saveWorkout(workout: NativeWorkoutSampleInput): Promise<NativeHealthWriteResult>
   
   @DoNotStrip
   @Keep

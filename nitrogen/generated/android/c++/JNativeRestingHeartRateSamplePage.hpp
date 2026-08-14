@@ -11,10 +11,12 @@
 #include "NativeRestingHeartRateSamplePage.hpp"
 
 #include "JNativeHealthDataOrigin.hpp"
+#include "JNativeHealthRecordingMethod.hpp"
 #include "JNativeHealthSampleIdentity.hpp"
 #include "JNativeHealthSampleIdentityKind.hpp"
 #include "JNativeRestingHeartRateSample.hpp"
 #include "NativeHealthDataOrigin.hpp"
+#include "NativeHealthRecordingMethod.hpp"
 #include "NativeHealthSampleIdentity.hpp"
 #include "NativeHealthSampleIdentityKind.hpp"
 #include "NativeRestingHeartRateSample.hpp"

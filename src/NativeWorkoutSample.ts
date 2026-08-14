@@ -1,4 +1,5 @@
 import type { NativeHealthDataOrigin } from './NativeHealthDataOrigin'
+import type { NativeHealthRecordingMethod } from './NativeHealthRecordingMethod'
 import type { NativeHealthMetricValue } from './NativeHealthMetricValue'
 import type { NativeHealthSampleIdentity } from './NativeHealthSampleIdentity'
 import type { NativeWorkoutActivity } from './NativeWorkoutActivity'
@@ -7,6 +8,7 @@ import type { NativeWorkoutActivity } from './NativeWorkoutActivity'
 export interface NativeWorkoutSample {
   identity: NativeHealthSampleIdentity
   origin: NativeHealthDataOrigin
+  recordingMethod: NativeHealthRecordingMethod
   startTimeMs: number
   endTimeMs: number
   elapsedDurationSeconds: number

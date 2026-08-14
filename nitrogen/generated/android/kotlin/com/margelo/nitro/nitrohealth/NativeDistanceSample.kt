@@ -26,6 +26,9 @@ data class NativeDistanceSample(
   val origin: NativeHealthDataOrigin,
   @DoNotStrip
   @Keep
+  val recordingMethod: NativeHealthRecordingMethod,
+  @DoNotStrip
+  @Keep
   val startTimeMs: Double,
   @DoNotStrip
   @Keep
@@ -44,6 +47,7 @@ data class NativeDistanceSample(
     if (other !is NativeDistanceSample) return false
     return Objects.deepEquals(this.identity, other.identity)
       && Objects.deepEquals(this.origin, other.origin)
+      && Objects.deepEquals(this.recordingMethod, other.recordingMethod)
       && Objects.deepEquals(this.startTimeMs, other.startTimeMs)
       && Objects.deepEquals(this.endTimeMs, other.endTimeMs)
       && Objects.deepEquals(this.distanceMeters, other.distanceMeters)
@@ -54,6 +58,7 @@ data class NativeDistanceSample(
     return arrayOf<Any?>(
       identity,
       origin,
+      recordingMethod,
       startTimeMs,
       endTimeMs,
       distanceMeters,
@@ -69,8 +74,8 @@ data class NativeDistanceSample(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, startTimeMs: Double, endTimeMs: Double, distanceMeters: Double, scope: NativeDistanceScope): NativeDistanceSample {
-      return NativeDistanceSample(identity, origin, startTimeMs, endTimeMs, distanceMeters, scope)
+    private fun fromCpp(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, recordingMethod: NativeHealthRecordingMethod, startTimeMs: Double, endTimeMs: Double, distanceMeters: Double, scope: NativeDistanceScope): NativeDistanceSample {
+      return NativeDistanceSample(identity, origin, recordingMethod, startTimeMs, endTimeMs, distanceMeters, scope)
     }
   }
 }

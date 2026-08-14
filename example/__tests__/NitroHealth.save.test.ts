@@ -11,17 +11,24 @@ import { NitroHealth } from 'react-native-nitro-health'
 describe('NitroHealth save contract', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockNitroHealth.saveDistance.mockResolvedValue({ storedScope: 'walkingRunning' })
+    mockNitroHealth.saveSteps.mockImplementation(async (samples) => ({
+      storedRecordingMethods: samples.map(() => 'unknown'),
+    }))
+    mockNitroHealth.saveDistance.mockResolvedValue({
+      storedScope: 'walkingRunning',
+      storedRecordingMethods: ['unknown'],
+    })
   })
 
   it('saves steps through the Nitro hybrid object', async () => {
     const startDate = new Date('2026-01-01T09:00:00.000Z')
     const endDate = new Date('2026-01-01T09:30:00.000Z')
-    mockNitroHealth.saveSteps.mockResolvedValue(undefined)
+    mockNitroHealth.saveSteps.mockResolvedValue({ storedRecordingMethods: ['unknown'] })
 
-    await expect(
-      NitroHealth.saveSteps([{ startDate, endDate, count: 512 }])
-    ).resolves.toBeUndefined()
+    await expect(NitroHealth.saveSteps([{ startDate, endDate, count: 512 }])).resolves.toEqual({
+      status: 'completed',
+      storedRecordingMethods: ['unknown'],
+    })
 
     expect(mockNitroHealth.saveSteps).toHaveBeenCalledWith([
       {
@@ -32,16 +39,91 @@ describe('NitroHealth save contract', () => {
     ])
   })
 
+  it('maps mixed recording methods in input order and trusts the native stored methods', async () => {
+    const startDate = new Date('2026-01-01T09:00:00.000Z')
+    const endDate = new Date('2026-01-01T09:30:00.000Z')
+    mockNitroHealth.saveSteps.mockResolvedValue({
+      storedRecordingMethods: ['automaticallyRecorded', 'unknown', 'manual'],
+    })
+
+    await expect(
+      NitroHealth.saveSteps([
+        { startDate, endDate, count: 100, recordingMethod: 'manual' },
+        { startDate, endDate, count: 200 },
+        { startDate, endDate, count: 300, recordingMethod: 'actively-recorded' },
+      ])
+    ).resolves.toEqual({
+      status: 'completed',
+      storedRecordingMethods: ['automatically-recorded', 'unknown', 'manual'],
+    })
+
+    expect(mockNitroHealth.saveSteps).toHaveBeenCalledWith([
+      {
+        startTimeMs: startDate.getTime(),
+        endTimeMs: endDate.getTime(),
+        count: 100,
+        recordingMethod: 'manual',
+      },
+      { startTimeMs: startDate.getTime(), endTimeMs: endDate.getTime(), count: 200 },
+      {
+        startTimeMs: startDate.getTime(),
+        endTimeMs: endDate.getTime(),
+        count: 300,
+        recordingMethod: 'activelyRecorded',
+      },
+    ])
+    expect(mockNitroHealth.saveSteps.mock.calls[0]?.[0][1]).toHaveProperty(
+      'recordingMethod',
+      undefined
+    )
+  })
+
+  it('rejects a native write result that is not aligned with its inputs', async () => {
+    const startDate = new Date('2026-01-01T09:00:00.000Z')
+    const endDate = new Date('2026-01-01T09:30:00.000Z')
+    mockNitroHealth.saveSteps.mockResolvedValueOnce({ storedRecordingMethods: [] })
+
+    await expect(NitroHealth.saveSteps([{ startDate, endDate, count: 100 }])).rejects.toThrow(
+      'Native write returned 0 recording methods for 1 inputs'
+    )
+  })
+
+  it('reports the index of an unsupported recording method', async () => {
+    const startDate = new Date('2026-01-01T09:00:00.000Z')
+    const endDate = new Date('2026-01-01T09:30:00.000Z')
+
+    await expect(
+      NitroHealth.saveSteps([
+        { startDate, endDate, count: 100 },
+        { startDate, endDate, count: 200, recordingMethod: 'invalid' as never },
+      ])
+    ).rejects.toThrow("samples[1]: unsupported recording method 'invalid'")
+    expect(mockNitroHealth.saveSteps).not.toHaveBeenCalled()
+  })
+
   it('saves distance through the Nitro hybrid object', async () => {
     const startDate = new Date('2026-01-01T09:00:00.000Z')
     const endDate = new Date('2026-01-01T09:30:00.000Z')
-    mockNitroHealth.saveDistance.mockResolvedValue({ storedScope: 'activityUnspecified' })
+    mockNitroHealth.saveDistance.mockResolvedValue({
+      storedScope: 'activityUnspecified',
+      storedRecordingMethods: ['activelyRecorded'],
+    })
 
     await expect(
       NitroHealth.saveDistance([
-        { scope: 'walking-running', startDate, endDate, distanceMeters: 1250.5 },
+        {
+          scope: 'walking-running',
+          startDate,
+          endDate,
+          distanceMeters: 1250.5,
+          recordingMethod: 'automatically-recorded',
+        },
       ])
-    ).resolves.toEqual({ status: 'completed', storedScope: 'activity-unspecified' })
+    ).resolves.toEqual({
+      status: 'completed',
+      storedScope: 'activity-unspecified',
+      storedRecordingMethods: ['actively-recorded'],
+    })
 
     expect(mockNitroHealth.saveDistance).toHaveBeenCalledWith([
       {
@@ -49,6 +131,7 @@ describe('NitroHealth save contract', () => {
         endTimeMs: endDate.getTime(),
         distanceMeters: 1250.5,
         scope: 'walkingRunning',
+        recordingMethod: 'automaticallyRecorded',
       },
     ])
   })
@@ -56,11 +139,13 @@ describe('NitroHealth save contract', () => {
   it('saves active energy burned through the Nitro hybrid object', async () => {
     const startDate = new Date('2026-01-01T09:00:00.000Z')
     const endDate = new Date('2026-01-01T09:30:00.000Z')
-    mockNitroHealth.saveActiveEnergyBurned.mockResolvedValue(undefined)
+    mockNitroHealth.saveActiveEnergyBurned.mockResolvedValue({
+      storedRecordingMethods: ['unknown'],
+    })
 
     await expect(
       NitroHealth.saveActiveEnergyBurned([{ startDate, endDate, kilocalories: 215 }])
-    ).resolves.toBeUndefined()
+    ).resolves.toEqual({ status: 'completed', storedRecordingMethods: ['unknown'] })
 
     expect(mockNitroHealth.saveActiveEnergyBurned).toHaveBeenCalledWith([
       {
@@ -74,11 +159,11 @@ describe('NitroHealth save contract', () => {
   it('saves hydration through the Nitro hybrid object', async () => {
     const startDate = new Date('2026-01-01T09:00:00.000Z')
     const endDate = new Date('2026-01-01T09:30:00.000Z')
-    mockNitroHealth.saveHydration.mockResolvedValue(undefined)
+    mockNitroHealth.saveHydration.mockResolvedValue({ storedRecordingMethods: ['unknown'] })
 
     await expect(
       NitroHealth.saveHydration([{ startDate, endDate, milliliters: 250.5 }])
-    ).resolves.toBeUndefined()
+    ).resolves.toEqual({ status: 'completed', storedRecordingMethods: ['unknown'] })
 
     expect(mockNitroHealth.saveHydration).toHaveBeenCalledWith([
       {
@@ -92,11 +177,11 @@ describe('NitroHealth save contract', () => {
   it('saves floors climbed through the Nitro hybrid object', async () => {
     const startDate = new Date('2026-01-01T09:00:00.000Z')
     const endDate = new Date('2026-01-01T09:30:00.000Z')
-    mockNitroHealth.saveFloorsClimbed.mockResolvedValue(undefined)
+    mockNitroHealth.saveFloorsClimbed.mockResolvedValue({ storedRecordingMethods: ['unknown'] })
 
     await expect(
       NitroHealth.saveFloorsClimbed([{ startDate, endDate, floors: 12.5 }])
-    ).resolves.toBeUndefined()
+    ).resolves.toEqual({ status: 'completed', storedRecordingMethods: ['unknown'] })
 
     expect(mockNitroHealth.saveFloorsClimbed).toHaveBeenCalledWith([
       {
@@ -109,9 +194,12 @@ describe('NitroHealth save contract', () => {
 
   it('saves heart rate through the Nitro hybrid object', async () => {
     const date = new Date('2026-01-01T09:00:00.000Z')
-    mockNitroHealth.saveHeartRate.mockResolvedValue(undefined)
+    mockNitroHealth.saveHeartRate.mockResolvedValue({ storedRecordingMethods: ['unknown'] })
 
-    await expect(NitroHealth.saveHeartRate([{ date, bpm: 72 }])).resolves.toBeUndefined()
+    await expect(NitroHealth.saveHeartRate([{ date, bpm: 72 }])).resolves.toEqual({
+      status: 'completed',
+      storedRecordingMethods: ['unknown'],
+    })
 
     expect(mockNitroHealth.saveHeartRate).toHaveBeenCalledWith([
       {
@@ -123,9 +211,12 @@ describe('NitroHealth save contract', () => {
 
   it('saves body mass through the Nitro hybrid object', async () => {
     const date = new Date('2026-01-01T09:00:00.000Z')
-    mockNitroHealth.saveBodyMass.mockResolvedValue(undefined)
+    mockNitroHealth.saveBodyMass.mockResolvedValue({ storedRecordingMethods: ['unknown'] })
 
-    await expect(NitroHealth.saveBodyMass([{ date, kilograms: 72.5 }])).resolves.toBeUndefined()
+    await expect(NitroHealth.saveBodyMass([{ date, kilograms: 72.5 }])).resolves.toEqual({
+      status: 'completed',
+      storedRecordingMethods: ['unknown'],
+    })
 
     expect(mockNitroHealth.saveBodyMass).toHaveBeenCalledWith([
       {
