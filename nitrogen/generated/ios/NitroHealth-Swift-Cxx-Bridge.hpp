@@ -18,6 +18,8 @@ namespace margelo::nitro::nitrohealth { struct NativeActiveEnergyBurnedSampleInp
 namespace margelo::nitro::nitrohealth { struct NativeActiveEnergyBurnedSamplePage; }
 // Forward declaration of `NativeActiveEnergyBurnedSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeActiveEnergyBurnedSample; }
+// Forward declaration of `NativeAndroidVo2MaxMeasurementMethod` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeAndroidVo2MaxMeasurementMethod; }
 // Forward declaration of `NativeBackgroundChangesMode` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class NativeBackgroundChangesMode; }
 // Forward declaration of `NativeBackgroundChangesResultStatus` to properly resolve imports.
@@ -156,6 +158,8 @@ namespace margelo::nitro::nitrohealth { struct NativeHydrationSampleInput; }
 namespace margelo::nitro::nitrohealth { struct NativeHydrationSamplePage; }
 // Forward declaration of `NativeHydrationSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHydrationSample; }
+// Forward declaration of `NativeIOSVo2MaxTestType` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeIOSVo2MaxTestType; }
 // Forward declaration of `NativeLeanBodyMassSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeLeanBodyMassSampleInput; }
 // Forward declaration of `NativeLeanBodyMassSamplePage` to properly resolve imports.
@@ -235,6 +239,7 @@ namespace NitroHealth { class HybridNitroHealthSpec_cxx; }
 #include "NativeActiveEnergyBurnedSample.hpp"
 #include "NativeActiveEnergyBurnedSampleInput.hpp"
 #include "NativeActiveEnergyBurnedSamplePage.hpp"
+#include "NativeAndroidVo2MaxMeasurementMethod.hpp"
 #include "NativeBackgroundChangesMode.hpp"
 #include "NativeBackgroundChangesResult.hpp"
 #include "NativeBackgroundChangesResultStatus.hpp"
@@ -304,6 +309,7 @@ namespace NitroHealth { class HybridNitroHealthSpec_cxx; }
 #include "NativeHydrationSample.hpp"
 #include "NativeHydrationSampleInput.hpp"
 #include "NativeHydrationSamplePage.hpp"
+#include "NativeIOSVo2MaxTestType.hpp"
 #include "NativeLeanBodyMassSample.hpp"
 #include "NativeLeanBodyMassSampleInput.hpp"
 #include "NativeLeanBodyMassSamplePage.hpp"
@@ -1247,6 +1253,36 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return optional.has_value();
   }
   inline std::vector<NativeHeightSample> get_std__optional_std__vector_NativeHeightSample__(const std::optional<std::vector<NativeHeightSample>>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::optional<NativeAndroidVo2MaxMeasurementMethod>
+  /**
+   * Specialized version of `std::optional<NativeAndroidVo2MaxMeasurementMethod>`.
+   */
+  using std__optional_NativeAndroidVo2MaxMeasurementMethod_ = std::optional<NativeAndroidVo2MaxMeasurementMethod>;
+  inline std::optional<NativeAndroidVo2MaxMeasurementMethod> create_std__optional_NativeAndroidVo2MaxMeasurementMethod_(const NativeAndroidVo2MaxMeasurementMethod& value) noexcept {
+    return std::optional<NativeAndroidVo2MaxMeasurementMethod>(value);
+  }
+  inline bool has_value_std__optional_NativeAndroidVo2MaxMeasurementMethod_(const std::optional<NativeAndroidVo2MaxMeasurementMethod>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline NativeAndroidVo2MaxMeasurementMethod get_std__optional_NativeAndroidVo2MaxMeasurementMethod_(const std::optional<NativeAndroidVo2MaxMeasurementMethod>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::optional<NativeIOSVo2MaxTestType>
+  /**
+   * Specialized version of `std::optional<NativeIOSVo2MaxTestType>`.
+   */
+  using std__optional_NativeIOSVo2MaxTestType_ = std::optional<NativeIOSVo2MaxTestType>;
+  inline std::optional<NativeIOSVo2MaxTestType> create_std__optional_NativeIOSVo2MaxTestType_(const NativeIOSVo2MaxTestType& value) noexcept {
+    return std::optional<NativeIOSVo2MaxTestType>(value);
+  }
+  inline bool has_value_std__optional_NativeIOSVo2MaxTestType_(const std::optional<NativeIOSVo2MaxTestType>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline NativeIOSVo2MaxTestType get_std__optional_NativeIOSVo2MaxTestType_(const std::optional<NativeIOSVo2MaxTestType>& optional) noexcept {
     return optional.value();
   }
   

@@ -578,22 +578,44 @@ describe('NitroHealth saves (native)', () => {
         return
       }
 
-      await NitroHealth.saveVo2Max([
-        { date: saveInterval.startDate, millilitersPerKilogramPerMinute: 42.5 },
-      ])
+      await NitroHealth.deleteRecordsByTimeRange('vo2Max', saveReadRange)
 
-      const page = await NitroHealth.readVo2Max(saveReadRange)
+      try {
+        await NitroHealth.saveVo2Max([
+          {
+            date: saveInterval.startDate,
+            millilitersPerKilogramPerMinute: 42.5,
+            metadata: {
+              android: { measurementMethod: 'multistage_fitness_test' },
+              ios: { testType: 'max_exercise' },
+            },
+          },
+        ])
 
-      if (isInconclusiveRead(page.samples)) {
-        return
+        const page = await NitroHealth.readVo2Max(saveReadRange)
+
+        if (isInconclusiveRead(page.samples)) {
+          return
+        }
+
+        const matches = page.samples.filter(
+          (sample) =>
+            sample.date.getTime() === saveInterval.startDate.getTime() &&
+            Math.abs(sample.millilitersPerKilogramPerMinute - 42.5) < 0.001
+        )
+
+        expect(matches).toHaveLength(1)
+        expect(matches[0]?.identity.kind).toBe('record')
+        if (Platform.OS === 'android') {
+          expect(matches[0]?.metadata).toEqual({
+            android: { measurementMethod: 'multistage_fitness_test' },
+          })
+        } else {
+          expect(matches[0]?.metadata).toEqual({ ios: { testType: 'max_exercise' } })
+        }
+      } finally {
+        await NitroHealth.deleteRecordsByTimeRange('vo2Max', saveReadRange)
       }
-
-      const matches = page.samples.filter(
-        (sample) => Math.abs(sample.millilitersPerKilogramPerMinute - 42.5) < 0.001
-      )
-
-      expect(matches.length).toBeGreaterThanOrEqual(1)
-      expect(matches[0]?.identity.kind).toBe('record')
     })
   })
 

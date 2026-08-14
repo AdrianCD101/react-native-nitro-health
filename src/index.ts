@@ -124,6 +124,13 @@ export type { StepSample } from './StepSample'
 export type { StepSampleInput } from './StepSampleInput'
 export type { Vo2MaxSample } from './Vo2MaxSample'
 export type { Vo2MaxSampleInput } from './Vo2MaxSampleInput'
+export type {
+  AndroidVo2MaxMeasurementMethod,
+  AndroidVo2MaxMetadata,
+  IOSVo2MaxMetadata,
+  IOSVo2MaxTestType,
+  Vo2MaxMetadata,
+} from './Vo2MaxMetadata'
 export type { WorkoutActivity } from './WorkoutActivity'
 export type { WorkoutActivityType } from './WorkoutActivityType'
 export type { WorkoutSample } from './WorkoutSample'

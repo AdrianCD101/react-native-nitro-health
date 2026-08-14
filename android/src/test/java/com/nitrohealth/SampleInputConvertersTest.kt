@@ -31,6 +31,7 @@ import com.margelo.nitro.nitrohealth.NativeRespiratoryRateSampleInput
 import com.margelo.nitro.nitrohealth.NativeRestingHeartRateSampleInput
 import com.margelo.nitro.nitrohealth.NativeStepSampleInput
 import com.margelo.nitro.nitrohealth.NativeVo2MaxSampleInput
+import com.margelo.nitro.nitrohealth.NativeAndroidVo2MaxMeasurementMethod
 import java.time.Instant
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -517,6 +518,9 @@ class SampleInputConvertersTest {
                 NativeVo2MaxSampleInput(
                     timeMs = startTimeMs,
                     millilitersPerKilogramPerMinute = 42.5,
+                    androidMeasurementMethod =
+                        NativeAndroidVo2MaxMeasurementMethod.MULTISTAGEFITNESSTEST,
+                    iosTestType = null,
                     syncId = null,
                     syncVersion = null
                 )
@@ -527,7 +531,10 @@ class SampleInputConvertersTest {
         assertEquals(Instant.ofEpochMilli(startTimeMs.toLong()), records[0].time)
         assertNull(records[0].zoneOffset)
         assertEquals(42.5, records[0].vo2MillilitersPerMinuteKilogram, 0.0)
-        assertEquals(Vo2MaxRecord.MEASUREMENT_METHOD_OTHER, records[0].measurementMethod)
+        assertEquals(
+            Vo2MaxRecord.MEASUREMENT_METHOD_MULTISTAGE_FITNESS_TEST,
+            records[0].measurementMethod
+        )
     }
 
     @Test
@@ -755,6 +762,8 @@ class SampleInputConvertersTest {
                     NativeVo2MaxSampleInput(
                         timeMs = startTimeMs,
                         millilitersPerKilogramPerMinute = 42.5,
+                        androidMeasurementMethod = null,
+                        iosTestType = null,
                         syncId = syncId,
                         syncVersion = syncVersion
                     )

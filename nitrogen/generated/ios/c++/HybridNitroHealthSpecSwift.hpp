@@ -100,6 +100,10 @@ namespace margelo::nitro::nitrohealth { struct NativeOxygenSaturationSample; }
 namespace margelo::nitro::nitrohealth { struct NativeHeightSample; }
 // Forward declaration of `NativeVo2MaxSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeVo2MaxSample; }
+// Forward declaration of `NativeAndroidVo2MaxMeasurementMethod` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeAndroidVo2MaxMeasurementMethod; }
+// Forward declaration of `NativeIOSVo2MaxTestType` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeIOSVo2MaxTestType; }
 // Forward declaration of `NativeSleepSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeSleepSample; }
 // Forward declaration of `NativeSleepSampleKind` to properly resolve imports.
@@ -286,6 +290,8 @@ namespace margelo::nitro::nitrohealth { enum class NativeHealthAuthorizationStat
 #include "NativeOxygenSaturationSample.hpp"
 #include "NativeHeightSample.hpp"
 #include "NativeVo2MaxSample.hpp"
+#include "NativeAndroidVo2MaxMeasurementMethod.hpp"
+#include "NativeIOSVo2MaxTestType.hpp"
 #include "NativeSleepSample.hpp"
 #include "NativeSleepSampleKind.hpp"
 #include "NativeSleepStageData.hpp"

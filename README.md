@@ -551,10 +551,41 @@ One `Vo2MaxSample` carries the reading in milliliters of oxygen per kilogram of 
 interface Vo2MaxSample extends HealthSample {
   date: Date
   millilitersPerKilogramPerMinute: number
+  metadata?: {
+    android?: {
+      measurementMethod?:
+        | 'other'
+        | 'metabolic_cart'
+        | 'heart_rate_ratio'
+        | 'cooper_test'
+        | 'multistage_fitness_test'
+        | 'rockport_fitness_test'
+    }
+    ios?: {
+      testType?:
+        | 'max_exercise'
+        | 'prediction_sub_max_exercise'
+        | 'prediction_non_exercise'
+        | 'prediction_step_test'
+    }
+  }
 }
 ```
 
-Android maps a Health Connect `Vo2MaxRecord` one-to-one (its `vo2MillilitersPerMinuteKilogram` field is the same unit); iOS stores an `HKQuantitySample` in `ml/(kg·min)`, so neither platform converts the value in JavaScript. The measurement method (Health Connect's `measurementMethod`, HealthKit's `HKMetadataKeyVO2MaxTestType`) is intentionally not modeled — the two enums do not map cleanly and are deferred to metadata passthrough like [#69](https://github.com/AdrianCD101/react-native-nitro-health/issues/69)/[#70](https://github.com/AdrianCD101/react-native-nitro-health/issues/70)/[#73](https://github.com/AdrianCD101/react-native-nitro-health/issues/73); Android writes store the explicit `MEASUREMENT_METHOD_OTHER` constant. VO2 max statistics are not supported by `readStatistics()`.
+Android maps a Health Connect `Vo2MaxRecord` one-to-one (its `vo2MillilitersPerMinuteKilogram` field is the same unit); iOS stores an `HKQuantitySample` in `ml/(kg·min)`, so neither platform converts the value in JavaScript. Their nonportable classifications remain separate: Health Connect's `measurementMethod` names a test protocol, while HealthKit's `HKMetadataKeyVO2MaxTestType` names a measurement class. Android reads and change upserts always return `metadata.android.measurementMethod`, including `other`; omitted Android writes use `other`. iOS returns `metadata.ios` only when HealthKit stored its test-type key, and omitted iOS writes attach no test type. Writing `prediction_step_test` requires iOS 26 or later. Each platform ignores the other platform's explicitly scoped write field. VO2 max statistics are not supported by `readStatistics()`.
+
+```ts
+await NitroHealth.saveVo2Max([
+  {
+    date: new Date(),
+    millilitersPerKilogramPerMinute: 44,
+    metadata: {
+      android: { measurementMethod: 'multistage_fitness_test' },
+      ios: { testType: 'max_exercise' },
+    },
+  },
+])
+```
 
 ### Heart Rate Variability
 

@@ -28,6 +28,7 @@ import type { HydrationSample } from '../HydrationSample'
 import type { HydrationSampleInput } from '../HydrationSampleInput'
 import type { Vo2MaxSample } from '../Vo2MaxSample'
 import type { Vo2MaxSampleInput } from '../Vo2MaxSampleInput'
+import type { AndroidVo2MaxMeasurementMethod, IOSVo2MaxTestType } from '../Vo2MaxMetadata'
 import type { NativeActiveEnergyBurnedSample } from '../NativeActiveEnergyBurnedSample'
 import type { NativeFloorsClimbedSample } from '../NativeFloorsClimbedSample'
 import type { NativeFloorsClimbedSampleInput } from '../NativeFloorsClimbedSampleInput'
@@ -554,6 +555,98 @@ function makeNativeBloodGlucoseMetadata(
   return result
 }
 
+function makeNativeAndroidVo2MaxMeasurementMethod(
+  value: AndroidVo2MaxMeasurementMethod | undefined,
+  index: number
+): NativeVo2MaxSampleInput['androidMeasurementMethod'] {
+  switch (value) {
+    case undefined:
+    case 'other':
+      return value
+    case 'metabolic_cart':
+      return 'metabolicCart'
+    case 'heart_rate_ratio':
+      return 'heartRateRatio'
+    case 'cooper_test':
+      return 'cooperTest'
+    case 'multistage_fitness_test':
+      return 'multistageFitnessTest'
+    case 'rockport_fitness_test':
+      return 'rockportFitnessTest'
+    default:
+      throw new Error(`samples[${index}]: metadata.android.measurementMethod is unsupported`)
+  }
+}
+
+function makeNativeIOSVo2MaxTestType(
+  value: IOSVo2MaxTestType | undefined,
+  index: number
+): NativeVo2MaxSampleInput['iosTestType'] {
+  switch (value) {
+    case undefined:
+      return undefined
+    case 'max_exercise':
+      return 'maxExercise'
+    case 'prediction_sub_max_exercise':
+      return 'predictionSubMaxExercise'
+    case 'prediction_non_exercise':
+      return 'predictionNonExercise'
+    case 'prediction_step_test':
+      return 'predictionStepTest'
+    default:
+      throw new Error(`samples[${index}]: metadata.ios.testType is unsupported`)
+  }
+}
+
+function makeNativeVo2MaxMetadata(
+  metadata: Vo2MaxSampleInput['metadata'],
+  index: number
+): Pick<NativeVo2MaxSampleInput, 'androidMeasurementMethod' | 'iosTestType'> {
+  if (metadata === undefined) return {}
+  if (typeof metadata !== 'object' || metadata === null || Array.isArray(metadata)) {
+    throw new Error(`samples[${index}]: metadata must be an object`)
+  }
+  const supportedPlatforms = new Set(['android', 'ios'])
+  const unsupportedPlatform = Object.keys(metadata).find((key) => !supportedPlatforms.has(key))
+  if (unsupportedPlatform !== undefined) {
+    throw new Error(`samples[${index}]: metadata.${unsupportedPlatform} is unsupported`)
+  }
+
+  const result: Pick<NativeVo2MaxSampleInput, 'androidMeasurementMethod' | 'iosTestType'> = {}
+  const android = metadata.android
+  if (android !== undefined) {
+    if (typeof android !== 'object' || android === null || Array.isArray(android)) {
+      throw new Error(`samples[${index}]: metadata.android must be an object`)
+    }
+    const unsupportedKey = Object.keys(android).find((key) => key !== 'measurementMethod')
+    if (unsupportedKey !== undefined) {
+      throw new Error(`samples[${index}]: metadata.android.${unsupportedKey} is unsupported`)
+    }
+    const androidMeasurementMethod = makeNativeAndroidVo2MaxMeasurementMethod(
+      android.measurementMethod,
+      index
+    )
+    if (androidMeasurementMethod !== undefined) {
+      result.androidMeasurementMethod = androidMeasurementMethod
+    }
+  }
+
+  const ios = metadata.ios
+  if (ios !== undefined) {
+    if (typeof ios !== 'object' || ios === null || Array.isArray(ios)) {
+      throw new Error(`samples[${index}]: metadata.ios must be an object`)
+    }
+    const unsupportedKey = Object.keys(ios).find((key) => key !== 'testType')
+    if (unsupportedKey !== undefined) {
+      throw new Error(`samples[${index}]: metadata.ios.${unsupportedKey} is unsupported`)
+    }
+    const iosTestType = makeNativeIOSVo2MaxTestType(ios.testType, index)
+    if (iosTestType !== undefined) result.iosTestType = iosTestType
+  }
+
+  return result
+}
+
 function makeBloodPressureBodyPosition(
   value: NonNullable<NativeBloodPressureSample['androidBodyPosition']>
 ): AndroidBloodPressureBodyPosition {
@@ -909,6 +1002,7 @@ export function makeNativeVo2MaxSampleInput(
   return {
     timeMs,
     millilitersPerKilogramPerMinute: sample.millilitersPerKilogramPerMinute,
+    ...makeNativeVo2MaxMetadata(sample.metadata, index),
     ...makeNativeSync(sample.sync, index),
   }
 }
@@ -1396,11 +1490,38 @@ export function makeHeightSample(sample: NativeHeightSample): HeightSample {
 }
 
 export function makeVo2MaxSample(sample: NativeVo2MaxSample): Vo2MaxSample {
+  const androidMeasurementMethod = {
+    other: 'other',
+    metabolicCart: 'metabolic_cart',
+    heartRateRatio: 'heart_rate_ratio',
+    cooperTest: 'cooper_test',
+    multistageFitnessTest: 'multistage_fitness_test',
+    rockportFitnessTest: 'rockport_fitness_test',
+  } as const
+  const iosTestType = {
+    maxExercise: 'max_exercise',
+    predictionSubMaxExercise: 'prediction_sub_max_exercise',
+    predictionNonExercise: 'prediction_non_exercise',
+    predictionStepTest: 'prediction_step_test',
+  } as const
+  let metadata: Vo2MaxSample['metadata']
+  if (sample.androidMeasurementMethod !== undefined) {
+    metadata = {
+      android: {
+        measurementMethod: androidMeasurementMethod[sample.androidMeasurementMethod],
+      },
+    }
+  }
+  if (sample.iosTestType !== undefined) {
+    metadata = { ...metadata, ios: { testType: iosTestType[sample.iosTestType] } }
+  }
+
   return {
     identity: makeHealthSampleIdentity(sample.identity),
     origin: makeHealthDataOrigin(sample.origin),
     date: new Date(sample.timeMs),
     millilitersPerKilogramPerMinute: sample.millilitersPerKilogramPerMinute,
+    ...(metadata === undefined ? {} : { metadata }),
   }
 }
 

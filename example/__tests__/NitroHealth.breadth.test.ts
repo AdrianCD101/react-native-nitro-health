@@ -443,6 +443,8 @@ describe('NitroHealth breadth data types contract', () => {
             ...nativeRecordMetadata('vo2max-record', 'com.example.tracker', 'Example Tracker'),
             timeMs,
             millilitersPerKilogramPerMinute: 42.5,
+            androidMeasurementMethod: 'multistageFitnessTest',
+            iosTestType: 'maxExercise',
           },
         ],
       })
@@ -460,6 +462,10 @@ describe('NitroHealth breadth data types contract', () => {
       expect(result.samples[0].date).toBeInstanceOf(Date)
       expect(result.samples[0].date.getTime()).toBe(timeMs)
       expect(result.samples[0].millilitersPerKilogramPerMinute).toBe(42.5)
+      expect(result.samples[0].metadata).toEqual({
+        android: { measurementMethod: 'multistage_fitness_test' },
+        ios: { testType: 'max_exercise' },
+      })
       expect(result.samples[0].origin).toEqual({
         identifier: 'com.example.tracker',
         displayName: 'Example Tracker',
@@ -1121,6 +1127,47 @@ describe('NitroHealth breadth data types contract', () => {
           NitroHealth.saveVo2Max([{ date, millilitersPerKilogramPerMinute }])
         ).rejects.toThrow('samples[0]: millilitersPerKilogramPerMinute must be between 0 and 100')
       }
+
+      expect(mockNitroHealth.saveVo2Max).not.toHaveBeenCalled()
+    })
+
+    it('maps both platform metadata scopes through the native transport', async () => {
+      const date = new Date('2026-01-01T09:00:00.000Z')
+      mockNitroHealth.saveVo2Max.mockResolvedValue(undefined)
+
+      await NitroHealth.saveVo2Max([
+        {
+          date,
+          millilitersPerKilogramPerMinute: 42.5,
+          metadata: {
+            android: { measurementMethod: 'multistage_fitness_test' },
+            ios: { testType: 'prediction_step_test' },
+          },
+        },
+      ])
+
+      expect(mockNitroHealth.saveVo2Max).toHaveBeenCalledWith([
+        {
+          timeMs: date.getTime(),
+          millilitersPerKilogramPerMinute: 42.5,
+          androidMeasurementMethod: 'multistageFitnessTest',
+          iosTestType: 'predictionStepTest',
+        },
+      ])
+    })
+
+    it('rejects unsupported platform metadata before crossing the native boundary', async () => {
+      const date = new Date('2026-01-01T09:00:00.000Z')
+
+      await expect(
+        NitroHealth.saveVo2Max([
+          {
+            date,
+            millilitersPerKilogramPerMinute: 42.5,
+            metadata: { ios: { testType: 'prediction_max_exercise' } },
+          } as never,
+        ])
+      ).rejects.toThrow('samples[0]: metadata.ios.testType is unsupported')
 
       expect(mockNitroHealth.saveVo2Max).not.toHaveBeenCalled()
     })

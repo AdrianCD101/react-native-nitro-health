@@ -413,10 +413,7 @@ func makeVo2MaxQuantitySamples(
             ),
             start: date,
             end: date,
-            metadata: try makeHealthKitSyncMetadata(
-                syncId: sample.syncId,
-                syncVersion: sample.syncVersion
-            )
+            metadata: try sample.healthKitMetadata()
         )
     }
 }

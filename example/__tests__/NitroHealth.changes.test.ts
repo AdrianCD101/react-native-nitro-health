@@ -207,6 +207,37 @@ describe('NitroHealth changes contract', () => {
     })
   })
 
+  it('maps VO2 max metadata on upserts', async () => {
+    const timeMs = Date.parse('2026-01-01T09:00:00.000Z')
+    mockNitroHealth.getChanges.mockResolvedValue({
+      changes: [
+        {
+          type: 'upsert',
+          recordId: 'vo2-record',
+          vo2MaxSamples: [
+            {
+              ...nativeRecordMetadata('vo2-record'),
+              timeMs,
+              millilitersPerKilogramPerMinute: 42.5,
+              androidMeasurementMethod: 'cooperTest',
+            },
+          ],
+        },
+      ],
+      nextChangesToken: 'next-token',
+      hasMore: false,
+      tokenExpired: false,
+    })
+
+    const result = await NitroHealth.getChanges('vo2Max', 'current-token')
+    if (result.tokenExpired) throw new Error('Expected a successful changes result')
+
+    expect(result.changes[0]).toMatchObject({
+      type: 'upsert',
+      samples: [{ metadata: { android: { measurementMethod: 'cooper_test' } } }],
+    })
+  })
+
   it('preserves an empty heart-rate upsert so cached children can be cleared', async () => {
     mockNitroHealth.getChanges.mockResolvedValue({
       changes: [
