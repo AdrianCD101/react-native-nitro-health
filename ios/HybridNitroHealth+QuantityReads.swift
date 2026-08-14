@@ -233,12 +233,7 @@ extension HybridNitroHealth {
 
         return Promise<NativeVo2MaxSamplePage>.async {
             let page = try await self.readInstantQuantitySamplePage(dataType: "vo2Max", query: query) { quantitySample, unit in
-                NativeVo2MaxSample(
-                    identity: quantitySample.nativeHealthSampleIdentity,
-                    origin: quantitySample.nativeHealthDataOrigin,
-                    timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
-                    millilitersPerKilogramPerMinute: quantitySample.quantity.doubleValue(for: unit)
-                )
+                try quantitySample.nativeVo2MaxSample(unit: unit)
             }
 
             return NativeVo2MaxSamplePage(samples: page.samples, nextCursor: page.nextCursor)

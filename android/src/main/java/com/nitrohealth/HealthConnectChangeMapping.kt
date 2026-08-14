@@ -261,12 +261,7 @@ private fun makeNativeUpsertionChange(record: Record): NativeHealthChange {
             type = "upsert",
             recordId = recordId,
             vo2MaxSamples = arrayOf(
-                NativeVo2MaxSample(
-                    identity = identity,
-                    origin = origin,
-                    timeMs = record.time.toEpochMilli().toDouble(),
-                    millilitersPerKilogramPerMinute = record.vo2MillilitersPerMinuteKilogram
-                )
+                makeNativeVo2MaxSample(record)
             )
         )
         is SleepSessionRecord -> makeNativeChange(

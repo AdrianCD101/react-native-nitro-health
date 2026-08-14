@@ -116,7 +116,6 @@ import com.margelo.nitro.nitrohealth.NativeSleepSamplePage
 import com.margelo.nitro.nitrohealth.NativeStepSample
 import com.margelo.nitro.nitrohealth.NativeStepSampleInput
 import com.margelo.nitro.nitrohealth.NativeStepSamplePage
-import com.margelo.nitro.nitrohealth.NativeVo2MaxSample
 import com.margelo.nitro.nitrohealth.NativeVo2MaxSampleInput
 import com.margelo.nitro.nitrohealth.NativeVo2MaxSamplePage
 import com.margelo.nitro.nitrohealth.NativeWorkoutSampleInput
@@ -853,14 +852,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         return Promise.async {
             val response = readInstantRecords<Vo2MaxRecord>("vo2Max", query)
             NativeVo2MaxSamplePage(
-                samples = response.records.map { record ->
-                    NativeVo2MaxSample(
-                        identity = makeRecordIdentity(record.metadata.id),
-                        origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
-                        timeMs = record.time.toEpochMilli().toDouble(),
-                        millilitersPerKilogramPerMinute = record.vo2MillilitersPerMinuteKilogram
-                    )
-                }.toTypedArray(),
+                samples = response.records.map(::makeNativeVo2MaxSample).toTypedArray(),
                 nextCursor = response.pageToken?.let { encodeSampleCursor("vo2Max", query, it) }
             )
         }

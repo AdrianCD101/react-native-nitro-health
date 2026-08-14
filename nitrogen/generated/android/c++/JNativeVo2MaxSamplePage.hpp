@@ -10,13 +10,17 @@
 #include <fbjni/fbjni.h>
 #include "NativeVo2MaxSamplePage.hpp"
 
+#include "JNativeAndroidVo2MaxMeasurementMethod.hpp"
 #include "JNativeHealthDataOrigin.hpp"
 #include "JNativeHealthSampleIdentity.hpp"
 #include "JNativeHealthSampleIdentityKind.hpp"
+#include "JNativeIOSVo2MaxTestType.hpp"
 #include "JNativeVo2MaxSample.hpp"
+#include "NativeAndroidVo2MaxMeasurementMethod.hpp"
 #include "NativeHealthDataOrigin.hpp"
 #include "NativeHealthSampleIdentity.hpp"
 #include "NativeHealthSampleIdentityKind.hpp"
+#include "NativeIOSVo2MaxTestType.hpp"
 #include "NativeVo2MaxSample.hpp"
 #include <optional>
 #include <string>

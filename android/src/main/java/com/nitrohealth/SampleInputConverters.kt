@@ -305,7 +305,7 @@ internal fun toVo2MaxRecords(samples: Array<NativeVo2MaxSampleInput>): List<Vo2M
             time = Instant.ofEpochMilli(sample.timeMs.toLong()),
             zoneOffset = null,
             vo2MillilitersPerMinuteKilogram = sample.millilitersPerKilogramPerMinute,
-            measurementMethod = Vo2MaxRecord.MEASUREMENT_METHOD_OTHER,
+            measurementMethod = healthConnectVo2MaxMeasurementMethod(sample.androidMeasurementMethod),
             metadata = makeSampleMetadata(sample.syncId, sample.syncVersion)
         )
     }

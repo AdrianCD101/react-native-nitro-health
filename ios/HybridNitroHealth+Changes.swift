@@ -364,19 +364,13 @@ extension HybridNitroHealth {
             )
         case "vo2Max":
             let quantitySample = try requireQuantitySample(sample, dataType: dataType)
+            let unit = HKUnit.literUnit(with: .milli).unitDivided(
+                by: HKUnit.gramUnit(with: .kilo).unitMultiplied(by: HKUnit.minute())
+            )
             return makeNativeHealthChange(
                 type: "upsert",
                 recordId: uuid,
-                vo2MaxSamples: [NativeVo2MaxSample(
-                    identity: quantitySample.nativeHealthSampleIdentity,
-                    origin: quantitySample.nativeHealthDataOrigin,
-                    timeMs: startTimeMs,
-                    millilitersPerKilogramPerMinute: quantitySample.quantity.doubleValue(
-                        for: HKUnit.literUnit(with: .milli).unitDivided(
-                            by: HKUnit.gramUnit(with: .kilo).unitMultiplied(by: HKUnit.minute())
-                        )
-                    )
-                )]
+                vo2MaxSamples: [try quantitySample.nativeVo2MaxSample(unit: unit)]
             )
         case "sleep":
             guard let categorySample = sample as? HKCategorySample else {

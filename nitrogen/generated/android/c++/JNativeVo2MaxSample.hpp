@@ -10,12 +10,16 @@
 #include <fbjni/fbjni.h>
 #include "NativeVo2MaxSample.hpp"
 
+#include "JNativeAndroidVo2MaxMeasurementMethod.hpp"
 #include "JNativeHealthDataOrigin.hpp"
 #include "JNativeHealthSampleIdentity.hpp"
 #include "JNativeHealthSampleIdentityKind.hpp"
+#include "JNativeIOSVo2MaxTestType.hpp"
+#include "NativeAndroidVo2MaxMeasurementMethod.hpp"
 #include "NativeHealthDataOrigin.hpp"
 #include "NativeHealthSampleIdentity.hpp"
 #include "NativeHealthSampleIdentityKind.hpp"
+#include "NativeIOSVo2MaxTestType.hpp"
 #include <optional>
 #include <string>
 
@@ -46,11 +50,17 @@ namespace margelo::nitro::nitrohealth {
       double timeMs = this->getFieldValue(fieldTimeMs);
       static const auto fieldMillilitersPerKilogramPerMinute = clazz->getField<double>("millilitersPerKilogramPerMinute");
       double millilitersPerKilogramPerMinute = this->getFieldValue(fieldMillilitersPerKilogramPerMinute);
+      static const auto fieldAndroidMeasurementMethod = clazz->getField<JNativeAndroidVo2MaxMeasurementMethod>("androidMeasurementMethod");
+      jni::local_ref<JNativeAndroidVo2MaxMeasurementMethod> androidMeasurementMethod = this->getFieldValue(fieldAndroidMeasurementMethod);
+      static const auto fieldIosTestType = clazz->getField<JNativeIOSVo2MaxTestType>("iosTestType");
+      jni::local_ref<JNativeIOSVo2MaxTestType> iosTestType = this->getFieldValue(fieldIosTestType);
       return NativeVo2MaxSample(
         identity->toCpp(),
         origin->toCpp(),
         timeMs,
-        millilitersPerKilogramPerMinute
+        millilitersPerKilogramPerMinute,
+        androidMeasurementMethod != nullptr ? std::make_optional(androidMeasurementMethod->toCpp()) : std::nullopt,
+        iosTestType != nullptr ? std::make_optional(iosTestType->toCpp()) : std::nullopt
       );
     }
 
@@ -60,7 +70,7 @@ namespace margelo::nitro::nitrohealth {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeVo2MaxSample::javaobject> fromCpp(const NativeVo2MaxSample& value) {
-      using JSignature = JNativeVo2MaxSample(jni::alias_ref<JNativeHealthSampleIdentity>, jni::alias_ref<JNativeHealthDataOrigin>, double, double);
+      using JSignature = JNativeVo2MaxSample(jni::alias_ref<JNativeHealthSampleIdentity>, jni::alias_ref<JNativeHealthDataOrigin>, double, double, jni::alias_ref<JNativeAndroidVo2MaxMeasurementMethod>, jni::alias_ref<JNativeIOSVo2MaxTestType>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
@@ -68,7 +78,9 @@ namespace margelo::nitro::nitrohealth {
         JNativeHealthSampleIdentity::fromCpp(value.identity),
         JNativeHealthDataOrigin::fromCpp(value.origin),
         value.timeMs,
-        value.millilitersPerKilogramPerMinute
+        value.millilitersPerKilogramPerMinute,
+        value.androidMeasurementMethod.has_value() ? JNativeAndroidVo2MaxMeasurementMethod::fromCpp(value.androidMeasurementMethod.value()) : nullptr,
+        value.iosTestType.has_value() ? JNativeIOSVo2MaxTestType::fromCpp(value.iosTestType.value()) : nullptr
       );
     }
   };
