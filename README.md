@@ -520,14 +520,16 @@ type IOSBodyTemperatureSensorLocation =
 Android maps a Health Connect `BodyTemperatureRecord` one-to-one; iOS stores an `HKQuantitySample` in `HKUnit.degreeCelsius()`. Measurement location is preserved through typed platform scopes because the native value sets overlap but are not identical: use `metadata.android.measurementLocation` for Health Connect and `metadata.ios.sensorLocation` for HealthKit. Omitted Android values use `unknown`; omitted iOS values attach no sensor-location metadata. Body temperature statistics are not supported by `readStatistics()`.
 
 ```ts
-await NitroHealth.saveBodyTemperature([{
-  date: new Date(),
-  celsius: 37.2,
-  metadata: {
-    android: { measurementLocation: 'mouth' },
-    ios: { sensorLocation: 'mouth' },
+await NitroHealth.saveBodyTemperature([
+  {
+    date: new Date(),
+    celsius: 37.2,
+    metadata: {
+      android: { measurementLocation: 'mouth' },
+      ios: { sensorLocation: 'mouth' },
+    },
   },
-}])
+])
 ```
 
 ### Respiratory Rate

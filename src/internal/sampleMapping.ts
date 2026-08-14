@@ -657,10 +657,7 @@ function makeNativeBodyTemperatureMetadata(
     if (unsupportedKey !== undefined) {
       throw new Error(`samples[${index}]: metadata.ios.${unsupportedKey} is unsupported`)
     }
-    const iosSensorLocation = makeNativeIOSBodyTemperatureSensorLocation(
-      ios.sensorLocation,
-      index
-    )
+    const iosSensorLocation = makeNativeIOSBodyTemperatureSensorLocation(ios.sensorLocation, index)
     if (iosSensorLocation !== undefined) result.iosSensorLocation = iosSensorLocation
   }
 
