@@ -486,10 +486,51 @@ One `BodyTemperatureSample` carries the reading in degrees Celsius (°F = °C ×
 interface BodyTemperatureSample extends HealthSample {
   date: Date
   celsius: number
+  metadata?: BodyTemperatureMetadata
 }
+
+type AndroidBodyTemperatureMeasurementLocation =
+  | 'unknown'
+  | 'armpit'
+  | 'finger'
+  | 'forehead'
+  | 'mouth'
+  | 'rectum'
+  | 'temporal_artery'
+  | 'toe'
+  | 'ear'
+  | 'wrist'
+  | 'vagina'
+
+type IOSBodyTemperatureSensorLocation =
+  | 'other'
+  | 'armpit'
+  | 'body'
+  | 'ear'
+  | 'finger'
+  | 'gastro_intestinal'
+  | 'mouth'
+  | 'rectum'
+  | 'toe'
+  | 'ear_drum'
+  | 'temporal_artery'
+  | 'forehead'
 ```
 
-Android maps a Health Connect `BodyTemperatureRecord` one-to-one; iOS stores an `HKQuantitySample` in `HKUnit.degreeCelsius()`. Health Connect's `measurementLocation` and HealthKit's `HKMetadataKeyBodyTemperatureSensorLocation` are intentionally not modeled yet — tracked in [#73](https://github.com/AdrianCD101/react-native-nitro-health/issues/73), where they are the strongest candidate so far for promotion to a typed portable field (8 of 10 values map exactly across platforms). Android writes store the explicit `MEASUREMENT_LOCATION_UNKNOWN` constant. Body temperature statistics are not supported by `readStatistics()`.
+Android maps a Health Connect `BodyTemperatureRecord` one-to-one; iOS stores an `HKQuantitySample` in `HKUnit.degreeCelsius()`. Measurement location is preserved through typed platform scopes because the native value sets overlap but are not identical: use `metadata.android.measurementLocation` for Health Connect and `metadata.ios.sensorLocation` for HealthKit. Omitted Android values use `unknown`; omitted iOS values attach no sensor-location metadata. Body temperature statistics are not supported by `readStatistics()`.
+
+```ts
+await NitroHealth.saveBodyTemperature([
+  {
+    date: new Date(),
+    celsius: 37.2,
+    metadata: {
+      android: { measurementLocation: 'mouth' },
+      ios: { sensorLocation: 'mouth' },
+    },
+  },
+])
+```
 
 ### Respiratory Rate
 
@@ -538,10 +579,11 @@ One `BasalBodyTemperatureSample` carries the reading in degrees Celsius (°F = �
 interface BasalBodyTemperatureSample extends HealthSample {
   date: Date
   celsius: number
+  metadata?: BodyTemperatureMetadata
 }
 ```
 
-Android maps a Health Connect `BasalBodyTemperatureRecord` one-to-one; iOS stores an `HKQuantitySample` in `HKUnit.degreeCelsius()`. Like body temperature, Health Connect's `measurementLocation` is intentionally not modeled yet — tracked in [#73](https://github.com/AdrianCD101/react-native-nitro-health/issues/73); Android writes store the explicit `MEASUREMENT_LOCATION_UNKNOWN` constant. Basal body temperature statistics are not supported by `readStatistics()`.
+Android maps a Health Connect `BasalBodyTemperatureRecord` one-to-one; iOS stores an `HKQuantitySample` in `HKUnit.degreeCelsius()`. It uses the same typed `BodyTemperatureMetadata` contract as body temperature for reads, writes, and change upserts. Basal body temperature statistics are not supported by `readStatistics()`.
 
 ### VO2 Max
 
@@ -554,7 +596,7 @@ interface Vo2MaxSample extends HealthSample {
 }
 ```
 
-Android maps a Health Connect `Vo2MaxRecord` one-to-one (its `vo2MillilitersPerMinuteKilogram` field is the same unit); iOS stores an `HKQuantitySample` in `ml/(kg·min)`, so neither platform converts the value in JavaScript. The measurement method (Health Connect's `measurementMethod`, HealthKit's `HKMetadataKeyVO2MaxTestType`) is intentionally not modeled — the two enums do not map cleanly and are deferred to metadata passthrough like [#69](https://github.com/AdrianCD101/react-native-nitro-health/issues/69)/[#70](https://github.com/AdrianCD101/react-native-nitro-health/issues/70)/[#73](https://github.com/AdrianCD101/react-native-nitro-health/issues/73); Android writes store the explicit `MEASUREMENT_METHOD_OTHER` constant. VO2 max statistics are not supported by `readStatistics()`.
+Android maps a Health Connect `Vo2MaxRecord` one-to-one (its `vo2MillilitersPerMinuteKilogram` field is the same unit); iOS stores an `HKQuantitySample` in `ml/(kg·min)`, so neither platform converts the value in JavaScript. The measurement method (Health Connect's `measurementMethod`, HealthKit's `HKMetadataKeyVO2MaxTestType`) is intentionally not modeled — the two enums do not map cleanly and are deferred to metadata passthrough like [#69](https://github.com/AdrianCD101/react-native-nitro-health/issues/69)/[#70](https://github.com/AdrianCD101/react-native-nitro-health/issues/70); Android writes store the explicit `MEASUREMENT_METHOD_OTHER` constant. VO2 max statistics are not supported by `readStatistics()`.
 
 ### Heart Rate Variability
 

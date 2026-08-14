@@ -10,6 +10,10 @@
 #include <fbjni/fbjni.h>
 #include "NativeBodyTemperatureSampleInput.hpp"
 
+#include "JNativeAndroidBodyTemperatureMeasurementLocation.hpp"
+#include "JNativeIOSBodyTemperatureSensorLocation.hpp"
+#include "NativeAndroidBodyTemperatureMeasurementLocation.hpp"
+#include "NativeIOSBodyTemperatureSensorLocation.hpp"
 #include <optional>
 #include <string>
 
@@ -36,6 +40,10 @@ namespace margelo::nitro::nitrohealth {
       double timeMs = this->getFieldValue(fieldTimeMs);
       static const auto fieldCelsius = clazz->getField<double>("celsius");
       double celsius = this->getFieldValue(fieldCelsius);
+      static const auto fieldAndroidMeasurementLocation = clazz->getField<JNativeAndroidBodyTemperatureMeasurementLocation>("androidMeasurementLocation");
+      jni::local_ref<JNativeAndroidBodyTemperatureMeasurementLocation> androidMeasurementLocation = this->getFieldValue(fieldAndroidMeasurementLocation);
+      static const auto fieldIosSensorLocation = clazz->getField<JNativeIOSBodyTemperatureSensorLocation>("iosSensorLocation");
+      jni::local_ref<JNativeIOSBodyTemperatureSensorLocation> iosSensorLocation = this->getFieldValue(fieldIosSensorLocation);
       static const auto fieldSyncId = clazz->getField<jni::JString>("syncId");
       jni::local_ref<jni::JString> syncId = this->getFieldValue(fieldSyncId);
       static const auto fieldSyncVersion = clazz->getField<jni::JDouble>("syncVersion");
@@ -43,6 +51,8 @@ namespace margelo::nitro::nitrohealth {
       return NativeBodyTemperatureSampleInput(
         timeMs,
         celsius,
+        androidMeasurementLocation != nullptr ? std::make_optional(androidMeasurementLocation->toCpp()) : std::nullopt,
+        iosSensorLocation != nullptr ? std::make_optional(iosSensorLocation->toCpp()) : std::nullopt,
         syncId != nullptr ? std::make_optional(syncId->toStdString()) : std::nullopt,
         syncVersion != nullptr ? std::make_optional(syncVersion->value()) : std::nullopt
       );
@@ -54,13 +64,15 @@ namespace margelo::nitro::nitrohealth {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeBodyTemperatureSampleInput::javaobject> fromCpp(const NativeBodyTemperatureSampleInput& value) {
-      using JSignature = JNativeBodyTemperatureSampleInput(double, double, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JDouble>);
+      using JSignature = JNativeBodyTemperatureSampleInput(double, double, jni::alias_ref<JNativeAndroidBodyTemperatureMeasurementLocation>, jni::alias_ref<JNativeIOSBodyTemperatureSensorLocation>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JDouble>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
         clazz,
         value.timeMs,
         value.celsius,
+        value.androidMeasurementLocation.has_value() ? JNativeAndroidBodyTemperatureMeasurementLocation::fromCpp(value.androidMeasurementLocation.value()) : nullptr,
+        value.iosSensorLocation.has_value() ? JNativeIOSBodyTemperatureSensorLocation::fromCpp(value.iosSensorLocation.value()) : nullptr,
         value.syncId.has_value() ? jni::make_jstring(value.syncId.value()) : nullptr,
         value.syncVersion.has_value() ? jni::JDouble::valueOf(value.syncVersion.value()) : nullptr
       );

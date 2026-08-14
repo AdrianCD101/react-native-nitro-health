@@ -211,6 +211,8 @@ describe('NitroHealth breadth data types contract', () => {
             ...nativeRecordMetadata('bt-record', 'com.example.thermometer', 'Example Thermometer'),
             timeMs,
             celsius: 36.6,
+            androidMeasurementLocation: 'mouth',
+            iosSensorLocation: 'earDrum',
           },
         ],
       })
@@ -228,6 +230,10 @@ describe('NitroHealth breadth data types contract', () => {
       expect(result.samples[0].date).toBeInstanceOf(Date)
       expect(result.samples[0].date.getTime()).toBe(timeMs)
       expect(result.samples[0].celsius).toBe(36.6)
+      expect(result.samples[0].metadata).toEqual({
+        android: { measurementLocation: 'mouth' },
+        ios: { sensorLocation: 'ear_drum' },
+      })
       expect(result.samples[0].origin).toEqual({
         identifier: 'com.example.thermometer',
         displayName: 'Example Thermometer',
@@ -351,6 +357,7 @@ describe('NitroHealth breadth data types contract', () => {
             ...nativeRecordMetadata('bbt-record', 'com.example.thermometer', 'Example Thermometer'),
             timeMs,
             celsius: 36.4,
+            androidMeasurementLocation: 'wrist',
           },
         ],
       })
@@ -368,6 +375,9 @@ describe('NitroHealth breadth data types contract', () => {
       expect(result.samples[0].date).toBeInstanceOf(Date)
       expect(result.samples[0].date.getTime()).toBe(timeMs)
       expect(result.samples[0].celsius).toBe(36.4)
+      expect(result.samples[0].metadata).toEqual({
+        android: { measurementLocation: 'wrist' },
+      })
       expect(result.samples[0].origin).toEqual({
         identifier: 'com.example.thermometer',
         displayName: 'Example Thermometer',
@@ -807,6 +817,47 @@ describe('NitroHealth breadth data types contract', () => {
       ])
     })
 
+    it('maps both platform metadata scopes through the native transport', async () => {
+      const date = new Date('2026-01-01T09:00:00.000Z')
+      mockNitroHealth.saveBodyTemperature.mockResolvedValue(undefined)
+
+      await NitroHealth.saveBodyTemperature([
+        {
+          date,
+          celsius: 36.6,
+          metadata: {
+            android: { measurementLocation: 'temporal_artery' },
+            ios: { sensorLocation: 'gastro_intestinal' },
+          },
+        },
+      ])
+
+      expect(mockNitroHealth.saveBodyTemperature).toHaveBeenCalledWith([
+        {
+          timeMs: date.getTime(),
+          celsius: 36.6,
+          androidMeasurementLocation: 'temporalArtery',
+          iosSensorLocation: 'gastroIntestinal',
+        },
+      ])
+    })
+
+    it('rejects unsupported location metadata before crossing the native boundary', async () => {
+      const date = new Date('2026-01-01T09:00:00.000Z')
+
+      await expect(
+        NitroHealth.saveBodyTemperature([
+          {
+            date,
+            celsius: 36.6,
+            metadata: { ios: { sensorLocation: 'neck' } },
+          } as never,
+        ])
+      ).rejects.toThrow('samples[0]: metadata.ios.sensorLocation is unsupported')
+
+      expect(mockNitroHealth.saveBodyTemperature).not.toHaveBeenCalled()
+    })
+
     it('rejects celsius outside 20-45 before crossing the native boundary', async () => {
       const date = new Date('2026-01-01T09:00:00.000Z')
 
@@ -984,6 +1035,31 @@ describe('NitroHealth breadth data types contract', () => {
 
       expect(mockNitroHealth.saveBasalBodyTemperature).toHaveBeenCalledWith([
         { timeMs: date.getTime(), celsius: 36.4 },
+      ])
+    })
+
+    it('maps temperature metadata through the same native transport', async () => {
+      const date = new Date('2026-01-01T06:30:00.000Z')
+      mockNitroHealth.saveBasalBodyTemperature.mockResolvedValue(undefined)
+
+      await NitroHealth.saveBasalBodyTemperature([
+        {
+          date,
+          celsius: 36.4,
+          metadata: {
+            android: { measurementLocation: 'wrist' },
+            ios: { sensorLocation: 'body' },
+          },
+        },
+      ])
+
+      expect(mockNitroHealth.saveBasalBodyTemperature).toHaveBeenCalledWith([
+        {
+          timeMs: date.getTime(),
+          celsius: 36.4,
+          androidMeasurementLocation: 'wrist',
+          iosSensorLocation: 'body',
+        },
       ])
     })
 

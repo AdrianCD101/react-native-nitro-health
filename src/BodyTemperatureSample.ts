@@ -1,3 +1,4 @@
+import type { BodyTemperatureMetadata } from './BodyTemperatureMetadata'
 import type { HealthSample } from './HealthSample'
 
 /** Body temperature sample returned by {@linkcode NitroHealth.readBodyTemperature}. */
@@ -6,4 +7,6 @@ export interface BodyTemperatureSample extends HealthSample {
   date: Date
   /** Body temperature in degrees Celsius (°F = °C × 9/5 + 32). */
   celsius: number
+  /** Platform-scoped fields retained by the native health store. */
+  metadata?: BodyTemperatureMetadata
 }

@@ -26,6 +26,12 @@ data class NativeBodyTemperatureSampleInput(
   val celsius: Double,
   @DoNotStrip
   @Keep
+  val androidMeasurementLocation: NativeAndroidBodyTemperatureMeasurementLocation?,
+  @DoNotStrip
+  @Keep
+  val iosSensorLocation: NativeIOSBodyTemperatureSensorLocation?,
+  @DoNotStrip
+  @Keep
   val syncId: String?,
   @DoNotStrip
   @Keep
@@ -38,6 +44,8 @@ data class NativeBodyTemperatureSampleInput(
     if (other !is NativeBodyTemperatureSampleInput) return false
     return Objects.deepEquals(this.timeMs, other.timeMs)
       && Objects.deepEquals(this.celsius, other.celsius)
+      && Objects.deepEquals(this.androidMeasurementLocation, other.androidMeasurementLocation)
+      && Objects.deepEquals(this.iosSensorLocation, other.iosSensorLocation)
       && Objects.deepEquals(this.syncId, other.syncId)
       && Objects.deepEquals(this.syncVersion, other.syncVersion)
   }
@@ -46,6 +54,8 @@ data class NativeBodyTemperatureSampleInput(
     return arrayOf<Any?>(
       timeMs,
       celsius,
+      androidMeasurementLocation,
+      iosSensorLocation,
       syncId,
       syncVersion
     ).contentDeepHashCode()
@@ -59,8 +69,8 @@ data class NativeBodyTemperatureSampleInput(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(timeMs: Double, celsius: Double, syncId: String?, syncVersion: Double?): NativeBodyTemperatureSampleInput {
-      return NativeBodyTemperatureSampleInput(timeMs, celsius, syncId, syncVersion)
+    private fun fromCpp(timeMs: Double, celsius: Double, androidMeasurementLocation: NativeAndroidBodyTemperatureMeasurementLocation?, iosSensorLocation: NativeIOSBodyTemperatureSensorLocation?, syncId: String?, syncVersion: Double?): NativeBodyTemperatureSampleInput {
+      return NativeBodyTemperatureSampleInput(timeMs, celsius, androidMeasurementLocation, iosSensorLocation, syncId, syncVersion)
     }
   }
 }
