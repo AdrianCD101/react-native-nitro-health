@@ -10,7 +10,10 @@
   "bugs": "https://github.com/AdrianCD101/react-native-nitro-health/issues",
   "license": "MIT",
   "author": "Adrian White",
-  "repository": "https://github.com/AdrianCD101/react-native-nitro-health.git",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AdrianCD101/react-native-nitro-health.git"
+  },
   "source": "src/index",
   "workspaces": [
     "example"
