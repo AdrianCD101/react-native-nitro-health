@@ -298,7 +298,7 @@ interface HealthDeviceInfo {
 
 Health Connect supplies `metadata.device`, including a stable device category, while HealthKit supplies `HKDevice.manufacturer` and `HKDevice.model` but no canonical category. Consequently, `device.type` is normally absent on iOS. The supported categories are `unknown`, `watch`, `phone`, `scale`, `ring`, `head-mounted`, `fitness-band`, `chest-strap`, and `smart-display`; future or unsupported Health Connect categories fold to `unknown`.
 
-Every top-level save input accepts optional `device` provenance. Android preserves type, manufacturer, and model; a missing Android type becomes `unknown`. iOS preserves manufacturer and model but cannot preserve the portable type, so a type-only device is omitted on iOS. `origin` is not writable and still identifies the app performing the save, even when that app imports data from another sensor.
+Every top-level save input accepts optional `device` provenance. Android preserves type, manufacturer, and model; a missing Android type becomes `unknown` when manufacturer or model provides useful provenance. An unknown-only Android device is omitted, whether it came from an explicit `{ type: 'unknown' }` input or from Health Connect's internal placeholder for an active or automatic record. iOS preserves manufacturer and model but cannot preserve the portable type, so a type-only device is omitted on iOS. `origin` is not writable and still identifies the app performing the save, even when that app imports data from another sensor.
 
 `device` is omitted when the service exposes no useful projected fields. Android flattened heart-rate readings and sleep stages inherit their parent record's device. An iOS sleep session applies one supplied device to the envelope and every independently stored stage. Device values are caller-asserted provenance, not verified or stable identifiers: do not infer a missing type from model text or use manufacturer/model as a database key.
 
@@ -1227,7 +1227,7 @@ module.exports = {
 
 Three profiles are available:
 
-- `polling` (default): available service, app-owned polling, background/history access `not-granted`, direct revocation, Health Connect-style recording-method and device preservation, and distance writes stored as `activity-unspecified`.
+- `polling` (default): available service, app-owned polling, background/history access `not-granted`, direct revocation, Health Connect-style recording-method and useful device preservation with unknown-only devices omitted, and distance writes stored as `activity-unspecified`.
 - `observer`: available service, observer frequencies, included background/history access, observer subscriptions, manual permission management/revocation, HealthKit-style active/automatic degradation to `unknown`, manufacturer/model-only mock device provenance, and walking/running distance storage.
 - `unavailable`: `not-supported` availability, unsupported additional access, unavailable permission/background outcomes, and polling capability shape.
 

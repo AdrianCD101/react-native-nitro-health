@@ -72,10 +72,32 @@ describe('NitroHealth Jest mock', () => {
       'actively-recorded',
     ])
     expect(page.samples.map(({ device }) => device)).toEqual([
-      { type: 'unknown' },
       undefined,
       undefined,
-      { type: 'unknown' },
+      undefined,
+      undefined,
+    ])
+  })
+
+  it('omits unknown-only Android devices and preserves useful unknown device details', async () => {
+    await NitroHealth.saveSteps([
+      { ...interval, count: 1, recordingMethod: 'actively-recorded' },
+      {
+        ...interval,
+        count: 2,
+        recordingMethod: 'automatically-recorded',
+        device: { type: 'unknown' },
+      },
+      { ...interval, count: 3, device: { manufacturer: 'Example' } },
+      { ...interval, count: 4, device: { model: 'Sensor' } },
+    ])
+
+    const page = await NitroHealth.readSteps(range)
+    expect(page.samples.map(({ device }) => device)).toEqual([
+      undefined,
+      undefined,
+      { type: 'unknown', manufacturer: 'Example' },
+      { type: 'unknown', model: 'Sensor' },
     ])
   })
 

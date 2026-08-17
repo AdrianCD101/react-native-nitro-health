@@ -8,6 +8,7 @@ import com.margelo.nitro.nitrohealth.NativeHealthDeviceType
 import com.margelo.nitro.nitrohealth.NativeHealthRecordingMethod
 import java.time.Instant
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Test
 
 class HealthConnectChangeMappingTest {
@@ -39,5 +40,25 @@ class HealthConnectChangeMappingTest {
         assertEquals(NativeHealthDeviceType.PHONE, sample.sampleMetadata.deviceType)
         assertEquals("Example Manufacturer", sample.sampleMetadata.deviceManufacturer)
         assertEquals("Example Model", sample.sampleMetadata.deviceModel)
+    }
+
+    @Test
+    fun upsertionOmitsUnknownOnlyDevice() {
+        val startTime = Instant.parse("2026-01-01T00:00:00Z")
+        val record = StepsRecord(
+            startTime = startTime,
+            startZoneOffset = null,
+            endTime = startTime.plusSeconds(60),
+            endZoneOffset = null,
+            count = 10,
+            metadata = Metadata.autoRecorded(device = Device(type = Device.TYPE_UNKNOWN))
+        )
+
+        val change = makeNativeHealthChange(UpsertionChange(record), "steps", StepsRecord::class)
+        val sampleMetadata = change.stepSamples!!.single().sampleMetadata
+
+        assertNull(sampleMetadata.deviceType)
+        assertNull(sampleMetadata.deviceManufacturer)
+        assertNull(sampleMetadata.deviceModel)
     }
 }

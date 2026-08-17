@@ -85,8 +85,35 @@ class SleepSessionRecordMappingTest {
         assertNull(samples[0].stage)
     }
 
+    @Test
+    fun envelopeAndChildrenOmitUnknownOnlyDevice() {
+        val stageStart = Instant.parse("2026-01-11T04:00:00Z")
+        val stageEnd = Instant.parse("2026-01-11T06:30:00Z")
+        val record = makeRecord(
+            stages = listOf(
+                SleepSessionRecord.Stage(
+                    startTime = stageStart,
+                    endTime = stageEnd,
+                    stage = SleepSessionRecord.STAGE_TYPE_LIGHT
+                )
+            ),
+            device = Device(type = Device.TYPE_UNKNOWN)
+        )
+
+        makeNativeSleepSamples(record).forEach {
+            assertNull(it.sampleMetadata.deviceType)
+            assertNull(it.sampleMetadata.deviceManufacturer)
+            assertNull(it.sampleMetadata.deviceModel)
+        }
+    }
+
     private fun makeRecord(
-        stages: List<SleepSessionRecord.Stage>
+        stages: List<SleepSessionRecord.Stage>,
+        device: Device = Device(
+            type = Device.TYPE_RING,
+            manufacturer = "Example Manufacturer",
+            model = "Example Model"
+        )
     ): SleepSessionRecord {
         return SleepSessionRecord(
             startTime = sessionStart,
@@ -94,13 +121,7 @@ class SleepSessionRecordMappingTest {
             endTime = sessionEnd,
             endZoneOffset = null,
             stages = stages,
-            metadata = Metadata.autoRecorded(
-                device = Device(
-                    type = Device.TYPE_RING,
-                    manufacturer = "Example Manufacturer",
-                    model = "Example Model"
-                )
-            )
+            metadata = Metadata.autoRecorded(device = device)
         )
     }
 }

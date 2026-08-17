@@ -7,6 +7,7 @@ import com.margelo.nitro.nitrohealth.NativeHealthDeviceType
 import com.margelo.nitro.nitrohealth.NativeHealthRecordingMethod
 import java.time.Instant
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Test
 
 class HeartRateRecordMappingTest {
@@ -42,6 +43,25 @@ class HeartRateRecordMappingTest {
             assertEquals(NativeHealthDeviceType.WATCH, it.sampleMetadata.deviceType)
             assertEquals("Example Manufacturer", it.sampleMetadata.deviceManufacturer)
             assertEquals("Example Model", it.sampleMetadata.deviceModel)
+        }
+    }
+
+    @Test
+    fun childrenOmitUnknownOnlyParentDevice() {
+        val startTime = Instant.parse("2026-01-01T00:00:00Z")
+        val record = HeartRateRecord(
+            startTime = startTime,
+            startZoneOffset = null,
+            endTime = startTime.plusSeconds(60),
+            endZoneOffset = null,
+            samples = listOf(HeartRateRecord.Sample(startTime, 60)),
+            metadata = Metadata.activelyRecorded(device = Device(type = Device.TYPE_UNKNOWN))
+        )
+
+        makeNativeHeartRateSamples(record).forEach {
+            assertNull(it.sampleMetadata.deviceType)
+            assertNull(it.sampleMetadata.deviceManufacturer)
+            assertNull(it.sampleMetadata.deviceModel)
         }
     }
 }
