@@ -20,6 +20,7 @@ func makeSleepCategorySamples(
         if let wasUserEntered = session.recordingMethod?.healthKitWasUserEntered {
             metadata[HKMetadataKeyWasUserEntered] = wasUserEntered
         }
+        let device = session.device?.healthKitDevice
         let indexedStages = session.stages.enumerated().map { stageIndex, stage in
             (
                 stageIndex: stageIndex,
@@ -43,6 +44,7 @@ func makeSleepCategorySamples(
             value: HKCategoryValueSleepAnalysis.inBed.rawValue,
             start: startDate,
             end: endDate,
+            device: device,
             metadata: metadata
         )
         var samples = [envelope]
@@ -67,6 +69,7 @@ func makeSleepCategorySamples(
                     value: try healthKitSleepStageValue(indexedStage.stage.stage),
                     start: indexedStage.startDate,
                     end: indexedStage.endDate,
+                    device: device,
                     metadata: metadata
                 )
             )

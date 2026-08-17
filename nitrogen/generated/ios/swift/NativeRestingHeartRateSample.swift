@@ -18,8 +18,14 @@ public extension NativeRestingHeartRateSample {
   /**
    * Create a new instance of `NativeRestingHeartRateSample`.
    */
-  init(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, recordingMethod: NativeHealthRecordingMethod, timeMs: Double, bpm: Double) {
-    self.init(identity, origin, recordingMethod, timeMs, bpm)
+  init(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, device: NativeHealthDeviceInfo?, recordingMethod: NativeHealthRecordingMethod, timeMs: Double, bpm: Double) {
+    self.init(identity, origin, { () -> bridge.std__optional_NativeHealthDeviceInfo_ in
+      if let __unwrappedValue = device {
+        return bridge.create_std__optional_NativeHealthDeviceInfo_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), recordingMethod, timeMs, bpm)
   }
 
   @inline(__always)
@@ -30,6 +36,11 @@ public extension NativeRestingHeartRateSample {
   @inline(__always)
   var origin: NativeHealthDataOrigin {
     return self.__origin
+  }
+  
+  @inline(__always)
+  var device: NativeHealthDeviceInfo? {
+    return self.__device.value
   }
   
   @inline(__always)

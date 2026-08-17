@@ -287,6 +287,7 @@ describe('NitroHealth idempotent saves (native)', () => {
         {
           ...idempotentInterval,
           count: 720_001,
+          device: { type: 'watch', manufacturer: 'Nitro Health', model: 'Initial Sensor' },
           sync: { id: 'nitro-health-harness-higher-version', version: 1 },
         },
       ])
@@ -302,6 +303,7 @@ describe('NitroHealth idempotent saves (native)', () => {
         {
           ...idempotentInterval,
           count: 720_002,
+          device: { type: 'phone', manufacturer: 'Nitro Health', model: 'Replacement Sensor' },
           sync: { id: 'nitro-health-harness-higher-version', version: 2 },
         },
       ])
@@ -315,6 +317,9 @@ describe('NitroHealth idempotent saves (native)', () => {
       }
 
       expect(replacementSample.count).toBe(720_002)
+      expect(replacementSample.device?.manufacturer).toBe('Nitro Health')
+      expect(replacementSample.device?.model).toBe('Replacement Sensor')
+      expect(replacementSample.device?.type).toBe(Platform.OS === 'android' ? 'phone' : undefined)
       if (Platform.OS === 'android') {
         expect(recordId(replacementSample.identity)).toBe(recordId(initialSample.identity))
       } else if (Platform.OS === 'ios') {
@@ -335,6 +340,7 @@ describe('NitroHealth idempotent saves (native)', () => {
         {
           ...idempotentInterval,
           count: 730_002,
+          device: { type: 'watch', manufacturer: 'Nitro Health', model: 'Current Sensor' },
           recordingMethod: 'manual',
           sync: { id: 'nitro-health-harness-lower-version', version: 2 },
         },
@@ -352,6 +358,7 @@ describe('NitroHealth idempotent saves (native)', () => {
         {
           ...idempotentInterval,
           count: 730_001,
+          device: { type: 'phone', manufacturer: 'Nitro Health', model: 'Stale Sensor' },
           recordingMethod: 'automatically-recorded',
           sync: { id: 'nitro-health-harness-lower-version', version: 1 },
         },
@@ -361,6 +368,11 @@ describe('NitroHealth idempotent saves (native)', () => {
 
       expect(afterLowerVersion).toHaveLength(1)
       expect(afterLowerVersion[0]?.count).toBe(730_002)
+      expect(afterLowerVersion[0]?.device?.manufacturer).toBe('Nitro Health')
+      expect(afterLowerVersion[0]?.device?.model).toBe('Current Sensor')
+      expect(afterLowerVersion[0]?.device?.type).toBe(
+        Platform.OS === 'android' ? 'watch' : undefined
+      )
       expect(afterLowerVersion[0]?.recordingMethod).toBe('manual')
       expect(lowerVersionResult.storedRecordingMethods).toEqual(['manual'])
       expect(afterLowerVersion[0] ? recordId(afterLowerVersion[0].identity) : undefined).toBe(

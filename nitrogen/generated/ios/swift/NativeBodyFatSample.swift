@@ -18,8 +18,14 @@ public extension NativeBodyFatSample {
   /**
    * Create a new instance of `NativeBodyFatSample`.
    */
-  init(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, recordingMethod: NativeHealthRecordingMethod, timeMs: Double, percentage: Double) {
-    self.init(identity, origin, recordingMethod, timeMs, percentage)
+  init(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, device: NativeHealthDeviceInfo?, recordingMethod: NativeHealthRecordingMethod, timeMs: Double, percentage: Double) {
+    self.init(identity, origin, { () -> bridge.std__optional_NativeHealthDeviceInfo_ in
+      if let __unwrappedValue = device {
+        return bridge.create_std__optional_NativeHealthDeviceInfo_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), recordingMethod, timeMs, percentage)
   }
 
   @inline(__always)
@@ -30,6 +36,11 @@ public extension NativeBodyFatSample {
   @inline(__always)
   var origin: NativeHealthDataOrigin {
     return self.__origin
+  }
+  
+  @inline(__always)
+  var device: NativeHealthDeviceInfo? {
+    return self.__device.value
   }
   
   @inline(__always)

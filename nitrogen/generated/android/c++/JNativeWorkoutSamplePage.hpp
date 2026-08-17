@@ -11,6 +11,8 @@
 #include "NativeWorkoutSamplePage.hpp"
 
 #include "JNativeHealthDataOrigin.hpp"
+#include "JNativeHealthDeviceInfo.hpp"
+#include "JNativeHealthDeviceType.hpp"
 #include "JNativeHealthMetricValue.hpp"
 #include "JNativeHealthMetricValueStatus.hpp"
 #include "JNativeHealthRecordingMethod.hpp"
@@ -22,6 +24,8 @@
 #include "JNativeWorkoutActivityStatus.hpp"
 #include "JNativeWorkoutSample.hpp"
 #include "NativeHealthDataOrigin.hpp"
+#include "NativeHealthDeviceInfo.hpp"
+#include "NativeHealthDeviceType.hpp"
 #include "NativeHealthMetricValue.hpp"
 #include "NativeHealthMetricValueStatus.hpp"
 #include "NativeHealthRecordingMethod.hpp"

@@ -13,6 +13,7 @@ internal fun makeNativeWorkoutSample(record: ExerciseSessionRecord): NativeWorko
     return NativeWorkoutSample(
         identity = makeRecordIdentity(record.metadata.id),
         origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
+        device = makeNativeHealthDeviceInfo(record.metadata.device),
         recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
         startTimeMs = record.startTime.toEpochMilli().toDouble(),
         endTimeMs = record.endTime.toEpochMilli().toDouble(),

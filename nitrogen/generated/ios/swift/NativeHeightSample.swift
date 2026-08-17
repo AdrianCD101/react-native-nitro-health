@@ -18,8 +18,14 @@ public extension NativeHeightSample {
   /**
    * Create a new instance of `NativeHeightSample`.
    */
-  init(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, recordingMethod: NativeHealthRecordingMethod, timeMs: Double, meters: Double) {
-    self.init(identity, origin, recordingMethod, timeMs, meters)
+  init(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, device: NativeHealthDeviceInfo?, recordingMethod: NativeHealthRecordingMethod, timeMs: Double, meters: Double) {
+    self.init(identity, origin, { () -> bridge.std__optional_NativeHealthDeviceInfo_ in
+      if let __unwrappedValue = device {
+        return bridge.create_std__optional_NativeHealthDeviceInfo_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), recordingMethod, timeMs, meters)
   }
 
   @inline(__always)
@@ -30,6 +36,11 @@ public extension NativeHeightSample {
   @inline(__always)
   var origin: NativeHealthDataOrigin {
     return self.__origin
+  }
+  
+  @inline(__always)
+  var device: NativeHealthDeviceInfo? {
+    return self.__device.value
   }
   
   @inline(__always)

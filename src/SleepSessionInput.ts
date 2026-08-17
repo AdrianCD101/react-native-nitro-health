@@ -1,3 +1,4 @@
+import type { HealthDeviceInfo } from './HealthDeviceInfo'
 import type { HealthRecordingMethod } from './HealthRecordingMethod'
 import type { SleepSessionStageInput } from './SleepSessionStageInput'
 
@@ -11,6 +12,8 @@ export interface SleepSessionInput {
   stages?: SleepSessionStageInput[]
   /** IANA time-zone identifier. Defaults to the device's current time zone. */
   timeZone?: string
+  /** Physical device asserted as having generated this session and its stages. */
+  device?: HealthDeviceInfo
   /**
    * Requested recording method. On iOS, active and automatic recording degrade to `unknown`.
    * @default 'unknown'

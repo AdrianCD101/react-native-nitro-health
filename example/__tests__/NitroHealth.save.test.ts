@@ -101,6 +101,64 @@ describe('NitroHealth save contract', () => {
     expect(mockNitroHealth.saveSteps).not.toHaveBeenCalled()
   })
 
+  it('maps writable device provenance and every portable device type', async () => {
+    const startDate = new Date('2026-01-01T09:00:00.000Z')
+    const endDate = new Date('2026-01-01T09:30:00.000Z')
+    const mappings = [
+      ['unknown', 'unknown'],
+      ['watch', 'watch'],
+      ['phone', 'phone'],
+      ['scale', 'scale'],
+      ['ring', 'ring'],
+      ['head-mounted', 'headMounted'],
+      ['fitness-band', 'fitnessBand'],
+      ['chest-strap', 'chestStrap'],
+      ['smart-display', 'smartDisplay'],
+    ] as const
+
+    await NitroHealth.saveSteps(
+      mappings.map(([type], index) => ({
+        startDate,
+        endDate,
+        count: index + 1,
+        device: { type, manufacturer: 'Example', model: 'Sensor' },
+      }))
+    )
+
+    expect(mockNitroHealth.saveSteps.mock.calls[0]?.[0].map(({ device }) => device)).toEqual(
+      mappings.map(([, type]) => ({ type, manufacturer: 'Example', model: 'Sensor' }))
+    )
+  })
+
+  it('rejects malformed writable device provenance before crossing native', async () => {
+    const startDate = new Date('2026-01-01T09:00:00.000Z')
+    const endDate = new Date('2026-01-01T09:30:00.000Z')
+    const save = (device: unknown) =>
+      NitroHealth.saveSteps([{ startDate, endDate, count: 100, device } as never])
+
+    await expect(save(null)).rejects.toThrow('samples[0]: device must be an object')
+    await expect(save([])).rejects.toThrow('samples[0]: device must be an object')
+    await expect(save({ type: 'thermometer' })).rejects.toThrow(
+      "samples[0]: unsupported device type 'thermometer'"
+    )
+    await expect(save({ manufacturer: '  ' })).rejects.toThrow(
+      'samples[0]: device.manufacturer must be a non-empty string'
+    )
+    await expect(save({ serialNumber: 'secret' })).rejects.toThrow(
+      'samples[0]: device.serialNumber is unsupported'
+    )
+    expect(mockNitroHealth.saveSteps).not.toHaveBeenCalled()
+  })
+
+  it('normalizes an empty writable device to omission', async () => {
+    const startDate = new Date('2026-01-01T09:00:00.000Z')
+    const endDate = new Date('2026-01-01T09:30:00.000Z')
+
+    await NitroHealth.saveSteps([{ startDate, endDate, count: 100, device: {} }])
+
+    expect(mockNitroHealth.saveSteps.mock.calls[0]?.[0][0]?.device).toBeUndefined()
+  })
+
   it('saves distance through the Nitro hybrid object', async () => {
     const startDate = new Date('2026-01-01T09:00:00.000Z')
     const endDate = new Date('2026-01-01T09:30:00.000Z')

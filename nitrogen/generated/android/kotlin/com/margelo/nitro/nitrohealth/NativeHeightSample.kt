@@ -26,6 +26,9 @@ data class NativeHeightSample(
   val origin: NativeHealthDataOrigin,
   @DoNotStrip
   @Keep
+  val device: NativeHealthDeviceInfo?,
+  @DoNotStrip
+  @Keep
   val recordingMethod: NativeHealthRecordingMethod,
   @DoNotStrip
   @Keep
@@ -41,6 +44,7 @@ data class NativeHeightSample(
     if (other !is NativeHeightSample) return false
     return Objects.deepEquals(this.identity, other.identity)
       && Objects.deepEquals(this.origin, other.origin)
+      && Objects.deepEquals(this.device, other.device)
       && Objects.deepEquals(this.recordingMethod, other.recordingMethod)
       && Objects.deepEquals(this.timeMs, other.timeMs)
       && Objects.deepEquals(this.meters, other.meters)
@@ -50,6 +54,7 @@ data class NativeHeightSample(
     return arrayOf<Any?>(
       identity,
       origin,
+      device,
       recordingMethod,
       timeMs,
       meters
@@ -64,8 +69,8 @@ data class NativeHeightSample(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, recordingMethod: NativeHealthRecordingMethod, timeMs: Double, meters: Double): NativeHeightSample {
-      return NativeHeightSample(identity, origin, recordingMethod, timeMs, meters)
+    private fun fromCpp(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, device: NativeHealthDeviceInfo?, recordingMethod: NativeHealthRecordingMethod, timeMs: Double, meters: Double): NativeHeightSample {
+      return NativeHeightSample(identity, origin, device, recordingMethod, timeMs, meters)
     }
   }
 }

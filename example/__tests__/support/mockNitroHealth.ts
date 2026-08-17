@@ -1,5 +1,6 @@
 import type { NitroHealth as NitroHealthSpec } from '../../../src/specs/nitro-health.nitro'
 import type { NativeHealthDataOrigin } from '../../../src/NativeHealthDataOrigin'
+import type { NativeHealthDeviceInfo } from '../../../src/NativeHealthDeviceInfo'
 import type { NativeHealthRecordingMethod } from '../../../src/NativeHealthRecordingMethod'
 import type { NativeHealthSampleIdentity } from '../../../src/NativeHealthSampleIdentity'
 
@@ -8,6 +9,7 @@ type NativeMethod = (...args: any[]) => any
 interface NativeRecordMetadata {
   identity: NativeHealthSampleIdentity
   origin: NativeHealthDataOrigin
+  device?: NativeHealthDeviceInfo
   recordingMethod: NativeHealthRecordingMethod
 }
 
@@ -141,11 +143,13 @@ export function nativeRecordMetadata(
   id: string,
   identifier = 'com.example.health',
   displayName?: string,
-  recordingMethod: NativeHealthRecordingMethod = 'unknown'
+  recordingMethod: NativeHealthRecordingMethod = 'unknown',
+  device?: NativeHealthDeviceInfo
 ): NativeRecordMetadata {
   return {
     identity: { kind: 'record' as const, id, recordId: id },
     origin: displayName === undefined ? { identifier } : { identifier, displayName },
+    ...(device === undefined ? {} : { device }),
     recordingMethod,
   }
 }
@@ -155,11 +159,13 @@ export function nativeRecordChildMetadata(
   recordId: string,
   identifier = 'com.example.health',
   displayName?: string,
-  recordingMethod: NativeHealthRecordingMethod = 'unknown'
+  recordingMethod: NativeHealthRecordingMethod = 'unknown',
+  device?: NativeHealthDeviceInfo
 ): NativeRecordMetadata {
   return {
     identity: { kind: 'recordChild' as const, id, recordId },
     origin: displayName === undefined ? { identifier } : { identifier, displayName },
+    ...(device === undefined ? {} : { device }),
     recordingMethod,
   }
 }

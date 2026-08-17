@@ -88,6 +88,7 @@ private fun makeNativeUpsertionChange(record: Record): NativeHealthChange {
                 NativeStepSample(
                     identity = identity,
                     origin = origin,
+                    device = makeNativeHealthDeviceInfo(record.metadata.device),
                     recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
                     startTimeMs = record.startTime.toEpochMilli().toDouble(),
                     endTimeMs = record.endTime.toEpochMilli().toDouble(),
@@ -122,6 +123,7 @@ private fun makeNativeUpsertionChange(record: Record): NativeHealthChange {
                 NativeRespiratoryRateSample(
                     identity = identity,
                     origin = origin,
+                    device = makeNativeHealthDeviceInfo(record.metadata.device),
                     recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
                     timeMs = record.time.toEpochMilli().toDouble(),
                     breathsPerMinute = record.rate
@@ -135,6 +137,7 @@ private fun makeNativeUpsertionChange(record: Record): NativeHealthChange {
                 NativeBodyFatSample(
                     identity = identity,
                     origin = origin,
+                    device = makeNativeHealthDeviceInfo(record.metadata.device),
                     recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
                     timeMs = record.time.toEpochMilli().toDouble(),
                     percentage = record.percentage.value
@@ -148,6 +151,7 @@ private fun makeNativeUpsertionChange(record: Record): NativeHealthChange {
                 NativeLeanBodyMassSample(
                     identity = identity,
                     origin = origin,
+                    device = makeNativeHealthDeviceInfo(record.metadata.device),
                     recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
                     timeMs = record.time.toEpochMilli().toDouble(),
                     kilograms = record.mass.inKilograms
@@ -166,6 +170,7 @@ private fun makeNativeUpsertionChange(record: Record): NativeHealthChange {
                 NativeRestingHeartRateSample(
                     identity = identity,
                     origin = origin,
+                    device = makeNativeHealthDeviceInfo(record.metadata.device),
                     recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
                     timeMs = record.time.toEpochMilli().toDouble(),
                     bpm = record.beatsPerMinute.toDouble()
@@ -179,6 +184,7 @@ private fun makeNativeUpsertionChange(record: Record): NativeHealthChange {
                 NativeHeartRateVariabilitySample(
                     identity = identity,
                     origin = origin,
+                    device = makeNativeHealthDeviceInfo(record.metadata.device),
                     recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
                     timeMs = record.time.toEpochMilli().toDouble(),
                     milliseconds = record.heartRateVariabilityMillis,
@@ -193,6 +199,7 @@ private fun makeNativeUpsertionChange(record: Record): NativeHealthChange {
                 NativeDistanceSample(
                     identity = identity,
                     origin = origin,
+                    device = makeNativeHealthDeviceInfo(record.metadata.device),
                     recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
                     startTimeMs = record.startTime.toEpochMilli().toDouble(),
                     endTimeMs = record.endTime.toEpochMilli().toDouble(),
@@ -208,6 +215,7 @@ private fun makeNativeUpsertionChange(record: Record): NativeHealthChange {
                 NativeActiveEnergyBurnedSample(
                     identity = identity,
                     origin = origin,
+                    device = makeNativeHealthDeviceInfo(record.metadata.device),
                     recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
                     startTimeMs = record.startTime.toEpochMilli().toDouble(),
                     endTimeMs = record.endTime.toEpochMilli().toDouble(),
@@ -222,6 +230,7 @@ private fun makeNativeUpsertionChange(record: Record): NativeHealthChange {
                 NativeHydrationSample(
                     identity = identity,
                     origin = origin,
+                    device = makeNativeHealthDeviceInfo(record.metadata.device),
                     recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
                     startTimeMs = record.startTime.toEpochMilli().toDouble(),
                     endTimeMs = record.endTime.toEpochMilli().toDouble(),
@@ -236,6 +245,7 @@ private fun makeNativeUpsertionChange(record: Record): NativeHealthChange {
                 NativeFloorsClimbedSample(
                     identity = identity,
                     origin = origin,
+                    device = makeNativeHealthDeviceInfo(record.metadata.device),
                     recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
                     startTimeMs = record.startTime.toEpochMilli().toDouble(),
                     endTimeMs = record.endTime.toEpochMilli().toDouble(),
@@ -250,6 +260,7 @@ private fun makeNativeUpsertionChange(record: Record): NativeHealthChange {
                 NativeOxygenSaturationSample(
                     identity = identity,
                     origin = origin,
+                    device = makeNativeHealthDeviceInfo(record.metadata.device),
                     recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
                     timeMs = record.time.toEpochMilli().toDouble(),
                     percentage = record.percentage.value
@@ -263,6 +274,7 @@ private fun makeNativeUpsertionChange(record: Record): NativeHealthChange {
                 NativeHeightSample(
                     identity = identity,
                     origin = origin,
+                    device = makeNativeHealthDeviceInfo(record.metadata.device),
                     recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
                     timeMs = record.time.toEpochMilli().toDouble(),
                     meters = record.height.inMeters
@@ -288,6 +300,7 @@ private fun makeNativeUpsertionChange(record: Record): NativeHealthChange {
                 NativeBodyMassSample(
                     identity = identity,
                     origin = origin,
+                    device = makeNativeHealthDeviceInfo(record.metadata.device),
                     recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
                     startTimeMs = record.time.toEpochMilli().toDouble(),
                     endTimeMs = record.time.toEpochMilli().toDouble(),

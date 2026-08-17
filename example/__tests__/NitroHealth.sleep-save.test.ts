@@ -38,6 +38,7 @@ describe('NitroHealth sleep session save contract', () => {
           startDate: sessionStart,
           endDate: sessionEnd,
           timeZone: 'America/New_York',
+          device: { type: 'watch', manufacturer: 'Example', model: 'Sleep Watch' },
           recordingMethod: 'automatically-recorded',
           stages,
         },
@@ -50,6 +51,7 @@ describe('NitroHealth sleep session save contract', () => {
         startTimeMs: sessionStart.getTime(),
         endTimeMs: sessionEnd.getTime(),
         timeZone: 'America/New_York',
+        device: { type: 'watch', manufacturer: 'Example', model: 'Sleep Watch' },
         recordingMethod: 'automaticallyRecorded',
         stages: [
           {
@@ -168,6 +170,20 @@ describe('NitroHealth sleep session save contract', () => {
         ])
       ).rejects.toThrow('timeZone must be a non-empty IANA time-zone identifier')
     }
+
+    expect(mockNitroHealth.saveSleepSessions).not.toHaveBeenCalled()
+  })
+
+  it('reports the session path for invalid device provenance', async () => {
+    await expect(
+      NitroHealth.saveSleepSessions([
+        {
+          startDate: sessionStart,
+          endDate: sessionEnd,
+          device: { model: '' },
+        },
+      ])
+    ).rejects.toThrow('sessions[0]: device.model must be a non-empty string')
 
     expect(mockNitroHealth.saveSleepSessions).not.toHaveBeenCalled()
   })

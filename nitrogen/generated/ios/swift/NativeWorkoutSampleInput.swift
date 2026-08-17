@@ -18,7 +18,7 @@ public extension NativeWorkoutSampleInput {
   /**
    * Create a new instance of `NativeWorkoutSampleInput`.
    */
-  init(startTimeMs: Double, endTimeMs: Double, activityType: String, displayName: String?, timeZone: String?, recordingMethod: NativeHealthRecordingMethod?, syncId: String?, syncVersion: Double?) {
+  init(startTimeMs: Double, endTimeMs: Double, activityType: String, displayName: String?, timeZone: String?, device: NativeHealthDeviceInfo?, recordingMethod: NativeHealthRecordingMethod?, syncId: String?, syncVersion: Double?) {
     self.init(startTimeMs, endTimeMs, std.string(activityType), { () -> bridge.std__optional_std__string_ in
       if let __unwrappedValue = displayName {
         return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
@@ -28,6 +28,12 @@ public extension NativeWorkoutSampleInput {
     }(), { () -> bridge.std__optional_std__string_ in
       if let __unwrappedValue = timeZone {
         return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_NativeHealthDeviceInfo_ in
+      if let __unwrappedValue = device {
+        return bridge.create_std__optional_NativeHealthDeviceInfo_(__unwrappedValue)
       } else {
         return .init()
       }
@@ -89,6 +95,11 @@ public extension NativeWorkoutSampleInput {
         return nil
       }
     }()
+  }
+  
+  @inline(__always)
+  var device: NativeHealthDeviceInfo? {
+    return self.__device.value
   }
   
   @inline(__always)

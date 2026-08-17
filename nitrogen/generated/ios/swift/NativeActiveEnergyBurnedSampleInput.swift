@@ -18,8 +18,14 @@ public extension NativeActiveEnergyBurnedSampleInput {
   /**
    * Create a new instance of `NativeActiveEnergyBurnedSampleInput`.
    */
-  init(startTimeMs: Double, endTimeMs: Double, kilocalories: Double, recordingMethod: NativeHealthRecordingMethod?, syncId: String?, syncVersion: Double?) {
-    self.init(startTimeMs, endTimeMs, kilocalories, { () -> bridge.std__optional_NativeHealthRecordingMethod_ in
+  init(startTimeMs: Double, endTimeMs: Double, kilocalories: Double, device: NativeHealthDeviceInfo?, recordingMethod: NativeHealthRecordingMethod?, syncId: String?, syncVersion: Double?) {
+    self.init(startTimeMs, endTimeMs, kilocalories, { () -> bridge.std__optional_NativeHealthDeviceInfo_ in
+      if let __unwrappedValue = device {
+        return bridge.create_std__optional_NativeHealthDeviceInfo_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_NativeHealthRecordingMethod_ in
       if let __unwrappedValue = recordingMethod {
         return bridge.create_std__optional_NativeHealthRecordingMethod_(__unwrappedValue)
       } else {
@@ -53,6 +59,11 @@ public extension NativeActiveEnergyBurnedSampleInput {
   @inline(__always)
   var kilocalories: Double {
     return self.__kilocalories
+  }
+  
+  @inline(__always)
+  var device: NativeHealthDeviceInfo? {
+    return self.__device.value
   }
   
   @inline(__always)

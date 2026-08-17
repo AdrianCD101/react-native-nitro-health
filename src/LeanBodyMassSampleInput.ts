@@ -1,3 +1,4 @@
+import type { HealthDeviceInfo } from './HealthDeviceInfo'
 import type { HealthRecordSync } from './HealthRecordSync'
 import type { HealthRecordingMethod } from './HealthRecordingMethod'
 
@@ -7,6 +8,8 @@ export interface LeanBodyMassSampleInput {
   date: Date
   /** Lean body mass in kilograms. Must be greater than 0 and at most 1,000. */
   kilograms: number
+  /** Physical device asserted as having generated this sample. */
+  device?: HealthDeviceInfo
   /**
    * Requested recording method. On iOS, active and automatic recording degrade to `unknown`.
    * @default 'unknown'

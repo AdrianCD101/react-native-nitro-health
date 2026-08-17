@@ -26,6 +26,9 @@ data class NativeOxygenSaturationSampleInput(
   val percentage: Double,
   @DoNotStrip
   @Keep
+  val device: NativeHealthDeviceInfo?,
+  @DoNotStrip
+  @Keep
   val recordingMethod: NativeHealthRecordingMethod?,
   @DoNotStrip
   @Keep
@@ -41,6 +44,7 @@ data class NativeOxygenSaturationSampleInput(
     if (other !is NativeOxygenSaturationSampleInput) return false
     return Objects.deepEquals(this.timeMs, other.timeMs)
       && Objects.deepEquals(this.percentage, other.percentage)
+      && Objects.deepEquals(this.device, other.device)
       && Objects.deepEquals(this.recordingMethod, other.recordingMethod)
       && Objects.deepEquals(this.syncId, other.syncId)
       && Objects.deepEquals(this.syncVersion, other.syncVersion)
@@ -50,6 +54,7 @@ data class NativeOxygenSaturationSampleInput(
     return arrayOf<Any?>(
       timeMs,
       percentage,
+      device,
       recordingMethod,
       syncId,
       syncVersion
@@ -64,8 +69,8 @@ data class NativeOxygenSaturationSampleInput(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(timeMs: Double, percentage: Double, recordingMethod: NativeHealthRecordingMethod?, syncId: String?, syncVersion: Double?): NativeOxygenSaturationSampleInput {
-      return NativeOxygenSaturationSampleInput(timeMs, percentage, recordingMethod, syncId, syncVersion)
+    private fun fromCpp(timeMs: Double, percentage: Double, device: NativeHealthDeviceInfo?, recordingMethod: NativeHealthRecordingMethod?, syncId: String?, syncVersion: Double?): NativeOxygenSaturationSampleInput {
+      return NativeOxygenSaturationSampleInput(timeMs, percentage, device, recordingMethod, syncId, syncVersion)
     }
   }
 }

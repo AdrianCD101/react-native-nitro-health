@@ -80,14 +80,18 @@ describe('NitroHealth pagination contract', () => {
     })
   })
 
-  describe('identity mapping', () => {
-    it('maps native record identity and origin onto public samples', async () => {
+  describe('sample metadata mapping', () => {
+    it('maps native identity, origin, and device provenance onto public samples', async () => {
       const startDate = new Date('2026-01-01T00:00:00.000Z')
       const endDate = new Date('2026-01-08T00:00:00.000Z')
       mockNitroHealth.readSteps.mockResolvedValue({
         samples: [
           {
-            ...nativeRecordMetadata('record-1', 'com.example.health', 'Example Health'),
+            ...nativeRecordMetadata('record-1', 'com.example.health', 'Example Health', 'unknown', {
+              type: 'headMounted',
+              manufacturer: 'Example Devices',
+              model: 'Vision 2',
+            }),
             startTimeMs: startDate.getTime(),
             endTimeMs: endDate.getTime(),
             count: 123,
@@ -102,6 +106,52 @@ describe('NitroHealth pagination contract', () => {
         identifier: 'com.example.health',
         displayName: 'Example Health',
       })
+      expect(result.samples[0].device).toEqual({
+        type: 'head-mounted',
+        manufacturer: 'Example Devices',
+        model: 'Vision 2',
+      })
+    })
+
+    it('omits device when the native sample has no device provenance', async () => {
+      const startDate = new Date('2026-01-01T00:00:00.000Z')
+      const endDate = new Date('2026-01-08T00:00:00.000Z')
+      mockNitroHealth.readSteps.mockResolvedValue({
+        samples: [
+          {
+            ...nativeRecordMetadata('record-2'),
+            startTimeMs: startDate.getTime(),
+            endTimeMs: endDate.getTime(),
+            count: 456,
+          },
+        ],
+      })
+
+      const result = await NitroHealth.readSteps({ startDate, endDate })
+
+      expect(result.samples[0]).not.toHaveProperty('device')
+    })
+
+    it('omits a native device containing only blank projected fields', async () => {
+      const startDate = new Date('2026-01-01T00:00:00.000Z')
+      const endDate = new Date('2026-01-08T00:00:00.000Z')
+      mockNitroHealth.readSteps.mockResolvedValue({
+        samples: [
+          {
+            ...nativeRecordMetadata('record-3', 'com.example.health', undefined, 'unknown', {
+              manufacturer: ' ',
+              model: '',
+            }),
+            startTimeMs: startDate.getTime(),
+            endTimeMs: endDate.getTime(),
+            count: 789,
+          },
+        ],
+      })
+
+      const result = await NitroHealth.readSteps({ startDate, endDate })
+
+      expect(result.samples[0]).not.toHaveProperty('device')
     })
   })
 

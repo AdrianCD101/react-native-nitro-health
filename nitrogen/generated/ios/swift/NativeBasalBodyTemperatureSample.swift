@@ -18,8 +18,14 @@ public extension NativeBasalBodyTemperatureSample {
   /**
    * Create a new instance of `NativeBasalBodyTemperatureSample`.
    */
-  init(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, recordingMethod: NativeHealthRecordingMethod, timeMs: Double, celsius: Double, androidMeasurementLocation: NativeAndroidBodyTemperatureMeasurementLocation?, iosSensorLocation: NativeIOSBodyTemperatureSensorLocation?) {
-    self.init(identity, origin, recordingMethod, timeMs, celsius, { () -> bridge.std__optional_NativeAndroidBodyTemperatureMeasurementLocation_ in
+  init(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, device: NativeHealthDeviceInfo?, recordingMethod: NativeHealthRecordingMethod, timeMs: Double, celsius: Double, androidMeasurementLocation: NativeAndroidBodyTemperatureMeasurementLocation?, iosSensorLocation: NativeIOSBodyTemperatureSensorLocation?) {
+    self.init(identity, origin, { () -> bridge.std__optional_NativeHealthDeviceInfo_ in
+      if let __unwrappedValue = device {
+        return bridge.create_std__optional_NativeHealthDeviceInfo_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), recordingMethod, timeMs, celsius, { () -> bridge.std__optional_NativeAndroidBodyTemperatureMeasurementLocation_ in
       if let __unwrappedValue = androidMeasurementLocation {
         return bridge.create_std__optional_NativeAndroidBodyTemperatureMeasurementLocation_(__unwrappedValue)
       } else {
@@ -42,6 +48,11 @@ public extension NativeBasalBodyTemperatureSample {
   @inline(__always)
   var origin: NativeHealthDataOrigin {
     return self.__origin
+  }
+  
+  @inline(__always)
+  var device: NativeHealthDeviceInfo? {
+    return self.__device.value
   }
   
   @inline(__always)

@@ -30,6 +30,8 @@
 
 // Forward declaration of `NativeSleepSessionStageInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeSleepSessionStageInput; }
+// Forward declaration of `NativeHealthDeviceInfo` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthDeviceInfo; }
 // Forward declaration of `NativeHealthRecordingMethod` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class NativeHealthRecordingMethod; }
 
@@ -37,6 +39,7 @@ namespace margelo::nitro::nitrohealth { enum class NativeHealthRecordingMethod; 
 #include <vector>
 #include <string>
 #include <optional>
+#include "NativeHealthDeviceInfo.hpp"
 #include "NativeHealthRecordingMethod.hpp"
 
 namespace margelo::nitro::nitrohealth {
@@ -50,11 +53,12 @@ namespace margelo::nitro::nitrohealth {
     double endTimeMs     SWIFT_PRIVATE;
     std::vector<NativeSleepSessionStageInput> stages     SWIFT_PRIVATE;
     std::optional<std::string> timeZone     SWIFT_PRIVATE;
+    std::optional<NativeHealthDeviceInfo> device     SWIFT_PRIVATE;
     std::optional<NativeHealthRecordingMethod> recordingMethod     SWIFT_PRIVATE;
 
   public:
     NativeSleepSessionInput() = default;
-    explicit NativeSleepSessionInput(double startTimeMs, double endTimeMs, std::vector<NativeSleepSessionStageInput> stages, std::optional<std::string> timeZone, std::optional<NativeHealthRecordingMethod> recordingMethod): startTimeMs(startTimeMs), endTimeMs(endTimeMs), stages(stages), timeZone(timeZone), recordingMethod(recordingMethod) {}
+    explicit NativeSleepSessionInput(double startTimeMs, double endTimeMs, std::vector<NativeSleepSessionStageInput> stages, std::optional<std::string> timeZone, std::optional<NativeHealthDeviceInfo> device, std::optional<NativeHealthRecordingMethod> recordingMethod): startTimeMs(startTimeMs), endTimeMs(endTimeMs), stages(stages), timeZone(timeZone), device(device), recordingMethod(recordingMethod) {}
 
   public:
     friend bool operator==(const NativeSleepSessionInput& lhs, const NativeSleepSessionInput& rhs) = default;
@@ -74,6 +78,7 @@ namespace margelo::nitro {
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs"))),
         JSIConverter<std::vector<margelo::nitro::nitrohealth::NativeSleepSessionStageInput>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "stages"))),
         JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeZone"))),
+        JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeHealthDeviceInfo>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "device"))),
         JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeHealthRecordingMethod>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "recordingMethod")))
       );
     }
@@ -83,6 +88,7 @@ namespace margelo::nitro {
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs"), JSIConverter<double>::toJSI(runtime, arg.endTimeMs));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "stages"), JSIConverter<std::vector<margelo::nitro::nitrohealth::NativeSleepSessionStageInput>>::toJSI(runtime, arg.stages));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "timeZone"), JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.timeZone));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "device"), JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeHealthDeviceInfo>>::toJSI(runtime, arg.device));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "recordingMethod"), JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeHealthRecordingMethod>>::toJSI(runtime, arg.recordingMethod));
       return obj;
     }
@@ -98,6 +104,7 @@ namespace margelo::nitro {
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs")))) return false;
       if (!JSIConverter<std::vector<margelo::nitro::nitrohealth::NativeSleepSessionStageInput>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "stages")))) return false;
       if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeZone")))) return false;
+      if (!JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeHealthDeviceInfo>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "device")))) return false;
       if (!JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeHealthRecordingMethod>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "recordingMethod")))) return false;
       return true;
     }

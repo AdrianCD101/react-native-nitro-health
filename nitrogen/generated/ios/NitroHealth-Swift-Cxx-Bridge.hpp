@@ -120,6 +120,10 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthDataOrigin; }
 namespace margelo::nitro::nitrohealth { struct NativeHealthDeleteResult; }
 // Forward declaration of `NativeHealthDeleteStatus` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class NativeHealthDeleteStatus; }
+// Forward declaration of `NativeHealthDeviceInfo` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthDeviceInfo; }
+// Forward declaration of `NativeHealthDeviceType` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeHealthDeviceType; }
 // Forward declaration of `NativeHealthMetricValueStatus` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class NativeHealthMetricValueStatus; }
 // Forward declaration of `NativeHealthMetricValue` to properly resolve imports.
@@ -298,6 +302,8 @@ namespace NitroHealth { class HybridNitroHealthSpec_cxx; }
 #include "NativeHealthDataOrigin.hpp"
 #include "NativeHealthDeleteResult.hpp"
 #include "NativeHealthDeleteStatus.hpp"
+#include "NativeHealthDeviceInfo.hpp"
+#include "NativeHealthDeviceType.hpp"
 #include "NativeHealthMetricValue.hpp"
 #include "NativeHealthMetricValueStatus.hpp"
 #include "NativeHealthPermission.hpp"
@@ -734,6 +740,36 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
   Func_void_std__string create_Func_void_std__string(void* NON_NULL swiftClosureWrapper) noexcept;
   inline Func_void_std__string_Wrapper wrap_Func_void_std__string(Func_void_std__string value) noexcept {
     return Func_void_std__string_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::optional<NativeHealthDeviceType>
+  /**
+   * Specialized version of `std::optional<NativeHealthDeviceType>`.
+   */
+  using std__optional_NativeHealthDeviceType_ = std::optional<NativeHealthDeviceType>;
+  inline std::optional<NativeHealthDeviceType> create_std__optional_NativeHealthDeviceType_(const NativeHealthDeviceType& value) noexcept {
+    return std::optional<NativeHealthDeviceType>(value);
+  }
+  inline bool has_value_std__optional_NativeHealthDeviceType_(const std::optional<NativeHealthDeviceType>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline NativeHealthDeviceType get_std__optional_NativeHealthDeviceType_(const std::optional<NativeHealthDeviceType>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::optional<NativeHealthDeviceInfo>
+  /**
+   * Specialized version of `std::optional<NativeHealthDeviceInfo>`.
+   */
+  using std__optional_NativeHealthDeviceInfo_ = std::optional<NativeHealthDeviceInfo>;
+  inline std::optional<NativeHealthDeviceInfo> create_std__optional_NativeHealthDeviceInfo_(const NativeHealthDeviceInfo& value) noexcept {
+    return std::optional<NativeHealthDeviceInfo>(value);
+  }
+  inline bool has_value_std__optional_NativeHealthDeviceInfo_(const std::optional<NativeHealthDeviceInfo>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline NativeHealthDeviceInfo get_std__optional_NativeHealthDeviceInfo_(const std::optional<NativeHealthDeviceInfo>& optional) noexcept {
+    return optional.value();
   }
   
   // pragma MARK: std::vector<NativeStepSample>

@@ -2,6 +2,8 @@ package com.nitrohealth
 
 import androidx.health.connect.client.records.metadata.Device
 import androidx.health.connect.client.records.metadata.Metadata
+import com.margelo.nitro.nitrohealth.NativeHealthDeviceInfo
+import com.margelo.nitro.nitrohealth.NativeHealthDeviceType
 import com.margelo.nitro.nitrohealth.NativeHealthRecordingMethod
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -38,6 +40,61 @@ class SampleMetadataTest {
                 assertNull(device.model)
             } else {
                 assertNull(unkeyed.device)
+            }
+        }
+    }
+
+    @Test
+    fun mapsEveryPortableDeviceType() {
+        val values = listOf(
+            null to Device.TYPE_UNKNOWN,
+            NativeHealthDeviceType.UNKNOWN to Device.TYPE_UNKNOWN,
+            NativeHealthDeviceType.WATCH to Device.TYPE_WATCH,
+            NativeHealthDeviceType.PHONE to Device.TYPE_PHONE,
+            NativeHealthDeviceType.SCALE to Device.TYPE_SCALE,
+            NativeHealthDeviceType.RING to Device.TYPE_RING,
+            NativeHealthDeviceType.HEADMOUNTED to Device.TYPE_HEAD_MOUNTED,
+            NativeHealthDeviceType.FITNESSBAND to Device.TYPE_FITNESS_BAND,
+            NativeHealthDeviceType.CHESTSTRAP to Device.TYPE_CHEST_STRAP,
+            NativeHealthDeviceType.SMARTDISPLAY to Device.TYPE_SMART_DISPLAY
+        )
+
+        values.forEach { (native, healthConnect) ->
+            val device = makeHealthConnectDevice(
+                NativeHealthDeviceInfo(
+                    type = native,
+                    manufacturer = "Example",
+                    model = "Sensor"
+                )
+            )!!
+
+            assertEquals(healthConnect, device.type)
+            assertEquals("Example", device.manufacturer)
+            assertEquals("Sensor", device.model)
+        }
+    }
+
+    @Test
+    fun suppliedDeviceSurvivesEveryRecordingMethod() {
+        val device = NativeHealthDeviceInfo(
+            type = NativeHealthDeviceType.PHONE,
+            manufacturer = "Example",
+            model = "Phone"
+        )
+
+        listOf(
+            NativeHealthRecordingMethod.MANUAL,
+            NativeHealthRecordingMethod.ACTIVELYRECORDED,
+            NativeHealthRecordingMethod.AUTOMATICALLYRECORDED,
+            NativeHealthRecordingMethod.UNKNOWN
+        ).forEach { method ->
+            val unkeyed = makeSampleMetadata(null, null, method, device)
+            val keyed = makeSampleMetadata("sample-sync-id", 3.0, method, device)
+
+            listOf(unkeyed, keyed).forEach { metadata ->
+                assertEquals(Device.TYPE_PHONE, metadata.device?.type)
+                assertEquals("Example", metadata.device?.manufacturer)
+                assertEquals("Phone", metadata.device?.model)
             }
         }
     }

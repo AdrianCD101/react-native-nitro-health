@@ -7,6 +7,7 @@ func makeWorkoutBuilderInput(
     startDate: Date,
     endDate: Date,
     configuration: HKWorkoutConfiguration,
+    device: HKDevice?,
     metadata: [String: Any]
 ) {
     let startDate = Date(timeIntervalSince1970: workout.startTimeMs / 1000)
@@ -42,6 +43,7 @@ func makeWorkoutBuilderInput(
         startDate: startDate,
         endDate: endDate,
         configuration: configuration,
+        device: workout.device?.healthKitDevice,
         metadata: metadata
     )
 }

@@ -1,4 +1,5 @@
 import type { NativeHealthDataOrigin } from './NativeHealthDataOrigin'
+import type { NativeHealthDeviceInfo } from './NativeHealthDeviceInfo'
 import type { NativeHealthRecordingMethod } from './NativeHealthRecordingMethod'
 import type { NativeHealthSampleIdentity } from './NativeHealthSampleIdentity'
 import type { NativeDistanceScope } from './NativeDistanceWriteResult'
@@ -7,6 +8,7 @@ import type { NativeDistanceScope } from './NativeDistanceWriteResult'
 export interface NativeDistanceSample {
   identity: NativeHealthSampleIdentity
   origin: NativeHealthDataOrigin
+  device?: NativeHealthDeviceInfo
   recordingMethod: NativeHealthRecordingMethod
   /** Inclusive start of the sample interval as Unix epoch milliseconds. */
   startTimeMs: number

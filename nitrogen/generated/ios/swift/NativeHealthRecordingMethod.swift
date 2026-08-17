@@ -19,12 +19,12 @@ public extension NativeHealthRecordingMethod {
     switch string {
       case "manual":
         self = .manual
+      case "unknown":
+        self = .unknown
       case "activelyRecorded":
         self = .activelyrecorded
       case "automaticallyRecorded":
         self = .automaticallyrecorded
-      case "unknown":
-        self = .unknown
       default:
         return nil
     }
@@ -37,12 +37,12 @@ public extension NativeHealthRecordingMethod {
     switch self {
       case .manual:
         return "manual"
+      case .unknown:
+        return "unknown"
       case .activelyrecorded:
         return "activelyRecorded"
       case .automaticallyrecorded:
         return "automaticallyRecorded"
-      case .unknown:
-        return "unknown"
     }
   }
 }

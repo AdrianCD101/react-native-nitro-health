@@ -41,7 +41,17 @@ describe('NitroHealth changes contract', () => {
           recordId: 'record-1',
           stepSamples: [
             {
-              ...nativeRecordMetadata('record-1', 'com.example.health', 'Example Health'),
+              ...nativeRecordMetadata(
+                'record-1',
+                'com.example.health',
+                'Example Health',
+                'unknown',
+                {
+                  type: 'chestStrap',
+                  manufacturer: 'Example Devices',
+                  model: 'HR Strap',
+                }
+              ),
               startTimeMs,
               endTimeMs,
               count: 123,
@@ -68,6 +78,11 @@ describe('NitroHealth changes contract', () => {
             {
               identity: { kind: 'record', id: 'record-1' },
               origin: { identifier: 'com.example.health', displayName: 'Example Health' },
+              device: {
+                type: 'chest-strap',
+                manufacturer: 'Example Devices',
+                model: 'HR Strap',
+              },
               recordingMethod: 'unknown',
               startDate: new Date(startTimeMs),
               endDate: new Date(endTimeMs),
@@ -95,12 +110,26 @@ describe('NitroHealth changes contract', () => {
           recordId: 'heart-record',
           heartRateSamples: [
             {
-              ...nativeRecordChildMetadata('heart-record#0', 'heart-record'),
+              ...nativeRecordChildMetadata(
+                'heart-record#0',
+                'heart-record',
+                'com.example.health',
+                undefined,
+                'unknown',
+                { type: 'watch', manufacturer: 'Example Devices', model: 'Watch' }
+              ),
               timeMs,
               bpm: 72,
             },
             {
-              ...nativeRecordChildMetadata('heart-record#1', 'heart-record'),
+              ...nativeRecordChildMetadata(
+                'heart-record#1',
+                'heart-record',
+                'com.example.health',
+                undefined,
+                'unknown',
+                { type: 'watch', manufacturer: 'Example Devices', model: 'Watch' }
+              ),
               timeMs: timeMs + 1000,
               bpm: 73,
             },
@@ -132,6 +161,10 @@ describe('NitroHealth changes contract', () => {
         id: 'heart-record#1',
         record: { kind: 'record', id: 'heart-record' },
       },
+    ])
+    expect(change.samples.map((sample) => sample.device)).toEqual([
+      { type: 'watch', manufacturer: 'Example Devices', model: 'Watch' },
+      { type: 'watch', manufacturer: 'Example Devices', model: 'Watch' },
     ])
   })
 

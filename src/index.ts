@@ -60,6 +60,7 @@ export type { HealthAuthorizationResult } from './HealthAuthorizationResult'
 export type { HealthChangesResult } from './HealthChangesResult'
 export type { HealthChangeNotification } from './HealthChangeNotification'
 export type { HealthDataOrigin } from './HealthDataOrigin'
+export type { HealthDeviceInfo, HealthDeviceType } from './HealthDeviceInfo'
 export type {
   AggregateOnlyHealthDataType,
   HealthDataType,

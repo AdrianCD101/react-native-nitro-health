@@ -18,8 +18,14 @@ public extension NativeFloorsClimbedSampleInput {
   /**
    * Create a new instance of `NativeFloorsClimbedSampleInput`.
    */
-  init(startTimeMs: Double, endTimeMs: Double, floors: Double, recordingMethod: NativeHealthRecordingMethod?, syncId: String?, syncVersion: Double?) {
-    self.init(startTimeMs, endTimeMs, floors, { () -> bridge.std__optional_NativeHealthRecordingMethod_ in
+  init(startTimeMs: Double, endTimeMs: Double, floors: Double, device: NativeHealthDeviceInfo?, recordingMethod: NativeHealthRecordingMethod?, syncId: String?, syncVersion: Double?) {
+    self.init(startTimeMs, endTimeMs, floors, { () -> bridge.std__optional_NativeHealthDeviceInfo_ in
+      if let __unwrappedValue = device {
+        return bridge.create_std__optional_NativeHealthDeviceInfo_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_NativeHealthRecordingMethod_ in
       if let __unwrappedValue = recordingMethod {
         return bridge.create_std__optional_NativeHealthRecordingMethod_(__unwrappedValue)
       } else {
@@ -53,6 +59,11 @@ public extension NativeFloorsClimbedSampleInput {
   @inline(__always)
   var floors: Double {
     return self.__floors
+  }
+  
+  @inline(__always)
+  var device: NativeHealthDeviceInfo? {
+    return self.__device.value
   }
   
   @inline(__always)

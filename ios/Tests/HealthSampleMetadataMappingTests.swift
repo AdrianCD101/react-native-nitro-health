@@ -28,4 +28,33 @@ final class HealthSampleMetadataMappingTests: XCTestCase {
             )
         )
     }
+
+    func testMapsAvailableDeviceManufacturerAndModel() {
+        XCTAssertEqual(
+            makeHealthDeviceInfoValues(
+                manufacturer: "Example Medical",
+                model: "Monitor 2"
+            ),
+            HealthDeviceInfoValues(
+                manufacturer: "Example Medical",
+                model: "Monitor 2"
+            )
+        )
+    }
+
+    func testMapsPartiallyAvailableDeviceInfo() {
+        XCTAssertEqual(
+            makeHealthDeviceInfoValues(manufacturer: nil, model: "Watch 3"),
+            HealthDeviceInfoValues(manufacturer: nil, model: "Watch 3")
+        )
+        XCTAssertEqual(
+            makeHealthDeviceInfoValues(manufacturer: "Example Medical", model: nil),
+            HealthDeviceInfoValues(manufacturer: "Example Medical", model: nil)
+        )
+    }
+
+    func testOmitsDeviceWhenProjectedFieldsAreUnavailable() {
+        XCTAssertNil(makeHealthDeviceInfoValues(manufacturer: nil, model: nil))
+        XCTAssertNil(makeHealthDeviceInfoValues(manufacturer: "", model: "  \n"))
+    }
 }

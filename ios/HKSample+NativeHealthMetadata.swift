@@ -27,4 +27,8 @@ extension HKSample {
             displayName: values.displayName
         )
     }
+
+    var nativeHealthDeviceInfo: NativeHealthDeviceInfo? {
+        return device?.nativeHealthDeviceInfo
+    }
 }

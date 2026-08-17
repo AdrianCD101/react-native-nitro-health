@@ -22,7 +22,8 @@ internal fun toSleepSessionRecords(
             metadata = makeSampleMetadata(
                 syncId = null,
                 syncVersion = null,
-                recordingMethod = session.recordingMethod
+                recordingMethod = session.recordingMethod,
+                device = session.device
             )
         )
     }

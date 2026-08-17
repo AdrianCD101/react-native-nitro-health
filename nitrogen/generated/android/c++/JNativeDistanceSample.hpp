@@ -12,11 +12,15 @@
 
 #include "JNativeDistanceScope.hpp"
 #include "JNativeHealthDataOrigin.hpp"
+#include "JNativeHealthDeviceInfo.hpp"
+#include "JNativeHealthDeviceType.hpp"
 #include "JNativeHealthRecordingMethod.hpp"
 #include "JNativeHealthSampleIdentity.hpp"
 #include "JNativeHealthSampleIdentityKind.hpp"
 #include "NativeDistanceScope.hpp"
 #include "NativeHealthDataOrigin.hpp"
+#include "NativeHealthDeviceInfo.hpp"
+#include "NativeHealthDeviceType.hpp"
 #include "NativeHealthRecordingMethod.hpp"
 #include "NativeHealthSampleIdentity.hpp"
 #include "NativeHealthSampleIdentityKind.hpp"
@@ -46,6 +50,8 @@ namespace margelo::nitro::nitrohealth {
       jni::local_ref<JNativeHealthSampleIdentity> identity = this->getFieldValue(fieldIdentity);
       static const auto fieldOrigin = clazz->getField<JNativeHealthDataOrigin>("origin");
       jni::local_ref<JNativeHealthDataOrigin> origin = this->getFieldValue(fieldOrigin);
+      static const auto fieldDevice = clazz->getField<JNativeHealthDeviceInfo>("device");
+      jni::local_ref<JNativeHealthDeviceInfo> device = this->getFieldValue(fieldDevice);
       static const auto fieldRecordingMethod = clazz->getField<JNativeHealthRecordingMethod>("recordingMethod");
       jni::local_ref<JNativeHealthRecordingMethod> recordingMethod = this->getFieldValue(fieldRecordingMethod);
       static const auto fieldStartTimeMs = clazz->getField<double>("startTimeMs");
@@ -59,6 +65,7 @@ namespace margelo::nitro::nitrohealth {
       return NativeDistanceSample(
         identity->toCpp(),
         origin->toCpp(),
+        device != nullptr ? std::make_optional(device->toCpp()) : std::nullopt,
         recordingMethod->toCpp(),
         startTimeMs,
         endTimeMs,
@@ -73,13 +80,14 @@ namespace margelo::nitro::nitrohealth {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeDistanceSample::javaobject> fromCpp(const NativeDistanceSample& value) {
-      using JSignature = JNativeDistanceSample(jni::alias_ref<JNativeHealthSampleIdentity>, jni::alias_ref<JNativeHealthDataOrigin>, jni::alias_ref<JNativeHealthRecordingMethod>, double, double, double, jni::alias_ref<JNativeDistanceScope>);
+      using JSignature = JNativeDistanceSample(jni::alias_ref<JNativeHealthSampleIdentity>, jni::alias_ref<JNativeHealthDataOrigin>, jni::alias_ref<JNativeHealthDeviceInfo>, jni::alias_ref<JNativeHealthRecordingMethod>, double, double, double, jni::alias_ref<JNativeDistanceScope>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
         clazz,
         JNativeHealthSampleIdentity::fromCpp(value.identity),
         JNativeHealthDataOrigin::fromCpp(value.origin),
+        value.device.has_value() ? JNativeHealthDeviceInfo::fromCpp(value.device.value()) : nullptr,
         JNativeHealthRecordingMethod::fromCpp(value.recordingMethod),
         value.startTimeMs,
         value.endTimeMs,

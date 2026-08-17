@@ -1,4 +1,5 @@
 import type { BloodGlucoseMetadata } from './BloodGlucoseMetadata'
+import type { HealthDeviceInfo } from './HealthDeviceInfo'
 import type { HealthRecordSync } from './HealthRecordSync'
 import type { HealthRecordingMethod } from './HealthRecordingMethod'
 
@@ -8,6 +9,8 @@ export interface BloodGlucoseSampleInput {
   date: Date
   /** Blood glucose concentration in millimoles per liter. Must be between 0.5 and 50 inclusive. */
   millimolesPerLiter: number
+  /** Physical device asserted as having generated this sample. */
+  device?: HealthDeviceInfo
   /** Platform-scoped fields retained by the native health store. */
   metadata?: BloodGlucoseMetadata
   /**

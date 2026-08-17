@@ -93,7 +93,14 @@ describe('NitroHealth changes (native)', () => {
     }
 
     const baselineToken = await NitroHealth.createChangesToken('steps')
-    await NitroHealth.saveSteps([{ ...changeInterval, count: 987_654 }])
+    await NitroHealth.saveSteps([
+      {
+        ...changeInterval,
+        count: 987_654,
+        device: { type: 'watch', manufacturer: 'Nitro Health', model: 'Harness Sensor' },
+        recordingMethod: 'actively-recorded',
+      },
+    ])
 
     const afterSave = await drainStepChanges(baselineToken)
     const upsert = afterSave.changes.find(
@@ -114,6 +121,15 @@ describe('NitroHealth changes (native)', () => {
           : sample.identity.record.id === upsert.record.id
       )
     ).toBe(true)
+    if (Platform.OS === 'android') {
+      expect(upsert.samples.every((sample) => sample.device?.type === 'watch')).toBe(true)
+    } else {
+      expect(upsert.samples.every((sample) => sample.device?.type === undefined)).toBe(true)
+    }
+    expect(upsert.samples.every((sample) => sample.device?.manufacturer === 'Nitro Health')).toBe(
+      true
+    )
+    expect(upsert.samples.every((sample) => sample.device?.model === 'Harness Sensor')).toBe(true)
 
     const deletion = await NitroHealth.deleteRecordsByIds('steps', [upsert.record])
     expect(deletion.status).toBe('completed')

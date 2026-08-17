@@ -266,7 +266,7 @@ Background and extended-history declarations are documented in [Background Synch
 
 ## Raw Sample Model
 
-Every raw sample returned by a `read*` method or a change upsert has required `identity`, `origin`, and `recordingMethod` fields.
+Every raw sample returned by a `read*` method or a change upsert has required `identity`, `origin`, and `recordingMethod` fields plus optional `device` provenance.
 
 ### Data Origin
 
@@ -280,6 +280,24 @@ interface HealthDataOrigin {
 `origin.identifier` is the stable application identifier supplied by the health service: an iOS bundle identifier or Android package name. `origin.displayName` is a human-readable app name when available. HealthKit supplies the source name; Health Connect currently supplies only the package name, so Android `displayName` is normally absent.
 
 Do not use a display name as a database key. Use `origin.identifier` for stable source grouping.
+
+### Device Provenance
+
+`origin` identifies the application that recorded a sample and is always assigned by the native health service. The optional `device` sibling describes the physical hardware asserted to have generated it:
+
+```ts
+interface HealthDeviceInfo {
+  type?: HealthDeviceType
+  manufacturer?: string
+  model?: string
+}
+```
+
+Health Connect supplies `metadata.device`, including a stable device category, while HealthKit supplies `HKDevice.manufacturer` and `HKDevice.model` but no canonical category. Consequently, `device.type` is normally absent on iOS. The supported categories are `unknown`, `watch`, `phone`, `scale`, `ring`, `head-mounted`, `fitness-band`, `chest-strap`, and `smart-display`; future or unsupported Health Connect categories fold to `unknown`.
+
+Every top-level save input accepts optional `device` provenance. Android preserves type, manufacturer, and model; a missing Android type becomes `unknown`. iOS preserves manufacturer and model but cannot preserve the portable type, so a type-only device is omitted on iOS. `origin` is not writable and still identifies the app performing the save, even when that app imports data from another sensor.
+
+`device` is omitted when the service exposes no useful projected fields. Android flattened heart-rate readings and sleep stages inherit their parent record's device. An iOS sleep session applies one supplied device to the envelope and every independently stored stage. Device values are caller-asserted provenance, not verified or stable identifiers: do not infer a missing type from model text or use manufacturer/model as a database key.
 
 ### Recording Method
 
@@ -331,7 +349,7 @@ Selecting a child sample's `identity.record` for deletion explicitly selects its
 
 ## Reading Data
 
-All raw reads return `{ samples, nextCursor? }`. Every listed sample also includes the common required `identity`, `origin`, and `recordingMethod` fields.
+All raw reads return `{ samples, nextCursor? }`. Every listed sample also includes the common required `identity`, `origin`, and `recordingMethod` fields and may include `device`.
 
 | Method                     | Data-specific sample fields                                 |
 | -------------------------- | ----------------------------------------------------------- |
@@ -368,7 +386,7 @@ const page = await NitroHealth.readSteps({
 })
 
 for (const sample of page.samples) {
-  console.log(sample.count, sample.identity, sample.origin, sample.recordingMethod)
+  console.log(sample.count, sample.identity, sample.origin, sample.device, sample.recordingMethod)
 }
 ```
 
@@ -823,7 +841,7 @@ async function applyStepChange(change: HealthRecordChange<'steps'>) {
 }
 ```
 
-Change identity is always record-level: every change has `record: { kind: 'record', id }`. An upsert can contain one sample, multiple record-child samples, or an empty array. Replace all locally cached samples owned by `change.record`; never append an upsert blindly. A delete removes every cached child owned by that record.
+Change identity is always record-level: every change has `record: { kind: 'record', id }`. An upsert can contain one sample, multiple record-child samples, or an empty array, and its samples carry the same optional device provenance as normal reads. Replace all locally cached samples owned by `change.record`; never append an upsert blindly. A delete removes every cached child owned by that record.
 
 Process changes in returned order, but do not treat that order as a cross-platform event timeline. Persist `nextChangesToken` only after the page commits. Reusing the input token safely replays the page; committing the next token early can lose changes. Serialize drains per data type, or use compare-and-swap persistence, so foreground and background sync cannot commit out of order. Continue immediately while `hasMore` is true.
 
@@ -971,6 +989,7 @@ if (stepsWrite?.status === 'granted') {
       startDate: new Date('2026-01-01T09:00:00.000Z'),
       endDate: new Date('2026-01-01T09:30:00.000Z'),
       count: 512,
+      device: { type: 'watch', manufacturer: 'Example', model: 'Running Watch' },
       recordingMethod: 'actively-recorded',
       sync: { id: 'morning-walk', version: 1 },
     },
@@ -981,6 +1000,8 @@ if (stepsWrite?.status === 'granted') {
 ```
 
 Every save resolves to `{ status: 'completed', storedRecordingMethods }` when the native operation succeeds. `storedRecordingMethods` has one entry per top-level input in the same order, reporting what the native store retained rather than merely echoing the request. For versioned writes, the native implementation reads the retained record back when read access is available; with write-only access, it reports the platform-normalized submitted method because neither platform exposes the retained lower-version record through its save response. `saveWorkout()` accepts one top-level workout, so its array always has length one. `saveDistance()` adds `storedScope` beside the same `storedRecordingMethods` array.
+
+`device` can be supplied on every top-level write input. It does not change the platform-owned `origin`. For versioned writes, a higher version replaces device provenance with the replacement payload and a lower version leaves the retained device unchanged. Write results do not echo retained device metadata; read the stored sample when confirmation is required.
 
 The main value constraints are:
 
@@ -1037,6 +1058,7 @@ await NitroHealth.saveSleepSessions([
     startDate: new Date('2026-01-11T03:00:00.000Z'),
     endDate: new Date('2026-01-11T11:30:00.000Z'),
     timeZone: 'America/New_York',
+    device: { type: 'watch', manufacturer: 'Example', model: 'Sleep Watch' },
     stages: [
       {
         startDate: new Date('2026-01-11T03:15:00.000Z'),
@@ -1053,7 +1075,7 @@ await NitroHealth.saveSleepSessions([
 ])
 ```
 
-Writable stages are `awake`, `asleep`, `asleepCore`, `asleepDeep`, and `asleepREM`. Stages must have positive duration, stay inside the session, and not overlap. Gaps and adjacent intervals are allowed. `timeZone` is an optional IANA identifier and defaults to the device time zone.
+Writable stages are `awake`, `asleep`, `asleepCore`, `asleepDeep`, and `asleepREM`. Stages must have positive duration, stay inside the session, and not overlap. Gaps and adjacent intervals are allowed. `timeZone` is an optional IANA identifier and defaults to the device time zone. Device provenance belongs to the session and is applied to every stored stage; stages do not accept conflicting device fields.
 
 Android writes one session record with nested stages. iOS writes one `inBed` category interval and each explicit stage in one save operation. Reads return Android session envelopes or independent iOS stages through the flat tagged model; neither platform receives a synthetic `asleep` stage for an unstaged session.
 
@@ -1066,6 +1088,7 @@ const workoutResult = await NitroHealth.saveWorkout({
   activityType: 'running',
   displayName: 'Morning run',
   timeZone: 'America/New_York',
+  device: { type: 'watch', manufacturer: 'Example', model: 'Running Watch' },
   recordingMethod: 'automatically-recorded',
   sync: { id: 'workout-2026-08-04-morning', version: 1 },
 })
@@ -1150,8 +1173,8 @@ module.exports = {
 
 Three profiles are available:
 
-- `polling` (default): available service, app-owned polling, background/history access `not-granted`, direct revocation, Health Connect-style recording-method preservation, and distance writes stored as `activity-unspecified`.
-- `observer`: available service, observer frequencies, included background/history access, observer subscriptions, manual permission management/revocation, HealthKit-style active/automatic degradation to `unknown`, and walking/running distance storage.
+- `polling` (default): available service, app-owned polling, background/history access `not-granted`, direct revocation, Health Connect-style recording-method and device preservation, and distance writes stored as `activity-unspecified`.
+- `observer`: available service, observer frequencies, included background/history access, observer subscriptions, manual permission management/revocation, HealthKit-style active/automatic degradation to `unknown`, manufacturer/model-only mock device provenance, and walking/running distance storage.
 - `unavailable`: `not-supported` availability, unsupported additional access, unavailable permission/background outcomes, and polling capability shape.
 
 Reset the exported singleton for each test and select the workflow under test:
@@ -1185,7 +1208,7 @@ resetNitroHealthMock({
 
 `createNitroHealthMock(options)` creates an independent mock object for dependency injection. `resetNitroHealthMock(options)` mutates and returns the exported `NitroHealth` mock used by the package mock. Overrides are applied after profile defaults.
 
-The mock is stateful for its basic save/read path: saves append samples, later matching reads return them with generated identities and profile-specific stored recording methods, and pagination operates over that in-memory storage. It is intentionally append-only: it does not emulate sync-version replacement or change-token history, and its delete methods are workflow stubs rather than a native ownership model, so they do not remove stored samples. `resetNitroHealthMock()` creates fresh storage and clears previously saved samples.
+The mock is stateful for its basic save/read path: saves append samples, later matching reads return them with generated identities, profile-specific stored recording methods, and device provenance, and pagination operates over that in-memory storage. Omitted devices remain absent except for the polling profile's Health Connect-style `unknown` device on active or automatic records. Supplied devices retain all fields in the polling profile, with a missing type normalized to `unknown`, and retain manufacturer/model in the observer profile. The mock is intentionally append-only: it does not emulate sync-version replacement or change-token history, and its delete methods are workflow stubs rather than a native ownership model, so they do not remove stored samples. `resetNitroHealthMock()` creates fresh storage and clears previously saved samples.
 
 Default reads start as empty pages, statistics return empty results, `createChangesToken()` returns `mock-changes-token`, and `getChanges()` returns an empty successful page. The mock enforces workflow-level requirements such as non-empty permission, background, write, and deletion inputs, but deliberately does not duplicate every sample-field validator from the facade.
 
@@ -1203,6 +1226,7 @@ This API replaces the previous surface; removed names and shapes are not compati
 - Replace `enableBackgroundDelivery`, `disableBackgroundDelivery`, and `addOnChangeNotificationListener` with `configureBackgroundChanges`, `disableBackgroundChanges`, and `subscribeToBackgroundChanges`.
 - Replace sample `uuid`, `recordUuid`, and optional `source` with tagged `identity` and required `origin`.
 - Every raw read sample and change upsert now has required `recordingMethod`; handle `unknown` rather than treating the field as optional.
+- Raw read samples and change upserts may include optional `device` provenance beside app-only `origin`; do not assume it is present or use it as sample identity.
 - Save methods no longer resolve `void`; consume or deliberately ignore their `completed` result and ordered `storedRecordingMethods` (`saveDistance()` also returns `storedScope`).
 - Replace `deleteSamplesByUuids` and `deleteSamplesByTimeRange` with `deleteRecordsByIds` and `deleteRecordsByTimeRange`; both now return typed outcomes.
 - Sleep results are now `session-envelope` or `stage` records. Stage-less sessions no longer produce a synthetic `asleep` interval.

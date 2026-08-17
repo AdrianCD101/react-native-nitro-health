@@ -178,6 +178,23 @@ function createNitroHealthMock(options = {}) {
     }
     return recordingMethod || 'unknown'
   }
+  const storedDeviceForInput = (device, recordingMethod) => {
+    if (device === undefined || Object.keys(device).length === 0) {
+      return profileName === 'polling' &&
+        (recordingMethod === 'actively-recorded' || recordingMethod === 'automatically-recorded')
+        ? { type: 'unknown' }
+        : undefined
+    }
+    if (profileName !== 'observer') {
+      return { ...device, type: device.type || 'unknown' }
+    }
+
+    const projected = {
+      ...(device.manufacturer === undefined ? {} : { manufacturer: device.manufacturer }),
+      ...(device.model === undefined ? {} : { model: device.model }),
+    }
+    return Object.keys(projected).length === 0 ? undefined : projected
+  }
   const nextIdentity = (dataType) => {
     identityCounters[dataType] += 1
     const recordId = `mock-${dataType}-${identityCounters[dataType]}`
@@ -190,14 +207,16 @@ function createNitroHealthMock(options = {}) {
     }
     return { kind: 'record', id: recordId }
   }
-  const makeStoredSample = (dataType, recordingMethod, fields) => ({
+  const makeStoredSample = (dataType, recordingMethod, device, fields) => ({
     identity: nextIdentity(dataType),
     origin: { ...mockOrigin },
+    ...(device === undefined ? {} : { device }),
     recordingMethod,
     ...fields,
   })
   const defaultStoredFields = (sample) => {
     const fields = { ...sample }
+    delete fields.device
     delete fields.recordingMethod
     delete fields.sync
     return fields
@@ -216,6 +235,7 @@ function createNitroHealthMock(options = {}) {
       makeStoredSample(
         dataType,
         storedRecordingMethods[index],
+        storedDeviceForInput(sample.device, storedRecordingMethods[index]),
         makeFields(sample, storedRecordingMethods[index])
       )
     )
@@ -411,6 +431,7 @@ function createNitroHealthMock(options = {}) {
         samples,
         (sample) => {
           const fields = { ...sample }
+          delete fields.device
           delete fields.recordingMethod
           delete fields.sync
           delete fields.scope

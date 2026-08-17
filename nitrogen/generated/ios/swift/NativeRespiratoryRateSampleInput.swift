@@ -18,8 +18,14 @@ public extension NativeRespiratoryRateSampleInput {
   /**
    * Create a new instance of `NativeRespiratoryRateSampleInput`.
    */
-  init(timeMs: Double, breathsPerMinute: Double, recordingMethod: NativeHealthRecordingMethod?, syncId: String?, syncVersion: Double?) {
-    self.init(timeMs, breathsPerMinute, { () -> bridge.std__optional_NativeHealthRecordingMethod_ in
+  init(timeMs: Double, breathsPerMinute: Double, device: NativeHealthDeviceInfo?, recordingMethod: NativeHealthRecordingMethod?, syncId: String?, syncVersion: Double?) {
+    self.init(timeMs, breathsPerMinute, { () -> bridge.std__optional_NativeHealthDeviceInfo_ in
+      if let __unwrappedValue = device {
+        return bridge.create_std__optional_NativeHealthDeviceInfo_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_NativeHealthRecordingMethod_ in
       if let __unwrappedValue = recordingMethod {
         return bridge.create_std__optional_NativeHealthRecordingMethod_(__unwrappedValue)
       } else {
@@ -48,6 +54,11 @@ public extension NativeRespiratoryRateSampleInput {
   @inline(__always)
   var breathsPerMinute: Double {
     return self.__breathsPerMinute
+  }
+  
+  @inline(__always)
+  var device: NativeHealthDeviceInfo? {
+    return self.__device.value
   }
   
   @inline(__always)

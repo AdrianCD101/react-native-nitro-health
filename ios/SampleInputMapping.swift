@@ -40,6 +40,7 @@ func makeStepQuantitySamples(
             quantity: HKQuantity(unit: HKUnit.count(), doubleValue: sample.count),
             start: Date(timeIntervalSince1970: sample.startTimeMs / 1000),
             end: Date(timeIntervalSince1970: sample.endTimeMs / 1000),
+            device: sample.device?.healthKitDevice,
             metadata: try makeHealthKitMetadata(
                 syncId: sample.syncId,
                 syncVersion: sample.syncVersion,
@@ -59,6 +60,7 @@ func makeDistanceQuantitySamples(
             quantity: HKQuantity(unit: HKUnit.meter(), doubleValue: sample.distanceMeters),
             start: Date(timeIntervalSince1970: sample.startTimeMs / 1000),
             end: Date(timeIntervalSince1970: sample.endTimeMs / 1000),
+            device: sample.device?.healthKitDevice,
             metadata: try makeHealthKitMetadata(
                 syncId: sample.syncId,
                 syncVersion: sample.syncVersion,
@@ -78,6 +80,7 @@ func makeActiveEnergyBurnedQuantitySamples(
             quantity: HKQuantity(unit: HKUnit.kilocalorie(), doubleValue: sample.kilocalories),
             start: Date(timeIntervalSince1970: sample.startTimeMs / 1000),
             end: Date(timeIntervalSince1970: sample.endTimeMs / 1000),
+            device: sample.device?.healthKitDevice,
             metadata: try makeHealthKitMetadata(
                 syncId: sample.syncId,
                 syncVersion: sample.syncVersion,
@@ -100,6 +103,7 @@ func makeHydrationQuantitySamples(
             ),
             start: Date(timeIntervalSince1970: sample.startTimeMs / 1000),
             end: Date(timeIntervalSince1970: sample.endTimeMs / 1000),
+            device: sample.device?.healthKitDevice,
             metadata: try makeHealthKitMetadata(
                 syncId: sample.syncId,
                 syncVersion: sample.syncVersion,
@@ -119,6 +123,7 @@ func makeFloorsClimbedQuantitySamples(
             quantity: HKQuantity(unit: HKUnit.count(), doubleValue: sample.floors),
             start: Date(timeIntervalSince1970: sample.startTimeMs / 1000),
             end: Date(timeIntervalSince1970: sample.endTimeMs / 1000),
+            device: sample.device?.healthKitDevice,
             metadata: try makeHealthKitMetadata(
                 syncId: sample.syncId,
                 syncVersion: sample.syncVersion,
@@ -142,6 +147,7 @@ func makeHeartRateQuantitySamples(
             quantity: HKQuantity(unit: bpmUnit, doubleValue: sample.bpm),
             start: date,
             end: date,
+            device: sample.device?.healthKitDevice,
             metadata: try makeHealthKitMetadata(
                 syncId: sample.syncId,
                 syncVersion: sample.syncVersion,
@@ -167,6 +173,7 @@ func makeBloodPressureCorrelations(
             quantity: HKQuantity(unit: bloodPressureMmHgUnit, doubleValue: sample.systolicMmHg),
             start: date,
             end: date,
+            device: sample.device?.healthKitDevice,
             metadata: try makeHealthKitMetadata(
                 syncId: sample.syncId.map { "\($0)#systolic" },
                 syncVersion: sample.syncVersion,
@@ -178,6 +185,7 @@ func makeBloodPressureCorrelations(
             quantity: HKQuantity(unit: bloodPressureMmHgUnit, doubleValue: sample.diastolicMmHg),
             start: date,
             end: date,
+            device: sample.device?.healthKitDevice,
             metadata: try makeHealthKitMetadata(
                 syncId: sample.syncId.map { "\($0)#diastolic" },
                 syncVersion: sample.syncVersion,
@@ -190,6 +198,7 @@ func makeBloodPressureCorrelations(
             start: date,
             end: date,
             objects: [systolic, diastolic],
+            device: sample.device?.healthKitDevice,
             metadata: try makeHealthKitMetadata(
                 syncId: sample.syncId,
                 syncVersion: sample.syncVersion,
@@ -213,6 +222,7 @@ func makeBodyMassQuantitySamples(
             quantity: HKQuantity(unit: kilogramUnit, doubleValue: sample.kilograms),
             start: date,
             end: date,
+            device: sample.device?.healthKitDevice,
             metadata: try makeHealthKitMetadata(
                 syncId: sample.syncId,
                 syncVersion: sample.syncVersion,
@@ -236,6 +246,7 @@ func makeRestingHeartRateQuantitySamples(
             quantity: HKQuantity(unit: bpmUnit, doubleValue: sample.bpm),
             start: date,
             end: date,
+            device: sample.device?.healthKitDevice,
             metadata: try makeHealthKitMetadata(
                 syncId: sample.syncId,
                 syncVersion: sample.syncVersion,
@@ -257,6 +268,7 @@ func makeBloodGlucoseQuantitySamples(
             quantity: HKQuantity(unit: bloodGlucoseMmolPerLiterUnit, doubleValue: sample.millimolesPerLiter),
             start: date,
             end: date,
+            device: sample.device?.healthKitDevice,
             metadata: try sample.healthKitMetadata()
         )
     }
@@ -274,6 +286,7 @@ func makeBodyTemperatureQuantitySamples(
             quantity: HKQuantity(unit: HKUnit.degreeCelsius(), doubleValue: sample.celsius),
             start: date,
             end: date,
+            device: sample.device?.healthKitDevice,
             metadata: try sample.healthKitMetadata()
         )
     }
@@ -293,6 +306,7 @@ func makeRespiratoryRateQuantitySamples(
             quantity: HKQuantity(unit: breathsPerMinuteUnit, doubleValue: sample.breathsPerMinute),
             start: date,
             end: date,
+            device: sample.device?.healthKitDevice,
             metadata: try makeHealthKitMetadata(
                 syncId: sample.syncId,
                 syncVersion: sample.syncVersion,
@@ -316,6 +330,7 @@ func makeBodyFatQuantitySamples(
             quantity: HKQuantity(unit: HKUnit.percent(), doubleValue: sample.percentage / 100),
             start: date,
             end: date,
+            device: sample.device?.healthKitDevice,
             metadata: try makeHealthKitMetadata(
                 syncId: sample.syncId,
                 syncVersion: sample.syncVersion,
@@ -339,6 +354,7 @@ func makeLeanBodyMassQuantitySamples(
             quantity: HKQuantity(unit: kilogramUnit, doubleValue: sample.kilograms),
             start: date,
             end: date,
+            device: sample.device?.healthKitDevice,
             metadata: try makeHealthKitMetadata(
                 syncId: sample.syncId,
                 syncVersion: sample.syncVersion,
@@ -360,6 +376,7 @@ func makeBasalBodyTemperatureQuantitySamples(
             quantity: HKQuantity(unit: HKUnit.degreeCelsius(), doubleValue: sample.celsius),
             start: date,
             end: date,
+            device: sample.device?.healthKitDevice,
             metadata: try sample.healthKitMetadata()
         )
     }
@@ -379,6 +396,7 @@ func makeOxygenSaturationQuantitySamples(
             quantity: HKQuantity(unit: HKUnit.percent(), doubleValue: sample.percentage / 100),
             start: date,
             end: date,
+            device: sample.device?.healthKitDevice,
             metadata: try makeHealthKitMetadata(
                 syncId: sample.syncId,
                 syncVersion: sample.syncVersion,
@@ -400,6 +418,7 @@ func makeHeightQuantitySamples(
             quantity: HKQuantity(unit: HKUnit.meter(), doubleValue: sample.meters),
             start: date,
             end: date,
+            device: sample.device?.healthKitDevice,
             metadata: try makeHealthKitMetadata(
                 syncId: sample.syncId,
                 syncVersion: sample.syncVersion,
@@ -428,6 +447,7 @@ func makeVo2MaxQuantitySamples(
             ),
             start: date,
             end: date,
+            device: sample.device?.healthKitDevice,
             metadata: try sample.healthKitMetadata()
         )
     }

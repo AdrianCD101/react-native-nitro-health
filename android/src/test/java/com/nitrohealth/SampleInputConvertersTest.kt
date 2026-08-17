@@ -1,12 +1,13 @@
 package com.nitrohealth
 
-import androidx.health.connect.client.records.metadata.Metadata
 import androidx.health.connect.client.records.BasalBodyTemperatureRecord
 import androidx.health.connect.client.records.BloodGlucoseRecord
 import androidx.health.connect.client.records.BloodPressureRecord
 import androidx.health.connect.client.records.BodyTemperatureMeasurementLocation
 import androidx.health.connect.client.records.MealType
 import androidx.health.connect.client.records.Vo2MaxRecord
+import androidx.health.connect.client.records.metadata.Device
+import androidx.health.connect.client.records.metadata.Metadata
 import com.margelo.nitro.nitrohealth.NativeActiveEnergyBurnedSampleInput
 import com.margelo.nitro.nitrohealth.NativeBloodGlucoseSampleInput
 import com.margelo.nitro.nitrohealth.NativeBloodGlucoseMealType
@@ -23,6 +24,8 @@ import com.margelo.nitro.nitrohealth.NativeDistanceSampleInput
 import com.margelo.nitro.nitrohealth.NativeDistanceScope
 import com.margelo.nitro.nitrohealth.NativeFloorsClimbedSampleInput
 import com.margelo.nitro.nitrohealth.NativeHeartRateSampleInput
+import com.margelo.nitro.nitrohealth.NativeHealthDeviceInfo
+import com.margelo.nitro.nitrohealth.NativeHealthDeviceType
 import com.margelo.nitro.nitrohealth.NativeHealthRecordingMethod
 import com.margelo.nitro.nitrohealth.NativeHeightSampleInput
 import com.margelo.nitro.nitrohealth.NativeHydrationSampleInput
@@ -51,6 +54,7 @@ class SampleInputConvertersTest {
                     startTimeMs = startTimeMs,
                     endTimeMs = endTimeMs,
                     count = 512.0,
+                    device = null,
                     recordingMethod = null,
                     syncId = null,
                     syncVersion = null
@@ -73,6 +77,7 @@ class SampleInputConvertersTest {
                     endTimeMs = endTimeMs,
                     distanceMeters = 1250.5,
                     scope = NativeDistanceScope.WALKINGRUNNING,
+                    device = null,
                     recordingMethod = null,
                     syncId = null,
                     syncVersion = null
@@ -94,6 +99,7 @@ class SampleInputConvertersTest {
                         endTimeMs = endTimeMs,
                         distanceMeters = 1250.5,
                         scope = NativeDistanceScope.ACTIVITYUNSPECIFIED,
+                        device = null,
                         recordingMethod = null,
                         syncId = null,
                         syncVersion = null
@@ -113,6 +119,7 @@ class SampleInputConvertersTest {
                     startTimeMs = startTimeMs,
                     endTimeMs = endTimeMs,
                     kilocalories = 215.25,
+                    device = null,
                     recordingMethod = null,
                     syncId = null,
                     syncVersion = null
@@ -132,6 +139,7 @@ class SampleInputConvertersTest {
                     startTimeMs = startTimeMs,
                     endTimeMs = endTimeMs,
                     milliliters = 250.5,
+                    device = null,
                     recordingMethod = null,
                     syncId = "hydration-sync",
                     syncVersion = 2.0
@@ -155,6 +163,7 @@ class SampleInputConvertersTest {
                     startTimeMs = startTimeMs,
                     endTimeMs = endTimeMs,
                     floors = 12.5,
+                    device = null,
                     recordingMethod = null,
                     syncId = null,
                     syncVersion = null
@@ -179,6 +188,7 @@ class SampleInputConvertersTest {
                 NativeHeartRateSampleInput(
                     timeMs = startTimeMs,
                     bpm = 72.0,
+                    device = null,
                     recordingMethod = null,
                     syncId = null,
                     syncVersion = null
@@ -186,6 +196,7 @@ class SampleInputConvertersTest {
                 NativeHeartRateSampleInput(
                     timeMs = secondTimeMs,
                     bpm = 138.0,
+                    device = null,
                     recordingMethod = null,
                     syncId = null,
                     syncVersion = null
@@ -209,6 +220,7 @@ class SampleInputConvertersTest {
                 NativeHeartRateSampleInput(
                     timeMs = startTimeMs,
                     bpm = 72.9,
+                    device = null,
                     recordingMethod = null,
                     syncId = null,
                     syncVersion = null
@@ -216,6 +228,7 @@ class SampleInputConvertersTest {
                 NativeHeartRateSampleInput(
                     timeMs = startTimeMs,
                     bpm = 72.4,
+                    device = null,
                     recordingMethod = null,
                     syncId = null,
                     syncVersion = null
@@ -234,6 +247,7 @@ class SampleInputConvertersTest {
                 NativeBodyMassSampleInput(
                     timeMs = startTimeMs,
                     kilograms = 72.5,
+                    device = null,
                     recordingMethod = null,
                     syncId = null,
                     syncVersion = null
@@ -253,6 +267,7 @@ class SampleInputConvertersTest {
                 NativeRestingHeartRateSampleInput(
                     timeMs = startTimeMs,
                     bpm = 58.0,
+                    device = null,
                     recordingMethod = null,
                     syncId = null,
                     syncVersion = null
@@ -272,6 +287,7 @@ class SampleInputConvertersTest {
                 NativeRestingHeartRateSampleInput(
                     timeMs = startTimeMs,
                     bpm = 58.9,
+                    device = null,
                     recordingMethod = null,
                     syncId = null,
                     syncVersion = null
@@ -279,6 +295,7 @@ class SampleInputConvertersTest {
                 NativeRestingHeartRateSampleInput(
                     timeMs = startTimeMs,
                     bpm = 58.4,
+                    device = null,
                     recordingMethod = null,
                     syncId = null,
                     syncVersion = null
@@ -298,6 +315,7 @@ class SampleInputConvertersTest {
                     timeMs = startTimeMs,
                     systolicMmHg = 118.0,
                     diastolicMmHg = 76.0,
+                    device = null,
                     recordingMethod = null,
                     androidBodyPosition = null,
                     androidMeasurementLocation = null,
@@ -324,6 +342,7 @@ class SampleInputConvertersTest {
                     timeMs = startTimeMs,
                     systolicMmHg = 118.0,
                     diastolicMmHg = 76.0,
+                    device = null,
                     recordingMethod = null,
                     androidBodyPosition = NativeBloodPressureBodyPosition.SITTINGDOWN,
                     androidMeasurementLocation =
@@ -348,6 +367,7 @@ class SampleInputConvertersTest {
                 NativeBloodGlucoseSampleInput(
                     timeMs = startTimeMs,
                     millimolesPerLiter = 5.4,
+                    device = null,
                     recordingMethod = null,
                     androidSpecimenSource = null,
                     androidMealType = null,
@@ -375,6 +395,7 @@ class SampleInputConvertersTest {
                 NativeBloodGlucoseSampleInput(
                     timeMs = startTimeMs,
                     millimolesPerLiter = 5.4,
+                    device = null,
                     recordingMethod = null,
                     androidSpecimenSource = NativeBloodGlucoseSpecimenSource.CAPILLARYBLOOD,
                     androidMealType = NativeBloodGlucoseMealType.BREAKFAST,
@@ -398,6 +419,7 @@ class SampleInputConvertersTest {
                 NativeBodyTemperatureSampleInput(
                     timeMs = startTimeMs,
                     celsius = 36.6,
+                    device = null,
                     recordingMethod = null,
                     androidMeasurementLocation = null,
                     iosSensorLocation = null,
@@ -424,6 +446,7 @@ class SampleInputConvertersTest {
                 NativeRespiratoryRateSampleInput(
                     timeMs = startTimeMs,
                     breathsPerMinute = 16.5,
+                    device = null,
                     recordingMethod = null,
                     syncId = null,
                     syncVersion = null
@@ -444,6 +467,7 @@ class SampleInputConvertersTest {
                 NativeBodyFatSampleInput(
                     timeMs = startTimeMs,
                     percentage = 18.5,
+                    device = null,
                     recordingMethod = null,
                     syncId = null,
                     syncVersion = null
@@ -464,6 +488,7 @@ class SampleInputConvertersTest {
                 NativeLeanBodyMassSampleInput(
                     timeMs = startTimeMs,
                     kilograms = 55.4,
+                    device = null,
                     recordingMethod = null,
                     syncId = null,
                     syncVersion = null
@@ -484,6 +509,7 @@ class SampleInputConvertersTest {
                 NativeBasalBodyTemperatureSampleInput(
                     timeMs = startTimeMs,
                     celsius = 36.4,
+                    device = null,
                     recordingMethod = null,
                     androidMeasurementLocation = null,
                     iosSensorLocation = null,
@@ -510,6 +536,7 @@ class SampleInputConvertersTest {
                 NativeOxygenSaturationSampleInput(
                     timeMs = startTimeMs,
                     percentage = 97.5,
+                    device = null,
                     recordingMethod = null,
                     syncId = null,
                     syncVersion = null
@@ -529,6 +556,7 @@ class SampleInputConvertersTest {
                 NativeHeightSampleInput(
                     timeMs = startTimeMs,
                     meters = 1.78,
+                    device = null,
                     recordingMethod = null,
                     syncId = null,
                     syncVersion = null
@@ -548,6 +576,7 @@ class SampleInputConvertersTest {
                 NativeVo2MaxSampleInput(
                     timeMs = startTimeMs,
                     millilitersPerKilogramPerMinute = 42.5,
+                    device = null,
                     recordingMethod = null,
                     androidMeasurementMethod =
                         NativeAndroidVo2MaxMeasurementMethod.MULTISTAGEFITNESSTEST,
@@ -624,12 +653,34 @@ class SampleInputConvertersTest {
     }
 
     @Test
+    fun allConvertersPreserveDeviceProvenance() {
+        val metadata = metadataFromAllConverters(
+            recordingMethod = NativeHealthRecordingMethod.AUTOMATICALLYRECORDED,
+            syncId = null,
+            syncVersion = null,
+            device = NativeHealthDeviceInfo(
+                type = NativeHealthDeviceType.SMARTDISPLAY,
+                manufacturer = "Example",
+                model = "Sensor Hub"
+            )
+        )
+
+        assertEquals(18, metadata.size)
+        metadata.forEach {
+            assertEquals(Device.TYPE_SMART_DISPLAY, it.device?.type)
+            assertEquals("Example", it.device?.manufacturer)
+            assertEquals("Sensor Hub", it.device?.model)
+        }
+    }
+
+    @Test
     fun toHeartRateRecordsSetsSyncMetadataOnParentRecord() {
         val record = toHeartRateRecords(
             arrayOf(
                 NativeHeartRateSampleInput(
                     timeMs = startTimeMs,
                     bpm = 72.0,
+                    device = null,
                     recordingMethod = null,
                     syncId = "heart-rate-sync-id",
                     syncVersion = 7.0
@@ -646,7 +697,8 @@ class SampleInputConvertersTest {
     private fun metadataFromAllConverters(
         recordingMethod: NativeHealthRecordingMethod?,
         syncId: String?,
-        syncVersion: Double?
+        syncVersion: Double?,
+        device: NativeHealthDeviceInfo? = null
     ): List<Metadata> {
         return listOf(
             toStepsRecords(
@@ -655,6 +707,7 @@ class SampleInputConvertersTest {
                         startTimeMs = startTimeMs,
                         endTimeMs = endTimeMs,
                         count = 512.0,
+                        device = device,
                         recordingMethod = recordingMethod,
                         syncId = syncId,
                         syncVersion = syncVersion
@@ -668,6 +721,7 @@ class SampleInputConvertersTest {
                         endTimeMs = endTimeMs,
                         distanceMeters = 1250.5,
                         scope = NativeDistanceScope.WALKINGRUNNING,
+                        device = device,
                         recordingMethod = recordingMethod,
                         syncId = syncId,
                         syncVersion = syncVersion
@@ -680,6 +734,7 @@ class SampleInputConvertersTest {
                         startTimeMs = startTimeMs,
                         endTimeMs = endTimeMs,
                         kilocalories = 215.25,
+                        device = device,
                         recordingMethod = recordingMethod,
                         syncId = syncId,
                         syncVersion = syncVersion
@@ -692,6 +747,7 @@ class SampleInputConvertersTest {
                         startTimeMs = startTimeMs,
                         endTimeMs = endTimeMs,
                         milliliters = 250.5,
+                        device = device,
                         recordingMethod = recordingMethod,
                         syncId = syncId,
                         syncVersion = syncVersion
@@ -704,6 +760,7 @@ class SampleInputConvertersTest {
                         startTimeMs = startTimeMs,
                         endTimeMs = endTimeMs,
                         floors = 12.5,
+                        device = device,
                         recordingMethod = recordingMethod,
                         syncId = syncId,
                         syncVersion = syncVersion
@@ -715,6 +772,7 @@ class SampleInputConvertersTest {
                     NativeHeartRateSampleInput(
                         timeMs = startTimeMs,
                         bpm = 72.0,
+                        device = device,
                         recordingMethod = recordingMethod,
                         syncId = syncId,
                         syncVersion = syncVersion
@@ -726,6 +784,7 @@ class SampleInputConvertersTest {
                     NativeBodyMassSampleInput(
                         timeMs = startTimeMs,
                         kilograms = 72.5,
+                        device = device,
                         recordingMethod = recordingMethod,
                         syncId = syncId,
                         syncVersion = syncVersion
@@ -737,6 +796,7 @@ class SampleInputConvertersTest {
                     NativeRestingHeartRateSampleInput(
                         timeMs = startTimeMs,
                         bpm = 58.0,
+                        device = device,
                         recordingMethod = recordingMethod,
                         syncId = syncId,
                         syncVersion = syncVersion
@@ -749,6 +809,7 @@ class SampleInputConvertersTest {
                         timeMs = startTimeMs,
                         systolicMmHg = 118.0,
                         diastolicMmHg = 76.0,
+                        device = device,
                         recordingMethod = recordingMethod,
                         androidBodyPosition = null,
                         androidMeasurementLocation = null,
@@ -762,6 +823,7 @@ class SampleInputConvertersTest {
                     NativeBloodGlucoseSampleInput(
                         timeMs = startTimeMs,
                         millimolesPerLiter = 5.4,
+                        device = device,
                         recordingMethod = recordingMethod,
                         androidSpecimenSource = null,
                         androidMealType = null,
@@ -777,6 +839,7 @@ class SampleInputConvertersTest {
                     NativeBodyTemperatureSampleInput(
                         timeMs = startTimeMs,
                         celsius = 36.6,
+                        device = device,
                         recordingMethod = recordingMethod,
                         androidMeasurementLocation = null,
                         iosSensorLocation = null,
@@ -790,6 +853,7 @@ class SampleInputConvertersTest {
                     NativeRespiratoryRateSampleInput(
                         timeMs = startTimeMs,
                         breathsPerMinute = 16.5,
+                        device = device,
                         recordingMethod = recordingMethod,
                         syncId = syncId,
                         syncVersion = syncVersion
@@ -801,6 +865,7 @@ class SampleInputConvertersTest {
                     NativeBodyFatSampleInput(
                         timeMs = startTimeMs,
                         percentage = 18.5,
+                        device = device,
                         recordingMethod = recordingMethod,
                         syncId = syncId,
                         syncVersion = syncVersion
@@ -812,6 +877,7 @@ class SampleInputConvertersTest {
                     NativeLeanBodyMassSampleInput(
                         timeMs = startTimeMs,
                         kilograms = 55.4,
+                        device = device,
                         recordingMethod = recordingMethod,
                         syncId = syncId,
                         syncVersion = syncVersion
@@ -823,6 +889,7 @@ class SampleInputConvertersTest {
                     NativeBasalBodyTemperatureSampleInput(
                         timeMs = startTimeMs,
                         celsius = 36.4,
+                        device = device,
                         recordingMethod = recordingMethod,
                         androidMeasurementLocation = null,
                         iosSensorLocation = null,
@@ -836,6 +903,7 @@ class SampleInputConvertersTest {
                     NativeOxygenSaturationSampleInput(
                         timeMs = startTimeMs,
                         percentage = 97.5,
+                        device = device,
                         recordingMethod = recordingMethod,
                         syncId = syncId,
                         syncVersion = syncVersion
@@ -847,6 +915,7 @@ class SampleInputConvertersTest {
                     NativeHeightSampleInput(
                         timeMs = startTimeMs,
                         meters = 1.78,
+                        device = device,
                         recordingMethod = recordingMethod,
                         syncId = syncId,
                         syncVersion = syncVersion
@@ -858,6 +927,7 @@ class SampleInputConvertersTest {
                     NativeVo2MaxSampleInput(
                         timeMs = startTimeMs,
                         millilitersPerKilogramPerMinute = 42.5,
+                        device = device,
                         recordingMethod = recordingMethod,
                         androidMeasurementMethod = null,
                         iosTestType = null,

@@ -18,8 +18,14 @@ public extension NativeBodyFatSampleInput {
   /**
    * Create a new instance of `NativeBodyFatSampleInput`.
    */
-  init(timeMs: Double, percentage: Double, recordingMethod: NativeHealthRecordingMethod?, syncId: String?, syncVersion: Double?) {
-    self.init(timeMs, percentage, { () -> bridge.std__optional_NativeHealthRecordingMethod_ in
+  init(timeMs: Double, percentage: Double, device: NativeHealthDeviceInfo?, recordingMethod: NativeHealthRecordingMethod?, syncId: String?, syncVersion: Double?) {
+    self.init(timeMs, percentage, { () -> bridge.std__optional_NativeHealthDeviceInfo_ in
+      if let __unwrappedValue = device {
+        return bridge.create_std__optional_NativeHealthDeviceInfo_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_NativeHealthRecordingMethod_ in
       if let __unwrappedValue = recordingMethod {
         return bridge.create_std__optional_NativeHealthRecordingMethod_(__unwrappedValue)
       } else {
@@ -48,6 +54,11 @@ public extension NativeBodyFatSampleInput {
   @inline(__always)
   var percentage: Double {
     return self.__percentage
+  }
+  
+  @inline(__always)
+  var device: NativeHealthDeviceInfo? {
+    return self.__device.value
   }
   
   @inline(__always)

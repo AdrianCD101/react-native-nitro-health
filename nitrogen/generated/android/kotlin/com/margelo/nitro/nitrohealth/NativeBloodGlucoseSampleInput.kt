@@ -26,6 +26,9 @@ data class NativeBloodGlucoseSampleInput(
   val millimolesPerLiter: Double,
   @DoNotStrip
   @Keep
+  val device: NativeHealthDeviceInfo?,
+  @DoNotStrip
+  @Keep
   val recordingMethod: NativeHealthRecordingMethod?,
   @DoNotStrip
   @Keep
@@ -53,6 +56,7 @@ data class NativeBloodGlucoseSampleInput(
     if (other !is NativeBloodGlucoseSampleInput) return false
     return Objects.deepEquals(this.timeMs, other.timeMs)
       && Objects.deepEquals(this.millimolesPerLiter, other.millimolesPerLiter)
+      && Objects.deepEquals(this.device, other.device)
       && Objects.deepEquals(this.recordingMethod, other.recordingMethod)
       && Objects.deepEquals(this.androidSpecimenSource, other.androidSpecimenSource)
       && Objects.deepEquals(this.androidMealType, other.androidMealType)
@@ -66,6 +70,7 @@ data class NativeBloodGlucoseSampleInput(
     return arrayOf<Any?>(
       timeMs,
       millimolesPerLiter,
+      device,
       recordingMethod,
       androidSpecimenSource,
       androidMealType,
@@ -84,8 +89,8 @@ data class NativeBloodGlucoseSampleInput(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(timeMs: Double, millimolesPerLiter: Double, recordingMethod: NativeHealthRecordingMethod?, androidSpecimenSource: NativeBloodGlucoseSpecimenSource?, androidMealType: NativeBloodGlucoseMealType?, androidRelationToMeal: NativeBloodGlucoseRelationToMeal?, iosMealTime: NativeBloodGlucoseMealTime?, syncId: String?, syncVersion: Double?): NativeBloodGlucoseSampleInput {
-      return NativeBloodGlucoseSampleInput(timeMs, millimolesPerLiter, recordingMethod, androidSpecimenSource, androidMealType, androidRelationToMeal, iosMealTime, syncId, syncVersion)
+    private fun fromCpp(timeMs: Double, millimolesPerLiter: Double, device: NativeHealthDeviceInfo?, recordingMethod: NativeHealthRecordingMethod?, androidSpecimenSource: NativeBloodGlucoseSpecimenSource?, androidMealType: NativeBloodGlucoseMealType?, androidRelationToMeal: NativeBloodGlucoseRelationToMeal?, iosMealTime: NativeBloodGlucoseMealTime?, syncId: String?, syncVersion: Double?): NativeBloodGlucoseSampleInput {
+      return NativeBloodGlucoseSampleInput(timeMs, millimolesPerLiter, device, recordingMethod, androidSpecimenSource, androidMealType, androidRelationToMeal, iosMealTime, syncId, syncVersion)
     }
   }
 }

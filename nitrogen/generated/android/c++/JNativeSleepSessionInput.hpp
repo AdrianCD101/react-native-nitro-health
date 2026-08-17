@@ -10,8 +10,12 @@
 #include <fbjni/fbjni.h>
 #include "NativeSleepSessionInput.hpp"
 
+#include "JNativeHealthDeviceInfo.hpp"
+#include "JNativeHealthDeviceType.hpp"
 #include "JNativeHealthRecordingMethod.hpp"
 #include "JNativeSleepSessionStageInput.hpp"
+#include "NativeHealthDeviceInfo.hpp"
+#include "NativeHealthDeviceType.hpp"
 #include "NativeHealthRecordingMethod.hpp"
 #include "NativeSleepSessionStageInput.hpp"
 #include <optional>
@@ -45,6 +49,8 @@ namespace margelo::nitro::nitrohealth {
       jni::local_ref<jni::JArrayClass<JNativeSleepSessionStageInput>> stages = this->getFieldValue(fieldStages);
       static const auto fieldTimeZone = clazz->getField<jni::JString>("timeZone");
       jni::local_ref<jni::JString> timeZone = this->getFieldValue(fieldTimeZone);
+      static const auto fieldDevice = clazz->getField<JNativeHealthDeviceInfo>("device");
+      jni::local_ref<JNativeHealthDeviceInfo> device = this->getFieldValue(fieldDevice);
       static const auto fieldRecordingMethod = clazz->getField<JNativeHealthRecordingMethod>("recordingMethod");
       jni::local_ref<JNativeHealthRecordingMethod> recordingMethod = this->getFieldValue(fieldRecordingMethod);
       return NativeSleepSessionInput(
@@ -61,6 +67,7 @@ namespace margelo::nitro::nitrohealth {
           return __vector;
         }(stages),
         timeZone != nullptr ? std::make_optional(timeZone->toStdString()) : std::nullopt,
+        device != nullptr ? std::make_optional(device->toCpp()) : std::nullopt,
         recordingMethod != nullptr ? std::make_optional(recordingMethod->toCpp()) : std::nullopt
       );
     }
@@ -71,7 +78,7 @@ namespace margelo::nitro::nitrohealth {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeSleepSessionInput::javaobject> fromCpp(const NativeSleepSessionInput& value) {
-      using JSignature = JNativeSleepSessionInput(double, double, jni::alias_ref<jni::JArrayClass<JNativeSleepSessionStageInput>>, jni::alias_ref<jni::JString>, jni::alias_ref<JNativeHealthRecordingMethod>);
+      using JSignature = JNativeSleepSessionInput(double, double, jni::alias_ref<jni::JArrayClass<JNativeSleepSessionStageInput>>, jni::alias_ref<jni::JString>, jni::alias_ref<JNativeHealthDeviceInfo>, jni::alias_ref<JNativeHealthRecordingMethod>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
@@ -89,6 +96,7 @@ namespace margelo::nitro::nitrohealth {
           return __array;
         }(value.stages),
         value.timeZone.has_value() ? jni::make_jstring(value.timeZone.value()) : nullptr,
+        value.device.has_value() ? JNativeHealthDeviceInfo::fromCpp(value.device.value()) : nullptr,
         value.recordingMethod.has_value() ? JNativeHealthRecordingMethod::fromCpp(value.recordingMethod.value()) : nullptr
       );
     }

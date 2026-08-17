@@ -163,6 +163,7 @@ describe('NitroHealth workouts contract', () => {
           activityType: 'running',
           displayName: 'Morning Run',
           timeZone: 'America/New_York',
+          device: { type: 'watch', manufacturer: 'Example', model: 'Run Watch' },
           recordingMethod: 'manual',
           sync: { id: 'workout-1', version: 2 },
         })
@@ -177,6 +178,7 @@ describe('NitroHealth workouts contract', () => {
         activityType: 'running',
         displayName: 'Morning Run',
         timeZone: 'America/New_York',
+        device: { type: 'watch', manufacturer: 'Example', model: 'Run Watch' },
         recordingMethod: 'manual',
         syncId: 'workout-1',
         syncVersion: 2,
@@ -215,6 +217,14 @@ describe('NitroHealth workouts contract', () => {
       await expect(
         NitroHealth.saveWorkout({ startDate, endDate, activityType: 'running', timeZone: '' })
       ).rejects.toThrow('workout: timeZone must be a non-empty IANA time-zone identifier')
+      await expect(
+        NitroHealth.saveWorkout({
+          startDate,
+          endDate,
+          activityType: 'running',
+          device: { manufacturer: '' },
+        })
+      ).rejects.toThrow('workout: device.manufacturer must be a non-empty string')
       await expect(
         NitroHealth.saveWorkout({
           startDate,
