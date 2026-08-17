@@ -63,7 +63,7 @@ import type { WorkoutActivityType } from '../WorkoutActivityType'
 import type { WorkoutSample } from '../WorkoutSample'
 import { makeHealthRecordingMethod, makeHealthSampleMetadata } from './sampleMetadataMapping'
 
-const SLEEP_STAGES = new Set<SleepStage>([
+const SLEEP_STAGES = new Set<string>([
   'inBed',
   'awake',
   'awakeInBed',
@@ -73,8 +73,8 @@ const SLEEP_STAGES = new Set<SleepStage>([
   'asleepREM',
   'outOfBed',
   'unknown',
-])
-const WORKOUT_ACTIVITY_TYPES = new Set<WorkoutActivityType>([
+] satisfies SleepStage[])
+const WORKOUT_ACTIVITY_TYPES = new Set<string>([
   'americanFootball',
   'archery',
   'australianFootball',
@@ -149,7 +149,15 @@ const WORKOUT_ACTIVITY_TYPES = new Set<WorkoutActivityType>([
   'wheelchair',
   'wrestling',
   'yoga',
-])
+] satisfies WorkoutActivityType[])
+
+function isSleepStage(value: string): value is SleepStage {
+  return SLEEP_STAGES.has(value)
+}
+
+function isWorkoutActivityType(value: string): value is WorkoutActivityType {
+  return WORKOUT_ACTIVITY_TYPES.has(value)
+}
 
 function makeBloodPressureBodyPosition(
   value: NonNullable<NativeBloodPressureSample['androidBodyPosition']>
@@ -263,10 +271,11 @@ export function makeSamplePage<TNative, TSample>(
   page: { samples: TNative[]; nextCursor?: string },
   map: (sample: TNative) => TSample
 ): HealthSamplePage<TSample> {
-  return {
+  const result: HealthSamplePage<TSample> = {
     samples: page.samples.map(map),
-    ...(page.nextCursor === undefined ? {} : { nextCursor: page.nextCursor }),
   }
+  if (page.nextCursor !== undefined) result.nextCursor = page.nextCursor
+  return result
 }
 
 export function makeDistanceScope(scope: NativeDistanceSample['scope']): DistanceSample['scope'] {
@@ -311,7 +320,7 @@ function makeWorkoutActivity(activity: NativeWorkoutActivity): WorkoutActivity {
   ) {
     throw new Error('Known native workout activity is incomplete')
   }
-  if (!WORKOUT_ACTIVITY_TYPES.has(activity.type as WorkoutActivityType)) {
+  if (!isWorkoutActivityType(activity.type)) {
     throw new Error(`Unsupported normalized native workout activity: ${activity.type}`)
   }
   if (activity.portability !== 'portable' && activity.portability !== 'readOnly') {
@@ -323,7 +332,7 @@ function makeWorkoutActivity(activity: NativeWorkoutActivity): WorkoutActivity {
 
   return {
     status: 'known',
-    type: activity.type as WorkoutActivityType,
+    type: activity.type,
     portability: activity.portability === 'readOnly' ? 'read-only' : 'portable',
     mapping: activity.mapping,
   }
@@ -458,13 +467,14 @@ export function makeBloodPressureSample(sample: NativeBloodPressureSample): Bloo
     }
   }
 
-  return {
+  const result: BloodPressureSample = {
     ...makeHealthSampleMetadata(sample.sampleMetadata),
     date: new Date(sample.timeMs),
     systolicMmHg: sample.systolicMmHg,
     diastolicMmHg: sample.diastolicMmHg,
-    ...(metadata === undefined ? {} : { metadata }),
   }
+  if (metadata !== undefined) result.metadata = metadata
+  return result
 }
 
 export function makeBloodGlucoseSample(sample: NativeBloodGlucoseSample): BloodGlucoseSample {
@@ -519,24 +529,26 @@ export function makeBloodGlucoseSample(sample: NativeBloodGlucoseSample): BloodG
     metadata = { ...metadata, ios: { mealTime: sample.iosMealTime } }
   }
 
-  return {
+  const result: BloodGlucoseSample = {
     ...makeHealthSampleMetadata(sample.sampleMetadata),
     date: new Date(sample.timeMs),
     millimolesPerLiter: sample.millimolesPerLiter,
-    ...(metadata === undefined ? {} : { metadata }),
   }
+  if (metadata !== undefined) result.metadata = metadata
+  return result
 }
 
 export function makeBodyTemperatureSample(
   sample: NativeBodyTemperatureSample
 ): BodyTemperatureSample {
   const metadata = makeBodyTemperatureMetadata(sample)
-  return {
+  const result: BodyTemperatureSample = {
     ...makeHealthSampleMetadata(sample.sampleMetadata),
     date: new Date(sample.timeMs),
     celsius: sample.celsius,
-    ...(metadata === undefined ? {} : { metadata }),
   }
+  if (metadata !== undefined) result.metadata = metadata
+  return result
 }
 
 export function makeRespiratoryRateSample(
@@ -569,12 +581,13 @@ export function makeBasalBodyTemperatureSample(
   sample: NativeBasalBodyTemperatureSample
 ): BasalBodyTemperatureSample {
   const metadata = makeBodyTemperatureMetadata(sample)
-  return {
+  const result: BasalBodyTemperatureSample = {
     ...makeHealthSampleMetadata(sample.sampleMetadata),
     date: new Date(sample.timeMs),
     celsius: sample.celsius,
-    ...(metadata === undefined ? {} : { metadata }),
   }
+  if (metadata !== undefined) result.metadata = metadata
+  return result
 }
 
 export function makeOxygenSaturationSample(
@@ -622,12 +635,13 @@ export function makeVo2MaxSample(sample: NativeVo2MaxSample): Vo2MaxSample {
     metadata = { ...metadata, ios: { testType: iosTestType[sample.iosTestType] } }
   }
 
-  return {
+  const result: Vo2MaxSample = {
     ...makeHealthSampleMetadata(sample.sampleMetadata),
     date: new Date(sample.timeMs),
     millilitersPerKilogramPerMinute: sample.millilitersPerKilogramPerMinute,
-    ...(metadata === undefined ? {} : { metadata }),
   }
+  if (metadata !== undefined) result.metadata = metadata
+  return result
 }
 
 export function makeSleepSample(sample: NativeSleepSample): SleepSample {
@@ -652,13 +666,13 @@ export function makeSleepSample(sample: NativeSleepSample): SleepSample {
     if (sample.stage === undefined || sample.stageData !== undefined) {
       throw new Error('Native sleep stage has invalid stage fields')
     }
-    if (!SLEEP_STAGES.has(sample.stage as SleepStage)) {
+    if (!isSleepStage(sample.stage)) {
       throw new Error(`Unsupported native sleep stage: ${sample.stage}`)
     }
     return {
       ...base,
       kind: 'stage',
-      stage: sample.stage as SleepStage,
+      stage: sample.stage,
     }
   }
 

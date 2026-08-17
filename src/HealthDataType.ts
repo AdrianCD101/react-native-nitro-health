@@ -47,8 +47,26 @@ export type ChangeTrackedHealthDataType = Exclude<HealthDataType, 'nutrition'>
  */
 export type AggregateOnlyHealthDataType = 'basalEnergyBurned' | 'totalEnergyBurned'
 
+/**
+ * Per-nutrient statistics-only types backed by the same records as `nutrition`: they support
+ * sum-only {@linkcode NitroHealth.readStatistics} buckets, are covered by the `nutrition`
+ * permission, and are never valid permission entries themselves. Raw reads and writes go
+ * through `nutrition`.
+ */
+export type NutritionStatisticsDataType =
+  | 'nutritionEnergyConsumed'
+  | 'nutritionProtein'
+  | 'nutritionTotalCarbohydrate'
+  | 'nutritionTotalFat'
+  | 'nutritionDietaryFiber'
+  | 'nutritionSugar'
+  | 'nutritionSodium'
+
 /** Data type accepted by {@linkcode NitroHealth.readStatistics}. */
-export type HealthStatisticsDataType = HealthDataType | AggregateOnlyHealthDataType
+export type HealthStatisticsDataType =
+  | HealthDataType
+  | AggregateOnlyHealthDataType
+  | NutritionStatisticsDataType
 
 /** Data type accepted by read permissions, including aggregate-only energy concepts. */
 export type HealthPermissionDataType = HealthDataType | AggregateOnlyHealthDataType

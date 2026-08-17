@@ -59,11 +59,7 @@ import type { Vo2MaxSampleInput } from '../Vo2MaxSampleInput'
 import type { AndroidVo2MaxMeasurementMethod, IOSVo2MaxTestType } from '../Vo2MaxMetadata'
 import type { WorkoutSampleInput } from '../WorkoutSampleInput'
 import type { WritableWorkoutActivityType } from '../WritableWorkoutActivityType'
-import {
-  makeNativeSync,
-  makeNativeWriteMetadata,
-  makeNativeWriteProvenance,
-} from './sampleMetadataMapping'
+import { makeNativeWriteMetadata, makeNativeWriteProvenance } from './sampleMetadataMapping'
 import {
   assertSampleBetween,
   assertSampleGreaterThanZero,
@@ -161,10 +157,7 @@ const WRITABLE_WORKOUT_ACTIVITY_TYPES = new Set<WritableWorkoutActivityType>([
   'yoga',
 ])
 
-function makeSampleInterval(
-  sample: { startDate: Date; endDate: Date },
-  index: number
-): { startTimeMs: number; endTimeMs: number } {
+function makeSampleInterval(sample: { startDate: Date; endDate: Date }, index: number) {
   const startTimeMs = assertValidSampleDate(sample.startDate, index, 'startDate')
   const endTimeMs = assertValidSampleDate(sample.endDate, index, 'endDate')
 
@@ -250,10 +243,15 @@ function makeNativeBloodPressureMetadata(
     android.measurementLocation,
     index
   )
-  return {
-    ...(androidBodyPosition === undefined ? {} : { androidBodyPosition }),
-    ...(androidMeasurementLocation === undefined ? {} : { androidMeasurementLocation }),
+  const result: Pick<
+    NativeBloodPressureSampleInput,
+    'androidBodyPosition' | 'androidMeasurementLocation'
+  > = {}
+  if (androidBodyPosition !== undefined) result.androidBodyPosition = androidBodyPosition
+  if (androidMeasurementLocation !== undefined) {
+    result.androidMeasurementLocation = androidMeasurementLocation
   }
+  return result
 }
 
 function makeNativeBloodGlucoseSpecimenSource(
@@ -800,15 +798,13 @@ export function makeNativeBloodPressureSampleInput(
     'diastolicMmHg'
   )
 
-  const provenance = makeNativeWriteProvenance(sample, index)
   const metadata = makeNativeBloodPressureMetadata(sample.metadata, index)
-  const sync = makeNativeSync(sample.sync, index)
 
   return {
     timeMs,
     systolicMmHg: sample.systolicMmHg,
     diastolicMmHg: sample.diastolicMmHg,
-    writeMetadata: { provenance, ...(sync === undefined ? {} : { sync }) },
+    writeMetadata: makeNativeWriteMetadata(sample, index),
     ...metadata,
   }
 }
@@ -827,14 +823,12 @@ export function makeNativeBloodGlucoseSampleInput(
     'millimolesPerLiter'
   )
 
-  const provenance = makeNativeWriteProvenance(sample, index)
   const metadata = makeNativeBloodGlucoseMetadata(sample.metadata, index)
-  const sync = makeNativeSync(sample.sync, index)
 
   return {
     timeMs,
     millimolesPerLiter: sample.millimolesPerLiter,
-    writeMetadata: { provenance, ...(sync === undefined ? {} : { sync }) },
+    writeMetadata: makeNativeWriteMetadata(sample, index),
     ...metadata,
   }
 }
@@ -847,14 +841,12 @@ export function makeNativeBodyTemperatureSampleInput(
 
   assertSampleBetween(sample.celsius, MIN_CELSIUS, MAX_CELSIUS, index, 'celsius')
 
-  const provenance = makeNativeWriteProvenance(sample, index)
   const metadata = makeNativeBodyTemperatureMetadata(sample.metadata, index)
-  const sync = makeNativeSync(sample.sync, index)
 
   return {
     timeMs,
     celsius: sample.celsius,
-    writeMetadata: { provenance, ...(sync === undefined ? {} : { sync }) },
+    writeMetadata: makeNativeWriteMetadata(sample, index),
     ...metadata,
   }
 }
@@ -919,14 +911,12 @@ export function makeNativeBasalBodyTemperatureSampleInput(
 
   assertSampleBetween(sample.celsius, MIN_CELSIUS, MAX_CELSIUS, index, 'celsius')
 
-  const provenance = makeNativeWriteProvenance(sample, index)
   const metadata = makeNativeBodyTemperatureMetadata(sample.metadata, index)
-  const sync = makeNativeSync(sample.sync, index)
 
   return {
     timeMs,
     celsius: sample.celsius,
-    writeMetadata: { provenance, ...(sync === undefined ? {} : { sync }) },
+    writeMetadata: makeNativeWriteMetadata(sample, index),
     ...metadata,
   }
 }
@@ -976,14 +966,12 @@ export function makeNativeVo2MaxSampleInput(
     'millilitersPerKilogramPerMinute'
   )
 
-  const provenance = makeNativeWriteProvenance(sample, index)
   const metadata = makeNativeVo2MaxMetadata(sample.metadata, index)
-  const sync = makeNativeSync(sample.sync, index)
 
   return {
     timeMs,
     millilitersPerKilogramPerMinute: sample.millilitersPerKilogramPerMinute,
-    writeMetadata: { provenance, ...(sync === undefined ? {} : { sync }) },
+    writeMetadata: makeNativeWriteMetadata(sample, index),
     ...metadata,
   }
 }

@@ -146,19 +146,18 @@ export function nativeRecordMetadata(
   recordingMethod: NativeHealthRecordingMethod = 'unknown',
   device?: NativeHealthDeviceInfo
 ): NativeRecordMetadata {
-  return {
-    sampleMetadata: {
-      identityKind: 'record',
-      identityId: id,
-      identityRecordId: id,
-      originIdentifier: identifier,
-      ...(displayName === undefined ? {} : { originDisplayName: displayName }),
-      ...(device?.type === undefined ? {} : { deviceType: device.type }),
-      ...(device?.manufacturer === undefined ? {} : { deviceManufacturer: device.manufacturer }),
-      ...(device?.model === undefined ? {} : { deviceModel: device.model }),
-      recordingMethod,
-    },
+  const sampleMetadata: NativeHealthSampleMetadata = {
+    identityKind: 'record',
+    identityId: id,
+    identityRecordId: id,
+    originIdentifier: identifier,
+    recordingMethod,
   }
+  if (displayName !== undefined) sampleMetadata.originDisplayName = displayName
+  if (device?.type !== undefined) sampleMetadata.deviceType = device.type
+  if (device?.manufacturer !== undefined) sampleMetadata.deviceManufacturer = device.manufacturer
+  if (device?.model !== undefined) sampleMetadata.deviceModel = device.model
+  return { sampleMetadata }
 }
 
 export function nativeRecordChildMetadata(
@@ -169,17 +168,16 @@ export function nativeRecordChildMetadata(
   recordingMethod: NativeHealthRecordingMethod = 'unknown',
   device?: NativeHealthDeviceInfo
 ): NativeRecordMetadata {
-  return {
-    sampleMetadata: {
-      identityKind: 'recordChild',
-      identityId: id,
-      identityRecordId: recordId,
-      originIdentifier: identifier,
-      ...(displayName === undefined ? {} : { originDisplayName: displayName }),
-      ...(device?.type === undefined ? {} : { deviceType: device.type }),
-      ...(device?.manufacturer === undefined ? {} : { deviceManufacturer: device.manufacturer }),
-      ...(device?.model === undefined ? {} : { deviceModel: device.model }),
-      recordingMethod,
-    },
+  const sampleMetadata: NativeHealthSampleMetadata = {
+    identityKind: 'recordChild',
+    identityId: id,
+    identityRecordId: recordId,
+    originIdentifier: identifier,
+    recordingMethod,
   }
+  if (displayName !== undefined) sampleMetadata.originDisplayName = displayName
+  if (device?.type !== undefined) sampleMetadata.deviceType = device.type
+  if (device?.manufacturer !== undefined) sampleMetadata.deviceManufacturer = device.manufacturer
+  if (device?.model !== undefined) sampleMetadata.deviceModel = device.model
+  return { sampleMetadata }
 }

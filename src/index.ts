@@ -67,6 +67,7 @@ export type {
   HealthDataType,
   HealthPermissionDataType,
   HealthStatisticsDataType,
+  NutritionStatisticsDataType,
   WritableHealthDataType,
 } from './HealthDataType'
 export type { HealthDateRangeQuery } from './HealthDateRangeQuery'

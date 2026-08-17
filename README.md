@@ -767,23 +767,45 @@ const heartRate = await NitroHealth.readStatistics('heartRate', {
 })
 ```
 
-| Data type            | Metrics             | Unit                 |
-| -------------------- | ------------------- | -------------------- |
-| `steps`              | `sum`               | count                |
-| `distance`           | `sum`               | meters, plus `scope` |
-| `activeEnergyBurned` | `sum`               | kcal                 |
-| `basalEnergyBurned`  | `sum`               | kcal                 |
-| `totalEnergyBurned`  | `sum`               | kcal                 |
-| `hydration`          | `sum`               | mL                   |
-| `floorsClimbed`      | `sum`               | count                |
-| `heartRate`          | `avg`, `min`, `max` | bpm                  |
-| `restingHeartRate`   | `avg`, `min`, `max` | bpm                  |
-| `height`             | `avg`, `min`, `max` | meters               |
-| `bodyMass`           | `avg`, `min`, `max` | kg                   |
+| Data type                    | Metrics             | Unit                 |
+| ---------------------------- | ------------------- | -------------------- |
+| `steps`                      | `sum`               | count                |
+| `distance`                   | `sum`               | meters, plus `scope` |
+| `activeEnergyBurned`         | `sum`               | kcal                 |
+| `basalEnergyBurned`          | `sum`               | kcal                 |
+| `totalEnergyBurned`          | `sum`               | kcal                 |
+| `hydration`                  | `sum`               | mL                   |
+| `floorsClimbed`              | `sum`               | count                |
+| `heartRate`                  | `avg`, `min`, `max` | bpm                  |
+| `restingHeartRate`           | `avg`, `min`, `max` | bpm                  |
+| `height`                     | `avg`, `min`, `max` | meters               |
+| `bodyMass`                   | `avg`, `min`, `max` | kg                   |
+| `nutritionEnergyConsumed`    | `sum`               | kcal                 |
+| `nutritionProtein`           | `sum`               | g                    |
+| `nutritionTotalCarbohydrate` | `sum`               | g                    |
+| `nutritionTotalFat`          | `sum`               | g                    |
+| `nutritionDietaryFiber`      | `sum`               | g                    |
+| `nutritionSugar`             | `sum`               | g                    |
+| `nutritionSodium`            | `sum`               | mg                   |
 
 On iOS, `floorsClimbed` statistics aggregate HealthKit flights climbed. See the raw-read portability note above.
 
-Sleep, HRV, oxygen saturation, blood pressure, blood glucose, body temperature, respiratory rate, body fat, lean body mass, basal body temperature, VO2 max, workout, and nutrition statistics are not supported by `readStatistics()`. Invalid data-type/metric combinations reject before crossing the native boundary.
+Sleep, HRV, oxygen saturation, blood pressure, blood glucose, body temperature, respiratory rate, body fat, lean body mass, basal body temperature, VO2 max, and workout statistics are not supported by `readStatistics()`, and neither is the raw `nutrition` type — nutrient aggregates go through the per-nutrient statistics types above. Invalid data-type/metric combinations reject before crossing the native boundary.
+
+### Nutrition Statistics
+
+The seven `nutrition*` types (`NutritionStatisticsDataType`) are statistics-only: sum buckets backed by the same records as `nutrition`. They are covered by the `nutrition` permission and are never valid permission entries themselves — requesting `{ dataType: 'nutritionProtein' }` as a permission rejects in JS.
+
+Android aggregates the corresponding `NutritionRecord` field. iOS runs statistics over the dietary quantity types, which see the whole store: unlike `readNutrition` (correlations only), these sums **include** loose dietary samples written by other apps outside a food correlation. Water is excluded as everywhere — use `hydration` statistics.
+
+```ts
+const dailyProtein = await NitroHealth.readStatistics('nutritionProtein', {
+  startDate,
+  endDate,
+  bucket: 'day',
+  metrics: ['sum'],
+})
+```
 
 ### Basal and Total Energy
 

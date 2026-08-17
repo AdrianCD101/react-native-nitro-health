@@ -3,6 +3,7 @@ import type { HealthDeviceInfo, HealthDeviceType } from '../HealthDeviceInfo'
 import type { HealthRecordSync } from '../HealthRecordSync'
 import type { HealthRecordingMethod } from '../HealthRecordingMethod'
 import type { HealthSampleIdentity } from '../HealthSampleIdentity'
+import type { HealthSample } from '../HealthSample'
 import type { NativeHealthDataOrigin } from '../NativeHealthDataOrigin'
 import type { NativeHealthDeviceInfo } from '../NativeHealthDeviceInfo'
 import type { NativeHealthRecordingMethod } from '../NativeHealthRecordingMethod'
@@ -141,10 +142,11 @@ export function makeNativeWriteMetadata(
   indexOrPrefix: number | string
 ): NativeHealthWriteMetadata {
   const sync = makeNativeSync(sample.sync, indexOrPrefix)
-  return {
+  const metadata: NativeHealthWriteMetadata = {
     provenance: makeNativeWriteProvenance(sample, indexOrPrefix),
-    ...(sync === undefined ? {} : { sync }),
   }
+  if (sync !== undefined) metadata.sync = sync
+  return metadata
 }
 
 export function makeHealthRecordingMethod(
@@ -215,25 +217,20 @@ function makeHealthDeviceInfo(
     return undefined
   }
 
-  return {
-    ...(type === undefined ? {} : { type }),
-    ...(manufacturer === undefined ? {} : { manufacturer }),
-    ...(model === undefined ? {} : { model }),
-  }
+  const info: HealthDeviceInfo = {}
+  if (type !== undefined) info.type = type
+  if (manufacturer !== undefined) info.manufacturer = manufacturer
+  if (model !== undefined) info.model = model
+  return info
 }
 
-export function makeHealthSampleMetadata(sampleMetadata: NativeHealthSampleMetadata): {
-  identity: HealthSampleIdentity
-  origin: HealthDataOrigin
-  device?: HealthDeviceInfo
-  recordingMethod: HealthRecordingMethod
-} {
+export function makeHealthSampleMetadata(sampleMetadata: NativeHealthSampleMetadata): HealthSample {
   const device = makeHealthDeviceInfo({
     type: sampleMetadata.deviceType,
     manufacturer: sampleMetadata.deviceManufacturer,
     model: sampleMetadata.deviceModel,
   })
-  return {
+  const metadata: HealthSample = {
     identity: makeHealthSampleIdentity({
       kind: sampleMetadata.identityKind,
       id: sampleMetadata.identityId,
@@ -243,9 +240,10 @@ export function makeHealthSampleMetadata(sampleMetadata: NativeHealthSampleMetad
       identifier: sampleMetadata.originIdentifier,
       displayName: sampleMetadata.originDisplayName,
     }),
-    ...(device === undefined ? {} : { device }),
     recordingMethod: makeHealthRecordingMethod(sampleMetadata.recordingMethod),
   }
+  if (device !== undefined) metadata.device = device
+  return metadata
 }
 
 function makeHealthSampleIdentity(identity: NativeHealthSampleIdentity): HealthSampleIdentity {

@@ -101,6 +101,27 @@ class HealthConnectPermissionUtilsTest {
     }
 
     @Test
+    fun nutritionStatisticsTypesCollapseToTheSameNutritionReadPermission() {
+        val statisticsTypes = listOf(
+            "nutritionEnergyConsumed",
+            "nutritionProtein",
+            "nutritionTotalCarbohydrate",
+            "nutritionTotalFat",
+            "nutritionDietaryFiber",
+            "nutritionSugar",
+            "nutritionSodium"
+        )
+
+        statisticsTypes.forEach { dataType ->
+            assertEquals(NutritionRecord::class, healthConnectRecordTypeForDataType(dataType))
+            assertEquals(
+                HealthPermission.getReadPermission(NutritionRecord::class),
+                toHealthConnectPermission(dataType, "read")
+            )
+        }
+    }
+
+    @Test
     fun toHealthConnectPermissionMapsReadPermissions() {
         assertEquals(
             HealthPermission.getReadPermission(StepsRecord::class),

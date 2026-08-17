@@ -9,6 +9,7 @@ import type {
   BodyTemperatureSample,
   FloorsClimbedSample,
   HydrationSample,
+  HealthDateRangeQuery,
   HealthPermission,
   NutritionSample,
   HealthSampleIdentity,
@@ -195,11 +196,12 @@ async function readIdempotentFloorsClimbed(
   let cursor: string | undefined
 
   do {
-    const page = await NitroHealth.readFloorsClimbed({
+    const query: HealthDateRangeQuery = {
       ...idempotentReadRange,
       limit: 1000,
-      ...(cursor === undefined ? {} : { cursor }),
-    })
+    }
+    if (cursor !== undefined) query.cursor = cursor
+    const page = await NitroHealth.readFloorsClimbed(query)
     samples.push(...page.samples)
     cursor = page.nextCursor
   } while (cursor !== undefined)

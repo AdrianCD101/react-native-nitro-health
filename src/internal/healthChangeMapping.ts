@@ -214,6 +214,7 @@ function makeHealthRecordChange<T extends ChangeTrackedHealthDataType>(
     throw new Error(`Unsupported native health change type: ${change.type}`)
   }
 
+  // SAFETY: makeUpsertSamples dispatches on the same dataType generic used by HealthRecordChange.
   return makeUpsertSamples(dataType, change) as HealthRecordChange<T>
 }
 

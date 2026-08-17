@@ -257,11 +257,84 @@ internal fun healthDataTypeDescriptorFor(dataType: String): HealthDataTypeDescri
             recordType = Vo2MaxRecord::class,
             permissionLabel = "VO2 max"
         )
-        // Raw nutrition entries reject readStatistics in JS; the per-nutrient
-        // statistics-only types are tracked separately and land with them.
+        // Raw nutrition entries reject readStatistics in JS; bucketed sums go through the
+        // per-nutrient statistics-only types below, which share NutritionRecord and
+        // therefore the single nutrition permission.
         "nutrition" -> HealthDataTypeDescriptor(
             recordType = NutritionRecord::class,
             permissionLabel = "nutrition"
+        )
+        "nutritionEnergyConsumed" -> HealthDataTypeDescriptor(
+            recordType = NutritionRecord::class,
+            permissionLabel = "nutrition",
+            statisticsMetrics = mapOf(
+                "sum" to StatisticsMetricBinding(
+                    metric = NutritionRecord.ENERGY_TOTAL,
+                    extract = { result -> result[NutritionRecord.ENERGY_TOTAL]?.inKilocalories }
+                )
+            )
+        )
+        "nutritionProtein" -> HealthDataTypeDescriptor(
+            recordType = NutritionRecord::class,
+            permissionLabel = "nutrition",
+            statisticsMetrics = mapOf(
+                "sum" to StatisticsMetricBinding(
+                    metric = NutritionRecord.PROTEIN_TOTAL,
+                    extract = { result -> result[NutritionRecord.PROTEIN_TOTAL]?.inGrams }
+                )
+            )
+        )
+        "nutritionTotalCarbohydrate" -> HealthDataTypeDescriptor(
+            recordType = NutritionRecord::class,
+            permissionLabel = "nutrition",
+            statisticsMetrics = mapOf(
+                "sum" to StatisticsMetricBinding(
+                    metric = NutritionRecord.TOTAL_CARBOHYDRATE_TOTAL,
+                    extract = { result ->
+                        result[NutritionRecord.TOTAL_CARBOHYDRATE_TOTAL]?.inGrams
+                    }
+                )
+            )
+        )
+        "nutritionTotalFat" -> HealthDataTypeDescriptor(
+            recordType = NutritionRecord::class,
+            permissionLabel = "nutrition",
+            statisticsMetrics = mapOf(
+                "sum" to StatisticsMetricBinding(
+                    metric = NutritionRecord.TOTAL_FAT_TOTAL,
+                    extract = { result -> result[NutritionRecord.TOTAL_FAT_TOTAL]?.inGrams }
+                )
+            )
+        )
+        "nutritionDietaryFiber" -> HealthDataTypeDescriptor(
+            recordType = NutritionRecord::class,
+            permissionLabel = "nutrition",
+            statisticsMetrics = mapOf(
+                "sum" to StatisticsMetricBinding(
+                    metric = NutritionRecord.DIETARY_FIBER_TOTAL,
+                    extract = { result -> result[NutritionRecord.DIETARY_FIBER_TOTAL]?.inGrams }
+                )
+            )
+        )
+        "nutritionSugar" -> HealthDataTypeDescriptor(
+            recordType = NutritionRecord::class,
+            permissionLabel = "nutrition",
+            statisticsMetrics = mapOf(
+                "sum" to StatisticsMetricBinding(
+                    metric = NutritionRecord.SUGAR_TOTAL,
+                    extract = { result -> result[NutritionRecord.SUGAR_TOTAL]?.inGrams }
+                )
+            )
+        )
+        "nutritionSodium" -> HealthDataTypeDescriptor(
+            recordType = NutritionRecord::class,
+            permissionLabel = "nutrition",
+            statisticsMetrics = mapOf(
+                "sum" to StatisticsMetricBinding(
+                    metric = NutritionRecord.SODIUM_TOTAL,
+                    extract = { result -> result[NutritionRecord.SODIUM_TOTAL]?.inMilligrams }
+                )
+            )
         )
         else -> throw IllegalArgumentException("Unsupported health data type: $dataType")
     }

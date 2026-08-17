@@ -42,7 +42,8 @@ describe('NitroHealth deletes (native)', () => {
     }
 
     await expect(
-      NitroHealth.deleteRecordsByIds('heartRate', [child as unknown as HealthRecordIdentity])
+      // @ts-expect-error This test exercises runtime validation for untyped JavaScript callers.
+      NitroHealth.deleteRecordsByIds('heartRate', [child])
     ).rejects.toThrow('records[0]: an independently deletable record identity is required')
   })
 
@@ -449,9 +450,8 @@ describe('NitroHealth deletes (native)', () => {
     let record: HealthRecordIdentity
     if (target.identity.kind === 'record-child') {
       await expect(
-        NitroHealth.deleteRecordsByIds('heartRate', [
-          target.identity as unknown as HealthRecordIdentity,
-        ])
+        // @ts-expect-error This test exercises runtime validation for untyped JavaScript callers.
+        NitroHealth.deleteRecordsByIds('heartRate', [target.identity])
       ).rejects.toThrow('an independently deletable record identity is required')
       record = target.identity.record
     } else {

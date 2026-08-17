@@ -201,10 +201,9 @@ function createNitroHealthMock(options = {}) {
       return { ...device, type: device.type || 'unknown' }
     }
 
-    const projected = {
-      ...(device.manufacturer === undefined ? {} : { manufacturer: device.manufacturer }),
-      ...(device.model === undefined ? {} : { model: device.model }),
-    }
+    const projected = {}
+    if (device.manufacturer !== undefined) projected.manufacturer = device.manufacturer
+    if (device.model !== undefined) projected.model = device.model
     return Object.keys(projected).length === 0 ? undefined : projected
   }
   const nextIdentity = (dataType) => {
@@ -219,13 +218,16 @@ function createNitroHealthMock(options = {}) {
     }
     return { kind: 'record', id: recordId }
   }
-  const makeStoredSample = (dataType, recordingMethod, device, fields) => ({
-    identity: nextIdentity(dataType),
-    origin: { ...mockOrigin },
-    ...(device === undefined ? {} : { device }),
-    recordingMethod,
-    ...fields,
-  })
+  const makeStoredSample = (dataType, recordingMethod, device, fields) => {
+    const storedSample = {
+      identity: nextIdentity(dataType),
+      origin: { ...mockOrigin },
+      recordingMethod,
+      ...fields,
+    }
+    if (device !== undefined) storedSample.device = device
+    return storedSample
+  }
   const defaultStoredFields = (sample) => {
     const fields = { ...sample }
     delete fields.device
@@ -496,25 +498,27 @@ function createNitroHealthMock(options = {}) {
       }))
     }),
     saveWorkout: createMockFunction((workout) =>
-      saveSamples('workout', [workout], (sample) => ({
-        startDate: sample.startDate,
-        endDate: sample.endDate,
-        elapsedDurationSeconds: (sample.endDate.getTime() - sample.startDate.getTime()) / 1000,
-        activeDuration: { status: 'not-reported' },
-        activity: {
-          status: 'known',
-          type: sample.activityType,
-          portability: 'portable',
-          mapping: 'exact',
-        },
-        ...(sample.displayName === undefined
-          ? {}
-          : profileName === 'observer'
-            ? { brandName: sample.displayName }
-            : { title: sample.displayName }),
-        totalDistance: { status: 'not-reported' },
-        totalActiveEnergyBurned: { status: 'not-reported' },
-      }))
+      saveSamples('workout', [workout], (sample) => {
+        const storedWorkout = {
+          startDate: sample.startDate,
+          endDate: sample.endDate,
+          elapsedDurationSeconds: (sample.endDate.getTime() - sample.startDate.getTime()) / 1000,
+          activeDuration: { status: 'not-reported' },
+          activity: {
+            status: 'known',
+            type: sample.activityType,
+            portability: 'portable',
+            mapping: 'exact',
+          },
+          totalDistance: { status: 'not-reported' },
+          totalActiveEnergyBurned: { status: 'not-reported' },
+        }
+        if (sample.displayName !== undefined) {
+          if (profileName === 'observer') storedWorkout.brandName = sample.displayName
+          else storedWorkout.title = sample.displayName
+        }
+        return storedWorkout
+      })
     ),
     saveNutrition: createMockFunction((samples) => saveSamples('nutrition', samples)),
     deleteRecordsByIds: createMockFunction((_dataType, records) => {

@@ -285,8 +285,9 @@ export interface NitroHealth {
    * Reads bucketed aggregates. Besides the raw-readable types, accepts the aggregate-only
    * energy types: `basalEnergyBurned` (iOS resting-energy sums; Android integrates stored
    * metabolic rates, estimating one from body metrics when none exist) and `totalEnergyBurned`
-   * (Android stored totals; iOS composes active + basal and omits buckets without basal data).
-   * Missing buckets mean "no data", never zero.
+   * (Android stored totals; iOS composes active + basal and omits buckets without basal data),
+   * plus the sum-only nutrition statistics types (`nutritionEnergyConsumed`, `nutritionProtein`, …)
+   * covered by the `nutrition` permission. Missing buckets mean "no data", never zero.
    */
   readStatistics<T extends HealthStatisticsDataType>(
     dataType: T,
