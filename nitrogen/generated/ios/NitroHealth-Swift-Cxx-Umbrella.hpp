@@ -188,6 +188,14 @@ namespace margelo::nitro::nitrohealth { struct NativeLeanBodyMassSampleInput; }
 namespace margelo::nitro::nitrohealth { struct NativeLeanBodyMassSamplePage; }
 // Forward declaration of `NativeLeanBodyMassSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeLeanBodyMassSample; }
+// Forward declaration of `NativeNutritionMealType` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeNutritionMealType; }
+// Forward declaration of `NativeNutritionSampleInput` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeNutritionSampleInput; }
+// Forward declaration of `NativeNutritionSamplePage` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeNutritionSamplePage; }
+// Forward declaration of `NativeNutritionSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeNutritionSample; }
 // Forward declaration of `NativeOxygenSaturationSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeOxygenSaturationSampleInput; }
 // Forward declaration of `NativeOxygenSaturationSamplePage` to properly resolve imports.
@@ -344,6 +352,10 @@ namespace margelo::nitro::nitrohealth { struct NativeWorkoutSample; }
 #include "NativeLeanBodyMassSample.hpp"
 #include "NativeLeanBodyMassSampleInput.hpp"
 #include "NativeLeanBodyMassSamplePage.hpp"
+#include "NativeNutritionMealType.hpp"
+#include "NativeNutritionSample.hpp"
+#include "NativeNutritionSampleInput.hpp"
+#include "NativeNutritionSamplePage.hpp"
 #include "NativeOxygenSaturationSample.hpp"
 #include "NativeOxygenSaturationSampleInput.hpp"
 #include "NativeOxygenSaturationSamplePage.hpp"

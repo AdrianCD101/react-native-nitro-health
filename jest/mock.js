@@ -27,15 +27,26 @@ const healthDataTypes = new Set([
   'sleep',
   'bodyMass',
   'workout',
+  'nutrition',
 ])
 
 const aggregateOnlyDataTypes = new Set(['basalEnergyBurned', 'totalEnergyBurned'])
+const changeTrackingUnsupportedDataTypes = new Set(['nutrition'])
 
 function validateDataTypes(values, label) {
   for (const [index, value] of values.entries()) {
     if (!healthDataTypes.has(value)) {
       return new Error(`${label}[${index}]: unsupported health data type '${value}'`)
     }
+    if (changeTrackingUnsupportedDataTypes.has(value)) {
+      return new Error(`${label}[${index}]: change tracking is not supported for '${value}' yet`)
+    }
+  }
+}
+
+function validateChangeTrackedDataType(dataType) {
+  if (changeTrackingUnsupportedDataTypes.has(dataType)) {
+    return new Error(`Change tracking is not supported for '${dataType}' yet`)
   }
 }
 
@@ -89,6 +100,7 @@ const writableDataTypes = [
   'vo2Max',
   'sleep',
   'workout',
+  'nutrition',
 ]
 
 const mockOrigin = {
@@ -189,10 +201,9 @@ function createNitroHealthMock(options = {}) {
       return { ...device, type: device.type || 'unknown' }
     }
 
-    const projected = {
-      ...(device.manufacturer === undefined ? {} : { manufacturer: device.manufacturer }),
-      ...(device.model === undefined ? {} : { model: device.model }),
-    }
+    const projected = {}
+    if (device.manufacturer !== undefined) projected.manufacturer = device.manufacturer
+    if (device.model !== undefined) projected.model = device.model
     return Object.keys(projected).length === 0 ? undefined : projected
   }
   const nextIdentity = (dataType) => {
@@ -207,13 +218,16 @@ function createNitroHealthMock(options = {}) {
     }
     return { kind: 'record', id: recordId }
   }
-  const makeStoredSample = (dataType, recordingMethod, device, fields) => ({
-    identity: nextIdentity(dataType),
-    origin: { ...mockOrigin },
-    ...(device === undefined ? {} : { device }),
-    recordingMethod,
-    ...fields,
-  })
+  const makeStoredSample = (dataType, recordingMethod, device, fields) => {
+    const storedSample = {
+      identity: nextIdentity(dataType),
+      origin: { ...mockOrigin },
+      recordingMethod,
+      ...fields,
+    }
+    if (device !== undefined) storedSample.device = device
+    return storedSample
+  }
   const defaultStoredFields = (sample) => {
     const fields = { ...sample }
     delete fields.device
@@ -390,15 +404,21 @@ function createNitroHealthMock(options = {}) {
         subscription: { remove: createMockFunction(() => undefined) },
       }
     }),
-    createChangesToken: createMockFunction(() => rejectWhenUnavailable('mock-changes-token')),
-    getChanges: createMockFunction(() =>
-      rejectWhenUnavailable({
+    createChangesToken: createMockFunction((dataType) => {
+      const validationError = validateChangeTrackedDataType(dataType)
+      if (validationError !== undefined) return Promise.reject(validationError)
+      return rejectWhenUnavailable('mock-changes-token')
+    }),
+    getChanges: createMockFunction((dataType) => {
+      const validationError = validateChangeTrackedDataType(dataType)
+      if (validationError !== undefined) return Promise.reject(validationError)
+      return rejectWhenUnavailable({
         tokenExpired: false,
         changes: [],
         nextChangesToken: 'mock-changes-token',
         hasMore: false,
       })
-    ),
+    }),
     readActiveEnergyBurned: createMockFunction((query) => readSamples('activeEnergyBurned', query)),
     readHydration: createMockFunction((query) => readSamples('hydration', query)),
     readFloorsClimbed: createMockFunction((query) => readSamples('floorsClimbed', query)),
@@ -424,6 +444,7 @@ function createNitroHealthMock(options = {}) {
     readStatistics: createMockFunction(() => rejectWhenUnavailable([])),
     readSleepSamples: createMockFunction((query) => readSamples('sleep', query)),
     readWorkouts: createMockFunction((query) => readSamples('workout', query)),
+    readNutrition: createMockFunction((query) => readSamples('nutrition', query)),
     saveSteps: createMockFunction((samples) => saveSamples('steps', samples)),
     saveDistance: createMockFunction((samples) =>
       saveSamples(
@@ -477,26 +498,29 @@ function createNitroHealthMock(options = {}) {
       }))
     }),
     saveWorkout: createMockFunction((workout) =>
-      saveSamples('workout', [workout], (sample) => ({
-        startDate: sample.startDate,
-        endDate: sample.endDate,
-        elapsedDurationSeconds: (sample.endDate.getTime() - sample.startDate.getTime()) / 1000,
-        activeDuration: { status: 'not-reported' },
-        activity: {
-          status: 'known',
-          type: sample.activityType,
-          portability: 'portable',
-          mapping: 'exact',
-        },
-        ...(sample.displayName === undefined
-          ? {}
-          : profileName === 'observer'
-            ? { brandName: sample.displayName }
-            : { title: sample.displayName }),
-        totalDistance: { status: 'not-reported' },
-        totalActiveEnergyBurned: { status: 'not-reported' },
-      }))
+      saveSamples('workout', [workout], (sample) => {
+        const storedWorkout = {
+          startDate: sample.startDate,
+          endDate: sample.endDate,
+          elapsedDurationSeconds: (sample.endDate.getTime() - sample.startDate.getTime()) / 1000,
+          activeDuration: { status: 'not-reported' },
+          activity: {
+            status: 'known',
+            type: sample.activityType,
+            portability: 'portable',
+            mapping: 'exact',
+          },
+          totalDistance: { status: 'not-reported' },
+          totalActiveEnergyBurned: { status: 'not-reported' },
+        }
+        if (sample.displayName !== undefined) {
+          if (profileName === 'observer') storedWorkout.brandName = sample.displayName
+          else storedWorkout.title = sample.displayName
+        }
+        return storedWorkout
+      })
     ),
+    saveNutrition: createMockFunction((samples) => saveSamples('nutrition', samples)),
     deleteRecordsByIds: createMockFunction((_dataType, records) => {
       if (records.length === 0) {
         return Promise.reject(new Error('At least one record identity is required'))

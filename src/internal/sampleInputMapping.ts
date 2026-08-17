@@ -38,6 +38,7 @@ import type { NativeHeartRateSampleInput } from '../NativeHeartRateSampleInput'
 import type { NativeHeightSampleInput } from '../NativeHeightSampleInput'
 import type { NativeHydrationSampleInput } from '../NativeHydrationSampleInput'
 import type { NativeLeanBodyMassSampleInput } from '../NativeLeanBodyMassSampleInput'
+import type { NativeNutritionSampleInput } from '../NativeNutritionSampleInput'
 import type { NativeOxygenSaturationSampleInput } from '../NativeOxygenSaturationSampleInput'
 import type { NativeRespiratoryRateSampleInput } from '../NativeRespiratoryRateSampleInput'
 import type { NativeRestingHeartRateSampleInput } from '../NativeRestingHeartRateSampleInput'
@@ -46,6 +47,8 @@ import type { NativeSleepSessionStageInput } from '../NativeSleepSessionStageInp
 import type { NativeStepSampleInput } from '../NativeStepSampleInput'
 import type { NativeVo2MaxSampleInput } from '../NativeVo2MaxSampleInput'
 import type { NativeWorkoutSampleInput } from '../NativeWorkoutSampleInput'
+import type { NutritionMealType } from '../NutritionMealType'
+import type { NutritionSampleInput } from '../NutritionSampleInput'
 import type { OxygenSaturationSampleInput } from '../OxygenSaturationSampleInput'
 import type { RespiratoryRateSampleInput } from '../RespiratoryRateSampleInput'
 import type { RestingHeartRateSampleInput } from '../RestingHeartRateSampleInput'
@@ -56,11 +59,7 @@ import type { Vo2MaxSampleInput } from '../Vo2MaxSampleInput'
 import type { AndroidVo2MaxMeasurementMethod, IOSVo2MaxTestType } from '../Vo2MaxMetadata'
 import type { WorkoutSampleInput } from '../WorkoutSampleInput'
 import type { WritableWorkoutActivityType } from '../WritableWorkoutActivityType'
-import {
-  makeNativeSync,
-  makeNativeWriteMetadata,
-  makeNativeWriteProvenance,
-} from './sampleMetadataMapping'
+import { makeNativeWriteMetadata, makeNativeWriteProvenance } from './sampleMetadataMapping'
 import {
   assertSampleBetween,
   assertSampleGreaterThanZero,
@@ -97,6 +96,8 @@ const MAX_KILOGRAMS = 1_000
 const MAX_HEIGHT_METERS = 3
 const MIN_VO2_MAX = 0
 const MAX_VO2_MAX = 100
+const MAX_NUTRIENT_VALUE = 100_000
+const NUTRITION_MEAL_TYPES = new Set<NutritionMealType>(['breakfast', 'lunch', 'dinner', 'snack'])
 const WRITABLE_SLEEP_STAGES = new Set<WritableSleepStage>([
   'awake',
   'asleep',
@@ -156,10 +157,7 @@ const WRITABLE_WORKOUT_ACTIVITY_TYPES = new Set<WritableWorkoutActivityType>([
   'yoga',
 ])
 
-function makeSampleInterval(
-  sample: { startDate: Date; endDate: Date },
-  index: number
-): { startTimeMs: number; endTimeMs: number } {
+function makeSampleInterval(sample: { startDate: Date; endDate: Date }, index: number) {
   const startTimeMs = assertValidSampleDate(sample.startDate, index, 'startDate')
   const endTimeMs = assertValidSampleDate(sample.endDate, index, 'endDate')
 
@@ -245,10 +243,15 @@ function makeNativeBloodPressureMetadata(
     android.measurementLocation,
     index
   )
-  return {
-    ...(androidBodyPosition === undefined ? {} : { androidBodyPosition }),
-    ...(androidMeasurementLocation === undefined ? {} : { androidMeasurementLocation }),
+  const result: Pick<
+    NativeBloodPressureSampleInput,
+    'androidBodyPosition' | 'androidMeasurementLocation'
+  > = {}
+  if (androidBodyPosition !== undefined) result.androidBodyPosition = androidBodyPosition
+  if (androidMeasurementLocation !== undefined) {
+    result.androidMeasurementLocation = androidMeasurementLocation
   }
+  return result
 }
 
 function makeNativeBloodGlucoseSpecimenSource(
@@ -657,6 +660,60 @@ export function makeNativeHydrationSampleInput(
   }
 }
 
+const NUTRITION_NUTRIENT_FIELDS = [
+  'energyKilocalories',
+  'proteinGrams',
+  'totalCarbohydrateGrams',
+  'totalFatGrams',
+  'dietaryFiberGrams',
+  'sugarGrams',
+  'sodiumMilligrams',
+] as const
+
+function makeNativeNutritionNutrient(
+  value: number | undefined,
+  index: number,
+  name: (typeof NUTRITION_NUTRIENT_FIELDS)[number]
+): number | undefined {
+  if (value === undefined) return undefined
+  assertSampleNonNegativeNumber(value, index, name)
+  assertSampleMaxValue(value, MAX_NUTRIENT_VALUE, index, name)
+  return value
+}
+
+export function makeNativeNutritionSampleInput(
+  sample: NutritionSampleInput,
+  index: number
+): NativeNutritionSampleInput {
+  const { startTimeMs, endTimeMs } = makeSampleInterval(sample, index)
+
+  if (NUTRITION_NUTRIENT_FIELDS.every((field) => sample[field] === undefined)) {
+    throw new Error(`samples[${index}]: at least one nutrient value is required`)
+  }
+  if (sample.mealType !== undefined && !NUTRITION_MEAL_TYPES.has(sample.mealType)) {
+    throw new Error(`samples[${index}]: mealType must be breakfast, lunch, dinner, or snack`)
+  }
+  if (sample.foodName !== undefined) {
+    if (typeof sample.foodName !== 'string' || sample.foodName.trim() === '') {
+      throw new Error(`samples[${index}]: foodName must be a non-empty string`)
+    }
+  }
+
+  const native: NativeNutritionSampleInput = {
+    startTimeMs,
+    endTimeMs,
+    writeMetadata: makeNativeWriteMetadata(sample, index),
+  }
+  if (sample.foodName !== undefined) native.foodName = sample.foodName
+  if (sample.mealType !== undefined) native.mealType = sample.mealType
+  for (const field of NUTRITION_NUTRIENT_FIELDS) {
+    const value = makeNativeNutritionNutrient(sample[field], index, field)
+    if (value !== undefined) native[field] = value
+  }
+
+  return native
+}
+
 export function makeNativeFloorsClimbedSampleInput(
   sample: FloorsClimbedSampleInput,
   index: number
@@ -741,15 +798,13 @@ export function makeNativeBloodPressureSampleInput(
     'diastolicMmHg'
   )
 
-  const provenance = makeNativeWriteProvenance(sample, index)
   const metadata = makeNativeBloodPressureMetadata(sample.metadata, index)
-  const sync = makeNativeSync(sample.sync, index)
 
   return {
     timeMs,
     systolicMmHg: sample.systolicMmHg,
     diastolicMmHg: sample.diastolicMmHg,
-    writeMetadata: { provenance, ...(sync === undefined ? {} : { sync }) },
+    writeMetadata: makeNativeWriteMetadata(sample, index),
     ...metadata,
   }
 }
@@ -768,14 +823,12 @@ export function makeNativeBloodGlucoseSampleInput(
     'millimolesPerLiter'
   )
 
-  const provenance = makeNativeWriteProvenance(sample, index)
   const metadata = makeNativeBloodGlucoseMetadata(sample.metadata, index)
-  const sync = makeNativeSync(sample.sync, index)
 
   return {
     timeMs,
     millimolesPerLiter: sample.millimolesPerLiter,
-    writeMetadata: { provenance, ...(sync === undefined ? {} : { sync }) },
+    writeMetadata: makeNativeWriteMetadata(sample, index),
     ...metadata,
   }
 }
@@ -788,14 +841,12 @@ export function makeNativeBodyTemperatureSampleInput(
 
   assertSampleBetween(sample.celsius, MIN_CELSIUS, MAX_CELSIUS, index, 'celsius')
 
-  const provenance = makeNativeWriteProvenance(sample, index)
   const metadata = makeNativeBodyTemperatureMetadata(sample.metadata, index)
-  const sync = makeNativeSync(sample.sync, index)
 
   return {
     timeMs,
     celsius: sample.celsius,
-    writeMetadata: { provenance, ...(sync === undefined ? {} : { sync }) },
+    writeMetadata: makeNativeWriteMetadata(sample, index),
     ...metadata,
   }
 }
@@ -860,14 +911,12 @@ export function makeNativeBasalBodyTemperatureSampleInput(
 
   assertSampleBetween(sample.celsius, MIN_CELSIUS, MAX_CELSIUS, index, 'celsius')
 
-  const provenance = makeNativeWriteProvenance(sample, index)
   const metadata = makeNativeBodyTemperatureMetadata(sample.metadata, index)
-  const sync = makeNativeSync(sample.sync, index)
 
   return {
     timeMs,
     celsius: sample.celsius,
-    writeMetadata: { provenance, ...(sync === undefined ? {} : { sync }) },
+    writeMetadata: makeNativeWriteMetadata(sample, index),
     ...metadata,
   }
 }
@@ -917,14 +966,12 @@ export function makeNativeVo2MaxSampleInput(
     'millilitersPerKilogramPerMinute'
   )
 
-  const provenance = makeNativeWriteProvenance(sample, index)
   const metadata = makeNativeVo2MaxMetadata(sample.metadata, index)
-  const sync = makeNativeSync(sample.sync, index)
 
   return {
     timeMs,
     millilitersPerKilogramPerMinute: sample.millilitersPerKilogramPerMinute,
-    writeMetadata: { provenance, ...(sync === undefined ? {} : { sync }) },
+    writeMetadata: makeNativeWriteMetadata(sample, index),
     ...metadata,
   }
 }

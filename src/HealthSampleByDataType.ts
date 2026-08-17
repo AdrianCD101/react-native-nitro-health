@@ -13,6 +13,7 @@ import type { HeightSample } from './HeightSample'
 import type { HydrationSample } from './HydrationSample'
 import type { Vo2MaxSample } from './Vo2MaxSample'
 import type { LeanBodyMassSample } from './LeanBodyMassSample'
+import type { NutritionSample } from './NutritionSample'
 import type { OxygenSaturationSample } from './OxygenSaturationSample'
 import type { RespiratoryRateSample } from './RespiratoryRateSample'
 import type { RestingHeartRateSample } from './RestingHeartRateSample'
@@ -64,4 +65,6 @@ export interface HealthSampleByDataType {
   bodyMass: BodyMassSample
   /** Workout sessions. */
   workout: WorkoutSample
+  /** Nutrition entries. */
+  nutrition: NutritionSample
 }

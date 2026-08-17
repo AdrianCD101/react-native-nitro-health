@@ -1,8 +1,8 @@
-import type { HealthDataType } from './HealthDataType'
+import type { ChangeTrackedHealthDataType } from './HealthDataType'
 import type { HealthRecordChange } from './HealthRecordChange'
 
 /** Result returned by {@linkcode NitroHealth.getChanges}. */
-export type HealthChangesResult<T extends HealthDataType> =
+export type HealthChangesResult<T extends ChangeTrackedHealthDataType> =
   | {
       /** The checkpoint is no longer usable and a full resync is required. */
       tokenExpired: true

@@ -16,6 +16,8 @@ import {
   hasVerifiedPermissions,
   last7DaysRange,
   lastDayRange,
+  nutritionReadPermission,
+  nutritionWritePermission,
   totalEnergyReadPermission,
 } from './support/harnessSupport'
 
@@ -325,6 +327,52 @@ describe('NitroHealth statistics (native)', () => {
         ).toBeGreaterThanOrEqual(baseline + 375.5 - 0.001)
       } finally {
         await NitroHealth.deleteRecordsByTimeRange('hydration', statisticsRange)
+      }
+    })
+
+    it('round-trips saved nutrition through per-nutrient statistics when authorized', async () => {
+      if (
+        !(await hasVerifiedPermissions([...nutritionReadPermission, ...nutritionWritePermission]))
+      ) {
+        return
+      }
+
+      await NitroHealth.deleteRecordsByTimeRange('nutrition', statisticsRange)
+      try {
+        const query = { ...statisticsRange, bucket: 'day' as const, metrics: ['sum' as const] }
+        const proteinBaseline = sumStatistics(
+          await NitroHealth.readStatistics('nutritionProtein', query)
+        )
+        const energyBaseline = sumStatistics(
+          await NitroHealth.readStatistics('nutritionEnergyConsumed', query)
+        )
+        const sodiumBaseline = sumStatistics(
+          await NitroHealth.readStatistics('nutritionSodium', query)
+        )
+
+        await NitroHealth.saveNutrition([
+          {
+            ...statisticsInterval,
+            foodName: 'Harness statistics meal',
+            energyKilocalories: 640,
+            proteinGrams: 42,
+            sync: { id: 'nitro-health-harness-nutrition-statistics', version: 1 },
+          },
+        ])
+
+        expect(
+          sumStatistics(await NitroHealth.readStatistics('nutritionProtein', query))
+        ).toBeGreaterThanOrEqual(proteinBaseline + 42 - 0.001)
+        expect(
+          sumStatistics(await NitroHealth.readStatistics('nutritionEnergyConsumed', query))
+        ).toBeGreaterThanOrEqual(energyBaseline + 640 - 0.001)
+        // Sodium was not part of the saved entry, so its sums must not change.
+        const sodiumAfterSave = sumStatistics(
+          await NitroHealth.readStatistics('nutritionSodium', query)
+        )
+        expect(Math.abs(sodiumAfterSave - sodiumBaseline)).toBeLessThan(0.001)
+      } finally {
+        await NitroHealth.deleteRecordsByTimeRange('nutrition', statisticsRange)
       }
     })
 

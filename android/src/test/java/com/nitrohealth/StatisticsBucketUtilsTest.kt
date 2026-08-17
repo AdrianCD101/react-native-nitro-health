@@ -3,6 +3,7 @@ package com.nitrohealth
 import androidx.health.connect.client.records.BasalMetabolicRateRecord
 import androidx.health.connect.client.records.FloorsClimbedRecord
 import androidx.health.connect.client.records.HydrationRecord
+import androidx.health.connect.client.records.NutritionRecord
 import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -104,6 +105,36 @@ class StatisticsBucketUtilsTest {
             TotalCaloriesBurnedRecord.ENERGY_TOTAL,
             descriptor.statisticsMetrics.getValue("sum").metric
         )
+    }
+
+    @Test
+    fun descriptorsForNutritionStatisticsTypesAggregateTheirNutrientSums() {
+        val expected = mapOf(
+            "nutritionEnergyConsumed" to NutritionRecord.ENERGY_TOTAL,
+            "nutritionProtein" to NutritionRecord.PROTEIN_TOTAL,
+            "nutritionTotalCarbohydrate" to NutritionRecord.TOTAL_CARBOHYDRATE_TOTAL,
+            "nutritionTotalFat" to NutritionRecord.TOTAL_FAT_TOTAL,
+            "nutritionDietaryFiber" to NutritionRecord.DIETARY_FIBER_TOTAL,
+            "nutritionSugar" to NutritionRecord.SUGAR_TOTAL,
+            "nutritionSodium" to NutritionRecord.SODIUM_TOTAL
+        )
+
+        expected.forEach { (dataType, metric) ->
+            val descriptor = healthDataTypeDescriptorFor(dataType)
+
+            assertEquals(NutritionRecord::class, descriptor.recordType)
+            assertEquals("nutrition", descriptor.permissionLabel)
+            assertEquals(setOf("sum"), descriptor.statisticsMetrics.keys)
+            assertEquals(metric, descriptor.statisticsMetrics.getValue("sum").metric)
+        }
+    }
+
+    @Test
+    fun descriptorForRawNutritionSupportsNoStatistics() {
+        val descriptor = healthDataTypeDescriptorFor("nutrition")
+
+        assertEquals(NutritionRecord::class, descriptor.recordType)
+        assertEquals(emptySet<String>(), descriptor.statisticsMetrics.keys)
     }
 
     @Test

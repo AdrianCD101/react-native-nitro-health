@@ -1,5 +1,5 @@
 import type { HealthChangesResult } from '../HealthChangesResult'
-import type { HealthDataType } from '../HealthDataType'
+import type { ChangeTrackedHealthDataType } from '../HealthDataType'
 import type { HealthRecordChange } from '../HealthRecordChange'
 import type { HealthSampleByDataType } from '../HealthSampleByDataType'
 import type { HealthSampleIdentity } from '../HealthSampleIdentity'
@@ -64,16 +64,16 @@ function getRecordIdentity(identity: HealthSampleIdentity) {
 }
 
 function makeUpsertSamples(
-  dataType: HealthDataType,
+  dataType: ChangeTrackedHealthDataType,
   change: NativeHealthChange
-): HealthRecordChange<HealthDataType> & { type: 'upsert' } {
+): HealthRecordChange<ChangeTrackedHealthDataType> & { type: 'upsert' } {
   const populatedFields = CHANGE_SAMPLE_FIELDS.filter((field) => change[field] !== undefined)
 
   if (populatedFields.length !== 1) {
     throw new Error(`Native '${dataType}' upsert must contain exactly one sample payload`)
   }
 
-  let samples: HealthSampleByDataType[HealthDataType][]
+  let samples: HealthSampleByDataType[ChangeTrackedHealthDataType][]
   switch (dataType) {
     case 'steps':
       if (change.stepSamples === undefined)
@@ -193,7 +193,7 @@ function makeUpsertSamples(
   }
 }
 
-function makeHealthRecordChange<T extends HealthDataType>(
+function makeHealthRecordChange<T extends ChangeTrackedHealthDataType>(
   dataType: T,
   change: NativeHealthChange
 ): HealthRecordChange<T> {
@@ -214,10 +214,11 @@ function makeHealthRecordChange<T extends HealthDataType>(
     throw new Error(`Unsupported native health change type: ${change.type}`)
   }
 
+  // SAFETY: makeUpsertSamples dispatches on the same dataType generic used by HealthRecordChange.
   return makeUpsertSamples(dataType, change) as HealthRecordChange<T>
 }
 
-export function makeHealthChangesResult<T extends HealthDataType>(
+export function makeHealthChangesResult<T extends ChangeTrackedHealthDataType>(
   dataType: T,
   result: NativeHealthChangesResult
 ): HealthChangesResult<T> {

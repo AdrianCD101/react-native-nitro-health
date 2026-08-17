@@ -210,6 +210,16 @@ export function makePermissionRevocationResult(
   }
 }
 
+type UnverifiablePermissionStatusEntry = HealthPermissionStatusEntry & {
+  status: 'unverifiable'
+}
+
+function isUnverifiablePermissionStatusEntry(
+  entry: HealthPermissionStatusEntry
+): entry is UnverifiablePermissionStatusEntry {
+  return entry.status === 'unverifiable'
+}
+
 function makePermissionStatusResult(
   result: NativeHealthPermissionStatusResult,
   requestedPermissions: HealthPermission[]
@@ -240,13 +250,13 @@ function makePermissionStatusResult(
   if (availability.status === 'available') {
     return { status: 'available', statuses }
   }
-  if (statuses.some((entry) => entry.status !== 'unverifiable')) {
+  if (!statuses.every(isUnverifiablePermissionStatusEntry)) {
     throw new Error('Unavailable permission result contains a verifiable permission status')
   }
   return {
     status: 'unavailable',
     availability,
-    statuses: statuses as Array<HealthPermissionStatusEntry & { status: 'unverifiable' }>,
+    statuses,
   }
 }
 

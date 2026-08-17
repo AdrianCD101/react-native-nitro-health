@@ -20,6 +20,8 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { allHealthPermissions, writableDataTypes } from './healthPermissions'
 
+const writableDataTypeSet = new Set<HealthPermissionDataType>(writableDataTypes)
+
 const readPermissions: Array<{ dataType: HealthPermissionDataType; label: string }> = [
   { dataType: 'steps', label: 'Steps' },
   { dataType: 'distance', label: 'Distance' },
@@ -32,15 +34,16 @@ const readPermissions: Array<{ dataType: HealthPermissionDataType; label: string
   { dataType: 'sleep', label: 'Sleep' },
   { dataType: 'bodyMass', label: 'Body Mass' },
   { dataType: 'workout', label: 'Workouts' },
+  { dataType: 'nutrition', label: 'Nutrition' },
 ]
 
 function isWritableDataType(
   dataType: HealthPermissionDataType
 ): dataType is WritableHealthDataType {
-  return writableDataTypes.includes(dataType as WritableHealthDataType)
+  return writableDataTypeSet.has(dataType)
 }
 
-function lastDays(days: number): { startDate: Date; endDate: Date } {
+function lastDays(days: number) {
   const endDate = new Date()
   return { startDate: new Date(endDate.getTime() - days * 24 * 60 * 60 * 1000), endDate }
 }
@@ -113,9 +116,14 @@ function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error)
 }
 
-const readCards: Partial<
-  Record<HealthPermissionDataType, { buttonLabel: string; execute: () => Promise<string[]> }>
-> = {
+interface ReadCard {
+  buttonLabel: string
+  execute: () => Promise<string[]>
+}
+
+type ReadCards = Partial<Record<HealthPermissionDataType, ReadCard>>
+
+const readCards = {
   steps: {
     buttonLabel: 'Read daily step totals',
     execute: async () => {
@@ -312,6 +320,30 @@ const readCards: Partial<
       ]
     },
   },
+  nutrition: {
+    buttonLabel: 'Read nutrition',
+    execute: async () => {
+      const page = await NitroHealth.readNutrition({
+        ...lastDays(7),
+        limit: 20,
+        ascending: false,
+      })
+      return [
+        `Nutrition entries: ${page.samples.length}${page.nextCursor ? ' (more available)' : ''}`,
+        ...page.samples.map(
+          (entry) =>
+            `${entry.startDate.toLocaleString()}: ${entry.foodName ?? 'unnamed'} | meal ${entry.mealType ?? 'n/a'} | ${entry.energyKilocalories?.toFixed(0) ?? 'n/a'} kcal | protein ${entry.proteinGrams?.toFixed(1) ?? 'n/a'} g | ${formatSampleContext(entry.identity, entry.origin)}`
+        ),
+      ]
+    },
+  },
+} satisfies ReadCards
+
+function getReadCard(dataType: HealthPermissionDataType): ReadCard | undefined {
+  for (const [readDataType, readCard] of Object.entries(readCards)) {
+    if (readDataType === dataType) return readCard
+  }
+  return undefined
 }
 
 type CardActivity = 'checking' | 'requesting' | 'requestingWrite' | 'reading' | 'saving'
@@ -521,7 +553,7 @@ function App(): React.JSX.Element {
   }
 
   async function runReadCard(dataType: HealthPermissionDataType): Promise<void> {
-    const readCard = readCards[dataType]
+    const readCard = getReadCard(dataType)
     if (!readCard) return
 
     updateCard(dataType, { activity: 'reading', feedback: undefined })
@@ -611,6 +643,19 @@ function App(): React.JSX.Element {
             displayName: 'Example run',
           })
           message = 'Saved a one-minute running workout'
+          break
+        case 'nutrition':
+          await NitroHealth.saveNutrition([
+            {
+              startDate,
+              endDate,
+              foodName: 'Example lunch',
+              mealType: 'lunch',
+              energyKilocalories: 640,
+              proteinGrams: 42,
+            },
+          ])
+          message = 'Saved a 640 kcal example lunch'
           break
         default:
           updateCard(dataType, { activity: undefined })
@@ -729,7 +774,7 @@ function App(): React.JSX.Element {
         {readPermissions.map(({ dataType, label }) => {
           const card = cards[dataType] ?? {}
           const isBusy = card.activity !== undefined
-          const readCard = readCards[dataType]
+          const readCard = getReadCard(dataType)
           const readLines = readResults[dataType]
           return (
             <View key={dataType} style={styles.card}>

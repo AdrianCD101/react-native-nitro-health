@@ -104,10 +104,9 @@ describe('NitroHealth aggregate-only energy statistics contract', () => {
   })
 
   it('rejects write permissions for aggregate-only energy types before crossing the bridge', async () => {
-    const permissions = [
-      { accessType: 'write', dataType: 'totalEnergyBurned' },
-    ] as unknown as HealthPermission[]
+    const permissions = [{ accessType: 'write', dataType: 'totalEnergyBurned' }] as const
 
+    // @ts-expect-error This test exercises runtime validation for untyped JavaScript callers.
     await expect(NitroHealth.requestAuthorization(permissions)).rejects.toThrow(
       'permissions[0]: totalEnergyBurned is an aggregate-only read type'
     )

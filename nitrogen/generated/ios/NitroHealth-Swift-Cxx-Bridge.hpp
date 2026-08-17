@@ -180,6 +180,14 @@ namespace margelo::nitro::nitrohealth { struct NativeLeanBodyMassSampleInput; }
 namespace margelo::nitro::nitrohealth { struct NativeLeanBodyMassSamplePage; }
 // Forward declaration of `NativeLeanBodyMassSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeLeanBodyMassSample; }
+// Forward declaration of `NativeNutritionMealType` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeNutritionMealType; }
+// Forward declaration of `NativeNutritionSampleInput` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeNutritionSampleInput; }
+// Forward declaration of `NativeNutritionSamplePage` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeNutritionSamplePage; }
+// Forward declaration of `NativeNutritionSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeNutritionSample; }
 // Forward declaration of `NativeOxygenSaturationSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeOxygenSaturationSampleInput; }
 // Forward declaration of `NativeOxygenSaturationSamplePage` to properly resolve imports.
@@ -334,6 +342,10 @@ namespace NitroHealth { class HybridNitroHealthSpec_cxx; }
 #include "NativeLeanBodyMassSample.hpp"
 #include "NativeLeanBodyMassSampleInput.hpp"
 #include "NativeLeanBodyMassSamplePage.hpp"
+#include "NativeNutritionMealType.hpp"
+#include "NativeNutritionSample.hpp"
+#include "NativeNutritionSampleInput.hpp"
+#include "NativeNutritionSamplePage.hpp"
 #include "NativeOxygenSaturationSample.hpp"
 #include "NativeOxygenSaturationSampleInput.hpp"
 #include "NativeOxygenSaturationSamplePage.hpp"
@@ -2406,6 +2418,66 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return Func_void_NativeWorkoutSamplePage_Wrapper(std::move(value));
   }
   
+  // pragma MARK: std::optional<NativeNutritionMealType>
+  /**
+   * Specialized version of `std::optional<NativeNutritionMealType>`.
+   */
+  using std__optional_NativeNutritionMealType_ = std::optional<NativeNutritionMealType>;
+  inline std::optional<NativeNutritionMealType> create_std__optional_NativeNutritionMealType_(const NativeNutritionMealType& value) noexcept {
+    return std::optional<NativeNutritionMealType>(value);
+  }
+  inline bool has_value_std__optional_NativeNutritionMealType_(const std::optional<NativeNutritionMealType>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline NativeNutritionMealType get_std__optional_NativeNutritionMealType_(const std::optional<NativeNutritionMealType>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::vector<NativeNutritionSample>
+  /**
+   * Specialized version of `std::vector<NativeNutritionSample>`.
+   */
+  using std__vector_NativeNutritionSample_ = std::vector<NativeNutritionSample>;
+  inline std::vector<NativeNutritionSample> create_std__vector_NativeNutritionSample_(size_t size) noexcept {
+    std::vector<NativeNutritionSample> vector;
+    vector.reserve(size);
+    return vector;
+  }
+  
+  // pragma MARK: std::shared_ptr<Promise<NativeNutritionSamplePage>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<NativeNutritionSamplePage>>`.
+   */
+  using std__shared_ptr_Promise_NativeNutritionSamplePage__ = std::shared_ptr<Promise<NativeNutritionSamplePage>>;
+  inline std::shared_ptr<Promise<NativeNutritionSamplePage>> create_std__shared_ptr_Promise_NativeNutritionSamplePage__() noexcept {
+    return Promise<NativeNutritionSamplePage>::create();
+  }
+  inline PromiseHolder<NativeNutritionSamplePage> wrap_std__shared_ptr_Promise_NativeNutritionSamplePage__(std::shared_ptr<Promise<NativeNutritionSamplePage>> promise) noexcept {
+    return PromiseHolder<NativeNutritionSamplePage>(std::move(promise));
+  }
+  
+  // pragma MARK: std::function<void(const NativeNutritionSamplePage& /* result */)>
+  /**
+   * Specialized version of `std::function<void(const NativeNutritionSamplePage&)>`.
+   */
+  using Func_void_NativeNutritionSamplePage = std::function<void(const NativeNutritionSamplePage& /* result */)>;
+  /**
+   * Wrapper class for a `std::function<void(const NativeNutritionSamplePage& / * result * /)>`, this can be used from Swift.
+   */
+  class Func_void_NativeNutritionSamplePage_Wrapper final {
+  public:
+    explicit Func_void_NativeNutritionSamplePage_Wrapper(std::function<void(const NativeNutritionSamplePage& /* result */)>&& func): _function(std::make_unique<std::function<void(const NativeNutritionSamplePage& /* result */)>>(std::move(func))) {}
+    inline void call(NativeNutritionSamplePage result) const noexcept {
+      _function->operator()(result);
+    }
+  private:
+    std::unique_ptr<std::function<void(const NativeNutritionSamplePage& /* result */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_NativeNutritionSamplePage create_Func_void_NativeNutritionSamplePage(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_NativeNutritionSamplePage_Wrapper wrap_Func_void_NativeNutritionSamplePage(Func_void_NativeNutritionSamplePage value) noexcept {
+    return Func_void_NativeNutritionSamplePage_Wrapper(std::move(value));
+  }
+  
   // pragma MARK: std::vector<NativeHealthRecordingMethod>
   /**
    * Specialized version of `std::vector<NativeHealthRecordingMethod>`.
@@ -2731,6 +2803,17 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
   using std__vector_NativeSleepSessionInput_ = std::vector<NativeSleepSessionInput>;
   inline std::vector<NativeSleepSessionInput> create_std__vector_NativeSleepSessionInput_(size_t size) noexcept {
     std::vector<NativeSleepSessionInput> vector;
+    vector.reserve(size);
+    return vector;
+  }
+  
+  // pragma MARK: std::vector<NativeNutritionSampleInput>
+  /**
+   * Specialized version of `std::vector<NativeNutritionSampleInput>`.
+   */
+  using std__vector_NativeNutritionSampleInput_ = std::vector<NativeNutritionSampleInput>;
+  inline std::vector<NativeNutritionSampleInput> create_std__vector_NativeNutritionSampleInput_(size_t size) noexcept {
+    std::vector<NativeNutritionSampleInput> vector;
     vector.reserve(size);
     return vector;
   }
@@ -3166,6 +3249,15 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
   }
   inline Result_std__shared_ptr_Promise_NativeWorkoutSamplePage___ create_Result_std__shared_ptr_Promise_NativeWorkoutSamplePage___(const std::exception_ptr& error) noexcept {
     return Result<std::shared_ptr<Promise<NativeWorkoutSamplePage>>>::withError(error);
+  }
+  
+  // pragma MARK: Result<std::shared_ptr<Promise<NativeNutritionSamplePage>>>
+  using Result_std__shared_ptr_Promise_NativeNutritionSamplePage___ = Result<std::shared_ptr<Promise<NativeNutritionSamplePage>>>;
+  inline Result_std__shared_ptr_Promise_NativeNutritionSamplePage___ create_Result_std__shared_ptr_Promise_NativeNutritionSamplePage___(const std::shared_ptr<Promise<NativeNutritionSamplePage>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<NativeNutritionSamplePage>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_NativeNutritionSamplePage___ create_Result_std__shared_ptr_Promise_NativeNutritionSamplePage___(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<NativeNutritionSamplePage>>>::withError(error);
   }
   
   // pragma MARK: Result<std::shared_ptr<Promise<NativeHealthWriteResult>>>

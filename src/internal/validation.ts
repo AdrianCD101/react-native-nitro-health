@@ -1,8 +1,12 @@
-import type { AggregateOnlyHealthDataType, HealthDataType } from '../HealthDataType'
+import type {
+  AggregateOnlyHealthDataType,
+  ChangeTrackedHealthDataType,
+  HealthDataType,
+} from '../HealthDataType'
 import type { HealthPermission } from '../HealthPermission'
 import type { HealthRecordIdentity } from '../HealthSampleIdentity'
 
-const HEALTH_DATA_TYPES = new Set<HealthDataType>([
+const HEALTH_DATA_TYPES = new Set<string>([
   'steps',
   'heartRate',
   'bloodPressure',
@@ -24,36 +28,57 @@ const HEALTH_DATA_TYPES = new Set<HealthDataType>([
   'sleep',
   'bodyMass',
   'workout',
-])
+  'nutrition',
+] satisfies HealthDataType[])
 
-const AGGREGATE_ONLY_DATA_TYPES = new Set<AggregateOnlyHealthDataType>([
+const CHANGE_TRACKING_UNSUPPORTED_DATA_TYPES = new Set<HealthDataType>(['nutrition'])
+
+const AGGREGATE_ONLY_DATA_TYPES = new Set<string>([
   'basalEnergyBurned',
   'totalEnergyBurned',
-])
+] satisfies AggregateOnlyHealthDataType[])
+
+interface HealthPermissionCandidate {
+  accessType?: unknown
+  dataType?: unknown
+}
+
+function isHealthPermissionCandidate(value: unknown): value is HealthPermissionCandidate {
+  return typeof value === 'object' && value !== null
+}
+
+function isHealthDataType(value: string): value is HealthDataType {
+  return HEALTH_DATA_TYPES.has(value)
+}
+
+function isAggregateOnlyHealthDataType(value: string): value is AggregateOnlyHealthDataType {
+  return AGGREGATE_ONLY_DATA_TYPES.has(value)
+}
+
+function isChangeTrackedHealthDataType(
+  dataType: HealthDataType
+): dataType is ChangeTrackedHealthDataType {
+  return !CHANGE_TRACKING_UNSUPPORTED_DATA_TYPES.has(dataType)
+}
 
 export function assertPermissions(permissions: HealthPermission[]): void {
   if (permissions.length === 0) {
     throw new Error('At least one health permission is required')
   }
   permissions.forEach((permission, index) => {
-    const candidate = permission as { accessType?: unknown; dataType?: unknown }
+    const candidate: unknown = permission
     if (
-      typeof permission !== 'object' ||
-      permission === null ||
+      !isHealthPermissionCandidate(candidate) ||
       (candidate.accessType !== 'read' && candidate.accessType !== 'write') ||
       typeof candidate.dataType !== 'string' ||
-      (!HEALTH_DATA_TYPES.has(candidate.dataType as HealthDataType) &&
-        !AGGREGATE_ONLY_DATA_TYPES.has(candidate.dataType as AggregateOnlyHealthDataType))
+      (!isHealthDataType(candidate.dataType) && !isAggregateOnlyHealthDataType(candidate.dataType))
     ) {
       throw new Error(`permissions[${index}]: a supported read or write permission is required`)
     }
     if (candidate.accessType === 'write' && candidate.dataType === 'heartRateVariability') {
       throw new Error('permissions[' + index + ']: heartRateVariability is read-only')
     }
-    if (
-      candidate.accessType === 'write' &&
-      AGGREGATE_ONLY_DATA_TYPES.has(candidate.dataType as AggregateOnlyHealthDataType)
-    ) {
+    if (candidate.accessType === 'write' && isAggregateOnlyHealthDataType(candidate.dataType)) {
       throw new Error(`permissions[${index}]: ${candidate.dataType} is an aggregate-only read type`)
     }
   })
@@ -61,10 +86,28 @@ export function assertPermissions(permissions: HealthPermission[]): void {
 
 export function parseHealthDataTypes(values: readonly string[], label: string): HealthDataType[] {
   return values.map((value, index) => {
-    if (!HEALTH_DATA_TYPES.has(value as HealthDataType)) {
+    if (!isHealthDataType(value)) {
       throw new Error(`${label}[${index}]: unsupported health data type '${value}'`)
     }
-    return value as HealthDataType
+    return value
+  })
+}
+
+export function assertChangeTrackedHealthDataType(dataType: HealthDataType): void {
+  if (CHANGE_TRACKING_UNSUPPORTED_DATA_TYPES.has(dataType)) {
+    throw new Error(`Change tracking is not supported for '${dataType}' yet`)
+  }
+}
+
+export function parseChangeTrackedHealthDataTypes(
+  values: readonly string[],
+  label: string
+): ChangeTrackedHealthDataType[] {
+  return parseHealthDataTypes(values, label).map((dataType, index) => {
+    if (!isChangeTrackedHealthDataType(dataType)) {
+      throw new Error(`${label}[${index}]: change tracking is not supported for '${dataType}' yet`)
+    }
+    return dataType
   })
 }
 

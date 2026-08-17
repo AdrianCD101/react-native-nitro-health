@@ -12,6 +12,7 @@ import androidx.health.connect.client.records.HeartRateRecord
 import androidx.health.connect.client.records.HeightRecord
 import androidx.health.connect.client.records.HydrationRecord
 import androidx.health.connect.client.records.LeanBodyMassRecord
+import androidx.health.connect.client.records.NutritionRecord
 import androidx.health.connect.client.records.OxygenSaturationRecord
 import androidx.health.connect.client.records.RespiratoryRateRecord
 import androidx.health.connect.client.records.RestingHeartRateRecord
@@ -38,6 +39,7 @@ import com.margelo.nitro.nitrohealth.NativeDistanceSampleInput
 import com.margelo.nitro.nitrohealth.NativeDistanceScope
 import com.margelo.nitro.nitrohealth.NativeFloorsClimbedSampleInput
 import com.margelo.nitro.nitrohealth.NativeHeartRateSampleInput
+import com.margelo.nitro.nitrohealth.NativeNutritionSampleInput
 import com.margelo.nitro.nitrohealth.NativeHydrationSampleInput
 import com.margelo.nitro.nitrohealth.NativeHeightSampleInput
 import com.margelo.nitro.nitrohealth.NativeOxygenSaturationSampleInput
@@ -159,6 +161,29 @@ internal fun toBloodPressureRecords(
             measurementLocation = healthConnectBloodPressureMeasurementLocation(
                 sample.androidMeasurementLocation
             ),
+            metadata = makeSampleMetadata(sample.writeMetadata)
+        )
+    }
+}
+
+internal fun toNutritionRecords(
+    samples: Array<NativeNutritionSampleInput>
+): List<NutritionRecord> {
+    return samples.map { sample ->
+        NutritionRecord(
+            startTime = Instant.ofEpochMilli(sample.startTimeMs.toLong()),
+            startZoneOffset = null,
+            endTime = Instant.ofEpochMilli(sample.endTimeMs.toLong()),
+            endZoneOffset = null,
+            energy = sample.energyKilocalories?.let(Energy::kilocalories),
+            protein = sample.proteinGrams?.let(Mass::grams),
+            totalCarbohydrate = sample.totalCarbohydrateGrams?.let(Mass::grams),
+            totalFat = sample.totalFatGrams?.let(Mass::grams),
+            dietaryFiber = sample.dietaryFiberGrams?.let(Mass::grams),
+            sugar = sample.sugarGrams?.let(Mass::grams),
+            sodium = sample.sodiumMilligrams?.let(Mass::milligrams),
+            name = sample.foodName,
+            mealType = healthConnectNutritionMealType(sample.mealType),
             metadata = makeSampleMetadata(sample.writeMetadata)
         )
     }

@@ -83,6 +83,8 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthStatisticsQuery; }
 namespace margelo::nitro::nitrohealth { struct NativeSleepSamplePage; }
 // Forward declaration of `NativeWorkoutSamplePage` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeWorkoutSamplePage; }
+// Forward declaration of `NativeNutritionSamplePage` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeNutritionSamplePage; }
 // Forward declaration of `NativeHealthWriteResult` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthWriteResult; }
 // Forward declaration of `NativeStepSampleInput` to properly resolve imports.
@@ -127,6 +129,8 @@ namespace margelo::nitro::nitrohealth { struct NativeVo2MaxSampleInput; }
 namespace margelo::nitro::nitrohealth { struct NativeSleepSessionInput; }
 // Forward declaration of `NativeWorkoutSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeWorkoutSampleInput; }
+// Forward declaration of `NativeNutritionSampleInput` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeNutritionSampleInput; }
 // Forward declaration of `NativeHealthDeleteResult` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthDeleteResult; }
 // Forward declaration of `NativeHealthPermissionStatusResult` to properly resolve imports.
@@ -176,6 +180,7 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthAuthorizationResult; 
 #include "NativeHealthStatisticsQuery.hpp"
 #include "NativeSleepSamplePage.hpp"
 #include "NativeWorkoutSamplePage.hpp"
+#include "NativeNutritionSamplePage.hpp"
 #include "NativeHealthWriteResult.hpp"
 #include "NativeStepSampleInput.hpp"
 #include "NativeDistanceWriteResult.hpp"
@@ -198,6 +203,7 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthAuthorizationResult; 
 #include "NativeVo2MaxSampleInput.hpp"
 #include "NativeSleepSessionInput.hpp"
 #include "NativeWorkoutSampleInput.hpp"
+#include "NativeNutritionSampleInput.hpp"
 #include "NativeHealthDeleteResult.hpp"
 #include "NativeHealthPermissionStatusResult.hpp"
 #include "NativeHealthPermission.hpp"
@@ -270,6 +276,7 @@ namespace margelo::nitro::nitrohealth {
       virtual std::shared_ptr<Promise<std::vector<NativeHealthStatistics>>> readStatistics(const std::string& dataType, const NativeHealthStatisticsQuery& query) = 0;
       virtual std::shared_ptr<Promise<NativeSleepSamplePage>> readSleepSamples(const NativeHealthDateRangeQuery& query) = 0;
       virtual std::shared_ptr<Promise<NativeWorkoutSamplePage>> readWorkouts(const NativeHealthDateRangeQuery& query) = 0;
+      virtual std::shared_ptr<Promise<NativeNutritionSamplePage>> readNutrition(const NativeHealthDateRangeQuery& query) = 0;
       virtual std::shared_ptr<Promise<NativeHealthWriteResult>> saveSteps(const std::vector<NativeStepSampleInput>& samples) = 0;
       virtual std::shared_ptr<Promise<NativeDistanceWriteResult>> saveDistance(const std::vector<NativeDistanceSampleInput>& samples) = 0;
       virtual std::shared_ptr<Promise<NativeHealthWriteResult>> saveActiveEnergyBurned(const std::vector<NativeActiveEnergyBurnedSampleInput>& samples) = 0;
@@ -290,6 +297,7 @@ namespace margelo::nitro::nitrohealth {
       virtual std::shared_ptr<Promise<NativeHealthWriteResult>> saveVo2Max(const std::vector<NativeVo2MaxSampleInput>& samples) = 0;
       virtual std::shared_ptr<Promise<NativeHealthWriteResult>> saveSleepSessions(const std::vector<NativeSleepSessionInput>& sessions) = 0;
       virtual std::shared_ptr<Promise<NativeHealthWriteResult>> saveWorkout(const NativeWorkoutSampleInput& workout) = 0;
+      virtual std::shared_ptr<Promise<NativeHealthWriteResult>> saveNutrition(const std::vector<NativeNutritionSampleInput>& samples) = 0;
       virtual std::shared_ptr<Promise<NativeHealthDeleteResult>> deleteRecordsByIds(const std::string& dataType, const std::vector<std::string>& recordIds) = 0;
       virtual std::shared_ptr<Promise<NativeHealthDeleteResult>> deleteRecordsByTimeRange(const std::string& dataType, const NativeHealthTimeRangeQuery& query) = 0;
       virtual std::shared_ptr<Promise<NativeHealthPermissionStatusResult>> getPermissionStatuses(const std::vector<NativeHealthPermission>& permissions) = 0;

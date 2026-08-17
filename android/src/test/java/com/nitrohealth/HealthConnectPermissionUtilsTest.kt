@@ -16,6 +16,7 @@ import androidx.health.connect.client.records.HeartRateVariabilityRmssdRecord
 import androidx.health.connect.client.records.HeightRecord
 import androidx.health.connect.client.records.HydrationRecord
 import androidx.health.connect.client.records.LeanBodyMassRecord
+import androidx.health.connect.client.records.NutritionRecord
 import androidx.health.connect.client.records.OxygenSaturationRecord
 import androidx.health.connect.client.records.RespiratoryRateRecord
 import androidx.health.connect.client.records.RestingHeartRateRecord
@@ -84,6 +85,40 @@ class HealthConnectPermissionUtilsTest {
             ExerciseSessionRecord::class,
             healthConnectRecordTypeForDataType("workout")
         )
+        assertEquals(NutritionRecord::class, healthConnectRecordTypeForDataType("nutrition"))
+    }
+
+    @Test
+    fun nutritionMapsToTheSingleNutritionPermissionStrings() {
+        assertEquals(
+            HealthPermission.getReadPermission(NutritionRecord::class),
+            toHealthConnectPermission("nutrition", "read")
+        )
+        assertEquals(
+            HealthPermission.getWritePermission(NutritionRecord::class),
+            toHealthConnectPermission("nutrition", "write")
+        )
+    }
+
+    @Test
+    fun nutritionStatisticsTypesCollapseToTheSameNutritionReadPermission() {
+        val statisticsTypes = listOf(
+            "nutritionEnergyConsumed",
+            "nutritionProtein",
+            "nutritionTotalCarbohydrate",
+            "nutritionTotalFat",
+            "nutritionDietaryFiber",
+            "nutritionSugar",
+            "nutritionSodium"
+        )
+
+        statisticsTypes.forEach { dataType ->
+            assertEquals(NutritionRecord::class, healthConnectRecordTypeForDataType(dataType))
+            assertEquals(
+                HealthPermission.getReadPermission(NutritionRecord::class),
+                toHealthConnectPermission(dataType, "read")
+            )
+        }
     }
 
     @Test

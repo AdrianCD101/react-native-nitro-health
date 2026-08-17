@@ -202,6 +202,28 @@ describe('NitroHealth reads (native)', () => {
     }
   })
 
+  it('reads nutrition entries as one sample per eating event under a record identity', async () => {
+    const page = await NitroHealth.readNutrition(emptyRange)
+    for (const sample of page.samples) {
+      assertSampleIdentityAndOrigin(sample)
+      expect(sample.identity.kind).toBe('record')
+      expect(sample.endDate.getTime()).toBeGreaterThanOrEqual(sample.startDate.getTime())
+      for (const value of [
+        sample.energyKilocalories,
+        sample.proteinGrams,
+        sample.totalCarbohydrateGrams,
+        sample.totalFatGrams,
+        sample.dietaryFiberGrams,
+        sample.sugarGrams,
+        sample.sodiumMilligrams,
+      ]) {
+        if (value !== undefined) {
+          expect(value).toBeGreaterThanOrEqual(0)
+        }
+      }
+    }
+  })
+
   it('reads blood glucose readings under a record identity with plausible mmol/L values', async () => {
     const page = await NitroHealth.readBloodGlucose(emptyRange)
     for (const sample of page.samples) {

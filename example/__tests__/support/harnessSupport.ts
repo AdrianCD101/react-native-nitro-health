@@ -107,6 +107,12 @@ export const workoutReadPermission: HealthPermission[] = [
 export const workoutWritePermission: HealthPermission[] = [
   { accessType: 'write', dataType: 'workout' },
 ]
+export const nutritionReadPermission: HealthPermission[] = [
+  { accessType: 'read', dataType: 'nutrition' },
+]
+export const nutritionWritePermission: HealthPermission[] = [
+  { accessType: 'write', dataType: 'nutrition' },
+]
 
 export const emptyRange = {
   startDate: new Date('2000-01-01T00:00:00.000Z'),

@@ -34,6 +34,14 @@ extension HybridNitroHealth {
                 return makeNativeHealthDeleteResult(deletedCount: deletedCount)
             }
 
+            // Nutrition entries are food HKCorrelations; deletion is write-gated on every
+            // member quantity type and removes the members alongside the correlation.
+            if dataType == "nutrition" {
+                try self.requireNutritionWriteAuthorization()
+                let deletedCount = try await self.deleteNutritionRecords(uuids: sampleUuids)
+                return makeNativeHealthDeleteResult(deletedCount: deletedCount)
+            }
+
             let sampleType = try makeHealthKitSampleType(dataType: dataType)
             try self.requireWriteAuthorization(
                 for: sampleType,
@@ -68,6 +76,12 @@ extension HybridNitroHealth {
             if dataType == "bloodPressure" {
                 try self.requireBloodPressureWriteAuthorization()
                 let deletedCount = try await self.deleteBloodPressureRecords(timeRangePredicate: predicate)
+                return makeNativeHealthDeleteResult(deletedCount: deletedCount)
+            }
+
+            if dataType == "nutrition" {
+                try self.requireNutritionWriteAuthorization()
+                let deletedCount = try await self.deleteNutritionRecords(timeRangePredicate: predicate)
                 return makeNativeHealthDeleteResult(deletedCount: deletedCount)
             }
 
@@ -106,7 +120,7 @@ private func makeNativeHealthDeleteResult(deletedCount: Int) -> NativeHealthDele
     )
 }
 
-// sleep, workout, and bloodPressure have no quantity descriptor (makeHealthDataTypeDescriptor
+// sleep, workout, bloodPressure, and nutrition have no quantity descriptor (makeHealthDataTypeDescriptor
 // throws for them); their labels mirror the read paths and Android's permissionLabel values. Falls back
 // to the raw dataType for unsupported values — makeHealthKitSampleType has already thrown by
 // the time labels matter.
@@ -114,6 +128,8 @@ func makeHealthDataTypeLabel(dataType: String) -> String {
     switch dataType {
     case "bloodPressure":
         return "blood pressure"
+    case "nutrition":
+        return "nutrition"
     case "sleep":
         return "sleep"
     case "workout":

@@ -9,10 +9,7 @@ import type { StatisticsBucket } from '../StatisticsBucket'
 import type { StatisticsMetric } from '../StatisticsMetric'
 import { assertStartBeforeEnd, assertValidDate } from './validation'
 
-export function makeTimeRange(query: { startDate: Date; endDate: Date }): {
-  startTimeMs: number
-  endTimeMs: number
-} {
+export function makeTimeRange(query: { startDate: Date; endDate: Date }) {
   const startTimeMs = assertValidDate(query.startDate, 'startDate')
   const endTimeMs = assertValidDate(query.endDate, 'endDate')
 
@@ -36,13 +33,16 @@ export function makeNativeSampleQuery(query: HealthDateRangeQuery): NativeHealth
     throw new Error('cursor must be a non-empty string')
   }
 
-  return {
+  const nativeQuery: NativeHealthDateRangeQuery = {
     startTimeMs,
     endTimeMs,
     limit,
     ascending: query.ascending ?? true,
-    ...(query.cursor !== undefined ? { cursor: query.cursor } : {}),
   }
+
+  if (query.cursor !== undefined) nativeQuery.cursor = query.cursor
+
+  return nativeQuery
 }
 
 export function makeNativeTimeRangeQuery(query: HealthTimeRangeQuery): NativeHealthTimeRangeQuery {
@@ -56,10 +56,7 @@ export function makeNativeTimeRangeQuery(query: HealthTimeRangeQuery): NativeHea
 
 const STATISTICS_BUCKETS: readonly StatisticsBucket[] = ['hour', 'day', 'week', 'month']
 
-const STATISTICS_METRICS_BY_DATA_TYPE: Record<
-  HealthStatisticsDataType,
-  readonly StatisticsMetric[]
-> = {
+const STATISTICS_METRICS_BY_DATA_TYPE = {
   steps: ['sum'],
   distance: ['sum'],
   activeEnergyBurned: ['sum'],
@@ -83,7 +80,15 @@ const STATISTICS_METRICS_BY_DATA_TYPE: Record<
   bodyMass: ['avg', 'min', 'max'],
   sleep: [],
   workout: [],
-}
+  nutrition: [],
+  nutritionEnergyConsumed: ['sum'],
+  nutritionProtein: ['sum'],
+  nutritionTotalCarbohydrate: ['sum'],
+  nutritionTotalFat: ['sum'],
+  nutritionDietaryFiber: ['sum'],
+  nutritionSugar: ['sum'],
+  nutritionSodium: ['sum'],
+} satisfies Record<HealthStatisticsDataType, readonly StatisticsMetric[]>
 
 const STATISTICS_METRICS: readonly StatisticsMetric[] = Array.from(
   new Set(Object.values(STATISTICS_METRICS_BY_DATA_TYPE).flat())
@@ -111,7 +116,7 @@ export function makeNativeStatisticsQuery(
     }
   }
 
-  const supportedMetrics = STATISTICS_METRICS_BY_DATA_TYPE[dataType]
+  const supportedMetrics = [...STATISTICS_METRICS_BY_DATA_TYPE[dataType]]
 
   if (supportedMetrics.length === 0) {
     throw new Error(`readStatistics does not support the '${dataType}' data type`)

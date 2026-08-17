@@ -42,7 +42,8 @@ describe('NitroHealth deletes (native)', () => {
     }
 
     await expect(
-      NitroHealth.deleteRecordsByIds('heartRate', [child as unknown as HealthRecordIdentity])
+      // @ts-expect-error This test exercises runtime validation for untyped JavaScript callers.
+      NitroHealth.deleteRecordsByIds('heartRate', [child])
     ).rejects.toThrow('records[0]: an independently deletable record identity is required')
   })
 
@@ -147,6 +148,34 @@ describe('NitroHealth deletes (native)', () => {
     assertCompletedIdentityDelete(result)
 
     const afterDelete = await NitroHealth.readBloodPressure(deleteReadRange)
+    expect(afterDelete.samples.some((sample) => sample.identity.id === saved.identity.id)).toBe(
+      false
+    )
+  })
+
+  it('round-trips save, delete by record identity, and re-read for nutrition', async () => {
+    const authorized = await hasVerifiedPermissions([
+      { accessType: 'write', dataType: 'nutrition' },
+      { accessType: 'read', dataType: 'nutrition' },
+    ])
+    if (!authorized) return
+
+    await NitroHealth.saveNutrition([
+      { ...deleteInterval, foodName: 'Harness delete meal', proteinGrams: 21 },
+    ])
+    const page = await NitroHealth.readNutrition(deleteReadRange)
+    assertConclusiveRead(page.samples)
+
+    const saved = page.samples.find((sample) => sample.foodName === 'Harness delete meal')
+    expect(saved).toBeDefined()
+    if (saved === undefined || saved.identity.kind !== 'record') return
+
+    // On iOS this exercises the correlation cascade: the entry and its dietary member
+    // samples must all disappear, not just the correlation shell.
+    const result = await NitroHealth.deleteRecordsByIds('nutrition', [saved.identity])
+    assertCompletedIdentityDelete(result)
+
+    const afterDelete = await NitroHealth.readNutrition(deleteReadRange)
     expect(afterDelete.samples.some((sample) => sample.identity.id === saved.identity.id)).toBe(
       false
     )
@@ -421,9 +450,8 @@ describe('NitroHealth deletes (native)', () => {
     let record: HealthRecordIdentity
     if (target.identity.kind === 'record-child') {
       await expect(
-        NitroHealth.deleteRecordsByIds('heartRate', [
-          target.identity as unknown as HealthRecordIdentity,
-        ])
+        // @ts-expect-error This test exercises runtime validation for untyped JavaScript callers.
+        NitroHealth.deleteRecordsByIds('heartRate', [target.identity])
       ).rejects.toThrow('an independently deletable record identity is required')
       record = target.identity.record
     } else {

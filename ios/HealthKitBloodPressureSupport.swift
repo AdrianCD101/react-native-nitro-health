@@ -35,11 +35,16 @@ func makeBloodPressureQuantityTypes() throws -> (systolic: HKQuantityType, diast
 }
 
 // Read-authorization checks go through getRequestStatusForAuthorization, which rejects
-// correlation types; blood pressure resolves to its two member quantity types instead.
+// correlation types; correlation-backed data types resolve to their member quantity
+// types instead.
 func makeReadAuthorizationObjectTypes(dataType: String) throws -> Set<HKObjectType> {
     if dataType == "bloodPressure" {
         let types = try makeBloodPressureQuantityTypes()
         return [types.systolic, types.diastolic]
+    }
+
+    if dataType == "nutrition" {
+        return Set(try makeNutritionQuantityTypes())
     }
 
     return [try makeHealthKitSampleType(dataType: dataType)]
@@ -51,6 +56,13 @@ func makeReadAuthorizationObjectTypes(dataType: String) throws -> Set<HKObjectTy
 func makeBackgroundDeliverySampleType(dataType: String) throws -> HKSampleType {
     if dataType == "bloodPressure" {
         return try makeBloodPressureQuantityTypes().systolic
+    }
+
+    // No nutrition member type is a faithful change trigger (every nutrient is optional),
+    // and nutrition change tracking is deferred pending the correlation anchored-query
+    // spike. JS rejects nutrition before the bridge; failing loudly beats a silent no-op.
+    if dataType == "nutrition" {
+        throw permissionError("Change tracking is not supported for 'nutrition' yet")
     }
 
     return try makeHealthKitSampleType(dataType: dataType)

@@ -10,6 +10,18 @@
     "lib/**",
     "example/ios/Pods/**",
     "example/android/build/**",
-    "nitrogen/generated/**"
+    "nitrogen/generated/**",
+    ".agent/**",
+    ".agents/**",
+    ".claude/**",
+    ".codex/**",
+    ".continue/**",
+    ".cursor/**",
+    ".gemini/**",
+    ".opencode/**",
+    ".pi/**",
+    ".roo/**",
+    ".windsurf/**",
+    "tools/oxlint/anti-slop/**"
   ]
 }

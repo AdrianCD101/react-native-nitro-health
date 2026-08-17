@@ -1,9 +1,9 @@
-import type { HealthDataType } from './HealthDataType'
+import type { ChangeTrackedHealthDataType } from './HealthDataType'
 import type { HealthSampleByDataType } from './HealthSampleByDataType'
 import type { HealthRecordIdentity } from './HealthSampleIdentity'
 
 /** A native record inserted, updated, or deleted since a changes token was created. */
-export type HealthRecordChange<T extends HealthDataType> =
+export type HealthRecordChange<T extends ChangeTrackedHealthDataType> =
   | {
       /** Indicates that the complete current record contents are provided. */
       type: 'upsert'

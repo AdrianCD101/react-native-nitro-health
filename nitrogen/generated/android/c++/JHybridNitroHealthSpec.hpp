@@ -90,6 +90,7 @@ namespace margelo::nitro::nitrohealth {
     std::shared_ptr<Promise<std::vector<NativeHealthStatistics>>> readStatistics(const std::string& dataType, const NativeHealthStatisticsQuery& query) override;
     std::shared_ptr<Promise<NativeSleepSamplePage>> readSleepSamples(const NativeHealthDateRangeQuery& query) override;
     std::shared_ptr<Promise<NativeWorkoutSamplePage>> readWorkouts(const NativeHealthDateRangeQuery& query) override;
+    std::shared_ptr<Promise<NativeNutritionSamplePage>> readNutrition(const NativeHealthDateRangeQuery& query) override;
     std::shared_ptr<Promise<NativeHealthWriteResult>> saveSteps(const std::vector<NativeStepSampleInput>& samples) override;
     std::shared_ptr<Promise<NativeDistanceWriteResult>> saveDistance(const std::vector<NativeDistanceSampleInput>& samples) override;
     std::shared_ptr<Promise<NativeHealthWriteResult>> saveActiveEnergyBurned(const std::vector<NativeActiveEnergyBurnedSampleInput>& samples) override;
@@ -110,6 +111,7 @@ namespace margelo::nitro::nitrohealth {
     std::shared_ptr<Promise<NativeHealthWriteResult>> saveVo2Max(const std::vector<NativeVo2MaxSampleInput>& samples) override;
     std::shared_ptr<Promise<NativeHealthWriteResult>> saveSleepSessions(const std::vector<NativeSleepSessionInput>& sessions) override;
     std::shared_ptr<Promise<NativeHealthWriteResult>> saveWorkout(const NativeWorkoutSampleInput& workout) override;
+    std::shared_ptr<Promise<NativeHealthWriteResult>> saveNutrition(const std::vector<NativeNutritionSampleInput>& samples) override;
     std::shared_ptr<Promise<NativeHealthDeleteResult>> deleteRecordsByIds(const std::string& dataType, const std::vector<std::string>& recordIds) override;
     std::shared_ptr<Promise<NativeHealthDeleteResult>> deleteRecordsByTimeRange(const std::string& dataType, const NativeHealthTimeRangeQuery& query) override;
     std::shared_ptr<Promise<NativeHealthPermissionStatusResult>> getPermissionStatuses(const std::vector<NativeHealthPermission>& permissions) override;

@@ -17,6 +17,7 @@ import androidx.health.connect.client.records.HeartRateVariabilityRmssdRecord
 import androidx.health.connect.client.records.HeightRecord
 import androidx.health.connect.client.records.HydrationRecord
 import androidx.health.connect.client.records.LeanBodyMassRecord
+import androidx.health.connect.client.records.NutritionRecord
 import androidx.health.connect.client.records.OxygenSaturationRecord
 import androidx.health.connect.client.records.Record
 import androidx.health.connect.client.records.RespiratoryRateRecord
@@ -255,6 +256,85 @@ internal fun healthDataTypeDescriptorFor(dataType: String): HealthDataTypeDescri
         "vo2Max" -> HealthDataTypeDescriptor(
             recordType = Vo2MaxRecord::class,
             permissionLabel = "VO2 max"
+        )
+        // Raw nutrition entries reject readStatistics in JS; bucketed sums go through the
+        // per-nutrient statistics-only types below, which share NutritionRecord and
+        // therefore the single nutrition permission.
+        "nutrition" -> HealthDataTypeDescriptor(
+            recordType = NutritionRecord::class,
+            permissionLabel = "nutrition"
+        )
+        "nutritionEnergyConsumed" -> HealthDataTypeDescriptor(
+            recordType = NutritionRecord::class,
+            permissionLabel = "nutrition",
+            statisticsMetrics = mapOf(
+                "sum" to StatisticsMetricBinding(
+                    metric = NutritionRecord.ENERGY_TOTAL,
+                    extract = { result -> result[NutritionRecord.ENERGY_TOTAL]?.inKilocalories }
+                )
+            )
+        )
+        "nutritionProtein" -> HealthDataTypeDescriptor(
+            recordType = NutritionRecord::class,
+            permissionLabel = "nutrition",
+            statisticsMetrics = mapOf(
+                "sum" to StatisticsMetricBinding(
+                    metric = NutritionRecord.PROTEIN_TOTAL,
+                    extract = { result -> result[NutritionRecord.PROTEIN_TOTAL]?.inGrams }
+                )
+            )
+        )
+        "nutritionTotalCarbohydrate" -> HealthDataTypeDescriptor(
+            recordType = NutritionRecord::class,
+            permissionLabel = "nutrition",
+            statisticsMetrics = mapOf(
+                "sum" to StatisticsMetricBinding(
+                    metric = NutritionRecord.TOTAL_CARBOHYDRATE_TOTAL,
+                    extract = { result ->
+                        result[NutritionRecord.TOTAL_CARBOHYDRATE_TOTAL]?.inGrams
+                    }
+                )
+            )
+        )
+        "nutritionTotalFat" -> HealthDataTypeDescriptor(
+            recordType = NutritionRecord::class,
+            permissionLabel = "nutrition",
+            statisticsMetrics = mapOf(
+                "sum" to StatisticsMetricBinding(
+                    metric = NutritionRecord.TOTAL_FAT_TOTAL,
+                    extract = { result -> result[NutritionRecord.TOTAL_FAT_TOTAL]?.inGrams }
+                )
+            )
+        )
+        "nutritionDietaryFiber" -> HealthDataTypeDescriptor(
+            recordType = NutritionRecord::class,
+            permissionLabel = "nutrition",
+            statisticsMetrics = mapOf(
+                "sum" to StatisticsMetricBinding(
+                    metric = NutritionRecord.DIETARY_FIBER_TOTAL,
+                    extract = { result -> result[NutritionRecord.DIETARY_FIBER_TOTAL]?.inGrams }
+                )
+            )
+        )
+        "nutritionSugar" -> HealthDataTypeDescriptor(
+            recordType = NutritionRecord::class,
+            permissionLabel = "nutrition",
+            statisticsMetrics = mapOf(
+                "sum" to StatisticsMetricBinding(
+                    metric = NutritionRecord.SUGAR_TOTAL,
+                    extract = { result -> result[NutritionRecord.SUGAR_TOTAL]?.inGrams }
+                )
+            )
+        )
+        "nutritionSodium" -> HealthDataTypeDescriptor(
+            recordType = NutritionRecord::class,
+            permissionLabel = "nutrition",
+            statisticsMetrics = mapOf(
+                "sum" to StatisticsMetricBinding(
+                    metric = NutritionRecord.SODIUM_TOTAL,
+                    extract = { result -> result[NutritionRecord.SODIUM_TOTAL]?.inMilligrams }
+                )
+            )
         )
         else -> throw IllegalArgumentException("Unsupported health data type: $dataType")
     }

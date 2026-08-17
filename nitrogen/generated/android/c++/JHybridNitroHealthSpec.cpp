@@ -171,6 +171,12 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthStatistics; }
 namespace margelo::nitro::nitrohealth { struct NativeSleepSamplePage; }
 // Forward declaration of `NativeWorkoutSamplePage` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeWorkoutSamplePage; }
+// Forward declaration of `NativeNutritionSamplePage` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeNutritionSamplePage; }
+// Forward declaration of `NativeNutritionSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeNutritionSample; }
+// Forward declaration of `NativeNutritionMealType` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeNutritionMealType; }
 // Forward declaration of `NativeHealthWriteResult` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthWriteResult; }
 // Forward declaration of `NativeDistanceWriteResult` to properly resolve imports.
@@ -249,6 +255,8 @@ namespace margelo::nitro::nitrohealth { struct NativeSleepSessionInput; }
 namespace margelo::nitro::nitrohealth { struct NativeSleepSessionStageInput; }
 // Forward declaration of `NativeWorkoutSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeWorkoutSampleInput; }
+// Forward declaration of `NativeNutritionSampleInput` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeNutritionSampleInput; }
 
 #include "NativeHealthAvailability.hpp"
 #include "JNativeHealthAvailability.hpp"
@@ -422,6 +430,12 @@ namespace margelo::nitro::nitrohealth { struct NativeWorkoutSampleInput; }
 #include "JNativeSleepSamplePage.hpp"
 #include "NativeWorkoutSamplePage.hpp"
 #include "JNativeWorkoutSamplePage.hpp"
+#include "NativeNutritionSamplePage.hpp"
+#include "JNativeNutritionSamplePage.hpp"
+#include "NativeNutritionSample.hpp"
+#include "JNativeNutritionSample.hpp"
+#include "NativeNutritionMealType.hpp"
+#include "JNativeNutritionMealType.hpp"
 #include "NativeHealthWriteResult.hpp"
 #include "JNativeHealthWriteResult.hpp"
 #include "NativeDistanceWriteResult.hpp"
@@ -501,6 +515,8 @@ namespace margelo::nitro::nitrohealth { struct NativeWorkoutSampleInput; }
 #include "JNativeSleepSessionStageInput.hpp"
 #include "NativeWorkoutSampleInput.hpp"
 #include "JNativeWorkoutSampleInput.hpp"
+#include "NativeNutritionSampleInput.hpp"
+#include "JNativeNutritionSampleInput.hpp"
 
 namespace margelo::nitro::nitrohealth {
 
@@ -1094,6 +1110,22 @@ namespace margelo::nitro::nitrohealth {
       return __promise;
     }();
   }
+  std::shared_ptr<Promise<NativeNutritionSamplePage>> JHybridNitroHealthSpec::readNutrition(const NativeHealthDateRangeQuery& query) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<JNativeHealthDateRangeQuery> /* query */)>("readNutrition");
+    auto __result = method(_javaPart, JNativeHealthDateRangeQuery::fromCpp(query));
+    return [&]() {
+      auto __promise = Promise<NativeNutritionSamplePage>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {
+        auto __result = jni::static_ref_cast<JNativeNutritionSamplePage>(__boxedResult);
+        __promise->resolve(__result->toCpp());
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
+  }
   std::shared_ptr<Promise<NativeHealthWriteResult>> JHybridNitroHealthSpec::saveSteps(const std::vector<NativeStepSampleInput>& samples) {
     static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<jni::JArrayClass<JNativeStepSampleInput>> /* samples */)>("saveSteps");
     auto __result = method(_javaPart, [&](auto&& __input) {
@@ -1572,6 +1604,31 @@ namespace margelo::nitro::nitrohealth {
   std::shared_ptr<Promise<NativeHealthWriteResult>> JHybridNitroHealthSpec::saveWorkout(const NativeWorkoutSampleInput& workout) {
     static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<JNativeWorkoutSampleInput> /* workout */)>("saveWorkout");
     auto __result = method(_javaPart, JNativeWorkoutSampleInput::fromCpp(workout));
+    return [&]() {
+      auto __promise = Promise<NativeHealthWriteResult>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {
+        auto __result = jni::static_ref_cast<JNativeHealthWriteResult>(__boxedResult);
+        __promise->resolve(__result->toCpp());
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
+  }
+  std::shared_ptr<Promise<NativeHealthWriteResult>> JHybridNitroHealthSpec::saveNutrition(const std::vector<NativeNutritionSampleInput>& samples) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<jni::JArrayClass<JNativeNutritionSampleInput>> /* samples */)>("saveNutrition");
+    auto __result = method(_javaPart, [&](auto&& __input) {
+      size_t __size = __input.size();
+      jni::local_ref<jni::JArrayClass<JNativeNutritionSampleInput>> __array = jni::JArrayClass<JNativeNutritionSampleInput>::newArray(__size);
+      for (size_t __i = 0; __i < __size; __i++) {
+        const auto& __element = __input[__i];
+        auto __elementJni = JNativeNutritionSampleInput::fromCpp(__element);
+        __array->setElement(__i, *__elementJni);
+      }
+      return __array;
+    }(samples));
     return [&]() {
       auto __promise = Promise<NativeHealthWriteResult>::create();
       __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {

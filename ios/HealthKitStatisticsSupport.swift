@@ -56,6 +56,58 @@ func makeHealthDataTypeDescriptor(dataType: String) throws -> HealthDataTypeDesc
             label: "hydration",
             isCumulative: true
         )
+    // Nutrition statistics types are backed by the same dietary quantity types the
+    // `nutrition` grant authorizes. Unlike correlation-only raw reads, these sums include
+    // loose dietary samples written by other apps outside a food correlation.
+    case "nutritionEnergyConsumed":
+        return HealthDataTypeDescriptor(
+            identifier: .dietaryEnergyConsumed,
+            unit: HKUnit.kilocalorie(),
+            label: "nutrition energy consumed",
+            isCumulative: true
+        )
+    case "nutritionProtein":
+        return HealthDataTypeDescriptor(
+            identifier: .dietaryProtein,
+            unit: HKUnit.gram(),
+            label: "nutrition protein",
+            isCumulative: true
+        )
+    case "nutritionTotalCarbohydrate":
+        return HealthDataTypeDescriptor(
+            identifier: .dietaryCarbohydrates,
+            unit: HKUnit.gram(),
+            label: "nutrition total carbohydrate",
+            isCumulative: true
+        )
+    case "nutritionTotalFat":
+        return HealthDataTypeDescriptor(
+            identifier: .dietaryFatTotal,
+            unit: HKUnit.gram(),
+            label: "nutrition total fat",
+            isCumulative: true
+        )
+    case "nutritionDietaryFiber":
+        return HealthDataTypeDescriptor(
+            identifier: .dietaryFiber,
+            unit: HKUnit.gram(),
+            label: "nutrition dietary fiber",
+            isCumulative: true
+        )
+    case "nutritionSugar":
+        return HealthDataTypeDescriptor(
+            identifier: .dietarySugar,
+            unit: HKUnit.gram(),
+            label: "nutrition sugar",
+            isCumulative: true
+        )
+    case "nutritionSodium":
+        return HealthDataTypeDescriptor(
+            identifier: .dietarySodium,
+            unit: HKUnit.gramUnit(with: .milli),
+            label: "nutrition sodium",
+            isCumulative: true
+        )
     case "floorsClimbed":
         return HealthDataTypeDescriptor(
             identifier: .flightsClimbed,
