@@ -6,7 +6,7 @@ jest.mock('react-native-nitro-modules', () => ({
   },
 }))
 
-import { NitroHealth } from 'react-native-nitro-health'
+import { NitroHealth, type HealthPermission } from 'react-native-nitro-health'
 
 describe('NitroHealth aggregate-only energy statistics contract', () => {
   beforeEach(() => {
