@@ -20,16 +20,7 @@ import java.util.Objects
 data class NativeStepSample(
   @DoNotStrip
   @Keep
-  val identity: NativeHealthSampleIdentity,
-  @DoNotStrip
-  @Keep
-  val origin: NativeHealthDataOrigin,
-  @DoNotStrip
-  @Keep
-  val device: NativeHealthDeviceInfo?,
-  @DoNotStrip
-  @Keep
-  val recordingMethod: NativeHealthRecordingMethod,
+  val sampleMetadata: NativeHealthSampleMetadata,
   @DoNotStrip
   @Keep
   val startTimeMs: Double,
@@ -45,10 +36,7 @@ data class NativeStepSample(
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other !is NativeStepSample) return false
-    return Objects.deepEquals(this.identity, other.identity)
-      && Objects.deepEquals(this.origin, other.origin)
-      && Objects.deepEquals(this.device, other.device)
-      && Objects.deepEquals(this.recordingMethod, other.recordingMethod)
+    return Objects.deepEquals(this.sampleMetadata, other.sampleMetadata)
       && Objects.deepEquals(this.startTimeMs, other.startTimeMs)
       && Objects.deepEquals(this.endTimeMs, other.endTimeMs)
       && Objects.deepEquals(this.count, other.count)
@@ -56,10 +44,7 @@ data class NativeStepSample(
 
   override fun hashCode(): Int {
     return arrayOf<Any?>(
-      identity,
-      origin,
-      device,
-      recordingMethod,
+      sampleMetadata,
       startTimeMs,
       endTimeMs,
       count
@@ -74,8 +59,8 @@ data class NativeStepSample(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, device: NativeHealthDeviceInfo?, recordingMethod: NativeHealthRecordingMethod, startTimeMs: Double, endTimeMs: Double, count: Double): NativeStepSample {
-      return NativeStepSample(identity, origin, device, recordingMethod, startTimeMs, endTimeMs, count)
+    private fun fromCpp(sampleMetadata: NativeHealthSampleMetadata, startTimeMs: Double, endTimeMs: Double, count: Double): NativeStepSample {
+      return NativeStepSample(sampleMetadata, startTimeMs, endTimeMs, count)
     }
   }
 }

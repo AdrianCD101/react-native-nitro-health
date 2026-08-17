@@ -25,20 +25,18 @@ class ExerciseSessionRecordMappingTest {
             exerciseType = ExerciseSessionRecord.EXERCISE_TYPE_RUNNING_TREADMILL,
             title = "Morning Run",
             metadata = makeSampleMetadata(
-                syncId = null,
-                syncVersion = null,
-                recordingMethod = NativeHealthRecordingMethod.MANUAL
+                makeTestWriteMetadata(recordingMethod = NativeHealthRecordingMethod.MANUAL)
             )
         )
 
         val sample = makeNativeWorkoutSample(record)
 
-        assertEquals(NativeHealthSampleIdentityKind.RECORD, sample.identity.kind)
-        assertEquals(record.metadata.id, sample.identity.id)
-        assertEquals(record.metadata.id, sample.identity.recordId)
-        assertEquals(record.metadata.dataOrigin.packageName, sample.origin.identifier)
-        assertNull(sample.origin.displayName)
-        assertEquals(NativeHealthRecordingMethod.MANUAL, sample.recordingMethod)
+        assertEquals(NativeHealthSampleIdentityKind.RECORD, sample.sampleMetadata.identityKind)
+        assertEquals(record.metadata.id, sample.sampleMetadata.identityId)
+        assertEquals(record.metadata.id, sample.sampleMetadata.identityRecordId)
+        assertEquals(record.metadata.dataOrigin.packageName, sample.sampleMetadata.originIdentifier)
+        assertNull(sample.sampleMetadata.originDisplayName)
+        assertEquals(NativeHealthRecordingMethod.MANUAL, sample.sampleMetadata.recordingMethod)
         assertEquals(3600.0, sample.elapsedDurationSeconds, 0.0)
         assertEquals(NativeHealthMetricValueStatus.UNSUPPORTED, sample.activeDuration.status)
         assertNull(sample.activeDuration.value)

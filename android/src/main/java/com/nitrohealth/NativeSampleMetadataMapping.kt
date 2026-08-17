@@ -1,10 +1,9 @@
 package com.nitrohealth
 
 import androidx.health.connect.client.records.metadata.Device
-import com.margelo.nitro.nitrohealth.NativeHealthDataOrigin
-import com.margelo.nitro.nitrohealth.NativeHealthDeviceInfo
+import androidx.health.connect.client.records.metadata.Metadata
 import com.margelo.nitro.nitrohealth.NativeHealthDeviceType
-import com.margelo.nitro.nitrohealth.NativeHealthSampleIdentity
+import com.margelo.nitro.nitrohealth.NativeHealthSampleMetadata
 import com.margelo.nitro.nitrohealth.NativeHealthSampleIdentityKind
 
 internal fun makeRecordIdentity(recordId: String): NativeHealthSampleIdentity {
@@ -26,36 +25,14 @@ internal fun makeRecordChildIdentity(
     )
 }
 
-internal fun makeHealthDataOrigin(packageName: String): NativeHealthDataOrigin {
-    return NativeHealthDataOrigin(identifier = packageName, displayName = null)
-}
-
-internal fun makeHealthConnectDevice(device: NativeHealthDeviceInfo?): Device? {
-    if (device == null) {
-        return null
-    }
-
-    val type = when (device.type) {
-        null, NativeHealthDeviceType.UNKNOWN -> Device.TYPE_UNKNOWN
-        NativeHealthDeviceType.WATCH -> Device.TYPE_WATCH
-        NativeHealthDeviceType.PHONE -> Device.TYPE_PHONE
-        NativeHealthDeviceType.SCALE -> Device.TYPE_SCALE
-        NativeHealthDeviceType.RING -> Device.TYPE_RING
-        NativeHealthDeviceType.HEADMOUNTED -> Device.TYPE_HEAD_MOUNTED
-        NativeHealthDeviceType.FITNESSBAND -> Device.TYPE_FITNESS_BAND
-        NativeHealthDeviceType.CHESTSTRAP -> Device.TYPE_CHEST_STRAP
-        NativeHealthDeviceType.SMARTDISPLAY -> Device.TYPE_SMART_DISPLAY
-    }
-
-    return Device(type = type, manufacturer = device.manufacturer, model = device.model)
-}
-
-internal fun makeNativeHealthDeviceInfo(device: Device?): NativeHealthDeviceInfo? {
-    if (device == null) {
-        return null
-    }
-
-    val type = when (device.type) {
+internal fun makeNativeHealthSampleMetadata(
+    metadata: Metadata,
+    identity: NativeHealthSampleIdentity? = null
+): NativeHealthSampleMetadata {
+    val resolvedIdentity = identity ?: makeRecordIdentity(metadata.id)
+    val device = metadata.device
+    val deviceType = when (device?.type) {
+        null -> null
         Device.TYPE_UNKNOWN -> NativeHealthDeviceType.UNKNOWN
         Device.TYPE_WATCH -> NativeHealthDeviceType.WATCH
         Device.TYPE_PHONE -> NativeHealthDeviceType.PHONE
@@ -68,9 +45,15 @@ internal fun makeNativeHealthDeviceInfo(device: Device?): NativeHealthDeviceInfo
         else -> NativeHealthDeviceType.UNKNOWN
     }
 
-    return NativeHealthDeviceInfo(
-        type = type,
-        manufacturer = device.manufacturer,
-        model = device.model
+    return NativeHealthSampleMetadata(
+        identityKind = resolvedIdentity.kind,
+        identityId = resolvedIdentity.id,
+        identityRecordId = resolvedIdentity.recordId,
+        originIdentifier = metadata.dataOrigin.packageName,
+        originDisplayName = null,
+        deviceType = deviceType,
+        deviceManufacturer = device?.manufacturer,
+        deviceModel = device?.model,
+        recordingMethod = nativeHealthRecordingMethod(metadata.recordingMethod)
     )
 }

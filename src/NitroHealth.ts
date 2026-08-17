@@ -81,26 +81,6 @@ import {
   makeNativeTimeRangeQuery,
 } from './internal/queryMapping'
 import {
-  makeActiveEnergyBurnedSample,
-  makeFloorsClimbedSample,
-  makeBasalBodyTemperatureSample,
-  makeBloodGlucoseSample,
-  makeBloodPressureSample,
-  makeBodyFatSample,
-  makeBodyTemperatureSample,
-  makeBodyMassSample,
-  makeDistanceSample,
-  makeDistanceWriteResult,
-  makeHealthChangesResult,
-  makeHealthWriteResult,
-  makeHealthStatistics,
-  makeHeartRateSample,
-  makeHeartRateStatistics,
-  makeHeartRateVariabilitySample,
-  makeHeightSample,
-  makeHydrationSample,
-  makeVo2MaxSample,
-  makeLeanBodyMassSample,
   makeNativeActiveEnergyBurnedSampleInput,
   makeNativeFloorsClimbedSampleInput,
   makeNativeBasalBodyTemperatureSampleInput,
@@ -121,6 +101,25 @@ import {
   makeNativeSleepSessionInput,
   makeNativeStepSampleInput,
   makeNativeWorkoutSampleInput,
+} from './internal/sampleInputMapping'
+import {
+  makeActiveEnergyBurnedSample,
+  makeFloorsClimbedSample,
+  makeBasalBodyTemperatureSample,
+  makeBloodGlucoseSample,
+  makeBloodPressureSample,
+  makeBodyFatSample,
+  makeBodyTemperatureSample,
+  makeBodyMassSample,
+  makeDistanceSample,
+  makeDistanceWriteResult,
+  makeHealthWriteResult,
+  makeHeartRateSample,
+  makeHeartRateVariabilitySample,
+  makeHeightSample,
+  makeHydrationSample,
+  makeVo2MaxSample,
+  makeLeanBodyMassSample,
   makeOxygenSaturationSample,
   makeRespiratoryRateSample,
   makeRestingHeartRateSample,
@@ -128,7 +127,9 @@ import {
   makeSleepSample,
   makeStepSample,
   makeWorkoutSample,
-} from './internal/sampleMapping'
+} from './internal/sampleOutputMapping'
+import { makeHealthChangesResult } from './internal/healthChangeMapping'
+import { makeHealthStatistics, makeHeartRateStatistics } from './internal/statisticsMapping'
 import {
   assertChangesToken,
   assertNonEmptySamples,

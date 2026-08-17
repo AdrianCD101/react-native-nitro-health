@@ -116,16 +116,12 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthCapabilities; }
 namespace margelo::nitro::nitrohealth { struct NativeHealthChange; }
 // Forward declaration of `NativeHealthChangesResult` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthChangesResult; }
-// Forward declaration of `NativeHealthDataOrigin` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeHealthDataOrigin; }
 // Forward declaration of `NativeHealthDateRangeQuery` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthDateRangeQuery; }
 // Forward declaration of `NativeHealthDeleteResult` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthDeleteResult; }
 // Forward declaration of `NativeHealthDeleteStatus` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class NativeHealthDeleteStatus; }
-// Forward declaration of `NativeHealthDeviceInfo` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeHealthDeviceInfo; }
 // Forward declaration of `NativeHealthDeviceType` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class NativeHealthDeviceType; }
 // Forward declaration of `NativeHealthMetricValueStatus` to properly resolve imports.
@@ -142,14 +138,20 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthPermission; }
 namespace margelo::nitro::nitrohealth { enum class NativeHealthRecordingMethod; }
 // Forward declaration of `NativeHealthSampleIdentityKind` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class NativeHealthSampleIdentityKind; }
-// Forward declaration of `NativeHealthSampleIdentity` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeHealthSampleIdentity; }
+// Forward declaration of `NativeHealthSampleMetadata` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthSampleMetadata; }
 // Forward declaration of `NativeHealthStatisticsQuery` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthStatisticsQuery; }
 // Forward declaration of `NativeHealthStatistics` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthStatistics; }
+// Forward declaration of `NativeHealthSyncMetadata` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthSyncMetadata; }
 // Forward declaration of `NativeHealthTimeRangeQuery` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthTimeRangeQuery; }
+// Forward declaration of `NativeHealthWriteMetadata` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthWriteMetadata; }
+// Forward declaration of `NativeHealthWriteProvenance` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthWriteProvenance; }
 // Forward declaration of `NativeHealthWriteResult` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthWriteResult; }
 // Forward declaration of `NativeHeartRateSampleInput` to properly resolve imports.
@@ -306,11 +308,9 @@ namespace margelo::nitro::nitrohealth { struct NativeWorkoutSample; }
 #include "NativeHealthCapabilities.hpp"
 #include "NativeHealthChange.hpp"
 #include "NativeHealthChangesResult.hpp"
-#include "NativeHealthDataOrigin.hpp"
 #include "NativeHealthDateRangeQuery.hpp"
 #include "NativeHealthDeleteResult.hpp"
 #include "NativeHealthDeleteStatus.hpp"
-#include "NativeHealthDeviceInfo.hpp"
 #include "NativeHealthDeviceType.hpp"
 #include "NativeHealthMetricValue.hpp"
 #include "NativeHealthMetricValueStatus.hpp"
@@ -318,11 +318,14 @@ namespace margelo::nitro::nitrohealth { struct NativeWorkoutSample; }
 #include "NativeHealthPermissionStatusEntry.hpp"
 #include "NativeHealthPermissionStatusResult.hpp"
 #include "NativeHealthRecordingMethod.hpp"
-#include "NativeHealthSampleIdentity.hpp"
 #include "NativeHealthSampleIdentityKind.hpp"
+#include "NativeHealthSampleMetadata.hpp"
 #include "NativeHealthStatistics.hpp"
 #include "NativeHealthStatisticsQuery.hpp"
+#include "NativeHealthSyncMetadata.hpp"
 #include "NativeHealthTimeRangeQuery.hpp"
+#include "NativeHealthWriteMetadata.hpp"
+#include "NativeHealthWriteProvenance.hpp"
 #include "NativeHealthWriteResult.hpp"
 #include "NativeHeartRateSample.hpp"
 #include "NativeHeartRateSampleInput.hpp"

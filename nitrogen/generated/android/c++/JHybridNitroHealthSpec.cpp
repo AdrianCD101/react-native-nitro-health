@@ -39,14 +39,10 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthChangesResult; }
 namespace margelo::nitro::nitrohealth { struct NativeHealthChange; }
 // Forward declaration of `NativeStepSample` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeStepSample; }
-// Forward declaration of `NativeHealthSampleIdentity` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeHealthSampleIdentity; }
+// Forward declaration of `NativeHealthSampleMetadata` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthSampleMetadata; }
 // Forward declaration of `NativeHealthSampleIdentityKind` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class NativeHealthSampleIdentityKind; }
-// Forward declaration of `NativeHealthDataOrigin` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeHealthDataOrigin; }
-// Forward declaration of `NativeHealthDeviceInfo` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeHealthDeviceInfo; }
 // Forward declaration of `NativeHealthDeviceType` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class NativeHealthDeviceType; }
 // Forward declaration of `NativeHealthRecordingMethod` to properly resolve imports.
@@ -207,6 +203,12 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthTimeRangeQuery; }
 namespace margelo::nitro::nitrohealth { struct NativeHealthStatisticsQuery; }
 // Forward declaration of `NativeStepSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeStepSampleInput; }
+// Forward declaration of `NativeHealthWriteMetadata` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthWriteMetadata; }
+// Forward declaration of `NativeHealthWriteProvenance` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthWriteProvenance; }
+// Forward declaration of `NativeHealthSyncMetadata` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthSyncMetadata; }
 // Forward declaration of `NativeDistanceSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeDistanceSampleInput; }
 // Forward declaration of `NativeActiveEnergyBurnedSampleInput` to properly resolve imports.
@@ -285,14 +287,10 @@ namespace margelo::nitro::nitrohealth { struct NativeWorkoutSampleInput; }
 #include "JNativeHealthChange.hpp"
 #include "NativeStepSample.hpp"
 #include "JNativeStepSample.hpp"
-#include "NativeHealthSampleIdentity.hpp"
-#include "JNativeHealthSampleIdentity.hpp"
+#include "NativeHealthSampleMetadata.hpp"
+#include "JNativeHealthSampleMetadata.hpp"
 #include "NativeHealthSampleIdentityKind.hpp"
 #include "JNativeHealthSampleIdentityKind.hpp"
-#include "NativeHealthDataOrigin.hpp"
-#include "JNativeHealthDataOrigin.hpp"
-#include "NativeHealthDeviceInfo.hpp"
-#include "JNativeHealthDeviceInfo.hpp"
 #include "NativeHealthDeviceType.hpp"
 #include "JNativeHealthDeviceType.hpp"
 #include "NativeHealthRecordingMethod.hpp"
@@ -457,6 +455,12 @@ namespace margelo::nitro::nitrohealth { struct NativeWorkoutSampleInput; }
 #include "JNativeHealthStatisticsQuery.hpp"
 #include "NativeStepSampleInput.hpp"
 #include "JNativeStepSampleInput.hpp"
+#include "NativeHealthWriteMetadata.hpp"
+#include "JNativeHealthWriteMetadata.hpp"
+#include "NativeHealthWriteProvenance.hpp"
+#include "JNativeHealthWriteProvenance.hpp"
+#include "NativeHealthSyncMetadata.hpp"
+#include "JNativeHealthSyncMetadata.hpp"
 #include "NativeDistanceSampleInput.hpp"
 #include "JNativeDistanceSampleInput.hpp"
 #include "NativeActiveEnergyBurnedSampleInput.hpp"

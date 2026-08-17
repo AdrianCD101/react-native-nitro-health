@@ -18,20 +18,8 @@ public extension NativeBasalBodyTemperatureSampleInput {
   /**
    * Create a new instance of `NativeBasalBodyTemperatureSampleInput`.
    */
-  init(timeMs: Double, celsius: Double, device: NativeHealthDeviceInfo?, recordingMethod: NativeHealthRecordingMethod?, androidMeasurementLocation: NativeAndroidBodyTemperatureMeasurementLocation?, iosSensorLocation: NativeIOSBodyTemperatureSensorLocation?, syncId: String?, syncVersion: Double?) {
-    self.init(timeMs, celsius, { () -> bridge.std__optional_NativeHealthDeviceInfo_ in
-      if let __unwrappedValue = device {
-        return bridge.create_std__optional_NativeHealthDeviceInfo_(__unwrappedValue)
-      } else {
-        return .init()
-      }
-    }(), { () -> bridge.std__optional_NativeHealthRecordingMethod_ in
-      if let __unwrappedValue = recordingMethod {
-        return bridge.create_std__optional_NativeHealthRecordingMethod_(__unwrappedValue)
-      } else {
-        return .init()
-      }
-    }(), { () -> bridge.std__optional_NativeAndroidBodyTemperatureMeasurementLocation_ in
+  init(timeMs: Double, celsius: Double, writeMetadata: NativeHealthWriteMetadata, androidMeasurementLocation: NativeAndroidBodyTemperatureMeasurementLocation?, iosSensorLocation: NativeIOSBodyTemperatureSensorLocation?) {
+    self.init(timeMs, celsius, writeMetadata, { () -> bridge.std__optional_NativeAndroidBodyTemperatureMeasurementLocation_ in
       if let __unwrappedValue = androidMeasurementLocation {
         return bridge.create_std__optional_NativeAndroidBodyTemperatureMeasurementLocation_(__unwrappedValue)
       } else {
@@ -40,18 +28,6 @@ public extension NativeBasalBodyTemperatureSampleInput {
     }(), { () -> bridge.std__optional_NativeIOSBodyTemperatureSensorLocation_ in
       if let __unwrappedValue = iosSensorLocation {
         return bridge.create_std__optional_NativeIOSBodyTemperatureSensorLocation_(__unwrappedValue)
-      } else {
-        return .init()
-      }
-    }(), { () -> bridge.std__optional_std__string_ in
-      if let __unwrappedValue = syncId {
-        return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
-      } else {
-        return .init()
-      }
-    }(), { () -> bridge.std__optional_double_ in
-      if let __unwrappedValue = syncVersion {
-        return bridge.create_std__optional_double_(__unwrappedValue)
       } else {
         return .init()
       }
@@ -69,13 +45,8 @@ public extension NativeBasalBodyTemperatureSampleInput {
   }
   
   @inline(__always)
-  var device: NativeHealthDeviceInfo? {
-    return self.__device.value
-  }
-  
-  @inline(__always)
-  var recordingMethod: NativeHealthRecordingMethod? {
-    return self.__recordingMethod.value
+  var writeMetadata: NativeHealthWriteMetadata {
+    return self.__writeMetadata
   }
   
   @inline(__always)
@@ -86,29 +57,5 @@ public extension NativeBasalBodyTemperatureSampleInput {
   @inline(__always)
   var iosSensorLocation: NativeIOSBodyTemperatureSensorLocation? {
     return self.__iosSensorLocation.value
-  }
-  
-  @inline(__always)
-  var syncId: String? {
-    return { () -> String? in
-      if bridge.has_value_std__optional_std__string_(self.__syncId) {
-        let __unwrapped = bridge.get_std__optional_std__string_(self.__syncId)
-        return String(__unwrapped)
-      } else {
-        return nil
-      }
-    }()
-  }
-  
-  @inline(__always)
-  var syncVersion: Double? {
-    return { () -> Double? in
-      if bridge.has_value_std__optional_double_(self.__syncVersion) {
-        let __unwrapped = bridge.get_std__optional_double_(self.__syncVersion)
-        return __unwrapped
-      } else {
-        return nil
-      }
-    }()
   }
 }

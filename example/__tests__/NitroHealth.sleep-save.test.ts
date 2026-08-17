@@ -51,8 +51,12 @@ describe('NitroHealth sleep session save contract', () => {
         startTimeMs: sessionStart.getTime(),
         endTimeMs: sessionEnd.getTime(),
         timeZone: 'America/New_York',
-        device: { type: 'watch', manufacturer: 'Example', model: 'Sleep Watch' },
-        recordingMethod: 'automaticallyRecorded',
+        writeProvenance: {
+          deviceType: 'watch',
+          deviceManufacturer: 'Example',
+          deviceModel: 'Sleep Watch',
+          recordingMethod: 'automaticallyRecorded',
+        },
         stages: [
           {
             startTimeMs: earlierStage.startDate.getTime(),

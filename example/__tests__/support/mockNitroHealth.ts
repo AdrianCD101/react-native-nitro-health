@@ -1,16 +1,12 @@
 import type { NitroHealth as NitroHealthSpec } from '../../../src/specs/nitro-health.nitro'
-import type { NativeHealthDataOrigin } from '../../../src/NativeHealthDataOrigin'
 import type { NativeHealthDeviceInfo } from '../../../src/NativeHealthDeviceInfo'
 import type { NativeHealthRecordingMethod } from '../../../src/NativeHealthRecordingMethod'
-import type { NativeHealthSampleIdentity } from '../../../src/NativeHealthSampleIdentity'
+import type { NativeHealthSampleMetadata } from '../../../src/NativeHealthSampleMetadata'
 
 type NativeMethod = (...args: any[]) => any
 
 interface NativeRecordMetadata {
-  identity: NativeHealthSampleIdentity
-  origin: NativeHealthDataOrigin
-  device?: NativeHealthDeviceInfo
-  recordingMethod: NativeHealthRecordingMethod
+  sampleMetadata: NativeHealthSampleMetadata
 }
 
 function mockNativeMethod<T extends NativeMethod>(): jest.Mock<ReturnType<T>, Parameters<T>> {
@@ -147,10 +143,17 @@ export function nativeRecordMetadata(
   device?: NativeHealthDeviceInfo
 ): NativeRecordMetadata {
   return {
-    identity: { kind: 'record' as const, id, recordId: id },
-    origin: displayName === undefined ? { identifier } : { identifier, displayName },
-    ...(device === undefined ? {} : { device }),
-    recordingMethod,
+    sampleMetadata: {
+      identityKind: 'record',
+      identityId: id,
+      identityRecordId: id,
+      originIdentifier: identifier,
+      ...(displayName === undefined ? {} : { originDisplayName: displayName }),
+      ...(device?.type === undefined ? {} : { deviceType: device.type }),
+      ...(device?.manufacturer === undefined ? {} : { deviceManufacturer: device.manufacturer }),
+      ...(device?.model === undefined ? {} : { deviceModel: device.model }),
+      recordingMethod,
+    },
   }
 }
 
@@ -163,9 +166,16 @@ export function nativeRecordChildMetadata(
   device?: NativeHealthDeviceInfo
 ): NativeRecordMetadata {
   return {
-    identity: { kind: 'recordChild' as const, id, recordId },
-    origin: displayName === undefined ? { identifier } : { identifier, displayName },
-    ...(device === undefined ? {} : { device }),
-    recordingMethod,
+    sampleMetadata: {
+      identityKind: 'recordChild',
+      identityId: id,
+      identityRecordId: recordId,
+      originIdentifier: identifier,
+      ...(displayName === undefined ? {} : { originDisplayName: displayName }),
+      ...(device?.type === undefined ? {} : { deviceType: device.type }),
+      ...(device?.manufacturer === undefined ? {} : { deviceManufacturer: device.manufacturer }),
+      ...(device?.model === undefined ? {} : { deviceModel: device.model }),
+      recordingMethod,
+    },
   }
 }

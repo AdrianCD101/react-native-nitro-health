@@ -20,16 +20,7 @@ import java.util.Objects
 data class NativeVo2MaxSample(
   @DoNotStrip
   @Keep
-  val identity: NativeHealthSampleIdentity,
-  @DoNotStrip
-  @Keep
-  val origin: NativeHealthDataOrigin,
-  @DoNotStrip
-  @Keep
-  val device: NativeHealthDeviceInfo?,
-  @DoNotStrip
-  @Keep
-  val recordingMethod: NativeHealthRecordingMethod,
+  val sampleMetadata: NativeHealthSampleMetadata,
   @DoNotStrip
   @Keep
   val timeMs: Double,
@@ -48,10 +39,7 @@ data class NativeVo2MaxSample(
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other !is NativeVo2MaxSample) return false
-    return Objects.deepEquals(this.identity, other.identity)
-      && Objects.deepEquals(this.origin, other.origin)
-      && Objects.deepEquals(this.device, other.device)
-      && Objects.deepEquals(this.recordingMethod, other.recordingMethod)
+    return Objects.deepEquals(this.sampleMetadata, other.sampleMetadata)
       && Objects.deepEquals(this.timeMs, other.timeMs)
       && Objects.deepEquals(this.millilitersPerKilogramPerMinute, other.millilitersPerKilogramPerMinute)
       && Objects.deepEquals(this.androidMeasurementMethod, other.androidMeasurementMethod)
@@ -60,10 +48,7 @@ data class NativeVo2MaxSample(
 
   override fun hashCode(): Int {
     return arrayOf<Any?>(
-      identity,
-      origin,
-      device,
-      recordingMethod,
+      sampleMetadata,
       timeMs,
       millilitersPerKilogramPerMinute,
       androidMeasurementMethod,
@@ -79,8 +64,8 @@ data class NativeVo2MaxSample(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, device: NativeHealthDeviceInfo?, recordingMethod: NativeHealthRecordingMethod, timeMs: Double, millilitersPerKilogramPerMinute: Double, androidMeasurementMethod: NativeAndroidVo2MaxMeasurementMethod?, iosTestType: NativeIOSVo2MaxTestType?): NativeVo2MaxSample {
-      return NativeVo2MaxSample(identity, origin, device, recordingMethod, timeMs, millilitersPerKilogramPerMinute, androidMeasurementMethod, iosTestType)
+    private fun fromCpp(sampleMetadata: NativeHealthSampleMetadata, timeMs: Double, millilitersPerKilogramPerMinute: Double, androidMeasurementMethod: NativeAndroidVo2MaxMeasurementMethod?, iosTestType: NativeIOSVo2MaxTestType?): NativeVo2MaxSample {
+      return NativeVo2MaxSample(sampleMetadata, timeMs, millilitersPerKilogramPerMinute, androidMeasurementMethod, iosTestType)
     }
   }
 }

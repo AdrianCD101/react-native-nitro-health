@@ -3,8 +3,9 @@
 //  Pods
 //
 //  Pure-Foundation validation for the optional versioned-sync pair passed by
-//  generated Nitro inputs. HealthKit metadata construction stays in
-//  SampleInputMapping.swift so this helper remains unit-testable with SwiftPM.
+//  generated Nitro inputs. HealthKit metadata construction stays in the
+//  HealthKit-only write-metadata extension so this helper remains unit-testable
+//  with SwiftPM.
 //
 
 import Foundation

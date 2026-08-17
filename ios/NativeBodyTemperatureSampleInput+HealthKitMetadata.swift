@@ -3,11 +3,7 @@ import HealthKit
 
 extension NativeBodyTemperatureSampleInput {
     func healthKitMetadata() throws -> [String: Any]? {
-        var metadata = try makeHealthKitMetadata(
-            syncId: syncId,
-            syncVersion: syncVersion,
-            recordingMethod: recordingMethod
-        ) ?? [:]
+        var metadata = try writeMetadata.healthKitMetadata() ?? [:]
 
         if let iosSensorLocation {
             metadata[HKMetadataKeyBodyTemperatureSensorLocation] = NSNumber(

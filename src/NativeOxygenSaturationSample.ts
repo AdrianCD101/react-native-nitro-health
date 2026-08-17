@@ -1,14 +1,8 @@
-import type { NativeHealthDataOrigin } from './NativeHealthDataOrigin'
-import type { NativeHealthDeviceInfo } from './NativeHealthDeviceInfo'
-import type { NativeHealthRecordingMethod } from './NativeHealthRecordingMethod'
-import type { NativeHealthSampleIdentity } from './NativeHealthSampleIdentity'
+import type { NativeHealthSampleMetadata } from './NativeHealthSampleMetadata'
 
 /** Native oxygen saturation sample shape returned through the Nitro spec. */
 export interface NativeOxygenSaturationSample {
-  identity: NativeHealthSampleIdentity
-  origin: NativeHealthDataOrigin
-  device?: NativeHealthDeviceInfo
-  recordingMethod: NativeHealthRecordingMethod
+  sampleMetadata: NativeHealthSampleMetadata
   timeMs: number
   percentage: number
 }

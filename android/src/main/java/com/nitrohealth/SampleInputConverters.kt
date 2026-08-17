@@ -56,12 +56,7 @@ internal fun toStepsRecords(samples: Array<NativeStepSampleInput>): List<StepsRe
             endTime = Instant.ofEpochMilli(sample.endTimeMs.toLong()),
             endZoneOffset = null,
             count = sample.count.toLong(),
-            metadata = makeSampleMetadata(
-                sample.syncId,
-                sample.syncVersion,
-                sample.recordingMethod,
-                sample.device
-            )
+            metadata = makeSampleMetadata(sample.writeMetadata)
         )
     }
 }
@@ -77,12 +72,7 @@ internal fun toDistanceRecords(samples: Array<NativeDistanceSampleInput>): List<
             endTime = Instant.ofEpochMilli(sample.endTimeMs.toLong()),
             endZoneOffset = null,
             distance = Length.meters(sample.distanceMeters),
-            metadata = makeSampleMetadata(
-                sample.syncId,
-                sample.syncVersion,
-                sample.recordingMethod,
-                sample.device
-            )
+            metadata = makeSampleMetadata(sample.writeMetadata)
         )
     }
 }
@@ -97,12 +87,7 @@ internal fun toActiveCaloriesBurnedRecords(
             endTime = Instant.ofEpochMilli(sample.endTimeMs.toLong()),
             endZoneOffset = null,
             energy = Energy.kilocalories(sample.kilocalories),
-            metadata = makeSampleMetadata(
-                sample.syncId,
-                sample.syncVersion,
-                sample.recordingMethod,
-                sample.device
-            )
+            metadata = makeSampleMetadata(sample.writeMetadata)
         )
     }
 }
@@ -117,12 +102,7 @@ internal fun toHydrationRecords(
             endTime = Instant.ofEpochMilli(sample.endTimeMs.toLong()),
             endZoneOffset = null,
             volume = Volume.milliliters(sample.milliliters),
-            metadata = makeSampleMetadata(
-                sample.syncId,
-                sample.syncVersion,
-                sample.recordingMethod,
-                sample.device
-            )
+            metadata = makeSampleMetadata(sample.writeMetadata)
         )
     }
 }
@@ -137,12 +117,7 @@ internal fun toFloorsClimbedRecords(
             endTime = Instant.ofEpochMilli(sample.endTimeMs.toLong()),
             endZoneOffset = null,
             floors = sample.floors,
-            metadata = makeSampleMetadata(
-                sample.syncId,
-                sample.syncVersion,
-                sample.recordingMethod,
-                sample.device
-            )
+            metadata = makeSampleMetadata(sample.writeMetadata)
         )
     }
 }
@@ -166,12 +141,7 @@ internal fun toHeartRateRecords(samples: Array<NativeHeartRateSampleInput>): Lis
                     beatsPerMinute = sample.bpm.roundToLong()
                 )
             ),
-            metadata = makeSampleMetadata(
-                sample.syncId,
-                sample.syncVersion,
-                sample.recordingMethod,
-                sample.device
-            )
+            metadata = makeSampleMetadata(sample.writeMetadata)
         )
     }
 }
@@ -189,12 +159,7 @@ internal fun toBloodPressureRecords(
             measurementLocation = healthConnectBloodPressureMeasurementLocation(
                 sample.androidMeasurementLocation
             ),
-            metadata = makeSampleMetadata(
-                sample.syncId,
-                sample.syncVersion,
-                sample.recordingMethod,
-                sample.device
-            )
+            metadata = makeSampleMetadata(sample.writeMetadata)
         )
     }
 }
@@ -206,12 +171,7 @@ internal fun toBloodGlucoseRecords(
         BloodGlucoseRecord(
             time = Instant.ofEpochMilli(sample.timeMs.toLong()),
             zoneOffset = null,
-            metadata = makeSampleMetadata(
-                sample.syncId,
-                sample.syncVersion,
-                sample.recordingMethod,
-                sample.device
-            ),
+            metadata = makeSampleMetadata(sample.writeMetadata),
             level = BloodGlucose.millimolesPerLiter(sample.millimolesPerLiter),
             specimenSource = healthConnectBloodGlucoseSpecimenSource(sample.androidSpecimenSource),
             mealType = healthConnectBloodGlucoseMealType(sample.androidMealType),
@@ -227,12 +187,7 @@ internal fun toBodyTemperatureRecords(
         BodyTemperatureRecord(
             time = Instant.ofEpochMilli(sample.timeMs.toLong()),
             zoneOffset = null,
-            metadata = makeSampleMetadata(
-                sample.syncId,
-                sample.syncVersion,
-                sample.recordingMethod,
-                sample.device
-            ),
+            metadata = makeSampleMetadata(sample.writeMetadata),
             temperature = Temperature.celsius(sample.celsius),
             measurementLocation = sample.androidMeasurementLocation
                 .toHealthConnectBodyTemperatureMeasurementLocation()
@@ -247,12 +202,7 @@ internal fun toBodyFatRecords(
         BodyFatRecord(
             time = Instant.ofEpochMilli(sample.timeMs.toLong()),
             zoneOffset = null,
-            metadata = makeSampleMetadata(
-                sample.syncId,
-                sample.syncVersion,
-                sample.recordingMethod,
-                sample.device
-            ),
+            metadata = makeSampleMetadata(sample.writeMetadata),
             percentage = Percentage(sample.percentage)
         )
     }
@@ -265,12 +215,7 @@ internal fun toLeanBodyMassRecords(
         LeanBodyMassRecord(
             time = Instant.ofEpochMilli(sample.timeMs.toLong()),
             zoneOffset = null,
-            metadata = makeSampleMetadata(
-                sample.syncId,
-                sample.syncVersion,
-                sample.recordingMethod,
-                sample.device
-            ),
+            metadata = makeSampleMetadata(sample.writeMetadata),
             mass = Mass.kilograms(sample.kilograms)
         )
     }
@@ -283,12 +228,7 @@ internal fun toBasalBodyTemperatureRecords(
         BasalBodyTemperatureRecord(
             time = Instant.ofEpochMilli(sample.timeMs.toLong()),
             zoneOffset = null,
-            metadata = makeSampleMetadata(
-                sample.syncId,
-                sample.syncVersion,
-                sample.recordingMethod,
-                sample.device
-            ),
+            metadata = makeSampleMetadata(sample.writeMetadata),
             temperature = Temperature.celsius(sample.celsius),
             measurementLocation = sample.androidMeasurementLocation
                 .toHealthConnectBodyTemperatureMeasurementLocation()
@@ -303,12 +243,7 @@ internal fun toRespiratoryRateRecords(
         RespiratoryRateRecord(
             time = Instant.ofEpochMilli(sample.timeMs.toLong()),
             zoneOffset = null,
-            metadata = makeSampleMetadata(
-                sample.syncId,
-                sample.syncVersion,
-                sample.recordingMethod,
-                sample.device
-            ),
+            metadata = makeSampleMetadata(sample.writeMetadata),
             rate = sample.breathsPerMinute
         )
     }
@@ -320,12 +255,7 @@ internal fun toWeightRecords(samples: Array<NativeBodyMassSampleInput>): List<We
             time = Instant.ofEpochMilli(sample.timeMs.toLong()),
             zoneOffset = null,
             weight = Mass.kilograms(sample.kilograms),
-            metadata = makeSampleMetadata(
-                sample.syncId,
-                sample.syncVersion,
-                sample.recordingMethod,
-                sample.device
-            )
+            metadata = makeSampleMetadata(sample.writeMetadata)
         )
     }
 }
@@ -340,12 +270,7 @@ internal fun toRestingHeartRateRecords(
             // Health Connect stores whole bpm; round to nearest instead of truncating
             // so fractional readings (e.g. 72.9) don't lose almost a full beat.
             beatsPerMinute = sample.bpm.roundToLong(),
-            metadata = makeSampleMetadata(
-                sample.syncId,
-                sample.syncVersion,
-                sample.recordingMethod,
-                sample.device
-            )
+            metadata = makeSampleMetadata(sample.writeMetadata)
         )
     }
 }
@@ -358,12 +283,7 @@ internal fun toOxygenSaturationRecords(
             time = Instant.ofEpochMilli(sample.timeMs.toLong()),
             zoneOffset = null,
             percentage = Percentage(sample.percentage),
-            metadata = makeSampleMetadata(
-                sample.syncId,
-                sample.syncVersion,
-                sample.recordingMethod,
-                sample.device
-            )
+            metadata = makeSampleMetadata(sample.writeMetadata)
         )
     }
 }
@@ -374,12 +294,7 @@ internal fun toHeightRecords(samples: Array<NativeHeightSampleInput>): List<Heig
             time = Instant.ofEpochMilli(sample.timeMs.toLong()),
             zoneOffset = null,
             height = Length.meters(sample.meters),
-            metadata = makeSampleMetadata(
-                sample.syncId,
-                sample.syncVersion,
-                sample.recordingMethod,
-                sample.device
-            )
+            metadata = makeSampleMetadata(sample.writeMetadata)
         )
     }
 }
@@ -391,12 +306,7 @@ internal fun toVo2MaxRecords(samples: Array<NativeVo2MaxSampleInput>): List<Vo2M
             zoneOffset = null,
             vo2MillilitersPerMinuteKilogram = sample.millilitersPerKilogramPerMinute,
             measurementMethod = healthConnectVo2MaxMeasurementMethod(sample.androidMeasurementMethod),
-            metadata = makeSampleMetadata(
-                sample.syncId,
-                sample.syncVersion,
-                sample.recordingMethod,
-                sample.device
-            )
+            metadata = makeSampleMetadata(sample.writeMetadata)
         )
     }
 }

@@ -29,16 +29,7 @@ data class NativeActiveEnergyBurnedSampleInput(
   val kilocalories: Double,
   @DoNotStrip
   @Keep
-  val device: NativeHealthDeviceInfo?,
-  @DoNotStrip
-  @Keep
-  val recordingMethod: NativeHealthRecordingMethod?,
-  @DoNotStrip
-  @Keep
-  val syncId: String?,
-  @DoNotStrip
-  @Keep
-  val syncVersion: Double?
+  val writeMetadata: NativeHealthWriteMetadata
 ) {
   /* primary constructor */
 
@@ -48,10 +39,7 @@ data class NativeActiveEnergyBurnedSampleInput(
     return Objects.deepEquals(this.startTimeMs, other.startTimeMs)
       && Objects.deepEquals(this.endTimeMs, other.endTimeMs)
       && Objects.deepEquals(this.kilocalories, other.kilocalories)
-      && Objects.deepEquals(this.device, other.device)
-      && Objects.deepEquals(this.recordingMethod, other.recordingMethod)
-      && Objects.deepEquals(this.syncId, other.syncId)
-      && Objects.deepEquals(this.syncVersion, other.syncVersion)
+      && Objects.deepEquals(this.writeMetadata, other.writeMetadata)
   }
 
   override fun hashCode(): Int {
@@ -59,10 +47,7 @@ data class NativeActiveEnergyBurnedSampleInput(
       startTimeMs,
       endTimeMs,
       kilocalories,
-      device,
-      recordingMethod,
-      syncId,
-      syncVersion
+      writeMetadata
     ).contentDeepHashCode()
   }
 
@@ -74,8 +59,8 @@ data class NativeActiveEnergyBurnedSampleInput(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(startTimeMs: Double, endTimeMs: Double, kilocalories: Double, device: NativeHealthDeviceInfo?, recordingMethod: NativeHealthRecordingMethod?, syncId: String?, syncVersion: Double?): NativeActiveEnergyBurnedSampleInput {
-      return NativeActiveEnergyBurnedSampleInput(startTimeMs, endTimeMs, kilocalories, device, recordingMethod, syncId, syncVersion)
+    private fun fromCpp(startTimeMs: Double, endTimeMs: Double, kilocalories: Double, writeMetadata: NativeHealthWriteMetadata): NativeActiveEnergyBurnedSampleInput {
+      return NativeActiveEnergyBurnedSampleInput(startTimeMs, endTimeMs, kilocalories, writeMetadata)
     }
   }
 }

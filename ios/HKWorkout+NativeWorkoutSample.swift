@@ -27,10 +27,7 @@ extension HKWorkout {
 
     var nativeWorkoutSample: NativeWorkoutSample {
         return NativeWorkoutSample(
-            identity: nativeHealthSampleIdentity,
-            origin: nativeHealthDataOrigin,
-            device: nativeHealthDeviceInfo,
-            recordingMethod: nativeHealthRecordingMethod,
+            sampleMetadata: nativeHealthSampleMetadata,
             startTimeMs: startDate.timeIntervalSince1970 * 1000,
             endTimeMs: endDate.timeIntervalSince1970 * 1000,
             elapsedDurationSeconds: endDate.timeIntervalSince(startDate),

@@ -36,32 +36,41 @@ class SleepSessionRecordMappingTest {
         assertEquals(2, samples.size)
         val envelope = samples[0]
         assertEquals(NativeSleepSampleKind.SESSIONENVELOPE, envelope.kind)
-        assertEquals(NativeHealthSampleIdentityKind.RECORD, envelope.identity.kind)
-        assertEquals(record.metadata.id, envelope.identity.id)
-        assertEquals(record.metadata.id, envelope.identity.recordId)
+        assertEquals(NativeHealthSampleIdentityKind.RECORD, envelope.sampleMetadata.identityKind)
+        assertEquals(record.metadata.id, envelope.sampleMetadata.identityId)
+        assertEquals(record.metadata.id, envelope.sampleMetadata.identityRecordId)
         assertEquals(sessionStart.toEpochMilli().toDouble(), envelope.startTimeMs, 0.0)
         assertEquals(sessionEnd.toEpochMilli().toDouble(), envelope.endTimeMs, 0.0)
         assertEquals(NativeSleepStageData.REPORTED, envelope.stageData)
         assertNull(envelope.stage)
-        assertEquals(record.metadata.dataOrigin.packageName, envelope.origin.identifier)
-        assertNull(envelope.origin.displayName)
-        assertEquals(NativeHealthRecordingMethod.AUTOMATICALLYRECORDED, envelope.recordingMethod)
+        assertEquals(record.metadata.dataOrigin.packageName, envelope.sampleMetadata.originIdentifier)
+        assertNull(envelope.sampleMetadata.originDisplayName)
+        assertEquals(
+            NativeHealthRecordingMethod.AUTOMATICALLYRECORDED,
+            envelope.sampleMetadata.recordingMethod
+        )
 
         val stage = samples[1]
         assertEquals(NativeSleepSampleKind.STAGE, stage.kind)
-        assertEquals(NativeHealthSampleIdentityKind.RECORDCHILD, stage.identity.kind)
-        assertEquals("${record.metadata.id}#0", stage.identity.id)
-        assertEquals(record.metadata.id, stage.identity.recordId)
+        assertEquals(NativeHealthSampleIdentityKind.RECORDCHILD, stage.sampleMetadata.identityKind)
+        assertEquals("${record.metadata.id}#0", stage.sampleMetadata.identityId)
+        assertEquals(record.metadata.id, stage.sampleMetadata.identityRecordId)
         assertEquals(stageStart.toEpochMilli().toDouble(), stage.startTimeMs, 0.0)
         assertEquals(stageEnd.toEpochMilli().toDouble(), stage.endTimeMs, 0.0)
         assertEquals("asleepCore", stage.stage)
         assertNull(stage.stageData)
-        assertEquals(envelope.origin, stage.origin)
-        assertEquals(envelope.device, stage.device)
-        assertEquals(NativeHealthDeviceType.RING, stage.device!!.type)
-        assertEquals("Example Manufacturer", stage.device.manufacturer)
-        assertEquals("Example Model", stage.device.model)
-        assertEquals(envelope.recordingMethod, stage.recordingMethod)
+        assertEquals(
+            envelope.sampleMetadata.originIdentifier,
+            stage.sampleMetadata.originIdentifier
+        )
+        assertEquals(envelope.sampleMetadata.deviceType, stage.sampleMetadata.deviceType)
+        assertEquals(NativeHealthDeviceType.RING, stage.sampleMetadata.deviceType)
+        assertEquals("Example Manufacturer", stage.sampleMetadata.deviceManufacturer)
+        assertEquals("Example Model", stage.sampleMetadata.deviceModel)
+        assertEquals(
+            envelope.sampleMetadata.recordingMethod,
+            stage.sampleMetadata.recordingMethod
+        )
     }
 
     @Test

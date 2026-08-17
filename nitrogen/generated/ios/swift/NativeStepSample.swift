@@ -18,34 +18,13 @@ public extension NativeStepSample {
   /**
    * Create a new instance of `NativeStepSample`.
    */
-  init(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, device: NativeHealthDeviceInfo?, recordingMethod: NativeHealthRecordingMethod, startTimeMs: Double, endTimeMs: Double, count: Double) {
-    self.init(identity, origin, { () -> bridge.std__optional_NativeHealthDeviceInfo_ in
-      if let __unwrappedValue = device {
-        return bridge.create_std__optional_NativeHealthDeviceInfo_(__unwrappedValue)
-      } else {
-        return .init()
-      }
-    }(), recordingMethod, startTimeMs, endTimeMs, count)
+  init(sampleMetadata: NativeHealthSampleMetadata, startTimeMs: Double, endTimeMs: Double, count: Double) {
+    self.init(sampleMetadata, startTimeMs, endTimeMs, count)
   }
 
   @inline(__always)
-  var identity: NativeHealthSampleIdentity {
-    return self.__identity
-  }
-  
-  @inline(__always)
-  var origin: NativeHealthDataOrigin {
-    return self.__origin
-  }
-  
-  @inline(__always)
-  var device: NativeHealthDeviceInfo? {
-    return self.__device.value
-  }
-  
-  @inline(__always)
-  var recordingMethod: NativeHealthRecordingMethod {
-    return self.__recordingMethod
+  var sampleMetadata: NativeHealthSampleMetadata {
+    return self.__sampleMetadata
   }
   
   @inline(__always)

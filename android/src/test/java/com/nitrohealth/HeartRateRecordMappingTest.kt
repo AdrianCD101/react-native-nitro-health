@@ -35,10 +35,13 @@ class HeartRateRecordMappingTest {
 
         assertEquals(2, samples.size)
         samples.forEach {
-            assertEquals(NativeHealthRecordingMethod.ACTIVELYRECORDED, it.recordingMethod)
-            assertEquals(NativeHealthDeviceType.WATCH, it.device!!.type)
-            assertEquals("Example Manufacturer", it.device.manufacturer)
-            assertEquals("Example Model", it.device.model)
+            assertEquals(
+                NativeHealthRecordingMethod.ACTIVELYRECORDED,
+                it.sampleMetadata.recordingMethod
+            )
+            assertEquals(NativeHealthDeviceType.WATCH, it.sampleMetadata.deviceType)
+            assertEquals("Example Manufacturer", it.sampleMetadata.deviceManufacturer)
+            assertEquals("Example Model", it.sampleMetadata.deviceModel)
         }
     }
 }

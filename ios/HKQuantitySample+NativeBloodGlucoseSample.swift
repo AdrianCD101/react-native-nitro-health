@@ -34,10 +34,7 @@ private func nativeBloodGlucoseMealTime(
 extension HKQuantitySample {
     func nativeBloodGlucoseSample() throws -> NativeBloodGlucoseSample {
         return NativeBloodGlucoseSample(
-            identity: nativeHealthSampleIdentity,
-            origin: nativeHealthDataOrigin,
-            device: nativeHealthDeviceInfo,
-            recordingMethod: nativeHealthRecordingMethod,
+            sampleMetadata: nativeHealthSampleMetadata,
             timeMs: startDate.timeIntervalSince1970 * 1000,
             millimolesPerLiter: quantity.doubleValue(for: bloodGlucoseMmolPerLiterUnit),
             androidSpecimenSource: nil,

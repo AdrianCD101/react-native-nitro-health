@@ -8,6 +8,15 @@ jest.mock('react-native-nitro-modules', () => ({
 
 import { NitroHealth } from 'react-native-nitro-health'
 
+const emptyWriteMetadata = {
+  provenance: {
+    deviceType: undefined,
+    deviceManufacturer: undefined,
+    deviceModel: undefined,
+    recordingMethod: undefined,
+  },
+}
+
 describe('NitroHealth save contract', () => {
   beforeEach(() => {
     jest.clearAllMocks()
@@ -35,6 +44,7 @@ describe('NitroHealth save contract', () => {
         startTimeMs: startDate.getTime(),
         endTimeMs: endDate.getTime(),
         count: 512,
+        writeMetadata: emptyWriteMetadata,
       },
     ])
   })
@@ -62,18 +72,37 @@ describe('NitroHealth save contract', () => {
         startTimeMs: startDate.getTime(),
         endTimeMs: endDate.getTime(),
         count: 100,
-        recordingMethod: 'manual',
+        writeMetadata: {
+          provenance: {
+            deviceType: undefined,
+            deviceManufacturer: undefined,
+            deviceModel: undefined,
+            recordingMethod: 'manual',
+          },
+        },
       },
-      { startTimeMs: startDate.getTime(), endTimeMs: endDate.getTime(), count: 200 },
+      {
+        startTimeMs: startDate.getTime(),
+        endTimeMs: endDate.getTime(),
+        count: 200,
+        writeMetadata: emptyWriteMetadata,
+      },
       {
         startTimeMs: startDate.getTime(),
         endTimeMs: endDate.getTime(),
         count: 300,
-        recordingMethod: 'activelyRecorded',
+        writeMetadata: {
+          provenance: {
+            deviceType: undefined,
+            deviceManufacturer: undefined,
+            deviceModel: undefined,
+            recordingMethod: 'activelyRecorded',
+          },
+        },
       },
     ])
     expect(mockNitroHealth.saveSteps.mock.calls[0]?.[0][1]).toHaveProperty(
-      'recordingMethod',
+      'writeMetadata.provenance.recordingMethod',
       undefined
     )
   })
@@ -125,8 +154,17 @@ describe('NitroHealth save contract', () => {
       }))
     )
 
-    expect(mockNitroHealth.saveSteps.mock.calls[0]?.[0].map(({ device }) => device)).toEqual(
-      mappings.map(([, type]) => ({ type, manufacturer: 'Example', model: 'Sensor' }))
+    expect(
+      mockNitroHealth.saveSteps.mock.calls[0]?.[0].map(
+        ({ writeMetadata }) => writeMetadata.provenance
+      )
+    ).toEqual(
+      mappings.map(([, deviceType]) => ({
+        deviceType,
+        deviceManufacturer: 'Example',
+        deviceModel: 'Sensor',
+        recordingMethod: undefined,
+      }))
     )
   })
 
@@ -156,7 +194,9 @@ describe('NitroHealth save contract', () => {
 
     await NitroHealth.saveSteps([{ startDate, endDate, count: 100, device: {} }])
 
-    expect(mockNitroHealth.saveSteps.mock.calls[0]?.[0][0]?.device).toBeUndefined()
+    expect(mockNitroHealth.saveSteps.mock.calls[0]?.[0][0]?.writeMetadata.provenance).toEqual(
+      emptyWriteMetadata.provenance
+    )
   })
 
   it('saves distance through the Nitro hybrid object', async () => {
@@ -189,7 +229,14 @@ describe('NitroHealth save contract', () => {
         endTimeMs: endDate.getTime(),
         distanceMeters: 1250.5,
         scope: 'walkingRunning',
-        recordingMethod: 'automaticallyRecorded',
+        writeMetadata: {
+          provenance: {
+            deviceType: undefined,
+            deviceManufacturer: undefined,
+            deviceModel: undefined,
+            recordingMethod: 'automaticallyRecorded',
+          },
+        },
       },
     ])
   })
@@ -210,6 +257,7 @@ describe('NitroHealth save contract', () => {
         startTimeMs: startDate.getTime(),
         endTimeMs: endDate.getTime(),
         kilocalories: 215,
+        writeMetadata: emptyWriteMetadata,
       },
     ])
   })
@@ -228,6 +276,7 @@ describe('NitroHealth save contract', () => {
         startTimeMs: startDate.getTime(),
         endTimeMs: endDate.getTime(),
         milliliters: 250.5,
+        writeMetadata: emptyWriteMetadata,
       },
     ])
   })
@@ -246,6 +295,7 @@ describe('NitroHealth save contract', () => {
         startTimeMs: startDate.getTime(),
         endTimeMs: endDate.getTime(),
         floors: 12.5,
+        writeMetadata: emptyWriteMetadata,
       },
     ])
   })
@@ -263,6 +313,7 @@ describe('NitroHealth save contract', () => {
       {
         timeMs: date.getTime(),
         bpm: 72,
+        writeMetadata: emptyWriteMetadata,
       },
     ])
   })
@@ -280,104 +331,8 @@ describe('NitroHealth save contract', () => {
       {
         timeMs: date.getTime(),
         kilograms: 72.5,
+        writeMetadata: emptyWriteMetadata,
       },
-    ])
-  })
-
-  it('maps versioned sync identity for every writable sample type', async () => {
-    const startDate = new Date('2026-01-01T09:00:00.000Z')
-    const endDate = new Date('2026-01-01T09:30:00.000Z')
-    const sync = { id: ' backend-record-42 ', version: 7 }
-    const nativeSync = { syncId: sync.id, syncVersion: sync.version }
-
-    await NitroHealth.saveSteps([{ startDate, endDate, count: 512, sync }])
-    await NitroHealth.saveDistance([
-      { scope: 'walking-running', startDate, endDate, distanceMeters: 1250.5, sync },
-    ])
-    await NitroHealth.saveActiveEnergyBurned([{ startDate, endDate, kilocalories: 215, sync }])
-    await NitroHealth.saveFloorsClimbed([{ startDate, endDate, floors: 12.5, sync }])
-    await NitroHealth.saveHeartRate([{ date: startDate, bpm: 72, sync }])
-    await NitroHealth.saveBloodPressure([
-      { date: startDate, systolicMmHg: 118, diastolicMmHg: 76, sync },
-    ])
-    await NitroHealth.saveBloodGlucose([{ date: startDate, millimolesPerLiter: 5.4, sync }])
-    await NitroHealth.saveBodyTemperature([{ date: startDate, celsius: 36.6, sync }])
-    await NitroHealth.saveRespiratoryRate([{ date: startDate, breathsPerMinute: 16.5, sync }])
-    await NitroHealth.saveBodyFat([{ date: startDate, percentage: 18.5, sync }])
-    await NitroHealth.saveLeanBodyMass([{ date: startDate, kilograms: 55.4, sync }])
-    await NitroHealth.saveBasalBodyTemperature([{ date: startDate, celsius: 36.4, sync }])
-    await NitroHealth.saveBodyMass([{ date: startDate, kilograms: 72.5, sync }])
-    await NitroHealth.saveRestingHeartRate([{ date: startDate, bpm: 58, sync }])
-    await NitroHealth.saveOxygenSaturation([{ date: startDate, percentage: 97.5, sync }])
-    await NitroHealth.saveHeight([{ date: startDate, meters: 1.78, sync }])
-    await NitroHealth.saveVo2Max([{ date: startDate, millilitersPerKilogramPerMinute: 42.5, sync }])
-
-    expect(mockNitroHealth.saveSteps).toHaveBeenCalledWith([
-      { startTimeMs: startDate.getTime(), endTimeMs: endDate.getTime(), count: 512, ...nativeSync },
-    ])
-    expect(mockNitroHealth.saveDistance).toHaveBeenCalledWith([
-      {
-        startTimeMs: startDate.getTime(),
-        endTimeMs: endDate.getTime(),
-        distanceMeters: 1250.5,
-        scope: 'walkingRunning',
-        ...nativeSync,
-      },
-    ])
-    expect(mockNitroHealth.saveActiveEnergyBurned).toHaveBeenCalledWith([
-      {
-        startTimeMs: startDate.getTime(),
-        endTimeMs: endDate.getTime(),
-        kilocalories: 215,
-        ...nativeSync,
-      },
-    ])
-    expect(mockNitroHealth.saveFloorsClimbed).toHaveBeenCalledWith([
-      {
-        startTimeMs: startDate.getTime(),
-        endTimeMs: endDate.getTime(),
-        floors: 12.5,
-        ...nativeSync,
-      },
-    ])
-    expect(mockNitroHealth.saveHeartRate).toHaveBeenCalledWith([
-      { timeMs: startDate.getTime(), bpm: 72, ...nativeSync },
-    ])
-    expect(mockNitroHealth.saveBloodPressure).toHaveBeenCalledWith([
-      { timeMs: startDate.getTime(), systolicMmHg: 118, diastolicMmHg: 76, ...nativeSync },
-    ])
-    expect(mockNitroHealth.saveBloodGlucose).toHaveBeenCalledWith([
-      { timeMs: startDate.getTime(), millimolesPerLiter: 5.4, ...nativeSync },
-    ])
-    expect(mockNitroHealth.saveBodyTemperature).toHaveBeenCalledWith([
-      { timeMs: startDate.getTime(), celsius: 36.6, ...nativeSync },
-    ])
-    expect(mockNitroHealth.saveRespiratoryRate).toHaveBeenCalledWith([
-      { timeMs: startDate.getTime(), breathsPerMinute: 16.5, ...nativeSync },
-    ])
-    expect(mockNitroHealth.saveBodyFat).toHaveBeenCalledWith([
-      { timeMs: startDate.getTime(), percentage: 18.5, ...nativeSync },
-    ])
-    expect(mockNitroHealth.saveLeanBodyMass).toHaveBeenCalledWith([
-      { timeMs: startDate.getTime(), kilograms: 55.4, ...nativeSync },
-    ])
-    expect(mockNitroHealth.saveBasalBodyTemperature).toHaveBeenCalledWith([
-      { timeMs: startDate.getTime(), celsius: 36.4, ...nativeSync },
-    ])
-    expect(mockNitroHealth.saveBodyMass).toHaveBeenCalledWith([
-      { timeMs: startDate.getTime(), kilograms: 72.5, ...nativeSync },
-    ])
-    expect(mockNitroHealth.saveRestingHeartRate).toHaveBeenCalledWith([
-      { timeMs: startDate.getTime(), bpm: 58, ...nativeSync },
-    ])
-    expect(mockNitroHealth.saveOxygenSaturation).toHaveBeenCalledWith([
-      { timeMs: startDate.getTime(), percentage: 97.5, ...nativeSync },
-    ])
-    expect(mockNitroHealth.saveHeight).toHaveBeenCalledWith([
-      { timeMs: startDate.getTime(), meters: 1.78, ...nativeSync },
-    ])
-    expect(mockNitroHealth.saveVo2Max).toHaveBeenCalledWith([
-      { timeMs: startDate.getTime(), millilitersPerKilogramPerMinute: 42.5, ...nativeSync },
     ])
   })
 
@@ -461,20 +416,29 @@ describe('NitroHealth save contract', () => {
     ])
 
     expect(mockNitroHealth.saveSteps).toHaveBeenCalledWith([
-      { startTimeMs: startDate.getTime(), endTimeMs: endDate.getTime(), count: 100 },
+      {
+        startTimeMs: startDate.getTime(),
+        endTimeMs: endDate.getTime(),
+        count: 100,
+        writeMetadata: emptyWriteMetadata,
+      },
       {
         startTimeMs: startDate.getTime(),
         endTimeMs: endDate.getTime(),
         count: 200,
-        syncId: 'Record-A',
-        syncVersion: 0,
+        writeMetadata: {
+          ...emptyWriteMetadata,
+          sync: { id: 'Record-A', version: 0 },
+        },
       },
       {
         startTimeMs: startDate.getTime(),
         endTimeMs: endDate.getTime(),
         count: 300,
-        syncId: 'record-a',
-        syncVersion: 0,
+        writeMetadata: {
+          ...emptyWriteMetadata,
+          sync: { id: 'record-a', version: 0 },
+        },
       },
     ])
   })

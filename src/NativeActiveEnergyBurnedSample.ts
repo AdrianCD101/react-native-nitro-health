@@ -1,14 +1,8 @@
-import type { NativeHealthDataOrigin } from './NativeHealthDataOrigin'
-import type { NativeHealthDeviceInfo } from './NativeHealthDeviceInfo'
-import type { NativeHealthRecordingMethod } from './NativeHealthRecordingMethod'
-import type { NativeHealthSampleIdentity } from './NativeHealthSampleIdentity'
+import type { NativeHealthSampleMetadata } from './NativeHealthSampleMetadata'
 
 /** Native active-energy interval with epoch millisecond timestamps. */
 export interface NativeActiveEnergyBurnedSample {
-  identity: NativeHealthSampleIdentity
-  origin: NativeHealthDataOrigin
-  device?: NativeHealthDeviceInfo
-  recordingMethod: NativeHealthRecordingMethod
+  sampleMetadata: NativeHealthSampleMetadata
   /** Inclusive start of the sample interval as Unix epoch milliseconds. */
   startTimeMs: number
   /** Exclusive end of the sample interval as Unix epoch milliseconds. */

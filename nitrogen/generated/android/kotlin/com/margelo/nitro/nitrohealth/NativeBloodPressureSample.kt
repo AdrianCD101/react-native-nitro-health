@@ -20,16 +20,7 @@ import java.util.Objects
 data class NativeBloodPressureSample(
   @DoNotStrip
   @Keep
-  val identity: NativeHealthSampleIdentity,
-  @DoNotStrip
-  @Keep
-  val origin: NativeHealthDataOrigin,
-  @DoNotStrip
-  @Keep
-  val device: NativeHealthDeviceInfo?,
-  @DoNotStrip
-  @Keep
-  val recordingMethod: NativeHealthRecordingMethod,
+  val sampleMetadata: NativeHealthSampleMetadata,
   @DoNotStrip
   @Keep
   val timeMs: Double,
@@ -51,10 +42,7 @@ data class NativeBloodPressureSample(
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other !is NativeBloodPressureSample) return false
-    return Objects.deepEquals(this.identity, other.identity)
-      && Objects.deepEquals(this.origin, other.origin)
-      && Objects.deepEquals(this.device, other.device)
-      && Objects.deepEquals(this.recordingMethod, other.recordingMethod)
+    return Objects.deepEquals(this.sampleMetadata, other.sampleMetadata)
       && Objects.deepEquals(this.timeMs, other.timeMs)
       && Objects.deepEquals(this.systolicMmHg, other.systolicMmHg)
       && Objects.deepEquals(this.diastolicMmHg, other.diastolicMmHg)
@@ -64,10 +52,7 @@ data class NativeBloodPressureSample(
 
   override fun hashCode(): Int {
     return arrayOf<Any?>(
-      identity,
-      origin,
-      device,
-      recordingMethod,
+      sampleMetadata,
       timeMs,
       systolicMmHg,
       diastolicMmHg,
@@ -84,8 +69,8 @@ data class NativeBloodPressureSample(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, device: NativeHealthDeviceInfo?, recordingMethod: NativeHealthRecordingMethod, timeMs: Double, systolicMmHg: Double, diastolicMmHg: Double, androidBodyPosition: NativeBloodPressureBodyPosition?, androidMeasurementLocation: NativeBloodPressureMeasurementLocation?): NativeBloodPressureSample {
-      return NativeBloodPressureSample(identity, origin, device, recordingMethod, timeMs, systolicMmHg, diastolicMmHg, androidBodyPosition, androidMeasurementLocation)
+    private fun fromCpp(sampleMetadata: NativeHealthSampleMetadata, timeMs: Double, systolicMmHg: Double, diastolicMmHg: Double, androidBodyPosition: NativeBloodPressureBodyPosition?, androidMeasurementLocation: NativeBloodPressureMeasurementLocation?): NativeBloodPressureSample {
+      return NativeBloodPressureSample(sampleMetadata, timeMs, systolicMmHg, diastolicMmHg, androidBodyPosition, androidMeasurementLocation)
     }
   }
 }

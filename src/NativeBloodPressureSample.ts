@@ -1,7 +1,4 @@
-import type { NativeHealthDataOrigin } from './NativeHealthDataOrigin'
-import type { NativeHealthDeviceInfo } from './NativeHealthDeviceInfo'
-import type { NativeHealthRecordingMethod } from './NativeHealthRecordingMethod'
-import type { NativeHealthSampleIdentity } from './NativeHealthSampleIdentity'
+import type { NativeHealthSampleMetadata } from './NativeHealthSampleMetadata'
 import type {
   NativeBloodPressureBodyPosition,
   NativeBloodPressureMeasurementLocation,
@@ -9,10 +6,7 @@ import type {
 
 /** Native blood pressure sample shape returned through the Nitro spec. */
 export interface NativeBloodPressureSample {
-  identity: NativeHealthSampleIdentity
-  origin: NativeHealthDataOrigin
-  device?: NativeHealthDeviceInfo
-  recordingMethod: NativeHealthRecordingMethod
+  sampleMetadata: NativeHealthSampleMetadata
   timeMs: number
   systolicMmHg: number
   diastolicMmHg: number

@@ -33,7 +33,6 @@ import com.margelo.nitro.nitrohealth.NativeBodyFatSample
 import com.margelo.nitro.nitrohealth.NativeBodyTemperatureSample
 import com.margelo.nitro.nitrohealth.NativeBodyMassSample
 import com.margelo.nitro.nitrohealth.NativeDistanceSample
-import com.margelo.nitro.nitrohealth.NativeDistanceScope
 import com.margelo.nitro.nitrohealth.NativeHealthChange
 import com.margelo.nitro.nitrohealth.NativeFloorsClimbedSample
 import com.margelo.nitro.nitrohealth.NativeHeartRateSample
@@ -78,23 +77,11 @@ internal fun makeNativeHealthChange(
 
 private fun makeNativeUpsertionChange(record: Record): NativeHealthChange {
     val recordId = record.metadata.id
-    val identity = makeRecordIdentity(recordId)
-    val origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName)
     return when (record) {
         is StepsRecord -> makeNativeChange(
             type = "upsert",
             recordId = recordId,
-            stepSamples = arrayOf(
-                NativeStepSample(
-                    identity = identity,
-                    origin = origin,
-                    device = makeNativeHealthDeviceInfo(record.metadata.device),
-                    recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
-                    startTimeMs = record.startTime.toEpochMilli().toDouble(),
-                    endTimeMs = record.endTime.toEpochMilli().toDouble(),
-                    count = record.count.toDouble()
-                )
-            )
+            stepSamples = arrayOf(makeNativeStepSample(record))
         )
         is HeartRateRecord -> makeNativeChange(
             type = "upsert",
@@ -119,44 +106,17 @@ private fun makeNativeUpsertionChange(record: Record): NativeHealthChange {
         is RespiratoryRateRecord -> makeNativeChange(
             type = "upsert",
             recordId = recordId,
-            respiratoryRateSamples = arrayOf(
-                NativeRespiratoryRateSample(
-                    identity = identity,
-                    origin = origin,
-                    device = makeNativeHealthDeviceInfo(record.metadata.device),
-                    recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
-                    timeMs = record.time.toEpochMilli().toDouble(),
-                    breathsPerMinute = record.rate
-                )
-            )
+            respiratoryRateSamples = arrayOf(makeNativeRespiratoryRateSample(record))
         )
         is BodyFatRecord -> makeNativeChange(
             type = "upsert",
             recordId = recordId,
-            bodyFatSamples = arrayOf(
-                NativeBodyFatSample(
-                    identity = identity,
-                    origin = origin,
-                    device = makeNativeHealthDeviceInfo(record.metadata.device),
-                    recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
-                    timeMs = record.time.toEpochMilli().toDouble(),
-                    percentage = record.percentage.value
-                )
-            )
+            bodyFatSamples = arrayOf(makeNativeBodyFatSample(record))
         )
         is LeanBodyMassRecord -> makeNativeChange(
             type = "upsert",
             recordId = recordId,
-            leanBodyMassSamples = arrayOf(
-                NativeLeanBodyMassSample(
-                    identity = identity,
-                    origin = origin,
-                    device = makeNativeHealthDeviceInfo(record.metadata.device),
-                    recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
-                    timeMs = record.time.toEpochMilli().toDouble(),
-                    kilograms = record.mass.inKilograms
-                )
-            )
+            leanBodyMassSamples = arrayOf(makeNativeLeanBodyMassSample(record))
         )
         is BasalBodyTemperatureRecord -> makeNativeChange(
             type = "upsert",
@@ -166,120 +126,42 @@ private fun makeNativeUpsertionChange(record: Record): NativeHealthChange {
         is RestingHeartRateRecord -> makeNativeChange(
             type = "upsert",
             recordId = recordId,
-            restingHeartRateSamples = arrayOf(
-                NativeRestingHeartRateSample(
-                    identity = identity,
-                    origin = origin,
-                    device = makeNativeHealthDeviceInfo(record.metadata.device),
-                    recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
-                    timeMs = record.time.toEpochMilli().toDouble(),
-                    bpm = record.beatsPerMinute.toDouble()
-                )
-            )
+            restingHeartRateSamples = arrayOf(makeNativeRestingHeartRateSample(record))
         )
         is HeartRateVariabilityRmssdRecord -> makeNativeChange(
             type = "upsert",
             recordId = recordId,
-            heartRateVariabilitySamples = arrayOf(
-                NativeHeartRateVariabilitySample(
-                    identity = identity,
-                    origin = origin,
-                    device = makeNativeHealthDeviceInfo(record.metadata.device),
-                    recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
-                    timeMs = record.time.toEpochMilli().toDouble(),
-                    milliseconds = record.heartRateVariabilityMillis,
-                    method = "rmssd"
-                )
-            )
+            heartRateVariabilitySamples = arrayOf(makeNativeHeartRateVariabilitySample(record))
         )
         is DistanceRecord -> makeNativeChange(
             type = "upsert",
             recordId = recordId,
-            distanceSamples = arrayOf(
-                NativeDistanceSample(
-                    identity = identity,
-                    origin = origin,
-                    device = makeNativeHealthDeviceInfo(record.metadata.device),
-                    recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
-                    startTimeMs = record.startTime.toEpochMilli().toDouble(),
-                    endTimeMs = record.endTime.toEpochMilli().toDouble(),
-                    distanceMeters = record.distance.inMeters,
-                    scope = NativeDistanceScope.ACTIVITYUNSPECIFIED
-                )
-            )
+            distanceSamples = arrayOf(makeNativeDistanceSample(record))
         )
         is ActiveCaloriesBurnedRecord -> makeNativeChange(
             type = "upsert",
             recordId = recordId,
-            activeEnergyBurnedSamples = arrayOf(
-                NativeActiveEnergyBurnedSample(
-                    identity = identity,
-                    origin = origin,
-                    device = makeNativeHealthDeviceInfo(record.metadata.device),
-                    recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
-                    startTimeMs = record.startTime.toEpochMilli().toDouble(),
-                    endTimeMs = record.endTime.toEpochMilli().toDouble(),
-                    kilocalories = record.energy.inKilocalories
-                )
-            )
+            activeEnergyBurnedSamples = arrayOf(makeNativeActiveEnergyBurnedSample(record))
         )
         is HydrationRecord -> makeNativeChange(
             type = "upsert",
             recordId = recordId,
-            hydrationSamples = arrayOf(
-                NativeHydrationSample(
-                    identity = identity,
-                    origin = origin,
-                    device = makeNativeHealthDeviceInfo(record.metadata.device),
-                    recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
-                    startTimeMs = record.startTime.toEpochMilli().toDouble(),
-                    endTimeMs = record.endTime.toEpochMilli().toDouble(),
-                    milliliters = record.volume.inMilliliters
-                )
-            )
+            hydrationSamples = arrayOf(makeNativeHydrationSample(record))
         )
         is FloorsClimbedRecord -> makeNativeChange(
             type = "upsert",
             recordId = recordId,
-            floorsClimbedSamples = arrayOf(
-                NativeFloorsClimbedSample(
-                    identity = identity,
-                    origin = origin,
-                    device = makeNativeHealthDeviceInfo(record.metadata.device),
-                    recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
-                    startTimeMs = record.startTime.toEpochMilli().toDouble(),
-                    endTimeMs = record.endTime.toEpochMilli().toDouble(),
-                    floors = record.floors
-                )
-            )
+            floorsClimbedSamples = arrayOf(makeNativeFloorsClimbedSample(record))
         )
         is OxygenSaturationRecord -> makeNativeChange(
             type = "upsert",
             recordId = recordId,
-            oxygenSaturationSamples = arrayOf(
-                NativeOxygenSaturationSample(
-                    identity = identity,
-                    origin = origin,
-                    device = makeNativeHealthDeviceInfo(record.metadata.device),
-                    recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
-                    timeMs = record.time.toEpochMilli().toDouble(),
-                    percentage = record.percentage.value
-                )
-            )
+            oxygenSaturationSamples = arrayOf(makeNativeOxygenSaturationSample(record))
         )
         is HeightRecord -> makeNativeChange(
             type = "upsert",
             recordId = recordId,
-            heightSamples = arrayOf(
-                NativeHeightSample(
-                    identity = identity,
-                    origin = origin,
-                    device = makeNativeHealthDeviceInfo(record.metadata.device),
-                    recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
-                    timeMs = record.time.toEpochMilli().toDouble(),
-                    meters = record.height.inMeters
-                )
-            )
+            heightSamples = arrayOf(makeNativeHeightSample(record))
         )
         is Vo2MaxRecord -> makeNativeChange(
             type = "upsert",
@@ -296,17 +178,7 @@ private fun makeNativeUpsertionChange(record: Record): NativeHealthChange {
         is WeightRecord -> makeNativeChange(
             type = "upsert",
             recordId = recordId,
-            bodyMassSamples = arrayOf(
-                NativeBodyMassSample(
-                    identity = identity,
-                    origin = origin,
-                    device = makeNativeHealthDeviceInfo(record.metadata.device),
-                    recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
-                    startTimeMs = record.time.toEpochMilli().toDouble(),
-                    endTimeMs = record.time.toEpochMilli().toDouble(),
-                    kilograms = record.weight.inKilograms
-                )
-            )
+            bodyMassSamples = arrayOf(makeNativeBodyMassSample(record))
         )
         is ExerciseSessionRecord -> makeNativeChange(
             type = "upsert",

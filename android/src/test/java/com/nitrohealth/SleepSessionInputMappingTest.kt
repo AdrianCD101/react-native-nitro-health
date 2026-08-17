@@ -3,7 +3,6 @@ package com.nitrohealth
 import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.metadata.Device
 import androidx.health.connect.client.records.metadata.Metadata
-import com.margelo.nitro.nitrohealth.NativeHealthDeviceInfo
 import com.margelo.nitro.nitrohealth.NativeHealthDeviceType
 import com.margelo.nitro.nitrohealth.NativeHealthRecordingMethod
 import com.margelo.nitro.nitrohealth.NativeSleepSessionInput
@@ -37,12 +36,12 @@ class SleepSessionInputMappingTest {
                         )
                     ),
                     timeZone = "America/New_York",
-                    device = NativeHealthDeviceInfo(
-                        type = NativeHealthDeviceType.WATCH,
-                        manufacturer = "Example",
-                        model = "Sleep Watch"
-                    ),
-                    recordingMethod = NativeHealthRecordingMethod.AUTOMATICALLYRECORDED
+                    writeProvenance = makeTestWriteProvenance(
+                        deviceType = NativeHealthDeviceType.WATCH,
+                        deviceManufacturer = "Example",
+                        deviceModel = "Sleep Watch",
+                        recordingMethod = NativeHealthRecordingMethod.AUTOMATICALLYRECORDED
+                    )
                 )
             )
         ).single()
@@ -83,8 +82,7 @@ class SleepSessionInputMappingTest {
                     endTimeMs = endTime.toEpochMilli().toDouble(),
                     stages = emptyArray(),
                     timeZone = "UTC",
-                    device = null,
-                    recordingMethod = null
+                    writeProvenance = makeTestWriteProvenance()
                 )
             )
         ).single()
@@ -105,8 +103,7 @@ class SleepSessionInputMappingTest {
                     endTimeMs = dstEnd.toEpochMilli().toDouble(),
                     stages = emptyArray(),
                     timeZone = "America/New_York",
-                    device = null,
-                    recordingMethod = null
+                    writeProvenance = makeTestWriteProvenance()
                 )
             )
         ).single()
@@ -125,8 +122,7 @@ class SleepSessionInputMappingTest {
                         endTimeMs = endTime.toEpochMilli().toDouble(),
                         stages = emptyArray(),
                         timeZone = "Not/A_Zone",
-                        device = null,
-                        recordingMethod = null
+                        writeProvenance = makeTestWriteProvenance()
                     )
                 )
             )
@@ -144,8 +140,7 @@ class SleepSessionInputMappingTest {
                         endTimeMs = endTime.toEpochMilli().toDouble(),
                         stages = emptyArray(),
                         timeZone = "+01:00",
-                        device = null,
-                        recordingMethod = null
+                        writeProvenance = makeTestWriteProvenance()
                     )
                 )
             )

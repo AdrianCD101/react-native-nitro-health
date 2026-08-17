@@ -2,7 +2,6 @@ package com.nitrohealth
 
 import androidx.health.connect.client.records.metadata.Device
 import androidx.health.connect.client.records.metadata.Metadata
-import com.margelo.nitro.nitrohealth.NativeHealthDeviceInfo
 import com.margelo.nitro.nitrohealth.NativeHealthDeviceType
 import com.margelo.nitro.nitrohealth.NativeHealthRecordingMethod
 import org.junit.Assert.assertEquals
@@ -23,8 +22,16 @@ class SampleMetadataTest {
         )
 
         values.forEach { (native, healthConnect) ->
-            val unkeyed = makeSampleMetadata(null, null, native)
-            val keyed = makeSampleMetadata("sample-sync-id", 3.0, native)
+            val unkeyed = makeSampleMetadata(
+                makeTestWriteMetadata(recordingMethod = native)
+            )
+            val keyed = makeSampleMetadata(
+                makeTestWriteMetadata(
+                    recordingMethod = native,
+                    syncId = "sample-sync-id",
+                    syncVersion = 3.0
+                )
+            )
 
             assertEquals(healthConnect, unkeyed.recordingMethod)
             assertEquals(healthConnect, keyed.recordingMethod)
@@ -60,13 +67,14 @@ class SampleMetadataTest {
         )
 
         values.forEach { (native, healthConnect) ->
-            val device = makeHealthConnectDevice(
-                NativeHealthDeviceInfo(
-                    type = native,
-                    manufacturer = "Example",
-                    model = "Sensor"
+            val metadata = makeSampleMetadata(
+                makeTestWriteProvenance(
+                    deviceType = native,
+                    deviceManufacturer = "Example",
+                    deviceModel = "Sensor"
                 )
-            )!!
+            )
+            val device = metadata.device!!
 
             assertEquals(healthConnect, device.type)
             assertEquals("Example", device.manufacturer)
@@ -76,20 +84,30 @@ class SampleMetadataTest {
 
     @Test
     fun suppliedDeviceSurvivesEveryRecordingMethod() {
-        val device = NativeHealthDeviceInfo(
-            type = NativeHealthDeviceType.PHONE,
-            manufacturer = "Example",
-            model = "Phone"
-        )
-
         listOf(
             NativeHealthRecordingMethod.MANUAL,
             NativeHealthRecordingMethod.ACTIVELYRECORDED,
             NativeHealthRecordingMethod.AUTOMATICALLYRECORDED,
             NativeHealthRecordingMethod.UNKNOWN
         ).forEach { method ->
-            val unkeyed = makeSampleMetadata(null, null, method, device)
-            val keyed = makeSampleMetadata("sample-sync-id", 3.0, method, device)
+            val unkeyed = makeSampleMetadata(
+                makeTestWriteMetadata(
+                    deviceType = NativeHealthDeviceType.PHONE,
+                    deviceManufacturer = "Example",
+                    deviceModel = "Phone",
+                    recordingMethod = method
+                )
+            )
+            val keyed = makeSampleMetadata(
+                makeTestWriteMetadata(
+                    deviceType = NativeHealthDeviceType.PHONE,
+                    deviceManufacturer = "Example",
+                    deviceModel = "Phone",
+                    recordingMethod = method,
+                    syncId = "sample-sync-id",
+                    syncVersion = 3.0
+                )
+            )
 
             listOf(unkeyed, keyed).forEach { metadata ->
                 assertEquals(Device.TYPE_PHONE, metadata.device?.type)
@@ -103,38 +121,14 @@ class SampleMetadataTest {
     fun defaultsRecordingMethodToUnknown() {
         assertEquals(
             Metadata.RECORDING_METHOD_UNKNOWN,
-            makeSampleMetadata(syncId = null, syncVersion = null).recordingMethod
-        )
-    }
-
-    @Test
-    fun rejectsSyncIdWithoutVersion() {
-        val error = assertThrows(IllegalArgumentException::class.java) {
-            makeSampleMetadata(syncId = "sample-sync-id", syncVersion = null)
-        }
-
-        assertEquals(
-            "syncId and syncVersion must either both be provided or both be absent",
-            error.message
-        )
-    }
-
-    @Test
-    fun rejectsSyncVersionWithoutId() {
-        val error = assertThrows(IllegalArgumentException::class.java) {
-            makeSampleMetadata(syncId = null, syncVersion = 1.0)
-        }
-
-        assertEquals(
-            "syncId and syncVersion must either both be provided or both be absent",
-            error.message
+            makeSampleMetadata(makeTestWriteMetadata()).recordingMethod
         )
     }
 
     @Test
     fun rejectsBlankSyncId() {
         val error = assertThrows(IllegalArgumentException::class.java) {
-            makeSampleMetadata(syncId = "  ", syncVersion = 1.0)
+            makeSampleMetadata(makeTestWriteMetadata(syncId = "  ", syncVersion = 1.0))
         }
 
         assertEquals("syncId must be a non-empty string", error.message)
@@ -152,7 +146,12 @@ class SampleMetadataTest {
 
         invalidVersions.forEach { syncVersion ->
             val error = assertThrows(IllegalArgumentException::class.java) {
-                makeSampleMetadata(syncId = "sample-sync-id", syncVersion = syncVersion)
+                makeSampleMetadata(
+                    makeTestWriteMetadata(
+                        syncId = "sample-sync-id",
+                        syncVersion = syncVersion
+                    )
+                )
             }
 
             assertEquals("syncVersion must be a non-negative safe integer", error.message)
@@ -162,8 +161,10 @@ class SampleMetadataTest {
     @Test
     fun acceptsMaximumSafeIntegerVersion() {
         val metadata = makeSampleMetadata(
-            syncId = "sample-sync-id",
-            syncVersion = 9_007_199_254_740_991.0
+            makeTestWriteMetadata(
+                syncId = "sample-sync-id",
+                syncVersion = 9_007_199_254_740_991.0
+            )
         )
 
         assertEquals("sample-sync-id", metadata.clientRecordId)

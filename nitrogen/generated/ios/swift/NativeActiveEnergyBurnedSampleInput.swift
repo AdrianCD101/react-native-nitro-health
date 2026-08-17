@@ -18,32 +18,8 @@ public extension NativeActiveEnergyBurnedSampleInput {
   /**
    * Create a new instance of `NativeActiveEnergyBurnedSampleInput`.
    */
-  init(startTimeMs: Double, endTimeMs: Double, kilocalories: Double, device: NativeHealthDeviceInfo?, recordingMethod: NativeHealthRecordingMethod?, syncId: String?, syncVersion: Double?) {
-    self.init(startTimeMs, endTimeMs, kilocalories, { () -> bridge.std__optional_NativeHealthDeviceInfo_ in
-      if let __unwrappedValue = device {
-        return bridge.create_std__optional_NativeHealthDeviceInfo_(__unwrappedValue)
-      } else {
-        return .init()
-      }
-    }(), { () -> bridge.std__optional_NativeHealthRecordingMethod_ in
-      if let __unwrappedValue = recordingMethod {
-        return bridge.create_std__optional_NativeHealthRecordingMethod_(__unwrappedValue)
-      } else {
-        return .init()
-      }
-    }(), { () -> bridge.std__optional_std__string_ in
-      if let __unwrappedValue = syncId {
-        return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
-      } else {
-        return .init()
-      }
-    }(), { () -> bridge.std__optional_double_ in
-      if let __unwrappedValue = syncVersion {
-        return bridge.create_std__optional_double_(__unwrappedValue)
-      } else {
-        return .init()
-      }
-    }())
+  init(startTimeMs: Double, endTimeMs: Double, kilocalories: Double, writeMetadata: NativeHealthWriteMetadata) {
+    self.init(startTimeMs, endTimeMs, kilocalories, writeMetadata)
   }
 
   @inline(__always)
@@ -62,36 +38,7 @@ public extension NativeActiveEnergyBurnedSampleInput {
   }
   
   @inline(__always)
-  var device: NativeHealthDeviceInfo? {
-    return self.__device.value
-  }
-  
-  @inline(__always)
-  var recordingMethod: NativeHealthRecordingMethod? {
-    return self.__recordingMethod.value
-  }
-  
-  @inline(__always)
-  var syncId: String? {
-    return { () -> String? in
-      if bridge.has_value_std__optional_std__string_(self.__syncId) {
-        let __unwrapped = bridge.get_std__optional_std__string_(self.__syncId)
-        return String(__unwrapped)
-      } else {
-        return nil
-      }
-    }()
-  }
-  
-  @inline(__always)
-  var syncVersion: Double? {
-    return { () -> Double? in
-      if bridge.has_value_std__optional_double_(self.__syncVersion) {
-        let __unwrapped = bridge.get_std__optional_double_(self.__syncVersion)
-        return __unwrapped
-      } else {
-        return nil
-      }
-    }()
+  var writeMetadata: NativeHealthWriteMetadata {
+    return self.__writeMetadata
   }
 }

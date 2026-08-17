@@ -20,16 +20,7 @@ import java.util.Objects
 data class NativeHeightSample(
   @DoNotStrip
   @Keep
-  val identity: NativeHealthSampleIdentity,
-  @DoNotStrip
-  @Keep
-  val origin: NativeHealthDataOrigin,
-  @DoNotStrip
-  @Keep
-  val device: NativeHealthDeviceInfo?,
-  @DoNotStrip
-  @Keep
-  val recordingMethod: NativeHealthRecordingMethod,
+  val sampleMetadata: NativeHealthSampleMetadata,
   @DoNotStrip
   @Keep
   val timeMs: Double,
@@ -42,20 +33,14 @@ data class NativeHeightSample(
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other !is NativeHeightSample) return false
-    return Objects.deepEquals(this.identity, other.identity)
-      && Objects.deepEquals(this.origin, other.origin)
-      && Objects.deepEquals(this.device, other.device)
-      && Objects.deepEquals(this.recordingMethod, other.recordingMethod)
+    return Objects.deepEquals(this.sampleMetadata, other.sampleMetadata)
       && Objects.deepEquals(this.timeMs, other.timeMs)
       && Objects.deepEquals(this.meters, other.meters)
   }
 
   override fun hashCode(): Int {
     return arrayOf<Any?>(
-      identity,
-      origin,
-      device,
-      recordingMethod,
+      sampleMetadata,
       timeMs,
       meters
     ).contentDeepHashCode()
@@ -69,8 +54,8 @@ data class NativeHeightSample(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, device: NativeHealthDeviceInfo?, recordingMethod: NativeHealthRecordingMethod, timeMs: Double, meters: Double): NativeHeightSample {
-      return NativeHeightSample(identity, origin, device, recordingMethod, timeMs, meters)
+    private fun fromCpp(sampleMetadata: NativeHealthSampleMetadata, timeMs: Double, meters: Double): NativeHeightSample {
+      return NativeHeightSample(sampleMetadata, timeMs, meters)
     }
   }
 }

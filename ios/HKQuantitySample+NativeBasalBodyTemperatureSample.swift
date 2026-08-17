@@ -4,10 +4,7 @@ import HealthKit
 extension HKQuantitySample {
     func nativeBasalBodyTemperatureSample() throws -> NativeBasalBodyTemperatureSample {
         return NativeBasalBodyTemperatureSample(
-            identity: nativeHealthSampleIdentity,
-            origin: nativeHealthDataOrigin,
-            device: nativeHealthDeviceInfo,
-            recordingMethod: nativeHealthRecordingMethod,
+            sampleMetadata: nativeHealthSampleMetadata,
             timeMs: startDate.timeIntervalSince1970 * 1000,
             celsius: quantity.doubleValue(for: HKUnit.degreeCelsius()),
             androidMeasurementLocation: nil,

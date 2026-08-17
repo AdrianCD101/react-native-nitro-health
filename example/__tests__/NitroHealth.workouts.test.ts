@@ -178,10 +178,15 @@ describe('NitroHealth workouts contract', () => {
         activityType: 'running',
         displayName: 'Morning Run',
         timeZone: 'America/New_York',
-        device: { type: 'watch', manufacturer: 'Example', model: 'Run Watch' },
-        recordingMethod: 'manual',
-        syncId: 'workout-1',
-        syncVersion: 2,
+        writeMetadata: {
+          provenance: {
+            deviceType: 'watch',
+            deviceManufacturer: 'Example',
+            deviceModel: 'Run Watch',
+            recordingMethod: 'manual',
+          },
+          sync: { id: 'workout-1', version: 2 },
+        },
       })
     })
 

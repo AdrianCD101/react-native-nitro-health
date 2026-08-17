@@ -1,7 +1,10 @@
 package com.nitrohealth
 
 import androidx.health.connect.client.records.metadata.Device
+import androidx.health.connect.client.records.metadata.Metadata
 import com.margelo.nitro.nitrohealth.NativeHealthDeviceType
+import com.margelo.nitro.nitrohealth.NativeHealthRecordingMethod
+import com.margelo.nitro.nitrohealth.NativeHealthSampleIdentityKind
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
@@ -22,37 +25,54 @@ class NativeSampleMetadataMappingTest {
         )
 
         values.forEach { (healthConnect, native) ->
-            val device = makeNativeHealthDeviceInfo(Device(type = healthConnect))!!
+            val sampleMetadata = makeNativeHealthSampleMetadata(
+                Metadata.unknownRecordingMethod(device = Device(type = healthConnect))
+            )
 
-            assertEquals(native, device.type)
-            assertNull(device.manufacturer)
-            assertNull(device.model)
+            assertEquals(native, sampleMetadata.deviceType)
+            assertNull(sampleMetadata.deviceManufacturer)
+            assertNull(sampleMetadata.deviceModel)
         }
     }
 
     @Test
-    fun futureDeviceTypeFallsBackToUnknown() {
-        val device = makeNativeHealthDeviceInfo(Device(type = Int.MAX_VALUE))
-
-        assertEquals(NativeHealthDeviceType.UNKNOWN, device!!.type)
-    }
-
-    @Test
-    fun nullDeviceRemainsNull() {
-        assertNull(makeNativeHealthDeviceInfo(null))
-    }
-
-    @Test
-    fun preservesManufacturerAndModel() {
-        val device = makeNativeHealthDeviceInfo(
-            Device(
+    fun mapsRecordMetadataAndExplicitChildIdentity() {
+        val metadata = Metadata.autoRecorded(
+            device = Device(
                 type = Device.TYPE_WATCH,
                 manufacturer = "Example Manufacturer",
                 model = "Example Model"
             )
-        )!!
+        )
+        val sampleMetadata = makeNativeHealthSampleMetadata(
+            metadata,
+            makeRecordChildIdentity(metadata.id, 3)
+        )
 
-        assertEquals("Example Manufacturer", device.manufacturer)
-        assertEquals("Example Model", device.model)
+        assertEquals(NativeHealthSampleIdentityKind.RECORDCHILD, sampleMetadata.identityKind)
+        assertEquals("${metadata.id}#3", sampleMetadata.identityId)
+        assertEquals(metadata.id, sampleMetadata.identityRecordId)
+        assertEquals(metadata.dataOrigin.packageName, sampleMetadata.originIdentifier)
+        assertNull(sampleMetadata.originDisplayName)
+        assertEquals(NativeHealthDeviceType.WATCH, sampleMetadata.deviceType)
+        assertEquals("Example Manufacturer", sampleMetadata.deviceManufacturer)
+        assertEquals("Example Model", sampleMetadata.deviceModel)
+        assertEquals(
+            NativeHealthRecordingMethod.AUTOMATICALLYRECORDED,
+            sampleMetadata.recordingMethod
+        )
+    }
+
+    @Test
+    fun absentDeviceRemainsAbsentAndFutureDeviceTypeFallsBackToUnknown() {
+        val absent = makeNativeHealthSampleMetadata(Metadata.unknownRecordingMethod())
+        val future = makeNativeHealthSampleMetadata(
+            Metadata.unknownRecordingMethod(device = Device(type = Int.MAX_VALUE))
+        )
+
+        assertNull(absent.deviceType)
+        assertNull(absent.deviceManufacturer)
+        assertNull(absent.deviceModel)
+        assertEquals(NativeHealthDeviceType.UNKNOWN, future.deviceType)
     }
 }

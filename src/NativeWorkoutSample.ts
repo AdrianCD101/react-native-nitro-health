@@ -1,16 +1,10 @@
-import type { NativeHealthDataOrigin } from './NativeHealthDataOrigin'
-import type { NativeHealthDeviceInfo } from './NativeHealthDeviceInfo'
-import type { NativeHealthRecordingMethod } from './NativeHealthRecordingMethod'
+import type { NativeHealthSampleMetadata } from './NativeHealthSampleMetadata'
 import type { NativeHealthMetricValue } from './NativeHealthMetricValue'
-import type { NativeHealthSampleIdentity } from './NativeHealthSampleIdentity'
 import type { NativeWorkoutActivity } from './NativeWorkoutActivity'
 
 /** Native workout session shape returned through the Nitro spec. */
 export interface NativeWorkoutSample {
-  identity: NativeHealthSampleIdentity
-  origin: NativeHealthDataOrigin
-  device?: NativeHealthDeviceInfo
-  recordingMethod: NativeHealthRecordingMethod
+  sampleMetadata: NativeHealthSampleMetadata
   startTimeMs: number
   endTimeMs: number
   elapsedDurationSeconds: number

@@ -20,16 +20,7 @@ import java.util.Objects
 data class NativeBodyFatSample(
   @DoNotStrip
   @Keep
-  val identity: NativeHealthSampleIdentity,
-  @DoNotStrip
-  @Keep
-  val origin: NativeHealthDataOrigin,
-  @DoNotStrip
-  @Keep
-  val device: NativeHealthDeviceInfo?,
-  @DoNotStrip
-  @Keep
-  val recordingMethod: NativeHealthRecordingMethod,
+  val sampleMetadata: NativeHealthSampleMetadata,
   @DoNotStrip
   @Keep
   val timeMs: Double,
@@ -42,20 +33,14 @@ data class NativeBodyFatSample(
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other !is NativeBodyFatSample) return false
-    return Objects.deepEquals(this.identity, other.identity)
-      && Objects.deepEquals(this.origin, other.origin)
-      && Objects.deepEquals(this.device, other.device)
-      && Objects.deepEquals(this.recordingMethod, other.recordingMethod)
+    return Objects.deepEquals(this.sampleMetadata, other.sampleMetadata)
       && Objects.deepEquals(this.timeMs, other.timeMs)
       && Objects.deepEquals(this.percentage, other.percentage)
   }
 
   override fun hashCode(): Int {
     return arrayOf<Any?>(
-      identity,
-      origin,
-      device,
-      recordingMethod,
+      sampleMetadata,
       timeMs,
       percentage
     ).contentDeepHashCode()
@@ -69,8 +54,8 @@ data class NativeBodyFatSample(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, device: NativeHealthDeviceInfo?, recordingMethod: NativeHealthRecordingMethod, timeMs: Double, percentage: Double): NativeBodyFatSample {
-      return NativeBodyFatSample(identity, origin, device, recordingMethod, timeMs, percentage)
+    private fun fromCpp(sampleMetadata: NativeHealthSampleMetadata, timeMs: Double, percentage: Double): NativeBodyFatSample {
+      return NativeBodyFatSample(sampleMetadata, timeMs, percentage)
     }
   }
 }

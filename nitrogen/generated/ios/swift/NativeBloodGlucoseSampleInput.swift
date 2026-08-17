@@ -18,20 +18,8 @@ public extension NativeBloodGlucoseSampleInput {
   /**
    * Create a new instance of `NativeBloodGlucoseSampleInput`.
    */
-  init(timeMs: Double, millimolesPerLiter: Double, device: NativeHealthDeviceInfo?, recordingMethod: NativeHealthRecordingMethod?, androidSpecimenSource: NativeBloodGlucoseSpecimenSource?, androidMealType: NativeBloodGlucoseMealType?, androidRelationToMeal: NativeBloodGlucoseRelationToMeal?, iosMealTime: NativeBloodGlucoseMealTime?, syncId: String?, syncVersion: Double?) {
-    self.init(timeMs, millimolesPerLiter, { () -> bridge.std__optional_NativeHealthDeviceInfo_ in
-      if let __unwrappedValue = device {
-        return bridge.create_std__optional_NativeHealthDeviceInfo_(__unwrappedValue)
-      } else {
-        return .init()
-      }
-    }(), { () -> bridge.std__optional_NativeHealthRecordingMethod_ in
-      if let __unwrappedValue = recordingMethod {
-        return bridge.create_std__optional_NativeHealthRecordingMethod_(__unwrappedValue)
-      } else {
-        return .init()
-      }
-    }(), { () -> bridge.std__optional_NativeBloodGlucoseSpecimenSource_ in
+  init(timeMs: Double, millimolesPerLiter: Double, writeMetadata: NativeHealthWriteMetadata, androidSpecimenSource: NativeBloodGlucoseSpecimenSource?, androidMealType: NativeBloodGlucoseMealType?, androidRelationToMeal: NativeBloodGlucoseRelationToMeal?, iosMealTime: NativeBloodGlucoseMealTime?) {
+    self.init(timeMs, millimolesPerLiter, writeMetadata, { () -> bridge.std__optional_NativeBloodGlucoseSpecimenSource_ in
       if let __unwrappedValue = androidSpecimenSource {
         return bridge.create_std__optional_NativeBloodGlucoseSpecimenSource_(__unwrappedValue)
       } else {
@@ -55,18 +43,6 @@ public extension NativeBloodGlucoseSampleInput {
       } else {
         return .init()
       }
-    }(), { () -> bridge.std__optional_std__string_ in
-      if let __unwrappedValue = syncId {
-        return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
-      } else {
-        return .init()
-      }
-    }(), { () -> bridge.std__optional_double_ in
-      if let __unwrappedValue = syncVersion {
-        return bridge.create_std__optional_double_(__unwrappedValue)
-      } else {
-        return .init()
-      }
     }())
   }
 
@@ -81,13 +57,8 @@ public extension NativeBloodGlucoseSampleInput {
   }
   
   @inline(__always)
-  var device: NativeHealthDeviceInfo? {
-    return self.__device.value
-  }
-  
-  @inline(__always)
-  var recordingMethod: NativeHealthRecordingMethod? {
-    return self.__recordingMethod.value
+  var writeMetadata: NativeHealthWriteMetadata {
+    return self.__writeMetadata
   }
   
   @inline(__always)
@@ -108,29 +79,5 @@ public extension NativeBloodGlucoseSampleInput {
   @inline(__always)
   var iosMealTime: NativeBloodGlucoseMealTime? {
     return self.__iosMealTime.value
-  }
-  
-  @inline(__always)
-  var syncId: String? {
-    return { () -> String? in
-      if bridge.has_value_std__optional_std__string_(self.__syncId) {
-        let __unwrapped = bridge.get_std__optional_std__string_(self.__syncId)
-        return String(__unwrapped)
-      } else {
-        return nil
-      }
-    }()
-  }
-  
-  @inline(__always)
-  var syncVersion: Double? {
-    return { () -> Double? in
-      if bridge.has_value_std__optional_double_(self.__syncVersion) {
-        let __unwrapped = bridge.get_std__optional_double_(self.__syncVersion)
-        return __unwrapped
-      } else {
-        return nil
-      }
-    }()
   }
 }

@@ -28,20 +28,10 @@
 #error NitroModules cannot be found! Are you sure you installed NitroModules properly?
 #endif
 
-// Forward declaration of `NativeHealthSampleIdentity` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeHealthSampleIdentity; }
-// Forward declaration of `NativeHealthDataOrigin` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeHealthDataOrigin; }
-// Forward declaration of `NativeHealthDeviceInfo` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeHealthDeviceInfo; }
-// Forward declaration of `NativeHealthRecordingMethod` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { enum class NativeHealthRecordingMethod; }
+// Forward declaration of `NativeHealthSampleMetadata` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthSampleMetadata; }
 
-#include "NativeHealthSampleIdentity.hpp"
-#include "NativeHealthDataOrigin.hpp"
-#include "NativeHealthDeviceInfo.hpp"
-#include <optional>
-#include "NativeHealthRecordingMethod.hpp"
+#include "NativeHealthSampleMetadata.hpp"
 
 namespace margelo::nitro::nitrohealth {
 
@@ -50,17 +40,14 @@ namespace margelo::nitro::nitrohealth {
    */
   struct NativeHydrationSample final {
   public:
-    NativeHealthSampleIdentity identity     SWIFT_PRIVATE;
-    NativeHealthDataOrigin origin     SWIFT_PRIVATE;
-    std::optional<NativeHealthDeviceInfo> device     SWIFT_PRIVATE;
-    NativeHealthRecordingMethod recordingMethod     SWIFT_PRIVATE;
+    NativeHealthSampleMetadata sampleMetadata     SWIFT_PRIVATE;
     double startTimeMs     SWIFT_PRIVATE;
     double endTimeMs     SWIFT_PRIVATE;
     double milliliters     SWIFT_PRIVATE;
 
   public:
     NativeHydrationSample() = default;
-    explicit NativeHydrationSample(NativeHealthSampleIdentity identity, NativeHealthDataOrigin origin, std::optional<NativeHealthDeviceInfo> device, NativeHealthRecordingMethod recordingMethod, double startTimeMs, double endTimeMs, double milliliters): identity(identity), origin(origin), device(device), recordingMethod(recordingMethod), startTimeMs(startTimeMs), endTimeMs(endTimeMs), milliliters(milliliters) {}
+    explicit NativeHydrationSample(NativeHealthSampleMetadata sampleMetadata, double startTimeMs, double endTimeMs, double milliliters): sampleMetadata(sampleMetadata), startTimeMs(startTimeMs), endTimeMs(endTimeMs), milliliters(milliliters) {}
 
   public:
     friend bool operator==(const NativeHydrationSample& lhs, const NativeHydrationSample& rhs) = default;
@@ -76,10 +63,7 @@ namespace margelo::nitro {
     static inline margelo::nitro::nitrohealth::NativeHydrationSample fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       jsi::Object obj = arg.asObject(runtime);
       return margelo::nitro::nitrohealth::NativeHydrationSample(
-        JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleIdentity>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "identity"))),
-        JSIConverter<margelo::nitro::nitrohealth::NativeHealthDataOrigin>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "origin"))),
-        JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeHealthDeviceInfo>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "device"))),
-        JSIConverter<margelo::nitro::nitrohealth::NativeHealthRecordingMethod>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "recordingMethod"))),
+        JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleMetadata>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "sampleMetadata"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "startTimeMs"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "milliliters")))
@@ -87,10 +71,7 @@ namespace margelo::nitro {
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::nitrohealth::NativeHydrationSample& arg) {
       jsi::Object obj(runtime);
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "identity"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleIdentity>::toJSI(runtime, arg.identity));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "origin"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthDataOrigin>::toJSI(runtime, arg.origin));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "device"), JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeHealthDeviceInfo>>::toJSI(runtime, arg.device));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "recordingMethod"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthRecordingMethod>::toJSI(runtime, arg.recordingMethod));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "sampleMetadata"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleMetadata>::toJSI(runtime, arg.sampleMetadata));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "startTimeMs"), JSIConverter<double>::toJSI(runtime, arg.startTimeMs));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs"), JSIConverter<double>::toJSI(runtime, arg.endTimeMs));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "milliliters"), JSIConverter<double>::toJSI(runtime, arg.milliliters));
@@ -104,10 +85,7 @@ namespace margelo::nitro {
       if (!nitro::isPlainObject(runtime, obj)) {
         return false;
       }
-      if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleIdentity>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "identity")))) return false;
-      if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthDataOrigin>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "origin")))) return false;
-      if (!JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeHealthDeviceInfo>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "device")))) return false;
-      if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthRecordingMethod>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "recordingMethod")))) return false;
+      if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleMetadata>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "sampleMetadata")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "startTimeMs")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "milliliters")))) return false;

@@ -18,34 +18,13 @@ public extension NativeHeartRateVariabilitySample {
   /**
    * Create a new instance of `NativeHeartRateVariabilitySample`.
    */
-  init(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, device: NativeHealthDeviceInfo?, recordingMethod: NativeHealthRecordingMethod, timeMs: Double, milliseconds: Double, method: String) {
-    self.init(identity, origin, { () -> bridge.std__optional_NativeHealthDeviceInfo_ in
-      if let __unwrappedValue = device {
-        return bridge.create_std__optional_NativeHealthDeviceInfo_(__unwrappedValue)
-      } else {
-        return .init()
-      }
-    }(), recordingMethod, timeMs, milliseconds, std.string(method))
+  init(sampleMetadata: NativeHealthSampleMetadata, timeMs: Double, milliseconds: Double, method: String) {
+    self.init(sampleMetadata, timeMs, milliseconds, std.string(method))
   }
 
   @inline(__always)
-  var identity: NativeHealthSampleIdentity {
-    return self.__identity
-  }
-  
-  @inline(__always)
-  var origin: NativeHealthDataOrigin {
-    return self.__origin
-  }
-  
-  @inline(__always)
-  var device: NativeHealthDeviceInfo? {
-    return self.__device.value
-  }
-  
-  @inline(__always)
-  var recordingMethod: NativeHealthRecordingMethod {
-    return self.__recordingMethod
+  var sampleMetadata: NativeHealthSampleMetadata {
+    return self.__sampleMetadata
   }
   
   @inline(__always)

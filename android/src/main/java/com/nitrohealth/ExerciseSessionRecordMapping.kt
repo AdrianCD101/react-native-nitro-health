@@ -11,10 +11,7 @@ internal fun makeNativeWorkoutSample(record: ExerciseSessionRecord): NativeWorko
         value = null
     )
     return NativeWorkoutSample(
-        identity = makeRecordIdentity(record.metadata.id),
-        origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
-        device = makeNativeHealthDeviceInfo(record.metadata.device),
-        recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
+        sampleMetadata = makeNativeHealthSampleMetadata(record.metadata),
         startTimeMs = record.startTime.toEpochMilli().toDouble(),
         endTimeMs = record.endTime.toEpochMilli().toDouble(),
         elapsedDurationSeconds =

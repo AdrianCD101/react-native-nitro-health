@@ -28,14 +28,8 @@
 #error NitroModules cannot be found! Are you sure you installed NitroModules properly?
 #endif
 
-// Forward declaration of `NativeHealthSampleIdentity` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeHealthSampleIdentity; }
-// Forward declaration of `NativeHealthDataOrigin` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeHealthDataOrigin; }
-// Forward declaration of `NativeHealthDeviceInfo` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeHealthDeviceInfo; }
-// Forward declaration of `NativeHealthRecordingMethod` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { enum class NativeHealthRecordingMethod; }
+// Forward declaration of `NativeHealthSampleMetadata` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthSampleMetadata; }
 // Forward declaration of `NativeBloodGlucoseSpecimenSource` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class NativeBloodGlucoseSpecimenSource; }
 // Forward declaration of `NativeBloodGlucoseMealType` to properly resolve imports.
@@ -45,12 +39,9 @@ namespace margelo::nitro::nitrohealth { enum class NativeBloodGlucoseRelationToM
 // Forward declaration of `NativeBloodGlucoseMealTime` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class NativeBloodGlucoseMealTime; }
 
-#include "NativeHealthSampleIdentity.hpp"
-#include "NativeHealthDataOrigin.hpp"
-#include "NativeHealthDeviceInfo.hpp"
-#include <optional>
-#include "NativeHealthRecordingMethod.hpp"
+#include "NativeHealthSampleMetadata.hpp"
 #include "NativeBloodGlucoseSpecimenSource.hpp"
+#include <optional>
 #include "NativeBloodGlucoseMealType.hpp"
 #include "NativeBloodGlucoseRelationToMeal.hpp"
 #include "NativeBloodGlucoseMealTime.hpp"
@@ -62,10 +53,7 @@ namespace margelo::nitro::nitrohealth {
    */
   struct NativeBloodGlucoseSample final {
   public:
-    NativeHealthSampleIdentity identity     SWIFT_PRIVATE;
-    NativeHealthDataOrigin origin     SWIFT_PRIVATE;
-    std::optional<NativeHealthDeviceInfo> device     SWIFT_PRIVATE;
-    NativeHealthRecordingMethod recordingMethod     SWIFT_PRIVATE;
+    NativeHealthSampleMetadata sampleMetadata     SWIFT_PRIVATE;
     double timeMs     SWIFT_PRIVATE;
     double millimolesPerLiter     SWIFT_PRIVATE;
     std::optional<NativeBloodGlucoseSpecimenSource> androidSpecimenSource     SWIFT_PRIVATE;
@@ -75,7 +63,7 @@ namespace margelo::nitro::nitrohealth {
 
   public:
     NativeBloodGlucoseSample() = default;
-    explicit NativeBloodGlucoseSample(NativeHealthSampleIdentity identity, NativeHealthDataOrigin origin, std::optional<NativeHealthDeviceInfo> device, NativeHealthRecordingMethod recordingMethod, double timeMs, double millimolesPerLiter, std::optional<NativeBloodGlucoseSpecimenSource> androidSpecimenSource, std::optional<NativeBloodGlucoseMealType> androidMealType, std::optional<NativeBloodGlucoseRelationToMeal> androidRelationToMeal, std::optional<NativeBloodGlucoseMealTime> iosMealTime): identity(identity), origin(origin), device(device), recordingMethod(recordingMethod), timeMs(timeMs), millimolesPerLiter(millimolesPerLiter), androidSpecimenSource(androidSpecimenSource), androidMealType(androidMealType), androidRelationToMeal(androidRelationToMeal), iosMealTime(iosMealTime) {}
+    explicit NativeBloodGlucoseSample(NativeHealthSampleMetadata sampleMetadata, double timeMs, double millimolesPerLiter, std::optional<NativeBloodGlucoseSpecimenSource> androidSpecimenSource, std::optional<NativeBloodGlucoseMealType> androidMealType, std::optional<NativeBloodGlucoseRelationToMeal> androidRelationToMeal, std::optional<NativeBloodGlucoseMealTime> iosMealTime): sampleMetadata(sampleMetadata), timeMs(timeMs), millimolesPerLiter(millimolesPerLiter), androidSpecimenSource(androidSpecimenSource), androidMealType(androidMealType), androidRelationToMeal(androidRelationToMeal), iosMealTime(iosMealTime) {}
 
   public:
     friend bool operator==(const NativeBloodGlucoseSample& lhs, const NativeBloodGlucoseSample& rhs) = default;
@@ -91,10 +79,7 @@ namespace margelo::nitro {
     static inline margelo::nitro::nitrohealth::NativeBloodGlucoseSample fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       jsi::Object obj = arg.asObject(runtime);
       return margelo::nitro::nitrohealth::NativeBloodGlucoseSample(
-        JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleIdentity>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "identity"))),
-        JSIConverter<margelo::nitro::nitrohealth::NativeHealthDataOrigin>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "origin"))),
-        JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeHealthDeviceInfo>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "device"))),
-        JSIConverter<margelo::nitro::nitrohealth::NativeHealthRecordingMethod>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "recordingMethod"))),
+        JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleMetadata>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "sampleMetadata"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeMs"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "millimolesPerLiter"))),
         JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeBloodGlucoseSpecimenSource>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "androidSpecimenSource"))),
@@ -105,10 +90,7 @@ namespace margelo::nitro {
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::nitrohealth::NativeBloodGlucoseSample& arg) {
       jsi::Object obj(runtime);
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "identity"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleIdentity>::toJSI(runtime, arg.identity));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "origin"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthDataOrigin>::toJSI(runtime, arg.origin));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "device"), JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeHealthDeviceInfo>>::toJSI(runtime, arg.device));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "recordingMethod"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthRecordingMethod>::toJSI(runtime, arg.recordingMethod));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "sampleMetadata"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleMetadata>::toJSI(runtime, arg.sampleMetadata));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "timeMs"), JSIConverter<double>::toJSI(runtime, arg.timeMs));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "millimolesPerLiter"), JSIConverter<double>::toJSI(runtime, arg.millimolesPerLiter));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "androidSpecimenSource"), JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeBloodGlucoseSpecimenSource>>::toJSI(runtime, arg.androidSpecimenSource));
@@ -125,10 +107,7 @@ namespace margelo::nitro {
       if (!nitro::isPlainObject(runtime, obj)) {
         return false;
       }
-      if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleIdentity>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "identity")))) return false;
-      if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthDataOrigin>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "origin")))) return false;
-      if (!JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeHealthDeviceInfo>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "device")))) return false;
-      if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthRecordingMethod>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "recordingMethod")))) return false;
+      if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleMetadata>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "sampleMetadata")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeMs")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "millimolesPerLiter")))) return false;
       if (!JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeBloodGlucoseSpecimenSource>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "androidSpecimenSource")))) return false;
