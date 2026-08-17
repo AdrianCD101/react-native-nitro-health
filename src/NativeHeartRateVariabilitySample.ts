@@ -1,14 +1,8 @@
-import type { NativeHealthDataOrigin } from './NativeHealthDataOrigin'
-import type { NativeHealthDeviceInfo } from './NativeHealthDeviceInfo'
-import type { NativeHealthRecordingMethod } from './NativeHealthRecordingMethod'
-import type { NativeHealthSampleIdentity } from './NativeHealthSampleIdentity'
+import type { NativeHealthSampleMetadata } from './NativeHealthSampleMetadata'
 
 /** Native heart rate variability sample shape returned through the Nitro spec. */
 export interface NativeHeartRateVariabilitySample {
-  identity: NativeHealthSampleIdentity
-  origin: NativeHealthDataOrigin
-  device?: NativeHealthDeviceInfo
-  recordingMethod: NativeHealthRecordingMethod
+  sampleMetadata: NativeHealthSampleMetadata
   timeMs: number
   milliseconds: number
   method: string

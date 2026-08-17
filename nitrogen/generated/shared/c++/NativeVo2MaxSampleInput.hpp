@@ -28,21 +28,17 @@
 #error NitroModules cannot be found! Are you sure you installed NitroModules properly?
 #endif
 
-// Forward declaration of `NativeHealthDeviceInfo` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeHealthDeviceInfo; }
-// Forward declaration of `NativeHealthRecordingMethod` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { enum class NativeHealthRecordingMethod; }
+// Forward declaration of `NativeHealthWriteMetadata` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthWriteMetadata; }
 // Forward declaration of `NativeAndroidVo2MaxMeasurementMethod` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class NativeAndroidVo2MaxMeasurementMethod; }
 // Forward declaration of `NativeIOSVo2MaxTestType` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class NativeIOSVo2MaxTestType; }
 
-#include "NativeHealthDeviceInfo.hpp"
-#include <optional>
-#include "NativeHealthRecordingMethod.hpp"
+#include "NativeHealthWriteMetadata.hpp"
 #include "NativeAndroidVo2MaxMeasurementMethod.hpp"
+#include <optional>
 #include "NativeIOSVo2MaxTestType.hpp"
-#include <string>
 
 namespace margelo::nitro::nitrohealth {
 
@@ -53,16 +49,13 @@ namespace margelo::nitro::nitrohealth {
   public:
     double timeMs     SWIFT_PRIVATE;
     double millilitersPerKilogramPerMinute     SWIFT_PRIVATE;
-    std::optional<NativeHealthDeviceInfo> device     SWIFT_PRIVATE;
-    std::optional<NativeHealthRecordingMethod> recordingMethod     SWIFT_PRIVATE;
+    NativeHealthWriteMetadata writeMetadata     SWIFT_PRIVATE;
     std::optional<NativeAndroidVo2MaxMeasurementMethod> androidMeasurementMethod     SWIFT_PRIVATE;
     std::optional<NativeIOSVo2MaxTestType> iosTestType     SWIFT_PRIVATE;
-    std::optional<std::string> syncId     SWIFT_PRIVATE;
-    std::optional<double> syncVersion     SWIFT_PRIVATE;
 
   public:
     NativeVo2MaxSampleInput() = default;
-    explicit NativeVo2MaxSampleInput(double timeMs, double millilitersPerKilogramPerMinute, std::optional<NativeHealthDeviceInfo> device, std::optional<NativeHealthRecordingMethod> recordingMethod, std::optional<NativeAndroidVo2MaxMeasurementMethod> androidMeasurementMethod, std::optional<NativeIOSVo2MaxTestType> iosTestType, std::optional<std::string> syncId, std::optional<double> syncVersion): timeMs(timeMs), millilitersPerKilogramPerMinute(millilitersPerKilogramPerMinute), device(device), recordingMethod(recordingMethod), androidMeasurementMethod(androidMeasurementMethod), iosTestType(iosTestType), syncId(syncId), syncVersion(syncVersion) {}
+    explicit NativeVo2MaxSampleInput(double timeMs, double millilitersPerKilogramPerMinute, NativeHealthWriteMetadata writeMetadata, std::optional<NativeAndroidVo2MaxMeasurementMethod> androidMeasurementMethod, std::optional<NativeIOSVo2MaxTestType> iosTestType): timeMs(timeMs), millilitersPerKilogramPerMinute(millilitersPerKilogramPerMinute), writeMetadata(writeMetadata), androidMeasurementMethod(androidMeasurementMethod), iosTestType(iosTestType) {}
 
   public:
     friend bool operator==(const NativeVo2MaxSampleInput& lhs, const NativeVo2MaxSampleInput& rhs) = default;
@@ -80,24 +73,18 @@ namespace margelo::nitro {
       return margelo::nitro::nitrohealth::NativeVo2MaxSampleInput(
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeMs"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "millilitersPerKilogramPerMinute"))),
-        JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeHealthDeviceInfo>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "device"))),
-        JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeHealthRecordingMethod>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "recordingMethod"))),
+        JSIConverter<margelo::nitro::nitrohealth::NativeHealthWriteMetadata>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "writeMetadata"))),
         JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeAndroidVo2MaxMeasurementMethod>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "androidMeasurementMethod"))),
-        JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeIOSVo2MaxTestType>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "iosTestType"))),
-        JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "syncId"))),
-        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "syncVersion")))
+        JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeIOSVo2MaxTestType>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "iosTestType")))
       );
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::nitrohealth::NativeVo2MaxSampleInput& arg) {
       jsi::Object obj(runtime);
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "timeMs"), JSIConverter<double>::toJSI(runtime, arg.timeMs));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "millilitersPerKilogramPerMinute"), JSIConverter<double>::toJSI(runtime, arg.millilitersPerKilogramPerMinute));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "device"), JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeHealthDeviceInfo>>::toJSI(runtime, arg.device));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "recordingMethod"), JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeHealthRecordingMethod>>::toJSI(runtime, arg.recordingMethod));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "writeMetadata"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthWriteMetadata>::toJSI(runtime, arg.writeMetadata));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "androidMeasurementMethod"), JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeAndroidVo2MaxMeasurementMethod>>::toJSI(runtime, arg.androidMeasurementMethod));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "iosTestType"), JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeIOSVo2MaxTestType>>::toJSI(runtime, arg.iosTestType));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "syncId"), JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.syncId));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "syncVersion"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.syncVersion));
       return obj;
     }
     static inline bool canConvert(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -110,12 +97,9 @@ namespace margelo::nitro {
       }
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeMs")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "millilitersPerKilogramPerMinute")))) return false;
-      if (!JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeHealthDeviceInfo>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "device")))) return false;
-      if (!JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeHealthRecordingMethod>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "recordingMethod")))) return false;
+      if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthWriteMetadata>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "writeMetadata")))) return false;
       if (!JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeAndroidVo2MaxMeasurementMethod>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "androidMeasurementMethod")))) return false;
       if (!JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeIOSVo2MaxTestType>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "iosTestType")))) return false;
-      if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "syncId")))) return false;
-      if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "syncVersion")))) return false;
       return true;
     }
   };

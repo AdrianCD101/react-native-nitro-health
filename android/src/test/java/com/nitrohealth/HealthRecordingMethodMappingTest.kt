@@ -45,7 +45,7 @@ class HealthRecordingMethodMappingTest {
                 endTime = time.plusSeconds(60),
                 endZoneOffset = null,
                 count = 1,
-                metadata = makeSampleMetadata(null, null, method)
+                metadata = makeSampleMetadata(makeTestWriteMetadata(recordingMethod = method))
             )
         }
 

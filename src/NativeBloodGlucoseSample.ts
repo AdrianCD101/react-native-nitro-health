@@ -1,7 +1,4 @@
-import type { NativeHealthDataOrigin } from './NativeHealthDataOrigin'
-import type { NativeHealthDeviceInfo } from './NativeHealthDeviceInfo'
-import type { NativeHealthRecordingMethod } from './NativeHealthRecordingMethod'
-import type { NativeHealthSampleIdentity } from './NativeHealthSampleIdentity'
+import type { NativeHealthSampleMetadata } from './NativeHealthSampleMetadata'
 import type {
   NativeBloodGlucoseMealTime,
   NativeBloodGlucoseMealType,
@@ -11,10 +8,7 @@ import type {
 
 /** Native blood glucose sample shape returned through the Nitro spec. */
 export interface NativeBloodGlucoseSample {
-  identity: NativeHealthSampleIdentity
-  origin: NativeHealthDataOrigin
-  device?: NativeHealthDeviceInfo
-  recordingMethod: NativeHealthRecordingMethod
+  sampleMetadata: NativeHealthSampleMetadata
   timeMs: number
   millimolesPerLiter: number
   androidSpecimenSource?: NativeBloodGlucoseSpecimenSource

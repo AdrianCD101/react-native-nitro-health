@@ -11,14 +11,18 @@
 #include "NativeVo2MaxSampleInput.hpp"
 
 #include "JNativeAndroidVo2MaxMeasurementMethod.hpp"
-#include "JNativeHealthDeviceInfo.hpp"
 #include "JNativeHealthDeviceType.hpp"
 #include "JNativeHealthRecordingMethod.hpp"
+#include "JNativeHealthSyncMetadata.hpp"
+#include "JNativeHealthWriteMetadata.hpp"
+#include "JNativeHealthWriteProvenance.hpp"
 #include "JNativeIOSVo2MaxTestType.hpp"
 #include "NativeAndroidVo2MaxMeasurementMethod.hpp"
-#include "NativeHealthDeviceInfo.hpp"
 #include "NativeHealthDeviceType.hpp"
 #include "NativeHealthRecordingMethod.hpp"
+#include "NativeHealthSyncMetadata.hpp"
+#include "NativeHealthWriteMetadata.hpp"
+#include "NativeHealthWriteProvenance.hpp"
 #include "NativeIOSVo2MaxTestType.hpp"
 #include <optional>
 #include <string>
@@ -46,27 +50,18 @@ namespace margelo::nitro::nitrohealth {
       double timeMs = this->getFieldValue(fieldTimeMs);
       static const auto fieldMillilitersPerKilogramPerMinute = clazz->getField<double>("millilitersPerKilogramPerMinute");
       double millilitersPerKilogramPerMinute = this->getFieldValue(fieldMillilitersPerKilogramPerMinute);
-      static const auto fieldDevice = clazz->getField<JNativeHealthDeviceInfo>("device");
-      jni::local_ref<JNativeHealthDeviceInfo> device = this->getFieldValue(fieldDevice);
-      static const auto fieldRecordingMethod = clazz->getField<JNativeHealthRecordingMethod>("recordingMethod");
-      jni::local_ref<JNativeHealthRecordingMethod> recordingMethod = this->getFieldValue(fieldRecordingMethod);
+      static const auto fieldWriteMetadata = clazz->getField<JNativeHealthWriteMetadata>("writeMetadata");
+      jni::local_ref<JNativeHealthWriteMetadata> writeMetadata = this->getFieldValue(fieldWriteMetadata);
       static const auto fieldAndroidMeasurementMethod = clazz->getField<JNativeAndroidVo2MaxMeasurementMethod>("androidMeasurementMethod");
       jni::local_ref<JNativeAndroidVo2MaxMeasurementMethod> androidMeasurementMethod = this->getFieldValue(fieldAndroidMeasurementMethod);
       static const auto fieldIosTestType = clazz->getField<JNativeIOSVo2MaxTestType>("iosTestType");
       jni::local_ref<JNativeIOSVo2MaxTestType> iosTestType = this->getFieldValue(fieldIosTestType);
-      static const auto fieldSyncId = clazz->getField<jni::JString>("syncId");
-      jni::local_ref<jni::JString> syncId = this->getFieldValue(fieldSyncId);
-      static const auto fieldSyncVersion = clazz->getField<jni::JDouble>("syncVersion");
-      jni::local_ref<jni::JDouble> syncVersion = this->getFieldValue(fieldSyncVersion);
       return NativeVo2MaxSampleInput(
         timeMs,
         millilitersPerKilogramPerMinute,
-        device != nullptr ? std::make_optional(device->toCpp()) : std::nullopt,
-        recordingMethod != nullptr ? std::make_optional(recordingMethod->toCpp()) : std::nullopt,
+        writeMetadata->toCpp(),
         androidMeasurementMethod != nullptr ? std::make_optional(androidMeasurementMethod->toCpp()) : std::nullopt,
-        iosTestType != nullptr ? std::make_optional(iosTestType->toCpp()) : std::nullopt,
-        syncId != nullptr ? std::make_optional(syncId->toStdString()) : std::nullopt,
-        syncVersion != nullptr ? std::make_optional(syncVersion->value()) : std::nullopt
+        iosTestType != nullptr ? std::make_optional(iosTestType->toCpp()) : std::nullopt
       );
     }
 
@@ -76,19 +71,16 @@ namespace margelo::nitro::nitrohealth {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeVo2MaxSampleInput::javaobject> fromCpp(const NativeVo2MaxSampleInput& value) {
-      using JSignature = JNativeVo2MaxSampleInput(double, double, jni::alias_ref<JNativeHealthDeviceInfo>, jni::alias_ref<JNativeHealthRecordingMethod>, jni::alias_ref<JNativeAndroidVo2MaxMeasurementMethod>, jni::alias_ref<JNativeIOSVo2MaxTestType>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JDouble>);
+      using JSignature = JNativeVo2MaxSampleInput(double, double, jni::alias_ref<JNativeHealthWriteMetadata>, jni::alias_ref<JNativeAndroidVo2MaxMeasurementMethod>, jni::alias_ref<JNativeIOSVo2MaxTestType>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
         clazz,
         value.timeMs,
         value.millilitersPerKilogramPerMinute,
-        value.device.has_value() ? JNativeHealthDeviceInfo::fromCpp(value.device.value()) : nullptr,
-        value.recordingMethod.has_value() ? JNativeHealthRecordingMethod::fromCpp(value.recordingMethod.value()) : nullptr,
+        JNativeHealthWriteMetadata::fromCpp(value.writeMetadata),
         value.androidMeasurementMethod.has_value() ? JNativeAndroidVo2MaxMeasurementMethod::fromCpp(value.androidMeasurementMethod.value()) : nullptr,
-        value.iosTestType.has_value() ? JNativeIOSVo2MaxTestType::fromCpp(value.iosTestType.value()) : nullptr,
-        value.syncId.has_value() ? jni::make_jstring(value.syncId.value()) : nullptr,
-        value.syncVersion.has_value() ? jni::JDouble::valueOf(value.syncVersion.value()) : nullptr
+        value.iosTestType.has_value() ? JNativeIOSVo2MaxTestType::fromCpp(value.iosTestType.value()) : nullptr
       );
     }
   };

@@ -11,13 +11,17 @@
 #include "NativeDistanceSampleInput.hpp"
 
 #include "JNativeDistanceScope.hpp"
-#include "JNativeHealthDeviceInfo.hpp"
 #include "JNativeHealthDeviceType.hpp"
 #include "JNativeHealthRecordingMethod.hpp"
+#include "JNativeHealthSyncMetadata.hpp"
+#include "JNativeHealthWriteMetadata.hpp"
+#include "JNativeHealthWriteProvenance.hpp"
 #include "NativeDistanceScope.hpp"
-#include "NativeHealthDeviceInfo.hpp"
 #include "NativeHealthDeviceType.hpp"
 #include "NativeHealthRecordingMethod.hpp"
+#include "NativeHealthSyncMetadata.hpp"
+#include "NativeHealthWriteMetadata.hpp"
+#include "NativeHealthWriteProvenance.hpp"
 #include <optional>
 #include <string>
 
@@ -48,23 +52,14 @@ namespace margelo::nitro::nitrohealth {
       double distanceMeters = this->getFieldValue(fieldDistanceMeters);
       static const auto fieldScope = clazz->getField<JNativeDistanceScope>("scope");
       jni::local_ref<JNativeDistanceScope> scope = this->getFieldValue(fieldScope);
-      static const auto fieldDevice = clazz->getField<JNativeHealthDeviceInfo>("device");
-      jni::local_ref<JNativeHealthDeviceInfo> device = this->getFieldValue(fieldDevice);
-      static const auto fieldRecordingMethod = clazz->getField<JNativeHealthRecordingMethod>("recordingMethod");
-      jni::local_ref<JNativeHealthRecordingMethod> recordingMethod = this->getFieldValue(fieldRecordingMethod);
-      static const auto fieldSyncId = clazz->getField<jni::JString>("syncId");
-      jni::local_ref<jni::JString> syncId = this->getFieldValue(fieldSyncId);
-      static const auto fieldSyncVersion = clazz->getField<jni::JDouble>("syncVersion");
-      jni::local_ref<jni::JDouble> syncVersion = this->getFieldValue(fieldSyncVersion);
+      static const auto fieldWriteMetadata = clazz->getField<JNativeHealthWriteMetadata>("writeMetadata");
+      jni::local_ref<JNativeHealthWriteMetadata> writeMetadata = this->getFieldValue(fieldWriteMetadata);
       return NativeDistanceSampleInput(
         startTimeMs,
         endTimeMs,
         distanceMeters,
         scope->toCpp(),
-        device != nullptr ? std::make_optional(device->toCpp()) : std::nullopt,
-        recordingMethod != nullptr ? std::make_optional(recordingMethod->toCpp()) : std::nullopt,
-        syncId != nullptr ? std::make_optional(syncId->toStdString()) : std::nullopt,
-        syncVersion != nullptr ? std::make_optional(syncVersion->value()) : std::nullopt
+        writeMetadata->toCpp()
       );
     }
 
@@ -74,7 +69,7 @@ namespace margelo::nitro::nitrohealth {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeDistanceSampleInput::javaobject> fromCpp(const NativeDistanceSampleInput& value) {
-      using JSignature = JNativeDistanceSampleInput(double, double, double, jni::alias_ref<JNativeDistanceScope>, jni::alias_ref<JNativeHealthDeviceInfo>, jni::alias_ref<JNativeHealthRecordingMethod>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JDouble>);
+      using JSignature = JNativeDistanceSampleInput(double, double, double, jni::alias_ref<JNativeDistanceScope>, jni::alias_ref<JNativeHealthWriteMetadata>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
@@ -83,10 +78,7 @@ namespace margelo::nitro::nitrohealth {
         value.endTimeMs,
         value.distanceMeters,
         JNativeDistanceScope::fromCpp(value.scope),
-        value.device.has_value() ? JNativeHealthDeviceInfo::fromCpp(value.device.value()) : nullptr,
-        value.recordingMethod.has_value() ? JNativeHealthRecordingMethod::fromCpp(value.recordingMethod.value()) : nullptr,
-        value.syncId.has_value() ? jni::make_jstring(value.syncId.value()) : nullptr,
-        value.syncVersion.has_value() ? jni::JDouble::valueOf(value.syncVersion.value()) : nullptr
+        JNativeHealthWriteMetadata::fromCpp(value.writeMetadata)
       );
     }
   };

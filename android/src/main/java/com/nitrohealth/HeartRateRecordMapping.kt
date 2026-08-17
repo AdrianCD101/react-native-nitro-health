@@ -7,15 +7,12 @@ internal fun makeNativeHeartRateSamples(
     record: HeartRateRecord
 ): Array<NativeHeartRateSample> {
     val recordId = record.metadata.id
-    val origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName)
-    val device = makeNativeHealthDeviceInfo(record.metadata.device)
-    val recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod)
     return record.samples.mapIndexed { index, sample ->
         NativeHeartRateSample(
-            identity = makeRecordChildIdentity(recordId, index),
-            origin = origin,
-            device = device,
-            recordingMethod = recordingMethod,
+            sampleMetadata = makeNativeHealthSampleMetadata(
+                record.metadata,
+                makeRecordChildIdentity(recordId, index)
+            ),
             timeMs = sample.time.toEpochMilli().toDouble(),
             bpm = sample.beatsPerMinute.toDouble()
         )

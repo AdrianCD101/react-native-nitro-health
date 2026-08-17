@@ -26,22 +26,13 @@ data class NativeBodyTemperatureSampleInput(
   val celsius: Double,
   @DoNotStrip
   @Keep
-  val device: NativeHealthDeviceInfo?,
-  @DoNotStrip
-  @Keep
-  val recordingMethod: NativeHealthRecordingMethod?,
+  val writeMetadata: NativeHealthWriteMetadata,
   @DoNotStrip
   @Keep
   val androidMeasurementLocation: NativeAndroidBodyTemperatureMeasurementLocation?,
   @DoNotStrip
   @Keep
-  val iosSensorLocation: NativeIOSBodyTemperatureSensorLocation?,
-  @DoNotStrip
-  @Keep
-  val syncId: String?,
-  @DoNotStrip
-  @Keep
-  val syncVersion: Double?
+  val iosSensorLocation: NativeIOSBodyTemperatureSensorLocation?
 ) {
   /* primary constructor */
 
@@ -50,24 +41,18 @@ data class NativeBodyTemperatureSampleInput(
     if (other !is NativeBodyTemperatureSampleInput) return false
     return Objects.deepEquals(this.timeMs, other.timeMs)
       && Objects.deepEquals(this.celsius, other.celsius)
-      && Objects.deepEquals(this.device, other.device)
-      && Objects.deepEquals(this.recordingMethod, other.recordingMethod)
+      && Objects.deepEquals(this.writeMetadata, other.writeMetadata)
       && Objects.deepEquals(this.androidMeasurementLocation, other.androidMeasurementLocation)
       && Objects.deepEquals(this.iosSensorLocation, other.iosSensorLocation)
-      && Objects.deepEquals(this.syncId, other.syncId)
-      && Objects.deepEquals(this.syncVersion, other.syncVersion)
   }
 
   override fun hashCode(): Int {
     return arrayOf<Any?>(
       timeMs,
       celsius,
-      device,
-      recordingMethod,
+      writeMetadata,
       androidMeasurementLocation,
-      iosSensorLocation,
-      syncId,
-      syncVersion
+      iosSensorLocation
     ).contentDeepHashCode()
   }
 
@@ -79,8 +64,8 @@ data class NativeBodyTemperatureSampleInput(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(timeMs: Double, celsius: Double, device: NativeHealthDeviceInfo?, recordingMethod: NativeHealthRecordingMethod?, androidMeasurementLocation: NativeAndroidBodyTemperatureMeasurementLocation?, iosSensorLocation: NativeIOSBodyTemperatureSensorLocation?, syncId: String?, syncVersion: Double?): NativeBodyTemperatureSampleInput {
-      return NativeBodyTemperatureSampleInput(timeMs, celsius, device, recordingMethod, androidMeasurementLocation, iosSensorLocation, syncId, syncVersion)
+    private fun fromCpp(timeMs: Double, celsius: Double, writeMetadata: NativeHealthWriteMetadata, androidMeasurementLocation: NativeAndroidBodyTemperatureMeasurementLocation?, iosSensorLocation: NativeIOSBodyTemperatureSensorLocation?): NativeBodyTemperatureSampleInput {
+      return NativeBodyTemperatureSampleInput(timeMs, celsius, writeMetadata, androidMeasurementLocation, iosSensorLocation)
     }
   }
 }

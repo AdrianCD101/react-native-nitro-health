@@ -4,19 +4,15 @@ import type {
   NativeBloodGlucoseRelationToMeal,
   NativeBloodGlucoseSpecimenSource,
 } from './NativeBloodGlucoseMetadata'
-import type { NativeHealthDeviceInfo } from './NativeHealthDeviceInfo'
-import type { NativeHealthRecordingMethod } from './NativeHealthRecordingMethod'
+import type { NativeHealthWriteMetadata } from './NativeHealthWriteMetadata'
 
 /** Native blood glucose sample input shape passed through the Nitro spec. */
 export interface NativeBloodGlucoseSampleInput {
   timeMs: number
   millimolesPerLiter: number
-  device?: NativeHealthDeviceInfo
-  recordingMethod?: NativeHealthRecordingMethod
+  writeMetadata: NativeHealthWriteMetadata
   androidSpecimenSource?: NativeBloodGlucoseSpecimenSource
   androidMealType?: NativeBloodGlucoseMealType
   androidRelationToMeal?: NativeBloodGlucoseRelationToMeal
   iosMealTime?: NativeBloodGlucoseMealTime
-  syncId?: string
-  syncVersion?: number
 }

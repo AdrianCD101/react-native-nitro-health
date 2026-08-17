@@ -16,11 +16,9 @@ func makeSleepCategorySamples(
             session.timeZone,
             errorPrefix: "sessions[\(sessionIndex)]"
         )
-        var metadata: [String: Any] = [HKMetadataKeyTimeZone: timeZone.identifier]
-        if let wasUserEntered = session.recordingMethod?.healthKitWasUserEntered {
-            metadata[HKMetadataKeyWasUserEntered] = wasUserEntered
-        }
-        let device = session.device?.healthKitDevice
+        var metadata = session.writeProvenance.healthKitMetadata ?? [:]
+        metadata[HKMetadataKeyTimeZone] = timeZone.identifier
+        let device = session.writeProvenance.healthKitDevice
         let indexedStages = session.stages.enumerated().map { stageIndex, stage in
             (
                 stageIndex: stageIndex,

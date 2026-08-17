@@ -40,24 +40,20 @@ import com.margelo.nitro.NitroModules
 import com.margelo.nitro.core.Promise
 import com.margelo.nitro.nitrohealth.BackgroundDeliveryFrequency
 import com.margelo.nitro.nitrohealth.HybridNitroHealthSpec
-import com.margelo.nitro.nitrohealth.NativeActiveEnergyBurnedSample
 import com.margelo.nitro.nitrohealth.NativeActiveEnergyBurnedSampleInput
 import com.margelo.nitro.nitrohealth.NativeActiveEnergyBurnedSamplePage
 import com.margelo.nitro.nitrohealth.NativeBloodGlucoseSampleInput
 import com.margelo.nitro.nitrohealth.NativeBloodGlucoseSamplePage
 import com.margelo.nitro.nitrohealth.NativeBasalBodyTemperatureSampleInput
 import com.margelo.nitro.nitrohealth.NativeBasalBodyTemperatureSamplePage
-import com.margelo.nitro.nitrohealth.NativeBodyFatSample
 import com.margelo.nitro.nitrohealth.NativeBodyFatSampleInput
 import com.margelo.nitro.nitrohealth.NativeBodyFatSamplePage
 import com.margelo.nitro.nitrohealth.NativeBodyTemperatureSampleInput
 import com.margelo.nitro.nitrohealth.NativeBodyTemperatureSamplePage
 import com.margelo.nitro.nitrohealth.NativeBloodPressureSampleInput
 import com.margelo.nitro.nitrohealth.NativeBloodPressureSamplePage
-import com.margelo.nitro.nitrohealth.NativeBodyMassSample
 import com.margelo.nitro.nitrohealth.NativeBodyMassSampleInput
 import com.margelo.nitro.nitrohealth.NativeBodyMassSamplePage
-import com.margelo.nitro.nitrohealth.NativeDistanceSample
 import com.margelo.nitro.nitrohealth.NativeDistanceSampleInput
 import com.margelo.nitro.nitrohealth.NativeDistanceSamplePage
 import com.margelo.nitro.nitrohealth.NativeDistanceScope
@@ -65,7 +61,6 @@ import com.margelo.nitro.nitrohealth.NativeDistanceWriteResult
 import com.margelo.nitro.nitrohealth.NativeBackgroundChangesMode
 import com.margelo.nitro.nitrohealth.NativeBackgroundChangesResult
 import com.margelo.nitro.nitrohealth.NativeBackgroundChangesResultStatus
-import com.margelo.nitro.nitrohealth.NativeFloorsClimbedSample
 import com.margelo.nitro.nitrohealth.NativeFloorsClimbedSampleInput
 import com.margelo.nitro.nitrohealth.NativeFloorsClimbedSamplePage
 import com.margelo.nitro.nitrohealth.NativeHealthAdditionalAccessStatus
@@ -87,34 +82,26 @@ import com.margelo.nitro.nitrohealth.NativeHealthWriteResult
 import com.margelo.nitro.nitrohealth.NativeHeartRateSampleInput
 import com.margelo.nitro.nitrohealth.NativeHeartRateSamplePage
 import com.margelo.nitro.nitrohealth.NativeHeartRateStatistics
-import com.margelo.nitro.nitrohealth.NativeHeartRateVariabilitySample
 import com.margelo.nitro.nitrohealth.NativeHeartRateVariabilitySamplePage
-import com.margelo.nitro.nitrohealth.NativeHeightSample
-import com.margelo.nitro.nitrohealth.NativeLeanBodyMassSample
 import com.margelo.nitro.nitrohealth.NativeLeanBodyMassSampleInput
 import com.margelo.nitro.nitrohealth.NativeLeanBodyMassSamplePage
 import com.margelo.nitro.nitrohealth.NativeHeightSampleInput
 import com.margelo.nitro.nitrohealth.NativeHeightSamplePage
-import com.margelo.nitro.nitrohealth.NativeHydrationSample
 import com.margelo.nitro.nitrohealth.NativeHydrationSampleInput
 import com.margelo.nitro.nitrohealth.NativeHydrationSamplePage
-import com.margelo.nitro.nitrohealth.NativeOxygenSaturationSample
 import com.margelo.nitro.nitrohealth.NativeOxygenSaturationSampleInput
 import com.margelo.nitro.nitrohealth.NativeOxygenSaturationSamplePage
 import com.margelo.nitro.nitrohealth.NativePermissionActionKind
 import com.margelo.nitro.nitrohealth.NativePermissionDestination
 import com.margelo.nitro.nitrohealth.NativePermissionWorkflowResult
 import com.margelo.nitro.nitrohealth.NativePermissionWorkflowStatus
-import com.margelo.nitro.nitrohealth.NativeRespiratoryRateSample
 import com.margelo.nitro.nitrohealth.NativeRespiratoryRateSampleInput
 import com.margelo.nitro.nitrohealth.NativeRespiratoryRateSamplePage
-import com.margelo.nitro.nitrohealth.NativeRestingHeartRateSample
 import com.margelo.nitro.nitrohealth.NativeRestingHeartRateSampleInput
 import com.margelo.nitro.nitrohealth.NativeRestingHeartRateSamplePage
 import com.margelo.nitro.nitrohealth.NativeSleepSessionInput
 import com.margelo.nitro.nitrohealth.NativeSleepSample
 import com.margelo.nitro.nitrohealth.NativeSleepSamplePage
-import com.margelo.nitro.nitrohealth.NativeStepSample
 import com.margelo.nitro.nitrohealth.NativeStepSampleInput
 import com.margelo.nitro.nitrohealth.NativeStepSamplePage
 import com.margelo.nitro.nitrohealth.NativeVo2MaxSampleInput
@@ -395,17 +382,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             val response = client.readRecords(request)
 
             NativeStepSamplePage(
-                samples = response.records.map { record ->
-                    NativeStepSample(
-                        identity = makeRecordIdentity(record.metadata.id),
-                        origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
-                        device = makeNativeHealthDeviceInfo(record.metadata.device),
-                        recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
-                        startTimeMs = record.startTime.toEpochMilli().toDouble(),
-                        endTimeMs = record.endTime.toEpochMilli().toDouble(),
-                        count = record.count.toDouble()
-                    )
-                }.toTypedArray(),
+                samples = response.records.map(::makeNativeStepSample).toTypedArray(),
                 nextCursor = response.pageToken?.let { encodeSampleCursor("steps", query, it) }
             )
         }
@@ -436,18 +413,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             val response = client.readRecords(request)
 
             NativeDistanceSamplePage(
-                samples = response.records.map { record ->
-                    NativeDistanceSample(
-                        identity = makeRecordIdentity(record.metadata.id),
-                        origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
-                        device = makeNativeHealthDeviceInfo(record.metadata.device),
-                        recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
-                        startTimeMs = record.startTime.toEpochMilli().toDouble(),
-                        endTimeMs = record.endTime.toEpochMilli().toDouble(),
-                        distanceMeters = record.distance.inMeters,
-                        scope = NativeDistanceScope.ACTIVITYUNSPECIFIED
-                    )
-                }.toTypedArray(),
+                samples = response.records.map(::makeNativeDistanceSample).toTypedArray(),
                 nextCursor = response.pageToken?.let { encodeSampleCursor("distance", query, it) }
             )
         }
@@ -478,17 +444,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             val response = client.readRecords(request)
 
             NativeActiveEnergyBurnedSamplePage(
-                samples = response.records.map { record ->
-                    NativeActiveEnergyBurnedSample(
-                        identity = makeRecordIdentity(record.metadata.id),
-                        origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
-                        device = makeNativeHealthDeviceInfo(record.metadata.device),
-                        recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
-                        startTimeMs = record.startTime.toEpochMilli().toDouble(),
-                        endTimeMs = record.endTime.toEpochMilli().toDouble(),
-                        kilocalories = record.energy.inKilocalories
-                    )
-                }.toTypedArray(),
+                samples = response.records.map(::makeNativeActiveEnergyBurnedSample).toTypedArray(),
                 nextCursor = response.pageToken?.let { encodeSampleCursor("activeEnergyBurned", query, it) }
             )
         }
@@ -519,17 +475,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             val response = client.readRecords(request)
 
             NativeHydrationSamplePage(
-                samples = response.records.map { record ->
-                    NativeHydrationSample(
-                        identity = makeRecordIdentity(record.metadata.id),
-                        origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
-                        device = makeNativeHealthDeviceInfo(record.metadata.device),
-                        recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
-                        startTimeMs = record.startTime.toEpochMilli().toDouble(),
-                        endTimeMs = record.endTime.toEpochMilli().toDouble(),
-                        milliliters = record.volume.inMilliliters
-                    )
-                }.toTypedArray(),
+                samples = response.records.map(::makeNativeHydrationSample).toTypedArray(),
                 nextCursor = response.pageToken?.let { encodeSampleCursor("hydration", query, it) }
             )
         }
@@ -560,17 +506,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             val response = client.readRecords(request)
 
             NativeFloorsClimbedSamplePage(
-                samples = response.records.map { record ->
-                    NativeFloorsClimbedSample(
-                        identity = makeRecordIdentity(record.metadata.id),
-                        origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
-                        device = makeNativeHealthDeviceInfo(record.metadata.device),
-                        recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
-                        startTimeMs = record.startTime.toEpochMilli().toDouble(),
-                        endTimeMs = record.endTime.toEpochMilli().toDouble(),
-                        floors = record.floors
-                    )
-                }.toTypedArray(),
+                samples = response.records.map(::makeNativeFloorsClimbedSample).toTypedArray(),
                 nextCursor = response.pageToken?.let { encodeSampleCursor("floorsClimbed", query, it) }
             )
         }
@@ -627,17 +563,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         return Promise.async {
             val response = readInstantRecords<WeightRecord>("bodyMass", query)
             NativeBodyMassSamplePage(
-                samples = response.records.map { record ->
-                    NativeBodyMassSample(
-                        identity = makeRecordIdentity(record.metadata.id),
-                        origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
-                        device = makeNativeHealthDeviceInfo(record.metadata.device),
-                        recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
-                        startTimeMs = record.time.toEpochMilli().toDouble(),
-                        endTimeMs = record.time.toEpochMilli().toDouble(),
-                        kilograms = record.weight.inKilograms
-                    )
-                }.toTypedArray(),
+                samples = response.records.map(::makeNativeBodyMassSample).toTypedArray(),
                 nextCursor = response.pageToken?.let { encodeSampleCursor("bodyMass", query, it) }
             )
         }
@@ -723,16 +649,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         return Promise.async {
             val response = readInstantRecords<RespiratoryRateRecord>("respiratoryRate", query)
             NativeRespiratoryRateSamplePage(
-                samples = response.records.map { record ->
-                    NativeRespiratoryRateSample(
-                        identity = makeRecordIdentity(record.metadata.id),
-                        origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
-                        device = makeNativeHealthDeviceInfo(record.metadata.device),
-                        recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
-                        timeMs = record.time.toEpochMilli().toDouble(),
-                        breathsPerMinute = record.rate
-                    )
-                }.toTypedArray(),
+                samples = response.records.map(::makeNativeRespiratoryRateSample).toTypedArray(),
                 nextCursor = response.pageToken?.let { encodeSampleCursor("respiratoryRate", query, it) }
             )
         }
@@ -744,16 +661,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         return Promise.async {
             val response = readInstantRecords<BodyFatRecord>("bodyFat", query)
             NativeBodyFatSamplePage(
-                samples = response.records.map { record ->
-                    NativeBodyFatSample(
-                        identity = makeRecordIdentity(record.metadata.id),
-                        origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
-                        device = makeNativeHealthDeviceInfo(record.metadata.device),
-                        recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
-                        timeMs = record.time.toEpochMilli().toDouble(),
-                        percentage = record.percentage.value
-                    )
-                }.toTypedArray(),
+                samples = response.records.map(::makeNativeBodyFatSample).toTypedArray(),
                 nextCursor = response.pageToken?.let { encodeSampleCursor("bodyFat", query, it) }
             )
         }
@@ -765,16 +673,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         return Promise.async {
             val response = readInstantRecords<LeanBodyMassRecord>("leanBodyMass", query)
             NativeLeanBodyMassSamplePage(
-                samples = response.records.map { record ->
-                    NativeLeanBodyMassSample(
-                        identity = makeRecordIdentity(record.metadata.id),
-                        origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
-                        device = makeNativeHealthDeviceInfo(record.metadata.device),
-                        recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
-                        timeMs = record.time.toEpochMilli().toDouble(),
-                        kilograms = record.mass.inKilograms
-                    )
-                }.toTypedArray(),
+                samples = response.records.map(::makeNativeLeanBodyMassSample).toTypedArray(),
                 nextCursor = response.pageToken?.let { encodeSampleCursor("leanBodyMass", query, it) }
             )
         }
@@ -798,16 +697,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         return Promise.async {
             val response = readInstantRecords<RestingHeartRateRecord>("restingHeartRate", query)
             NativeRestingHeartRateSamplePage(
-                samples = response.records.map { record ->
-                    NativeRestingHeartRateSample(
-                        identity = makeRecordIdentity(record.metadata.id),
-                        origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
-                        device = makeNativeHealthDeviceInfo(record.metadata.device),
-                        recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
-                        timeMs = record.time.toEpochMilli().toDouble(),
-                        bpm = record.beatsPerMinute.toDouble()
-                    )
-                }.toTypedArray(),
+                samples = response.records.map(::makeNativeRestingHeartRateSample).toTypedArray(),
                 nextCursor = response.pageToken?.let { encodeSampleCursor("restingHeartRate", query, it) }
             )
         }
@@ -819,17 +709,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         return Promise.async {
             val response = readInstantRecords<HeartRateVariabilityRmssdRecord>("heartRateVariability", query)
             NativeHeartRateVariabilitySamplePage(
-                samples = response.records.map { record ->
-                    NativeHeartRateVariabilitySample(
-                        identity = makeRecordIdentity(record.metadata.id),
-                        origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
-                        device = makeNativeHealthDeviceInfo(record.metadata.device),
-                        recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
-                        timeMs = record.time.toEpochMilli().toDouble(),
-                        milliseconds = record.heartRateVariabilityMillis,
-                        method = "rmssd"
-                    )
-                }.toTypedArray(),
+                samples = response.records.map(::makeNativeHeartRateVariabilitySample).toTypedArray(),
                 nextCursor = response.pageToken?.let { encodeSampleCursor("heartRateVariability", query, it) }
             )
         }
@@ -841,16 +721,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         return Promise.async {
             val response = readInstantRecords<OxygenSaturationRecord>("oxygenSaturation", query)
             NativeOxygenSaturationSamplePage(
-                samples = response.records.map { record ->
-                    NativeOxygenSaturationSample(
-                        identity = makeRecordIdentity(record.metadata.id),
-                        origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
-                        device = makeNativeHealthDeviceInfo(record.metadata.device),
-                        recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
-                        timeMs = record.time.toEpochMilli().toDouble(),
-                        percentage = record.percentage.value
-                    )
-                }.toTypedArray(),
+                samples = response.records.map(::makeNativeOxygenSaturationSample).toTypedArray(),
                 nextCursor = response.pageToken?.let { encodeSampleCursor("oxygenSaturation", query, it) }
             )
         }
@@ -860,16 +731,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         return Promise.async {
             val response = readInstantRecords<HeightRecord>("height", query)
             NativeHeightSamplePage(
-                samples = response.records.map { record ->
-                    NativeHeightSample(
-                        identity = makeRecordIdentity(record.metadata.id),
-                        origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
-                        device = makeNativeHealthDeviceInfo(record.metadata.device),
-                        recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
-                        timeMs = record.time.toEpochMilli().toDouble(),
-                        meters = record.height.inMeters
-                    )
-                }.toTypedArray(),
+                samples = response.records.map(::makeNativeHeightSample).toTypedArray(),
                 nextCursor = response.pageToken?.let { encodeSampleCursor("height", query, it) }
             )
         }
@@ -1058,11 +920,11 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                 makeNativeSleepSamples(record).asIterable()
             }
             val ordered = if (query.ascending) {
-                samples.sortedWith(compareBy({ it.startTimeMs }, { it.identity.id }))
+                samples.sortedWith(compareBy({ it.startTimeMs }, { it.sampleMetadata.identityId }))
             } else {
                 samples.sortedWith(compareByDescending<NativeSleepSample> {
                     it.startTimeMs
-                }.thenByDescending { it.identity.id })
+                }.thenByDescending { it.sampleMetadata.identityId })
             }
 
             NativeSleepSamplePage(

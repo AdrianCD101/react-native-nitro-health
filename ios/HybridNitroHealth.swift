@@ -38,15 +38,7 @@ class HybridNitroHealth: HybridNitroHealthSpec {
                     return nil
                 }
 
-                return NativeStepSample(
-                    identity: quantitySample.nativeHealthSampleIdentity,
-                    origin: quantitySample.nativeHealthDataOrigin,
-                    device: quantitySample.nativeHealthDeviceInfo,
-                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
-                    startTimeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
-                    endTimeMs: quantitySample.endDate.timeIntervalSince1970 * 1000,
-                    count: quantitySample.quantity.doubleValue(for: HKUnit.count())
-                )
+                return quantitySample.nativeStepSample
             }
 
             return NativeStepSamplePage(samples: page.samples, nextCursor: page.nextCursor)
@@ -72,16 +64,7 @@ class HybridNitroHealth: HybridNitroHealthSpec {
                     return nil
                 }
 
-                return NativeDistanceSample(
-                    identity: quantitySample.nativeHealthSampleIdentity,
-                    origin: quantitySample.nativeHealthDataOrigin,
-                    device: quantitySample.nativeHealthDeviceInfo,
-                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
-                    startTimeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
-                    endTimeMs: quantitySample.endDate.timeIntervalSince1970 * 1000,
-                    distanceMeters: quantitySample.quantity.doubleValue(for: HKUnit.meter()),
-                    scope: .walkingrunning
-                )
+                return quantitySample.nativeDistanceSample
             }
 
             return NativeDistanceSamplePage(samples: page.samples, nextCursor: page.nextCursor)
@@ -107,15 +90,7 @@ class HybridNitroHealth: HybridNitroHealthSpec {
                     return nil
                 }
 
-                return NativeActiveEnergyBurnedSample(
-                    identity: quantitySample.nativeHealthSampleIdentity,
-                    origin: quantitySample.nativeHealthDataOrigin,
-                    device: quantitySample.nativeHealthDeviceInfo,
-                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
-                    startTimeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
-                    endTimeMs: quantitySample.endDate.timeIntervalSince1970 * 1000,
-                    kilocalories: quantitySample.quantity.doubleValue(for: HKUnit.kilocalorie())
-                )
+                return quantitySample.nativeActiveEnergyBurnedSample
             }
 
             return NativeActiveEnergyBurnedSamplePage(samples: page.samples, nextCursor: page.nextCursor)
@@ -129,8 +104,6 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         }
 
         let quantityType = try makeHealthKitQuantityType(dataType: "hydration")
-        let unit = HKUnit.literUnit(with: .milli)
-
         return Promise<NativeHydrationSamplePage>.async {
             let page = try await self.queryPagedSamples(
                 sampleType: quantityType,
@@ -142,15 +115,7 @@ class HybridNitroHealth: HybridNitroHealthSpec {
                     return nil
                 }
 
-                return NativeHydrationSample(
-                    identity: quantitySample.nativeHealthSampleIdentity,
-                    origin: quantitySample.nativeHealthDataOrigin,
-                    device: quantitySample.nativeHealthDeviceInfo,
-                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
-                    startTimeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
-                    endTimeMs: quantitySample.endDate.timeIntervalSince1970 * 1000,
-                    milliliters: quantitySample.quantity.doubleValue(for: unit)
-                )
+                return quantitySample.nativeHydrationSample
             }
 
             return NativeHydrationSamplePage(samples: page.samples, nextCursor: page.nextCursor)
@@ -176,15 +141,7 @@ class HybridNitroHealth: HybridNitroHealthSpec {
                     return nil
                 }
 
-                return NativeFloorsClimbedSample(
-                    identity: quantitySample.nativeHealthSampleIdentity,
-                    origin: quantitySample.nativeHealthDataOrigin,
-                    device: quantitySample.nativeHealthDeviceInfo,
-                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
-                    startTimeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
-                    endTimeMs: quantitySample.endDate.timeIntervalSince1970 * 1000,
-                    floors: quantitySample.quantity.doubleValue(for: HKUnit.count())
-                )
+                return quantitySample.nativeFloorsClimbedSample
             }
 
             return NativeFloorsClimbedSamplePage(samples: page.samples, nextCursor: page.nextCursor)
@@ -199,8 +156,6 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         }
 
         let quantityType = try makeHealthKitQuantityType(dataType: "heartRate")
-        let bpmUnit = HKUnit.count().unitDivided(by: HKUnit.minute())
-
         return Promise<NativeHeartRateSamplePage>.async {
             let page = try await self.queryPagedSamples(
                 sampleType: quantityType,
@@ -212,14 +167,7 @@ class HybridNitroHealth: HybridNitroHealthSpec {
                     return nil
                 }
 
-                return NativeHeartRateSample(
-                    identity: quantitySample.nativeHealthSampleIdentity,
-                    origin: quantitySample.nativeHealthDataOrigin,
-                    device: quantitySample.nativeHealthDeviceInfo,
-                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
-                    timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
-                    bpm: quantitySample.quantity.doubleValue(for: bpmUnit)
-                )
+                return quantitySample.nativeHeartRateSample
             }
 
             return NativeHeartRateSamplePage(samples: page.samples, nextCursor: page.nextCursor)
@@ -233,16 +181,8 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         }
 
         return Promise<NativeBodyMassSamplePage>.async {
-            let page = try await self.readInstantQuantitySamplePage(dataType: "bodyMass", query: query) { quantitySample, unit in
-                NativeBodyMassSample(
-                    identity: quantitySample.nativeHealthSampleIdentity,
-                    origin: quantitySample.nativeHealthDataOrigin,
-                    device: quantitySample.nativeHealthDeviceInfo,
-                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
-                    startTimeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
-                    endTimeMs: quantitySample.endDate.timeIntervalSince1970 * 1000,
-                    kilograms: quantitySample.quantity.doubleValue(for: unit)
-                )
+            let page = try await self.readInstantQuantitySamplePage(dataType: "bodyMass", query: query) { quantitySample in
+                quantitySample.nativeBodyMassSample
             }
 
             return NativeBodyMassSamplePage(samples: page.samples, nextCursor: page.nextCursor)

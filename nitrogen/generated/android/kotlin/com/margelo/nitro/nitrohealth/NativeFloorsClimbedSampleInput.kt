@@ -29,16 +29,7 @@ data class NativeFloorsClimbedSampleInput(
   val floors: Double,
   @DoNotStrip
   @Keep
-  val device: NativeHealthDeviceInfo?,
-  @DoNotStrip
-  @Keep
-  val recordingMethod: NativeHealthRecordingMethod?,
-  @DoNotStrip
-  @Keep
-  val syncId: String?,
-  @DoNotStrip
-  @Keep
-  val syncVersion: Double?
+  val writeMetadata: NativeHealthWriteMetadata
 ) {
   /* primary constructor */
 
@@ -48,10 +39,7 @@ data class NativeFloorsClimbedSampleInput(
     return Objects.deepEquals(this.startTimeMs, other.startTimeMs)
       && Objects.deepEquals(this.endTimeMs, other.endTimeMs)
       && Objects.deepEquals(this.floors, other.floors)
-      && Objects.deepEquals(this.device, other.device)
-      && Objects.deepEquals(this.recordingMethod, other.recordingMethod)
-      && Objects.deepEquals(this.syncId, other.syncId)
-      && Objects.deepEquals(this.syncVersion, other.syncVersion)
+      && Objects.deepEquals(this.writeMetadata, other.writeMetadata)
   }
 
   override fun hashCode(): Int {
@@ -59,10 +47,7 @@ data class NativeFloorsClimbedSampleInput(
       startTimeMs,
       endTimeMs,
       floors,
-      device,
-      recordingMethod,
-      syncId,
-      syncVersion
+      writeMetadata
     ).contentDeepHashCode()
   }
 
@@ -74,8 +59,8 @@ data class NativeFloorsClimbedSampleInput(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(startTimeMs: Double, endTimeMs: Double, floors: Double, device: NativeHealthDeviceInfo?, recordingMethod: NativeHealthRecordingMethod?, syncId: String?, syncVersion: Double?): NativeFloorsClimbedSampleInput {
-      return NativeFloorsClimbedSampleInput(startTimeMs, endTimeMs, floors, device, recordingMethod, syncId, syncVersion)
+    private fun fromCpp(startTimeMs: Double, endTimeMs: Double, floors: Double, writeMetadata: NativeHealthWriteMetadata): NativeFloorsClimbedSampleInput {
+      return NativeFloorsClimbedSampleInput(startTimeMs, endTimeMs, floors, writeMetadata)
     }
   }
 }

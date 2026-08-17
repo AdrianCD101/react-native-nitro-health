@@ -20,11 +20,6 @@ internal fun toExerciseSessionRecord(workout: NativeWorkoutSampleInput): Exercis
         endZoneOffset = zoneId.rules.getOffset(endTime),
         exerciseType = toHealthConnectWorkoutActivityType(workout.activityType),
         title = workout.displayName,
-        metadata = makeSampleMetadata(
-            workout.syncId,
-            workout.syncVersion,
-            workout.recordingMethod,
-            workout.device
-        )
+        metadata = makeSampleMetadata(workout.writeMetadata)
     )
 }

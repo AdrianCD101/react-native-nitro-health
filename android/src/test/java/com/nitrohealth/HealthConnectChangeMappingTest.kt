@@ -32,9 +32,12 @@ class HealthConnectChangeMappingTest {
         val change = makeNativeHealthChange(UpsertionChange(record), "steps", StepsRecord::class)
 
         val sample = change.stepSamples!!.single()
-        assertEquals(NativeHealthRecordingMethod.AUTOMATICALLYRECORDED, sample.recordingMethod)
-        assertEquals(NativeHealthDeviceType.PHONE, sample.device!!.type)
-        assertEquals("Example Manufacturer", sample.device.manufacturer)
-        assertEquals("Example Model", sample.device.model)
+        assertEquals(
+            NativeHealthRecordingMethod.AUTOMATICALLYRECORDED,
+            sample.sampleMetadata.recordingMethod
+        )
+        assertEquals(NativeHealthDeviceType.PHONE, sample.sampleMetadata.deviceType)
+        assertEquals("Example Manufacturer", sample.sampleMetadata.deviceManufacturer)
+        assertEquals("Example Model", sample.sampleMetadata.deviceModel)
     }
 }

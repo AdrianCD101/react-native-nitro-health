@@ -114,14 +114,10 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthCapabilities; }
 namespace margelo::nitro::nitrohealth { struct NativeHealthChange; }
 // Forward declaration of `NativeHealthChangesResult` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthChangesResult; }
-// Forward declaration of `NativeHealthDataOrigin` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeHealthDataOrigin; }
 // Forward declaration of `NativeHealthDeleteResult` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthDeleteResult; }
 // Forward declaration of `NativeHealthDeleteStatus` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class NativeHealthDeleteStatus; }
-// Forward declaration of `NativeHealthDeviceInfo` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeHealthDeviceInfo; }
 // Forward declaration of `NativeHealthDeviceType` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class NativeHealthDeviceType; }
 // Forward declaration of `NativeHealthMetricValueStatus` to properly resolve imports.
@@ -138,10 +134,16 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthPermission; }
 namespace margelo::nitro::nitrohealth { enum class NativeHealthRecordingMethod; }
 // Forward declaration of `NativeHealthSampleIdentityKind` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class NativeHealthSampleIdentityKind; }
-// Forward declaration of `NativeHealthSampleIdentity` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeHealthSampleIdentity; }
+// Forward declaration of `NativeHealthSampleMetadata` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthSampleMetadata; }
 // Forward declaration of `NativeHealthStatistics` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthStatistics; }
+// Forward declaration of `NativeHealthSyncMetadata` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthSyncMetadata; }
+// Forward declaration of `NativeHealthWriteMetadata` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthWriteMetadata; }
+// Forward declaration of `NativeHealthWriteProvenance` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthWriteProvenance; }
 // Forward declaration of `NativeHealthWriteResult` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthWriteResult; }
 // Forward declaration of `NativeHeartRateSampleInput` to properly resolve imports.
@@ -299,10 +301,8 @@ namespace NitroHealth { class HybridNitroHealthSpec_cxx; }
 #include "NativeHealthCapabilities.hpp"
 #include "NativeHealthChange.hpp"
 #include "NativeHealthChangesResult.hpp"
-#include "NativeHealthDataOrigin.hpp"
 #include "NativeHealthDeleteResult.hpp"
 #include "NativeHealthDeleteStatus.hpp"
-#include "NativeHealthDeviceInfo.hpp"
 #include "NativeHealthDeviceType.hpp"
 #include "NativeHealthMetricValue.hpp"
 #include "NativeHealthMetricValueStatus.hpp"
@@ -310,9 +310,12 @@ namespace NitroHealth { class HybridNitroHealthSpec_cxx; }
 #include "NativeHealthPermissionStatusEntry.hpp"
 #include "NativeHealthPermissionStatusResult.hpp"
 #include "NativeHealthRecordingMethod.hpp"
-#include "NativeHealthSampleIdentity.hpp"
 #include "NativeHealthSampleIdentityKind.hpp"
+#include "NativeHealthSampleMetadata.hpp"
 #include "NativeHealthStatistics.hpp"
+#include "NativeHealthSyncMetadata.hpp"
+#include "NativeHealthWriteMetadata.hpp"
+#include "NativeHealthWriteProvenance.hpp"
 #include "NativeHealthWriteResult.hpp"
 #include "NativeHeartRateSample.hpp"
 #include "NativeHeartRateSampleInput.hpp"
@@ -754,21 +757,6 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return optional.has_value();
   }
   inline NativeHealthDeviceType get_std__optional_NativeHealthDeviceType_(const std::optional<NativeHealthDeviceType>& optional) noexcept {
-    return optional.value();
-  }
-  
-  // pragma MARK: std::optional<NativeHealthDeviceInfo>
-  /**
-   * Specialized version of `std::optional<NativeHealthDeviceInfo>`.
-   */
-  using std__optional_NativeHealthDeviceInfo_ = std::optional<NativeHealthDeviceInfo>;
-  inline std::optional<NativeHealthDeviceInfo> create_std__optional_NativeHealthDeviceInfo_(const NativeHealthDeviceInfo& value) noexcept {
-    return std::optional<NativeHealthDeviceInfo>(value);
-  }
-  inline bool has_value_std__optional_NativeHealthDeviceInfo_(const std::optional<NativeHealthDeviceInfo>& optional) noexcept {
-    return optional.has_value();
-  }
-  inline NativeHealthDeviceInfo get_std__optional_NativeHealthDeviceInfo_(const std::optional<NativeHealthDeviceInfo>& optional) noexcept {
     return optional.value();
   }
   
@@ -2475,6 +2463,21 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return optional.has_value();
   }
   inline NativeHealthRecordingMethod get_std__optional_NativeHealthRecordingMethod_(const std::optional<NativeHealthRecordingMethod>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::optional<NativeHealthSyncMetadata>
+  /**
+   * Specialized version of `std::optional<NativeHealthSyncMetadata>`.
+   */
+  using std__optional_NativeHealthSyncMetadata_ = std::optional<NativeHealthSyncMetadata>;
+  inline std::optional<NativeHealthSyncMetadata> create_std__optional_NativeHealthSyncMetadata_(const NativeHealthSyncMetadata& value) noexcept {
+    return std::optional<NativeHealthSyncMetadata>(value);
+  }
+  inline bool has_value_std__optional_NativeHealthSyncMetadata_(const std::optional<NativeHealthSyncMetadata>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline NativeHealthSyncMetadata get_std__optional_NativeHealthSyncMetadata_(const std::optional<NativeHealthSyncMetadata>& optional) noexcept {
     return optional.value();
   }
   

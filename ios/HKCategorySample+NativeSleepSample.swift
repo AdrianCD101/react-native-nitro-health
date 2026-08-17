@@ -7,10 +7,7 @@ extension HKCategorySample {
         switch interval {
         case .stage(let stage):
             return NativeSleepSample(
-                identity: nativeHealthSampleIdentity,
-                origin: nativeHealthDataOrigin,
-                device: nativeHealthDeviceInfo,
-                recordingMethod: nativeHealthRecordingMethod,
+                sampleMetadata: nativeHealthSampleMetadata,
                 kind: .stage,
                 startTimeMs: startDate.timeIntervalSince1970 * 1000,
                 endTimeMs: endDate.timeIntervalSince1970 * 1000,

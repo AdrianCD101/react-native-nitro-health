@@ -28,25 +28,16 @@
 #error NitroModules cannot be found! Are you sure you installed NitroModules properly?
 #endif
 
-// Forward declaration of `NativeHealthSampleIdentity` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeHealthSampleIdentity; }
-// Forward declaration of `NativeHealthDataOrigin` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeHealthDataOrigin; }
-// Forward declaration of `NativeHealthDeviceInfo` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeHealthDeviceInfo; }
-// Forward declaration of `NativeHealthRecordingMethod` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { enum class NativeHealthRecordingMethod; }
+// Forward declaration of `NativeHealthSampleMetadata` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthSampleMetadata; }
 // Forward declaration of `NativeBloodPressureBodyPosition` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class NativeBloodPressureBodyPosition; }
 // Forward declaration of `NativeBloodPressureMeasurementLocation` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class NativeBloodPressureMeasurementLocation; }
 
-#include "NativeHealthSampleIdentity.hpp"
-#include "NativeHealthDataOrigin.hpp"
-#include "NativeHealthDeviceInfo.hpp"
-#include <optional>
-#include "NativeHealthRecordingMethod.hpp"
+#include "NativeHealthSampleMetadata.hpp"
 #include "NativeBloodPressureBodyPosition.hpp"
+#include <optional>
 #include "NativeBloodPressureMeasurementLocation.hpp"
 
 namespace margelo::nitro::nitrohealth {
@@ -56,10 +47,7 @@ namespace margelo::nitro::nitrohealth {
    */
   struct NativeBloodPressureSample final {
   public:
-    NativeHealthSampleIdentity identity     SWIFT_PRIVATE;
-    NativeHealthDataOrigin origin     SWIFT_PRIVATE;
-    std::optional<NativeHealthDeviceInfo> device     SWIFT_PRIVATE;
-    NativeHealthRecordingMethod recordingMethod     SWIFT_PRIVATE;
+    NativeHealthSampleMetadata sampleMetadata     SWIFT_PRIVATE;
     double timeMs     SWIFT_PRIVATE;
     double systolicMmHg     SWIFT_PRIVATE;
     double diastolicMmHg     SWIFT_PRIVATE;
@@ -68,7 +56,7 @@ namespace margelo::nitro::nitrohealth {
 
   public:
     NativeBloodPressureSample() = default;
-    explicit NativeBloodPressureSample(NativeHealthSampleIdentity identity, NativeHealthDataOrigin origin, std::optional<NativeHealthDeviceInfo> device, NativeHealthRecordingMethod recordingMethod, double timeMs, double systolicMmHg, double diastolicMmHg, std::optional<NativeBloodPressureBodyPosition> androidBodyPosition, std::optional<NativeBloodPressureMeasurementLocation> androidMeasurementLocation): identity(identity), origin(origin), device(device), recordingMethod(recordingMethod), timeMs(timeMs), systolicMmHg(systolicMmHg), diastolicMmHg(diastolicMmHg), androidBodyPosition(androidBodyPosition), androidMeasurementLocation(androidMeasurementLocation) {}
+    explicit NativeBloodPressureSample(NativeHealthSampleMetadata sampleMetadata, double timeMs, double systolicMmHg, double diastolicMmHg, std::optional<NativeBloodPressureBodyPosition> androidBodyPosition, std::optional<NativeBloodPressureMeasurementLocation> androidMeasurementLocation): sampleMetadata(sampleMetadata), timeMs(timeMs), systolicMmHg(systolicMmHg), diastolicMmHg(diastolicMmHg), androidBodyPosition(androidBodyPosition), androidMeasurementLocation(androidMeasurementLocation) {}
 
   public:
     friend bool operator==(const NativeBloodPressureSample& lhs, const NativeBloodPressureSample& rhs) = default;
@@ -84,10 +72,7 @@ namespace margelo::nitro {
     static inline margelo::nitro::nitrohealth::NativeBloodPressureSample fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       jsi::Object obj = arg.asObject(runtime);
       return margelo::nitro::nitrohealth::NativeBloodPressureSample(
-        JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleIdentity>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "identity"))),
-        JSIConverter<margelo::nitro::nitrohealth::NativeHealthDataOrigin>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "origin"))),
-        JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeHealthDeviceInfo>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "device"))),
-        JSIConverter<margelo::nitro::nitrohealth::NativeHealthRecordingMethod>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "recordingMethod"))),
+        JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleMetadata>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "sampleMetadata"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeMs"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "systolicMmHg"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "diastolicMmHg"))),
@@ -97,10 +82,7 @@ namespace margelo::nitro {
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::nitrohealth::NativeBloodPressureSample& arg) {
       jsi::Object obj(runtime);
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "identity"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleIdentity>::toJSI(runtime, arg.identity));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "origin"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthDataOrigin>::toJSI(runtime, arg.origin));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "device"), JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeHealthDeviceInfo>>::toJSI(runtime, arg.device));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "recordingMethod"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthRecordingMethod>::toJSI(runtime, arg.recordingMethod));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "sampleMetadata"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleMetadata>::toJSI(runtime, arg.sampleMetadata));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "timeMs"), JSIConverter<double>::toJSI(runtime, arg.timeMs));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "systolicMmHg"), JSIConverter<double>::toJSI(runtime, arg.systolicMmHg));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "diastolicMmHg"), JSIConverter<double>::toJSI(runtime, arg.diastolicMmHg));
@@ -116,10 +98,7 @@ namespace margelo::nitro {
       if (!nitro::isPlainObject(runtime, obj)) {
         return false;
       }
-      if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleIdentity>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "identity")))) return false;
-      if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthDataOrigin>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "origin")))) return false;
-      if (!JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeHealthDeviceInfo>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "device")))) return false;
-      if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthRecordingMethod>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "recordingMethod")))) return false;
+      if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleMetadata>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "sampleMetadata")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeMs")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "systolicMmHg")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "diastolicMmHg")))) return false;

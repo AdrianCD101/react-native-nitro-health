@@ -10,19 +10,15 @@
 #include <fbjni/fbjni.h>
 #include "NativeHeightSamplePage.hpp"
 
-#include "JNativeHealthDataOrigin.hpp"
-#include "JNativeHealthDeviceInfo.hpp"
 #include "JNativeHealthDeviceType.hpp"
 #include "JNativeHealthRecordingMethod.hpp"
-#include "JNativeHealthSampleIdentity.hpp"
 #include "JNativeHealthSampleIdentityKind.hpp"
+#include "JNativeHealthSampleMetadata.hpp"
 #include "JNativeHeightSample.hpp"
-#include "NativeHealthDataOrigin.hpp"
-#include "NativeHealthDeviceInfo.hpp"
 #include "NativeHealthDeviceType.hpp"
 #include "NativeHealthRecordingMethod.hpp"
-#include "NativeHealthSampleIdentity.hpp"
 #include "NativeHealthSampleIdentityKind.hpp"
+#include "NativeHealthSampleMetadata.hpp"
 #include "NativeHeightSample.hpp"
 #include <optional>
 #include <string>

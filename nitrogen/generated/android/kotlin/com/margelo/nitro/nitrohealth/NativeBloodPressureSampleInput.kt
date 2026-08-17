@@ -29,22 +29,13 @@ data class NativeBloodPressureSampleInput(
   val diastolicMmHg: Double,
   @DoNotStrip
   @Keep
-  val device: NativeHealthDeviceInfo?,
-  @DoNotStrip
-  @Keep
-  val recordingMethod: NativeHealthRecordingMethod?,
+  val writeMetadata: NativeHealthWriteMetadata,
   @DoNotStrip
   @Keep
   val androidBodyPosition: NativeBloodPressureBodyPosition?,
   @DoNotStrip
   @Keep
-  val androidMeasurementLocation: NativeBloodPressureMeasurementLocation?,
-  @DoNotStrip
-  @Keep
-  val syncId: String?,
-  @DoNotStrip
-  @Keep
-  val syncVersion: Double?
+  val androidMeasurementLocation: NativeBloodPressureMeasurementLocation?
 ) {
   /* primary constructor */
 
@@ -54,12 +45,9 @@ data class NativeBloodPressureSampleInput(
     return Objects.deepEquals(this.timeMs, other.timeMs)
       && Objects.deepEquals(this.systolicMmHg, other.systolicMmHg)
       && Objects.deepEquals(this.diastolicMmHg, other.diastolicMmHg)
-      && Objects.deepEquals(this.device, other.device)
-      && Objects.deepEquals(this.recordingMethod, other.recordingMethod)
+      && Objects.deepEquals(this.writeMetadata, other.writeMetadata)
       && Objects.deepEquals(this.androidBodyPosition, other.androidBodyPosition)
       && Objects.deepEquals(this.androidMeasurementLocation, other.androidMeasurementLocation)
-      && Objects.deepEquals(this.syncId, other.syncId)
-      && Objects.deepEquals(this.syncVersion, other.syncVersion)
   }
 
   override fun hashCode(): Int {
@@ -67,12 +55,9 @@ data class NativeBloodPressureSampleInput(
       timeMs,
       systolicMmHg,
       diastolicMmHg,
-      device,
-      recordingMethod,
+      writeMetadata,
       androidBodyPosition,
-      androidMeasurementLocation,
-      syncId,
-      syncVersion
+      androidMeasurementLocation
     ).contentDeepHashCode()
   }
 
@@ -84,8 +69,8 @@ data class NativeBloodPressureSampleInput(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(timeMs: Double, systolicMmHg: Double, diastolicMmHg: Double, device: NativeHealthDeviceInfo?, recordingMethod: NativeHealthRecordingMethod?, androidBodyPosition: NativeBloodPressureBodyPosition?, androidMeasurementLocation: NativeBloodPressureMeasurementLocation?, syncId: String?, syncVersion: Double?): NativeBloodPressureSampleInput {
-      return NativeBloodPressureSampleInput(timeMs, systolicMmHg, diastolicMmHg, device, recordingMethod, androidBodyPosition, androidMeasurementLocation, syncId, syncVersion)
+    private fun fromCpp(timeMs: Double, systolicMmHg: Double, diastolicMmHg: Double, writeMetadata: NativeHealthWriteMetadata, androidBodyPosition: NativeBloodPressureBodyPosition?, androidMeasurementLocation: NativeBloodPressureMeasurementLocation?): NativeBloodPressureSampleInput {
+      return NativeBloodPressureSampleInput(timeMs, systolicMmHg, diastolicMmHg, writeMetadata, androidBodyPosition, androidMeasurementLocation)
     }
   }
 }

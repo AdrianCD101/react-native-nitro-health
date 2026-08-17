@@ -13,6 +13,14 @@ jest.mock('react-native-nitro-modules', () => ({
 import { NitroHealth } from 'react-native-nitro-health'
 
 const nativeUnknownWriteResult = { storedRecordingMethods: ['unknown' as const] }
+const emptyWriteMetadata = {
+  provenance: {
+    deviceType: undefined,
+    deviceManufacturer: undefined,
+    deviceModel: undefined,
+    recordingMethod: undefined,
+  },
+}
 const unknownWriteResult = {
   status: 'completed' as const,
   storedRecordingMethods: ['unknown' as const],
@@ -587,7 +595,7 @@ describe('NitroHealth breadth data types contract', () => {
       )
 
       expect(mockNitroHealth.saveRestingHeartRate).toHaveBeenCalledWith([
-        { timeMs: date.getTime(), bpm: 58 },
+        { timeMs: date.getTime(), bpm: 58, writeMetadata: emptyWriteMetadata },
       ])
     })
 
@@ -630,7 +638,12 @@ describe('NitroHealth breadth data types contract', () => {
       ).resolves.toEqual(unknownWriteResult)
 
       expect(mockNitroHealth.saveBloodPressure).toHaveBeenCalledWith([
-        { timeMs: date.getTime(), systolicMmHg: 118, diastolicMmHg: 76 },
+        {
+          timeMs: date.getTime(),
+          systolicMmHg: 118,
+          diastolicMmHg: 76,
+          writeMetadata: emptyWriteMetadata,
+        },
       ])
     })
 
@@ -657,6 +670,7 @@ describe('NitroHealth breadth data types contract', () => {
           timeMs: date.getTime(),
           systolicMmHg: 118,
           diastolicMmHg: 76,
+          writeMetadata: emptyWriteMetadata,
           androidBodyPosition: 'sittingDown',
           androidMeasurementLocation: 'leftUpperArm',
         },
@@ -681,6 +695,7 @@ describe('NitroHealth breadth data types contract', () => {
           timeMs: date.getTime(),
           systolicMmHg: 118,
           diastolicMmHg: 76,
+          writeMetadata: emptyWriteMetadata,
           androidBodyPosition: 'standingUp',
         },
       ])
@@ -782,7 +797,7 @@ describe('NitroHealth breadth data types contract', () => {
       ).resolves.toEqual(unknownWriteResult)
 
       expect(mockNitroHealth.saveBloodGlucose).toHaveBeenCalledWith([
-        { timeMs: date.getTime(), millimolesPerLiter: 5.4 },
+        { timeMs: date.getTime(), millimolesPerLiter: 5.4, writeMetadata: emptyWriteMetadata },
       ])
     })
 
@@ -809,6 +824,7 @@ describe('NitroHealth breadth data types contract', () => {
         {
           timeMs: date.getTime(),
           millimolesPerLiter: 5.4,
+          writeMetadata: emptyWriteMetadata,
           androidSpecimenSource: 'capillaryBlood',
           androidMealType: 'breakfast',
           androidRelationToMeal: 'beforeMeal',
@@ -876,7 +892,7 @@ describe('NitroHealth breadth data types contract', () => {
       )
 
       expect(mockNitroHealth.saveBodyTemperature).toHaveBeenCalledWith([
-        { timeMs: date.getTime(), celsius: 36.6 },
+        { timeMs: date.getTime(), celsius: 36.6, writeMetadata: emptyWriteMetadata },
       ])
     })
 
@@ -899,6 +915,7 @@ describe('NitroHealth breadth data types contract', () => {
         {
           timeMs: date.getTime(),
           celsius: 36.6,
+          writeMetadata: emptyWriteMetadata,
           androidMeasurementLocation: 'temporalArtery',
           iosSensorLocation: 'gastroIntestinal',
         },
@@ -964,7 +981,11 @@ describe('NitroHealth breadth data types contract', () => {
       ).resolves.toEqual(unknownWriteResult)
 
       expect(mockNitroHealth.saveRespiratoryRate).toHaveBeenCalledWith([
-        { timeMs: date.getTime(), breathsPerMinute: 16.5 },
+        {
+          timeMs: date.getTime(),
+          breathsPerMinute: 16.5,
+          writeMetadata: emptyWriteMetadata,
+        },
       ])
     })
 
@@ -1011,7 +1032,7 @@ describe('NitroHealth breadth data types contract', () => {
       )
 
       expect(mockNitroHealth.saveBodyFat).toHaveBeenCalledWith([
-        { timeMs: date.getTime(), percentage: 18.5 },
+        { timeMs: date.getTime(), percentage: 18.5, writeMetadata: emptyWriteMetadata },
       ])
     })
 
@@ -1058,7 +1079,7 @@ describe('NitroHealth breadth data types contract', () => {
       )
 
       expect(mockNitroHealth.saveLeanBodyMass).toHaveBeenCalledWith([
-        { timeMs: date.getTime(), kilograms: 55.4 },
+        { timeMs: date.getTime(), kilograms: 55.4, writeMetadata: emptyWriteMetadata },
       ])
     })
 
@@ -1103,7 +1124,7 @@ describe('NitroHealth breadth data types contract', () => {
       ).resolves.toEqual(unknownWriteResult)
 
       expect(mockNitroHealth.saveBasalBodyTemperature).toHaveBeenCalledWith([
-        { timeMs: date.getTime(), celsius: 36.4 },
+        { timeMs: date.getTime(), celsius: 36.4, writeMetadata: emptyWriteMetadata },
       ])
     })
 
@@ -1126,6 +1147,7 @@ describe('NitroHealth breadth data types contract', () => {
         {
           timeMs: date.getTime(),
           celsius: 36.4,
+          writeMetadata: emptyWriteMetadata,
           androidMeasurementLocation: 'wrist',
           iosSensorLocation: 'body',
         },
@@ -1175,7 +1197,7 @@ describe('NitroHealth breadth data types contract', () => {
       )
 
       expect(mockNitroHealth.saveOxygenSaturation).toHaveBeenCalledWith([
-        { timeMs: date.getTime(), percentage: 97.5 },
+        { timeMs: date.getTime(), percentage: 97.5, writeMetadata: emptyWriteMetadata },
       ])
     })
 
@@ -1214,7 +1236,7 @@ describe('NitroHealth breadth data types contract', () => {
       )
 
       expect(mockNitroHealth.saveHeight).toHaveBeenCalledWith([
-        { timeMs: date.getTime(), meters: 1.78 },
+        { timeMs: date.getTime(), meters: 1.78, writeMetadata: emptyWriteMetadata },
       ])
     })
 
@@ -1251,7 +1273,11 @@ describe('NitroHealth breadth data types contract', () => {
       ).resolves.toEqual(unknownWriteResult)
 
       expect(mockNitroHealth.saveVo2Max).toHaveBeenCalledWith([
-        { timeMs: date.getTime(), millilitersPerKilogramPerMinute: 42.5 },
+        {
+          timeMs: date.getTime(),
+          millilitersPerKilogramPerMinute: 42.5,
+          writeMetadata: emptyWriteMetadata,
+        },
       ])
     })
 
@@ -1291,6 +1317,7 @@ describe('NitroHealth breadth data types contract', () => {
         {
           timeMs: date.getTime(),
           millilitersPerKilogramPerMinute: 42.5,
+          writeMetadata: emptyWriteMetadata,
           androidMeasurementMethod: 'multistageFitnessTest',
           iosTestType: 'predictionStepTest',
         },
@@ -1347,7 +1374,12 @@ describe('NitroHealth breadth data types contract', () => {
       ).resolves.toEqual(unknownWriteResult)
 
       expect(mockNitroHealth.saveFloorsClimbed).toHaveBeenCalledWith([
-        { startTimeMs: startDate.getTime(), endTimeMs: endDate.getTime(), floors: 12.5 },
+        {
+          startTimeMs: startDate.getTime(),
+          endTimeMs: endDate.getTime(),
+          floors: 12.5,
+          writeMetadata: emptyWriteMetadata,
+        },
       ])
     })
 

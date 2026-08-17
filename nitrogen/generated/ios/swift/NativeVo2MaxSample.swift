@@ -18,14 +18,8 @@ public extension NativeVo2MaxSample {
   /**
    * Create a new instance of `NativeVo2MaxSample`.
    */
-  init(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, device: NativeHealthDeviceInfo?, recordingMethod: NativeHealthRecordingMethod, timeMs: Double, millilitersPerKilogramPerMinute: Double, androidMeasurementMethod: NativeAndroidVo2MaxMeasurementMethod?, iosTestType: NativeIOSVo2MaxTestType?) {
-    self.init(identity, origin, { () -> bridge.std__optional_NativeHealthDeviceInfo_ in
-      if let __unwrappedValue = device {
-        return bridge.create_std__optional_NativeHealthDeviceInfo_(__unwrappedValue)
-      } else {
-        return .init()
-      }
-    }(), recordingMethod, timeMs, millilitersPerKilogramPerMinute, { () -> bridge.std__optional_NativeAndroidVo2MaxMeasurementMethod_ in
+  init(sampleMetadata: NativeHealthSampleMetadata, timeMs: Double, millilitersPerKilogramPerMinute: Double, androidMeasurementMethod: NativeAndroidVo2MaxMeasurementMethod?, iosTestType: NativeIOSVo2MaxTestType?) {
+    self.init(sampleMetadata, timeMs, millilitersPerKilogramPerMinute, { () -> bridge.std__optional_NativeAndroidVo2MaxMeasurementMethod_ in
       if let __unwrappedValue = androidMeasurementMethod {
         return bridge.create_std__optional_NativeAndroidVo2MaxMeasurementMethod_(__unwrappedValue)
       } else {
@@ -41,23 +35,8 @@ public extension NativeVo2MaxSample {
   }
 
   @inline(__always)
-  var identity: NativeHealthSampleIdentity {
-    return self.__identity
-  }
-  
-  @inline(__always)
-  var origin: NativeHealthDataOrigin {
-    return self.__origin
-  }
-  
-  @inline(__always)
-  var device: NativeHealthDeviceInfo? {
-    return self.__device.value
-  }
-  
-  @inline(__always)
-  var recordingMethod: NativeHealthRecordingMethod {
-    return self.__recordingMethod
+  var sampleMetadata: NativeHealthSampleMetadata {
+    return self.__sampleMetadata
   }
   
   @inline(__always)

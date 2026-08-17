@@ -20,16 +20,7 @@ import java.util.Objects
 data class NativeFloorsClimbedSample(
   @DoNotStrip
   @Keep
-  val identity: NativeHealthSampleIdentity,
-  @DoNotStrip
-  @Keep
-  val origin: NativeHealthDataOrigin,
-  @DoNotStrip
-  @Keep
-  val device: NativeHealthDeviceInfo?,
-  @DoNotStrip
-  @Keep
-  val recordingMethod: NativeHealthRecordingMethod,
+  val sampleMetadata: NativeHealthSampleMetadata,
   @DoNotStrip
   @Keep
   val startTimeMs: Double,
@@ -45,10 +36,7 @@ data class NativeFloorsClimbedSample(
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other !is NativeFloorsClimbedSample) return false
-    return Objects.deepEquals(this.identity, other.identity)
-      && Objects.deepEquals(this.origin, other.origin)
-      && Objects.deepEquals(this.device, other.device)
-      && Objects.deepEquals(this.recordingMethod, other.recordingMethod)
+    return Objects.deepEquals(this.sampleMetadata, other.sampleMetadata)
       && Objects.deepEquals(this.startTimeMs, other.startTimeMs)
       && Objects.deepEquals(this.endTimeMs, other.endTimeMs)
       && Objects.deepEquals(this.floors, other.floors)
@@ -56,10 +44,7 @@ data class NativeFloorsClimbedSample(
 
   override fun hashCode(): Int {
     return arrayOf<Any?>(
-      identity,
-      origin,
-      device,
-      recordingMethod,
+      sampleMetadata,
       startTimeMs,
       endTimeMs,
       floors
@@ -74,8 +59,8 @@ data class NativeFloorsClimbedSample(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, device: NativeHealthDeviceInfo?, recordingMethod: NativeHealthRecordingMethod, startTimeMs: Double, endTimeMs: Double, floors: Double): NativeFloorsClimbedSample {
-      return NativeFloorsClimbedSample(identity, origin, device, recordingMethod, startTimeMs, endTimeMs, floors)
+    private fun fromCpp(sampleMetadata: NativeHealthSampleMetadata, startTimeMs: Double, endTimeMs: Double, floors: Double): NativeFloorsClimbedSample {
+      return NativeFloorsClimbedSample(sampleMetadata, startTimeMs, endTimeMs, floors)
     }
   }
 }

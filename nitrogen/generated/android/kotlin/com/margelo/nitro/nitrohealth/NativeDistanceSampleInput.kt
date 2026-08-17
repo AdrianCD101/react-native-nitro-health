@@ -32,16 +32,7 @@ data class NativeDistanceSampleInput(
   val scope: NativeDistanceScope,
   @DoNotStrip
   @Keep
-  val device: NativeHealthDeviceInfo?,
-  @DoNotStrip
-  @Keep
-  val recordingMethod: NativeHealthRecordingMethod?,
-  @DoNotStrip
-  @Keep
-  val syncId: String?,
-  @DoNotStrip
-  @Keep
-  val syncVersion: Double?
+  val writeMetadata: NativeHealthWriteMetadata
 ) {
   /* primary constructor */
 
@@ -52,10 +43,7 @@ data class NativeDistanceSampleInput(
       && Objects.deepEquals(this.endTimeMs, other.endTimeMs)
       && Objects.deepEquals(this.distanceMeters, other.distanceMeters)
       && Objects.deepEquals(this.scope, other.scope)
-      && Objects.deepEquals(this.device, other.device)
-      && Objects.deepEquals(this.recordingMethod, other.recordingMethod)
-      && Objects.deepEquals(this.syncId, other.syncId)
-      && Objects.deepEquals(this.syncVersion, other.syncVersion)
+      && Objects.deepEquals(this.writeMetadata, other.writeMetadata)
   }
 
   override fun hashCode(): Int {
@@ -64,10 +52,7 @@ data class NativeDistanceSampleInput(
       endTimeMs,
       distanceMeters,
       scope,
-      device,
-      recordingMethod,
-      syncId,
-      syncVersion
+      writeMetadata
     ).contentDeepHashCode()
   }
 
@@ -79,8 +64,8 @@ data class NativeDistanceSampleInput(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(startTimeMs: Double, endTimeMs: Double, distanceMeters: Double, scope: NativeDistanceScope, device: NativeHealthDeviceInfo?, recordingMethod: NativeHealthRecordingMethod?, syncId: String?, syncVersion: Double?): NativeDistanceSampleInput {
-      return NativeDistanceSampleInput(startTimeMs, endTimeMs, distanceMeters, scope, device, recordingMethod, syncId, syncVersion)
+    private fun fromCpp(startTimeMs: Double, endTimeMs: Double, distanceMeters: Double, scope: NativeDistanceScope, writeMetadata: NativeHealthWriteMetadata): NativeDistanceSampleInput {
+      return NativeDistanceSampleInput(startTimeMs, endTimeMs, distanceMeters, scope, writeMetadata)
     }
   }
 }

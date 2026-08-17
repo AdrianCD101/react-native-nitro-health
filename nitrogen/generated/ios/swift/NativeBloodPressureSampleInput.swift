@@ -18,20 +18,8 @@ public extension NativeBloodPressureSampleInput {
   /**
    * Create a new instance of `NativeBloodPressureSampleInput`.
    */
-  init(timeMs: Double, systolicMmHg: Double, diastolicMmHg: Double, device: NativeHealthDeviceInfo?, recordingMethod: NativeHealthRecordingMethod?, androidBodyPosition: NativeBloodPressureBodyPosition?, androidMeasurementLocation: NativeBloodPressureMeasurementLocation?, syncId: String?, syncVersion: Double?) {
-    self.init(timeMs, systolicMmHg, diastolicMmHg, { () -> bridge.std__optional_NativeHealthDeviceInfo_ in
-      if let __unwrappedValue = device {
-        return bridge.create_std__optional_NativeHealthDeviceInfo_(__unwrappedValue)
-      } else {
-        return .init()
-      }
-    }(), { () -> bridge.std__optional_NativeHealthRecordingMethod_ in
-      if let __unwrappedValue = recordingMethod {
-        return bridge.create_std__optional_NativeHealthRecordingMethod_(__unwrappedValue)
-      } else {
-        return .init()
-      }
-    }(), { () -> bridge.std__optional_NativeBloodPressureBodyPosition_ in
+  init(timeMs: Double, systolicMmHg: Double, diastolicMmHg: Double, writeMetadata: NativeHealthWriteMetadata, androidBodyPosition: NativeBloodPressureBodyPosition?, androidMeasurementLocation: NativeBloodPressureMeasurementLocation?) {
+    self.init(timeMs, systolicMmHg, diastolicMmHg, writeMetadata, { () -> bridge.std__optional_NativeBloodPressureBodyPosition_ in
       if let __unwrappedValue = androidBodyPosition {
         return bridge.create_std__optional_NativeBloodPressureBodyPosition_(__unwrappedValue)
       } else {
@@ -40,18 +28,6 @@ public extension NativeBloodPressureSampleInput {
     }(), { () -> bridge.std__optional_NativeBloodPressureMeasurementLocation_ in
       if let __unwrappedValue = androidMeasurementLocation {
         return bridge.create_std__optional_NativeBloodPressureMeasurementLocation_(__unwrappedValue)
-      } else {
-        return .init()
-      }
-    }(), { () -> bridge.std__optional_std__string_ in
-      if let __unwrappedValue = syncId {
-        return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
-      } else {
-        return .init()
-      }
-    }(), { () -> bridge.std__optional_double_ in
-      if let __unwrappedValue = syncVersion {
-        return bridge.create_std__optional_double_(__unwrappedValue)
       } else {
         return .init()
       }
@@ -74,13 +50,8 @@ public extension NativeBloodPressureSampleInput {
   }
   
   @inline(__always)
-  var device: NativeHealthDeviceInfo? {
-    return self.__device.value
-  }
-  
-  @inline(__always)
-  var recordingMethod: NativeHealthRecordingMethod? {
-    return self.__recordingMethod.value
+  var writeMetadata: NativeHealthWriteMetadata {
+    return self.__writeMetadata
   }
   
   @inline(__always)
@@ -91,29 +62,5 @@ public extension NativeBloodPressureSampleInput {
   @inline(__always)
   var androidMeasurementLocation: NativeBloodPressureMeasurementLocation? {
     return self.__androidMeasurementLocation.value
-  }
-  
-  @inline(__always)
-  var syncId: String? {
-    return { () -> String? in
-      if bridge.has_value_std__optional_std__string_(self.__syncId) {
-        let __unwrapped = bridge.get_std__optional_std__string_(self.__syncId)
-        return String(__unwrapped)
-      } else {
-        return nil
-      }
-    }()
-  }
-  
-  @inline(__always)
-  var syncVersion: Double? {
-    return { () -> Double? in
-      if bridge.has_value_std__optional_double_(self.__syncVersion) {
-        let __unwrapped = bridge.get_std__optional_double_(self.__syncVersion)
-        return __unwrapped
-      } else {
-        return nil
-      }
-    }()
   }
 }

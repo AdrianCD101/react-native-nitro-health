@@ -102,10 +102,7 @@ private fun nativeRelationToMeal(value: Int): NativeBloodGlucoseRelationToMeal {
 
 internal fun makeNativeBloodGlucoseSample(record: BloodGlucoseRecord): NativeBloodGlucoseSample {
     return NativeBloodGlucoseSample(
-        identity = makeRecordIdentity(record.metadata.id),
-        origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
-        device = makeNativeHealthDeviceInfo(record.metadata.device),
-        recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
+        sampleMetadata = makeNativeHealthSampleMetadata(record.metadata),
         timeMs = record.time.toEpochMilli().toDouble(),
         millimolesPerLiter = record.level.inMillimolesPerLiter,
         androidSpecimenSource = nativeSpecimenSource(record.specimenSource),

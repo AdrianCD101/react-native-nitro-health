@@ -1,10 +1,10 @@
 import HealthKit
 
-extension NativeHealthDeviceInfo {
+extension NativeHealthWriteProvenance {
     var healthKitDevice: HKDevice? {
         guard let values = makeHealthDeviceInfoValues(
-            manufacturer: manufacturer,
-            model: model
+            manufacturer: deviceManufacturer,
+            model: deviceModel
         ) else {
             return nil
         }
@@ -19,5 +19,13 @@ extension NativeHealthDeviceInfo {
             localIdentifier: nil,
             udiDeviceIdentifier: nil
         )
+    }
+
+    var healthKitMetadata: [String: Any]? {
+        guard let wasUserEntered = recordingMethod?.healthKitWasUserEntered else {
+            return nil
+        }
+
+        return [HKMetadataKeyWasUserEntered: wasUserEntered]
     }
 }

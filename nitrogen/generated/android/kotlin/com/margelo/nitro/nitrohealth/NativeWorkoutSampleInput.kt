@@ -35,16 +35,7 @@ data class NativeWorkoutSampleInput(
   val timeZone: String?,
   @DoNotStrip
   @Keep
-  val device: NativeHealthDeviceInfo?,
-  @DoNotStrip
-  @Keep
-  val recordingMethod: NativeHealthRecordingMethod?,
-  @DoNotStrip
-  @Keep
-  val syncId: String?,
-  @DoNotStrip
-  @Keep
-  val syncVersion: Double?
+  val writeMetadata: NativeHealthWriteMetadata
 ) {
   /* primary constructor */
 
@@ -56,10 +47,7 @@ data class NativeWorkoutSampleInput(
       && Objects.deepEquals(this.activityType, other.activityType)
       && Objects.deepEquals(this.displayName, other.displayName)
       && Objects.deepEquals(this.timeZone, other.timeZone)
-      && Objects.deepEquals(this.device, other.device)
-      && Objects.deepEquals(this.recordingMethod, other.recordingMethod)
-      && Objects.deepEquals(this.syncId, other.syncId)
-      && Objects.deepEquals(this.syncVersion, other.syncVersion)
+      && Objects.deepEquals(this.writeMetadata, other.writeMetadata)
   }
 
   override fun hashCode(): Int {
@@ -69,10 +57,7 @@ data class NativeWorkoutSampleInput(
       activityType,
       displayName,
       timeZone,
-      device,
-      recordingMethod,
-      syncId,
-      syncVersion
+      writeMetadata
     ).contentDeepHashCode()
   }
 
@@ -84,8 +69,8 @@ data class NativeWorkoutSampleInput(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(startTimeMs: Double, endTimeMs: Double, activityType: String, displayName: String?, timeZone: String?, device: NativeHealthDeviceInfo?, recordingMethod: NativeHealthRecordingMethod?, syncId: String?, syncVersion: Double?): NativeWorkoutSampleInput {
-      return NativeWorkoutSampleInput(startTimeMs, endTimeMs, activityType, displayName, timeZone, device, recordingMethod, syncId, syncVersion)
+    private fun fromCpp(startTimeMs: Double, endTimeMs: Double, activityType: String, displayName: String?, timeZone: String?, writeMetadata: NativeHealthWriteMetadata): NativeWorkoutSampleInput {
+      return NativeWorkoutSampleInput(startTimeMs, endTimeMs, activityType, displayName, timeZone, writeMetadata)
     }
   }
 }

@@ -29,16 +29,7 @@ data class NativeStepSampleInput(
   val count: Double,
   @DoNotStrip
   @Keep
-  val device: NativeHealthDeviceInfo?,
-  @DoNotStrip
-  @Keep
-  val recordingMethod: NativeHealthRecordingMethod?,
-  @DoNotStrip
-  @Keep
-  val syncId: String?,
-  @DoNotStrip
-  @Keep
-  val syncVersion: Double?
+  val writeMetadata: NativeHealthWriteMetadata
 ) {
   /* primary constructor */
 
@@ -48,10 +39,7 @@ data class NativeStepSampleInput(
     return Objects.deepEquals(this.startTimeMs, other.startTimeMs)
       && Objects.deepEquals(this.endTimeMs, other.endTimeMs)
       && Objects.deepEquals(this.count, other.count)
-      && Objects.deepEquals(this.device, other.device)
-      && Objects.deepEquals(this.recordingMethod, other.recordingMethod)
-      && Objects.deepEquals(this.syncId, other.syncId)
-      && Objects.deepEquals(this.syncVersion, other.syncVersion)
+      && Objects.deepEquals(this.writeMetadata, other.writeMetadata)
   }
 
   override fun hashCode(): Int {
@@ -59,10 +47,7 @@ data class NativeStepSampleInput(
       startTimeMs,
       endTimeMs,
       count,
-      device,
-      recordingMethod,
-      syncId,
-      syncVersion
+      writeMetadata
     ).contentDeepHashCode()
   }
 
@@ -74,8 +59,8 @@ data class NativeStepSampleInput(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(startTimeMs: Double, endTimeMs: Double, count: Double, device: NativeHealthDeviceInfo?, recordingMethod: NativeHealthRecordingMethod?, syncId: String?, syncVersion: Double?): NativeStepSampleInput {
-      return NativeStepSampleInput(startTimeMs, endTimeMs, count, device, recordingMethod, syncId, syncVersion)
+    private fun fromCpp(startTimeMs: Double, endTimeMs: Double, count: Double, writeMetadata: NativeHealthWriteMetadata): NativeStepSampleInput {
+      return NativeStepSampleInput(startTimeMs, endTimeMs, count, writeMetadata)
     }
   }
 }

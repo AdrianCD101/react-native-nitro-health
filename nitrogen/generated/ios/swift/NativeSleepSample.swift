@@ -18,14 +18,8 @@ public extension NativeSleepSample {
   /**
    * Create a new instance of `NativeSleepSample`.
    */
-  init(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, device: NativeHealthDeviceInfo?, recordingMethod: NativeHealthRecordingMethod, kind: NativeSleepSampleKind, startTimeMs: Double, endTimeMs: Double, stage: String?, stageData: NativeSleepStageData?) {
-    self.init(identity, origin, { () -> bridge.std__optional_NativeHealthDeviceInfo_ in
-      if let __unwrappedValue = device {
-        return bridge.create_std__optional_NativeHealthDeviceInfo_(__unwrappedValue)
-      } else {
-        return .init()
-      }
-    }(), recordingMethod, kind, startTimeMs, endTimeMs, { () -> bridge.std__optional_std__string_ in
+  init(sampleMetadata: NativeHealthSampleMetadata, kind: NativeSleepSampleKind, startTimeMs: Double, endTimeMs: Double, stage: String?, stageData: NativeSleepStageData?) {
+    self.init(sampleMetadata, kind, startTimeMs, endTimeMs, { () -> bridge.std__optional_std__string_ in
       if let __unwrappedValue = stage {
         return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
       } else {
@@ -41,23 +35,8 @@ public extension NativeSleepSample {
   }
 
   @inline(__always)
-  var identity: NativeHealthSampleIdentity {
-    return self.__identity
-  }
-  
-  @inline(__always)
-  var origin: NativeHealthDataOrigin {
-    return self.__origin
-  }
-  
-  @inline(__always)
-  var device: NativeHealthDeviceInfo? {
-    return self.__device.value
-  }
-  
-  @inline(__always)
-  var recordingMethod: NativeHealthRecordingMethod {
-    return self.__recordingMethod
+  var sampleMetadata: NativeHealthSampleMetadata {
+    return self.__sampleMetadata
   }
   
   @inline(__always)

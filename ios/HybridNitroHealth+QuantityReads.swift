@@ -16,18 +16,16 @@ import NitroModules
 
 extension HybridNitroHealth {
     // Shared boilerplate for instantaneous (point-in-time) quantity reads: descriptor/type
-    // lookup, auth gate, cursor-paged query, then per-sample mapping. Each data type only
-    // supplies its unit conversion and struct construction. readHeartRate stays bespoke to
-    // remain symmetric with Android, where HeartRateRecord is a series record that needs
-    // post-read flattening.
+    // lookup, auth gate, cursor-paged query, then per-sample mapping. readHeartRate stays
+    // bespoke to remain symmetric with Android, where HeartRateRecord is a series record
+    // that needs post-read flattening.
     func readInstantQuantitySamplePage<T>(
         dataType: String,
         query: NativeHealthDateRangeQuery,
-        map: (HKQuantitySample, HKUnit) throws -> T
+        map: (HKQuantitySample) throws -> T
     ) async throws -> (samples: [T], nextCursor: String?) {
         let descriptor = try makeHealthDataTypeDescriptor(dataType: dataType)
         let quantityType = try makeHealthKitQuantityType(dataType: dataType)
-        let unit = descriptor.unit
 
         return try await queryPagedSamples(
             sampleType: quantityType,
@@ -39,7 +37,7 @@ extension HybridNitroHealth {
                 return nil
             }
 
-            return try map(quantitySample, unit)
+            return try map(quantitySample)
         }
     }
 
@@ -49,15 +47,8 @@ extension HybridNitroHealth {
         }
 
         return Promise<NativeRestingHeartRateSamplePage>.async {
-            let page = try await self.readInstantQuantitySamplePage(dataType: "restingHeartRate", query: query) { quantitySample, unit in
-                NativeRestingHeartRateSample(
-                    identity: quantitySample.nativeHealthSampleIdentity,
-                    origin: quantitySample.nativeHealthDataOrigin,
-                    device: quantitySample.nativeHealthDeviceInfo,
-                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
-                    timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
-                    bpm: quantitySample.quantity.doubleValue(for: unit)
-                )
+            let page = try await self.readInstantQuantitySamplePage(dataType: "restingHeartRate", query: query) { quantitySample in
+                quantitySample.nativeRestingHeartRateSample
             }
 
             return NativeRestingHeartRateSamplePage(samples: page.samples, nextCursor: page.nextCursor)
@@ -72,16 +63,8 @@ extension HybridNitroHealth {
         }
 
         return Promise<NativeHeartRateVariabilitySamplePage>.async {
-            let page = try await self.readInstantQuantitySamplePage(dataType: "heartRateVariability", query: query) { quantitySample, unit in
-                NativeHeartRateVariabilitySample(
-                    identity: quantitySample.nativeHealthSampleIdentity,
-                    origin: quantitySample.nativeHealthDataOrigin,
-                    device: quantitySample.nativeHealthDeviceInfo,
-                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
-                    timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
-                    milliseconds: quantitySample.quantity.doubleValue(for: unit),
-                    method: "sdnn"
-                )
+            let page = try await self.readInstantQuantitySamplePage(dataType: "heartRateVariability", query: query) { quantitySample in
+                quantitySample.nativeHeartRateVariabilitySample
             }
 
             return NativeHeartRateVariabilitySamplePage(samples: page.samples, nextCursor: page.nextCursor)
@@ -97,15 +80,8 @@ extension HybridNitroHealth {
         }
 
         return Promise<NativeOxygenSaturationSamplePage>.async {
-            let page = try await self.readInstantQuantitySamplePage(dataType: "oxygenSaturation", query: query) { quantitySample, unit in
-                NativeOxygenSaturationSample(
-                    identity: quantitySample.nativeHealthSampleIdentity,
-                    origin: quantitySample.nativeHealthDataOrigin,
-                    device: quantitySample.nativeHealthDeviceInfo,
-                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
-                    timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
-                    percentage: quantitySample.quantity.doubleValue(for: unit) * 100
-                )
+            let page = try await self.readInstantQuantitySamplePage(dataType: "oxygenSaturation", query: query) { quantitySample in
+                quantitySample.nativeOxygenSaturationSample
             }
 
             return NativeOxygenSaturationSamplePage(samples: page.samples, nextCursor: page.nextCursor)
@@ -118,7 +94,7 @@ extension HybridNitroHealth {
         }
 
         return Promise<NativeBloodGlucoseSamplePage>.async {
-            let page = try await self.readInstantQuantitySamplePage(dataType: "bloodGlucose", query: query) { quantitySample, _ in
+            let page = try await self.readInstantQuantitySamplePage(dataType: "bloodGlucose", query: query) { quantitySample in
                 try quantitySample.nativeBloodGlucoseSample()
             }
 
@@ -132,7 +108,7 @@ extension HybridNitroHealth {
         }
 
         return Promise<NativeBodyTemperatureSamplePage>.async {
-            let page = try await self.readInstantQuantitySamplePage(dataType: "bodyTemperature", query: query) { quantitySample, _ in
+            let page = try await self.readInstantQuantitySamplePage(dataType: "bodyTemperature", query: query) { quantitySample in
                 try quantitySample.nativeBodyTemperatureSample()
             }
 
@@ -146,15 +122,8 @@ extension HybridNitroHealth {
         }
 
         return Promise<NativeRespiratoryRateSamplePage>.async {
-            let page = try await self.readInstantQuantitySamplePage(dataType: "respiratoryRate", query: query) { quantitySample, unit in
-                NativeRespiratoryRateSample(
-                    identity: quantitySample.nativeHealthSampleIdentity,
-                    origin: quantitySample.nativeHealthDataOrigin,
-                    device: quantitySample.nativeHealthDeviceInfo,
-                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
-                    timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
-                    breathsPerMinute: quantitySample.quantity.doubleValue(for: unit)
-                )
+            let page = try await self.readInstantQuantitySamplePage(dataType: "respiratoryRate", query: query) { quantitySample in
+                quantitySample.nativeRespiratoryRateSample
             }
 
             return NativeRespiratoryRateSamplePage(samples: page.samples, nextCursor: page.nextCursor)
@@ -169,15 +138,8 @@ extension HybridNitroHealth {
         }
 
         return Promise<NativeBodyFatSamplePage>.async {
-            let page = try await self.readInstantQuantitySamplePage(dataType: "bodyFat", query: query) { quantitySample, unit in
-                NativeBodyFatSample(
-                    identity: quantitySample.nativeHealthSampleIdentity,
-                    origin: quantitySample.nativeHealthDataOrigin,
-                    device: quantitySample.nativeHealthDeviceInfo,
-                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
-                    timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
-                    percentage: quantitySample.quantity.doubleValue(for: unit) * 100
-                )
+            let page = try await self.readInstantQuantitySamplePage(dataType: "bodyFat", query: query) { quantitySample in
+                quantitySample.nativeBodyFatSample
             }
 
             return NativeBodyFatSamplePage(samples: page.samples, nextCursor: page.nextCursor)
@@ -190,15 +152,8 @@ extension HybridNitroHealth {
         }
 
         return Promise<NativeLeanBodyMassSamplePage>.async {
-            let page = try await self.readInstantQuantitySamplePage(dataType: "leanBodyMass", query: query) { quantitySample, unit in
-                NativeLeanBodyMassSample(
-                    identity: quantitySample.nativeHealthSampleIdentity,
-                    origin: quantitySample.nativeHealthDataOrigin,
-                    device: quantitySample.nativeHealthDeviceInfo,
-                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
-                    timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
-                    kilograms: quantitySample.quantity.doubleValue(for: unit)
-                )
+            let page = try await self.readInstantQuantitySamplePage(dataType: "leanBodyMass", query: query) { quantitySample in
+                quantitySample.nativeLeanBodyMassSample
             }
 
             return NativeLeanBodyMassSamplePage(samples: page.samples, nextCursor: page.nextCursor)
@@ -211,7 +166,7 @@ extension HybridNitroHealth {
         }
 
         return Promise<NativeBasalBodyTemperatureSamplePage>.async {
-            let page = try await self.readInstantQuantitySamplePage(dataType: "basalBodyTemperature", query: query) { quantitySample, _ in
+            let page = try await self.readInstantQuantitySamplePage(dataType: "basalBodyTemperature", query: query) { quantitySample in
                 try quantitySample.nativeBasalBodyTemperatureSample()
             }
 
@@ -225,15 +180,8 @@ extension HybridNitroHealth {
         }
 
         return Promise<NativeHeightSamplePage>.async {
-            let page = try await self.readInstantQuantitySamplePage(dataType: "height", query: query) { quantitySample, unit in
-                NativeHeightSample(
-                    identity: quantitySample.nativeHealthSampleIdentity,
-                    origin: quantitySample.nativeHealthDataOrigin,
-                    device: quantitySample.nativeHealthDeviceInfo,
-                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
-                    timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
-                    meters: quantitySample.quantity.doubleValue(for: unit)
-                )
+            let page = try await self.readInstantQuantitySamplePage(dataType: "height", query: query) { quantitySample in
+                quantitySample.nativeHeightSample
             }
 
             return NativeHeightSamplePage(samples: page.samples, nextCursor: page.nextCursor)
@@ -246,8 +194,8 @@ extension HybridNitroHealth {
         }
 
         return Promise<NativeVo2MaxSamplePage>.async {
-            let page = try await self.readInstantQuantitySamplePage(dataType: "vo2Max", query: query) { quantitySample, unit in
-                try quantitySample.nativeVo2MaxSample(unit: unit)
+            let page = try await self.readInstantQuantitySamplePage(dataType: "vo2Max", query: query) { quantitySample in
+                try quantitySample.nativeVo2MaxSample()
             }
 
             return NativeVo2MaxSamplePage(samples: page.samples, nextCursor: page.nextCursor)

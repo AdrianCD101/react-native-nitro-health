@@ -19,12 +19,7 @@ internal fun toSleepSessionRecords(
             endTime = endTime,
             endZoneOffset = zoneId.rules.getOffset(endTime),
             stages = session.stages.map(::toSleepSessionStage),
-            metadata = makeSampleMetadata(
-                syncId = null,
-                syncVersion = null,
-                recordingMethod = session.recordingMethod,
-                device = session.device
-            )
+            metadata = makeSampleMetadata(session.writeProvenance)
         )
     }
 }

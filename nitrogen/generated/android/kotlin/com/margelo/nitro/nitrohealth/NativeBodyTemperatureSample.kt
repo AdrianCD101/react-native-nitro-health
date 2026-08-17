@@ -20,16 +20,7 @@ import java.util.Objects
 data class NativeBodyTemperatureSample(
   @DoNotStrip
   @Keep
-  val identity: NativeHealthSampleIdentity,
-  @DoNotStrip
-  @Keep
-  val origin: NativeHealthDataOrigin,
-  @DoNotStrip
-  @Keep
-  val device: NativeHealthDeviceInfo?,
-  @DoNotStrip
-  @Keep
-  val recordingMethod: NativeHealthRecordingMethod,
+  val sampleMetadata: NativeHealthSampleMetadata,
   @DoNotStrip
   @Keep
   val timeMs: Double,
@@ -48,10 +39,7 @@ data class NativeBodyTemperatureSample(
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other !is NativeBodyTemperatureSample) return false
-    return Objects.deepEquals(this.identity, other.identity)
-      && Objects.deepEquals(this.origin, other.origin)
-      && Objects.deepEquals(this.device, other.device)
-      && Objects.deepEquals(this.recordingMethod, other.recordingMethod)
+    return Objects.deepEquals(this.sampleMetadata, other.sampleMetadata)
       && Objects.deepEquals(this.timeMs, other.timeMs)
       && Objects.deepEquals(this.celsius, other.celsius)
       && Objects.deepEquals(this.androidMeasurementLocation, other.androidMeasurementLocation)
@@ -60,10 +48,7 @@ data class NativeBodyTemperatureSample(
 
   override fun hashCode(): Int {
     return arrayOf<Any?>(
-      identity,
-      origin,
-      device,
-      recordingMethod,
+      sampleMetadata,
       timeMs,
       celsius,
       androidMeasurementLocation,
@@ -79,8 +64,8 @@ data class NativeBodyTemperatureSample(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, device: NativeHealthDeviceInfo?, recordingMethod: NativeHealthRecordingMethod, timeMs: Double, celsius: Double, androidMeasurementLocation: NativeAndroidBodyTemperatureMeasurementLocation?, iosSensorLocation: NativeIOSBodyTemperatureSensorLocation?): NativeBodyTemperatureSample {
-      return NativeBodyTemperatureSample(identity, origin, device, recordingMethod, timeMs, celsius, androidMeasurementLocation, iosSensorLocation)
+    private fun fromCpp(sampleMetadata: NativeHealthSampleMetadata, timeMs: Double, celsius: Double, androidMeasurementLocation: NativeAndroidBodyTemperatureMeasurementLocation?, iosSensorLocation: NativeIOSBodyTemperatureSensorLocation?): NativeBodyTemperatureSample {
+      return NativeBodyTemperatureSample(sampleMetadata, timeMs, celsius, androidMeasurementLocation, iosSensorLocation)
     }
   }
 }

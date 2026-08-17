@@ -146,8 +146,6 @@ extension HybridNitroHealth {
 
     private func makeUpsertChange(sample: HKSample, dataType: String) throws -> NativeHealthChange {
         let uuid = sample.uuid.uuidString
-        let startTimeMs = sample.startDate.timeIntervalSince1970 * 1000
-        let endTimeMs = sample.endDate.timeIntervalSince1970 * 1000
 
         switch dataType {
         case "steps":
@@ -155,31 +153,14 @@ extension HybridNitroHealth {
             return makeNativeHealthChange(
                 type: "upsert",
                 recordId: uuid,
-                stepSamples: [NativeStepSample(
-                    identity: quantitySample.nativeHealthSampleIdentity,
-                    origin: quantitySample.nativeHealthDataOrigin,
-                    device: quantitySample.nativeHealthDeviceInfo,
-                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
-                    startTimeMs: startTimeMs,
-                    endTimeMs: endTimeMs,
-                    count: quantitySample.quantity.doubleValue(for: HKUnit.count())
-                )]
+                stepSamples: [quantitySample.nativeStepSample]
             )
         case "heartRate":
             let quantitySample = try requireQuantitySample(sample, dataType: dataType)
             return makeNativeHealthChange(
                 type: "upsert",
                 recordId: uuid,
-                heartRateSamples: [NativeHeartRateSample(
-                    identity: quantitySample.nativeHealthSampleIdentity,
-                    origin: quantitySample.nativeHealthDataOrigin,
-                    device: quantitySample.nativeHealthDeviceInfo,
-                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
-                    timeMs: startTimeMs,
-                    bpm: quantitySample.quantity.doubleValue(
-                        for: HKUnit.count().unitDivided(by: HKUnit.minute())
-                    )
-                )]
+                heartRateSamples: [quantitySample.nativeHeartRateSample]
             )
         case "bloodPressure":
             guard let correlation = sample as? HKCorrelation else {
@@ -218,44 +199,21 @@ extension HybridNitroHealth {
             return makeNativeHealthChange(
                 type: "upsert",
                 recordId: uuid,
-                respiratoryRateSamples: [NativeRespiratoryRateSample(
-                    identity: quantitySample.nativeHealthSampleIdentity,
-                    origin: quantitySample.nativeHealthDataOrigin,
-                    device: quantitySample.nativeHealthDeviceInfo,
-                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
-                    timeMs: startTimeMs,
-                    breathsPerMinute: quantitySample.quantity.doubleValue(
-                        for: HKUnit.count().unitDivided(by: HKUnit.minute())
-                    )
-                )]
+                respiratoryRateSamples: [quantitySample.nativeRespiratoryRateSample]
             )
         case "bodyFat":
             let quantitySample = try requireQuantitySample(sample, dataType: dataType)
             return makeNativeHealthChange(
                 type: "upsert",
                 recordId: uuid,
-                bodyFatSamples: [NativeBodyFatSample(
-                    identity: quantitySample.nativeHealthSampleIdentity,
-                    origin: quantitySample.nativeHealthDataOrigin,
-                    device: quantitySample.nativeHealthDeviceInfo,
-                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
-                    timeMs: startTimeMs,
-                    percentage: quantitySample.quantity.doubleValue(for: HKUnit.percent()) * 100
-                )]
+                bodyFatSamples: [quantitySample.nativeBodyFatSample]
             )
         case "leanBodyMass":
             let quantitySample = try requireQuantitySample(sample, dataType: dataType)
             return makeNativeHealthChange(
                 type: "upsert",
                 recordId: uuid,
-                leanBodyMassSamples: [NativeLeanBodyMassSample(
-                    identity: quantitySample.nativeHealthSampleIdentity,
-                    origin: quantitySample.nativeHealthDataOrigin,
-                    device: quantitySample.nativeHealthDeviceInfo,
-                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
-                    timeMs: startTimeMs,
-                    kilograms: quantitySample.quantity.doubleValue(for: HKUnit.gramUnit(with: .kilo))
-                )]
+                leanBodyMassSamples: [quantitySample.nativeLeanBodyMassSample]
             )
         case "basalBodyTemperature":
             let quantitySample = try requireQuantitySample(sample, dataType: dataType)
@@ -269,134 +227,63 @@ extension HybridNitroHealth {
             return makeNativeHealthChange(
                 type: "upsert",
                 recordId: uuid,
-                restingHeartRateSamples: [NativeRestingHeartRateSample(
-                    identity: quantitySample.nativeHealthSampleIdentity,
-                    origin: quantitySample.nativeHealthDataOrigin,
-                    device: quantitySample.nativeHealthDeviceInfo,
-                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
-                    timeMs: startTimeMs,
-                    bpm: quantitySample.quantity.doubleValue(
-                        for: HKUnit.count().unitDivided(by: HKUnit.minute())
-                    )
-                )]
+                restingHeartRateSamples: [quantitySample.nativeRestingHeartRateSample]
             )
         case "heartRateVariability":
             let quantitySample = try requireQuantitySample(sample, dataType: dataType)
             return makeNativeHealthChange(
                 type: "upsert",
                 recordId: uuid,
-                heartRateVariabilitySamples: [NativeHeartRateVariabilitySample(
-                    identity: quantitySample.nativeHealthSampleIdentity,
-                    origin: quantitySample.nativeHealthDataOrigin,
-                    device: quantitySample.nativeHealthDeviceInfo,
-                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
-                    timeMs: startTimeMs,
-                    milliseconds: quantitySample.quantity.doubleValue(
-                        for: HKUnit.secondUnit(with: .milli)
-                    ),
-                    method: "sdnn"
-                )]
+                heartRateVariabilitySamples: [quantitySample.nativeHeartRateVariabilitySample]
             )
         case "distance":
             let quantitySample = try requireQuantitySample(sample, dataType: dataType)
             return makeNativeHealthChange(
                 type: "upsert",
                 recordId: uuid,
-                distanceSamples: [NativeDistanceSample(
-                    identity: quantitySample.nativeHealthSampleIdentity,
-                    origin: quantitySample.nativeHealthDataOrigin,
-                    device: quantitySample.nativeHealthDeviceInfo,
-                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
-                    startTimeMs: startTimeMs,
-                    endTimeMs: endTimeMs,
-                    distanceMeters: quantitySample.quantity.doubleValue(for: HKUnit.meter()),
-                    scope: .walkingrunning
-                )]
+                distanceSamples: [quantitySample.nativeDistanceSample]
             )
         case "activeEnergyBurned":
             let quantitySample = try requireQuantitySample(sample, dataType: dataType)
             return makeNativeHealthChange(
                 type: "upsert",
                 recordId: uuid,
-                activeEnergyBurnedSamples: [NativeActiveEnergyBurnedSample(
-                    identity: quantitySample.nativeHealthSampleIdentity,
-                    origin: quantitySample.nativeHealthDataOrigin,
-                    device: quantitySample.nativeHealthDeviceInfo,
-                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
-                    startTimeMs: startTimeMs,
-                    endTimeMs: endTimeMs,
-                    kilocalories: quantitySample.quantity.doubleValue(for: HKUnit.kilocalorie())
-                )]
+                activeEnergyBurnedSamples: [quantitySample.nativeActiveEnergyBurnedSample]
             )
         case "hydration":
             let quantitySample = try requireQuantitySample(sample, dataType: dataType)
             return makeNativeHealthChange(
                 type: "upsert",
                 recordId: uuid,
-                hydrationSamples: [NativeHydrationSample(
-                    identity: quantitySample.nativeHealthSampleIdentity,
-                    origin: quantitySample.nativeHealthDataOrigin,
-                    device: quantitySample.nativeHealthDeviceInfo,
-                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
-                    startTimeMs: startTimeMs,
-                    endTimeMs: endTimeMs,
-                    milliliters: quantitySample.quantity.doubleValue(
-                        for: HKUnit.literUnit(with: .milli)
-                    )
-                )]
+                hydrationSamples: [quantitySample.nativeHydrationSample]
             )
         case "floorsClimbed":
             let quantitySample = try requireQuantitySample(sample, dataType: dataType)
             return makeNativeHealthChange(
                 type: "upsert",
                 recordId: uuid,
-                floorsClimbedSamples: [NativeFloorsClimbedSample(
-                    identity: quantitySample.nativeHealthSampleIdentity,
-                    origin: quantitySample.nativeHealthDataOrigin,
-                    device: quantitySample.nativeHealthDeviceInfo,
-                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
-                    startTimeMs: startTimeMs,
-                    endTimeMs: endTimeMs,
-                    floors: quantitySample.quantity.doubleValue(for: HKUnit.count())
-                )]
+                floorsClimbedSamples: [quantitySample.nativeFloorsClimbedSample]
             )
         case "oxygenSaturation":
             let quantitySample = try requireQuantitySample(sample, dataType: dataType)
             return makeNativeHealthChange(
                 type: "upsert",
                 recordId: uuid,
-                oxygenSaturationSamples: [NativeOxygenSaturationSample(
-                    identity: quantitySample.nativeHealthSampleIdentity,
-                    origin: quantitySample.nativeHealthDataOrigin,
-                    device: quantitySample.nativeHealthDeviceInfo,
-                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
-                    timeMs: startTimeMs,
-                    percentage: quantitySample.quantity.doubleValue(for: HKUnit.percent()) * 100
-                )]
+                oxygenSaturationSamples: [quantitySample.nativeOxygenSaturationSample]
             )
         case "height":
             let quantitySample = try requireQuantitySample(sample, dataType: dataType)
             return makeNativeHealthChange(
                 type: "upsert",
                 recordId: uuid,
-                heightSamples: [NativeHeightSample(
-                    identity: quantitySample.nativeHealthSampleIdentity,
-                    origin: quantitySample.nativeHealthDataOrigin,
-                    device: quantitySample.nativeHealthDeviceInfo,
-                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
-                    timeMs: startTimeMs,
-                    meters: quantitySample.quantity.doubleValue(for: HKUnit.meter())
-                )]
+                heightSamples: [quantitySample.nativeHeightSample]
             )
         case "vo2Max":
             let quantitySample = try requireQuantitySample(sample, dataType: dataType)
-            let unit = HKUnit.literUnit(with: .milli).unitDivided(
-                by: HKUnit.gramUnit(with: .kilo).unitMultiplied(by: HKUnit.minute())
-            )
             return makeNativeHealthChange(
                 type: "upsert",
                 recordId: uuid,
-                vo2MaxSamples: [try quantitySample.nativeVo2MaxSample(unit: unit)]
+                vo2MaxSamples: [try quantitySample.nativeVo2MaxSample()]
             )
         case "sleep":
             guard let categorySample = sample as? HKCategorySample else {
@@ -417,15 +304,7 @@ extension HybridNitroHealth {
             return makeNativeHealthChange(
                 type: "upsert",
                 recordId: uuid,
-                bodyMassSamples: [NativeBodyMassSample(
-                    identity: quantitySample.nativeHealthSampleIdentity,
-                    origin: quantitySample.nativeHealthDataOrigin,
-                    device: quantitySample.nativeHealthDeviceInfo,
-                    recordingMethod: quantitySample.nativeHealthRecordingMethod,
-                    startTimeMs: startTimeMs,
-                    endTimeMs: endTimeMs,
-                    kilograms: quantitySample.quantity.doubleValue(for: HKUnit.gramUnit(with: .kilo))
-                )]
+                bodyMassSamples: [quantitySample.nativeBodyMassSample]
             )
         case "workout":
             guard let workout = sample as? HKWorkout else {

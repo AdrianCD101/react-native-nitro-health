@@ -12,14 +12,18 @@
 
 #include "JNativeBloodPressureBodyPosition.hpp"
 #include "JNativeBloodPressureMeasurementLocation.hpp"
-#include "JNativeHealthDeviceInfo.hpp"
 #include "JNativeHealthDeviceType.hpp"
 #include "JNativeHealthRecordingMethod.hpp"
+#include "JNativeHealthSyncMetadata.hpp"
+#include "JNativeHealthWriteMetadata.hpp"
+#include "JNativeHealthWriteProvenance.hpp"
 #include "NativeBloodPressureBodyPosition.hpp"
 #include "NativeBloodPressureMeasurementLocation.hpp"
-#include "NativeHealthDeviceInfo.hpp"
 #include "NativeHealthDeviceType.hpp"
 #include "NativeHealthRecordingMethod.hpp"
+#include "NativeHealthSyncMetadata.hpp"
+#include "NativeHealthWriteMetadata.hpp"
+#include "NativeHealthWriteProvenance.hpp"
 #include <optional>
 #include <string>
 
@@ -48,28 +52,19 @@ namespace margelo::nitro::nitrohealth {
       double systolicMmHg = this->getFieldValue(fieldSystolicMmHg);
       static const auto fieldDiastolicMmHg = clazz->getField<double>("diastolicMmHg");
       double diastolicMmHg = this->getFieldValue(fieldDiastolicMmHg);
-      static const auto fieldDevice = clazz->getField<JNativeHealthDeviceInfo>("device");
-      jni::local_ref<JNativeHealthDeviceInfo> device = this->getFieldValue(fieldDevice);
-      static const auto fieldRecordingMethod = clazz->getField<JNativeHealthRecordingMethod>("recordingMethod");
-      jni::local_ref<JNativeHealthRecordingMethod> recordingMethod = this->getFieldValue(fieldRecordingMethod);
+      static const auto fieldWriteMetadata = clazz->getField<JNativeHealthWriteMetadata>("writeMetadata");
+      jni::local_ref<JNativeHealthWriteMetadata> writeMetadata = this->getFieldValue(fieldWriteMetadata);
       static const auto fieldAndroidBodyPosition = clazz->getField<JNativeBloodPressureBodyPosition>("androidBodyPosition");
       jni::local_ref<JNativeBloodPressureBodyPosition> androidBodyPosition = this->getFieldValue(fieldAndroidBodyPosition);
       static const auto fieldAndroidMeasurementLocation = clazz->getField<JNativeBloodPressureMeasurementLocation>("androidMeasurementLocation");
       jni::local_ref<JNativeBloodPressureMeasurementLocation> androidMeasurementLocation = this->getFieldValue(fieldAndroidMeasurementLocation);
-      static const auto fieldSyncId = clazz->getField<jni::JString>("syncId");
-      jni::local_ref<jni::JString> syncId = this->getFieldValue(fieldSyncId);
-      static const auto fieldSyncVersion = clazz->getField<jni::JDouble>("syncVersion");
-      jni::local_ref<jni::JDouble> syncVersion = this->getFieldValue(fieldSyncVersion);
       return NativeBloodPressureSampleInput(
         timeMs,
         systolicMmHg,
         diastolicMmHg,
-        device != nullptr ? std::make_optional(device->toCpp()) : std::nullopt,
-        recordingMethod != nullptr ? std::make_optional(recordingMethod->toCpp()) : std::nullopt,
+        writeMetadata->toCpp(),
         androidBodyPosition != nullptr ? std::make_optional(androidBodyPosition->toCpp()) : std::nullopt,
-        androidMeasurementLocation != nullptr ? std::make_optional(androidMeasurementLocation->toCpp()) : std::nullopt,
-        syncId != nullptr ? std::make_optional(syncId->toStdString()) : std::nullopt,
-        syncVersion != nullptr ? std::make_optional(syncVersion->value()) : std::nullopt
+        androidMeasurementLocation != nullptr ? std::make_optional(androidMeasurementLocation->toCpp()) : std::nullopt
       );
     }
 
@@ -79,7 +74,7 @@ namespace margelo::nitro::nitrohealth {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeBloodPressureSampleInput::javaobject> fromCpp(const NativeBloodPressureSampleInput& value) {
-      using JSignature = JNativeBloodPressureSampleInput(double, double, double, jni::alias_ref<JNativeHealthDeviceInfo>, jni::alias_ref<JNativeHealthRecordingMethod>, jni::alias_ref<JNativeBloodPressureBodyPosition>, jni::alias_ref<JNativeBloodPressureMeasurementLocation>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JDouble>);
+      using JSignature = JNativeBloodPressureSampleInput(double, double, double, jni::alias_ref<JNativeHealthWriteMetadata>, jni::alias_ref<JNativeBloodPressureBodyPosition>, jni::alias_ref<JNativeBloodPressureMeasurementLocation>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
@@ -87,12 +82,9 @@ namespace margelo::nitro::nitrohealth {
         value.timeMs,
         value.systolicMmHg,
         value.diastolicMmHg,
-        value.device.has_value() ? JNativeHealthDeviceInfo::fromCpp(value.device.value()) : nullptr,
-        value.recordingMethod.has_value() ? JNativeHealthRecordingMethod::fromCpp(value.recordingMethod.value()) : nullptr,
+        JNativeHealthWriteMetadata::fromCpp(value.writeMetadata),
         value.androidBodyPosition.has_value() ? JNativeBloodPressureBodyPosition::fromCpp(value.androidBodyPosition.value()) : nullptr,
-        value.androidMeasurementLocation.has_value() ? JNativeBloodPressureMeasurementLocation::fromCpp(value.androidMeasurementLocation.value()) : nullptr,
-        value.syncId.has_value() ? jni::make_jstring(value.syncId.value()) : nullptr,
-        value.syncVersion.has_value() ? jni::JDouble::valueOf(value.syncVersion.value()) : nullptr
+        value.androidMeasurementLocation.has_value() ? JNativeBloodPressureMeasurementLocation::fromCpp(value.androidMeasurementLocation.value()) : nullptr
       );
     }
   };
