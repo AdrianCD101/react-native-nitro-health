@@ -22,6 +22,28 @@ function assertSampleIdentityAndOrigin(sample: HealthSample): void {
   expect(typeof sample.origin.identifier).toBe('string')
   expect(sample.origin.identifier.length).toBeGreaterThan(0)
   expect(['string', 'undefined']).toContain(typeof sample.origin.displayName)
+
+  if (sample.device !== undefined) {
+    expect([
+      'unknown',
+      'watch',
+      'phone',
+      'scale',
+      'ring',
+      'head-mounted',
+      'fitness-band',
+      'chest-strap',
+      'smart-display',
+      undefined,
+    ]).toContain(sample.device.type)
+    expect(['string', 'undefined']).toContain(typeof sample.device.manufacturer)
+    expect(['string', 'undefined']).toContain(typeof sample.device.model)
+    expect(
+      sample.device.type !== undefined ||
+        sample.device.manufacturer !== undefined ||
+        sample.device.model !== undefined
+    ).toBe(true)
+  }
 }
 
 function assertMetric(metric: HealthMetricValue): void {

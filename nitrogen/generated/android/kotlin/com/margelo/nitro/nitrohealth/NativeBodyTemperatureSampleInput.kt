@@ -26,6 +26,9 @@ data class NativeBodyTemperatureSampleInput(
   val celsius: Double,
   @DoNotStrip
   @Keep
+  val device: NativeHealthDeviceInfo?,
+  @DoNotStrip
+  @Keep
   val recordingMethod: NativeHealthRecordingMethod?,
   @DoNotStrip
   @Keep
@@ -47,6 +50,7 @@ data class NativeBodyTemperatureSampleInput(
     if (other !is NativeBodyTemperatureSampleInput) return false
     return Objects.deepEquals(this.timeMs, other.timeMs)
       && Objects.deepEquals(this.celsius, other.celsius)
+      && Objects.deepEquals(this.device, other.device)
       && Objects.deepEquals(this.recordingMethod, other.recordingMethod)
       && Objects.deepEquals(this.androidMeasurementLocation, other.androidMeasurementLocation)
       && Objects.deepEquals(this.iosSensorLocation, other.iosSensorLocation)
@@ -58,6 +62,7 @@ data class NativeBodyTemperatureSampleInput(
     return arrayOf<Any?>(
       timeMs,
       celsius,
+      device,
       recordingMethod,
       androidMeasurementLocation,
       iosSensorLocation,
@@ -74,8 +79,8 @@ data class NativeBodyTemperatureSampleInput(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(timeMs: Double, celsius: Double, recordingMethod: NativeHealthRecordingMethod?, androidMeasurementLocation: NativeAndroidBodyTemperatureMeasurementLocation?, iosSensorLocation: NativeIOSBodyTemperatureSensorLocation?, syncId: String?, syncVersion: Double?): NativeBodyTemperatureSampleInput {
-      return NativeBodyTemperatureSampleInput(timeMs, celsius, recordingMethod, androidMeasurementLocation, iosSensorLocation, syncId, syncVersion)
+    private fun fromCpp(timeMs: Double, celsius: Double, device: NativeHealthDeviceInfo?, recordingMethod: NativeHealthRecordingMethod?, androidMeasurementLocation: NativeAndroidBodyTemperatureMeasurementLocation?, iosSensorLocation: NativeIOSBodyTemperatureSensorLocation?, syncId: String?, syncVersion: Double?): NativeBodyTemperatureSampleInput {
+      return NativeBodyTemperatureSampleInput(timeMs, celsius, device, recordingMethod, androidMeasurementLocation, iosSensorLocation, syncId, syncVersion)
     }
   }
 }

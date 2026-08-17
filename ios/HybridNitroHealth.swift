@@ -41,6 +41,7 @@ class HybridNitroHealth: HybridNitroHealthSpec {
                 return NativeStepSample(
                     identity: quantitySample.nativeHealthSampleIdentity,
                     origin: quantitySample.nativeHealthDataOrigin,
+                    device: quantitySample.nativeHealthDeviceInfo,
                     recordingMethod: quantitySample.nativeHealthRecordingMethod,
                     startTimeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
                     endTimeMs: quantitySample.endDate.timeIntervalSince1970 * 1000,
@@ -74,6 +75,7 @@ class HybridNitroHealth: HybridNitroHealthSpec {
                 return NativeDistanceSample(
                     identity: quantitySample.nativeHealthSampleIdentity,
                     origin: quantitySample.nativeHealthDataOrigin,
+                    device: quantitySample.nativeHealthDeviceInfo,
                     recordingMethod: quantitySample.nativeHealthRecordingMethod,
                     startTimeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
                     endTimeMs: quantitySample.endDate.timeIntervalSince1970 * 1000,
@@ -108,6 +110,7 @@ class HybridNitroHealth: HybridNitroHealthSpec {
                 return NativeActiveEnergyBurnedSample(
                     identity: quantitySample.nativeHealthSampleIdentity,
                     origin: quantitySample.nativeHealthDataOrigin,
+                    device: quantitySample.nativeHealthDeviceInfo,
                     recordingMethod: quantitySample.nativeHealthRecordingMethod,
                     startTimeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
                     endTimeMs: quantitySample.endDate.timeIntervalSince1970 * 1000,
@@ -142,6 +145,7 @@ class HybridNitroHealth: HybridNitroHealthSpec {
                 return NativeHydrationSample(
                     identity: quantitySample.nativeHealthSampleIdentity,
                     origin: quantitySample.nativeHealthDataOrigin,
+                    device: quantitySample.nativeHealthDeviceInfo,
                     recordingMethod: quantitySample.nativeHealthRecordingMethod,
                     startTimeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
                     endTimeMs: quantitySample.endDate.timeIntervalSince1970 * 1000,
@@ -175,6 +179,7 @@ class HybridNitroHealth: HybridNitroHealthSpec {
                 return NativeFloorsClimbedSample(
                     identity: quantitySample.nativeHealthSampleIdentity,
                     origin: quantitySample.nativeHealthDataOrigin,
+                    device: quantitySample.nativeHealthDeviceInfo,
                     recordingMethod: quantitySample.nativeHealthRecordingMethod,
                     startTimeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
                     endTimeMs: quantitySample.endDate.timeIntervalSince1970 * 1000,
@@ -210,6 +215,7 @@ class HybridNitroHealth: HybridNitroHealthSpec {
                 return NativeHeartRateSample(
                     identity: quantitySample.nativeHealthSampleIdentity,
                     origin: quantitySample.nativeHealthDataOrigin,
+                    device: quantitySample.nativeHealthDeviceInfo,
                     recordingMethod: quantitySample.nativeHealthRecordingMethod,
                     timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
                     bpm: quantitySample.quantity.doubleValue(for: bpmUnit)
@@ -231,6 +237,7 @@ class HybridNitroHealth: HybridNitroHealthSpec {
                 NativeBodyMassSample(
                     identity: quantitySample.nativeHealthSampleIdentity,
                     origin: quantitySample.nativeHealthDataOrigin,
+                    device: quantitySample.nativeHealthDeviceInfo,
                     recordingMethod: quantitySample.nativeHealthRecordingMethod,
                     startTimeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
                     endTimeMs: quantitySample.endDate.timeIntervalSince1970 * 1000,

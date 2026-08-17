@@ -12,6 +12,8 @@
 
 #include "JNativeAndroidVo2MaxMeasurementMethod.hpp"
 #include "JNativeHealthDataOrigin.hpp"
+#include "JNativeHealthDeviceInfo.hpp"
+#include "JNativeHealthDeviceType.hpp"
 #include "JNativeHealthRecordingMethod.hpp"
 #include "JNativeHealthSampleIdentity.hpp"
 #include "JNativeHealthSampleIdentityKind.hpp"
@@ -19,6 +21,8 @@
 #include "JNativeVo2MaxSample.hpp"
 #include "NativeAndroidVo2MaxMeasurementMethod.hpp"
 #include "NativeHealthDataOrigin.hpp"
+#include "NativeHealthDeviceInfo.hpp"
+#include "NativeHealthDeviceType.hpp"
 #include "NativeHealthRecordingMethod.hpp"
 #include "NativeHealthSampleIdentity.hpp"
 #include "NativeHealthSampleIdentityKind.hpp"

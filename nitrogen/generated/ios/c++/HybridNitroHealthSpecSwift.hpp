@@ -52,6 +52,10 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthSampleIdentity; }
 namespace margelo::nitro::nitrohealth { enum class NativeHealthSampleIdentityKind; }
 // Forward declaration of `NativeHealthDataOrigin` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthDataOrigin; }
+// Forward declaration of `NativeHealthDeviceInfo` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthDeviceInfo; }
+// Forward declaration of `NativeHealthDeviceType` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeHealthDeviceType; }
 // Forward declaration of `NativeHealthRecordingMethod` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class NativeHealthRecordingMethod; }
 // Forward declaration of `NativeHeartRateSample` to properly resolve imports.
@@ -274,6 +278,8 @@ namespace margelo::nitro::nitrohealth { enum class NativeHealthAuthorizationStat
 #include "NativeHealthSampleIdentity.hpp"
 #include "NativeHealthSampleIdentityKind.hpp"
 #include "NativeHealthDataOrigin.hpp"
+#include "NativeHealthDeviceInfo.hpp"
+#include "NativeHealthDeviceType.hpp"
 #include "NativeHealthRecordingMethod.hpp"
 #include "NativeHeartRateSample.hpp"
 #include "NativeBloodPressureSample.hpp"

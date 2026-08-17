@@ -14,11 +14,15 @@
 #include "JNativeBloodGlucoseMealType.hpp"
 #include "JNativeBloodGlucoseRelationToMeal.hpp"
 #include "JNativeBloodGlucoseSpecimenSource.hpp"
+#include "JNativeHealthDeviceInfo.hpp"
+#include "JNativeHealthDeviceType.hpp"
 #include "JNativeHealthRecordingMethod.hpp"
 #include "NativeBloodGlucoseMealTime.hpp"
 #include "NativeBloodGlucoseMealType.hpp"
 #include "NativeBloodGlucoseRelationToMeal.hpp"
 #include "NativeBloodGlucoseSpecimenSource.hpp"
+#include "NativeHealthDeviceInfo.hpp"
+#include "NativeHealthDeviceType.hpp"
 #include "NativeHealthRecordingMethod.hpp"
 #include <optional>
 #include <string>
@@ -46,6 +50,8 @@ namespace margelo::nitro::nitrohealth {
       double timeMs = this->getFieldValue(fieldTimeMs);
       static const auto fieldMillimolesPerLiter = clazz->getField<double>("millimolesPerLiter");
       double millimolesPerLiter = this->getFieldValue(fieldMillimolesPerLiter);
+      static const auto fieldDevice = clazz->getField<JNativeHealthDeviceInfo>("device");
+      jni::local_ref<JNativeHealthDeviceInfo> device = this->getFieldValue(fieldDevice);
       static const auto fieldRecordingMethod = clazz->getField<JNativeHealthRecordingMethod>("recordingMethod");
       jni::local_ref<JNativeHealthRecordingMethod> recordingMethod = this->getFieldValue(fieldRecordingMethod);
       static const auto fieldAndroidSpecimenSource = clazz->getField<JNativeBloodGlucoseSpecimenSource>("androidSpecimenSource");
@@ -63,6 +69,7 @@ namespace margelo::nitro::nitrohealth {
       return NativeBloodGlucoseSampleInput(
         timeMs,
         millimolesPerLiter,
+        device != nullptr ? std::make_optional(device->toCpp()) : std::nullopt,
         recordingMethod != nullptr ? std::make_optional(recordingMethod->toCpp()) : std::nullopt,
         androidSpecimenSource != nullptr ? std::make_optional(androidSpecimenSource->toCpp()) : std::nullopt,
         androidMealType != nullptr ? std::make_optional(androidMealType->toCpp()) : std::nullopt,
@@ -79,13 +86,14 @@ namespace margelo::nitro::nitrohealth {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeBloodGlucoseSampleInput::javaobject> fromCpp(const NativeBloodGlucoseSampleInput& value) {
-      using JSignature = JNativeBloodGlucoseSampleInput(double, double, jni::alias_ref<JNativeHealthRecordingMethod>, jni::alias_ref<JNativeBloodGlucoseSpecimenSource>, jni::alias_ref<JNativeBloodGlucoseMealType>, jni::alias_ref<JNativeBloodGlucoseRelationToMeal>, jni::alias_ref<JNativeBloodGlucoseMealTime>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JDouble>);
+      using JSignature = JNativeBloodGlucoseSampleInput(double, double, jni::alias_ref<JNativeHealthDeviceInfo>, jni::alias_ref<JNativeHealthRecordingMethod>, jni::alias_ref<JNativeBloodGlucoseSpecimenSource>, jni::alias_ref<JNativeBloodGlucoseMealType>, jni::alias_ref<JNativeBloodGlucoseRelationToMeal>, jni::alias_ref<JNativeBloodGlucoseMealTime>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JDouble>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
         clazz,
         value.timeMs,
         value.millimolesPerLiter,
+        value.device.has_value() ? JNativeHealthDeviceInfo::fromCpp(value.device.value()) : nullptr,
         value.recordingMethod.has_value() ? JNativeHealthRecordingMethod::fromCpp(value.recordingMethod.value()) : nullptr,
         value.androidSpecimenSource.has_value() ? JNativeBloodGlucoseSpecimenSource::fromCpp(value.androidSpecimenSource.value()) : nullptr,
         value.androidMealType.has_value() ? JNativeBloodGlucoseMealType::fromCpp(value.androidMealType.value()) : nullptr,

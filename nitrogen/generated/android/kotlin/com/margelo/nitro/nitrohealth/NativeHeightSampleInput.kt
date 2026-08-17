@@ -26,6 +26,9 @@ data class NativeHeightSampleInput(
   val meters: Double,
   @DoNotStrip
   @Keep
+  val device: NativeHealthDeviceInfo?,
+  @DoNotStrip
+  @Keep
   val recordingMethod: NativeHealthRecordingMethod?,
   @DoNotStrip
   @Keep
@@ -41,6 +44,7 @@ data class NativeHeightSampleInput(
     if (other !is NativeHeightSampleInput) return false
     return Objects.deepEquals(this.timeMs, other.timeMs)
       && Objects.deepEquals(this.meters, other.meters)
+      && Objects.deepEquals(this.device, other.device)
       && Objects.deepEquals(this.recordingMethod, other.recordingMethod)
       && Objects.deepEquals(this.syncId, other.syncId)
       && Objects.deepEquals(this.syncVersion, other.syncVersion)
@@ -50,6 +54,7 @@ data class NativeHeightSampleInput(
     return arrayOf<Any?>(
       timeMs,
       meters,
+      device,
       recordingMethod,
       syncId,
       syncVersion
@@ -64,8 +69,8 @@ data class NativeHeightSampleInput(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(timeMs: Double, meters: Double, recordingMethod: NativeHealthRecordingMethod?, syncId: String?, syncVersion: Double?): NativeHeightSampleInput {
-      return NativeHeightSampleInput(timeMs, meters, recordingMethod, syncId, syncVersion)
+    private fun fromCpp(timeMs: Double, meters: Double, device: NativeHealthDeviceInfo?, recordingMethod: NativeHealthRecordingMethod?, syncId: String?, syncVersion: Double?): NativeHeightSampleInput {
+      return NativeHeightSampleInput(timeMs, meters, device, recordingMethod, syncId, syncVersion)
     }
   }
 }

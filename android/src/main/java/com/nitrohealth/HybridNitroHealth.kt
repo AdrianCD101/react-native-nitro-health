@@ -399,6 +399,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                     NativeStepSample(
                         identity = makeRecordIdentity(record.metadata.id),
                         origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
+                        device = makeNativeHealthDeviceInfo(record.metadata.device),
                         recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
                         startTimeMs = record.startTime.toEpochMilli().toDouble(),
                         endTimeMs = record.endTime.toEpochMilli().toDouble(),
@@ -439,6 +440,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                     NativeDistanceSample(
                         identity = makeRecordIdentity(record.metadata.id),
                         origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
+                        device = makeNativeHealthDeviceInfo(record.metadata.device),
                         recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
                         startTimeMs = record.startTime.toEpochMilli().toDouble(),
                         endTimeMs = record.endTime.toEpochMilli().toDouble(),
@@ -480,6 +482,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                     NativeActiveEnergyBurnedSample(
                         identity = makeRecordIdentity(record.metadata.id),
                         origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
+                        device = makeNativeHealthDeviceInfo(record.metadata.device),
                         recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
                         startTimeMs = record.startTime.toEpochMilli().toDouble(),
                         endTimeMs = record.endTime.toEpochMilli().toDouble(),
@@ -520,6 +523,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                     NativeHydrationSample(
                         identity = makeRecordIdentity(record.metadata.id),
                         origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
+                        device = makeNativeHealthDeviceInfo(record.metadata.device),
                         recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
                         startTimeMs = record.startTime.toEpochMilli().toDouble(),
                         endTimeMs = record.endTime.toEpochMilli().toDouble(),
@@ -560,6 +564,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                     NativeFloorsClimbedSample(
                         identity = makeRecordIdentity(record.metadata.id),
                         origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
+                        device = makeNativeHealthDeviceInfo(record.metadata.device),
                         recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
                         startTimeMs = record.startTime.toEpochMilli().toDouble(),
                         endTimeMs = record.endTime.toEpochMilli().toDouble(),
@@ -626,6 +631,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                     NativeBodyMassSample(
                         identity = makeRecordIdentity(record.metadata.id),
                         origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
+                        device = makeNativeHealthDeviceInfo(record.metadata.device),
                         recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
                         startTimeMs = record.time.toEpochMilli().toDouble(),
                         endTimeMs = record.time.toEpochMilli().toDouble(),
@@ -721,6 +727,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                     NativeRespiratoryRateSample(
                         identity = makeRecordIdentity(record.metadata.id),
                         origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
+                        device = makeNativeHealthDeviceInfo(record.metadata.device),
                         recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
                         timeMs = record.time.toEpochMilli().toDouble(),
                         breathsPerMinute = record.rate
@@ -741,6 +748,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                     NativeBodyFatSample(
                         identity = makeRecordIdentity(record.metadata.id),
                         origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
+                        device = makeNativeHealthDeviceInfo(record.metadata.device),
                         recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
                         timeMs = record.time.toEpochMilli().toDouble(),
                         percentage = record.percentage.value
@@ -761,6 +769,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                     NativeLeanBodyMassSample(
                         identity = makeRecordIdentity(record.metadata.id),
                         origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
+                        device = makeNativeHealthDeviceInfo(record.metadata.device),
                         recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
                         timeMs = record.time.toEpochMilli().toDouble(),
                         kilograms = record.mass.inKilograms
@@ -793,6 +802,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                     NativeRestingHeartRateSample(
                         identity = makeRecordIdentity(record.metadata.id),
                         origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
+                        device = makeNativeHealthDeviceInfo(record.metadata.device),
                         recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
                         timeMs = record.time.toEpochMilli().toDouble(),
                         bpm = record.beatsPerMinute.toDouble()
@@ -813,6 +823,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                     NativeHeartRateVariabilitySample(
                         identity = makeRecordIdentity(record.metadata.id),
                         origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
+                        device = makeNativeHealthDeviceInfo(record.metadata.device),
                         recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
                         timeMs = record.time.toEpochMilli().toDouble(),
                         milliseconds = record.heartRateVariabilityMillis,
@@ -834,6 +845,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                     NativeOxygenSaturationSample(
                         identity = makeRecordIdentity(record.metadata.id),
                         origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
+                        device = makeNativeHealthDeviceInfo(record.metadata.device),
                         recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
                         timeMs = record.time.toEpochMilli().toDouble(),
                         percentage = record.percentage.value
@@ -852,6 +864,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                     NativeHeightSample(
                         identity = makeRecordIdentity(record.metadata.id),
                         origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
+                        device = makeNativeHealthDeviceInfo(record.metadata.device),
                         recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
                         timeMs = record.time.toEpochMilli().toDouble(),
                         meters = record.height.inMeters

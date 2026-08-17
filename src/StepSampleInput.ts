@@ -1,3 +1,4 @@
+import type { HealthDeviceInfo } from './HealthDeviceInfo'
 import type { HealthRecordSync } from './HealthRecordSync'
 import type { HealthRecordingMethod } from './HealthRecordingMethod'
 
@@ -9,6 +10,8 @@ export interface StepSampleInput {
   endDate: Date
   /** Number of steps recorded during the sample range (1 to 1,000,000). */
   count: number
+  /** Physical device asserted as having generated this sample. */
+  device?: HealthDeviceInfo
   /**
    * Requested recording method. On iOS, active and automatic recording degrade to `unknown`.
    * @default 'unknown'

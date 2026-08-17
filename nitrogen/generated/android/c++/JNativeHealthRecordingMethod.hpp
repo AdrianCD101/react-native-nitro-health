@@ -45,15 +45,15 @@ namespace margelo::nitro::nitrohealth {
         case NativeHealthRecordingMethod::MANUAL:
           static const auto fieldMANUAL = clazz->getStaticField<JNativeHealthRecordingMethod>("MANUAL");
           return clazz->getStaticFieldValue(fieldMANUAL);
+        case NativeHealthRecordingMethod::UNKNOWN:
+          static const auto fieldUNKNOWN = clazz->getStaticField<JNativeHealthRecordingMethod>("UNKNOWN");
+          return clazz->getStaticFieldValue(fieldUNKNOWN);
         case NativeHealthRecordingMethod::ACTIVELYRECORDED:
           static const auto fieldACTIVELYRECORDED = clazz->getStaticField<JNativeHealthRecordingMethod>("ACTIVELYRECORDED");
           return clazz->getStaticFieldValue(fieldACTIVELYRECORDED);
         case NativeHealthRecordingMethod::AUTOMATICALLYRECORDED:
           static const auto fieldAUTOMATICALLYRECORDED = clazz->getStaticField<JNativeHealthRecordingMethod>("AUTOMATICALLYRECORDED");
           return clazz->getStaticFieldValue(fieldAUTOMATICALLYRECORDED);
-        case NativeHealthRecordingMethod::UNKNOWN:
-          static const auto fieldUNKNOWN = clazz->getStaticField<JNativeHealthRecordingMethod>("UNKNOWN");
-          return clazz->getStaticFieldValue(fieldUNKNOWN);
         default:
           std::string stringValue = std::to_string(static_cast<int>(value));
           throw std::invalid_argument("Invalid enum value (" + stringValue + "!");

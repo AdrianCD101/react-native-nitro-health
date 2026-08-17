@@ -1,3 +1,4 @@
+import type { NativeHealthDeviceInfo } from './NativeHealthDeviceInfo'
 import type { NativeHealthRecordingMethod } from './NativeHealthRecordingMethod'
 import type { NativeSleepSessionStageInput } from './NativeSleepSessionStageInput'
 
@@ -7,5 +8,6 @@ export interface NativeSleepSessionInput {
   endTimeMs: number
   stages: NativeSleepSessionStageInput[]
   timeZone?: string
+  device?: NativeHealthDeviceInfo
   recordingMethod?: NativeHealthRecordingMethod
 }

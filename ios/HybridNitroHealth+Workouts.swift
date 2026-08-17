@@ -49,7 +49,7 @@ extension HybridNitroHealth {
             let builder = HKWorkoutBuilder(
                 healthStore: healthStore,
                 configuration: input.configuration,
-                device: nil
+                device: input.device
             )
 
             do {

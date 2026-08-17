@@ -73,6 +73,7 @@ internal fun makeNativeBloodPressureSample(record: BloodPressureRecord): NativeB
     return NativeBloodPressureSample(
         identity = makeRecordIdentity(record.metadata.id),
         origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
+        device = makeNativeHealthDeviceInfo(record.metadata.device),
         recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
         timeMs = record.time.toEpochMilli().toDouble(),
         systolicMmHg = record.systolic.inMillimetersOfMercury,

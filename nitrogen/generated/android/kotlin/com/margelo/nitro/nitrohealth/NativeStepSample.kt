@@ -26,6 +26,9 @@ data class NativeStepSample(
   val origin: NativeHealthDataOrigin,
   @DoNotStrip
   @Keep
+  val device: NativeHealthDeviceInfo?,
+  @DoNotStrip
+  @Keep
   val recordingMethod: NativeHealthRecordingMethod,
   @DoNotStrip
   @Keep
@@ -44,6 +47,7 @@ data class NativeStepSample(
     if (other !is NativeStepSample) return false
     return Objects.deepEquals(this.identity, other.identity)
       && Objects.deepEquals(this.origin, other.origin)
+      && Objects.deepEquals(this.device, other.device)
       && Objects.deepEquals(this.recordingMethod, other.recordingMethod)
       && Objects.deepEquals(this.startTimeMs, other.startTimeMs)
       && Objects.deepEquals(this.endTimeMs, other.endTimeMs)
@@ -54,6 +58,7 @@ data class NativeStepSample(
     return arrayOf<Any?>(
       identity,
       origin,
+      device,
       recordingMethod,
       startTimeMs,
       endTimeMs,
@@ -69,8 +74,8 @@ data class NativeStepSample(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, recordingMethod: NativeHealthRecordingMethod, startTimeMs: Double, endTimeMs: Double, count: Double): NativeStepSample {
-      return NativeStepSample(identity, origin, recordingMethod, startTimeMs, endTimeMs, count)
+    private fun fromCpp(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, device: NativeHealthDeviceInfo?, recordingMethod: NativeHealthRecordingMethod, startTimeMs: Double, endTimeMs: Double, count: Double): NativeStepSample {
+      return NativeStepSample(identity, origin, device, recordingMethod, startTimeMs, endTimeMs, count)
     }
   }
 }

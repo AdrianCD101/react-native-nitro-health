@@ -17,7 +17,6 @@ const origin = {
   identifier: 'react-native-nitro-health.mock',
   displayName: 'Nitro Health Jest Mock',
 }
-
 describe('NitroHealth Jest mock', () => {
   beforeEach(() => {
     resetNitroHealthMock()
@@ -71,6 +70,12 @@ describe('NitroHealth Jest mock', () => {
       'manual',
       'unknown',
       'actively-recorded',
+    ])
+    expect(page.samples.map(({ device }) => device)).toEqual([
+      { type: 'unknown' },
+      undefined,
+      undefined,
+      { type: 'unknown' },
     ])
   })
 
@@ -169,6 +174,7 @@ describe('NitroHealth Jest mock', () => {
       storedRecordingMethods: ['manual', 'unknown', 'unknown', 'unknown', 'unknown'],
     })
     const page = await observer.readRestingHeartRate(range)
+    expect(page.samples.every(({ device }) => device === undefined)).toBe(true)
     expect(page.samples.map(({ recordingMethod }) => recordingMethod)).toEqual([
       'manual',
       'unknown',
@@ -214,6 +220,34 @@ describe('NitroHealth Jest mock', () => {
         distanceMeters: 1000,
       })
     )
+  })
+
+  it('round-trips caller-supplied device provenance using platform projection', async () => {
+    await NitroHealth.saveDistance([
+      {
+        ...interval,
+        scope: 'walking-running',
+        distanceMeters: 100,
+        device: { manufacturer: 'Caller' },
+      },
+    ])
+    const observer = createNitroHealthMock({ profile: 'observer' })
+    await observer.saveDistance([
+      {
+        ...interval,
+        scope: 'walking-running',
+        distanceMeters: 100,
+        device: { manufacturer: 'Caller' },
+      },
+    ])
+
+    expect((await NitroHealth.readDistance(range)).samples[0]?.device).toEqual({
+      manufacturer: 'Caller',
+      type: 'unknown',
+    })
+    expect((await observer.readDistance(range)).samples[0]?.device).toEqual({
+      manufacturer: 'Caller',
+    })
   })
 
   it('stores one public sleep envelope per session with aligned methods', async () => {

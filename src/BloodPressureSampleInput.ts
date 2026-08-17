@@ -1,4 +1,5 @@
 import type { BloodPressureMetadata } from './BloodPressureMetadata'
+import type { HealthDeviceInfo } from './HealthDeviceInfo'
 import type { HealthRecordSync } from './HealthRecordSync'
 import type { HealthRecordingMethod } from './HealthRecordingMethod'
 
@@ -10,6 +11,8 @@ export interface BloodPressureSampleInput {
   systolicMmHg: number
   /** Diastolic pressure in millimeters of mercury. Must be between 10 and 180 inclusive. */
   diastolicMmHg: number
+  /** Physical device asserted as having generated this sample. */
+  device?: HealthDeviceInfo
   /** Platform-scoped fields retained by the native health store. */
   metadata?: BloodPressureMetadata
   /**

@@ -1,4 +1,5 @@
 import type { HealthDataOrigin } from './HealthDataOrigin'
+import type { HealthDeviceInfo } from './HealthDeviceInfo'
 import type { HealthRecordingMethod } from './HealthRecordingMethod'
 import type { HealthSampleIdentity } from './HealthSampleIdentity'
 
@@ -8,6 +9,8 @@ export interface HealthSample {
   identity: HealthSampleIdentity
   /** Application that originally recorded this sample. */
   origin: HealthDataOrigin
+  /** Physical device that generated this sample, when reported. */
+  device?: HealthDeviceInfo
   /** Method retained by the native health service for this sample. */
   recordingMethod: HealthRecordingMethod
 }

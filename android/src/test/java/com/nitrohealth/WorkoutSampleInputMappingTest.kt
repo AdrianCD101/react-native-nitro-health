@@ -1,7 +1,10 @@
 package com.nitrohealth
 
 import androidx.health.connect.client.records.ExerciseSessionRecord
+import androidx.health.connect.client.records.metadata.Device
 import androidx.health.connect.client.records.metadata.Metadata
+import com.margelo.nitro.nitrohealth.NativeHealthDeviceInfo
+import com.margelo.nitro.nitrohealth.NativeHealthDeviceType
 import com.margelo.nitro.nitrohealth.NativeHealthRecordingMethod
 import com.margelo.nitro.nitrohealth.NativeWorkoutSampleInput
 import java.time.Instant
@@ -23,6 +26,11 @@ class WorkoutSampleInputMappingTest {
                 activityType = "running",
                 displayName = "Morning Run",
                 timeZone = "America/New_York",
+                device = NativeHealthDeviceInfo(
+                    type = NativeHealthDeviceType.WATCH,
+                    manufacturer = "Example",
+                    model = "Run Watch"
+                ),
                 recordingMethod = NativeHealthRecordingMethod.ACTIVELYRECORDED,
                 syncId = "workout-1",
                 syncVersion = 2.0
@@ -38,6 +46,9 @@ class WorkoutSampleInputMappingTest {
         assertEquals("workout-1", record.metadata.clientRecordId)
         assertEquals(2L, record.metadata.clientRecordVersion)
         assertEquals(Metadata.RECORDING_METHOD_ACTIVELY_RECORDED, record.metadata.recordingMethod)
+        assertEquals(Device.TYPE_WATCH, record.metadata.device?.type)
+        assertEquals("Example", record.metadata.device?.manufacturer)
+        assertEquals("Run Watch", record.metadata.device?.model)
     }
 
     @Test
@@ -50,6 +61,7 @@ class WorkoutSampleInputMappingTest {
                     activityType = "running",
                     displayName = null,
                     timeZone = "UTC",
+                    device = null,
                     recordingMethod = null,
                     syncId = null,
                     syncVersion = null
@@ -64,6 +76,7 @@ class WorkoutSampleInputMappingTest {
                     activityType = "archery",
                     displayName = null,
                     timeZone = "UTC",
+                    device = null,
                     recordingMethod = null,
                     syncId = null,
                     syncVersion = null

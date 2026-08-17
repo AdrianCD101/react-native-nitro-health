@@ -18,8 +18,14 @@ public extension NativeBasalBodyTemperatureSampleInput {
   /**
    * Create a new instance of `NativeBasalBodyTemperatureSampleInput`.
    */
-  init(timeMs: Double, celsius: Double, recordingMethod: NativeHealthRecordingMethod?, androidMeasurementLocation: NativeAndroidBodyTemperatureMeasurementLocation?, iosSensorLocation: NativeIOSBodyTemperatureSensorLocation?, syncId: String?, syncVersion: Double?) {
-    self.init(timeMs, celsius, { () -> bridge.std__optional_NativeHealthRecordingMethod_ in
+  init(timeMs: Double, celsius: Double, device: NativeHealthDeviceInfo?, recordingMethod: NativeHealthRecordingMethod?, androidMeasurementLocation: NativeAndroidBodyTemperatureMeasurementLocation?, iosSensorLocation: NativeIOSBodyTemperatureSensorLocation?, syncId: String?, syncVersion: Double?) {
+    self.init(timeMs, celsius, { () -> bridge.std__optional_NativeHealthDeviceInfo_ in
+      if let __unwrappedValue = device {
+        return bridge.create_std__optional_NativeHealthDeviceInfo_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_NativeHealthRecordingMethod_ in
       if let __unwrappedValue = recordingMethod {
         return bridge.create_std__optional_NativeHealthRecordingMethod_(__unwrappedValue)
       } else {
@@ -60,6 +66,11 @@ public extension NativeBasalBodyTemperatureSampleInput {
   @inline(__always)
   var celsius: Double {
     return self.__celsius
+  }
+  
+  @inline(__always)
+  var device: NativeHealthDeviceInfo? {
+    return self.__device.value
   }
   
   @inline(__always)

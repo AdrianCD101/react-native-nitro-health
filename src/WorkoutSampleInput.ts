@@ -1,3 +1,4 @@
+import type { HealthDeviceInfo } from './HealthDeviceInfo'
 import type { HealthRecordSync } from './HealthRecordSync'
 import type { HealthRecordingMethod } from './HealthRecordingMethod'
 import type { WritableWorkoutActivityType } from './WritableWorkoutActivityType'
@@ -14,6 +15,8 @@ export interface WorkoutSampleInput {
   displayName?: string
   /** IANA time-zone identifier. Defaults to the device's current time zone. */
   timeZone?: string
+  /** Physical device asserted as having generated this workout. */
+  device?: HealthDeviceInfo
   /**
    * Requested recording method. On iOS, active and automatic recording degrade to `unknown`.
    * @default 'unknown'

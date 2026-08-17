@@ -30,9 +30,9 @@ namespace margelo::nitro::nitrohealth {
    */
   enum class NativeHealthRecordingMethod {
     MANUAL      SWIFT_NAME(manual) = 0,
-    ACTIVELYRECORDED      SWIFT_NAME(activelyrecorded) = 1,
-    AUTOMATICALLYRECORDED      SWIFT_NAME(automaticallyrecorded) = 2,
-    UNKNOWN      SWIFT_NAME(unknown) = 3,
+    UNKNOWN      SWIFT_NAME(unknown) = 1,
+    ACTIVELYRECORDED      SWIFT_NAME(activelyrecorded) = 2,
+    AUTOMATICALLYRECORDED      SWIFT_NAME(automaticallyrecorded) = 3,
   } CLOSED_ENUM;
 
 } // namespace margelo::nitro::nitrohealth
@@ -46,9 +46,9 @@ namespace margelo::nitro {
       std::string unionValue = JSIConverter<std::string>::fromJSI(runtime, arg);
       switch (hashString(unionValue.c_str(), unionValue.size())) {
         case hashString("manual"): return margelo::nitro::nitrohealth::NativeHealthRecordingMethod::MANUAL;
+        case hashString("unknown"): return margelo::nitro::nitrohealth::NativeHealthRecordingMethod::UNKNOWN;
         case hashString("activelyRecorded"): return margelo::nitro::nitrohealth::NativeHealthRecordingMethod::ACTIVELYRECORDED;
         case hashString("automaticallyRecorded"): return margelo::nitro::nitrohealth::NativeHealthRecordingMethod::AUTOMATICALLYRECORDED;
-        case hashString("unknown"): return margelo::nitro::nitrohealth::NativeHealthRecordingMethod::UNKNOWN;
         default: [[unlikely]]
           throw std::invalid_argument("Cannot convert \"" + unionValue + "\" to enum NativeHealthRecordingMethod - invalid value!");
       }
@@ -56,9 +56,9 @@ namespace margelo::nitro {
     static inline jsi::Value toJSI(jsi::Runtime& runtime, margelo::nitro::nitrohealth::NativeHealthRecordingMethod arg) {
       switch (arg) {
         case margelo::nitro::nitrohealth::NativeHealthRecordingMethod::MANUAL: return JSIConverter<std::string>::toJSI(runtime, "manual");
+        case margelo::nitro::nitrohealth::NativeHealthRecordingMethod::UNKNOWN: return JSIConverter<std::string>::toJSI(runtime, "unknown");
         case margelo::nitro::nitrohealth::NativeHealthRecordingMethod::ACTIVELYRECORDED: return JSIConverter<std::string>::toJSI(runtime, "activelyRecorded");
         case margelo::nitro::nitrohealth::NativeHealthRecordingMethod::AUTOMATICALLYRECORDED: return JSIConverter<std::string>::toJSI(runtime, "automaticallyRecorded");
-        case margelo::nitro::nitrohealth::NativeHealthRecordingMethod::UNKNOWN: return JSIConverter<std::string>::toJSI(runtime, "unknown");
         default: [[unlikely]]
           throw std::invalid_argument("Cannot convert NativeHealthRecordingMethod to JS - invalid value: "
                                     + std::to_string(static_cast<int>(arg)) + "!");
@@ -71,9 +71,9 @@ namespace margelo::nitro {
       std::string unionValue = JSIConverter<std::string>::fromJSI(runtime, value);
       switch (hashString(unionValue.c_str(), unionValue.size())) {
         case hashString("manual"):
+        case hashString("unknown"):
         case hashString("activelyRecorded"):
         case hashString("automaticallyRecorded"):
-        case hashString("unknown"):
           return true;
         default:
           return false;

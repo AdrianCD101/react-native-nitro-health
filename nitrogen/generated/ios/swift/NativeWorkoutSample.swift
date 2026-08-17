@@ -18,8 +18,14 @@ public extension NativeWorkoutSample {
   /**
    * Create a new instance of `NativeWorkoutSample`.
    */
-  init(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, recordingMethod: NativeHealthRecordingMethod, startTimeMs: Double, endTimeMs: Double, elapsedDurationSeconds: Double, activeDuration: NativeHealthMetricValue, activity: NativeWorkoutActivity, title: String?, brandName: String?, totalDistance: NativeHealthMetricValue, totalActiveEnergyBurned: NativeHealthMetricValue) {
-    self.init(identity, origin, recordingMethod, startTimeMs, endTimeMs, elapsedDurationSeconds, activeDuration, activity, { () -> bridge.std__optional_std__string_ in
+  init(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, device: NativeHealthDeviceInfo?, recordingMethod: NativeHealthRecordingMethod, startTimeMs: Double, endTimeMs: Double, elapsedDurationSeconds: Double, activeDuration: NativeHealthMetricValue, activity: NativeWorkoutActivity, title: String?, brandName: String?, totalDistance: NativeHealthMetricValue, totalActiveEnergyBurned: NativeHealthMetricValue) {
+    self.init(identity, origin, { () -> bridge.std__optional_NativeHealthDeviceInfo_ in
+      if let __unwrappedValue = device {
+        return bridge.create_std__optional_NativeHealthDeviceInfo_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), recordingMethod, startTimeMs, endTimeMs, elapsedDurationSeconds, activeDuration, activity, { () -> bridge.std__optional_std__string_ in
       if let __unwrappedValue = title {
         return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
       } else {
@@ -42,6 +48,11 @@ public extension NativeWorkoutSample {
   @inline(__always)
   var origin: NativeHealthDataOrigin {
     return self.__origin
+  }
+  
+  @inline(__always)
+  var device: NativeHealthDeviceInfo? {
+    return self.__device.value
   }
   
   @inline(__always)

@@ -104,6 +104,7 @@ internal fun makeNativeBloodGlucoseSample(record: BloodGlucoseRecord): NativeBlo
     return NativeBloodGlucoseSample(
         identity = makeRecordIdentity(record.metadata.id),
         origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
+        device = makeNativeHealthDeviceInfo(record.metadata.device),
         recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
         timeMs = record.time.toEpochMilli().toDouble(),
         millimolesPerLiter = record.level.inMillimolesPerLiter,

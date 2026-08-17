@@ -17,9 +17,9 @@ import com.facebook.proguard.annotations.DoNotStrip
 @Keep
 enum class NativeHealthRecordingMethod(@DoNotStrip @Keep val value: Int) {
   MANUAL(0),
-  ACTIVELYRECORDED(1),
-  AUTOMATICALLYRECORDED(2),
-  UNKNOWN(3);
+  UNKNOWN(1),
+  ACTIVELYRECORDED(2),
+  AUTOMATICALLYRECORDED(3);
 
   companion object
 }

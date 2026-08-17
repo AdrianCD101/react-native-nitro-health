@@ -18,8 +18,14 @@ public extension NativeVo2MaxSampleInput {
   /**
    * Create a new instance of `NativeVo2MaxSampleInput`.
    */
-  init(timeMs: Double, millilitersPerKilogramPerMinute: Double, recordingMethod: NativeHealthRecordingMethod?, androidMeasurementMethod: NativeAndroidVo2MaxMeasurementMethod?, iosTestType: NativeIOSVo2MaxTestType?, syncId: String?, syncVersion: Double?) {
-    self.init(timeMs, millilitersPerKilogramPerMinute, { () -> bridge.std__optional_NativeHealthRecordingMethod_ in
+  init(timeMs: Double, millilitersPerKilogramPerMinute: Double, device: NativeHealthDeviceInfo?, recordingMethod: NativeHealthRecordingMethod?, androidMeasurementMethod: NativeAndroidVo2MaxMeasurementMethod?, iosTestType: NativeIOSVo2MaxTestType?, syncId: String?, syncVersion: Double?) {
+    self.init(timeMs, millilitersPerKilogramPerMinute, { () -> bridge.std__optional_NativeHealthDeviceInfo_ in
+      if let __unwrappedValue = device {
+        return bridge.create_std__optional_NativeHealthDeviceInfo_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_NativeHealthRecordingMethod_ in
       if let __unwrappedValue = recordingMethod {
         return bridge.create_std__optional_NativeHealthRecordingMethod_(__unwrappedValue)
       } else {
@@ -60,6 +66,11 @@ public extension NativeVo2MaxSampleInput {
   @inline(__always)
   var millilitersPerKilogramPerMinute: Double {
     return self.__millilitersPerKilogramPerMinute
+  }
+  
+  @inline(__always)
+  var device: NativeHealthDeviceInfo? {
+    return self.__device.value
   }
   
   @inline(__always)

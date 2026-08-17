@@ -14,6 +14,22 @@ function assertOrigin(sample: HealthSample): void {
   expect(typeof sample.origin.identifier).toBe('string')
   expect(sample.origin.identifier.length).toBeGreaterThan(0)
   expect(['string', 'undefined']).toContain(typeof sample.origin.displayName)
+  if (sample.device !== undefined) {
+    expect([
+      'unknown',
+      'watch',
+      'phone',
+      'scale',
+      'ring',
+      'head-mounted',
+      'fitness-band',
+      'chest-strap',
+      'smart-display',
+      undefined,
+    ]).toContain(sample.device.type)
+    expect(['string', 'undefined']).toContain(typeof sample.device.manufacturer)
+    expect(['string', 'undefined']).toContain(typeof sample.device.model)
+  }
 }
 
 function getWorkoutDisplayName(workout: WorkoutSample): string | undefined {
@@ -125,6 +141,41 @@ describe('NitroHealth saves (native)', () => {
     assertConclusiveRead(page.samples)
 
     expect(page.samples.some((sample) => sample.count === 321)).toBe(true)
+  })
+
+  it('round-trips caller-asserted step device provenance with platform fidelity', async () => {
+    const authorized = await hasVerifiedPermissions([
+      { accessType: 'write', dataType: 'steps' },
+      { accessType: 'read', dataType: 'steps' },
+    ])
+    if (!authorized) return
+
+    const count = 654323
+    await NitroHealth.saveSteps([
+      {
+        ...saveInterval,
+        count,
+        device: {
+          type: 'watch',
+          manufacturer: 'Nitro Health',
+          model: 'Harness Sensor',
+        },
+        sync: { id: 'nitro-health-harness-device-provenance', version: 1 },
+      },
+    ])
+
+    const page = await NitroHealth.readSteps(saveReadRange)
+    assertConclusiveRead(page.samples)
+    const match = page.samples.find(
+      (sample) =>
+        sample.count === count &&
+        sample.startDate.getTime() === saveInterval.startDate.getTime() &&
+        sample.endDate.getTime() === saveInterval.endDate.getTime()
+    )
+    expect(match).toBeDefined()
+    expect(match?.device?.manufacturer).toBe('Nitro Health')
+    expect(match?.device?.model).toBe('Harness Sensor')
+    expect(match?.device?.type).toBe(Platform.OS === 'android' ? 'watch' : undefined)
   })
 
   it('round-trips manual and automatic step recording methods with platform fidelity', async () => {

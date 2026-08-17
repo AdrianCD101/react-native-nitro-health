@@ -26,6 +26,9 @@ data class NativeRestingHeartRateSample(
   val origin: NativeHealthDataOrigin,
   @DoNotStrip
   @Keep
+  val device: NativeHealthDeviceInfo?,
+  @DoNotStrip
+  @Keep
   val recordingMethod: NativeHealthRecordingMethod,
   @DoNotStrip
   @Keep
@@ -41,6 +44,7 @@ data class NativeRestingHeartRateSample(
     if (other !is NativeRestingHeartRateSample) return false
     return Objects.deepEquals(this.identity, other.identity)
       && Objects.deepEquals(this.origin, other.origin)
+      && Objects.deepEquals(this.device, other.device)
       && Objects.deepEquals(this.recordingMethod, other.recordingMethod)
       && Objects.deepEquals(this.timeMs, other.timeMs)
       && Objects.deepEquals(this.bpm, other.bpm)
@@ -50,6 +54,7 @@ data class NativeRestingHeartRateSample(
     return arrayOf<Any?>(
       identity,
       origin,
+      device,
       recordingMethod,
       timeMs,
       bpm
@@ -64,8 +69,8 @@ data class NativeRestingHeartRateSample(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, recordingMethod: NativeHealthRecordingMethod, timeMs: Double, bpm: Double): NativeRestingHeartRateSample {
-      return NativeRestingHeartRateSample(identity, origin, recordingMethod, timeMs, bpm)
+    private fun fromCpp(identity: NativeHealthSampleIdentity, origin: NativeHealthDataOrigin, device: NativeHealthDeviceInfo?, recordingMethod: NativeHealthRecordingMethod, timeMs: Double, bpm: Double): NativeRestingHeartRateSample {
+      return NativeRestingHeartRateSample(identity, origin, device, recordingMethod, timeMs, bpm)
     }
   }
 }

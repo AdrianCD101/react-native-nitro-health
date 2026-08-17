@@ -53,6 +53,7 @@ extension HybridNitroHealth {
                 NativeRestingHeartRateSample(
                     identity: quantitySample.nativeHealthSampleIdentity,
                     origin: quantitySample.nativeHealthDataOrigin,
+                    device: quantitySample.nativeHealthDeviceInfo,
                     recordingMethod: quantitySample.nativeHealthRecordingMethod,
                     timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
                     bpm: quantitySample.quantity.doubleValue(for: unit)
@@ -75,6 +76,7 @@ extension HybridNitroHealth {
                 NativeHeartRateVariabilitySample(
                     identity: quantitySample.nativeHealthSampleIdentity,
                     origin: quantitySample.nativeHealthDataOrigin,
+                    device: quantitySample.nativeHealthDeviceInfo,
                     recordingMethod: quantitySample.nativeHealthRecordingMethod,
                     timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
                     milliseconds: quantitySample.quantity.doubleValue(for: unit),
@@ -99,6 +101,7 @@ extension HybridNitroHealth {
                 NativeOxygenSaturationSample(
                     identity: quantitySample.nativeHealthSampleIdentity,
                     origin: quantitySample.nativeHealthDataOrigin,
+                    device: quantitySample.nativeHealthDeviceInfo,
                     recordingMethod: quantitySample.nativeHealthRecordingMethod,
                     timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
                     percentage: quantitySample.quantity.doubleValue(for: unit) * 100
@@ -147,6 +150,7 @@ extension HybridNitroHealth {
                 NativeRespiratoryRateSample(
                     identity: quantitySample.nativeHealthSampleIdentity,
                     origin: quantitySample.nativeHealthDataOrigin,
+                    device: quantitySample.nativeHealthDeviceInfo,
                     recordingMethod: quantitySample.nativeHealthRecordingMethod,
                     timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
                     breathsPerMinute: quantitySample.quantity.doubleValue(for: unit)
@@ -169,6 +173,7 @@ extension HybridNitroHealth {
                 NativeBodyFatSample(
                     identity: quantitySample.nativeHealthSampleIdentity,
                     origin: quantitySample.nativeHealthDataOrigin,
+                    device: quantitySample.nativeHealthDeviceInfo,
                     recordingMethod: quantitySample.nativeHealthRecordingMethod,
                     timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
                     percentage: quantitySample.quantity.doubleValue(for: unit) * 100
@@ -189,6 +194,7 @@ extension HybridNitroHealth {
                 NativeLeanBodyMassSample(
                     identity: quantitySample.nativeHealthSampleIdentity,
                     origin: quantitySample.nativeHealthDataOrigin,
+                    device: quantitySample.nativeHealthDeviceInfo,
                     recordingMethod: quantitySample.nativeHealthRecordingMethod,
                     timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
                     kilograms: quantitySample.quantity.doubleValue(for: unit)
@@ -223,6 +229,7 @@ extension HybridNitroHealth {
                 NativeHeightSample(
                     identity: quantitySample.nativeHealthSampleIdentity,
                     origin: quantitySample.nativeHealthDataOrigin,
+                    device: quantitySample.nativeHealthDeviceInfo,
                     recordingMethod: quantitySample.nativeHealthRecordingMethod,
                     timeMs: quantitySample.startDate.timeIntervalSince1970 * 1000,
                     meters: quantitySample.quantity.doubleValue(for: unit)

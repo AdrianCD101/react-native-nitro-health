@@ -1,6 +1,9 @@
 package com.nitrohealth
 
 import androidx.health.connect.client.records.HeartRateRecord
+import androidx.health.connect.client.records.metadata.Device
+import androidx.health.connect.client.records.metadata.Metadata
+import com.margelo.nitro.nitrohealth.NativeHealthDeviceType
 import com.margelo.nitro.nitrohealth.NativeHealthRecordingMethod
 import java.time.Instant
 import org.junit.Assert.assertEquals
@@ -8,7 +11,7 @@ import org.junit.Test
 
 class HeartRateRecordMappingTest {
     @Test
-    fun childrenInheritParentRecordingMethod() {
+    fun childrenInheritParentRecordingMethodAndDevice() {
         val startTime = Instant.parse("2026-01-01T00:00:00Z")
         val record = HeartRateRecord(
             startTime = startTime,
@@ -19,10 +22,12 @@ class HeartRateRecordMappingTest {
                 HeartRateRecord.Sample(startTime, 60),
                 HeartRateRecord.Sample(startTime.plusSeconds(60), 80)
             ),
-            metadata = makeSampleMetadata(
-                syncId = null,
-                syncVersion = null,
-                recordingMethod = NativeHealthRecordingMethod.ACTIVELYRECORDED
+            metadata = Metadata.activelyRecorded(
+                device = Device(
+                    type = Device.TYPE_WATCH,
+                    manufacturer = "Example Manufacturer",
+                    model = "Example Model"
+                )
             )
         )
 
@@ -31,6 +36,9 @@ class HeartRateRecordMappingTest {
         assertEquals(2, samples.size)
         samples.forEach {
             assertEquals(NativeHealthRecordingMethod.ACTIVELYRECORDED, it.recordingMethod)
+            assertEquals(NativeHealthDeviceType.WATCH, it.device!!.type)
+            assertEquals("Example Manufacturer", it.device.manufacturer)
+            assertEquals("Example Model", it.device.model)
         }
     }
 }

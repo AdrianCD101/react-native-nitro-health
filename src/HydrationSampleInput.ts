@@ -1,3 +1,4 @@
+import type { HealthDeviceInfo } from './HealthDeviceInfo'
 import type { HealthRecordSync } from './HealthRecordSync'
 import type { HealthRecordingMethod } from './HealthRecordingMethod'
 
@@ -9,6 +10,8 @@ export interface HydrationSampleInput {
   endDate: Date
   /** Water consumed during the sample range, in milliliters (0 to 100,000). */
   milliliters: number
+  /** Physical device asserted as having generated this sample. */
+  device?: HealthDeviceInfo
   /**
    * Requested recording method. On iOS, active and automatic recording degrade to `unknown`.
    * @default 'unknown'

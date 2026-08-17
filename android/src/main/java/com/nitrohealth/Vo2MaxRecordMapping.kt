@@ -48,6 +48,7 @@ internal fun makeNativeVo2MaxSample(record: Vo2MaxRecord): NativeVo2MaxSample {
     return NativeVo2MaxSample(
         identity = makeRecordIdentity(record.metadata.id),
         origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
+        device = makeNativeHealthDeviceInfo(record.metadata.device),
         recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
         timeMs = record.time.toEpochMilli().toDouble(),
         millilitersPerKilogramPerMinute = record.vo2MillilitersPerMinuteKilogram,

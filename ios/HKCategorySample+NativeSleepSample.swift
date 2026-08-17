@@ -9,6 +9,7 @@ extension HKCategorySample {
             return NativeSleepSample(
                 identity: nativeHealthSampleIdentity,
                 origin: nativeHealthDataOrigin,
+                device: nativeHealthDeviceInfo,
                 recordingMethod: nativeHealthRecordingMethod,
                 kind: .stage,
                 startTimeMs: startDate.timeIntervalSince1970 * 1000,

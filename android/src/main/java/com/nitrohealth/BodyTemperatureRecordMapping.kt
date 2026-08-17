@@ -75,6 +75,7 @@ internal fun makeNativeBodyTemperatureSample(
     return NativeBodyTemperatureSample(
         identity = makeRecordIdentity(record.metadata.id),
         origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
+        device = makeNativeHealthDeviceInfo(record.metadata.device),
         recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
         timeMs = record.time.toEpochMilli().toDouble(),
         celsius = record.temperature.inCelsius,
@@ -89,6 +90,7 @@ internal fun makeNativeBasalBodyTemperatureSample(
     return NativeBasalBodyTemperatureSample(
         identity = makeRecordIdentity(record.metadata.id),
         origin = makeHealthDataOrigin(record.metadata.dataOrigin.packageName),
+        device = makeNativeHealthDeviceInfo(record.metadata.device),
         recordingMethod = nativeHealthRecordingMethod(record.metadata.recordingMethod),
         timeMs = record.time.toEpochMilli().toDouble(),
         celsius = record.temperature.inCelsius,

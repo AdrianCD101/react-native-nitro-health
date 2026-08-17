@@ -5,6 +5,7 @@ extension HKQuantitySample {
         return NativeVo2MaxSample(
             identity: nativeHealthSampleIdentity,
             origin: nativeHealthDataOrigin,
+            device: nativeHealthDeviceInfo,
             recordingMethod: nativeHealthRecordingMethod,
             timeMs: startDate.timeIntervalSince1970 * 1000,
             millilitersPerKilogramPerMinute: quantity.doubleValue(for: unit),

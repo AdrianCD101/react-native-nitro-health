@@ -32,6 +32,8 @@
 namespace margelo::nitro::nitrohealth { struct NativeHealthSampleIdentity; }
 // Forward declaration of `NativeHealthDataOrigin` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthDataOrigin; }
+// Forward declaration of `NativeHealthDeviceInfo` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthDeviceInfo; }
 // Forward declaration of `NativeHealthRecordingMethod` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class NativeHealthRecordingMethod; }
 // Forward declaration of `NativeAndroidBodyTemperatureMeasurementLocation` to properly resolve imports.
@@ -41,9 +43,10 @@ namespace margelo::nitro::nitrohealth { enum class NativeIOSBodyTemperatureSenso
 
 #include "NativeHealthSampleIdentity.hpp"
 #include "NativeHealthDataOrigin.hpp"
+#include "NativeHealthDeviceInfo.hpp"
+#include <optional>
 #include "NativeHealthRecordingMethod.hpp"
 #include "NativeAndroidBodyTemperatureMeasurementLocation.hpp"
-#include <optional>
 #include "NativeIOSBodyTemperatureSensorLocation.hpp"
 
 namespace margelo::nitro::nitrohealth {
@@ -55,6 +58,7 @@ namespace margelo::nitro::nitrohealth {
   public:
     NativeHealthSampleIdentity identity     SWIFT_PRIVATE;
     NativeHealthDataOrigin origin     SWIFT_PRIVATE;
+    std::optional<NativeHealthDeviceInfo> device     SWIFT_PRIVATE;
     NativeHealthRecordingMethod recordingMethod     SWIFT_PRIVATE;
     double timeMs     SWIFT_PRIVATE;
     double celsius     SWIFT_PRIVATE;
@@ -63,7 +67,7 @@ namespace margelo::nitro::nitrohealth {
 
   public:
     NativeBodyTemperatureSample() = default;
-    explicit NativeBodyTemperatureSample(NativeHealthSampleIdentity identity, NativeHealthDataOrigin origin, NativeHealthRecordingMethod recordingMethod, double timeMs, double celsius, std::optional<NativeAndroidBodyTemperatureMeasurementLocation> androidMeasurementLocation, std::optional<NativeIOSBodyTemperatureSensorLocation> iosSensorLocation): identity(identity), origin(origin), recordingMethod(recordingMethod), timeMs(timeMs), celsius(celsius), androidMeasurementLocation(androidMeasurementLocation), iosSensorLocation(iosSensorLocation) {}
+    explicit NativeBodyTemperatureSample(NativeHealthSampleIdentity identity, NativeHealthDataOrigin origin, std::optional<NativeHealthDeviceInfo> device, NativeHealthRecordingMethod recordingMethod, double timeMs, double celsius, std::optional<NativeAndroidBodyTemperatureMeasurementLocation> androidMeasurementLocation, std::optional<NativeIOSBodyTemperatureSensorLocation> iosSensorLocation): identity(identity), origin(origin), device(device), recordingMethod(recordingMethod), timeMs(timeMs), celsius(celsius), androidMeasurementLocation(androidMeasurementLocation), iosSensorLocation(iosSensorLocation) {}
 
   public:
     friend bool operator==(const NativeBodyTemperatureSample& lhs, const NativeBodyTemperatureSample& rhs) = default;
@@ -81,6 +85,7 @@ namespace margelo::nitro {
       return margelo::nitro::nitrohealth::NativeBodyTemperatureSample(
         JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleIdentity>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "identity"))),
         JSIConverter<margelo::nitro::nitrohealth::NativeHealthDataOrigin>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "origin"))),
+        JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeHealthDeviceInfo>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "device"))),
         JSIConverter<margelo::nitro::nitrohealth::NativeHealthRecordingMethod>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "recordingMethod"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeMs"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "celsius"))),
@@ -92,6 +97,7 @@ namespace margelo::nitro {
       jsi::Object obj(runtime);
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "identity"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleIdentity>::toJSI(runtime, arg.identity));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "origin"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthDataOrigin>::toJSI(runtime, arg.origin));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "device"), JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeHealthDeviceInfo>>::toJSI(runtime, arg.device));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "recordingMethod"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthRecordingMethod>::toJSI(runtime, arg.recordingMethod));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "timeMs"), JSIConverter<double>::toJSI(runtime, arg.timeMs));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "celsius"), JSIConverter<double>::toJSI(runtime, arg.celsius));
@@ -109,6 +115,7 @@ namespace margelo::nitro {
       }
       if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthSampleIdentity>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "identity")))) return false;
       if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthDataOrigin>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "origin")))) return false;
+      if (!JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeHealthDeviceInfo>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "device")))) return false;
       if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthRecordingMethod>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "recordingMethod")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeMs")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "celsius")))) return false;

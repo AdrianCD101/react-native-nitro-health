@@ -11,9 +11,13 @@
 #include "NativeBodyTemperatureSampleInput.hpp"
 
 #include "JNativeAndroidBodyTemperatureMeasurementLocation.hpp"
+#include "JNativeHealthDeviceInfo.hpp"
+#include "JNativeHealthDeviceType.hpp"
 #include "JNativeHealthRecordingMethod.hpp"
 #include "JNativeIOSBodyTemperatureSensorLocation.hpp"
 #include "NativeAndroidBodyTemperatureMeasurementLocation.hpp"
+#include "NativeHealthDeviceInfo.hpp"
+#include "NativeHealthDeviceType.hpp"
 #include "NativeHealthRecordingMethod.hpp"
 #include "NativeIOSBodyTemperatureSensorLocation.hpp"
 #include <optional>
@@ -42,6 +46,8 @@ namespace margelo::nitro::nitrohealth {
       double timeMs = this->getFieldValue(fieldTimeMs);
       static const auto fieldCelsius = clazz->getField<double>("celsius");
       double celsius = this->getFieldValue(fieldCelsius);
+      static const auto fieldDevice = clazz->getField<JNativeHealthDeviceInfo>("device");
+      jni::local_ref<JNativeHealthDeviceInfo> device = this->getFieldValue(fieldDevice);
       static const auto fieldRecordingMethod = clazz->getField<JNativeHealthRecordingMethod>("recordingMethod");
       jni::local_ref<JNativeHealthRecordingMethod> recordingMethod = this->getFieldValue(fieldRecordingMethod);
       static const auto fieldAndroidMeasurementLocation = clazz->getField<JNativeAndroidBodyTemperatureMeasurementLocation>("androidMeasurementLocation");
@@ -55,6 +61,7 @@ namespace margelo::nitro::nitrohealth {
       return NativeBodyTemperatureSampleInput(
         timeMs,
         celsius,
+        device != nullptr ? std::make_optional(device->toCpp()) : std::nullopt,
         recordingMethod != nullptr ? std::make_optional(recordingMethod->toCpp()) : std::nullopt,
         androidMeasurementLocation != nullptr ? std::make_optional(androidMeasurementLocation->toCpp()) : std::nullopt,
         iosSensorLocation != nullptr ? std::make_optional(iosSensorLocation->toCpp()) : std::nullopt,
@@ -69,13 +76,14 @@ namespace margelo::nitro::nitrohealth {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeBodyTemperatureSampleInput::javaobject> fromCpp(const NativeBodyTemperatureSampleInput& value) {
-      using JSignature = JNativeBodyTemperatureSampleInput(double, double, jni::alias_ref<JNativeHealthRecordingMethod>, jni::alias_ref<JNativeAndroidBodyTemperatureMeasurementLocation>, jni::alias_ref<JNativeIOSBodyTemperatureSensorLocation>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JDouble>);
+      using JSignature = JNativeBodyTemperatureSampleInput(double, double, jni::alias_ref<JNativeHealthDeviceInfo>, jni::alias_ref<JNativeHealthRecordingMethod>, jni::alias_ref<JNativeAndroidBodyTemperatureMeasurementLocation>, jni::alias_ref<JNativeIOSBodyTemperatureSensorLocation>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JDouble>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
         clazz,
         value.timeMs,
         value.celsius,
+        value.device.has_value() ? JNativeHealthDeviceInfo::fromCpp(value.device.value()) : nullptr,
         value.recordingMethod.has_value() ? JNativeHealthRecordingMethod::fromCpp(value.recordingMethod.value()) : nullptr,
         value.androidMeasurementLocation.has_value() ? JNativeAndroidBodyTemperatureMeasurementLocation::fromCpp(value.androidMeasurementLocation.value()) : nullptr,
         value.iosSensorLocation.has_value() ? JNativeIOSBodyTemperatureSensorLocation::fromCpp(value.iosSensorLocation.value()) : nullptr,

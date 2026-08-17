@@ -1,4 +1,5 @@
 import type { BodyTemperatureMetadata } from './BodyTemperatureMetadata'
+import type { HealthDeviceInfo } from './HealthDeviceInfo'
 import type { HealthRecordSync } from './HealthRecordSync'
 import type { HealthRecordingMethod } from './HealthRecordingMethod'
 
@@ -8,6 +9,8 @@ export interface BasalBodyTemperatureSampleInput {
   date: Date
   /** Basal body temperature in degrees Celsius. Must be between 20 and 45 inclusive. */
   celsius: number
+  /** Physical device asserted as having generated this sample. */
+  device?: HealthDeviceInfo
   /** Platform-scoped fields retained by the native health store. */
   metadata?: BodyTemperatureMetadata
   /**
