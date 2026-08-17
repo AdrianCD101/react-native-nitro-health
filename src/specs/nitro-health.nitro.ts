@@ -51,6 +51,8 @@ import type { NativeHeightSamplePage } from '../NativeHeightSamplePage'
 import type { NativeHydrationSampleInput } from '../NativeHydrationSampleInput'
 import type { NativeHydrationSamplePage } from '../NativeHydrationSamplePage'
 import type { NativeVo2MaxSamplePage } from '../NativeVo2MaxSamplePage'
+import type { NativeNutritionSampleInput } from '../NativeNutritionSampleInput'
+import type { NativeNutritionSamplePage } from '../NativeNutritionSamplePage'
 import type { NativeOxygenSaturationSampleInput } from '../NativeOxygenSaturationSampleInput'
 import type { NativeOxygenSaturationSamplePage } from '../NativeOxygenSaturationSamplePage'
 import type { NativeRespiratoryRateSampleInput } from '../NativeRespiratoryRateSampleInput'
@@ -116,6 +118,7 @@ export interface NitroHealth extends HybridObject<{ ios: 'swift'; android: 'kotl
   ): Promise<NativeHealthStatistics[]>
   readSleepSamples(query: NativeHealthDateRangeQuery): Promise<NativeSleepSamplePage>
   readWorkouts(query: NativeHealthDateRangeQuery): Promise<NativeWorkoutSamplePage>
+  readNutrition(query: NativeHealthDateRangeQuery): Promise<NativeNutritionSamplePage>
   saveSteps(samples: NativeStepSampleInput[]): Promise<NativeHealthWriteResult>
   saveDistance(samples: NativeDistanceSampleInput[]): Promise<NativeDistanceWriteResult>
   saveActiveEnergyBurned(
@@ -144,6 +147,7 @@ export interface NitroHealth extends HybridObject<{ ios: 'swift'; android: 'kotl
   saveVo2Max(samples: NativeVo2MaxSampleInput[]): Promise<NativeHealthWriteResult>
   saveSleepSessions(sessions: NativeSleepSessionInput[]): Promise<NativeHealthWriteResult>
   saveWorkout(workout: NativeWorkoutSampleInput): Promise<NativeHealthWriteResult>
+  saveNutrition(samples: NativeNutritionSampleInput[]): Promise<NativeHealthWriteResult>
   deleteRecordsByIds(dataType: string, recordIds: string[]): Promise<NativeHealthDeleteResult>
   deleteRecordsByTimeRange(
     dataType: string,

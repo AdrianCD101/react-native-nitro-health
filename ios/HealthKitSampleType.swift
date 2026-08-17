@@ -13,6 +13,12 @@ func makeHealthKitSampleType(dataType: String) throws -> HKSampleType {
         return try makeBloodPressureCorrelationType()
     }
 
+    // Nutrition entries are stored as food HKCorrelations; the same correlation-type
+    // constraints as blood pressure apply, resolved via HealthKitNutritionSupport.swift.
+    if dataType == "nutrition" {
+        return try makeNutritionCorrelationType()
+    }
+
     if dataType == "sleep" {
         guard let categoryType = HKObjectType.categoryType(forIdentifier: .sleepAnalysis) else {
             throw permissionError("Health data type is not available on this device: sleep")

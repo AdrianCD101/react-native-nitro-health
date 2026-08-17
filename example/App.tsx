@@ -32,6 +32,7 @@ const readPermissions: Array<{ dataType: HealthPermissionDataType; label: string
   { dataType: 'sleep', label: 'Sleep' },
   { dataType: 'bodyMass', label: 'Body Mass' },
   { dataType: 'workout', label: 'Workouts' },
+  { dataType: 'nutrition', label: 'Nutrition' },
 ]
 
 function isWritableDataType(
@@ -308,6 +309,23 @@ const readCards: Partial<
         ...page.samples.map(
           (workout) =>
             `${workout.startDate.toLocaleString()}: ${formatActivity(workout.activity)} | elapsed ${Math.round(workout.elapsedDurationSeconds / 60)} min | active ${formatMetric(workout.activeDuration, 'sec')} | title ${workout.title ?? 'n/a'} | brand ${workout.brandName ?? 'n/a'} | distance ${formatMetric(workout.totalDistance, 'm')} | energy ${formatMetric(workout.totalActiveEnergyBurned, 'kcal')} | ${formatSampleContext(workout.identity, workout.origin)}`
+        ),
+      ]
+    },
+  },
+  nutrition: {
+    buttonLabel: 'Read nutrition',
+    execute: async () => {
+      const page = await NitroHealth.readNutrition({
+        ...lastDays(7),
+        limit: 20,
+        ascending: false,
+      })
+      return [
+        `Nutrition entries: ${page.samples.length}${page.nextCursor ? ' (more available)' : ''}`,
+        ...page.samples.map(
+          (entry) =>
+            `${entry.startDate.toLocaleString()}: ${entry.foodName ?? 'unnamed'} | meal ${entry.mealType ?? 'n/a'} | ${entry.energyKilocalories?.toFixed(0) ?? 'n/a'} kcal | protein ${entry.proteinGrams?.toFixed(1) ?? 'n/a'} g | ${formatSampleContext(entry.identity, entry.origin)}`
         ),
       ]
     },
@@ -611,6 +629,19 @@ function App(): React.JSX.Element {
             displayName: 'Example run',
           })
           message = 'Saved a one-minute running workout'
+          break
+        case 'nutrition':
+          await NitroHealth.saveNutrition([
+            {
+              startDate,
+              endDate,
+              foodName: 'Example lunch',
+              mealType: 'lunch',
+              energyKilocalories: 640,
+              proteinGrams: 42,
+            },
+          ])
+          message = 'Saved a 640 kcal example lunch'
           break
         default:
           updateCard(dataType, { activity: undefined })

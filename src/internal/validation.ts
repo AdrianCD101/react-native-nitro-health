@@ -1,4 +1,8 @@
-import type { AggregateOnlyHealthDataType, HealthDataType } from '../HealthDataType'
+import type {
+  AggregateOnlyHealthDataType,
+  ChangeTrackedHealthDataType,
+  HealthDataType,
+} from '../HealthDataType'
 import type { HealthPermission } from '../HealthPermission'
 import type { HealthRecordIdentity } from '../HealthSampleIdentity'
 
@@ -24,7 +28,10 @@ const HEALTH_DATA_TYPES = new Set<HealthDataType>([
   'sleep',
   'bodyMass',
   'workout',
+  'nutrition',
 ])
+
+const CHANGE_TRACKING_UNSUPPORTED_DATA_TYPES = new Set<HealthDataType>(['nutrition'])
 
 const AGGREGATE_ONLY_DATA_TYPES = new Set<AggregateOnlyHealthDataType>([
   'basalEnergyBurned',
@@ -65,6 +72,24 @@ export function parseHealthDataTypes(values: readonly string[], label: string): 
       throw new Error(`${label}[${index}]: unsupported health data type '${value}'`)
     }
     return value as HealthDataType
+  })
+}
+
+export function assertChangeTrackedHealthDataType(dataType: HealthDataType): void {
+  if (CHANGE_TRACKING_UNSUPPORTED_DATA_TYPES.has(dataType)) {
+    throw new Error(`Change tracking is not supported for '${dataType}' yet`)
+  }
+}
+
+export function parseChangeTrackedHealthDataTypes(
+  values: readonly string[],
+  label: string
+): ChangeTrackedHealthDataType[] {
+  return parseHealthDataTypes(values, label).map((dataType, index) => {
+    if (CHANGE_TRACKING_UNSUPPORTED_DATA_TYPES.has(dataType)) {
+      throw new Error(`${label}[${index}]: change tracking is not supported for '${dataType}' yet`)
+    }
+    return dataType as ChangeTrackedHealthDataType
   })
 }
 

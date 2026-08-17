@@ -83,6 +83,7 @@ const STATISTICS_METRICS_BY_DATA_TYPE: Record<
   bodyMass: ['avg', 'min', 'max'],
   sleep: [],
   workout: [],
+  nutrition: [],
 }
 
 const STATISTICS_METRICS: readonly StatisticsMetric[] = Array.from(

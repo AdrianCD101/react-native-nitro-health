@@ -27,9 +27,18 @@ export type HealthDataType =
   | 'sleep'
   | 'bodyMass'
   | 'workout'
+  | 'nutrition'
 
 /** Health data type that can be written portably. */
 export type WritableHealthDataType = Exclude<HealthDataType, 'heartRateVariability'>
+
+/**
+ * Health data type supported by change tracking and background change delivery.
+ *
+ * `nutrition` is excluded until HealthKit anchored-query behavior over food correlations
+ * is verified; requesting it rejects loudly rather than delivering incomplete changes.
+ */
+export type ChangeTrackedHealthDataType = Exclude<HealthDataType, 'nutrition'>
 
 /**
  * Energy concept that exists only as an aggregate: HealthKit has no total-energy sample type and

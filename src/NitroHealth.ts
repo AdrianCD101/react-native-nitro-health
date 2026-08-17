@@ -36,7 +36,11 @@ import type {
 import type { HealthAuthorizationResult } from './HealthAuthorizationResult'
 import type { HealthChangeNotification } from './HealthChangeNotification'
 import type { HealthChangesResult } from './HealthChangesResult'
-import type { HealthDataType, HealthStatisticsDataType } from './HealthDataType'
+import type {
+  ChangeTrackedHealthDataType,
+  HealthDataType,
+  HealthStatisticsDataType,
+} from './HealthDataType'
 import type { HealthDateRangeQuery } from './HealthDateRangeQuery'
 import type { HealthIdentityDeleteResult, HealthTimeRangeDeleteResult } from './HealthDeleteResult'
 import type { HealthPermission } from './HealthPermission'
@@ -69,6 +73,8 @@ import type { RespiratoryRateSample } from './RespiratoryRateSample'
 import type { RespiratoryRateSampleInput } from './RespiratoryRateSampleInput'
 import type { RestingHeartRateSample } from './RestingHeartRateSample'
 import type { RestingHeartRateSampleInput } from './RestingHeartRateSampleInput'
+import type { NutritionSample } from './NutritionSample'
+import type { NutritionSampleInput } from './NutritionSampleInput'
 import type { SleepSample } from './SleepSample'
 import type { SleepSessionInput } from './SleepSessionInput'
 import type { StepSample } from './StepSample'
@@ -95,6 +101,7 @@ import {
   makeNativeHydrationSampleInput,
   makeNativeVo2MaxSampleInput,
   makeNativeLeanBodyMassSampleInput,
+  makeNativeNutritionSampleInput,
   makeNativeOxygenSaturationSampleInput,
   makeNativeRespiratoryRateSampleInput,
   makeNativeRestingHeartRateSampleInput,
@@ -120,6 +127,7 @@ import {
   makeHydrationSample,
   makeVo2MaxSample,
   makeLeanBodyMassSample,
+  makeNutritionSample,
   makeOxygenSaturationSample,
   makeRespiratoryRateSample,
   makeRestingHeartRateSample,
@@ -131,13 +139,14 @@ import {
 import { makeHealthChangesResult } from './internal/healthChangeMapping'
 import { makeHealthStatistics, makeHeartRateStatistics } from './internal/statisticsMapping'
 import {
+  assertChangeTrackedHealthDataType,
   assertChangesToken,
   assertNonEmptySamples,
   assertNonEmptySessions,
   assertPermissions,
   assertRecordIdentities,
   assertUniqueSampleSyncIds,
-  parseHealthDataTypes,
+  parseChangeTrackedHealthDataTypes,
 } from './internal/validation'
 import {
   makeAdditionalAccessResult,
@@ -165,7 +174,7 @@ let isDispatchingChangeNotification = false
 
 function notifyChangeNotificationListeners(dataTypes: string[], deliveryId: string): void {
   const notification: HealthChangeNotification = {
-    dataTypes: [...new Set(parseHealthDataTypes(dataTypes, 'notification.dataTypes'))],
+    dataTypes: [...new Set(parseChangeTrackedHealthDataTypes(dataTypes, 'notification.dataTypes'))],
   }
   const listeners = [...changeNotificationListeners.values()]
   if (listeners.length === 0) return
@@ -223,16 +232,16 @@ export interface NitroHealth {
   ): Promise<BackgroundChangesConfigurationResult>
   /** Disables observer delivery or reports app-owned polling cleanup requirements. */
   disableBackgroundChanges(
-    dataTypes?: HealthDataType[]
+    dataTypes?: ChangeTrackedHealthDataType[]
   ): Promise<BackgroundChangesConfigurationResult>
   /** Subscribes to observer hints or reports that app-owned polling is required. */
   subscribeToBackgroundChanges(
     listener: (notification: HealthChangeNotification) => void
   ): BackgroundChangesSubscriptionResult
   /** Creates a durable checkpoint for future changes to one health data type. */
-  createChangesToken(dataType: HealthDataType): Promise<string>
+  createChangesToken(dataType: ChangeTrackedHealthDataType): Promise<string>
   /** Reads record changes after a checkpoint created for the same data type. */
-  getChanges<T extends HealthDataType>(
+  getChanges<T extends ChangeTrackedHealthDataType>(
     dataType: T,
     changesToken: string
   ): Promise<HealthChangesResult<T>>
@@ -285,6 +294,11 @@ export interface NitroHealth {
   ): Promise<Array<HealthStatisticsByDataType<T>>>
   readSleepSamples(query: HealthDateRangeQuery): Promise<HealthSamplePage<SleepSample>>
   readWorkouts(query: HealthDateRangeQuery): Promise<HealthSamplePage<WorkoutSample>>
+  /**
+   * Reads paginated nutrition entries. iOS reads food correlations only, so dietary
+   * samples written by other apps outside a correlation are not returned.
+   */
+  readNutrition(query: HealthDateRangeQuery): Promise<HealthSamplePage<NutritionSample>>
   saveSteps(samples: StepSampleInput[]): Promise<HealthWriteResult>
   saveDistance(samples: DistanceSampleInput[]): Promise<DistanceWriteResult>
   saveActiveEnergyBurned(samples: ActiveEnergyBurnedSampleInput[]): Promise<HealthWriteResult>
@@ -308,6 +322,8 @@ export interface NitroHealth {
   saveSleepSessions(sessions: SleepSessionInput[]): Promise<HealthWriteResult>
   /** Saves one workout and returns exactly one stored recording method. */
   saveWorkout(workout: WorkoutSampleInput): Promise<HealthWriteResult>
+  /** Saves nutrition entries. Each entry must carry at least one nutrient value. */
+  saveNutrition(samples: NutritionSampleInput[]): Promise<HealthWriteResult>
   /** Deletes independently deletable records by physical identity. */
   deleteRecordsByIds(
     dataType: HealthDataType,
@@ -365,7 +381,11 @@ export const NitroHealth: NitroHealth = {
     }
     return makeBackgroundChangesResult(
       await NitroHealthNative.configureBackgroundChanges(
-        [...new Set(parseHealthDataTypes(configuration.dataTypes, 'configuration.dataTypes'))],
+        [
+          ...new Set(
+            parseChangeTrackedHealthDataTypes(configuration.dataTypes, 'configuration.dataTypes')
+          ),
+        ],
         configuration.frequency
       )
     )
@@ -378,7 +398,7 @@ export const NitroHealth: NitroHealth = {
       await NitroHealthNative.disableBackgroundChanges(
         dataTypes === undefined
           ? undefined
-          : [...new Set(parseHealthDataTypes(dataTypes, 'dataTypes'))]
+          : [...new Set(parseChangeTrackedHealthDataTypes(dataTypes, 'dataTypes'))]
       )
     )
   },
@@ -418,10 +438,12 @@ export const NitroHealth: NitroHealth = {
       },
     }
   },
-  createChangesToken(dataType) {
+  async createChangesToken(dataType) {
+    assertChangeTrackedHealthDataType(dataType)
     return NitroHealthNative.createChangesToken(dataType)
   },
   async getChanges(dataType, changesToken) {
+    assertChangeTrackedHealthDataType(dataType)
     assertChangesToken(changesToken)
     return makeHealthChangesResult(
       dataType,
@@ -578,6 +600,12 @@ export const NitroHealth: NitroHealth = {
     return makeSamplePage(
       await NitroHealthNative.readWorkouts(makeNativeSampleQuery(query)),
       makeWorkoutSample
+    )
+  },
+  async readNutrition(query) {
+    return makeSamplePage(
+      await NitroHealthNative.readNutrition(makeNativeSampleQuery(query)),
+      makeNutritionSample
     )
   },
   async saveSteps(samples) {
@@ -741,6 +769,15 @@ export const NitroHealth: NitroHealth = {
     return makeHealthWriteResult(
       await NitroHealthNative.saveWorkout(makeNativeWorkoutSampleInput(workout)),
       1
+    )
+  },
+  async saveNutrition(samples) {
+    assertNonEmptySamples(samples)
+    const nativeSamples = samples.map(makeNativeNutritionSampleInput)
+    assertUniqueSampleSyncIds(samples)
+    return makeHealthWriteResult(
+      await NitroHealthNative.saveNutrition(nativeSamples),
+      samples.length
     )
   },
   async deleteRecordsByIds(dataType, records) {

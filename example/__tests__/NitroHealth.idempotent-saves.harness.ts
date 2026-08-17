@@ -10,6 +10,7 @@ import type {
   FloorsClimbedSample,
   HydrationSample,
   HealthPermission,
+  NutritionSample,
   HealthSampleIdentity,
   LeanBodyMassSample,
   RespiratoryRateSample,
@@ -68,6 +69,10 @@ const basalBodyTemperatureReadWritePermissions: HealthPermission[] = [
   { accessType: 'read', dataType: 'basalBodyTemperature' },
   { accessType: 'write', dataType: 'basalBodyTemperature' },
 ]
+const nutritionReadWritePermissions: HealthPermission[] = [
+  { accessType: 'read', dataType: 'nutrition' },
+  { accessType: 'write', dataType: 'nutrition' },
+]
 const idempotentInterval = {
   startDate: new Date('2004-06-01T09:00:00.000Z'),
   endDate: new Date('2004-06-01T09:30:00.000Z'),
@@ -118,6 +123,18 @@ async function readIdempotentBloodPressure(
     (sample) =>
       sample.date.getTime() === idempotentInterval.startDate.getTime() &&
       expectedSystolic.includes(sample.systolicMmHg)
+  )
+}
+
+async function readIdempotentNutrition(
+  expectedFoodNames: readonly string[]
+): Promise<NutritionSample[]> {
+  const page = await NitroHealth.readNutrition({ ...idempotentReadRange, limit: 1000 })
+  return page.samples.filter(
+    (sample) =>
+      sample.startDate.getTime() === idempotentInterval.startDate.getTime() &&
+      sample.foodName !== undefined &&
+      expectedFoodNames.includes(sample.foodName)
   )
 }
 
@@ -480,6 +497,98 @@ describe('NitroHealth idempotent saves (native)', () => {
       }
     } finally {
       await NitroHealth.deleteRecordsByTimeRange('bloodPressure', idempotentReadRange)
+    }
+  })
+
+  // On iOS a versioned nutrition re-save must replace the correlation AND every dietary
+  // member sample (via the per-member sync-id suffixes); a duplicate or a nutrient-count
+  // mismatch here means members were orphaned.
+  it('keeps exactly one nutrition entry when the same versioned save is retried', async () => {
+    await requireVerifiedPermissions(nutritionReadWritePermissions)
+
+    await NitroHealth.deleteRecordsByTimeRange('nutrition', idempotentReadRange)
+    try {
+      const sample = {
+        ...idempotentInterval,
+        foodName: 'Harness idempotent meal',
+        mealType: 'dinner' as const,
+        energyKilocalories: 550,
+        proteinGrams: 35,
+        sync: { id: 'nitro-health-harness-nutrition-retry', version: 1 },
+      }
+
+      await NitroHealth.saveNutrition([sample])
+      await NitroHealth.saveNutrition([sample])
+
+      const samples = await readIdempotentNutrition(['Harness idempotent meal'])
+      expect(samples).toHaveLength(1)
+      expect(samples[0]?.energyKilocalories).toBeCloseTo(550, 1)
+      expect(samples[0]?.proteinGrams).toBeCloseTo(35, 1)
+      expect(samples[0]?.mealType).toBe('dinner')
+    } finally {
+      await NitroHealth.deleteRecordsByTimeRange('nutrition', idempotentReadRange)
+    }
+  })
+
+  it('replaces a nutrition entry at a higher version with platform-specific identity', async () => {
+    await requireVerifiedPermissions(nutritionReadWritePermissions)
+
+    await NitroHealth.deleteRecordsByTimeRange('nutrition', idempotentReadRange)
+    try {
+      const syncId = 'nitro-health-harness-nutrition-higher-version'
+      await NitroHealth.saveNutrition([
+        {
+          ...idempotentInterval,
+          foodName: 'Harness versioned meal v1',
+          energyKilocalories: 500,
+          proteinGrams: 30,
+          sync: { id: syncId, version: 1 },
+        },
+      ])
+
+      const initial = await readIdempotentNutrition([
+        'Harness versioned meal v1',
+        'Harness versioned meal v2',
+      ])
+      expect(initial).toHaveLength(1)
+      const initialSample = initial[0]
+      if (initialSample === undefined) {
+        return
+      }
+
+      // v2 drops protein and adds sodium: replacement must not leave a stale protein
+      // member behind on iOS.
+      await NitroHealth.saveNutrition([
+        {
+          ...idempotentInterval,
+          foodName: 'Harness versioned meal v2',
+          energyKilocalories: 520,
+          sodiumMilligrams: 700,
+          sync: { id: syncId, version: 2 },
+        },
+      ])
+
+      const replacement = await readIdempotentNutrition([
+        'Harness versioned meal v1',
+        'Harness versioned meal v2',
+      ])
+      expect(replacement).toHaveLength(1)
+      const replacementSample = replacement[0]
+      if (replacementSample === undefined) {
+        return
+      }
+
+      expect(replacementSample.foodName).toBe('Harness versioned meal v2')
+      expect(replacementSample.energyKilocalories).toBeCloseTo(520, 1)
+      expect(replacementSample.sodiumMilligrams).toBeCloseTo(700, 1)
+      expect(replacementSample.proteinGrams).toBeUndefined()
+      if (Platform.OS === 'android') {
+        expect(recordId(replacementSample.identity)).toBe(recordId(initialSample.identity))
+      } else if (Platform.OS === 'ios') {
+        expect(recordId(replacementSample.identity)).not.toBe(recordId(initialSample.identity))
+      }
+    } finally {
+      await NitroHealth.deleteRecordsByTimeRange('nutrition', idempotentReadRange)
     }
   })
 

@@ -570,6 +570,93 @@ describe('NitroHealth saves (native)', () => {
     })
   })
 
+  describe('nutrition', () => {
+    // The on-device proof of iOS food-correlation atomicity: the save writes one
+    // HKCorrelation with one member per present nutrient (Android: one NutritionRecord)
+    // and the read must surface exactly one entry carrying EVERY saved field under a
+    // single record identity — never per-nutrient fragments, never dropped fields.
+    it('round-trips a saved entry as one sample with every field when authorized', async () => {
+      const authorized = await hasVerifiedPermissions([
+        { accessType: 'write', dataType: 'nutrition' },
+        { accessType: 'read', dataType: 'nutrition' },
+      ])
+
+      if (!authorized) {
+        return
+      }
+
+      await NitroHealth.deleteRecordsByTimeRange('nutrition', saveReadRange)
+
+      try {
+        await NitroHealth.saveNutrition([
+          {
+            ...saveInterval,
+            foodName: 'Harness chicken salad',
+            mealType: 'lunch',
+            energyKilocalories: 640,
+            proteinGrams: 42,
+            totalCarbohydrateGrams: 38.5,
+            totalFatGrams: 22,
+            dietaryFiberGrams: 6,
+            sugarGrams: 9.5,
+            sodiumMilligrams: 820,
+          },
+        ])
+
+        const page = await NitroHealth.readNutrition(saveReadRange)
+
+        assertConclusiveRead(page.samples)
+
+        const matches = page.samples.filter((sample) => sample.foodName === 'Harness chicken salad')
+
+        expect(matches).toHaveLength(1)
+        const match = matches[0]
+        expect(match?.identity.kind).toBe('record')
+        expect(match?.mealType).toBe('lunch')
+        expect(match?.energyKilocalories).toBeCloseTo(640, 1)
+        expect(match?.proteinGrams).toBeCloseTo(42, 1)
+        expect(match?.totalCarbohydrateGrams).toBeCloseTo(38.5, 1)
+        expect(match?.totalFatGrams).toBeCloseTo(22, 1)
+        expect(match?.dietaryFiberGrams).toBeCloseTo(6, 1)
+        expect(match?.sugarGrams).toBeCloseTo(9.5, 1)
+        expect(match?.sodiumMilligrams).toBeCloseTo(820, 1)
+      } finally {
+        await NitroHealth.deleteRecordsByTimeRange('nutrition', saveReadRange)
+      }
+    })
+
+    it('omits absent nutrients on read-back instead of fabricating zeros', async () => {
+      const authorized = await hasVerifiedPermissions([
+        { accessType: 'write', dataType: 'nutrition' },
+        { accessType: 'read', dataType: 'nutrition' },
+      ])
+
+      if (!authorized) {
+        return
+      }
+
+      await NitroHealth.deleteRecordsByTimeRange('nutrition', saveReadRange)
+
+      try {
+        await NitroHealth.saveNutrition([
+          { ...saveInterval, foodName: 'Harness protein shake', proteinGrams: 30 },
+        ])
+
+        const page = await NitroHealth.readNutrition(saveReadRange)
+        assertConclusiveRead(page.samples)
+
+        const match = page.samples.find((sample) => sample.foodName === 'Harness protein shake')
+        expect(match).toBeDefined()
+        expect(match?.proteinGrams).toBeCloseTo(30, 1)
+        expect(match?.energyKilocalories).toBeUndefined()
+        expect(match?.sodiumMilligrams).toBeUndefined()
+        expect(match?.mealType).toBeUndefined()
+      } finally {
+        await NitroHealth.deleteRecordsByTimeRange('nutrition', saveReadRange)
+      }
+    })
+  })
+
   describe('blood glucose', () => {
     it('round-trips a saved reading in mmol/L when authorized', async () => {
       const authorized = await hasVerifiedPermissions([

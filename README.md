@@ -137,7 +137,7 @@ if (capabilities.status === 'available' && capabilities.historyRead === 'not-gra
 
 ## Permissions
 
-Supported data types are `steps`, `heartRate`, `bloodPressure`, `bloodGlucose`, `bodyTemperature`, `respiratoryRate`, `bodyFat`, `leanBodyMass`, `basalBodyTemperature`, `restingHeartRate`, `heartRateVariability`, `distance`, `activeEnergyBurned`, `hydration`, `floorsClimbed`, `oxygenSaturation`, `height`, `vo2Max`, `sleep`, `bodyMass`, and `workout`. Read permissions additionally accept the aggregate-only energy types `basalEnergyBurned` and `totalEnergyBurned` (see [Basal and Total Energy](#basal-and-total-energy)); write permissions for them are rejected in JS.
+Supported data types are `steps`, `heartRate`, `bloodPressure`, `bloodGlucose`, `bodyTemperature`, `respiratoryRate`, `bodyFat`, `leanBodyMass`, `basalBodyTemperature`, `restingHeartRate`, `heartRateVariability`, `distance`, `activeEnergyBurned`, `hydration`, `floorsClimbed`, `oxygenSaturation`, `height`, `vo2Max`, `sleep`, `bodyMass`, `workout`, and `nutrition`. Read permissions additionally accept the aggregate-only energy types `basalEnergyBurned` and `totalEnergyBurned` (see [Basal and Total Energy](#basal-and-total-energy)); write permissions for them are rejected in JS.
 
 ### Authorization
 
@@ -259,6 +259,9 @@ On Android, the consumer app must declare every Health Connect data permission i
 | `sleep`                | `android.permission.health.READ_SLEEP`                  | `android.permission.health.WRITE_SLEEP`                  |
 | `bodyMass`             | `android.permission.health.READ_WEIGHT`                 | `android.permission.health.WRITE_WEIGHT`                 |
 | `workout`              | `android.permission.health.READ_EXERCISE`               | `android.permission.health.WRITE_EXERCISE`               |
+| `nutrition`            | `android.permission.health.READ_NUTRITION`              | `android.permission.health.WRITE_NUTRITION`              |
+
+One `nutrition` permission covers every nutrition field. On iOS it fans out to the individual dietary quantity-type authorizations (one system-sheet row per nutrient), and `getPermissionStatuses` folds the write states worst-of: any denied nutrient reports `notGranted` for the whole grant.
 
 Undeclared Health Connect permissions do not appear in the system permission sheet and cannot be granted. The Android privacy-policy rationale activity and provider package query are also consumer-app responsibilities; see `example/android/app/src/main/AndroidManifest.xml` for a complete reference.
 
@@ -351,29 +354,32 @@ Selecting a child sample's `identity.record` for deletion explicitly selects its
 
 All raw reads return `{ samples, nextCursor? }`. Every listed sample also includes the common required `identity`, `origin`, and `recordingMethod` fields and may include `device`.
 
-| Method                     | Data-specific sample fields                                 |
-| -------------------------- | ----------------------------------------------------------- |
-| `readSteps`                | `startDate`, `endDate`, `count`                             |
-| `readDistance`             | `startDate`, `endDate`, `distanceMeters`, `scope`           |
-| `readActiveEnergyBurned`   | `startDate`, `endDate`, `kilocalories`                      |
-| `readHydration`            | `startDate`, `endDate`, `milliliters`                       |
-| `readFloorsClimbed`        | `startDate`, `endDate`, `floors`                            |
-| `readBodyMass`             | `startDate`, `endDate`, `kilograms`                         |
-| `readHeartRate`            | `date`, `bpm`                                               |
-| `readBloodPressure`        | `date`, `systolicMmHg`, `diastolicMmHg`                     |
-| `readBloodGlucose`         | `date`, `millimolesPerLiter`                                |
-| `readBodyTemperature`      | `date`, `celsius`                                           |
-| `readRespiratoryRate`      | `date`, `breathsPerMinute`                                  |
-| `readBodyFat`              | `date`, `percentage`                                        |
-| `readLeanBodyMass`         | `date`, `kilograms`                                         |
-| `readBasalBodyTemperature` | `date`, `celsius`                                           |
-| `readRestingHeartRate`     | `date`, `bpm`                                               |
-| `readHeartRateVariability` | `date`, `milliseconds`, `method`                            |
-| `readOxygenSaturation`     | `date`, `percentage`                                        |
-| `readHeight`               | `date`, `meters`                                            |
-| `readVo2Max`               | `date`, `millilitersPerKilogramPerMinute`                   |
-| `readSleepSamples`         | tagged session-envelope or stage fields                     |
-| `readWorkouts`             | workout duration, activity, labels, and metric availability |
+| Method                     | Data-specific sample fields                                                       |
+| -------------------------- | --------------------------------------------------------------------------------- |
+| `readSteps`                | `startDate`, `endDate`, `count`                                                   |
+| `readDistance`             | `startDate`, `endDate`, `distanceMeters`, `scope`                                 |
+| `readActiveEnergyBurned`   | `startDate`, `endDate`, `kilocalories`                                            |
+| `readHydration`            | `startDate`, `endDate`, `milliliters`                                             |
+| `readFloorsClimbed`        | `startDate`, `endDate`, `floors`                                                  |
+| `readBodyMass`             | `startDate`, `endDate`, `kilograms`                                               |
+| `readHeartRate`            | `date`, `bpm`                                                                     |
+| `readBloodPressure`        | `date`, `systolicMmHg`, `diastolicMmHg`                                           |
+| `readBloodGlucose`         | `date`, `millimolesPerLiter`                                                      |
+| `readBodyTemperature`      | `date`, `celsius`                                                                 |
+| `readRespiratoryRate`      | `date`, `breathsPerMinute`                                                        |
+| `readBodyFat`              | `date`, `percentage`                                                              |
+| `readLeanBodyMass`         | `date`, `kilograms`                                                               |
+| `readBasalBodyTemperature` | `date`, `celsius`                                                                 |
+| `readRestingHeartRate`     | `date`, `bpm`                                                                     |
+| `readHeartRateVariability` | `date`, `milliseconds`, `method`                                                  |
+| `readOxygenSaturation`     | `date`, `percentage`                                                              |
+| `readHeight`               | `date`, `meters`                                                                  |
+| `readVo2Max`               | `date`, `millilitersPerKilogramPerMinute`                                         |
+| `readSleepSamples`         | tagged session-envelope or stage fields                                           |
+| `readWorkouts`             | workout duration, activity, labels, and metric availability                       |
+| `readNutrition`            | `startDate`, `endDate`, plus optional `foodName`, `mealType`, and nutrient fields |
+
+`readNutrition` returns one sample per eating event with the optional fields `foodName`, `mealType`, `energyKilocalories`, `proteinGrams`, `totalCarbohydrateGrams`, `totalFatGrams`, `dietaryFiberGrams`, `sugarGrams`, and `sodiumMilligrams`; absent nutrients are omitted, never zero-filled. Android maps a Health Connect `NutritionRecord` one-to-one. iOS reads food `HKCorrelation`s, so dietary samples written by other apps outside a correlation are not visible to this read. Water is never part of a nutrition entry; `hydration` remains the only water API.
 
 `floorsClimbed` is the portable API name. Android values come from Health Connect floors climbed; iOS values come from HealthKit flights climbed and are exposed unchanged as `floors`. A flight and a building floor are not guaranteed to be physically equivalent.
 
@@ -777,7 +783,7 @@ const heartRate = await NitroHealth.readStatistics('heartRate', {
 
 On iOS, `floorsClimbed` statistics aggregate HealthKit flights climbed. See the raw-read portability note above.
 
-Sleep, HRV, oxygen saturation, blood pressure, blood glucose, body temperature, respiratory rate, body fat, lean body mass, basal body temperature, VO2 max, and workout statistics are not supported by `readStatistics()`. Invalid data-type/metric combinations reject before crossing the native boundary.
+Sleep, HRV, oxygen saturation, blood pressure, blood glucose, body temperature, respiratory rate, body fat, lean body mass, basal body temperature, VO2 max, workout, and nutrition statistics are not supported by `readStatistics()`. Invalid data-type/metric combinations reject before crossing the native boundary.
 
 ### Basal and Total Energy
 
@@ -798,7 +804,9 @@ Buckets anchor at `startDate`. Use local midnight for calendar-day buckets. `wee
 
 ## Change Tracking
 
-Change tokens are durable synchronization checkpoints. They are different from pagination cursors. Persist one token per `HealthDataType` and device/store.
+Change tokens are durable synchronization checkpoints. They are different from pagination cursors. Persist one token per `ChangeTrackedHealthDataType` and device/store.
+
+`nutrition` does not support change tracking yet: HealthKit anchored-query behavior over food correlations is unverified, so requesting it rejects loudly (and is excluded at the type level) rather than delivering incomplete changes.
 
 Create the token before the initial snapshot so changes that occur while paging the snapshot are not lost:
 
@@ -972,7 +980,7 @@ Each scheduled run should recheck availability, `getCapabilities()`, and relevan
 
 ## Writing Data
 
-Request write authorization before saving. Save methods exist for steps, distance, active energy, hydration, floors climbed, heart rate, blood pressure, blood glucose, body temperature, respiratory rate, body fat, lean body mass, basal body temperature, resting heart rate, oxygen saturation, height, VO2 max, body mass, sleep sessions, and completed workouts. HRV remains read-only.
+Request write authorization before saving. Save methods exist for steps, distance, active energy, hydration, floors climbed, heart rate, blood pressure, blood glucose, body temperature, respiratory rate, body fat, lean body mass, basal body temperature, resting heart rate, oxygen saturation, height, VO2 max, body mass, sleep sessions, completed workouts, and nutrition entries. HRV remains read-only.
 
 ```ts
 const authorization = await NitroHealth.requestAuthorization([
@@ -1022,6 +1030,7 @@ The main value constraints are:
 - `saveHeight`: `meters` greater than 0 and at most 3.
 - `saveVo2Max`: `millilitersPerKilogramPerMinute` from 0 through 100.
 - `saveBodyMass`: `kilograms` greater than 0 and at most 1,000.
+- `saveNutrition`: at least one nutrient field per entry; every nutrient is non-negative and at most 100,000 (`energyKilocalories` in kcal, `proteinGrams`/`totalCarbohydrateGrams`/`totalFatGrams`/`dietaryFiberGrams`/`sugarGrams` in grams, `sodiumMilligrams` in mg). `foodName` must be non-blank when present; `mealType` is `breakfast`, `lunch`, `dinner`, or `snack`.
 
 Interval inputs require `startDate < endDate`; point measurements use `date`. Batch saves require a non-empty array.
 
@@ -1099,6 +1108,29 @@ console.log(workoutResult.storedRecordingMethods[0])
 `activityType` accepts `WritableWorkoutActivityType`, the portable subset that reads back with the same normalized meaning. Read-only and unknown activities reject rather than silently changing meaning. Canonical writes choose one native subtype where reads broaden several variants.
 
 `displayName` is write intent, not a promise that both stores expose the same native field. It becomes the Android workout `title` and the iOS workout `brandName`; reads keep those fields separate. The workout interval supplies elapsed duration. This API does not write pause events, distance/energy totals, routes, segments, laps, or planned workouts.
+
+### Write Nutrition
+
+```ts
+await NitroHealth.saveNutrition([
+  {
+    startDate: new Date('2026-08-04T12:00:00.000Z'),
+    endDate: new Date('2026-08-04T12:30:00.000Z'),
+    foodName: 'Chicken salad',
+    mealType: 'lunch',
+    energyKilocalories: 640,
+    proteinGrams: 42,
+    totalCarbohydrateGrams: 38.5,
+    totalFatGrams: 22,
+    sodiumMilligrams: 820,
+    sync: { id: 'lunch-2026-08-04', version: 1 },
+  },
+])
+```
+
+One entry is one eating event carrying at least one nutrient. Android stores one `NutritionRecord`. iOS stores one food `HKCorrelation` wrapping one dietary sample per present nutrient, saved atomically, and a versioned re-save replaces the correlation and every member — including members whose nutrient was dropped from the newer version.
+
+`foodName` is stored natively on both platforms (Health Connect `name`, HealthKit's standard food-type metadata key). `mealType` is native on Android; HealthKit has no standard meal-type key, so iOS retains it under the library-owned metadata key `com.nitrohealth.meal_type` — round-tripped by apps using this library, semantically opaque to other HealthKit apps.
 
 ## Deleting Records
 

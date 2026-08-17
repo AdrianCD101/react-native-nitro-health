@@ -17,6 +17,7 @@ import androidx.health.connect.client.records.HeartRateVariabilityRmssdRecord
 import androidx.health.connect.client.records.HeightRecord
 import androidx.health.connect.client.records.HydrationRecord
 import androidx.health.connect.client.records.LeanBodyMassRecord
+import androidx.health.connect.client.records.NutritionRecord
 import androidx.health.connect.client.records.OxygenSaturationRecord
 import androidx.health.connect.client.records.Record
 import androidx.health.connect.client.records.RespiratoryRateRecord
@@ -255,6 +256,12 @@ internal fun healthDataTypeDescriptorFor(dataType: String): HealthDataTypeDescri
         "vo2Max" -> HealthDataTypeDescriptor(
             recordType = Vo2MaxRecord::class,
             permissionLabel = "VO2 max"
+        )
+        // Raw nutrition entries reject readStatistics in JS; the per-nutrient
+        // statistics-only types are tracked separately and land with them.
+        "nutrition" -> HealthDataTypeDescriptor(
+            recordType = NutritionRecord::class,
+            permissionLabel = "nutrition"
         )
         else -> throw IllegalArgumentException("Unsupported health data type: $dataType")
     }

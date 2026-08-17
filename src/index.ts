@@ -63,6 +63,7 @@ export type { HealthDataOrigin } from './HealthDataOrigin'
 export type { HealthDeviceInfo, HealthDeviceType } from './HealthDeviceInfo'
 export type {
   AggregateOnlyHealthDataType,
+  ChangeTrackedHealthDataType,
   HealthDataType,
   HealthPermissionDataType,
   HealthStatisticsDataType,
@@ -112,6 +113,9 @@ export type { HydrationSample } from './HydrationSample'
 export type { HydrationSampleInput } from './HydrationSampleInput'
 export type { ListenerSubscription } from './ListenerSubscription'
 export { NitroHealth } from './NitroHealth'
+export type { NutritionMealType } from './NutritionMealType'
+export type { NutritionSample } from './NutritionSample'
+export type { NutritionSampleInput } from './NutritionSampleInput'
 export type { OxygenSaturationSample } from './OxygenSaturationSample'
 export type { OxygenSaturationSampleInput } from './OxygenSaturationSampleInput'
 export type { RespiratoryRateSample } from './RespiratoryRateSample'

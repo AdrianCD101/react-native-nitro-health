@@ -154,6 +154,51 @@ func makeBloodPressureCorrelations(
     }
 }
 
+// Sync identity goes on the correlation AND every member sample (with derived member ids)
+// so a versioned re-save replaces all stored objects in one call; correlation-only identity
+// would orphan the previous members as stray dietary samples.
+func makeNutritionCorrelations(
+    samples: [NativeNutritionSampleInput],
+    correlationType: HKCorrelationType
+) throws -> [HKCorrelation] {
+    return try samples.map { sample in
+        let start = Date(timeIntervalSince1970: sample.startTimeMs / 1000)
+        let end = Date(timeIntervalSince1970: sample.endTimeMs / 1000)
+
+        let members: [HKSample] = try NutritionNutrients.all.compactMap { descriptor in
+            guard let value = sample[keyPath: descriptor.inputValue] else {
+                return nil
+            }
+
+            return HKQuantitySample(
+                type: try makeNutritionQuantityType(descriptor),
+                quantity: HKQuantity(unit: descriptor.unit, doubleValue: value),
+                start: start,
+                end: end,
+                device: sample.writeMetadata.healthKitDevice,
+                metadata: try sample.writeMetadata.healthKitMetadata(
+                    syncIdentifierSuffix: descriptor.syncIdentifierSuffix
+                )
+            )
+        }
+
+        // JS validation requires at least one nutrient; an empty correlation would be a
+        // contract violation HealthKit rejects with an opaque error, so fail loudly here.
+        guard !members.isEmpty else {
+            throw permissionError("A nutrition entry requires at least one nutrient value")
+        }
+
+        return HKCorrelation(
+            type: correlationType,
+            start: start,
+            end: end,
+            objects: Set(members),
+            device: sample.writeMetadata.healthKitDevice,
+            metadata: try sample.healthKitCorrelationMetadata()
+        )
+    }
+}
+
 func makeBodyMassQuantitySamples(
     samples: [NativeBodyMassSampleInput],
     quantityType: HKQuantityType

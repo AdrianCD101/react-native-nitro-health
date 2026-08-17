@@ -1,6 +1,6 @@
 import type { HealthAdditionalAccessStatus } from './HealthCapabilities'
 import type { HealthAvailability } from './HealthAvailability'
-import type { HealthDataType } from './HealthDataType'
+import type { ChangeTrackedHealthDataType } from './HealthDataType'
 import type { ListenerSubscription } from './ListenerSubscription'
 
 /** Result of configuring or disabling background change delivery. */
@@ -50,7 +50,7 @@ export type BackgroundChangesSubscriptionResult =
 /** Requested background observer configuration. */
 export interface BackgroundChangesConfiguration {
   /** Data types whose change tokens should be drained after a delivery hint. */
-  dataTypes: HealthDataType[]
+  dataTypes: ChangeTrackedHealthDataType[]
   /** Preferred observer-delivery frequency. */
   frequency: 'immediate' | 'hourly' | 'daily' | 'weekly'
 }

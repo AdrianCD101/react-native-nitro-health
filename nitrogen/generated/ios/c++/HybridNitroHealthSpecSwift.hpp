@@ -184,6 +184,12 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthStatisticsQuery; }
 namespace margelo::nitro::nitrohealth { struct NativeSleepSamplePage; }
 // Forward declaration of `NativeWorkoutSamplePage` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeWorkoutSamplePage; }
+// Forward declaration of `NativeNutritionSamplePage` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeNutritionSamplePage; }
+// Forward declaration of `NativeNutritionSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeNutritionSample; }
+// Forward declaration of `NativeNutritionMealType` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeNutritionMealType; }
 // Forward declaration of `NativeHealthWriteResult` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthWriteResult; }
 // Forward declaration of `NativeStepSampleInput` to properly resolve imports.
@@ -236,6 +242,8 @@ namespace margelo::nitro::nitrohealth { struct NativeSleepSessionInput; }
 namespace margelo::nitro::nitrohealth { struct NativeSleepSessionStageInput; }
 // Forward declaration of `NativeWorkoutSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeWorkoutSampleInput; }
+// Forward declaration of `NativeNutritionSampleInput` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeNutritionSampleInput; }
 // Forward declaration of `NativeHealthDeleteResult` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthDeleteResult; }
 // Forward declaration of `NativeHealthDeleteStatus` to properly resolve imports.
@@ -346,6 +354,9 @@ namespace margelo::nitro::nitrohealth { enum class NativeHealthAuthorizationStat
 #include "NativeHealthStatisticsQuery.hpp"
 #include "NativeSleepSamplePage.hpp"
 #include "NativeWorkoutSamplePage.hpp"
+#include "NativeNutritionSamplePage.hpp"
+#include "NativeNutritionSample.hpp"
+#include "NativeNutritionMealType.hpp"
 #include "NativeHealthWriteResult.hpp"
 #include "NativeStepSampleInput.hpp"
 #include "NativeHealthWriteMetadata.hpp"
@@ -372,6 +383,7 @@ namespace margelo::nitro::nitrohealth { enum class NativeHealthAuthorizationStat
 #include "NativeSleepSessionInput.hpp"
 #include "NativeSleepSessionStageInput.hpp"
 #include "NativeWorkoutSampleInput.hpp"
+#include "NativeNutritionSampleInput.hpp"
 #include "NativeHealthDeleteResult.hpp"
 #include "NativeHealthDeleteStatus.hpp"
 #include "NativeDeletedCountStatus.hpp"
@@ -720,6 +732,14 @@ namespace margelo::nitro::nitrohealth {
       auto __value = std::move(__result.value());
       return __value;
     }
+    inline std::shared_ptr<Promise<NativeNutritionSamplePage>> readNutrition(const NativeHealthDateRangeQuery& query) override {
+      auto __result = _swiftPart.readNutrition(std::forward<decltype(query)>(query));
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
     inline std::shared_ptr<Promise<NativeHealthWriteResult>> saveSteps(const std::vector<NativeStepSampleInput>& samples) override {
       auto __result = _swiftPart.saveSteps(samples);
       if (__result.hasError()) [[unlikely]] {
@@ -874,6 +894,14 @@ namespace margelo::nitro::nitrohealth {
     }
     inline std::shared_ptr<Promise<NativeHealthWriteResult>> saveWorkout(const NativeWorkoutSampleInput& workout) override {
       auto __result = _swiftPart.saveWorkout(std::forward<decltype(workout)>(workout));
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline std::shared_ptr<Promise<NativeHealthWriteResult>> saveNutrition(const std::vector<NativeNutritionSampleInput>& samples) override {
+      auto __result = _swiftPart.saveNutrition(samples);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }

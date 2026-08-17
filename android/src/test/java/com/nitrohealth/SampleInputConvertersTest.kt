@@ -29,6 +29,8 @@ import com.margelo.nitro.nitrohealth.NativeHealthRecordingMethod
 import com.margelo.nitro.nitrohealth.NativeHeightSampleInput
 import com.margelo.nitro.nitrohealth.NativeHydrationSampleInput
 import com.margelo.nitro.nitrohealth.NativeLeanBodyMassSampleInput
+import com.margelo.nitro.nitrohealth.NativeNutritionMealType
+import com.margelo.nitro.nitrohealth.NativeNutritionSampleInput
 import com.margelo.nitro.nitrohealth.NativeOxygenSaturationSampleInput
 import com.margelo.nitro.nitrohealth.NativeRespiratoryRateSampleInput
 import com.margelo.nitro.nitrohealth.NativeRestingHeartRateSampleInput
@@ -265,6 +267,78 @@ class SampleInputConvertersTest {
 
         assertEquals(59L, records[0].beatsPerMinute)
         assertEquals(58L, records[1].beatsPerMinute)
+    }
+
+    @Test
+    fun toNutritionRecordsMapsEveryFieldAndSyncMetadata() {
+        val records = toNutritionRecords(
+            arrayOf(
+                NativeNutritionSampleInput(
+                    startTimeMs = startTimeMs,
+                    endTimeMs = endTimeMs,
+                    writeMetadata = makeTestWriteMetadata(
+                        syncId = "nutrition-sync",
+                        syncVersion = 3.0
+                    ),
+                    foodName = "Chicken salad",
+                    mealType = NativeNutritionMealType.LUNCH,
+                    energyKilocalories = 640.0,
+                    proteinGrams = 42.0,
+                    totalCarbohydrateGrams = 38.5,
+                    totalFatGrams = 22.0,
+                    dietaryFiberGrams = 6.0,
+                    sugarGrams = 9.5,
+                    sodiumMilligrams = 820.0
+                )
+            )
+        )
+
+        assertEquals(1, records.size)
+        assertEquals(Instant.ofEpochMilli(startTimeMs.toLong()), records[0].startTime)
+        assertEquals(Instant.ofEpochMilli(endTimeMs.toLong()), records[0].endTime)
+        assertEquals("Chicken salad", records[0].name)
+        assertEquals(MealType.MEAL_TYPE_LUNCH, records[0].mealType)
+        assertEquals(640.0, records[0].energy!!.inKilocalories, 0.0001)
+        assertEquals(42.0, records[0].protein!!.inGrams, 0.0001)
+        assertEquals(38.5, records[0].totalCarbohydrate!!.inGrams, 0.0001)
+        assertEquals(22.0, records[0].totalFat!!.inGrams, 0.0001)
+        assertEquals(6.0, records[0].dietaryFiber!!.inGrams, 0.0001)
+        assertEquals(9.5, records[0].sugar!!.inGrams, 0.0001)
+        assertEquals(820.0, records[0].sodium!!.inMilligrams, 0.0001)
+        assertEquals("nutrition-sync", records[0].metadata.clientRecordId)
+        assertEquals(3L, records[0].metadata.clientRecordVersion)
+    }
+
+    @Test
+    fun toNutritionRecordsLeavesAbsentFieldsNullAndMealTypeUnknown() {
+        val record = toNutritionRecords(
+            arrayOf(
+                NativeNutritionSampleInput(
+                    startTimeMs = startTimeMs,
+                    endTimeMs = endTimeMs,
+                    writeMetadata = makeTestWriteMetadata(),
+                    foodName = null,
+                    mealType = null,
+                    energyKilocalories = null,
+                    proteinGrams = 30.0,
+                    totalCarbohydrateGrams = null,
+                    totalFatGrams = null,
+                    dietaryFiberGrams = null,
+                    sugarGrams = null,
+                    sodiumMilligrams = null
+                )
+            )
+        ).single()
+
+        assertEquals(30.0, record.protein!!.inGrams, 0.0001)
+        assertNull(record.energy)
+        assertNull(record.totalCarbohydrate)
+        assertNull(record.totalFat)
+        assertNull(record.dietaryFiber)
+        assertNull(record.sugar)
+        assertNull(record.sodium)
+        assertNull(record.name)
+        assertEquals(MealType.MEAL_TYPE_UNKNOWN, record.mealType)
     }
 
     @Test

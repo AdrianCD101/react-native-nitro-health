@@ -56,6 +56,7 @@ export const mockNitroHealth = {
   readStatistics: mockNativeMethod<NitroHealthSpec['readStatistics']>(),
   readSleepSamples: mockNativeMethod<NitroHealthSpec['readSleepSamples']>(),
   readWorkouts: mockNativeMethod<NitroHealthSpec['readWorkouts']>(),
+  readNutrition: mockNativeMethod<NitroHealthSpec['readNutrition']>(),
   saveSteps: mockNativeMethod<NitroHealthSpec['saveSteps']>().mockResolvedValue({
     storedRecordingMethods: ['unknown'],
   }),
@@ -127,6 +128,9 @@ export const mockNitroHealth = {
     storedRecordingMethods: ['unknown'],
   }),
   saveWorkout: mockNativeMethod<NitroHealthSpec['saveWorkout']>().mockResolvedValue({
+    storedRecordingMethods: ['unknown'],
+  }),
+  saveNutrition: mockNativeMethod<NitroHealthSpec['saveNutrition']>().mockResolvedValue({
     storedRecordingMethods: ['unknown'],
   }),
   deleteRecordsByIds: mockNativeMethod<NitroHealthSpec['deleteRecordsByIds']>(),

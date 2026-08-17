@@ -37,6 +37,8 @@ import type { NativeFloorsClimbedSample } from '../NativeFloorsClimbedSample'
 import type { NativeHealthMetricValue } from '../NativeHealthMetricValue'
 import type { NativeHealthWriteResult } from '../NativeHealthWriteResult'
 import type { NativeHeartRateSample } from '../NativeHeartRateSample'
+import type { NativeNutritionSample } from '../NativeNutritionSample'
+import type { NutritionSample } from '../NutritionSample'
 import type { NativeHeartRateVariabilitySample } from '../NativeHeartRateVariabilitySample'
 import type { NativeHeightSample } from '../NativeHeightSample'
 import type { NativeHydrationSample } from '../NativeHydrationSample'
@@ -364,6 +366,27 @@ export function makeHydrationSample(sample: NativeHydrationSample): HydrationSam
     endDate: new Date(sample.endTimeMs),
     milliliters: sample.milliliters,
   }
+}
+
+export function makeNutritionSample(sample: NativeNutritionSample): NutritionSample {
+  const nutrition: NutritionSample = {
+    ...makeHealthSampleMetadata(sample.sampleMetadata),
+    startDate: new Date(sample.startTimeMs),
+    endDate: new Date(sample.endTimeMs),
+  }
+  if (sample.foodName !== undefined) nutrition.foodName = sample.foodName
+  if (sample.mealType !== undefined) nutrition.mealType = sample.mealType
+  if (sample.energyKilocalories !== undefined)
+    nutrition.energyKilocalories = sample.energyKilocalories
+  if (sample.proteinGrams !== undefined) nutrition.proteinGrams = sample.proteinGrams
+  if (sample.totalCarbohydrateGrams !== undefined)
+    nutrition.totalCarbohydrateGrams = sample.totalCarbohydrateGrams
+  if (sample.totalFatGrams !== undefined) nutrition.totalFatGrams = sample.totalFatGrams
+  if (sample.dietaryFiberGrams !== undefined) nutrition.dietaryFiberGrams = sample.dietaryFiberGrams
+  if (sample.sugarGrams !== undefined) nutrition.sugarGrams = sample.sugarGrams
+  if (sample.sodiumMilligrams !== undefined) nutrition.sodiumMilligrams = sample.sodiumMilligrams
+
+  return nutrition
 }
 
 export function makeFloorsClimbedSample(sample: NativeFloorsClimbedSample): FloorsClimbedSample {

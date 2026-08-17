@@ -755,13 +755,20 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         case "read":
             status = .unverifiable
         case "write":
-            // Blood pressure writes save an HKCorrelation whose members need sharing
-            // authorization on both quantity types, so its status is the worst-of the two.
+            // Correlation-backed writes save an HKCorrelation whose members need sharing
+            // authorization on every member quantity type, so the status is the worst-of
+            // across all of them.
             if permission.dataType == "bloodPressure" {
                 let quantityTypes = try makeBloodPressureQuantityTypes()
-                status = makeWorstOfWriteStatus(
+                status = makeWorstOfWriteStatus([
                     healthStore.authorizationStatus(for: quantityTypes.systolic),
-                    healthStore.authorizationStatus(for: quantityTypes.diastolic)
+                    healthStore.authorizationStatus(for: quantityTypes.diastolic),
+                ])
+            } else if permission.dataType == "nutrition" {
+                status = makeWorstOfWriteStatus(
+                    try makeNutritionQuantityTypes().map { quantityType in
+                        healthStore.authorizationStatus(for: quantityType)
+                    }
                 )
             } else {
                 let sampleType = try makeHealthKitSampleType(dataType: permission.dataType)
@@ -788,10 +795,9 @@ class HybridNitroHealth: HybridNitroHealthSpec {
     }
 
     private func makeWorstOfWriteStatus(
-        _ first: HKAuthorizationStatus,
-        _ second: HKAuthorizationStatus
+        _ authorizationStatuses: [HKAuthorizationStatus]
     ) -> HealthPermissionStatus {
-        let statuses = [makeWriteStatus(first), makeWriteStatus(second)]
+        let statuses = authorizationStatuses.map(makeWriteStatus)
 
         if statuses.contains(.notgranted) {
             return .notgranted
@@ -837,6 +843,22 @@ class HybridNitroHealth: HybridNitroHealthSpec {
                 case "write":
                     toShare.insert(quantityTypes.systolic)
                     toShare.insert(quantityTypes.diastolic)
+                default:
+                    throw permissionError("Unsupported health permission access type: \(permission.accessType)")
+                }
+                continue
+            }
+
+            // One nutrition grant fans out to every dietary member quantity type, so the
+            // system sheet shows one row per nutrient.
+            if permission.dataType == "nutrition" {
+                let quantityTypes = try makeNutritionQuantityTypes()
+
+                switch permission.accessType {
+                case "read":
+                    quantityTypes.forEach { toRead.insert($0) }
+                case "write":
+                    quantityTypes.forEach { toShare.insert($0) }
                 default:
                     throw permissionError("Unsupported health permission access type: \(permission.accessType)")
                 }

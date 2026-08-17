@@ -27,6 +27,7 @@ export const healthDataTypes: HealthDataType[] = [
   'sleep',
   'bodyMass',
   'workout',
+  'nutrition',
 ]
 
 // Read-only aggregate energy concepts; no raw reads or writes exist for these.
@@ -56,6 +57,7 @@ export const writableDataTypes: WritableHealthDataType[] = [
   'sleep',
   'bodyMass',
   'workout',
+  'nutrition',
 ]
 
 export const allHealthPermissions: HealthPermission[] = [

@@ -1,4 +1,4 @@
-import type { HealthDataType } from './HealthDataType'
+import type { ChangeTrackedHealthDataType } from './HealthDataType'
 
 /**
  * Coalesced hint that one or more health data types may have changed.
@@ -7,5 +7,5 @@ import type { HealthDataType } from './HealthDataType'
  */
 export interface HealthChangeNotification {
   /** Data types whose durable change feeds should be drained. */
-  readonly dataTypes: readonly HealthDataType[]
+  readonly dataTypes: readonly ChangeTrackedHealthDataType[]
 }

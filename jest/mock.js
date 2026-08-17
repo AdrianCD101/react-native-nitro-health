@@ -27,15 +27,26 @@ const healthDataTypes = new Set([
   'sleep',
   'bodyMass',
   'workout',
+  'nutrition',
 ])
 
 const aggregateOnlyDataTypes = new Set(['basalEnergyBurned', 'totalEnergyBurned'])
+const changeTrackingUnsupportedDataTypes = new Set(['nutrition'])
 
 function validateDataTypes(values, label) {
   for (const [index, value] of values.entries()) {
     if (!healthDataTypes.has(value)) {
       return new Error(`${label}[${index}]: unsupported health data type '${value}'`)
     }
+    if (changeTrackingUnsupportedDataTypes.has(value)) {
+      return new Error(`${label}[${index}]: change tracking is not supported for '${value}' yet`)
+    }
+  }
+}
+
+function validateChangeTrackedDataType(dataType) {
+  if (changeTrackingUnsupportedDataTypes.has(dataType)) {
+    return new Error(`Change tracking is not supported for '${dataType}' yet`)
   }
 }
 
@@ -89,6 +100,7 @@ const writableDataTypes = [
   'vo2Max',
   'sleep',
   'workout',
+  'nutrition',
 ]
 
 const mockOrigin = {
@@ -390,15 +402,21 @@ function createNitroHealthMock(options = {}) {
         subscription: { remove: createMockFunction(() => undefined) },
       }
     }),
-    createChangesToken: createMockFunction(() => rejectWhenUnavailable('mock-changes-token')),
-    getChanges: createMockFunction(() =>
-      rejectWhenUnavailable({
+    createChangesToken: createMockFunction((dataType) => {
+      const validationError = validateChangeTrackedDataType(dataType)
+      if (validationError !== undefined) return Promise.reject(validationError)
+      return rejectWhenUnavailable('mock-changes-token')
+    }),
+    getChanges: createMockFunction((dataType) => {
+      const validationError = validateChangeTrackedDataType(dataType)
+      if (validationError !== undefined) return Promise.reject(validationError)
+      return rejectWhenUnavailable({
         tokenExpired: false,
         changes: [],
         nextChangesToken: 'mock-changes-token',
         hasMore: false,
       })
-    ),
+    }),
     readActiveEnergyBurned: createMockFunction((query) => readSamples('activeEnergyBurned', query)),
     readHydration: createMockFunction((query) => readSamples('hydration', query)),
     readFloorsClimbed: createMockFunction((query) => readSamples('floorsClimbed', query)),
@@ -424,6 +442,7 @@ function createNitroHealthMock(options = {}) {
     readStatistics: createMockFunction(() => rejectWhenUnavailable([])),
     readSleepSamples: createMockFunction((query) => readSamples('sleep', query)),
     readWorkouts: createMockFunction((query) => readSamples('workout', query)),
+    readNutrition: createMockFunction((query) => readSamples('nutrition', query)),
     saveSteps: createMockFunction((samples) => saveSamples('steps', samples)),
     saveDistance: createMockFunction((samples) =>
       saveSamples(
@@ -497,6 +516,7 @@ function createNitroHealthMock(options = {}) {
         totalActiveEnergyBurned: { status: 'not-reported' },
       }))
     ),
+    saveNutrition: createMockFunction((samples) => saveSamples('nutrition', samples)),
     deleteRecordsByIds: createMockFunction((_dataType, records) => {
       if (records.length === 0) {
         return Promise.reject(new Error('At least one record identity is required'))

@@ -152,6 +152,34 @@ describe('NitroHealth deletes (native)', () => {
     )
   })
 
+  it('round-trips save, delete by record identity, and re-read for nutrition', async () => {
+    const authorized = await hasVerifiedPermissions([
+      { accessType: 'write', dataType: 'nutrition' },
+      { accessType: 'read', dataType: 'nutrition' },
+    ])
+    if (!authorized) return
+
+    await NitroHealth.saveNutrition([
+      { ...deleteInterval, foodName: 'Harness delete meal', proteinGrams: 21 },
+    ])
+    const page = await NitroHealth.readNutrition(deleteReadRange)
+    assertConclusiveRead(page.samples)
+
+    const saved = page.samples.find((sample) => sample.foodName === 'Harness delete meal')
+    expect(saved).toBeDefined()
+    if (saved === undefined || saved.identity.kind !== 'record') return
+
+    // On iOS this exercises the correlation cascade: the entry and its dietary member
+    // samples must all disappear, not just the correlation shell.
+    const result = await NitroHealth.deleteRecordsByIds('nutrition', [saved.identity])
+    assertCompletedIdentityDelete(result)
+
+    const afterDelete = await NitroHealth.readNutrition(deleteReadRange)
+    expect(afterDelete.samples.some((sample) => sample.identity.id === saved.identity.id)).toBe(
+      false
+    )
+  })
+
   it('round-trips save, delete by record identity, and re-read for blood glucose', async () => {
     const authorized = await hasVerifiedPermissions([
       { accessType: 'write', dataType: 'bloodGlucose' },
