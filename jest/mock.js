@@ -190,15 +190,15 @@ function createNitroHealthMock(options = {}) {
     }
     return recordingMethod || 'unknown'
   }
-  const storedDeviceForInput = (device, recordingMethod) => {
-    if (device === undefined || Object.keys(device).length === 0) {
-      return profileName === 'polling' &&
-        (recordingMethod === 'actively-recorded' || recordingMethod === 'automatically-recorded')
-        ? { type: 'unknown' }
-        : undefined
-    }
+  const storedDeviceForInput = (device) => {
+    if (device === undefined || Object.keys(device).length === 0) return undefined
     if (profileName !== 'observer') {
-      return { ...device, type: device.type || 'unknown' }
+      const projected = { ...device, type: device.type || 'unknown' }
+      return projected.type === 'unknown' &&
+        projected.manufacturer === undefined &&
+        projected.model === undefined
+        ? undefined
+        : projected
     }
 
     const projected = {}
@@ -249,7 +249,7 @@ function createNitroHealthMock(options = {}) {
       makeStoredSample(
         dataType,
         storedRecordingMethods[index],
-        storedDeviceForInput(sample.device, storedRecordingMethods[index]),
+        storedDeviceForInput(sample.device),
         makeFields(sample, storedRecordingMethods[index])
       )
     )

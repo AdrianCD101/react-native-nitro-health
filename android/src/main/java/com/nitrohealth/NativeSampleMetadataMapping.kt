@@ -30,7 +30,7 @@ internal fun makeNativeHealthSampleMetadata(
     identity: NativeHealthSampleIdentity? = null
 ): NativeHealthSampleMetadata {
     val resolvedIdentity = identity ?: makeRecordIdentity(metadata.id)
-    val device = metadata.device
+    val device = normalizeHealthConnectDevice(metadata.device)
     val deviceType = when (device?.type) {
         null -> null
         Device.TYPE_UNKNOWN -> NativeHealthDeviceType.UNKNOWN
@@ -56,4 +56,15 @@ internal fun makeNativeHealthSampleMetadata(
         deviceModel = device?.model,
         recordingMethod = nativeHealthRecordingMethod(metadata.recordingMethod)
     )
+}
+
+private fun normalizeHealthConnectDevice(device: Device?): Device? {
+    if (
+        device?.type == Device.TYPE_UNKNOWN &&
+        device.manufacturer == null &&
+        device.model == null
+    ) {
+        return null
+    }
+    return device
 }

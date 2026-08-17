@@ -13,7 +13,6 @@ class NativeSampleMetadataMappingTest {
     @Test
     fun mapsEveryStableHealthConnectDeviceType() {
         val values = listOf(
-            Device.TYPE_UNKNOWN to NativeHealthDeviceType.UNKNOWN,
             Device.TYPE_WATCH to NativeHealthDeviceType.WATCH,
             Device.TYPE_PHONE to NativeHealthDeviceType.PHONE,
             Device.TYPE_SCALE to NativeHealthDeviceType.SCALE,
@@ -33,6 +32,41 @@ class NativeSampleMetadataMappingTest {
             assertNull(sampleMetadata.deviceManufacturer)
             assertNull(sampleMetadata.deviceModel)
         }
+    }
+
+    @Test
+    fun unknownOnlyProviderDeviceMatchesAbsentPlatformDevice() {
+        val providerBacked = makeNativeHealthSampleMetadata(
+            Metadata.unknownRecordingMethod(device = Device(type = Device.TYPE_UNKNOWN))
+        )
+        val platformBacked = makeNativeHealthSampleMetadata(Metadata.unknownRecordingMethod())
+
+        listOf(providerBacked, platformBacked).forEach { sampleMetadata ->
+            assertNull(sampleMetadata.deviceType)
+            assertNull(sampleMetadata.deviceManufacturer)
+            assertNull(sampleMetadata.deviceModel)
+        }
+    }
+
+    @Test
+    fun unknownDeviceWithManufacturerOrModelRemainsPresent() {
+        val manufacturerOnly = makeNativeHealthSampleMetadata(
+            Metadata.unknownRecordingMethod(
+                device = Device(type = Device.TYPE_UNKNOWN, manufacturer = "Example")
+            )
+        )
+        val modelOnly = makeNativeHealthSampleMetadata(
+            Metadata.unknownRecordingMethod(
+                device = Device(type = Device.TYPE_UNKNOWN, model = "Sensor")
+            )
+        )
+
+        assertEquals(NativeHealthDeviceType.UNKNOWN, manufacturerOnly.deviceType)
+        assertEquals("Example", manufacturerOnly.deviceManufacturer)
+        assertNull(manufacturerOnly.deviceModel)
+        assertEquals(NativeHealthDeviceType.UNKNOWN, modelOnly.deviceType)
+        assertNull(modelOnly.deviceManufacturer)
+        assertEquals("Sensor", modelOnly.deviceModel)
     }
 
     @Test
