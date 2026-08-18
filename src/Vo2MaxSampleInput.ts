@@ -1,10 +1,8 @@
-import type { HealthDeviceInfo } from './HealthDeviceInfo'
-import type { HealthRecordSync } from './HealthRecordSync'
-import type { HealthRecordingMethod } from './HealthRecordingMethod'
+import type { HealthWriteMetadataInput } from './HealthWriteMetadataInput'
 import type { Vo2MaxMetadata } from './Vo2MaxMetadata'
 
 /** VO2 max sample accepted by {@linkcode NitroHealth.saveVo2Max}. */
-export interface Vo2MaxSampleInput {
+export interface Vo2MaxSampleInput extends HealthWriteMetadataInput {
   /** Instant the reading was taken. */
   date: Date
   /**
@@ -12,15 +10,6 @@ export interface Vo2MaxSampleInput {
    * Must be between 0 and 100 inclusive.
    */
   millilitersPerKilogramPerMinute: number
-  /** Physical device asserted as having generated this sample. */
-  device?: HealthDeviceInfo
   /** Platform-scoped details to preserve on the platform that owns each field. */
   metadata?: Vo2MaxMetadata
-  /**
-   * Requested recording method. On iOS, active and automatic recording degrade to `unknown`.
-   * @default 'unknown'
-   */
-  recordingMethod?: HealthRecordingMethod
-  /** Optional logical identity that makes retries idempotent and higher versions replace. */
-  sync?: HealthRecordSync
 }

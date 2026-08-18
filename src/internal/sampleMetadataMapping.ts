@@ -4,6 +4,8 @@ import type { HealthRecordSync } from '../HealthRecordSync'
 import type { HealthRecordingMethod } from '../HealthRecordingMethod'
 import type { HealthSampleIdentity } from '../HealthSampleIdentity'
 import type { HealthSample } from '../HealthSample'
+import type { HealthWriteMetadataInput } from '../HealthWriteMetadataInput'
+import type { HealthWriteProvenanceInput } from '../HealthWriteProvenanceInput'
 import type { NativeHealthDataOrigin } from '../NativeHealthDataOrigin'
 import type { NativeHealthDeviceInfo } from '../NativeHealthDeviceInfo'
 import type { NativeHealthRecordingMethod } from '../NativeHealthRecordingMethod'
@@ -121,7 +123,7 @@ function makeNativeHealthDeviceInfo(
 }
 
 export function makeNativeWriteProvenance(
-  sample: { device?: HealthDeviceInfo; recordingMethod?: HealthRecordingMethod },
+  sample: HealthWriteProvenanceInput,
   indexOrPrefix: number | string
 ): NativeHealthWriteProvenance {
   const device = makeNativeHealthDeviceInfo(sample.device, indexOrPrefix)
@@ -134,11 +136,7 @@ export function makeNativeWriteProvenance(
 }
 
 export function makeNativeWriteMetadata(
-  sample: {
-    device?: HealthDeviceInfo
-    recordingMethod?: HealthRecordingMethod
-    sync?: HealthRecordSync
-  },
+  sample: HealthWriteMetadataInput,
   indexOrPrefix: number | string
 ): NativeHealthWriteMetadata {
   const sync = makeNativeSync(sample.sync, indexOrPrefix)

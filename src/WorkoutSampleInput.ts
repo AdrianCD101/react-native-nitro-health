@@ -1,10 +1,12 @@
+import type { HealthWriteMetadataInput } from './HealthWriteMetadataInput'
 import type { HealthDeviceInfo } from './HealthDeviceInfo'
-import type { HealthRecordSync } from './HealthRecordSync'
-import type { HealthRecordingMethod } from './HealthRecordingMethod'
 import type { WritableWorkoutActivityType } from './WritableWorkoutActivityType'
 
 /** Completed workout accepted by {@linkcode NitroHealth.saveWorkout}. */
-export interface WorkoutSampleInput {
+export interface WorkoutSampleInput extends HealthWriteMetadataInput {
+  /** Physical device asserted as having generated this workout. */
+  device?: HealthDeviceInfo
+
   /** Start of the workout. */
   startDate: Date
   /** End of the workout. */
@@ -15,13 +17,4 @@ export interface WorkoutSampleInput {
   displayName?: string
   /** IANA time-zone identifier. Defaults to the device's current time zone. */
   timeZone?: string
-  /** Physical device asserted as having generated this workout. */
-  device?: HealthDeviceInfo
-  /**
-   * Requested recording method. On iOS, active and automatic recording degrade to `unknown`.
-   * @default 'unknown'
-   */
-  recordingMethod?: HealthRecordingMethod
-  /** Optional logical identity that makes retries idempotent and higher versions replace. */
-  sync?: HealthRecordSync
 }

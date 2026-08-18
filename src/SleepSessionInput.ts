@@ -1,9 +1,9 @@
 import type { HealthDeviceInfo } from './HealthDeviceInfo'
-import type { HealthRecordingMethod } from './HealthRecordingMethod'
+import type { HealthWriteProvenanceInput } from './HealthWriteProvenanceInput'
 import type { SleepSessionStageInput } from './SleepSessionStageInput'
 
 /** Sleep session written by {@linkcode NitroHealth.saveSleepSessions}. */
-export interface SleepSessionInput {
+export interface SleepSessionInput extends HealthWriteProvenanceInput {
   /** Start of the complete sleep session. */
   startDate: Date
   /** End of the complete sleep session. */
@@ -14,9 +14,4 @@ export interface SleepSessionInput {
   timeZone?: string
   /** Physical device asserted as having generated this session and its stages. */
   device?: HealthDeviceInfo
-  /**
-   * Requested recording method. On iOS, active and automatic recording degrade to `unknown`.
-   * @default 'unknown'
-   */
-  recordingMethod?: HealthRecordingMethod
 }
