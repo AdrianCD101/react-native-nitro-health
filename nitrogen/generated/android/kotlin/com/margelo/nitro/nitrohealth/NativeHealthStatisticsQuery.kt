@@ -29,7 +29,10 @@ data class NativeHealthStatisticsQuery(
   val bucket: String,
   @DoNotStrip
   @Keep
-  val metrics: Array<String>
+  val metrics: Array<String>,
+  @DoNotStrip
+  @Keep
+  val timeZone: String?
 ) {
   /* primary constructor */
 
@@ -40,6 +43,7 @@ data class NativeHealthStatisticsQuery(
       && Objects.deepEquals(this.endTimeMs, other.endTimeMs)
       && Objects.deepEquals(this.bucket, other.bucket)
       && Objects.deepEquals(this.metrics, other.metrics)
+      && Objects.deepEquals(this.timeZone, other.timeZone)
   }
 
   override fun hashCode(): Int {
@@ -47,7 +51,8 @@ data class NativeHealthStatisticsQuery(
       startTimeMs,
       endTimeMs,
       bucket,
-      metrics
+      metrics,
+      timeZone
     ).contentDeepHashCode()
   }
 
@@ -59,8 +64,8 @@ data class NativeHealthStatisticsQuery(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(startTimeMs: Double, endTimeMs: Double, bucket: String, metrics: Array<String>): NativeHealthStatisticsQuery {
-      return NativeHealthStatisticsQuery(startTimeMs, endTimeMs, bucket, metrics)
+    private fun fromCpp(startTimeMs: Double, endTimeMs: Double, bucket: String, metrics: Array<String>, timeZone: String?): NativeHealthStatisticsQuery {
+      return NativeHealthStatisticsQuery(startTimeMs, endTimeMs, bucket, metrics, timeZone)
     }
   }
 }

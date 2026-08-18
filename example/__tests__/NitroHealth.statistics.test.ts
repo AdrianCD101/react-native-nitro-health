@@ -30,13 +30,69 @@ describe('NitroHealth readStatistics contract', () => {
     })
   })
 
+  it('forwards timeZone to the Nitro hybrid object when provided', async () => {
+    const startDate = new Date('2026-01-01T00:00:00.000Z')
+    const endDate = new Date('2026-01-08T00:00:00.000Z')
+    mockNitroHealth.readStatistics.mockResolvedValue([])
+
+    await expect(
+      NitroHealth.readStatistics('steps', {
+        startDate,
+        endDate,
+        bucket: 'day',
+        metrics: ['sum'],
+        timeZone: 'America/New_York',
+      })
+    ).resolves.toEqual([])
+
+    expect(mockNitroHealth.readStatistics).toHaveBeenCalledWith('steps', {
+      startTimeMs: startDate.getTime(),
+      endTimeMs: endDate.getTime(),
+      bucket: 'day',
+      metrics: ['sum'],
+      timeZone: 'America/New_York',
+    })
+  })
+
+  it.each(['', '   '])(
+    'rejects a blank timeZone (%j) before crossing the native boundary',
+    async (timeZone) => {
+      const startDate = new Date('2026-01-01T00:00:00.000Z')
+      const endDate = new Date('2026-01-08T00:00:00.000Z')
+
+      await expect(
+        NitroHealth.readStatistics('steps', {
+          startDate,
+          endDate,
+          bucket: 'day',
+          metrics: ['sum'],
+          timeZone,
+        })
+      ).rejects.toThrow('timeZone must be a non-empty IANA time-zone identifier')
+
+      expect(mockNitroHealth.readStatistics).not.toHaveBeenCalled()
+    }
+  )
+
+  it('throws when a native bucket is missing the resolved timeZone', async () => {
+    const startDate = new Date('2026-01-01T00:00:00.000Z')
+    const endDate = new Date('2026-01-08T00:00:00.000Z')
+    mockNitroHealth.readStatistics.mockResolvedValue([
+      { startTimeMs: startDate.getTime(), endTimeMs: endDate.getTime(), sum: 1234 },
+    ])
+
+    await expect(
+      NitroHealth.readStatistics('steps', { startDate, endDate, bucket: 'day', metrics: ['sum'] })
+    ).rejects.toThrow('Native statistics are missing timeZone')
+  })
+
   it('maps native results back to HealthStatistics with Date instances', async () => {
     const startDate = new Date('2026-01-01T00:00:00.000Z')
     const endDate = new Date('2026-01-08T00:00:00.000Z')
     const bucketStartMs = new Date('2026-01-01T00:00:00.000Z').getTime()
     const bucketEndMs = new Date('2026-01-02T00:00:00.000Z').getTime()
     mockNitroHealth.readStatistics.mockResolvedValue([
-      { startTimeMs: bucketStartMs, endTimeMs: bucketEndMs, sum: 1234 },
+      { startTimeMs: bucketStartMs, endTimeMs: bucketEndMs, sum: 1234, timeZone: 'UTC' },
     ])
 
     const result = await NitroHealth.readStatistics('steps', {
@@ -55,6 +111,7 @@ describe('NitroHealth readStatistics contract', () => {
     expect(result[0].avg).toBeUndefined()
     expect(result[0].min).toBeUndefined()
     expect(result[0].max).toBeUndefined()
+    expect(result[0].timeZone).toBe('UTC')
   })
 
   it('maps native distance scope onto every public statistics bucket', async () => {
@@ -66,6 +123,7 @@ describe('NitroHealth readStatistics contract', () => {
         endTimeMs: endDate.getTime(),
         sum: 5432,
         scope: 'activityUnspecified',
+        timeZone: 'UTC',
       },
     ])
 
@@ -82,6 +140,7 @@ describe('NitroHealth readStatistics contract', () => {
         endDate,
         sum: 5432,
         scope: 'activity-unspecified',
+        timeZone: 'UTC',
       },
     ])
   })
@@ -96,6 +155,7 @@ describe('NitroHealth readStatistics contract', () => {
         avg: 70,
         min: 55,
         max: 130,
+        timeZone: 'UTC',
       },
     ])
 

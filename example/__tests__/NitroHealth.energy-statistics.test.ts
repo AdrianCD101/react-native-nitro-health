@@ -41,7 +41,7 @@ describe('NitroHealth aggregate-only energy statistics contract', () => {
     const bucketStartMs = startDate.getTime()
     const bucketEndMs = new Date('2026-01-02T00:00:00.000Z').getTime()
     mockNitroHealth.readStatistics.mockResolvedValue([
-      { startTimeMs: bucketStartMs, endTimeMs: bucketEndMs, sum: 2450.5 },
+      { startTimeMs: bucketStartMs, endTimeMs: bucketEndMs, sum: 2450.5, timeZone: 'UTC' },
     ])
 
     const result = await NitroHealth.readStatistics('totalEnergyBurned', {

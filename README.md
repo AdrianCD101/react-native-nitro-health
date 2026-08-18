@@ -765,7 +765,18 @@ const heartRate = await NitroHealth.readStatistics('heartRate', {
   bucket: 'hour',
   metrics: ['avg', 'min', 'max'],
 })
+
+// Reproducible daily buckets, independent of where the device currently is:
+const tokyoDays = await NitroHealth.readStatistics('steps', {
+  startDate,
+  endDate,
+  bucket: 'day',
+  metrics: ['sum'],
+  timeZone: 'Asia/Tokyo',
+})
 ```
+
+`timeZone` is an optional IANA identifier that day, week, and month buckets are computed in; omitted means the device's current zone at query time. Every returned bucket echoes the resolved zone as `timeZone`, so results stay self-describing after the fact. Invalid identifiers (including fixed offsets like `"+01:00"`) reject; only real IANA names and `"UTC"` resolve.
 
 | Data type                    | Metrics             | Unit                 |
 | ---------------------------- | ------------------- | -------------------- |
@@ -820,7 +831,7 @@ Do not compare energy totals across platforms bucket-for-bucket; compare trends 
 
 On iOS a `totalEnergyBurned` read permission authorizes both component quantity types (active and basal energy), the same way blood pressure authorizes its two members. On Android the permissions are `READ_BASAL_METABOLIC_RATE` and `READ_TOTAL_CALORIES_BURNED`; see the permission table above.
 
-Buckets anchor at `startDate`. Use local midnight for calendar-day buckets. `week` is a rolling seven-day interval from that anchor. The final bucket is clamped to `endDate`, empty buckets are omitted, and results are ascending. Hour buckets are fixed 3600-second intervals; day, week, and month buckets follow the device calendar and local time zone.
+Buckets anchor at `startDate`. Use local midnight for calendar-day buckets. `week` is a rolling seven-day interval from that anchor. The final bucket is clamped to `endDate`, empty buckets are omitted, and results are ascending. Hour buckets are fixed 3600-second intervals; day, week, and month buckets follow the resolved time zone — the query's `timeZone` when provided, otherwise the device zone at query time — so a day bucket containing a DST transition spans 23 or 25 physical hours. Every bucket echoes the resolved zone as `timeZone`.
 
 `readHeartRateStatistics({ startDate, endDate })` remains the whole-range heart-rate aggregate and returns `{ average?, min?, max? }`.
 

@@ -33,6 +33,7 @@ namespace margelo::nitro::nitrohealth { enum class NativeDistanceScope; }
 
 #include <optional>
 #include "NativeDistanceScope.hpp"
+#include <string>
 
 namespace margelo::nitro::nitrohealth {
 
@@ -48,10 +49,11 @@ namespace margelo::nitro::nitrohealth {
     std::optional<double> min     SWIFT_PRIVATE;
     std::optional<double> max     SWIFT_PRIVATE;
     std::optional<NativeDistanceScope> scope     SWIFT_PRIVATE;
+    std::optional<std::string> timeZone     SWIFT_PRIVATE;
 
   public:
     NativeHealthStatistics() = default;
-    explicit NativeHealthStatistics(double startTimeMs, double endTimeMs, std::optional<double> sum, std::optional<double> avg, std::optional<double> min, std::optional<double> max, std::optional<NativeDistanceScope> scope): startTimeMs(startTimeMs), endTimeMs(endTimeMs), sum(sum), avg(avg), min(min), max(max), scope(scope) {}
+    explicit NativeHealthStatistics(double startTimeMs, double endTimeMs, std::optional<double> sum, std::optional<double> avg, std::optional<double> min, std::optional<double> max, std::optional<NativeDistanceScope> scope, std::optional<std::string> timeZone): startTimeMs(startTimeMs), endTimeMs(endTimeMs), sum(sum), avg(avg), min(min), max(max), scope(scope), timeZone(timeZone) {}
 
   public:
     friend bool operator==(const NativeHealthStatistics& lhs, const NativeHealthStatistics& rhs) = default;
@@ -73,7 +75,8 @@ namespace margelo::nitro {
         JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "avg"))),
         JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "min"))),
         JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "max"))),
-        JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeDistanceScope>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "scope")))
+        JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeDistanceScope>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "scope"))),
+        JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeZone")))
       );
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::nitrohealth::NativeHealthStatistics& arg) {
@@ -85,6 +88,7 @@ namespace margelo::nitro {
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "min"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.min));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "max"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.max));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "scope"), JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeDistanceScope>>::toJSI(runtime, arg.scope));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "timeZone"), JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.timeZone));
       return obj;
     }
     static inline bool canConvert(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -102,6 +106,7 @@ namespace margelo::nitro {
       if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "min")))) return false;
       if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "max")))) return false;
       if (!JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeDistanceScope>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "scope")))) return false;
+      if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeZone")))) return false;
       return true;
     }
   };

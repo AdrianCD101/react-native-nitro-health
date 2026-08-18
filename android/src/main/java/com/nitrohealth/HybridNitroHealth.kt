@@ -808,6 +808,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
 
             val slicer = makeBucketSlicer(query.bucket)
                 ?: throw IllegalArgumentException("Unsupported statistics bucket: ${query.bucket}")
+            val zoneId = resolveIanaZoneId(query.timeZone, "readStatistics")
             val metrics = requestedMetrics.values.map { it.metric }.toSet()
 
             val samples = when (slicer) {
@@ -827,12 +828,12 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                             result = group.result,
                             bucketStartTimeMs = group.startTime.toEpochMilli().toDouble(),
                             bucketEndTimeMs = group.endTime.toEpochMilli().toDouble(),
-                            query = query
+                            query = query,
+                            zoneId = zoneId
                         )
                     }
                 }
                 is BucketSlicer.ByPeriod -> {
-                    val zoneId = ZoneId.systemDefault()
                     val request = AggregateGroupByPeriodRequest(
                         metrics = metrics,
                         timeRangeFilter = TimeRangeFilter.between(
@@ -848,7 +849,8 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                             result = group.result,
                             bucketStartTimeMs = group.startTime.atZone(zoneId).toInstant().toEpochMilli().toDouble(),
                             bucketEndTimeMs = group.endTime.atZone(zoneId).toInstant().toEpochMilli().toDouble(),
-                            query = query
+                            query = query,
+                            zoneId = zoneId
                         )
                     }
                 }
@@ -864,7 +866,8 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         result: AggregationResult,
         bucketStartTimeMs: Double,
         bucketEndTimeMs: Double,
-        query: NativeHealthStatisticsQuery
+        query: NativeHealthStatisticsQuery,
+        zoneId: ZoneId
     ): NativeHealthStatistics? {
         val values = requestedMetrics.mapValues { (_, binding) -> binding.extract(result) }
         if (values.values.all { it == null }) {
@@ -889,7 +892,8 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
                 NativeDistanceScope.ACTIVITYUNSPECIFIED
             } else {
                 null
-            }
+            },
+            timeZone = zoneId.id
         )
     }
 

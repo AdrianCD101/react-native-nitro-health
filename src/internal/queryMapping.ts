@@ -130,10 +130,19 @@ export function makeNativeStatisticsQuery(
     }
   }
 
-  return {
+  const nativeQuery: NativeHealthStatisticsQuery = {
     startTimeMs,
     endTimeMs,
     bucket: query.bucket,
     metrics,
   }
+
+  if (query.timeZone !== undefined) {
+    if (typeof query.timeZone !== 'string' || query.timeZone.trim() === '') {
+      throw new Error('timeZone must be a non-empty IANA time-zone identifier')
+    }
+    nativeQuery.timeZone = query.timeZone
+  }
+
+  return nativeQuery
 }

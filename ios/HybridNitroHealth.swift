@@ -219,23 +219,28 @@ class HybridNitroHealth: HybridNitroHealthSpec {
 
     // Note: like readHeartRateStatistics, HealthKit resolves with empty buckets when read access
     // is denied. Bucket boundaries anchor at query.startTimeMs (not startOfDay/calendar weeks),
-    // so 'week' is a rolling 7-day window from the anchor rather than a calendar week.
+    // so 'week' is a rolling 7-day window from the anchor rather than a calendar week. Day and
+    // month buckets are computed in the resolved time zone (query.timeZone, or the device zone
+    // when omitted), which every returned bucket echoes.
     func readStatistics(dataType: String, query: NativeHealthStatisticsQuery) throws -> Promise<[NativeHealthStatistics]> {
         if !HKHealthStore.isHealthDataAvailable() {
             throw permissionError("Health data is not available")
         }
 
+        let timeZone = try resolveIanaTimeZone(query.timeZone, errorPrefix: "readStatistics")
+
         if dataType == "totalEnergyBurned" {
-            return try readTotalEnergyBurnedStatistics(query: query)
+            return try readTotalEnergyBurnedStatistics(query: query, timeZone: timeZone)
         }
 
         let descriptor = try makeHealthDataTypeDescriptor(dataType: dataType)
         let quantityType = try makeHealthKitQuantityType(dataType: dataType)
         let unit = descriptor.unit
         let options = try makeStatisticsOptions(dataType: dataType, isCumulative: descriptor.isCumulative, metrics: query.metrics)
-        guard let intervalComponents = makeBucketIntervalComponents(bucket: query.bucket) else {
+        guard let bucketComponents = makeBucketIntervalComponents(bucket: query.bucket) else {
             throw permissionError("Unsupported statistics bucket: \(query.bucket)")
         }
+        let intervalComponents = makeZonedIntervalComponents(bucketComponents, timeZone: timeZone)
 
         let startDate = Date(timeIntervalSince1970: query.startTimeMs / 1000)
         let endDate = Date(timeIntervalSince1970: query.endTimeMs / 1000)
@@ -279,7 +284,8 @@ class HybridNitroHealth: HybridNitroHealthSpec {
                     avg: avg,
                     min: min,
                     max: max,
-                    scope: dataType == "distance" ? .walkingrunning : nil
+                    scope: dataType == "distance" ? .walkingrunning : nil,
+                    timeZone: timeZone.identifier
                 )
             }
         }
@@ -289,7 +295,8 @@ class HybridNitroHealth: HybridNitroHealthSpec {
     // from active plus basal energy. Buckets without a basal sum are omitted rather than
     // reporting the active half as if it were the whole total.
     private func readTotalEnergyBurnedStatistics(
-        query: NativeHealthStatisticsQuery
+        query: NativeHealthStatisticsQuery,
+        timeZone: TimeZone
     ) throws -> Promise<[NativeHealthStatistics]> {
         let activeType = try makeHealthKitQuantityType(dataType: "activeEnergyBurned")
         let basalType = try makeHealthKitQuantityType(dataType: "basalEnergyBurned")
@@ -298,9 +305,10 @@ class HybridNitroHealth: HybridNitroHealthSpec {
             isCumulative: true,
             metrics: query.metrics
         )
-        guard let intervalComponents = makeBucketIntervalComponents(bucket: query.bucket) else {
+        guard let bucketComponents = makeBucketIntervalComponents(bucket: query.bucket) else {
             throw permissionError("Unsupported statistics bucket: \(query.bucket)")
         }
+        let intervalComponents = makeZonedIntervalComponents(bucketComponents, timeZone: timeZone)
 
         let unit = HKUnit.kilocalorie()
         let startDate = Date(timeIntervalSince1970: query.startTimeMs / 1000)
@@ -359,7 +367,8 @@ class HybridNitroHealth: HybridNitroHealthSpec {
                     avg: nil,
                     min: nil,
                     max: nil,
-                    scope: nil
+                    scope: nil,
+                    timeZone: timeZone.identifier
                 )
             }
         }

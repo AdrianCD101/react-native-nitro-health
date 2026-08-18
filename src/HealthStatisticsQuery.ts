@@ -11,4 +11,10 @@ export interface HealthStatisticsQuery {
   bucket: StatisticsBucket
   /** Aggregate metrics to compute per bucket. Must be compatible with the queried data type. */
   metrics: StatisticsMetric[]
+  /**
+   * IANA time-zone identifier that day, week, and month buckets are computed in.
+   * Defaults to the device's current time zone at query time. The resolved zone is
+   * echoed on every returned bucket as {@linkcode HealthStatistics.timeZone}.
+   */
+  timeZone?: string
 }
