@@ -972,38 +972,20 @@ In polling mode, configure and disable cannot create or cancel the consumer's sc
 
 ### iOS Observer Bootstrap And Retention
 
-iOS observer configuration is persisted by the library. The native bootstrap restores configured observers before JavaScript starts, and pending data-type hints are retained and coalesced until a JavaScript listener receives them. The library acknowledges a native delivery after the current JavaScript listeners have run. Always drain the durable token because a hint contains no records and can be delayed, duplicated, or coalesced.
+iOS observer configuration is persisted by the library and restored automatically: a load-time constructor in the pod re-registers all configured observers when the application finishes launching, so terminated-app background delivery works with no AppDelegate code, bridging header, or other consumer setup. Pending data-type hints are retained and coalesced until a JavaScript listener receives them. The library acknowledges a native delivery after the current JavaScript listeners have run. Always drain the durable token because a hint contains no records and can be delayed, duplicated, or coalesced.
 
-HealthKit exposes observer delivery as an iOS capability, but does not provide an iOS API for inspecting the host app's signed background-delivery entitlement. A missing entitlement therefore causes `configureBackgroundChanges()` to reject rather than changing the reported capability to polling.
+The automatic bootstrap does nothing unless the app previously called `configureBackgroundChanges()` — for apps that never enable background delivery it is a single `UserDefaults` read at launch.
 
-Autolinking cannot restore observers early enough for terminated-app delivery. Add the HealthKit background-delivery entitlement to the consumer target:
+The only remaining consumer step is the HealthKit background-delivery entitlement on the app target (Expo prebuild apps apply it through a config plugin; this package does not currently ship one):
 
 ```xml
 <key>com.apple.developer.healthkit.background-delivery</key>
 <true/>
 ```
 
-Import the library bootstrap header from the app target's Objective-C bridging header:
+HealthKit exposes observer delivery as an iOS capability, but does not provide an iOS API for inspecting the host app's signed background-delivery entitlement. A missing entitlement therefore causes `configureBackgroundChanges()` to reject rather than changing the reported capability to polling.
 
-```objc
-#import <NitroHealth/NitroHealthBackgroundDelivery.h>
-```
-
-Then call the bootstrap near the beginning of `application(_:didFinishLaunchingWithOptions:)`, before React Native starts:
-
-```swift
-func application(
-  _ application: UIApplication,
-  didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
-) -> Bool {
-  NitroHealthRegisterPersistedObservers()
-
-  // Start React Native after persisted observers have been registered.
-  return true
-}
-```
-
-Objective-C and Objective-C++ AppDelegates can import `NitroHealthBackgroundDelivery.h` directly. Bare React Native apps add this setup once. Expo prebuild apps must apply the entitlement, bridging import, and AppDelegate call through their own config plugin; this package does not currently ship one.
+**Upgrading from the manual bootstrap:** delete the `void NitroHealthRegisterPersistedObservers(void);` declaration (or `#import <NitroHealth/NitroHealthBackgroundDelivery.h>`) from the app's bridging header and the `NitroHealthRegisterPersistedObservers()` call from the AppDelegate — the function and its header no longer exist, and leaving the call in place fails at link time.
 
 HealthKit can enforce slower minimum frequencies for some types, protected data can be unavailable while the device is locked, and force-quitting can prevent relaunch. Drain configured tokens on normal launch and foreground activation even when no hint was received. True server delivery and cold-launch behavior require a signed physical device; Simulator is insufficient.
 
