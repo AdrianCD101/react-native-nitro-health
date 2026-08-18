@@ -25,4 +25,24 @@ final class StatisticsBucketUtilsTests: XCTestCase {
     func testMakeBucketIntervalComponentsEmptyReturnsNil() {
         XCTAssertNil(makeBucketIntervalComponents(bucket: ""))
     }
+
+    func testMakeZonedIntervalComponentsStampsZoneAndCalendar() throws {
+        let timeZone = try XCTUnwrap(TimeZone(identifier: "America/New_York"))
+        let zoned = makeZonedIntervalComponents(DateComponents(day: 1), timeZone: timeZone)
+
+        XCTAssertEqual(zoned.day, 1)
+        XCTAssertEqual(zoned.timeZone, timeZone)
+        XCTAssertEqual(zoned.calendar?.identifier, .gregorian)
+        XCTAssertEqual(zoned.calendar?.timeZone, timeZone)
+    }
+
+    func testMakeZonedIntervalComponentsPreservesOriginalUnits() {
+        let timeZone = TimeZone(identifier: "UTC")!
+        let zoned = makeZonedIntervalComponents(DateComponents(month: 1), timeZone: timeZone)
+
+        XCTAssertEqual(zoned.month, 1)
+        XCTAssertNil(zoned.day)
+        XCTAssertNil(zoned.hour)
+        XCTAssertEqual(zoned.timeZone, timeZone)
+    }
 }

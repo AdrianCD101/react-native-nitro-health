@@ -18,13 +18,19 @@ public extension NativeHealthStatisticsQuery {
   /**
    * Create a new instance of `NativeHealthStatisticsQuery`.
    */
-  init(startTimeMs: Double, endTimeMs: Double, bucket: String, metrics: [String]) {
+  init(startTimeMs: Double, endTimeMs: Double, bucket: String, metrics: [String], timeZone: String?) {
     self.init(startTimeMs, endTimeMs, std.string(bucket), { () -> bridge.std__vector_std__string_ in
       var __vector = bridge.create_std__vector_std__string_(metrics.count)
       for __item in metrics {
         __vector.push_back(std.string(__item))
       }
       return __vector
+    }(), { () -> bridge.std__optional_std__string_ in
+      if let __unwrappedValue = timeZone {
+        return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
+      } else {
+        return .init()
+      }
     }())
   }
 
@@ -46,5 +52,17 @@ public extension NativeHealthStatisticsQuery {
   @inline(__always)
   var metrics: [String] {
     return self.__metrics.map({ __item in String(__item) })
+  }
+  
+  @inline(__always)
+  var timeZone: String? {
+    return { () -> String? in
+      if bridge.has_value_std__optional_std__string_(self.__timeZone) {
+        let __unwrapped = bridge.get_std__optional_std__string_(self.__timeZone)
+        return String(__unwrapped)
+      } else {
+        return nil
+      }
+    }()
   }
 }

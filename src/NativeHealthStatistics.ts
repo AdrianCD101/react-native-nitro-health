@@ -9,4 +9,5 @@ export interface NativeHealthStatistics {
   min?: number
   max?: number
   scope?: NativeDistanceScope
+  timeZone?: string
 }

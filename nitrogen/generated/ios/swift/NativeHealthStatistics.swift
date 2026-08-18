@@ -18,7 +18,7 @@ public extension NativeHealthStatistics {
   /**
    * Create a new instance of `NativeHealthStatistics`.
    */
-  init(startTimeMs: Double, endTimeMs: Double, sum: Double?, avg: Double?, min: Double?, max: Double?, scope: NativeDistanceScope?) {
+  init(startTimeMs: Double, endTimeMs: Double, sum: Double?, avg: Double?, min: Double?, max: Double?, scope: NativeDistanceScope?, timeZone: String?) {
     self.init(startTimeMs, endTimeMs, { () -> bridge.std__optional_double_ in
       if let __unwrappedValue = sum {
         return bridge.create_std__optional_double_(__unwrappedValue)
@@ -46,6 +46,12 @@ public extension NativeHealthStatistics {
     }(), { () -> bridge.std__optional_NativeDistanceScope_ in
       if let __unwrappedValue = scope {
         return bridge.create_std__optional_NativeDistanceScope_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_std__string_ in
+      if let __unwrappedValue = timeZone {
+        return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
       } else {
         return .init()
       }
@@ -113,5 +119,17 @@ public extension NativeHealthStatistics {
   @inline(__always)
   var scope: NativeDistanceScope? {
     return self.__scope.value
+  }
+  
+  @inline(__always)
+  var timeZone: String? {
+    return { () -> String? in
+      if bridge.has_value_std__optional_std__string_(self.__timeZone) {
+        let __unwrapped = bridge.get_std__optional_std__string_(self.__timeZone)
+        return String(__unwrapped)
+      } else {
+        return nil
+      }
+    }()
   }
 }

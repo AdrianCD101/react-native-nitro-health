@@ -4,4 +4,5 @@ export interface NativeHealthStatisticsQuery {
   endTimeMs: number
   bucket: string
   metrics: string[]
+  timeZone?: string
 }

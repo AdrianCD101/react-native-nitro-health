@@ -32,6 +32,7 @@
 
 #include <string>
 #include <vector>
+#include <optional>
 
 namespace margelo::nitro::nitrohealth {
 
@@ -44,10 +45,11 @@ namespace margelo::nitro::nitrohealth {
     double endTimeMs     SWIFT_PRIVATE;
     std::string bucket     SWIFT_PRIVATE;
     std::vector<std::string> metrics     SWIFT_PRIVATE;
+    std::optional<std::string> timeZone     SWIFT_PRIVATE;
 
   public:
     NativeHealthStatisticsQuery() = default;
-    explicit NativeHealthStatisticsQuery(double startTimeMs, double endTimeMs, std::string bucket, std::vector<std::string> metrics): startTimeMs(startTimeMs), endTimeMs(endTimeMs), bucket(bucket), metrics(metrics) {}
+    explicit NativeHealthStatisticsQuery(double startTimeMs, double endTimeMs, std::string bucket, std::vector<std::string> metrics, std::optional<std::string> timeZone): startTimeMs(startTimeMs), endTimeMs(endTimeMs), bucket(bucket), metrics(metrics), timeZone(timeZone) {}
 
   public:
     friend bool operator==(const NativeHealthStatisticsQuery& lhs, const NativeHealthStatisticsQuery& rhs) = default;
@@ -66,7 +68,8 @@ namespace margelo::nitro {
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "startTimeMs"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs"))),
         JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "bucket"))),
-        JSIConverter<std::vector<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "metrics")))
+        JSIConverter<std::vector<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "metrics"))),
+        JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeZone")))
       );
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::nitrohealth::NativeHealthStatisticsQuery& arg) {
@@ -75,6 +78,7 @@ namespace margelo::nitro {
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs"), JSIConverter<double>::toJSI(runtime, arg.endTimeMs));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "bucket"), JSIConverter<std::string>::toJSI(runtime, arg.bucket));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "metrics"), JSIConverter<std::vector<std::string>>::toJSI(runtime, arg.metrics));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "timeZone"), JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.timeZone));
       return obj;
     }
     static inline bool canConvert(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -89,6 +93,7 @@ namespace margelo::nitro {
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs")))) return false;
       if (!JSIConverter<std::string>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "bucket")))) return false;
       if (!JSIConverter<std::vector<std::string>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "metrics")))) return false;
+      if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeZone")))) return false;
       return true;
     }
   };

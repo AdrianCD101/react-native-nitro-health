@@ -10,6 +10,7 @@
 #include <fbjni/fbjni.h>
 #include "NativeHealthStatisticsQuery.hpp"
 
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -40,6 +41,8 @@ namespace margelo::nitro::nitrohealth {
       jni::local_ref<jni::JString> bucket = this->getFieldValue(fieldBucket);
       static const auto fieldMetrics = clazz->getField<jni::JArrayClass<jni::JString>>("metrics");
       jni::local_ref<jni::JArrayClass<jni::JString>> metrics = this->getFieldValue(fieldMetrics);
+      static const auto fieldTimeZone = clazz->getField<jni::JString>("timeZone");
+      jni::local_ref<jni::JString> timeZone = this->getFieldValue(fieldTimeZone);
       return NativeHealthStatisticsQuery(
         startTimeMs,
         endTimeMs,
@@ -53,7 +56,8 @@ namespace margelo::nitro::nitrohealth {
             __vector.push_back(__element->toStdString());
           }
           return __vector;
-        }(metrics)
+        }(metrics),
+        timeZone != nullptr ? std::make_optional(timeZone->toStdString()) : std::nullopt
       );
     }
 
@@ -63,7 +67,7 @@ namespace margelo::nitro::nitrohealth {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeHealthStatisticsQuery::javaobject> fromCpp(const NativeHealthStatisticsQuery& value) {
-      using JSignature = JNativeHealthStatisticsQuery(double, double, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JArrayClass<jni::JString>>);
+      using JSignature = JNativeHealthStatisticsQuery(double, double, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JArrayClass<jni::JString>>, jni::alias_ref<jni::JString>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
@@ -80,7 +84,8 @@ namespace margelo::nitro::nitrohealth {
             __array->setElement(__i, *__elementJni);
           }
           return __array;
-        }(value.metrics)
+        }(value.metrics),
+        value.timeZone.has_value() ? jni::make_jstring(value.timeZone.value()) : nullptr
       );
     }
   };

@@ -12,6 +12,12 @@ export interface HealthStatistics {
   min?: number
   /** Maximum of matching values, present only when 'max' was requested and supported. */
   max?: number
+  /**
+   * Resolved IANA time zone the buckets were computed in — the query's
+   * {@linkcode HealthStatisticsQuery.timeZone} when provided, otherwise the
+   * device's time zone at query time.
+   */
+  timeZone: string
 }
 
 /** Distance statistics with explicit native activity coverage. */

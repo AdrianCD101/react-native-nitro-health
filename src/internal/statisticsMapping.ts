@@ -20,6 +20,10 @@ export function makeHealthStatistics<T extends HealthStatisticsDataType>(
   dataType: T,
   statistics: NativeHealthStatistics
 ): HealthStatisticsByDataType<T> {
+  if (statistics.timeZone === undefined) {
+    throw new Error('Native statistics are missing timeZone')
+  }
+
   const result: HealthStatistics = {
     startDate: new Date(statistics.startTimeMs),
     endDate: new Date(statistics.endTimeMs),
@@ -27,6 +31,7 @@ export function makeHealthStatistics<T extends HealthStatisticsDataType>(
     avg: statistics.avg,
     min: statistics.min,
     max: statistics.max,
+    timeZone: statistics.timeZone,
   }
 
   if (dataType === 'distance') {

@@ -100,6 +100,9 @@ function assertStatisticsEntry(
   expect(entry.startDate).toBeInstanceOf(Date)
   expect(entry.endDate).toBeInstanceOf(Date)
   expect(entry.startDate.getTime()).toBeLessThan(entry.endDate.getTime())
+  // Every bucket echoes the resolved zone — the device zone when the query omitted one.
+  expect(typeof entry.timeZone).toBe('string')
+  expect(entry.timeZone.length).toBeGreaterThan(0)
 
   for (const key of statisticsMetricKeys) {
     if (metrics.includes(key)) {
@@ -226,6 +229,121 @@ describe('NitroHealth statistics (native)', () => {
           metrics: ['sum'],
         })
       ).rejects.toThrow('bucket must be one of: hour, day, week, month')
+    })
+
+    it('rejects an invalid IANA time zone natively, including for hour buckets', async () => {
+      for (const bucket of ['hour', 'day'] as const) {
+        await expect(
+          NitroHealth.readStatistics('steps', {
+            ...emptyRange,
+            bucket,
+            metrics: ['sum'],
+            timeZone: 'Not/A_Zone',
+          })
+        ).rejects.toThrow('timeZone is not a valid IANA time-zone identifier')
+
+        // Fixed-offset strings are deliberately rejected; only real IANA identifiers resolve.
+        await expect(
+          NitroHealth.readStatistics('steps', {
+            ...emptyRange,
+            bucket,
+            metrics: ['sum'],
+            timeZone: '+01:00',
+          })
+        ).rejects.toThrow('timeZone is not a valid IANA time-zone identifier')
+      }
+    })
+
+    // America/New_York day buckets around the DST transitions: 2026-03-08 (spring forward) has
+    // 23 hours and 2025-11-02 (fall back) has 25. Both dates are in the past so the samples are
+    // writable, and each range is a dedicated island that is cleared before and after.
+    it('computes day buckets in an explicit non-device zone across DST boundaries', async () => {
+      const authorized = await hasVerifiedPermissions([
+        { accessType: 'write', dataType: 'steps' },
+        { accessType: 'read', dataType: 'steps' },
+      ])
+
+      if (!authorized || !(await isActivityAggregationVisible())) {
+        return
+      }
+
+      // Local midnights in America/New_York: 2026-03-08T00:00 is 05:00Z (EST, -5); after the
+      // shift 2026-03-09T00:00 and 2026-03-10T00:00 are 04:00Z (EDT, -4).
+      const springRange = {
+        startDate: new Date('2026-03-08T05:00:00.000Z'),
+        endDate: new Date('2026-03-10T04:00:00.000Z'),
+      }
+      // 2025-11-02T00:00 is 04:00Z (EDT, -4); 2025-11-03T00:00 is 05:00Z (EST, -5).
+      const fallRange = {
+        startDate: new Date('2025-11-02T04:00:00.000Z'),
+        endDate: new Date('2025-11-03T05:00:00.000Z'),
+      }
+      const hour = 60 * 60 * 1000
+
+      await NitroHealth.deleteRecordsByTimeRange('steps', springRange)
+      await NitroHealth.deleteRecordsByTimeRange('steps', fallRange)
+      try {
+        await NitroHealth.saveSteps([
+          {
+            startDate: new Date('2026-03-08T12:00:00.000Z'),
+            endDate: new Date('2026-03-08T12:30:00.000Z'),
+            count: 11,
+            sync: { id: 'nitro-health-harness-dst-spring-day-1', version: 1 },
+          },
+          {
+            startDate: new Date('2026-03-09T12:00:00.000Z'),
+            endDate: new Date('2026-03-09T12:30:00.000Z'),
+            count: 22,
+            sync: { id: 'nitro-health-harness-dst-spring-day-2', version: 1 },
+          },
+          {
+            startDate: new Date('2025-11-02T12:00:00.000Z'),
+            endDate: new Date('2025-11-02T12:30:00.000Z'),
+            count: 33,
+            sync: { id: 'nitro-health-harness-dst-fall', version: 1 },
+          },
+        ])
+
+        const springBuckets = await NitroHealth.readStatistics('steps', {
+          ...springRange,
+          bucket: 'day',
+          metrics: ['sum'],
+          timeZone: 'America/New_York',
+        })
+
+        expect(springBuckets).toHaveLength(2)
+        for (const bucket of springBuckets) {
+          expect(bucket.timeZone).toBe('America/New_York')
+        }
+        // The bucket containing the spring-forward shift spans 23 physical hours.
+        expect(springBuckets[0].startDate.getTime()).toBe(springRange.startDate.getTime())
+        expect(springBuckets[0].endDate.getTime() - springBuckets[0].startDate.getTime()).toBe(
+          23 * hour
+        )
+        expect(springBuckets[0].sum).toBe(11)
+        expect(springBuckets[1].endDate.getTime() - springBuckets[1].startDate.getTime()).toBe(
+          24 * hour
+        )
+        expect(springBuckets[1].sum).toBe(22)
+
+        const fallBuckets = await NitroHealth.readStatistics('steps', {
+          ...fallRange,
+          bucket: 'day',
+          metrics: ['sum'],
+          timeZone: 'America/New_York',
+        })
+
+        // The bucket containing the fall-back shift spans 25 physical hours.
+        expect(fallBuckets).toHaveLength(1)
+        expect(fallBuckets[0].timeZone).toBe('America/New_York')
+        expect(fallBuckets[0].endDate.getTime() - fallBuckets[0].startDate.getTime()).toBe(
+          25 * hour
+        )
+        expect(fallBuckets[0].sum).toBe(33)
+      } finally {
+        await NitroHealth.deleteRecordsByTimeRange('steps', springRange)
+        await NitroHealth.deleteRecordsByTimeRange('steps', fallRange)
+      }
     })
 
     it('round-trips saved steps through readStatistics when authorized', async () => {

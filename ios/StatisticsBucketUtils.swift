@@ -1,5 +1,14 @@
 import Foundation
 
+func makeZonedIntervalComponents(_ components: DateComponents, timeZone: TimeZone) -> DateComponents {
+    var calendar = Calendar(identifier: .gregorian)
+    calendar.timeZone = timeZone
+    var zoned = components
+    zoned.calendar = calendar
+    zoned.timeZone = timeZone
+    return zoned
+}
+
 func makeBucketIntervalComponents(bucket: String) -> DateComponents? {
     switch bucket {
     case "hour":
