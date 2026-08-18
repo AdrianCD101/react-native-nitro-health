@@ -18,4 +18,21 @@ final class TimeZoneMappingTests: XCTestCase {
             XCTAssertThrowsError(try resolveIanaTimeZone(identifier, errorPrefix: "workout"))
         }
     }
+
+    // Nitro sends String(describing: error) to JS, so the plain description — not just
+    // errorDescription — must carry the human-readable message.
+    func testStringDescribingCarriesTheResolverMessage() {
+        XCTAssertThrowsError(
+            try resolveIanaTimeZone("Not/A_Zone", errorPrefix: "readStatistics")
+        ) { error in
+            XCTAssertEqual(
+                String(describing: error),
+                "readStatistics: timeZone is not a valid IANA time-zone identifier: Not/A_Zone"
+            )
+            XCTAssertEqual(
+                error.localizedDescription,
+                "readStatistics: timeZone is not a valid IANA time-zone identifier: Not/A_Zone"
+            )
+        }
+    }
 }
