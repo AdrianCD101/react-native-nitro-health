@@ -273,8 +273,9 @@ Verify the example target includes:
 
 - HealthKit capability.
 - `NSHealthShareUsageDescription` and `NSHealthUpdateUsageDescription`.
-- Background-delivery entitlement when testing observers.
-- `NitroHealthRegisterPersistedObservers()` before React Native startup.
+- Background-delivery entitlement when testing observers. Observer restoration
+  at launch is automatic (load-time constructor in the pod); no AppDelegate
+  call is needed.
 
 For a physical device, open `example/ios/NitroHealthExample.xcworkspace` in Xcode, select a local signing team, and use a unique bundle identifier if needed. Do not commit local signing changes.
 

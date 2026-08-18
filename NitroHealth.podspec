@@ -14,16 +14,14 @@ Pod::Spec.new do |s|
   s.source       = { :git => "https://github.com/AdrianCD101/react-native-nitro-health.git", :tag => "#{s.version}" }
 
   s.source_files = [
-    # Public bootstrap API (C-compatible so app targets do not import the mixed C++ module)
     "ios/**/*.h",
     # Implementation (Swift)
     "ios/**/*.swift",
-    # Autolinking/Registration (Objective-C++)
+    # Background bootstrap constructor (Objective-C) and Autolinking/Registration (Objective-C++)
     "ios/**/*.{m,mm}",
     # Implementation (C++ objects)
     "cpp/**/*.{hpp,cpp}",
   ]
-  s.public_header_files = "ios/NitroHealthBackgroundDelivery.h"
   # SwiftPM-only unit tests — must not compile into the pod.
   s.exclude_files = "ios/Tests/**"
   s.ios.frameworks = 'HealthKit'
