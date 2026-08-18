@@ -18,15 +18,9 @@ public extension NativeWorkoutSampleInput {
   /**
    * Create a new instance of `NativeWorkoutSampleInput`.
    */
-  init(startTimeMs: Double, endTimeMs: Double, activityType: String, displayName: String?, timeZone: String?, writeMetadata: NativeHealthWriteMetadata) {
+  init(startTimeMs: Double, endTimeMs: Double, activityType: String, displayName: String?, writeMetadata: NativeHealthWriteMetadata) {
     self.init(startTimeMs, endTimeMs, std.string(activityType), { () -> bridge.std__optional_std__string_ in
       if let __unwrappedValue = displayName {
-        return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
-      } else {
-        return .init()
-      }
-    }(), { () -> bridge.std__optional_std__string_ in
-      if let __unwrappedValue = timeZone {
         return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
       } else {
         return .init()
@@ -54,18 +48,6 @@ public extension NativeWorkoutSampleInput {
     return { () -> String? in
       if bridge.has_value_std__optional_std__string_(self.__displayName) {
         let __unwrapped = bridge.get_std__optional_std__string_(self.__displayName)
-        return String(__unwrapped)
-      } else {
-        return nil
-      }
-    }()
-  }
-  
-  @inline(__always)
-  var timeZone: String? {
-    return { () -> String? in
-      if bridge.has_value_std__optional_std__string_(self.__timeZone) {
-        let __unwrapped = bridge.get_std__optional_std__string_(self.__timeZone)
         return String(__unwrapped)
       } else {
         return nil

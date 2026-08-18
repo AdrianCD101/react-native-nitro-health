@@ -346,6 +346,17 @@ describe('NitroHealth save contract', () => {
       ).rejects.toThrow('samples[0]: sync must contain an id and version')
     }
 
+    // Blank timeZone rejection goes through the shared write-metadata assert, so one
+    // interval and one instantaneous type stand in for all 20 base-carrying inputs.
+    for (const timeZone of ['', '   ']) {
+      await expect(
+        NitroHealth.saveSteps([{ startDate, endDate, count: 100, timeZone }])
+      ).rejects.toThrow('samples[0]: timeZone must be a non-empty IANA time-zone identifier')
+      await expect(
+        NitroHealth.saveBloodGlucose([{ date: startDate, millimolesPerLiter: 5, timeZone }])
+      ).rejects.toThrow('samples[0]: timeZone must be a non-empty IANA time-zone identifier')
+    }
+
     for (const id of ['', '  ']) {
       await expect(
         NitroHealth.saveSteps([{ startDate, endDate, count: 100, sync: { id, version: 0 } }])

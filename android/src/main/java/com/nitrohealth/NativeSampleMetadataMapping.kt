@@ -5,6 +5,7 @@ import androidx.health.connect.client.records.metadata.Metadata
 import com.margelo.nitro.nitrohealth.NativeHealthDeviceType
 import com.margelo.nitro.nitrohealth.NativeHealthSampleMetadata
 import com.margelo.nitro.nitrohealth.NativeHealthSampleIdentityKind
+import java.time.ZoneOffset
 
 internal fun makeRecordIdentity(recordId: String): NativeHealthSampleIdentity {
     return NativeHealthSampleIdentity(
@@ -27,6 +28,7 @@ internal fun makeRecordChildIdentity(
 
 internal fun makeNativeHealthSampleMetadata(
     metadata: Metadata,
+    zoneOffset: ZoneOffset?,
     identity: NativeHealthSampleIdentity? = null
 ): NativeHealthSampleMetadata {
     val resolvedIdentity = identity ?: makeRecordIdentity(metadata.id)
@@ -54,7 +56,10 @@ internal fun makeNativeHealthSampleMetadata(
         deviceType = deviceType,
         deviceManufacturer = device?.manufacturer,
         deviceModel = device?.model,
-        recordingMethod = nativeHealthRecordingMethod(metadata.recordingMethod)
+        recordingMethod = nativeHealthRecordingMethod(metadata.recordingMethod),
+        zoneOffset = formatZoneOffset(zoneOffset),
+        // Health Connect stores offsets only; a zone name is never available on Android.
+        timeZone = null
     )
 }
 

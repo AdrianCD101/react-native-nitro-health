@@ -5,4 +5,5 @@ import type { NativeHealthWriteProvenance } from './NativeHealthWriteProvenance'
 export interface NativeHealthWriteMetadata {
   provenance: NativeHealthWriteProvenance
   sync?: NativeHealthSyncMetadata
+  timeZone?: string
 }

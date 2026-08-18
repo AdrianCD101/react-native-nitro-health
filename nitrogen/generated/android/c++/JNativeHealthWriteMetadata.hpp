@@ -44,9 +44,12 @@ namespace margelo::nitro::nitrohealth {
       jni::local_ref<JNativeHealthWriteProvenance> provenance = this->getFieldValue(fieldProvenance);
       static const auto fieldSync = clazz->getField<JNativeHealthSyncMetadata>("sync");
       jni::local_ref<JNativeHealthSyncMetadata> sync = this->getFieldValue(fieldSync);
+      static const auto fieldTimeZone = clazz->getField<jni::JString>("timeZone");
+      jni::local_ref<jni::JString> timeZone = this->getFieldValue(fieldTimeZone);
       return NativeHealthWriteMetadata(
         provenance->toCpp(),
-        sync != nullptr ? std::make_optional(sync->toCpp()) : std::nullopt
+        sync != nullptr ? std::make_optional(sync->toCpp()) : std::nullopt,
+        timeZone != nullptr ? std::make_optional(timeZone->toStdString()) : std::nullopt
       );
     }
 
@@ -56,13 +59,14 @@ namespace margelo::nitro::nitrohealth {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeHealthWriteMetadata::javaobject> fromCpp(const NativeHealthWriteMetadata& value) {
-      using JSignature = JNativeHealthWriteMetadata(jni::alias_ref<JNativeHealthWriteProvenance>, jni::alias_ref<JNativeHealthSyncMetadata>);
+      using JSignature = JNativeHealthWriteMetadata(jni::alias_ref<JNativeHealthWriteProvenance>, jni::alias_ref<JNativeHealthSyncMetadata>, jni::alias_ref<jni::JString>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
         clazz,
         JNativeHealthWriteProvenance::fromCpp(value.provenance),
-        value.sync.has_value() ? JNativeHealthSyncMetadata::fromCpp(value.sync.value()) : nullptr
+        value.sync.has_value() ? JNativeHealthSyncMetadata::fromCpp(value.sync.value()) : nullptr,
+        value.timeZone.has_value() ? jni::make_jstring(value.timeZone.value()) : nullptr
       );
     }
   };

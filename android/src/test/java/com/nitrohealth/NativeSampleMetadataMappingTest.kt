@@ -25,7 +25,8 @@ class NativeSampleMetadataMappingTest {
 
         values.forEach { (healthConnect, native) ->
             val sampleMetadata = makeNativeHealthSampleMetadata(
-                Metadata.unknownRecordingMethod(device = Device(type = healthConnect))
+                Metadata.unknownRecordingMethod(device = Device(type = healthConnect)),
+                zoneOffset = null
             )
 
             assertEquals(native, sampleMetadata.deviceType)
@@ -37,9 +38,10 @@ class NativeSampleMetadataMappingTest {
     @Test
     fun unknownOnlyProviderDeviceMatchesAbsentPlatformDevice() {
         val providerBacked = makeNativeHealthSampleMetadata(
-            Metadata.unknownRecordingMethod(device = Device(type = Device.TYPE_UNKNOWN))
+            Metadata.unknownRecordingMethod(device = Device(type = Device.TYPE_UNKNOWN)),
+            zoneOffset = null
         )
-        val platformBacked = makeNativeHealthSampleMetadata(Metadata.unknownRecordingMethod())
+        val platformBacked = makeNativeHealthSampleMetadata(Metadata.unknownRecordingMethod(), zoneOffset = null)
 
         listOf(providerBacked, platformBacked).forEach { sampleMetadata ->
             assertNull(sampleMetadata.deviceType)
@@ -53,12 +55,14 @@ class NativeSampleMetadataMappingTest {
         val manufacturerOnly = makeNativeHealthSampleMetadata(
             Metadata.unknownRecordingMethod(
                 device = Device(type = Device.TYPE_UNKNOWN, manufacturer = "Example")
-            )
+            ),
+            zoneOffset = null
         )
         val modelOnly = makeNativeHealthSampleMetadata(
             Metadata.unknownRecordingMethod(
                 device = Device(type = Device.TYPE_UNKNOWN, model = "Sensor")
-            )
+            ),
+            zoneOffset = null
         )
 
         assertEquals(NativeHealthDeviceType.UNKNOWN, manufacturerOnly.deviceType)
@@ -80,7 +84,8 @@ class NativeSampleMetadataMappingTest {
         )
         val sampleMetadata = makeNativeHealthSampleMetadata(
             metadata,
-            makeRecordChildIdentity(metadata.id, 3)
+            zoneOffset = null,
+            identity = makeRecordChildIdentity(metadata.id, 3)
         )
 
         assertEquals(NativeHealthSampleIdentityKind.RECORDCHILD, sampleMetadata.identityKind)
@@ -99,9 +104,10 @@ class NativeSampleMetadataMappingTest {
 
     @Test
     fun absentDeviceRemainsAbsentAndFutureDeviceTypeFallsBackToUnknown() {
-        val absent = makeNativeHealthSampleMetadata(Metadata.unknownRecordingMethod())
+        val absent = makeNativeHealthSampleMetadata(Metadata.unknownRecordingMethod(), zoneOffset = null)
         val future = makeNativeHealthSampleMetadata(
-            Metadata.unknownRecordingMethod(device = Device(type = Int.MAX_VALUE))
+            Metadata.unknownRecordingMethod(device = Device(type = Int.MAX_VALUE)),
+            zoneOffset = null
         )
 
         assertNull(absent.deviceType)

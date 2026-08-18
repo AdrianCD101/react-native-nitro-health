@@ -7,7 +7,7 @@ internal fun makeNativeOxygenSaturationSample(
     record: OxygenSaturationRecord
 ): NativeOxygenSaturationSample {
     return NativeOxygenSaturationSample(
-        sampleMetadata = makeNativeHealthSampleMetadata(record.metadata),
+        sampleMetadata = makeNativeHealthSampleMetadata(record.metadata, record.zoneOffset),
         timeMs = record.time.toEpochMilli().toDouble(),
         percentage = record.percentage.value
     )

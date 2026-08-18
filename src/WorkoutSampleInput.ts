@@ -15,6 +15,4 @@ export interface WorkoutSampleInput extends HealthWriteMetadataInput {
   activityType: WritableWorkoutActivityType
   /** Optional user-visible label, stored using the closest native workout metadata. */
   displayName?: string
-  /** IANA time-zone identifier. Defaults to the device's current time zone. */
-  timeZone?: string
 }

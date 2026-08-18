@@ -22,6 +22,22 @@ describe('NitroHealth Jest mock', () => {
     resetNitroHealthMock()
   })
 
+  it('round-trips a caller-supplied timeZone and never fabricates zoneOffset', async () => {
+    const startDate = new Date('2026-01-01T09:00:00.000Z')
+    const endDate = new Date('2026-01-01T09:30:00.000Z')
+
+    await NitroHealth.saveSteps([
+      { startDate, endDate, count: 100, timeZone: 'America/New_York' },
+      { startDate, endDate, count: 200 },
+    ])
+    const { samples } = await NitroHealth.readSteps({ startDate, endDate })
+
+    expect(samples[0]?.timeZone).toBe('America/New_York')
+    expect(samples[1]?.timeZone).toBeUndefined()
+    // The mock has no zone database, so it never derives an offset — a documented limitation.
+    expect(samples.every((sample) => sample.zoneOffset === undefined)).toBe(true)
+  })
+
   it('uses polling availability and unknown recording method defaults', async () => {
     expect(NitroHealth.getAvailability()).toEqual({ status: 'available' })
     await expect(NitroHealth.getCapabilities()).resolves.toEqual({

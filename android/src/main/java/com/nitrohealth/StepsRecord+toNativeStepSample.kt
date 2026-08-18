@@ -5,7 +5,7 @@ import com.margelo.nitro.nitrohealth.NativeStepSample
 
 internal fun makeNativeStepSample(record: StepsRecord): NativeStepSample {
     return NativeStepSample(
-        sampleMetadata = makeNativeHealthSampleMetadata(record.metadata),
+        sampleMetadata = makeNativeHealthSampleMetadata(record.metadata, record.startZoneOffset),
         startTimeMs = record.startTime.toEpochMilli().toDouble(),
         endTimeMs = record.endTime.toEpochMilli().toDouble(),
         count = record.count.toDouble()

@@ -57,10 +57,12 @@ namespace margelo::nitro::nitrohealth {
     std::optional<std::string> deviceManufacturer     SWIFT_PRIVATE;
     std::optional<std::string> deviceModel     SWIFT_PRIVATE;
     NativeHealthRecordingMethod recordingMethod     SWIFT_PRIVATE;
+    std::optional<std::string> zoneOffset     SWIFT_PRIVATE;
+    std::optional<std::string> timeZone     SWIFT_PRIVATE;
 
   public:
     NativeHealthSampleMetadata() = default;
-    explicit NativeHealthSampleMetadata(NativeHealthSampleIdentityKind identityKind, std::string identityId, std::string identityRecordId, std::string originIdentifier, std::optional<std::string> originDisplayName, std::optional<NativeHealthDeviceType> deviceType, std::optional<std::string> deviceManufacturer, std::optional<std::string> deviceModel, NativeHealthRecordingMethod recordingMethod): identityKind(identityKind), identityId(identityId), identityRecordId(identityRecordId), originIdentifier(originIdentifier), originDisplayName(originDisplayName), deviceType(deviceType), deviceManufacturer(deviceManufacturer), deviceModel(deviceModel), recordingMethod(recordingMethod) {}
+    explicit NativeHealthSampleMetadata(NativeHealthSampleIdentityKind identityKind, std::string identityId, std::string identityRecordId, std::string originIdentifier, std::optional<std::string> originDisplayName, std::optional<NativeHealthDeviceType> deviceType, std::optional<std::string> deviceManufacturer, std::optional<std::string> deviceModel, NativeHealthRecordingMethod recordingMethod, std::optional<std::string> zoneOffset, std::optional<std::string> timeZone): identityKind(identityKind), identityId(identityId), identityRecordId(identityRecordId), originIdentifier(originIdentifier), originDisplayName(originDisplayName), deviceType(deviceType), deviceManufacturer(deviceManufacturer), deviceModel(deviceModel), recordingMethod(recordingMethod), zoneOffset(zoneOffset), timeZone(timeZone) {}
 
   public:
     friend bool operator==(const NativeHealthSampleMetadata& lhs, const NativeHealthSampleMetadata& rhs) = default;
@@ -84,7 +86,9 @@ namespace margelo::nitro {
         JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeHealthDeviceType>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "deviceType"))),
         JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "deviceManufacturer"))),
         JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "deviceModel"))),
-        JSIConverter<margelo::nitro::nitrohealth::NativeHealthRecordingMethod>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "recordingMethod")))
+        JSIConverter<margelo::nitro::nitrohealth::NativeHealthRecordingMethod>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "recordingMethod"))),
+        JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "zoneOffset"))),
+        JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeZone")))
       );
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::nitrohealth::NativeHealthSampleMetadata& arg) {
@@ -98,6 +102,8 @@ namespace margelo::nitro {
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "deviceManufacturer"), JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.deviceManufacturer));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "deviceModel"), JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.deviceModel));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "recordingMethod"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthRecordingMethod>::toJSI(runtime, arg.recordingMethod));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "zoneOffset"), JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.zoneOffset));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "timeZone"), JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.timeZone));
       return obj;
     }
     static inline bool canConvert(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -117,6 +123,8 @@ namespace margelo::nitro {
       if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "deviceManufacturer")))) return false;
       if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "deviceModel")))) return false;
       if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthRecordingMethod>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "recordingMethod")))) return false;
+      if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "zoneOffset")))) return false;
+      if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeZone")))) return false;
       return true;
     }
   };

@@ -6,7 +6,7 @@ import com.margelo.nitro.nitrohealth.NativeDistanceScope
 
 internal fun makeNativeDistanceSample(record: DistanceRecord): NativeDistanceSample {
     return NativeDistanceSample(
-        sampleMetadata = makeNativeHealthSampleMetadata(record.metadata),
+        sampleMetadata = makeNativeHealthSampleMetadata(record.metadata, record.startZoneOffset),
         startTimeMs = record.startTime.toEpochMilli().toDouble(),
         endTimeMs = record.endTime.toEpochMilli().toDouble(),
         distanceMeters = record.distance.inMeters,

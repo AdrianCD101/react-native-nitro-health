@@ -464,6 +464,99 @@ describe('NitroHealth saves (native)', () => {
     }
   })
 
+  describe('time zone round-trip', () => {
+    // America/New_York springs forward on 2026-03-08 (a past date, so samples are writable):
+    // 06:30Z is still EST (-05:00), 07:30Z is EDT (-04:00). Dedicated island, cleared around
+    // each run.
+    const dstReadRange = {
+      startDate: new Date('2026-03-08T00:00:00.000Z'),
+      endDate: new Date('2026-03-09T00:00:00.000Z'),
+    }
+    const dstStraddlingInterval = {
+      startDate: new Date('2026-03-08T06:30:00.000Z'),
+      endDate: new Date('2026-03-08T07:30:00.000Z'),
+    }
+
+    it('stores an explicit non-device zone and reads its per-instant offset back', async () => {
+      const authorized = await hasVerifiedPermissions([
+        { accessType: 'write', dataType: 'steps' },
+        { accessType: 'read', dataType: 'steps' },
+      ])
+      if (!authorized) {
+        return
+      }
+
+      await NitroHealth.deleteRecordsByTimeRange('steps', dstReadRange)
+      try {
+        await NitroHealth.saveSteps([
+          {
+            ...dstStraddlingInterval,
+            count: 77,
+            timeZone: 'America/New_York',
+            sync: { id: 'nitro-health-harness-zone-roundtrip', version: 1 },
+          },
+        ])
+
+        const page = await NitroHealth.readSteps(dstReadRange)
+        const saved = page.samples.find((sample) => sample.count === 77)
+        expect(saved).toBeDefined()
+        if (saved !== undefined) {
+          // The interval straddles the spring-forward shift; the surfaced offset is
+          // resolved at the sample's start, which is still EST.
+          expect(saved.zoneOffset).toBe('-05:00')
+          if (Platform.OS === 'ios') {
+            expect(saved.timeZone).toBe('America/New_York')
+          } else {
+            // Health Connect stores offsets only — the zone name is never available.
+            expect(saved.timeZone).toBeUndefined()
+          }
+        }
+      } finally {
+        await NitroHealth.deleteRecordsByTimeRange('steps', dstReadRange)
+      }
+    })
+
+    it('stores the device zone when timeZone is omitted', async () => {
+      const authorized = await hasVerifiedPermissions([
+        { accessType: 'write', dataType: 'bloodGlucose' },
+        { accessType: 'read', dataType: 'bloodGlucose' },
+      ])
+      if (!authorized) {
+        return
+      }
+
+      await NitroHealth.deleteRecordsByTimeRange('bloodGlucose', saveReadRange)
+      try {
+        await NitroHealth.saveBloodGlucose([
+          {
+            date: saveInterval.startDate,
+            millimolesPerLiter: 5.5,
+            sync: { id: 'nitro-health-harness-zone-default', version: 1 },
+          },
+        ])
+
+        const page = await NitroHealth.readBloodGlucose(saveReadRange)
+        const saved = page.samples.find(
+          (sample) => Math.abs(sample.millimolesPerLiter - 5.5) < 0.001
+        )
+        expect(saved).toBeDefined()
+        if (saved !== undefined) {
+          // Omitted timeZone resolves to the device zone at write time on both platforms,
+          // so our own write always reads back with a concrete offset.
+          expect(typeof saved.zoneOffset).toBe('string')
+          expect(saved.zoneOffset).toMatch(/^[+-]\d{2}:\d{2}$/)
+          if (Platform.OS === 'ios') {
+            expect(typeof saved.timeZone).toBe('string')
+          } else {
+            expect(saved.timeZone).toBeUndefined()
+          }
+        }
+      } finally {
+        await NitroHealth.deleteRecordsByTimeRange('bloodGlucose', saveReadRange)
+      }
+    })
+  })
+
   describe('resting heart rate', () => {
     it('round-trips saved resting heart rate through native code when authorized', async () => {
       const authorized = await hasVerifiedPermissions([

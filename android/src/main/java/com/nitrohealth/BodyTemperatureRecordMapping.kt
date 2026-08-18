@@ -73,7 +73,7 @@ internal fun makeNativeBodyTemperatureSample(
     record: BodyTemperatureRecord
 ): NativeBodyTemperatureSample {
     return NativeBodyTemperatureSample(
-        sampleMetadata = makeNativeHealthSampleMetadata(record.metadata),
+        sampleMetadata = makeNativeHealthSampleMetadata(record.metadata, record.zoneOffset),
         timeMs = record.time.toEpochMilli().toDouble(),
         celsius = record.temperature.inCelsius,
         androidMeasurementLocation = nativeBodyTemperatureMeasurementLocation(record.measurementLocation),
@@ -85,7 +85,7 @@ internal fun makeNativeBasalBodyTemperatureSample(
     record: BasalBodyTemperatureRecord
 ): NativeBasalBodyTemperatureSample {
     return NativeBasalBodyTemperatureSample(
-        sampleMetadata = makeNativeHealthSampleMetadata(record.metadata),
+        sampleMetadata = makeNativeHealthSampleMetadata(record.metadata, record.zoneOffset),
         timeMs = record.time.toEpochMilli().toDouble(),
         celsius = record.temperature.inCelsius,
         androidMeasurementLocation = nativeBodyTemperatureMeasurementLocation(record.measurementLocation),

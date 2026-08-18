@@ -30,7 +30,7 @@ internal fun nativeNutritionMealType(value: Int): NativeNutritionMealType? {
 
 internal fun makeNativeNutritionSample(record: NutritionRecord): NativeNutritionSample {
     return NativeNutritionSample(
-        sampleMetadata = makeNativeHealthSampleMetadata(record.metadata),
+        sampleMetadata = makeNativeHealthSampleMetadata(record.metadata, record.startZoneOffset),
         startTimeMs = record.startTime.toEpochMilli().toDouble(),
         endTimeMs = record.endTime.toEpochMilli().toDouble(),
         foodName = record.name,

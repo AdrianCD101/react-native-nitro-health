@@ -32,9 +32,6 @@ data class NativeWorkoutSampleInput(
   val displayName: String?,
   @DoNotStrip
   @Keep
-  val timeZone: String?,
-  @DoNotStrip
-  @Keep
   val writeMetadata: NativeHealthWriteMetadata
 ) {
   /* primary constructor */
@@ -46,7 +43,6 @@ data class NativeWorkoutSampleInput(
       && Objects.deepEquals(this.endTimeMs, other.endTimeMs)
       && Objects.deepEquals(this.activityType, other.activityType)
       && Objects.deepEquals(this.displayName, other.displayName)
-      && Objects.deepEquals(this.timeZone, other.timeZone)
       && Objects.deepEquals(this.writeMetadata, other.writeMetadata)
   }
 
@@ -56,7 +52,6 @@ data class NativeWorkoutSampleInput(
       endTimeMs,
       activityType,
       displayName,
-      timeZone,
       writeMetadata
     ).contentDeepHashCode()
   }
@@ -69,8 +64,8 @@ data class NativeWorkoutSampleInput(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(startTimeMs: Double, endTimeMs: Double, activityType: String, displayName: String?, timeZone: String?, writeMetadata: NativeHealthWriteMetadata): NativeWorkoutSampleInput {
-      return NativeWorkoutSampleInput(startTimeMs, endTimeMs, activityType, displayName, timeZone, writeMetadata)
+    private fun fromCpp(startTimeMs: Double, endTimeMs: Double, activityType: String, displayName: String?, writeMetadata: NativeHealthWriteMetadata): NativeWorkoutSampleInput {
+      return NativeWorkoutSampleInput(startTimeMs, endTimeMs, activityType, displayName, writeMetadata)
     }
   }
 }

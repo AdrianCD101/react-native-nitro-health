@@ -59,7 +59,11 @@ import type { Vo2MaxSampleInput } from '../Vo2MaxSampleInput'
 import type { AndroidVo2MaxMeasurementMethod, IOSVo2MaxTestType } from '../Vo2MaxMetadata'
 import type { WorkoutSampleInput } from '../WorkoutSampleInput'
 import type { WritableWorkoutActivityType } from '../WritableWorkoutActivityType'
-import { makeNativeWriteMetadata, makeNativeWriteProvenance } from './sampleMetadataMapping'
+import {
+  assertTimeZoneIdentifier,
+  makeNativeWriteMetadata,
+  makeNativeWriteProvenance,
+} from './sampleMetadataMapping'
 import {
   assertSampleBetween,
   assertSampleGreaterThanZero,
@@ -985,11 +989,7 @@ export function makeNativeSleepSessionInput(
   const endTimeMs = dateToTimeMs(session.endDate, `${prefix}a valid endDate is required`)
   assertStartBeforeEnd(startTimeMs, endTimeMs, prefix)
 
-  if (session.timeZone !== undefined) {
-    if (typeof session.timeZone !== 'string' || session.timeZone.trim() === '') {
-      throw new Error(`${prefix}timeZone must be a non-empty IANA time-zone identifier`)
-    }
-  }
+  assertTimeZoneIdentifier(session.timeZone, `sessions[${sessionIndex}]`)
 
   if (session.stages !== undefined && !Array.isArray(session.stages)) {
     throw new Error(`${prefix}stages must be an array when provided`)
@@ -1073,18 +1073,11 @@ export function makeNativeWorkoutSampleInput(
     }
   }
 
-  if (workout.timeZone !== undefined) {
-    if (typeof workout.timeZone !== 'string' || workout.timeZone.trim() === '') {
-      throw new Error('workout: timeZone must be a non-empty IANA time-zone identifier')
-    }
-  }
-
   return {
     startTimeMs,
     endTimeMs,
     activityType: workout.activityType,
     displayName: workout.displayName,
-    timeZone: workout.timeZone,
     writeMetadata: makeNativeWriteMetadata(workout, 'workout'),
   }
 }

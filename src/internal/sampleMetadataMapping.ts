@@ -135,15 +135,28 @@ export function makeNativeWriteProvenance(
   }
 }
 
+export function assertTimeZoneIdentifier(
+  timeZone: string | undefined,
+  indexOrPrefix: number | string
+): void {
+  if (timeZone === undefined) return
+  if (typeof timeZone !== 'string' || timeZone.trim() === '') {
+    const prefix = typeof indexOrPrefix === 'number' ? `samples[${indexOrPrefix}]` : indexOrPrefix
+    throw new Error(`${prefix}: timeZone must be a non-empty IANA time-zone identifier`)
+  }
+}
+
 export function makeNativeWriteMetadata(
   sample: HealthWriteMetadataInput,
   indexOrPrefix: number | string
 ): NativeHealthWriteMetadata {
+  assertTimeZoneIdentifier(sample.timeZone, indexOrPrefix)
   const sync = makeNativeSync(sample.sync, indexOrPrefix)
   const metadata: NativeHealthWriteMetadata = {
     provenance: makeNativeWriteProvenance(sample, indexOrPrefix),
   }
   if (sync !== undefined) metadata.sync = sync
+  if (sample.timeZone !== undefined) metadata.timeZone = sample.timeZone
   return metadata
 }
 
@@ -241,6 +254,8 @@ export function makeHealthSampleMetadata(sampleMetadata: NativeHealthSampleMetad
     recordingMethod: makeHealthRecordingMethod(sampleMetadata.recordingMethod),
   }
   if (device !== undefined) metadata.device = device
+  if (sampleMetadata.zoneOffset !== undefined) metadata.zoneOffset = sampleMetadata.zoneOffset
+  if (sampleMetadata.timeZone !== undefined) metadata.timeZone = sampleMetadata.timeZone
   return metadata
 }
 

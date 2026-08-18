@@ -24,14 +24,14 @@ class WorkoutSampleInputMappingTest {
                 endTimeMs = endTime.toEpochMilli().toDouble(),
                 activityType = "running",
                 displayName = "Morning Run",
-                timeZone = "America/New_York",
                 writeMetadata = makeTestWriteMetadata(
                     deviceType = NativeHealthDeviceType.WATCH,
                     deviceManufacturer = "Example",
                     deviceModel = "Run Watch",
                     recordingMethod = NativeHealthRecordingMethod.ACTIVELYRECORDED,
                     syncId = "workout-1",
-                    syncVersion = 2.0
+                    syncVersion = 2.0,
+                    timeZone = "America/New_York"
                 )
             )
         )
@@ -59,8 +59,7 @@ class WorkoutSampleInputMappingTest {
                     endTimeMs = startTime.toEpochMilli().toDouble(),
                     activityType = "running",
                     displayName = null,
-                    timeZone = "UTC",
-                    writeMetadata = makeTestWriteMetadata()
+                    writeMetadata = makeTestWriteMetadata(timeZone = "UTC")
                 )
             )
         }
@@ -71,8 +70,7 @@ class WorkoutSampleInputMappingTest {
                     endTimeMs = endTime.toEpochMilli().toDouble(),
                     activityType = "archery",
                     displayName = null,
-                    timeZone = "UTC",
-                    writeMetadata = makeTestWriteMetadata()
+                    writeMetadata = makeTestWriteMetadata(timeZone = "UTC")
                 )
             )
         }

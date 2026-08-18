@@ -110,7 +110,8 @@ const sampleMetadata = nativeRecordMetadata(
   'com.example.metadata',
   'Metadata Source',
   'automaticallyRecorded',
-  { type: 'smartDisplay', manufacturer: 'Example', model: 'Metadata Sensor' }
+  { type: 'smartDisplay', manufacturer: 'Example', model: 'Metadata Sensor' },
+  { zoneOffset: '-05:00', timeZone: 'America/New_York' }
 )
 
 const nativeSamples = {
@@ -373,6 +374,7 @@ const publicWriteMetadata = {
   device,
   recordingMethod: 'automatically-recorded',
   sync,
+  timeZone: 'America/New_York',
 } as const
 const publicSleepProvenance = {
   device,
@@ -387,6 +389,7 @@ const expectedNativeProvenance = {
 const expectedNativeWriteMetadata = {
   provenance: expectedNativeProvenance,
   sync,
+  timeZone: 'America/New_York',
 } satisfies NativeHealthWriteMetadata
 const expectedSampleMetadata = {
   identity: { kind: 'record', id: recordId },
@@ -397,6 +400,8 @@ const expectedSampleMetadata = {
     model: 'Metadata Sensor',
   },
   recordingMethod: 'automatically-recorded',
+  zoneOffset: '-05:00',
+  timeZone: 'America/New_York',
 } satisfies HealthSample
 
 const writeMatrix = {

@@ -11,7 +11,7 @@ internal fun makeNativeWorkoutSample(record: ExerciseSessionRecord): NativeWorko
         value = null
     )
     return NativeWorkoutSample(
-        sampleMetadata = makeNativeHealthSampleMetadata(record.metadata),
+        sampleMetadata = makeNativeHealthSampleMetadata(record.metadata, record.startZoneOffset),
         startTimeMs = record.startTime.toEpochMilli().toDouble(),
         endTimeMs = record.endTime.toEpochMilli().toDouble(),
         elapsedDurationSeconds =

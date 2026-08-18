@@ -54,9 +54,9 @@ internal fun toStepsRecords(samples: Array<NativeStepSampleInput>): List<StepsRe
     return samples.map { sample ->
         StepsRecord(
             startTime = Instant.ofEpochMilli(sample.startTimeMs.toLong()),
-            startZoneOffset = null,
+            startZoneOffset = writeZoneOffset(sample.writeMetadata.timeZone, sample.startTimeMs),
             endTime = Instant.ofEpochMilli(sample.endTimeMs.toLong()),
-            endZoneOffset = null,
+            endZoneOffset = writeZoneOffset(sample.writeMetadata.timeZone, sample.endTimeMs),
             count = sample.count.toLong(),
             metadata = makeSampleMetadata(sample.writeMetadata)
         )
@@ -70,9 +70,9 @@ internal fun toDistanceRecords(samples: Array<NativeDistanceSampleInput>): List<
         }
         DistanceRecord(
             startTime = Instant.ofEpochMilli(sample.startTimeMs.toLong()),
-            startZoneOffset = null,
+            startZoneOffset = writeZoneOffset(sample.writeMetadata.timeZone, sample.startTimeMs),
             endTime = Instant.ofEpochMilli(sample.endTimeMs.toLong()),
-            endZoneOffset = null,
+            endZoneOffset = writeZoneOffset(sample.writeMetadata.timeZone, sample.endTimeMs),
             distance = Length.meters(sample.distanceMeters),
             metadata = makeSampleMetadata(sample.writeMetadata)
         )
@@ -85,9 +85,9 @@ internal fun toActiveCaloriesBurnedRecords(
     return samples.map { sample ->
         ActiveCaloriesBurnedRecord(
             startTime = Instant.ofEpochMilli(sample.startTimeMs.toLong()),
-            startZoneOffset = null,
+            startZoneOffset = writeZoneOffset(sample.writeMetadata.timeZone, sample.startTimeMs),
             endTime = Instant.ofEpochMilli(sample.endTimeMs.toLong()),
-            endZoneOffset = null,
+            endZoneOffset = writeZoneOffset(sample.writeMetadata.timeZone, sample.endTimeMs),
             energy = Energy.kilocalories(sample.kilocalories),
             metadata = makeSampleMetadata(sample.writeMetadata)
         )
@@ -100,9 +100,9 @@ internal fun toHydrationRecords(
     return samples.map { sample ->
         HydrationRecord(
             startTime = Instant.ofEpochMilli(sample.startTimeMs.toLong()),
-            startZoneOffset = null,
+            startZoneOffset = writeZoneOffset(sample.writeMetadata.timeZone, sample.startTimeMs),
             endTime = Instant.ofEpochMilli(sample.endTimeMs.toLong()),
-            endZoneOffset = null,
+            endZoneOffset = writeZoneOffset(sample.writeMetadata.timeZone, sample.endTimeMs),
             volume = Volume.milliliters(sample.milliliters),
             metadata = makeSampleMetadata(sample.writeMetadata)
         )
@@ -115,9 +115,9 @@ internal fun toFloorsClimbedRecords(
     return samples.map { sample ->
         FloorsClimbedRecord(
             startTime = Instant.ofEpochMilli(sample.startTimeMs.toLong()),
-            startZoneOffset = null,
+            startZoneOffset = writeZoneOffset(sample.writeMetadata.timeZone, sample.startTimeMs),
             endTime = Instant.ofEpochMilli(sample.endTimeMs.toLong()),
-            endZoneOffset = null,
+            endZoneOffset = writeZoneOffset(sample.writeMetadata.timeZone, sample.endTimeMs),
             floors = sample.floors,
             metadata = makeSampleMetadata(sample.writeMetadata)
         )
@@ -132,9 +132,9 @@ internal fun toHeartRateRecords(samples: Array<NativeHeartRateSampleInput>): Lis
 
         HeartRateRecord(
             startTime = time,
-            startZoneOffset = null,
+            startZoneOffset = writeZoneOffset(sample.writeMetadata.timeZone, sample.timeMs),
             endTime = time,
-            endZoneOffset = null,
+            endZoneOffset = writeZoneOffset(sample.writeMetadata.timeZone, sample.timeMs),
             samples = listOf(
                 HeartRateRecord.Sample(
                     time = time,
@@ -154,7 +154,7 @@ internal fun toBloodPressureRecords(
     return samples.map { sample ->
         BloodPressureRecord(
             time = Instant.ofEpochMilli(sample.timeMs.toLong()),
-            zoneOffset = null,
+            zoneOffset = writeZoneOffset(sample.writeMetadata.timeZone, sample.timeMs),
             systolic = Pressure.millimetersOfMercury(sample.systolicMmHg),
             diastolic = Pressure.millimetersOfMercury(sample.diastolicMmHg),
             bodyPosition = healthConnectBloodPressureBodyPosition(sample.androidBodyPosition),
@@ -172,9 +172,9 @@ internal fun toNutritionRecords(
     return samples.map { sample ->
         NutritionRecord(
             startTime = Instant.ofEpochMilli(sample.startTimeMs.toLong()),
-            startZoneOffset = null,
+            startZoneOffset = writeZoneOffset(sample.writeMetadata.timeZone, sample.startTimeMs),
             endTime = Instant.ofEpochMilli(sample.endTimeMs.toLong()),
-            endZoneOffset = null,
+            endZoneOffset = writeZoneOffset(sample.writeMetadata.timeZone, sample.endTimeMs),
             energy = sample.energyKilocalories?.let(Energy::kilocalories),
             protein = sample.proteinGrams?.let(Mass::grams),
             totalCarbohydrate = sample.totalCarbohydrateGrams?.let(Mass::grams),
@@ -195,7 +195,7 @@ internal fun toBloodGlucoseRecords(
     return samples.map { sample ->
         BloodGlucoseRecord(
             time = Instant.ofEpochMilli(sample.timeMs.toLong()),
-            zoneOffset = null,
+            zoneOffset = writeZoneOffset(sample.writeMetadata.timeZone, sample.timeMs),
             metadata = makeSampleMetadata(sample.writeMetadata),
             level = BloodGlucose.millimolesPerLiter(sample.millimolesPerLiter),
             specimenSource = healthConnectBloodGlucoseSpecimenSource(sample.androidSpecimenSource),
@@ -211,7 +211,7 @@ internal fun toBodyTemperatureRecords(
     return samples.map { sample ->
         BodyTemperatureRecord(
             time = Instant.ofEpochMilli(sample.timeMs.toLong()),
-            zoneOffset = null,
+            zoneOffset = writeZoneOffset(sample.writeMetadata.timeZone, sample.timeMs),
             metadata = makeSampleMetadata(sample.writeMetadata),
             temperature = Temperature.celsius(sample.celsius),
             measurementLocation = sample.androidMeasurementLocation
@@ -226,7 +226,7 @@ internal fun toBodyFatRecords(
     return samples.map { sample ->
         BodyFatRecord(
             time = Instant.ofEpochMilli(sample.timeMs.toLong()),
-            zoneOffset = null,
+            zoneOffset = writeZoneOffset(sample.writeMetadata.timeZone, sample.timeMs),
             metadata = makeSampleMetadata(sample.writeMetadata),
             percentage = Percentage(sample.percentage)
         )
@@ -239,7 +239,7 @@ internal fun toLeanBodyMassRecords(
     return samples.map { sample ->
         LeanBodyMassRecord(
             time = Instant.ofEpochMilli(sample.timeMs.toLong()),
-            zoneOffset = null,
+            zoneOffset = writeZoneOffset(sample.writeMetadata.timeZone, sample.timeMs),
             metadata = makeSampleMetadata(sample.writeMetadata),
             mass = Mass.kilograms(sample.kilograms)
         )
@@ -252,7 +252,7 @@ internal fun toBasalBodyTemperatureRecords(
     return samples.map { sample ->
         BasalBodyTemperatureRecord(
             time = Instant.ofEpochMilli(sample.timeMs.toLong()),
-            zoneOffset = null,
+            zoneOffset = writeZoneOffset(sample.writeMetadata.timeZone, sample.timeMs),
             metadata = makeSampleMetadata(sample.writeMetadata),
             temperature = Temperature.celsius(sample.celsius),
             measurementLocation = sample.androidMeasurementLocation
@@ -267,7 +267,7 @@ internal fun toRespiratoryRateRecords(
     return samples.map { sample ->
         RespiratoryRateRecord(
             time = Instant.ofEpochMilli(sample.timeMs.toLong()),
-            zoneOffset = null,
+            zoneOffset = writeZoneOffset(sample.writeMetadata.timeZone, sample.timeMs),
             metadata = makeSampleMetadata(sample.writeMetadata),
             rate = sample.breathsPerMinute
         )
@@ -278,7 +278,7 @@ internal fun toWeightRecords(samples: Array<NativeBodyMassSampleInput>): List<We
     return samples.map { sample ->
         WeightRecord(
             time = Instant.ofEpochMilli(sample.timeMs.toLong()),
-            zoneOffset = null,
+            zoneOffset = writeZoneOffset(sample.writeMetadata.timeZone, sample.timeMs),
             weight = Mass.kilograms(sample.kilograms),
             metadata = makeSampleMetadata(sample.writeMetadata)
         )
@@ -291,7 +291,7 @@ internal fun toRestingHeartRateRecords(
     return samples.map { sample ->
         RestingHeartRateRecord(
             time = Instant.ofEpochMilli(sample.timeMs.toLong()),
-            zoneOffset = null,
+            zoneOffset = writeZoneOffset(sample.writeMetadata.timeZone, sample.timeMs),
             // Health Connect stores whole bpm; round to nearest instead of truncating
             // so fractional readings (e.g. 72.9) don't lose almost a full beat.
             beatsPerMinute = sample.bpm.roundToLong(),
@@ -306,7 +306,7 @@ internal fun toOxygenSaturationRecords(
     return samples.map { sample ->
         OxygenSaturationRecord(
             time = Instant.ofEpochMilli(sample.timeMs.toLong()),
-            zoneOffset = null,
+            zoneOffset = writeZoneOffset(sample.writeMetadata.timeZone, sample.timeMs),
             percentage = Percentage(sample.percentage),
             metadata = makeSampleMetadata(sample.writeMetadata)
         )
@@ -317,7 +317,7 @@ internal fun toHeightRecords(samples: Array<NativeHeightSampleInput>): List<Heig
     return samples.map { sample ->
         HeightRecord(
             time = Instant.ofEpochMilli(sample.timeMs.toLong()),
-            zoneOffset = null,
+            zoneOffset = writeZoneOffset(sample.writeMetadata.timeZone, sample.timeMs),
             height = Length.meters(sample.meters),
             metadata = makeSampleMetadata(sample.writeMetadata)
         )
@@ -328,7 +328,7 @@ internal fun toVo2MaxRecords(samples: Array<NativeVo2MaxSampleInput>): List<Vo2M
     return samples.map { sample ->
         Vo2MaxRecord(
             time = Instant.ofEpochMilli(sample.timeMs.toLong()),
-            zoneOffset = null,
+            zoneOffset = writeZoneOffset(sample.writeMetadata.timeZone, sample.timeMs),
             vo2MillilitersPerMinuteKilogram = sample.millilitersPerKilogramPerMinute,
             measurementMethod = healthConnectVo2MaxMeasurementMethod(sample.androidMeasurementMethod),
             metadata = makeSampleMetadata(sample.writeMetadata)

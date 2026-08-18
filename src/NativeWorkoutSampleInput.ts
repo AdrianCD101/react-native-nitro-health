@@ -6,6 +6,5 @@ export interface NativeWorkoutSampleInput {
   endTimeMs: number
   activityType: string
   displayName?: string
-  timeZone?: string
   writeMetadata: NativeHealthWriteMetadata
 }

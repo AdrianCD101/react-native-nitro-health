@@ -50,8 +50,6 @@ namespace margelo::nitro::nitrohealth {
       jni::local_ref<jni::JString> activityType = this->getFieldValue(fieldActivityType);
       static const auto fieldDisplayName = clazz->getField<jni::JString>("displayName");
       jni::local_ref<jni::JString> displayName = this->getFieldValue(fieldDisplayName);
-      static const auto fieldTimeZone = clazz->getField<jni::JString>("timeZone");
-      jni::local_ref<jni::JString> timeZone = this->getFieldValue(fieldTimeZone);
       static const auto fieldWriteMetadata = clazz->getField<JNativeHealthWriteMetadata>("writeMetadata");
       jni::local_ref<JNativeHealthWriteMetadata> writeMetadata = this->getFieldValue(fieldWriteMetadata);
       return NativeWorkoutSampleInput(
@@ -59,7 +57,6 @@ namespace margelo::nitro::nitrohealth {
         endTimeMs,
         activityType->toStdString(),
         displayName != nullptr ? std::make_optional(displayName->toStdString()) : std::nullopt,
-        timeZone != nullptr ? std::make_optional(timeZone->toStdString()) : std::nullopt,
         writeMetadata->toCpp()
       );
     }
@@ -70,7 +67,7 @@ namespace margelo::nitro::nitrohealth {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeWorkoutSampleInput::javaobject> fromCpp(const NativeWorkoutSampleInput& value) {
-      using JSignature = JNativeWorkoutSampleInput(double, double, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<JNativeHealthWriteMetadata>);
+      using JSignature = JNativeWorkoutSampleInput(double, double, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<JNativeHealthWriteMetadata>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
@@ -79,7 +76,6 @@ namespace margelo::nitro::nitrohealth {
         value.endTimeMs,
         jni::make_jstring(value.activityType),
         value.displayName.has_value() ? jni::make_jstring(value.displayName.value()) : nullptr,
-        value.timeZone.has_value() ? jni::make_jstring(value.timeZone.value()) : nullptr,
         JNativeHealthWriteMetadata::fromCpp(value.writeMetadata)
       );
     }

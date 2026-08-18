@@ -36,6 +36,7 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthSyncMetadata; }
 #include "NativeHealthWriteProvenance.hpp"
 #include "NativeHealthSyncMetadata.hpp"
 #include <optional>
+#include <string>
 
 namespace margelo::nitro::nitrohealth {
 
@@ -46,10 +47,11 @@ namespace margelo::nitro::nitrohealth {
   public:
     NativeHealthWriteProvenance provenance     SWIFT_PRIVATE;
     std::optional<NativeHealthSyncMetadata> sync     SWIFT_PRIVATE;
+    std::optional<std::string> timeZone     SWIFT_PRIVATE;
 
   public:
     NativeHealthWriteMetadata() = default;
-    explicit NativeHealthWriteMetadata(NativeHealthWriteProvenance provenance, std::optional<NativeHealthSyncMetadata> sync): provenance(provenance), sync(sync) {}
+    explicit NativeHealthWriteMetadata(NativeHealthWriteProvenance provenance, std::optional<NativeHealthSyncMetadata> sync, std::optional<std::string> timeZone): provenance(provenance), sync(sync), timeZone(timeZone) {}
 
   public:
     friend bool operator==(const NativeHealthWriteMetadata& lhs, const NativeHealthWriteMetadata& rhs) = default;
@@ -66,13 +68,15 @@ namespace margelo::nitro {
       jsi::Object obj = arg.asObject(runtime);
       return margelo::nitro::nitrohealth::NativeHealthWriteMetadata(
         JSIConverter<margelo::nitro::nitrohealth::NativeHealthWriteProvenance>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "provenance"))),
-        JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeHealthSyncMetadata>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "sync")))
+        JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeHealthSyncMetadata>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "sync"))),
+        JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeZone")))
       );
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::nitrohealth::NativeHealthWriteMetadata& arg) {
       jsi::Object obj(runtime);
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "provenance"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthWriteProvenance>::toJSI(runtime, arg.provenance));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "sync"), JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeHealthSyncMetadata>>::toJSI(runtime, arg.sync));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "timeZone"), JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.timeZone));
       return obj;
     }
     static inline bool canConvert(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -85,6 +89,7 @@ namespace margelo::nitro {
       }
       if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthWriteProvenance>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "provenance")))) return false;
       if (!JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeHealthSyncMetadata>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "sync")))) return false;
+      if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeZone")))) return false;
       return true;
     }
   };
