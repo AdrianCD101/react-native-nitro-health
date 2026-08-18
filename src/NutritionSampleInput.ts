@@ -1,6 +1,4 @@
-import type { HealthDeviceInfo } from './HealthDeviceInfo'
-import type { HealthRecordSync } from './HealthRecordSync'
-import type { HealthRecordingMethod } from './HealthRecordingMethod'
+import type { HealthWriteMetadataInput } from './HealthWriteMetadataInput'
 import type { NutritionMealType } from './NutritionMealType'
 
 /**
@@ -9,7 +7,7 @@ import type { NutritionMealType } from './NutritionMealType'
  * At least one nutrient field must be present. Water is never part of a nutrition
  * entry; use {@linkcode NitroHealth.saveHydration}.
  */
-export interface NutritionSampleInput {
+export interface NutritionSampleInput extends HealthWriteMetadataInput {
   /** Inclusive start of the eating event. */
   startDate: Date
   /** Exclusive end of the eating event. */
@@ -32,13 +30,4 @@ export interface NutritionSampleInput {
   sugarGrams?: number
   /** Sodium in milligrams (0 to 100,000). */
   sodiumMilligrams?: number
-  /** Physical device asserted as having generated this sample. */
-  device?: HealthDeviceInfo
-  /**
-   * Requested recording method. On iOS, active and automatic recording degrade to `unknown`.
-   * @default 'unknown'
-   */
-  recordingMethod?: HealthRecordingMethod
-  /** Optional logical identity that makes retries idempotent and higher versions replace. */
-  sync?: HealthRecordSync
 }
