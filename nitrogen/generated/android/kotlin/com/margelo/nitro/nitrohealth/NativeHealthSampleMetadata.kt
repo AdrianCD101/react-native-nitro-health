@@ -44,7 +44,13 @@ data class NativeHealthSampleMetadata(
   val deviceModel: String?,
   @DoNotStrip
   @Keep
-  val recordingMethod: NativeHealthRecordingMethod
+  val recordingMethod: NativeHealthRecordingMethod,
+  @DoNotStrip
+  @Keep
+  val zoneOffset: String?,
+  @DoNotStrip
+  @Keep
+  val timeZone: String?
 ) {
   /* primary constructor */
 
@@ -60,6 +66,8 @@ data class NativeHealthSampleMetadata(
       && Objects.deepEquals(this.deviceManufacturer, other.deviceManufacturer)
       && Objects.deepEquals(this.deviceModel, other.deviceModel)
       && Objects.deepEquals(this.recordingMethod, other.recordingMethod)
+      && Objects.deepEquals(this.zoneOffset, other.zoneOffset)
+      && Objects.deepEquals(this.timeZone, other.timeZone)
   }
 
   override fun hashCode(): Int {
@@ -72,7 +80,9 @@ data class NativeHealthSampleMetadata(
       deviceType,
       deviceManufacturer,
       deviceModel,
-      recordingMethod
+      recordingMethod,
+      zoneOffset,
+      timeZone
     ).contentDeepHashCode()
   }
 
@@ -84,8 +94,8 @@ data class NativeHealthSampleMetadata(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(identityKind: NativeHealthSampleIdentityKind, identityId: String, identityRecordId: String, originIdentifier: String, originDisplayName: String?, deviceType: NativeHealthDeviceType?, deviceManufacturer: String?, deviceModel: String?, recordingMethod: NativeHealthRecordingMethod): NativeHealthSampleMetadata {
-      return NativeHealthSampleMetadata(identityKind, identityId, identityRecordId, originIdentifier, originDisplayName, deviceType, deviceManufacturer, deviceModel, recordingMethod)
+    private fun fromCpp(identityKind: NativeHealthSampleIdentityKind, identityId: String, identityRecordId: String, originIdentifier: String, originDisplayName: String?, deviceType: NativeHealthDeviceType?, deviceManufacturer: String?, deviceModel: String?, recordingMethod: NativeHealthRecordingMethod, zoneOffset: String?, timeZone: String?): NativeHealthSampleMetadata {
+      return NativeHealthSampleMetadata(identityKind, identityId, identityRecordId, originIdentifier, originDisplayName, deviceType, deviceManufacturer, deviceModel, recordingMethod, zoneOffset, timeZone)
     }
   }
 }

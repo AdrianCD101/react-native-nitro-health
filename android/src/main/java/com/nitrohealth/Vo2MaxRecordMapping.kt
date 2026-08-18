@@ -46,7 +46,7 @@ internal fun nativeVo2MaxMeasurementMethod(
 
 internal fun makeNativeVo2MaxSample(record: Vo2MaxRecord): NativeVo2MaxSample {
     return NativeVo2MaxSample(
-        sampleMetadata = makeNativeHealthSampleMetadata(record.metadata),
+        sampleMetadata = makeNativeHealthSampleMetadata(record.metadata, record.zoneOffset),
         timeMs = record.time.toEpochMilli().toDouble(),
         millilitersPerKilogramPerMinute = record.vo2MillilitersPerMinuteKilogram,
         androidMeasurementMethod = nativeVo2MaxMeasurementMethod(record.measurementMethod),

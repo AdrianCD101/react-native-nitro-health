@@ -11,6 +11,7 @@ internal fun makeNativeHeartRateSamples(
         NativeHeartRateSample(
             sampleMetadata = makeNativeHealthSampleMetadata(
                 record.metadata,
+                record.startZoneOffset,
                 makeRecordChildIdentity(recordId, index)
             ),
             timeMs = sample.time.toEpochMilli().toDouble(),

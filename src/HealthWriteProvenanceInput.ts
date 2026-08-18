@@ -10,4 +10,10 @@ export interface HealthWriteProvenanceInput {
    * @default 'unknown'
    */
   recordingMethod?: HealthRecordingMethod
+  /**
+   * IANA time-zone identifier the record was captured in. Defaults to the device's
+   * current time zone at write time. Android stores it as the record's zone offset;
+   * iOS stores the identifier as `HKMetadataKeyTimeZone`.
+   */
+  timeZone?: string
 }

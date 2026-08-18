@@ -10,8 +10,6 @@ export interface SleepSessionInput extends HealthWriteProvenanceInput {
   endDate: Date
   /** Optional non-overlapping stage intervals contained within the session. */
   stages?: SleepSessionStageInput[]
-  /** IANA time-zone identifier. Defaults to the device's current time zone. */
-  timeZone?: string
   /** Physical device asserted as having generated this session and its stages. */
   device?: HealthDeviceInfo
 }

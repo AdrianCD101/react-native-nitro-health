@@ -13,4 +13,6 @@ export interface NativeHealthSampleMetadata {
   deviceManufacturer?: string
   deviceModel?: string
   recordingMethod: NativeHealthRecordingMethod
+  zoneOffset?: string
+  timeZone?: string
 }

@@ -46,12 +46,11 @@ namespace margelo::nitro::nitrohealth {
     double endTimeMs     SWIFT_PRIVATE;
     std::string activityType     SWIFT_PRIVATE;
     std::optional<std::string> displayName     SWIFT_PRIVATE;
-    std::optional<std::string> timeZone     SWIFT_PRIVATE;
     NativeHealthWriteMetadata writeMetadata     SWIFT_PRIVATE;
 
   public:
     NativeWorkoutSampleInput() = default;
-    explicit NativeWorkoutSampleInput(double startTimeMs, double endTimeMs, std::string activityType, std::optional<std::string> displayName, std::optional<std::string> timeZone, NativeHealthWriteMetadata writeMetadata): startTimeMs(startTimeMs), endTimeMs(endTimeMs), activityType(activityType), displayName(displayName), timeZone(timeZone), writeMetadata(writeMetadata) {}
+    explicit NativeWorkoutSampleInput(double startTimeMs, double endTimeMs, std::string activityType, std::optional<std::string> displayName, NativeHealthWriteMetadata writeMetadata): startTimeMs(startTimeMs), endTimeMs(endTimeMs), activityType(activityType), displayName(displayName), writeMetadata(writeMetadata) {}
 
   public:
     friend bool operator==(const NativeWorkoutSampleInput& lhs, const NativeWorkoutSampleInput& rhs) = default;
@@ -71,7 +70,6 @@ namespace margelo::nitro {
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs"))),
         JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "activityType"))),
         JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "displayName"))),
-        JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeZone"))),
         JSIConverter<margelo::nitro::nitrohealth::NativeHealthWriteMetadata>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "writeMetadata")))
       );
     }
@@ -81,7 +79,6 @@ namespace margelo::nitro {
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs"), JSIConverter<double>::toJSI(runtime, arg.endTimeMs));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "activityType"), JSIConverter<std::string>::toJSI(runtime, arg.activityType));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "displayName"), JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.displayName));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "timeZone"), JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.timeZone));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "writeMetadata"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthWriteMetadata>::toJSI(runtime, arg.writeMetadata));
       return obj;
     }
@@ -97,7 +94,6 @@ namespace margelo::nitro {
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs")))) return false;
       if (!JSIConverter<std::string>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "activityType")))) return false;
       if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "displayName")))) return false;
-      if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeZone")))) return false;
       if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthWriteMetadata>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "writeMetadata")))) return false;
       return true;
     }

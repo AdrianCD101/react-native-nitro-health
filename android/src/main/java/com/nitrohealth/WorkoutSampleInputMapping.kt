@@ -12,7 +12,7 @@ internal fun toExerciseSessionRecord(workout: NativeWorkoutSampleInput): Exercis
         "workout: displayName must be a non-empty string when provided"
     }
 
-    val zoneId = resolveIanaZoneId(workout.timeZone, "workout")
+    val zoneId = resolveIanaZoneId(workout.writeMetadata.timeZone, "workout")
     return ExerciseSessionRecord(
         startTime = startTime,
         startZoneOffset = zoneId.rules.getOffset(startTime),

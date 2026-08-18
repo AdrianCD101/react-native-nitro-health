@@ -56,6 +56,10 @@ namespace margelo::nitro::nitrohealth {
       jni::local_ref<jni::JString> deviceModel = this->getFieldValue(fieldDeviceModel);
       static const auto fieldRecordingMethod = clazz->getField<JNativeHealthRecordingMethod>("recordingMethod");
       jni::local_ref<JNativeHealthRecordingMethod> recordingMethod = this->getFieldValue(fieldRecordingMethod);
+      static const auto fieldZoneOffset = clazz->getField<jni::JString>("zoneOffset");
+      jni::local_ref<jni::JString> zoneOffset = this->getFieldValue(fieldZoneOffset);
+      static const auto fieldTimeZone = clazz->getField<jni::JString>("timeZone");
+      jni::local_ref<jni::JString> timeZone = this->getFieldValue(fieldTimeZone);
       return NativeHealthSampleMetadata(
         identityKind->toCpp(),
         identityId->toStdString(),
@@ -65,7 +69,9 @@ namespace margelo::nitro::nitrohealth {
         deviceType != nullptr ? std::make_optional(deviceType->toCpp()) : std::nullopt,
         deviceManufacturer != nullptr ? std::make_optional(deviceManufacturer->toStdString()) : std::nullopt,
         deviceModel != nullptr ? std::make_optional(deviceModel->toStdString()) : std::nullopt,
-        recordingMethod->toCpp()
+        recordingMethod->toCpp(),
+        zoneOffset != nullptr ? std::make_optional(zoneOffset->toStdString()) : std::nullopt,
+        timeZone != nullptr ? std::make_optional(timeZone->toStdString()) : std::nullopt
       );
     }
 
@@ -75,7 +81,7 @@ namespace margelo::nitro::nitrohealth {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeHealthSampleMetadata::javaobject> fromCpp(const NativeHealthSampleMetadata& value) {
-      using JSignature = JNativeHealthSampleMetadata(jni::alias_ref<JNativeHealthSampleIdentityKind>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<JNativeHealthDeviceType>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<JNativeHealthRecordingMethod>);
+      using JSignature = JNativeHealthSampleMetadata(jni::alias_ref<JNativeHealthSampleIdentityKind>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<JNativeHealthDeviceType>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<JNativeHealthRecordingMethod>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
@@ -88,7 +94,9 @@ namespace margelo::nitro::nitrohealth {
         value.deviceType.has_value() ? JNativeHealthDeviceType::fromCpp(value.deviceType.value()) : nullptr,
         value.deviceManufacturer.has_value() ? jni::make_jstring(value.deviceManufacturer.value()) : nullptr,
         value.deviceModel.has_value() ? jni::make_jstring(value.deviceModel.value()) : nullptr,
-        JNativeHealthRecordingMethod::fromCpp(value.recordingMethod)
+        JNativeHealthRecordingMethod::fromCpp(value.recordingMethod),
+        value.zoneOffset.has_value() ? jni::make_jstring(value.zoneOffset.value()) : nullptr,
+        value.timeZone.has_value() ? jni::make_jstring(value.timeZone.value()) : nullptr
       );
     }
   };

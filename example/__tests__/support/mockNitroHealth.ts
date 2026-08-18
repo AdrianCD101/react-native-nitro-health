@@ -144,7 +144,8 @@ export function nativeRecordMetadata(
   identifier = 'com.example.health',
   displayName?: string,
   recordingMethod: NativeHealthRecordingMethod = 'unknown',
-  device?: NativeHealthDeviceInfo
+  device?: NativeHealthDeviceInfo,
+  zone?: { zoneOffset?: string; timeZone?: string }
 ): NativeRecordMetadata {
   const sampleMetadata: NativeHealthSampleMetadata = {
     identityKind: 'record',
@@ -157,6 +158,8 @@ export function nativeRecordMetadata(
   if (device?.type !== undefined) sampleMetadata.deviceType = device.type
   if (device?.manufacturer !== undefined) sampleMetadata.deviceManufacturer = device.manufacturer
   if (device?.model !== undefined) sampleMetadata.deviceModel = device.model
+  if (zone?.zoneOffset !== undefined) sampleMetadata.zoneOffset = zone.zoneOffset
+  if (zone?.timeZone !== undefined) sampleMetadata.timeZone = zone.timeZone
   return { sampleMetadata }
 }
 

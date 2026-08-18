@@ -7,7 +7,7 @@ internal fun makeNativeRespiratoryRateSample(
     record: RespiratoryRateRecord
 ): NativeRespiratoryRateSample {
     return NativeRespiratoryRateSample(
-        sampleMetadata = makeNativeHealthSampleMetadata(record.metadata),
+        sampleMetadata = makeNativeHealthSampleMetadata(record.metadata, record.zoneOffset),
         timeMs = record.time.toEpochMilli().toDouble(),
         breathsPerMinute = record.rate
     )

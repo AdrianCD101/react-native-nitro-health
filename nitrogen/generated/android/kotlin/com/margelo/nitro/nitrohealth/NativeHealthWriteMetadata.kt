@@ -23,7 +23,10 @@ data class NativeHealthWriteMetadata(
   val provenance: NativeHealthWriteProvenance,
   @DoNotStrip
   @Keep
-  val sync: NativeHealthSyncMetadata?
+  val sync: NativeHealthSyncMetadata?,
+  @DoNotStrip
+  @Keep
+  val timeZone: String?
 ) {
   /* primary constructor */
 
@@ -32,12 +35,14 @@ data class NativeHealthWriteMetadata(
     if (other !is NativeHealthWriteMetadata) return false
     return Objects.deepEquals(this.provenance, other.provenance)
       && Objects.deepEquals(this.sync, other.sync)
+      && Objects.deepEquals(this.timeZone, other.timeZone)
   }
 
   override fun hashCode(): Int {
     return arrayOf<Any?>(
       provenance,
-      sync
+      sync,
+      timeZone
     ).contentDeepHashCode()
   }
 
@@ -49,8 +54,8 @@ data class NativeHealthWriteMetadata(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(provenance: NativeHealthWriteProvenance, sync: NativeHealthSyncMetadata?): NativeHealthWriteMetadata {
-      return NativeHealthWriteMetadata(provenance, sync)
+    private fun fromCpp(provenance: NativeHealthWriteProvenance, sync: NativeHealthSyncMetadata?, timeZone: String?): NativeHealthWriteMetadata {
+      return NativeHealthWriteMetadata(provenance, sync, timeZone)
     }
   }
 }

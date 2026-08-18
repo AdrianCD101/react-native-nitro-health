@@ -18,7 +18,7 @@ public extension NativeHealthSampleMetadata {
   /**
    * Create a new instance of `NativeHealthSampleMetadata`.
    */
-  init(identityKind: NativeHealthSampleIdentityKind, identityId: String, identityRecordId: String, originIdentifier: String, originDisplayName: String?, deviceType: NativeHealthDeviceType?, deviceManufacturer: String?, deviceModel: String?, recordingMethod: NativeHealthRecordingMethod) {
+  init(identityKind: NativeHealthSampleIdentityKind, identityId: String, identityRecordId: String, originIdentifier: String, originDisplayName: String?, deviceType: NativeHealthDeviceType?, deviceManufacturer: String?, deviceModel: String?, recordingMethod: NativeHealthRecordingMethod, zoneOffset: String?, timeZone: String?) {
     self.init(identityKind, std.string(identityId), std.string(identityRecordId), std.string(originIdentifier), { () -> bridge.std__optional_std__string_ in
       if let __unwrappedValue = originDisplayName {
         return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
@@ -43,7 +43,19 @@ public extension NativeHealthSampleMetadata {
       } else {
         return .init()
       }
-    }(), recordingMethod)
+    }(), recordingMethod, { () -> bridge.std__optional_std__string_ in
+      if let __unwrappedValue = zoneOffset {
+        return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_std__string_ in
+      if let __unwrappedValue = timeZone {
+        return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
+      } else {
+        return .init()
+      }
+    }())
   }
 
   @inline(__always)
@@ -110,5 +122,29 @@ public extension NativeHealthSampleMetadata {
   @inline(__always)
   var recordingMethod: NativeHealthRecordingMethod {
     return self.__recordingMethod
+  }
+  
+  @inline(__always)
+  var zoneOffset: String? {
+    return { () -> String? in
+      if bridge.has_value_std__optional_std__string_(self.__zoneOffset) {
+        let __unwrapped = bridge.get_std__optional_std__string_(self.__zoneOffset)
+        return String(__unwrapped)
+      } else {
+        return nil
+      }
+    }()
+  }
+  
+  @inline(__always)
+  var timeZone: String? {
+    return { () -> String? in
+      if bridge.has_value_std__optional_std__string_(self.__timeZone) {
+        let __unwrapped = bridge.get_std__optional_std__string_(self.__timeZone)
+        return String(__unwrapped)
+      } else {
+        return nil
+      }
+    }()
   }
 }

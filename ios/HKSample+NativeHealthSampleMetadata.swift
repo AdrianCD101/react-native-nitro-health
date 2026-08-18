@@ -19,6 +19,10 @@ extension HKSample {
         case .record:
             identityKind = .record
         }
+        let zone = makeHealthSampleZoneValues(
+            storedTimeZoneIdentifier: metadata?[HKMetadataKeyTimeZone] as? String,
+            startDate: startDate
+        )
 
         return NativeHealthSampleMetadata(
             identityKind: identityKind,
@@ -29,7 +33,9 @@ extension HKSample {
             deviceType: nil,
             deviceManufacturer: device?.manufacturer,
             deviceModel: device?.model,
-            recordingMethod: nativeHealthRecordingMethod
+            recordingMethod: nativeHealthRecordingMethod,
+            zoneOffset: zone.zoneOffset,
+            timeZone: zone.timeZone
         )
     }
 }

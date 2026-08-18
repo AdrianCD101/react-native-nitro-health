@@ -26,7 +26,8 @@ internal fun makeTestWriteMetadata(
     deviceModel: String? = null,
     recordingMethod: NativeHealthRecordingMethod? = null,
     syncId: String? = null,
-    syncVersion: Double? = null
+    syncVersion: Double? = null,
+    timeZone: String? = null
 ): NativeHealthWriteMetadata {
     require((syncId == null) == (syncVersion == null))
     return NativeHealthWriteMetadata(
@@ -40,6 +41,7 @@ internal fun makeTestWriteMetadata(
             null
         } else {
             NativeHealthSyncMetadata(id = syncId, version = syncVersion)
-        }
+        },
+        timeZone = timeZone
     )
 }

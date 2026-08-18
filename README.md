@@ -269,7 +269,18 @@ Background and extended-history declarations are documented in [Background Synch
 
 ## Raw Sample Model
 
-Every raw sample returned by a `read*` method or a change upsert has required `identity`, `origin`, and `recordingMethod` fields plus optional `device` provenance.
+Every raw sample returned by a `read*` method or a change upsert has required `identity`, `origin`, and `recordingMethod` fields plus optional `device` provenance and optional time-zone fields.
+
+### Time Zone
+
+Every write input accepts an optional `timeZone` (IANA identifier, e.g. `'Asia/Tokyo'`); omitted means the device's current zone at write time. Android stores it as the record's zone offset, resolved per instant — an interval crossing a DST shift gets differing start and end offsets. iOS stores the identifier itself as `HKMetadataKeyTimeZone` on every write. Invalid identifiers (including fixed offsets like `'+01:00'`) reject.
+
+Reads surface what the store retains, never a fabricated value:
+
+- `zoneOffset?` — portable UTC offset (e.g. `"+09:00"`, always `"+00:00"` rather than `"Z"`). Android returns the record's stored offset (the start offset for intervals); iOS derives it from the stored zone name at the sample's start date. Absent when the writer stored no zone.
+- `timeZone?` — the IANA zone name, only available from HealthKit and only when the writer attached one. Always absent on Android, whose store keeps offsets only.
+
+Change upserts reuse the same sample types, so both fields ride along in change tracking automatically.
 
 ### Data Origin
 
@@ -352,7 +363,7 @@ Selecting a child sample's `identity.record` for deletion explicitly selects its
 
 ## Reading Data
 
-All raw reads return `{ samples, nextCursor? }`. Every listed sample also includes the common required `identity`, `origin`, and `recordingMethod` fields and may include `device`.
+All raw reads return `{ samples, nextCursor? }`. Every listed sample also includes the common required `identity`, `origin`, and `recordingMethod` fields and may include `device`, `zoneOffset`, and `timeZone` (see [Time Zone](#time-zone)).
 
 | Method                     | Data-specific sample fields                                                       |
 | -------------------------- | --------------------------------------------------------------------------------- |

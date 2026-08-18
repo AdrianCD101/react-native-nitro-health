@@ -71,7 +71,7 @@ internal fun nativeBloodPressureMeasurementLocation(
 
 internal fun makeNativeBloodPressureSample(record: BloodPressureRecord): NativeBloodPressureSample {
     return NativeBloodPressureSample(
-        sampleMetadata = makeNativeHealthSampleMetadata(record.metadata),
+        sampleMetadata = makeNativeHealthSampleMetadata(record.metadata, record.zoneOffset),
         timeMs = record.time.toEpochMilli().toDouble(),
         systolicMmHg = record.systolic.inMillimetersOfMercury,
         diastolicMmHg = record.diastolic.inMillimetersOfMercury,

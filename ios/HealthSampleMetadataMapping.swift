@@ -20,6 +20,34 @@ struct HealthDeviceInfoValues: Equatable {
     let model: String?
 }
 
+struct HealthSampleZoneValues: Equatable {
+    let timeZone: String?
+    let zoneOffset: String?
+}
+
+func formatUtcOffset(seconds: Int) -> String {
+    let sign = seconds < 0 ? "-" : "+"
+    let total = abs(seconds)
+    return String(format: "%@%02d:%02d", sign, total / 3600, (total % 3600) / 60)
+}
+
+// A missing or unresolvable stored identifier yields (nil, nil) — the reader's own zone is
+// never substituted. The offset is resolved at the sample's start date, so it is DST-correct.
+func makeHealthSampleZoneValues(
+    storedTimeZoneIdentifier: String?,
+    startDate: Date
+) -> HealthSampleZoneValues {
+    guard let storedTimeZoneIdentifier,
+          let timeZone = TimeZone(identifier: storedTimeZoneIdentifier) else {
+        return HealthSampleZoneValues(timeZone: nil, zoneOffset: nil)
+    }
+
+    return HealthSampleZoneValues(
+        timeZone: storedTimeZoneIdentifier,
+        zoneOffset: formatUtcOffset(seconds: timeZone.secondsFromGMT(for: startDate))
+    )
+}
+
 func makeHealthSampleIdentityValues(uuid: UUID) -> HealthSampleIdentityValues {
     let id = uuid.uuidString
     return HealthSampleIdentityValues(kind: .record, id: id, recordId: id)

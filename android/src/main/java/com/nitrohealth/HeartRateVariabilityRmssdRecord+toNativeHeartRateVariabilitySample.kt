@@ -7,7 +7,7 @@ internal fun makeNativeHeartRateVariabilitySample(
     record: HeartRateVariabilityRmssdRecord
 ): NativeHeartRateVariabilitySample {
     return NativeHeartRateVariabilitySample(
-        sampleMetadata = makeNativeHealthSampleMetadata(record.metadata),
+        sampleMetadata = makeNativeHealthSampleMetadata(record.metadata, record.zoneOffset),
         timeMs = record.time.toEpochMilli().toDouble(),
         milliseconds = record.heartRateVariabilityMillis,
         method = "rmssd"

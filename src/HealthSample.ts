@@ -13,4 +13,17 @@ export interface HealthSample {
   device?: HealthDeviceInfo
   /** Method retained by the native health service for this sample. */
   recordingMethod: HealthRecordingMethod
+  /**
+   * UTC offset the sample was recorded at (e.g. `"+09:00"`), when the store
+   * retains one. Android surfaces the record's stored zone offset; iOS derives
+   * it from the stored time-zone name at the sample's start date. Absent when
+   * the writer stored no zone — never fabricated from the reader's zone.
+   */
+  zoneOffset?: string
+  /**
+   * IANA time-zone name the sample was recorded in, when the store retains
+   * one. Only HealthKit stores names (`HKMetadataKeyTimeZone`), so this is
+   * absent on Android and on iOS samples whose writer did not attach it.
+   */
+  timeZone?: string
 }

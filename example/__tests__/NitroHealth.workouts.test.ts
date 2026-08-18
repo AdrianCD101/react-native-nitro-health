@@ -177,7 +177,6 @@ describe('NitroHealth workouts contract', () => {
         endTimeMs: endDate.getTime(),
         activityType: 'running',
         displayName: 'Morning Run',
-        timeZone: 'America/New_York',
         writeMetadata: {
           provenance: {
             deviceType: 'watch',
@@ -186,6 +185,7 @@ describe('NitroHealth workouts contract', () => {
             recordingMethod: 'manual',
           },
           sync: { id: 'workout-1', version: 2 },
+          timeZone: 'America/New_York',
         },
       })
     })

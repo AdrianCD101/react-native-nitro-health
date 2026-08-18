@@ -38,6 +38,8 @@ import com.margelo.nitro.nitrohealth.NativeStepSampleInput
 import com.margelo.nitro.nitrohealth.NativeVo2MaxSampleInput
 import com.margelo.nitro.nitrohealth.NativeAndroidVo2MaxMeasurementMethod
 import java.time.Instant
+import java.time.ZoneId
+import java.time.ZoneOffset
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertThrows
@@ -46,6 +48,12 @@ import org.junit.Test
 class SampleInputConvertersTest {
     private val startTimeMs = 1_767_222_000_000.0
     private val endTimeMs = 1_767_223_800_000.0
+
+    // Omitted timeZone resolves to the device zone at write time, per instant.
+    private val deviceStartOffset =
+        ZoneId.systemDefault().rules.getOffset(Instant.ofEpochMilli(startTimeMs.toLong()))
+    private val deviceEndOffset =
+        ZoneId.systemDefault().rules.getOffset(Instant.ofEpochMilli(endTimeMs.toLong()))
 
     @Test
     fun toStepsRecordsMapsTimesAndCount() {
@@ -64,6 +72,42 @@ class SampleInputConvertersTest {
         assertEquals(Instant.ofEpochMilli(startTimeMs.toLong()), records[0].startTime)
         assertEquals(Instant.ofEpochMilli(endTimeMs.toLong()), records[0].endTime)
         assertEquals(512L, records[0].count)
+    }
+
+    @Test
+    fun toStepsRecordsResolvesExplicitZonePerInstantAcrossDaylightSaving() {
+        // America/New_York springs forward on 2026-03-08: 06:30Z is still EST, 07:30Z is EDT.
+        val dstStartMs = Instant.parse("2026-03-08T06:30:00Z").toEpochMilli().toDouble()
+        val dstEndMs = Instant.parse("2026-03-08T07:30:00Z").toEpochMilli().toDouble()
+        val records = toStepsRecords(
+            arrayOf(
+                NativeStepSampleInput(
+                    startTimeMs = dstStartMs,
+                    endTimeMs = dstEndMs,
+                    count = 100.0,
+                    writeMetadata = makeTestWriteMetadata(timeZone = "America/New_York")
+                )
+            )
+        )
+
+        assertEquals(ZoneOffset.of("-05:00"), records[0].startZoneOffset)
+        assertEquals(ZoneOffset.of("-04:00"), records[0].endZoneOffset)
+    }
+
+    @Test
+    fun toStepsRecordsRejectsInvalidTimeZone() {
+        assertThrows(IllegalArgumentException::class.java) {
+            toStepsRecords(
+                arrayOf(
+                    NativeStepSampleInput(
+                        startTimeMs = startTimeMs,
+                        endTimeMs = endTimeMs,
+                        count = 1.0,
+                        writeMetadata = makeTestWriteMetadata(timeZone = "Not/A_Zone")
+                    )
+                )
+            )
+        }
     }
 
     @Test
@@ -160,8 +204,8 @@ class SampleInputConvertersTest {
         assertEquals(1, records.size)
         assertEquals(Instant.ofEpochMilli(startTimeMs.toLong()), records[0].startTime)
         assertEquals(Instant.ofEpochMilli(endTimeMs.toLong()), records[0].endTime)
-        assertNull(records[0].startZoneOffset)
-        assertNull(records[0].endZoneOffset)
+        assertEquals(deviceStartOffset, records[0].startZoneOffset)
+        assertEquals(deviceEndOffset, records[0].endZoneOffset)
         assertEquals(12.5, records[0].floors, 0.0)
     }
 
@@ -358,7 +402,7 @@ class SampleInputConvertersTest {
 
         assertEquals(1, records.size)
         assertEquals(Instant.ofEpochMilli(startTimeMs.toLong()), records[0].time)
-        assertNull(records[0].zoneOffset)
+        assertEquals(deviceStartOffset, records[0].zoneOffset)
         assertEquals(118.0, records[0].systolic.inMillimetersOfMercury, 0.0)
         assertEquals(76.0, records[0].diastolic.inMillimetersOfMercury, 0.0)
         assertEquals(BloodPressureRecord.BODY_POSITION_UNKNOWN, records[0].bodyPosition)
@@ -406,7 +450,7 @@ class SampleInputConvertersTest {
 
         assertEquals(1, records.size)
         assertEquals(Instant.ofEpochMilli(startTimeMs.toLong()), records[0].time)
-        assertNull(records[0].zoneOffset)
+        assertEquals(deviceStartOffset, records[0].zoneOffset)
         assertEquals(5.4, records[0].level.inMillimolesPerLiter, 0.0)
         assertEquals(BloodGlucoseRecord.SPECIMEN_SOURCE_UNKNOWN, records[0].specimenSource)
         assertEquals(MealType.MEAL_TYPE_UNKNOWN, records[0].mealType)
@@ -450,7 +494,7 @@ class SampleInputConvertersTest {
 
         assertEquals(1, records.size)
         assertEquals(Instant.ofEpochMilli(startTimeMs.toLong()), records[0].time)
-        assertNull(records[0].zoneOffset)
+        assertEquals(deviceStartOffset, records[0].zoneOffset)
         assertEquals(36.6, records[0].temperature.inCelsius, 0.0)
         assertEquals(
             BodyTemperatureMeasurementLocation.MEASUREMENT_LOCATION_UNKNOWN,
@@ -472,7 +516,7 @@ class SampleInputConvertersTest {
 
         assertEquals(1, records.size)
         assertEquals(Instant.ofEpochMilli(startTimeMs.toLong()), records[0].time)
-        assertNull(records[0].zoneOffset)
+        assertEquals(deviceStartOffset, records[0].zoneOffset)
         assertEquals(16.5, records[0].rate, 0.0)
     }
 
@@ -490,7 +534,7 @@ class SampleInputConvertersTest {
 
         assertEquals(1, records.size)
         assertEquals(Instant.ofEpochMilli(startTimeMs.toLong()), records[0].time)
-        assertNull(records[0].zoneOffset)
+        assertEquals(deviceStartOffset, records[0].zoneOffset)
         assertEquals(18.5, records[0].percentage.value, 0.0)
     }
 
@@ -508,7 +552,7 @@ class SampleInputConvertersTest {
 
         assertEquals(1, records.size)
         assertEquals(Instant.ofEpochMilli(startTimeMs.toLong()), records[0].time)
-        assertNull(records[0].zoneOffset)
+        assertEquals(deviceStartOffset, records[0].zoneOffset)
         assertEquals(55.4, records[0].mass.inKilograms, 0.0)
     }
 
@@ -528,7 +572,7 @@ class SampleInputConvertersTest {
 
         assertEquals(1, records.size)
         assertEquals(Instant.ofEpochMilli(startTimeMs.toLong()), records[0].time)
-        assertNull(records[0].zoneOffset)
+        assertEquals(deviceStartOffset, records[0].zoneOffset)
         assertEquals(36.4, records[0].temperature.inCelsius, 0.0)
         assertEquals(
             BodyTemperatureMeasurementLocation.MEASUREMENT_LOCATION_UNKNOWN,
@@ -587,7 +631,7 @@ class SampleInputConvertersTest {
 
         assertEquals(1, records.size)
         assertEquals(Instant.ofEpochMilli(startTimeMs.toLong()), records[0].time)
-        assertNull(records[0].zoneOffset)
+        assertEquals(deviceStartOffset, records[0].zoneOffset)
         assertEquals(42.5, records[0].vo2MillilitersPerMinuteKilogram, 0.0)
         assertEquals(
             Vo2MaxRecord.MEASUREMENT_METHOD_MULTISTAGE_FITNESS_TEST,

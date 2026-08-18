@@ -18,10 +18,16 @@ public extension NativeHealthWriteMetadata {
   /**
    * Create a new instance of `NativeHealthWriteMetadata`.
    */
-  init(provenance: NativeHealthWriteProvenance, sync: NativeHealthSyncMetadata?) {
+  init(provenance: NativeHealthWriteProvenance, sync: NativeHealthSyncMetadata?, timeZone: String?) {
     self.init(provenance, { () -> bridge.std__optional_NativeHealthSyncMetadata_ in
       if let __unwrappedValue = sync {
         return bridge.create_std__optional_NativeHealthSyncMetadata_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_std__string_ in
+      if let __unwrappedValue = timeZone {
+        return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
       } else {
         return .init()
       }
@@ -36,5 +42,17 @@ public extension NativeHealthWriteMetadata {
   @inline(__always)
   var sync: NativeHealthSyncMetadata? {
     return self.__sync.value
+  }
+  
+  @inline(__always)
+  var timeZone: String? {
+    return { () -> String? in
+      if bridge.has_value_std__optional_std__string_(self.__timeZone) {
+        let __unwrapped = bridge.get_std__optional_std__string_(self.__timeZone)
+        return String(__unwrapped)
+      } else {
+        return nil
+      }
+    }()
   }
 }
