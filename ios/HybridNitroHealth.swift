@@ -227,10 +227,8 @@ class HybridNitroHealth: HybridNitroHealthSpec {
             throw permissionError("Health data is not available")
         }
 
-        let timeZone = try resolveIanaTimeZone(query.timeZone, errorPrefix: "readStatistics")
-
         if dataType == "totalEnergyBurned" {
-            return try readTotalEnergyBurnedStatistics(query: query, timeZone: timeZone)
+            return try readTotalEnergyBurnedStatistics(query: query)
         }
 
         let descriptor = try makeHealthDataTypeDescriptor(dataType: dataType)
@@ -240,7 +238,6 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         guard let bucketComponents = makeBucketIntervalComponents(bucket: query.bucket) else {
             throw permissionError("Unsupported statistics bucket: \(query.bucket)")
         }
-        let intervalComponents = makeZonedIntervalComponents(bucketComponents, timeZone: timeZone)
 
         let startDate = Date(timeIntervalSince1970: query.startTimeMs / 1000)
         let endDate = Date(timeIntervalSince1970: query.endTimeMs / 1000)
@@ -249,6 +246,10 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         let label = descriptor.label
 
         return Promise<[NativeHealthStatistics]>.async {
+            // Resolved inside the promise so an invalid identifier rejects with the
+            // resolver's message rather than Nitro's raw sync-throw rendering.
+            let timeZone = try resolveIanaTimeZone(query.timeZone, errorPrefix: "readStatistics")
+            let intervalComponents = makeZonedIntervalComponents(bucketComponents, timeZone: timeZone)
             try await self.requireDeterminedReadAuthorization(for: quantityType, label: label)
             let statistics = try await self.queryHealthKitStatisticsCollection(
                 quantityType: quantityType,
@@ -295,8 +296,7 @@ class HybridNitroHealth: HybridNitroHealthSpec {
     // from active plus basal energy. Buckets without a basal sum are omitted rather than
     // reporting the active half as if it were the whole total.
     private func readTotalEnergyBurnedStatistics(
-        query: NativeHealthStatisticsQuery,
-        timeZone: TimeZone
+        query: NativeHealthStatisticsQuery
     ) throws -> Promise<[NativeHealthStatistics]> {
         let activeType = try makeHealthKitQuantityType(dataType: "activeEnergyBurned")
         let basalType = try makeHealthKitQuantityType(dataType: "basalEnergyBurned")
@@ -308,7 +308,6 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         guard let bucketComponents = makeBucketIntervalComponents(bucket: query.bucket) else {
             throw permissionError("Unsupported statistics bucket: \(query.bucket)")
         }
-        let intervalComponents = makeZonedIntervalComponents(bucketComponents, timeZone: timeZone)
 
         let unit = HKUnit.kilocalorie()
         let startDate = Date(timeIntervalSince1970: query.startTimeMs / 1000)
@@ -316,6 +315,10 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         let predicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate, options: [])
 
         return Promise<[NativeHealthStatistics]>.async {
+            // Resolved inside the promise so an invalid identifier rejects with the
+            // resolver's message rather than Nitro's raw sync-throw rendering.
+            let timeZone = try resolveIanaTimeZone(query.timeZone, errorPrefix: "readStatistics")
+            let intervalComponents = makeZonedIntervalComponents(bucketComponents, timeZone: timeZone)
             try await self.requireDeterminedReadAuthorization(
                 for: [activeType, basalType] as Set<HKObjectType>,
                 label: "total energy burned"

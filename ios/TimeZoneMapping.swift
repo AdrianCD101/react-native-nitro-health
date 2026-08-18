@@ -1,13 +1,19 @@
 import Foundation
 
-enum TimeZoneMappingError: LocalizedError {
+// Nitro stringifies thrown Swift errors with String(describing:), which ignores
+// LocalizedError — CustomStringConvertible is what makes the message reach JS.
+enum TimeZoneMappingError: LocalizedError, CustomStringConvertible {
     case invalidIdentifier(String, prefix: String)
 
-    var errorDescription: String? {
+    var description: String {
         switch self {
         case .invalidIdentifier(let identifier, let prefix):
             return "\(prefix): timeZone is not a valid IANA time-zone identifier: \(identifier)"
         }
+    }
+
+    var errorDescription: String? {
+        return description
     }
 }
 
