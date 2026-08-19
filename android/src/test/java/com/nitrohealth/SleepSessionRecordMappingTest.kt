@@ -43,6 +43,8 @@ class SleepSessionRecordMappingTest {
         assertEquals(sessionEnd.toEpochMilli().toDouble(), envelope.endTimeMs, 0.0)
         assertEquals(NativeSleepStageData.REPORTED, envelope.stageData)
         assertNull(envelope.stage)
+        assertEquals("Night sleep", envelope.androidTitle)
+        assertEquals("travel day", envelope.androidNotes)
         assertEquals(record.metadata.dataOrigin.packageName, envelope.sampleMetadata.originIdentifier)
         assertNull(envelope.sampleMetadata.originDisplayName)
         assertEquals(
@@ -59,6 +61,8 @@ class SleepSessionRecordMappingTest {
         assertEquals(stageEnd.toEpochMilli().toDouble(), stage.endTimeMs, 0.0)
         assertEquals("asleepCore", stage.stage)
         assertNull(stage.stageData)
+        assertNull(stage.androidTitle)
+        assertNull(stage.androidNotes)
         assertEquals(
             envelope.sampleMetadata.originIdentifier,
             stage.sampleMetadata.originIdentifier
@@ -120,6 +124,8 @@ class SleepSessionRecordMappingTest {
             startZoneOffset = null,
             endTime = sessionEnd,
             endZoneOffset = null,
+            title = "Night sleep",
+            notes = "travel day",
             stages = stages,
             metadata = Metadata.autoRecorded(device = device)
         )

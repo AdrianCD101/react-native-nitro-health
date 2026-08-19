@@ -41,6 +41,7 @@ describe('NitroHealth sleep session save contract', () => {
           device: { type: 'watch', manufacturer: 'Example', model: 'Sleep Watch' },
           recordingMethod: 'automatically-recorded',
           sync: { id: 'night-2026-01-11', version: 2 },
+          metadata: { android: { title: 'Night sleep', notes: 'travel day' } },
           stages,
         },
       ])
@@ -61,6 +62,8 @@ describe('NitroHealth sleep session save contract', () => {
           sync: { id: 'night-2026-01-11', version: 2 },
           timeZone: 'America/New_York',
         },
+        androidTitle: 'Night sleep',
+        androidNotes: 'travel day',
         stages: [
           {
             startTimeMs: earlierStage.startDate.getTime(),
@@ -168,6 +171,31 @@ describe('NitroHealth sleep session save contract', () => {
         } as never,
       ])
     ).rejects.toThrow('stage must be awake, asleep, asleepCore, asleepDeep, or asleepREM')
+  })
+
+  it('rejects unsupported or blank platform metadata before crossing native', async () => {
+    await expect(
+      NitroHealth.saveSleepSessions([
+        {
+          startDate: sessionStart,
+          endDate: sessionEnd,
+          metadata: { android: { title: '  ' } },
+        },
+      ])
+    ).rejects.toThrow(
+      'sessions[0]: metadata.android.title must be a non-empty string when provided'
+    )
+    await expect(
+      NitroHealth.saveSleepSessions([
+        {
+          startDate: sessionStart,
+          endDate: sessionEnd,
+          metadata: { ios: { title: 'nope' } } as never,
+        },
+      ])
+    ).rejects.toThrow('sessions[0]: metadata.ios is unsupported')
+
+    expect(mockNitroHealth.saveSleepSessions).not.toHaveBeenCalled()
   })
 
   it('rejects duplicate sync ids across sessions before crossing native', async () => {

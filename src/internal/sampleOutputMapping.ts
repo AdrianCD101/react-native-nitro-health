@@ -54,7 +54,8 @@ import type { NativeWorkoutSample } from '../NativeWorkoutSample'
 import type { OxygenSaturationSample } from '../OxygenSaturationSample'
 import type { RespiratoryRateSample } from '../RespiratoryRateSample'
 import type { RestingHeartRateSample } from '../RestingHeartRateSample'
-import type { SleepSample } from '../SleepSample'
+import type { SleepSample, SleepSessionEnvelope } from '../SleepSample'
+import type { AndroidSleepSessionMetadata } from '../SleepSessionMetadata'
 import type { SleepStage } from '../SleepStage'
 import type { StepSample } from '../StepSample'
 import type { Vo2MaxSample } from '../Vo2MaxSample'
@@ -654,11 +655,20 @@ export function makeSleepSample(sample: NativeSleepSample): SleepSample {
     if (sample.stage !== undefined || sample.stageData === undefined) {
       throw new Error('Native sleep session envelope has invalid stage fields')
     }
-    return {
+    let android: AndroidSleepSessionMetadata | undefined
+    if (sample.androidTitle !== undefined) {
+      android = { title: sample.androidTitle }
+    }
+    if (sample.androidNotes !== undefined) {
+      android = { ...android, notes: sample.androidNotes }
+    }
+    const envelope: SleepSessionEnvelope = {
       ...base,
       kind: 'session-envelope',
       stageData: sample.stageData === 'notReported' ? 'not-reported' : sample.stageData,
     }
+    if (android !== undefined) envelope.metadata = { android }
+    return envelope
   }
 
   if (sample.kind === 'stage') {

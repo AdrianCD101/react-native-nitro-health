@@ -35,7 +35,13 @@ data class NativeSleepSample(
   val stage: String?,
   @DoNotStrip
   @Keep
-  val stageData: NativeSleepStageData?
+  val stageData: NativeSleepStageData?,
+  @DoNotStrip
+  @Keep
+  val androidTitle: String?,
+  @DoNotStrip
+  @Keep
+  val androidNotes: String?
 ) {
   /* primary constructor */
 
@@ -48,6 +54,8 @@ data class NativeSleepSample(
       && Objects.deepEquals(this.endTimeMs, other.endTimeMs)
       && Objects.deepEquals(this.stage, other.stage)
       && Objects.deepEquals(this.stageData, other.stageData)
+      && Objects.deepEquals(this.androidTitle, other.androidTitle)
+      && Objects.deepEquals(this.androidNotes, other.androidNotes)
   }
 
   override fun hashCode(): Int {
@@ -57,7 +65,9 @@ data class NativeSleepSample(
       startTimeMs,
       endTimeMs,
       stage,
-      stageData
+      stageData,
+      androidTitle,
+      androidNotes
     ).contentDeepHashCode()
   }
 
@@ -69,8 +79,8 @@ data class NativeSleepSample(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(sampleMetadata: NativeHealthSampleMetadata, kind: NativeSleepSampleKind, startTimeMs: Double, endTimeMs: Double, stage: String?, stageData: NativeSleepStageData?): NativeSleepSample {
-      return NativeSleepSample(sampleMetadata, kind, startTimeMs, endTimeMs, stage, stageData)
+    private fun fromCpp(sampleMetadata: NativeHealthSampleMetadata, kind: NativeSleepSampleKind, startTimeMs: Double, endTimeMs: Double, stage: String?, stageData: NativeSleepStageData?, androidTitle: String?, androidNotes: String?): NativeSleepSample {
+      return NativeSleepSample(sampleMetadata, kind, startTimeMs, endTimeMs, stage, stageData, androidTitle, androidNotes)
     }
   }
 }

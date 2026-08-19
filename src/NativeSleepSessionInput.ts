@@ -7,4 +7,6 @@ export interface NativeSleepSessionInput {
   endTimeMs: number
   stages: NativeSleepSessionStageInput[]
   writeMetadata: NativeHealthWriteMetadata
+  androidTitle?: string
+  androidNotes?: string
 }

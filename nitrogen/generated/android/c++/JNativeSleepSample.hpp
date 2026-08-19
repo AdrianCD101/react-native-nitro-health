@@ -56,13 +56,19 @@ namespace margelo::nitro::nitrohealth {
       jni::local_ref<jni::JString> stage = this->getFieldValue(fieldStage);
       static const auto fieldStageData = clazz->getField<JNativeSleepStageData>("stageData");
       jni::local_ref<JNativeSleepStageData> stageData = this->getFieldValue(fieldStageData);
+      static const auto fieldAndroidTitle = clazz->getField<jni::JString>("androidTitle");
+      jni::local_ref<jni::JString> androidTitle = this->getFieldValue(fieldAndroidTitle);
+      static const auto fieldAndroidNotes = clazz->getField<jni::JString>("androidNotes");
+      jni::local_ref<jni::JString> androidNotes = this->getFieldValue(fieldAndroidNotes);
       return NativeSleepSample(
         sampleMetadata->toCpp(),
         kind->toCpp(),
         startTimeMs,
         endTimeMs,
         stage != nullptr ? std::make_optional(stage->toStdString()) : std::nullopt,
-        stageData != nullptr ? std::make_optional(stageData->toCpp()) : std::nullopt
+        stageData != nullptr ? std::make_optional(stageData->toCpp()) : std::nullopt,
+        androidTitle != nullptr ? std::make_optional(androidTitle->toStdString()) : std::nullopt,
+        androidNotes != nullptr ? std::make_optional(androidNotes->toStdString()) : std::nullopt
       );
     }
 
@@ -72,7 +78,7 @@ namespace margelo::nitro::nitrohealth {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeSleepSample::javaobject> fromCpp(const NativeSleepSample& value) {
-      using JSignature = JNativeSleepSample(jni::alias_ref<JNativeHealthSampleMetadata>, jni::alias_ref<JNativeSleepSampleKind>, double, double, jni::alias_ref<jni::JString>, jni::alias_ref<JNativeSleepStageData>);
+      using JSignature = JNativeSleepSample(jni::alias_ref<JNativeHealthSampleMetadata>, jni::alias_ref<JNativeSleepSampleKind>, double, double, jni::alias_ref<jni::JString>, jni::alias_ref<JNativeSleepStageData>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
@@ -82,7 +88,9 @@ namespace margelo::nitro::nitrohealth {
         value.startTimeMs,
         value.endTimeMs,
         value.stage.has_value() ? jni::make_jstring(value.stage.value()) : nullptr,
-        value.stageData.has_value() ? JNativeSleepStageData::fromCpp(value.stageData.value()) : nullptr
+        value.stageData.has_value() ? JNativeSleepStageData::fromCpp(value.stageData.value()) : nullptr,
+        value.androidTitle.has_value() ? jni::make_jstring(value.androidTitle.value()) : nullptr,
+        value.androidNotes.has_value() ? jni::make_jstring(value.androidNotes.value()) : nullptr
       );
     }
   };

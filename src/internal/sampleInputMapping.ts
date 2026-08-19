@@ -976,6 +976,48 @@ export function makeNativeVo2MaxSampleInput(
   }
 }
 
+function makeNativeSleepSessionMetadata(
+  metadata: SleepSessionInput['metadata'],
+  sessionIndex: number
+): Pick<NativeSleepSessionInput, 'androidTitle' | 'androidNotes'> {
+  if (metadata === undefined) return {}
+  const prefix = `sessions[${sessionIndex}]: `
+  if (typeof metadata !== 'object' || metadata === null || Array.isArray(metadata)) {
+    throw new Error(`${prefix}metadata must be an object`)
+  }
+  const unsupportedPlatform = Object.keys(metadata).find((key) => key !== 'android')
+  if (unsupportedPlatform !== undefined) {
+    throw new Error(`${prefix}metadata.${unsupportedPlatform} is unsupported`)
+  }
+
+  const result: Pick<NativeSleepSessionInput, 'androidTitle' | 'androidNotes'> = {}
+  const android = metadata.android
+  if (android !== undefined) {
+    if (typeof android !== 'object' || android === null || Array.isArray(android)) {
+      throw new Error(`${prefix}metadata.android must be an object`)
+    }
+    const supportedKeys = new Set(['title', 'notes'])
+    const unsupportedKey = Object.keys(android).find((key) => !supportedKeys.has(key))
+    if (unsupportedKey !== undefined) {
+      throw new Error(`${prefix}metadata.android.${unsupportedKey} is unsupported`)
+    }
+    if (android.title !== undefined) {
+      if (typeof android.title !== 'string' || android.title.trim() === '') {
+        throw new Error(`${prefix}metadata.android.title must be a non-empty string when provided`)
+      }
+      result.androidTitle = android.title
+    }
+    if (android.notes !== undefined) {
+      if (typeof android.notes !== 'string' || android.notes.trim() === '') {
+        throw new Error(`${prefix}metadata.android.notes must be a non-empty string when provided`)
+      }
+      result.androidNotes = android.notes
+    }
+  }
+
+  return result
+}
+
 export function makeNativeSleepSessionInput(
   session: SleepSessionInput,
   sessionIndex: number
@@ -1042,6 +1084,7 @@ export function makeNativeSleepSessionInput(
     endTimeMs,
     stages: indexedStages.map(({ nativeStage }) => nativeStage),
     writeMetadata: makeNativeWriteMetadata(session, `sessions[${sessionIndex}]`),
+    ...makeNativeSleepSessionMetadata(session.metadata, sessionIndex),
   }
 }
 

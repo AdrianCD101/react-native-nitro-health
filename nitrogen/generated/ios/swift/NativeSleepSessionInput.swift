@@ -18,14 +18,26 @@ public extension NativeSleepSessionInput {
   /**
    * Create a new instance of `NativeSleepSessionInput`.
    */
-  init(startTimeMs: Double, endTimeMs: Double, stages: [NativeSleepSessionStageInput], writeMetadata: NativeHealthWriteMetadata) {
+  init(startTimeMs: Double, endTimeMs: Double, stages: [NativeSleepSessionStageInput], writeMetadata: NativeHealthWriteMetadata, androidTitle: String?, androidNotes: String?) {
     self.init(startTimeMs, endTimeMs, { () -> bridge.std__vector_NativeSleepSessionStageInput_ in
       var __vector = bridge.create_std__vector_NativeSleepSessionStageInput_(stages.count)
       for __item in stages {
         __vector.push_back(__item)
       }
       return __vector
-    }(), writeMetadata)
+    }(), writeMetadata, { () -> bridge.std__optional_std__string_ in
+      if let __unwrappedValue = androidTitle {
+        return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_std__string_ in
+      if let __unwrappedValue = androidNotes {
+        return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
+      } else {
+        return .init()
+      }
+    }())
   }
 
   @inline(__always)
@@ -46,5 +58,29 @@ public extension NativeSleepSessionInput {
   @inline(__always)
   var writeMetadata: NativeHealthWriteMetadata {
     return self.__writeMetadata
+  }
+  
+  @inline(__always)
+  var androidTitle: String? {
+    return { () -> String? in
+      if bridge.has_value_std__optional_std__string_(self.__androidTitle) {
+        let __unwrapped = bridge.get_std__optional_std__string_(self.__androidTitle)
+        return String(__unwrapped)
+      } else {
+        return nil
+      }
+    }()
+  }
+  
+  @inline(__always)
+  var androidNotes: String? {
+    return { () -> String? in
+      if bridge.has_value_std__optional_std__string_(self.__androidNotes) {
+        let __unwrapped = bridge.get_std__optional_std__string_(self.__androidNotes)
+        return String(__unwrapped)
+      } else {
+        return nil
+      }
+    }()
   }
 }

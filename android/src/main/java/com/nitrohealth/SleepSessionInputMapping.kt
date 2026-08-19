@@ -18,6 +18,8 @@ internal fun toSleepSessionRecords(
             startZoneOffset = zoneId.rules.getOffset(startTime),
             endTime = endTime,
             endZoneOffset = zoneId.rules.getOffset(endTime),
+            title = session.androidTitle,
+            notes = session.androidNotes,
             stages = session.stages.map(::toSleepSessionStage),
             metadata = makeSampleMetadata(session.writeMetadata)
         )
