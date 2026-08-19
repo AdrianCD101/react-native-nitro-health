@@ -230,6 +230,14 @@ class HybridNitroHealth: HybridNitroHealthSpec {
         if dataType == "totalEnergyBurned" {
             return try readTotalEnergyBurnedStatistics(query: query)
         }
+        // Category samples and workouts have no HKStatisticsCollectionQuery, so
+        // their 'duration' metric is hand-computed from raw sample intervals.
+        if dataType == "sleep" {
+            return try readSleepDurationStatistics(query: query)
+        }
+        if dataType == "workout" {
+            return try readWorkoutDurationStatistics(query: query)
+        }
 
         let descriptor = try makeHealthDataTypeDescriptor(dataType: dataType)
         let quantityType = try makeHealthKitQuantityType(dataType: dataType)
@@ -285,6 +293,7 @@ class HybridNitroHealth: HybridNitroHealthSpec {
                     avg: avg,
                     min: min,
                     max: max,
+                    duration: nil,
                     scope: dataType == "distance" ? .walkingrunning : nil,
                     timeZone: timeZone.identifier
                 )
@@ -370,6 +379,7 @@ class HybridNitroHealth: HybridNitroHealthSpec {
                     avg: nil,
                     min: nil,
                     max: nil,
+                    duration: nil,
                     scope: nil,
                     timeZone: timeZone.identifier
                 )

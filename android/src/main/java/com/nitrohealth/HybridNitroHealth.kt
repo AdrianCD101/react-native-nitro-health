@@ -888,6 +888,7 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
             avg = values["avg"],
             min = values["min"],
             max = values["max"],
+            duration = values["duration"],
             scope = if (dataType == "distance") {
                 NativeDistanceScope.ACTIVITYUNSPECIFIED
             } else {

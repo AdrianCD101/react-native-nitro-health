@@ -13,6 +13,11 @@ export interface HealthStatistics {
   /** Maximum of matching values, present only when 'max' was requested and supported. */
   max?: number
   /**
+   * Total duration in seconds, present only when 'duration' was requested and
+   * supported. Absent means no data in the bucket, never zero.
+   */
+  duration?: number
+  /**
    * Resolved IANA time zone the buckets were computed in — the query's
    * {@linkcode HealthStatisticsQuery.timeZone} when provided, otherwise the
    * device's time zone at query time.

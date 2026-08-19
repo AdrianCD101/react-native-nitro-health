@@ -131,7 +131,7 @@ describe('NitroHealth workouts contract', () => {
   })
 
   describe('readStatistics', () => {
-    it("rejects the 'workout' data type without crossing the bridge", async () => {
+    it("rejects non-duration metrics for 'workout' without crossing the bridge", async () => {
       const startDate = new Date('2026-01-01T00:00:00.000Z')
       const endDate = new Date('2026-01-08T00:00:00.000Z')
 
@@ -142,7 +142,7 @@ describe('NitroHealth workouts contract', () => {
           bucket: 'day',
           metrics: ['sum'],
         })
-      ).rejects.toThrow("readStatistics does not support the 'workout' data type")
+      ).rejects.toThrow(`Metric 'sum' is not supported for 'workout' (supported: duration)`)
       expect(mockNitroHealth.readStatistics).not.toHaveBeenCalled()
     })
   })

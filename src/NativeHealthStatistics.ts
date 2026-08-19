@@ -8,6 +8,7 @@ export interface NativeHealthStatistics {
   avg?: number
   min?: number
   max?: number
+  duration?: number
   scope?: NativeDistanceScope
   timeZone?: string
 }
