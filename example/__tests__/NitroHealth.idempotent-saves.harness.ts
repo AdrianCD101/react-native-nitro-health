@@ -15,6 +15,7 @@ import type {
   HealthSampleIdentity,
   LeanBodyMassSample,
   RespiratoryRateSample,
+  SleepSample,
   StepSample,
   Vo2MaxSample,
   WorkoutSample,
@@ -73,6 +74,10 @@ const basalBodyTemperatureReadWritePermissions: HealthPermission[] = [
 const nutritionReadWritePermissions: HealthPermission[] = [
   { accessType: 'read', dataType: 'nutrition' },
   { accessType: 'write', dataType: 'nutrition' },
+]
+const sleepReadWritePermissions: HealthPermission[] = [
+  { accessType: 'read', dataType: 'sleep' },
+  { accessType: 'write', dataType: 'sleep' },
 ]
 const idempotentInterval = {
   startDate: new Date('2004-06-01T09:00:00.000Z'),
@@ -270,6 +275,21 @@ async function readIdempotentWorkouts(
       workoutDisplayName(workout) !== undefined &&
       expectedDisplayNames.includes(workoutDisplayName(workout) ?? '')
   )
+}
+
+async function readIdempotentSleepSamples(): Promise<SleepSample[]> {
+  const page = await NitroHealth.readSleepSamples({ ...idempotentReadRange, limit: 1000 })
+  return page.samples.filter(
+    (sample) =>
+      sample.startDate.getTime() >= idempotentReadRange.startDate.getTime() &&
+      sample.endDate.getTime() <= idempotentReadRange.endDate.getTime()
+  )
+}
+
+// The session envelope reads back as kind 'session-envelope' on Android and as an
+// 'inBed' stage sample on iOS, so counts are asserted per stage value instead.
+function sleepStageSamples(samples: readonly SleepSample[], stage: string): SleepSample[] {
+  return samples.filter((sample) => sample.kind === 'stage' && sample.stage === stage)
 }
 
 describe('NitroHealth idempotent saves (native)', () => {
@@ -591,6 +611,95 @@ describe('NitroHealth idempotent saves (native)', () => {
       }
     } finally {
       await NitroHealth.deleteRecordsByTimeRange('nutrition', idempotentReadRange)
+    }
+  })
+
+  it('keeps exactly one sleep session when the same versioned save is retried', async () => {
+    await requireVerifiedPermissions(sleepReadWritePermissions)
+
+    await NitroHealth.deleteRecordsByTimeRange('sleep', idempotentReadRange)
+    try {
+      const session = {
+        ...idempotentInterval,
+        stages: [
+          {
+            startDate: idempotentInterval.startDate,
+            endDate: new Date('2004-06-01T09:15:00.000Z'),
+            stage: 'asleepCore' as const,
+          },
+          {
+            startDate: new Date('2004-06-01T09:15:00.000Z'),
+            endDate: idempotentInterval.endDate,
+            stage: 'asleepDeep' as const,
+          },
+        ],
+        sync: { id: 'nitro-health-harness-sleep-retry', version: 1 },
+      }
+
+      await NitroHealth.saveSleepSessions([session])
+      await NitroHealth.saveSleepSessions([session])
+
+      const samples = await readIdempotentSleepSamples()
+      expect(sleepStageSamples(samples, 'asleepCore')).toHaveLength(1)
+      expect(sleepStageSamples(samples, 'asleepDeep')).toHaveLength(1)
+    } finally {
+      await NitroHealth.deleteRecordsByTimeRange('sleep', idempotentReadRange)
+    }
+  })
+
+  it('replaces a sleep session at a higher version and removes dropped stages', async () => {
+    await requireVerifiedPermissions(sleepReadWritePermissions)
+
+    await NitroHealth.deleteRecordsByTimeRange('sleep', idempotentReadRange)
+    try {
+      const syncId = 'nitro-health-harness-sleep-higher-version'
+      const stageBoundary = new Date('2004-06-01T09:10:00.000Z')
+      await NitroHealth.saveSleepSessions([
+        {
+          ...idempotentInterval,
+          stages: [
+            {
+              startDate: idempotentInterval.startDate,
+              endDate: stageBoundary,
+              stage: 'asleepCore' as const,
+            },
+            {
+              startDate: stageBoundary,
+              endDate: new Date('2004-06-01T09:20:00.000Z'),
+              stage: 'asleepDeep' as const,
+            },
+            {
+              startDate: new Date('2004-06-01T09:20:00.000Z'),
+              endDate: idempotentInterval.endDate,
+              stage: 'asleepREM' as const,
+            },
+          ],
+          sync: { id: syncId, version: 1 },
+        },
+      ])
+
+      // v2 drops the deep and REM stages: replacement must not leave stale stage
+      // samples behind on iOS.
+      await NitroHealth.saveSleepSessions([
+        {
+          ...idempotentInterval,
+          stages: [
+            {
+              startDate: idempotentInterval.startDate,
+              endDate: stageBoundary,
+              stage: 'asleepCore' as const,
+            },
+          ],
+          sync: { id: syncId, version: 2 },
+        },
+      ])
+
+      const samples = await readIdempotentSleepSamples()
+      expect(sleepStageSamples(samples, 'asleepCore')).toHaveLength(1)
+      expect(sleepStageSamples(samples, 'asleepDeep')).toHaveLength(0)
+      expect(sleepStageSamples(samples, 'asleepREM')).toHaveLength(0)
+    } finally {
+      await NitroHealth.deleteRecordsByTimeRange('sleep', idempotentReadRange)
     }
   })
 

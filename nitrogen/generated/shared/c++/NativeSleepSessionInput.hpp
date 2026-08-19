@@ -30,14 +30,12 @@
 
 // Forward declaration of `NativeSleepSessionStageInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeSleepSessionStageInput; }
-// Forward declaration of `NativeHealthWriteProvenance` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeHealthWriteProvenance; }
+// Forward declaration of `NativeHealthWriteMetadata` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthWriteMetadata; }
 
 #include "NativeSleepSessionStageInput.hpp"
 #include <vector>
-#include <string>
-#include <optional>
-#include "NativeHealthWriteProvenance.hpp"
+#include "NativeHealthWriteMetadata.hpp"
 
 namespace margelo::nitro::nitrohealth {
 
@@ -49,12 +47,11 @@ namespace margelo::nitro::nitrohealth {
     double startTimeMs     SWIFT_PRIVATE;
     double endTimeMs     SWIFT_PRIVATE;
     std::vector<NativeSleepSessionStageInput> stages     SWIFT_PRIVATE;
-    std::optional<std::string> timeZone     SWIFT_PRIVATE;
-    NativeHealthWriteProvenance writeProvenance     SWIFT_PRIVATE;
+    NativeHealthWriteMetadata writeMetadata     SWIFT_PRIVATE;
 
   public:
     NativeSleepSessionInput() = default;
-    explicit NativeSleepSessionInput(double startTimeMs, double endTimeMs, std::vector<NativeSleepSessionStageInput> stages, std::optional<std::string> timeZone, NativeHealthWriteProvenance writeProvenance): startTimeMs(startTimeMs), endTimeMs(endTimeMs), stages(stages), timeZone(timeZone), writeProvenance(writeProvenance) {}
+    explicit NativeSleepSessionInput(double startTimeMs, double endTimeMs, std::vector<NativeSleepSessionStageInput> stages, NativeHealthWriteMetadata writeMetadata): startTimeMs(startTimeMs), endTimeMs(endTimeMs), stages(stages), writeMetadata(writeMetadata) {}
 
   public:
     friend bool operator==(const NativeSleepSessionInput& lhs, const NativeSleepSessionInput& rhs) = default;
@@ -73,8 +70,7 @@ namespace margelo::nitro {
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "startTimeMs"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs"))),
         JSIConverter<std::vector<margelo::nitro::nitrohealth::NativeSleepSessionStageInput>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "stages"))),
-        JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeZone"))),
-        JSIConverter<margelo::nitro::nitrohealth::NativeHealthWriteProvenance>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "writeProvenance")))
+        JSIConverter<margelo::nitro::nitrohealth::NativeHealthWriteMetadata>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "writeMetadata")))
       );
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::nitrohealth::NativeSleepSessionInput& arg) {
@@ -82,8 +78,7 @@ namespace margelo::nitro {
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "startTimeMs"), JSIConverter<double>::toJSI(runtime, arg.startTimeMs));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs"), JSIConverter<double>::toJSI(runtime, arg.endTimeMs));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "stages"), JSIConverter<std::vector<margelo::nitro::nitrohealth::NativeSleepSessionStageInput>>::toJSI(runtime, arg.stages));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "timeZone"), JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.timeZone));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "writeProvenance"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthWriteProvenance>::toJSI(runtime, arg.writeProvenance));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "writeMetadata"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthWriteMetadata>::toJSI(runtime, arg.writeMetadata));
       return obj;
     }
     static inline bool canConvert(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -97,8 +92,7 @@ namespace margelo::nitro {
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "startTimeMs")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs")))) return false;
       if (!JSIConverter<std::vector<margelo::nitro::nitrohealth::NativeSleepSessionStageInput>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "stages")))) return false;
-      if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeZone")))) return false;
-      if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthWriteProvenance>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "writeProvenance")))) return false;
+      if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthWriteMetadata>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "writeMetadata")))) return false;
       return true;
     }
   };

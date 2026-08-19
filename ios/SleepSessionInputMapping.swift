@@ -12,13 +12,8 @@ func makeSleepCategorySamples(
             throw sleepSessionInputError("sessions[\(sessionIndex)]: startDate must be before endDate")
         }
 
-        let timeZone = try resolveIanaTimeZone(
-            session.timeZone,
-            errorPrefix: "sessions[\(sessionIndex)]"
-        )
-        var metadata = session.writeProvenance.healthKitMetadata ?? [:]
-        metadata[HKMetadataKeyTimeZone] = timeZone.identifier
-        let device = session.writeProvenance.healthKitDevice
+        let errorPrefix = "sessions[\(sessionIndex)]"
+        let device = session.writeMetadata.healthKitDevice
         let indexedStages = session.stages.enumerated().map { stageIndex, stage in
             (
                 stageIndex: stageIndex,
@@ -43,11 +38,11 @@ func makeSleepCategorySamples(
             start: startDate,
             end: endDate,
             device: device,
-            metadata: metadata
+            metadata: try session.writeMetadata.healthKitMetadata(errorPrefix: errorPrefix)
         )
         var samples = [envelope]
 
-        for indexedStage in indexedStages {
+        for (sortedIndex, indexedStage) in indexedStages.enumerated() {
             let stagePrefix = "sessions[\(sessionIndex)].stages[\(indexedStage.stageIndex)]: "
             guard indexedStage.startDate < indexedStage.endDate else {
                 throw sleepSessionInputError("\(stagePrefix)startDate must be before endDate")
@@ -68,7 +63,12 @@ func makeSleepCategorySamples(
                     start: indexedStage.startDate,
                     end: indexedStage.endDate,
                     device: device,
-                    metadata: metadata
+                    // Suffixed off the sorted position so a versioned re-save replaces
+                    // stage samples deterministically regardless of caller array order.
+                    metadata: try session.writeMetadata.healthKitMetadata(
+                        syncIdentifierSuffix: sleepStageSyncSuffix(sortedIndex: sortedIndex),
+                        errorPrefix: errorPrefix
+                    )
                 )
             )
             previousStage = (stageIndex: indexedStage.stageIndex, endDate: indexedStage.endDate)

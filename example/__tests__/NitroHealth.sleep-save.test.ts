@@ -40,6 +40,7 @@ describe('NitroHealth sleep session save contract', () => {
           timeZone: 'America/New_York',
           device: { type: 'watch', manufacturer: 'Example', model: 'Sleep Watch' },
           recordingMethod: 'automatically-recorded',
+          sync: { id: 'night-2026-01-11', version: 2 },
           stages,
         },
       ])
@@ -50,12 +51,15 @@ describe('NitroHealth sleep session save contract', () => {
       {
         startTimeMs: sessionStart.getTime(),
         endTimeMs: sessionEnd.getTime(),
-        timeZone: 'America/New_York',
-        writeProvenance: {
-          deviceType: 'watch',
-          deviceManufacturer: 'Example',
-          deviceModel: 'Sleep Watch',
-          recordingMethod: 'automaticallyRecorded',
+        writeMetadata: {
+          provenance: {
+            deviceType: 'watch',
+            deviceManufacturer: 'Example',
+            deviceModel: 'Sleep Watch',
+            recordingMethod: 'automaticallyRecorded',
+          },
+          sync: { id: 'night-2026-01-11', version: 2 },
+          timeZone: 'America/New_York',
         },
         stages: [
           {
@@ -164,6 +168,17 @@ describe('NitroHealth sleep session save contract', () => {
         } as never,
       ])
     ).rejects.toThrow('stage must be awake, asleep, asleepCore, asleepDeep, or asleepREM')
+  })
+
+  it('rejects duplicate sync ids across sessions before crossing native', async () => {
+    await expect(
+      NitroHealth.saveSleepSessions([
+        { startDate: sessionStart, endDate: sessionEnd, sync: { id: 'night-1', version: 1 } },
+        { startDate: sessionStart, endDate: sessionEnd, sync: { id: 'night-1', version: 1 } },
+      ])
+    ).rejects.toThrow('samples[1]: sync.id duplicates samples[0].sync.id within this save call')
+
+    expect(mockNitroHealth.saveSleepSessions).not.toHaveBeenCalled()
   })
 
   it('rejects invalid time-zone values before crossing native', async () => {

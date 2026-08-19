@@ -18,20 +18,14 @@ public extension NativeSleepSessionInput {
   /**
    * Create a new instance of `NativeSleepSessionInput`.
    */
-  init(startTimeMs: Double, endTimeMs: Double, stages: [NativeSleepSessionStageInput], timeZone: String?, writeProvenance: NativeHealthWriteProvenance) {
+  init(startTimeMs: Double, endTimeMs: Double, stages: [NativeSleepSessionStageInput], writeMetadata: NativeHealthWriteMetadata) {
     self.init(startTimeMs, endTimeMs, { () -> bridge.std__vector_NativeSleepSessionStageInput_ in
       var __vector = bridge.create_std__vector_NativeSleepSessionStageInput_(stages.count)
       for __item in stages {
         __vector.push_back(__item)
       }
       return __vector
-    }(), { () -> bridge.std__optional_std__string_ in
-      if let __unwrappedValue = timeZone {
-        return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
-      } else {
-        return .init()
-      }
-    }(), writeProvenance)
+    }(), writeMetadata)
   }
 
   @inline(__always)
@@ -50,19 +44,7 @@ public extension NativeSleepSessionInput {
   }
   
   @inline(__always)
-  var timeZone: String? {
-    return { () -> String? in
-      if bridge.has_value_std__optional_std__string_(self.__timeZone) {
-        let __unwrapped = bridge.get_std__optional_std__string_(self.__timeZone)
-        return String(__unwrapped)
-      } else {
-        return nil
-      }
-    }()
-  }
-  
-  @inline(__always)
-  var writeProvenance: NativeHealthWriteProvenance {
-    return self.__writeProvenance
+  var writeMetadata: NativeHealthWriteMetadata {
+    return self.__writeMetadata
   }
 }

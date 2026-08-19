@@ -68,7 +68,7 @@ class SampleMetadataTest {
 
         values.forEach { (native, healthConnect) ->
             val metadata = makeSampleMetadata(
-                makeTestWriteProvenance(
+                makeTestWriteMetadata(
                     deviceType = native,
                     deviceManufacturer = "Example",
                     deviceModel = "Sensor"

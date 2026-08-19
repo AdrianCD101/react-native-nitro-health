@@ -1060,7 +1060,9 @@ The main value constraints are:
 
 Interval inputs require `startDate < endDate`; point measurements use `date`. Batch saves require a non-empty array.
 
-Most inputs can include `sync: { id, version }` for retry-safe versioned writes. Exact retries are idempotent in stored state, a higher version replaces the logical record, and a lower version is ignored. Increment `version` whenever payload changes. IDs are nonblank, case-sensitive, scoped to the app and data type, and unique within one batch. Sleep sessions intentionally do not accept `sync` because one session can map to several independent HealthKit samples.
+Every write input can include `sync: { id, version }` for retry-safe versioned writes. Exact retries are idempotent in stored state, a higher version replaces the logical record, and a lower version is ignored. Increment `version` whenever payload changes. IDs are nonblank, case-sensitive, scoped to the app and data type, and unique within one batch.
+
+A sleep session maps to several independent HealthKit samples, so on iOS the session's `sync.id` goes on the envelope and each stage sample stores a derived identifier (`<id>#stage0`, `<id>#stage1`, … over the chronologically sorted stages). A versioned re-save replaces every sample of the session, and stages dropped from the new payload are removed. On Android the session is one record and `sync` maps directly to its client record identity.
 
 Avoid overlapping cumulative writes. Health Connect and HealthKit aggregate overlaps differently even though raw reads preserve every stored record.
 

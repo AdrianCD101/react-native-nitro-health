@@ -11,7 +11,7 @@ internal fun toSleepSessionRecords(
     return sessions.mapIndexed { sessionIndex, session ->
         val startTime = Instant.ofEpochMilli(session.startTimeMs.toLong())
         val endTime = Instant.ofEpochMilli(session.endTimeMs.toLong())
-        val zoneId = resolveIanaZoneId(session.timeZone, "sessions[$sessionIndex]")
+        val zoneId = resolveIanaZoneId(session.writeMetadata.timeZone, "sessions[$sessionIndex]")
 
         SleepSessionRecord(
             startTime = startTime,
@@ -19,7 +19,7 @@ internal fun toSleepSessionRecords(
             endTime = endTime,
             endZoneOffset = zoneId.rules.getOffset(endTime),
             stages = session.stages.map(::toSleepSessionStage),
-            metadata = makeSampleMetadata(session.writeProvenance)
+            metadata = makeSampleMetadata(session.writeMetadata)
         )
     }
 }

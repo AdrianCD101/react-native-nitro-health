@@ -761,6 +761,7 @@ export const NitroHealth: NitroHealth = {
   },
   async saveSleepSessions(sessions) {
     assertNonEmptySessions(sessions)
+    assertUniqueSampleSyncIds(sessions)
     return makeHealthWriteResult(
       await NitroHealthNative.saveSleepSessions(sessions.map(makeNativeSleepSessionInput)),
       sessions.length
