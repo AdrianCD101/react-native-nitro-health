@@ -802,6 +802,8 @@ const tokyoDays = await NitroHealth.readStatistics('steps', {
 | `restingHeartRate`           | `avg`, `min`, `max` | bpm                  |
 | `height`                     | `avg`, `min`, `max` | meters               |
 | `bodyMass`                   | `avg`, `min`, `max` | kg                   |
+| `sleep`                      | `duration`          | seconds              |
+| `workout`                    | `duration`          | seconds              |
 | `nutritionEnergyConsumed`    | `sum`               | kcal                 |
 | `nutritionProtein`           | `sum`               | g                    |
 | `nutritionTotalCarbohydrate` | `sum`               | g                    |
@@ -812,7 +814,11 @@ const tokyoDays = await NitroHealth.readStatistics('steps', {
 
 On iOS, `floorsClimbed` statistics aggregate HealthKit flights climbed. See the raw-read portability note above.
 
-Sleep, HRV, oxygen saturation, blood pressure, blood glucose, body temperature, respiratory rate, body fat, lean body mass, basal body temperature, VO2 max, and workout statistics are not supported by `readStatistics()`, and neither is the raw `nutrition` type — nutrient aggregates go through the per-nutrient statistics types above. Invalid data-type/metric combinations reject before crossing the native boundary.
+`sleep` duration is time asleep per bucket, in seconds, with awake time excluded. Android uses Health Connect's native sleep-duration aggregate. HealthKit has no aggregate for category samples, so iOS computes it from raw intervals: asleep stage intervals are union-merged across sources (each minute counts once even when several apps recorded the same span), and an in-bed interval that no stage sample overlaps counts in full — matching Health Connect's rule for stage-less sessions. Because the platforms aggregate from their own stores, the same person's night can produce slightly different totals per platform when the underlying source data differs.
+
+`workout` duration sums each workout's own declared duration (which can exclude pauses) per bucket, in seconds. Overlapping workouts are not merged, and a workout spanning a bucket boundary contributes to each bucket in proportion to its wall-clock overlap.
+
+HRV, oxygen saturation, blood pressure, blood glucose, body temperature, respiratory rate, body fat, lean body mass, basal body temperature, and VO2 max statistics are not supported by `readStatistics()`, and neither is the raw `nutrition` type — nutrient aggregates go through the per-nutrient statistics types above. Invalid data-type/metric combinations reject before crossing the native boundary.
 
 ### Nutrition Statistics
 

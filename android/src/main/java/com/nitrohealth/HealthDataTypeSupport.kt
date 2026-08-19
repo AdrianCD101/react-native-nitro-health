@@ -44,7 +44,7 @@ internal data class StatisticsMetricBinding(
  * `makeHealthDataTypeDescriptor` in `ios/HealthKitStatisticsSupport.swift`: the Health Connect
  * record type behind the data type, the label used in permission error messages, and the
  * statistics metric names the data type supports (empty for types `readStatistics` rejects
- * in JS, like sleep, heart rate variability, and oxygen saturation).
+ * in JS, like heart rate variability and oxygen saturation).
  *
  * Permissions ([healthConnectRecordTypeForDataType]), reads/saves, and `readStatistics` all
  * pull from this table, so adding a data type means adding exactly one entry here.
@@ -185,11 +185,27 @@ internal fun healthDataTypeDescriptorFor(dataType: String): HealthDataTypeDescri
         )
         "sleep" -> HealthDataTypeDescriptor(
             recordType = SleepSessionRecord::class,
-            permissionLabel = "sleep"
+            permissionLabel = "sleep",
+            statisticsMetrics = mapOf(
+                "duration" to StatisticsMetricBinding(
+                    metric = SleepSessionRecord.SLEEP_DURATION_TOTAL,
+                    extract = { result ->
+                        result[SleepSessionRecord.SLEEP_DURATION_TOTAL]?.seconds?.toDouble()
+                    }
+                )
+            )
         )
         "workout" -> HealthDataTypeDescriptor(
             recordType = ExerciseSessionRecord::class,
-            permissionLabel = "workouts"
+            permissionLabel = "workouts",
+            statisticsMetrics = mapOf(
+                "duration" to StatisticsMetricBinding(
+                    metric = ExerciseSessionRecord.EXERCISE_DURATION_TOTAL,
+                    extract = { result ->
+                        result[ExerciseSessionRecord.EXERCISE_DURATION_TOTAL]?.seconds?.toDouble()
+                    }
+                )
+            )
         )
         "bodyMass" -> HealthDataTypeDescriptor(
             recordType = WeightRecord::class,

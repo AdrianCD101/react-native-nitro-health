@@ -18,7 +18,7 @@ public extension NativeHealthStatistics {
   /**
    * Create a new instance of `NativeHealthStatistics`.
    */
-  init(startTimeMs: Double, endTimeMs: Double, sum: Double?, avg: Double?, min: Double?, max: Double?, scope: NativeDistanceScope?, timeZone: String?) {
+  init(startTimeMs: Double, endTimeMs: Double, sum: Double?, avg: Double?, min: Double?, max: Double?, duration: Double?, scope: NativeDistanceScope?, timeZone: String?) {
     self.init(startTimeMs, endTimeMs, { () -> bridge.std__optional_double_ in
       if let __unwrappedValue = sum {
         return bridge.create_std__optional_double_(__unwrappedValue)
@@ -39,6 +39,12 @@ public extension NativeHealthStatistics {
       }
     }(), { () -> bridge.std__optional_double_ in
       if let __unwrappedValue = max {
+        return bridge.create_std__optional_double_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_double_ in
+      if let __unwrappedValue = duration {
         return bridge.create_std__optional_double_(__unwrappedValue)
       } else {
         return .init()
@@ -109,6 +115,18 @@ public extension NativeHealthStatistics {
     return { () -> Double? in
       if bridge.has_value_std__optional_double_(self.__max) {
         let __unwrapped = bridge.get_std__optional_double_(self.__max)
+        return __unwrapped
+      } else {
+        return nil
+      }
+    }()
+  }
+  
+  @inline(__always)
+  var duration: Double? {
+    return { () -> Double? in
+      if bridge.has_value_std__optional_double_(self.__duration) {
+        let __unwrapped = bridge.get_std__optional_double_(self.__duration)
         return __unwrapped
       } else {
         return nil

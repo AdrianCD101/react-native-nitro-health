@@ -38,6 +38,9 @@ data class NativeHealthStatistics(
   val max: Double?,
   @DoNotStrip
   @Keep
+  val duration: Double?,
+  @DoNotStrip
+  @Keep
   val scope: NativeDistanceScope?,
   @DoNotStrip
   @Keep
@@ -54,6 +57,7 @@ data class NativeHealthStatistics(
       && Objects.deepEquals(this.avg, other.avg)
       && Objects.deepEquals(this.min, other.min)
       && Objects.deepEquals(this.max, other.max)
+      && Objects.deepEquals(this.duration, other.duration)
       && Objects.deepEquals(this.scope, other.scope)
       && Objects.deepEquals(this.timeZone, other.timeZone)
   }
@@ -66,6 +70,7 @@ data class NativeHealthStatistics(
       avg,
       min,
       max,
+      duration,
       scope,
       timeZone
     ).contentDeepHashCode()
@@ -79,8 +84,8 @@ data class NativeHealthStatistics(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(startTimeMs: Double, endTimeMs: Double, sum: Double?, avg: Double?, min: Double?, max: Double?, scope: NativeDistanceScope?, timeZone: String?): NativeHealthStatistics {
-      return NativeHealthStatistics(startTimeMs, endTimeMs, sum, avg, min, max, scope, timeZone)
+    private fun fromCpp(startTimeMs: Double, endTimeMs: Double, sum: Double?, avg: Double?, min: Double?, max: Double?, duration: Double?, scope: NativeDistanceScope?, timeZone: String?): NativeHealthStatistics {
+      return NativeHealthStatistics(startTimeMs, endTimeMs, sum, avg, min, max, duration, scope, timeZone)
     }
   }
 }

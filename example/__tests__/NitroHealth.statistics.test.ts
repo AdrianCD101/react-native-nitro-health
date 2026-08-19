@@ -275,7 +275,65 @@ describe('NitroHealth readStatistics contract', () => {
     expect(mockNitroHealth.readStatistics).not.toHaveBeenCalled()
   })
 
-  it('rejects the sleep data type entirely before crossing the native boundary', async () => {
+  it.each(['sleep', 'workout'] as const)(
+    "forwards a 'duration' query for %s to the Nitro hybrid object",
+    async (dataType) => {
+      const startDate = new Date('2026-01-01T00:00:00.000Z')
+      const endDate = new Date('2026-01-08T00:00:00.000Z')
+      mockNitroHealth.readStatistics.mockResolvedValue([])
+
+      await expect(
+        NitroHealth.readStatistics(dataType, {
+          startDate,
+          endDate,
+          bucket: 'day',
+          metrics: ['duration'],
+        })
+      ).resolves.toEqual([])
+
+      expect(mockNitroHealth.readStatistics).toHaveBeenCalledWith(dataType, {
+        startTimeMs: startDate.getTime(),
+        endTimeMs: endDate.getTime(),
+        bucket: 'day',
+        metrics: ['duration'],
+      })
+    }
+  )
+
+  it('maps a native duration bucket back onto HealthStatistics', async () => {
+    const startDate = new Date('2026-01-01T00:00:00.000Z')
+    const endDate = new Date('2026-01-02T00:00:00.000Z')
+    mockNitroHealth.readStatistics.mockResolvedValue([
+      {
+        startTimeMs: startDate.getTime(),
+        endTimeMs: endDate.getTime(),
+        duration: 27360,
+        timeZone: 'Europe/London',
+      },
+    ])
+
+    await expect(
+      NitroHealth.readStatistics('sleep', {
+        startDate,
+        endDate,
+        bucket: 'day',
+        metrics: ['duration'],
+      })
+    ).resolves.toEqual([
+      {
+        startDate,
+        endDate,
+        sum: undefined,
+        avg: undefined,
+        min: undefined,
+        max: undefined,
+        duration: 27360,
+        timeZone: 'Europe/London',
+      },
+    ])
+  })
+
+  it("rejects 'sum' for sleep before crossing the native boundary", async () => {
     const startDate = new Date('2026-01-01T00:00:00.000Z')
     const endDate = new Date('2026-01-08T00:00:00.000Z')
 
@@ -286,7 +344,23 @@ describe('NitroHealth readStatistics contract', () => {
         bucket: 'day',
         metrics: ['sum'],
       })
-    ).rejects.toThrow(`readStatistics does not support the 'sleep' data type`)
+    ).rejects.toThrow(`Metric 'sum' is not supported for 'sleep' (supported: duration)`)
+
+    expect(mockNitroHealth.readStatistics).not.toHaveBeenCalled()
+  })
+
+  it("rejects 'duration' for steps before crossing the native boundary", async () => {
+    const startDate = new Date('2026-01-01T00:00:00.000Z')
+    const endDate = new Date('2026-01-08T00:00:00.000Z')
+
+    await expect(
+      NitroHealth.readStatistics('steps', {
+        startDate,
+        endDate,
+        bucket: 'day',
+        metrics: ['duration'],
+      })
+    ).rejects.toThrow(`Metric 'duration' is not supported for 'steps' (supported: sum)`)
 
     expect(mockNitroHealth.readStatistics).not.toHaveBeenCalled()
   })

@@ -31,6 +31,7 @@ export function makeHealthStatistics<T extends HealthStatisticsDataType>(
     avg: statistics.avg,
     min: statistics.min,
     max: statistics.max,
+    duration: statistics.duration,
     timeZone: statistics.timeZone,
   }
 

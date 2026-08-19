@@ -1,9 +1,11 @@
 package com.nitrohealth
 
 import androidx.health.connect.client.records.BasalMetabolicRateRecord
+import androidx.health.connect.client.records.ExerciseSessionRecord
 import androidx.health.connect.client.records.FloorsClimbedRecord
 import androidx.health.connect.client.records.HydrationRecord
 import androidx.health.connect.client.records.NutritionRecord
+import androidx.health.connect.client.records.SleepSessionRecord
 import androidx.health.connect.client.records.TotalCaloriesBurnedRecord
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -177,13 +179,30 @@ class StatisticsBucketUtilsTest {
         assertEquals(setOf("avg", "min", "max"), descriptor.statisticsMetrics.keys)
     }
 
-    // These data types exist in the descriptor table (permissions and raw reads need them) but
-    // support no statistics metrics, so any requested metric fails the readStatistics lookup.
     @Test
-    fun descriptorForSleepSupportsNoStatisticsMetrics() {
-        assertTrue(healthDataTypeDescriptorFor("sleep").statisticsMetrics.isEmpty())
+    fun descriptorForSleepAggregatesSleepDuration() {
+        val descriptor = healthDataTypeDescriptorFor("sleep")
+
+        assertEquals(setOf("duration"), descriptor.statisticsMetrics.keys)
+        assertEquals(
+            SleepSessionRecord.SLEEP_DURATION_TOTAL,
+            descriptor.statisticsMetrics.getValue("duration").metric
+        )
     }
 
+    @Test
+    fun descriptorForWorkoutAggregatesExerciseDuration() {
+        val descriptor = healthDataTypeDescriptorFor("workout")
+
+        assertEquals(setOf("duration"), descriptor.statisticsMetrics.keys)
+        assertEquals(
+            ExerciseSessionRecord.EXERCISE_DURATION_TOTAL,
+            descriptor.statisticsMetrics.getValue("duration").metric
+        )
+    }
+
+    // These data types exist in the descriptor table (permissions and raw reads need them) but
+    // support no statistics metrics, so any requested metric fails the readStatistics lookup.
     @Test
     fun descriptorForHeartRateVariabilitySupportsNoStatisticsMetrics() {
         assertTrue(healthDataTypeDescriptorFor("heartRateVariability").statisticsMetrics.isEmpty())

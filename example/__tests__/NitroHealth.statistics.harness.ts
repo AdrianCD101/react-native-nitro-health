@@ -21,7 +21,7 @@ import {
   totalEnergyReadPermission,
 } from './support/harnessSupport'
 
-const statisticsMetricKeys = ['sum', 'avg', 'min', 'max'] as const
+const statisticsMetricKeys = ['sum', 'avg', 'min', 'max', 'duration'] as const
 const statisticsRangeEnd = Date.now() - 60 * 60 * 1000
 const statisticsRange = {
   startDate: new Date(statisticsRangeEnd - 48 * 60 * 60 * 1000),
@@ -491,6 +491,106 @@ describe('NitroHealth statistics (native)', () => {
         expect(Math.abs(sodiumAfterSave - sodiumBaseline)).toBeLessThan(0.001)
       } finally {
         await NitroHealth.deleteRecordsByTimeRange('nutrition', statisticsRange)
+      }
+    })
+
+    it('round-trips a saved sleep session through duration statistics when authorized', async () => {
+      if (
+        !(await hasVerifiedPermissions([
+          { accessType: 'read', dataType: 'sleep' },
+          { accessType: 'write', dataType: 'sleep' },
+        ]))
+      ) {
+        return
+      }
+
+      // Dedicated 2005 date island (2000-2004/2006 belong to other fixtures).
+      const sleepRange = {
+        startDate: new Date('2005-06-01T00:00:00.000Z'),
+        endDate: new Date('2005-06-03T00:00:00.000Z'),
+      }
+      await NitroHealth.deleteRecordsByTimeRange('sleep', sleepRange)
+      try {
+        // 8h session with a 30-minute awake gap: both platforms must report
+        // 7.5h asleep (Android subtracts awake stages natively; iOS
+        // union-merges the asleep stage intervals).
+        await NitroHealth.saveSleepSessions([
+          {
+            startDate: new Date('2005-06-01T21:00:00.000Z'),
+            endDate: new Date('2005-06-02T05:00:00.000Z'),
+            stages: [
+              {
+                startDate: new Date('2005-06-01T21:00:00.000Z'),
+                endDate: new Date('2005-06-02T01:00:00.000Z'),
+                stage: 'asleepCore',
+              },
+              {
+                startDate: new Date('2005-06-02T01:00:00.000Z'),
+                endDate: new Date('2005-06-02T01:30:00.000Z'),
+                stage: 'awake',
+              },
+              {
+                startDate: new Date('2005-06-02T01:30:00.000Z'),
+                endDate: new Date('2005-06-02T05:00:00.000Z'),
+                stage: 'asleepDeep',
+              },
+            ],
+            sync: { id: 'nitro-health-harness-sleep-statistics', version: 1 },
+          },
+        ])
+
+        const buckets = await NitroHealth.readStatistics('sleep', {
+          ...sleepRange,
+          bucket: 'day',
+          metrics: ['duration'],
+          timeZone: 'UTC',
+        })
+        for (const bucket of buckets) {
+          assertStatisticsEntry(bucket, ['duration'])
+        }
+        const totalSeconds = buckets.reduce((sum, bucket) => sum + (bucket.duration ?? 0), 0)
+        expect(totalSeconds).toBe(7.5 * 3600)
+      } finally {
+        await NitroHealth.deleteRecordsByTimeRange('sleep', sleepRange)
+      }
+    })
+
+    it('round-trips a saved workout through duration statistics when authorized', async () => {
+      if (
+        !(await hasVerifiedPermissions([
+          { accessType: 'read', dataType: 'workout' },
+          { accessType: 'write', dataType: 'workout' },
+        ]))
+      ) {
+        return
+      }
+
+      const workoutRange = {
+        startDate: new Date('2005-07-01T00:00:00.000Z'),
+        endDate: new Date('2005-07-02T00:00:00.000Z'),
+      }
+      await NitroHealth.deleteRecordsByTimeRange('workout', workoutRange)
+      try {
+        await NitroHealth.saveWorkout({
+          startDate: new Date('2005-07-01T10:00:00.000Z'),
+          endDate: new Date('2005-07-01T11:00:00.000Z'),
+          activityType: 'walking',
+          sync: { id: 'nitro-health-harness-workout-statistics', version: 1 },
+        })
+
+        const buckets = await NitroHealth.readStatistics('workout', {
+          ...workoutRange,
+          bucket: 'day',
+          metrics: ['duration'],
+          timeZone: 'UTC',
+        })
+        for (const bucket of buckets) {
+          assertStatisticsEntry(bucket, ['duration'])
+        }
+        const totalSeconds = buckets.reduce((sum, bucket) => sum + (bucket.duration ?? 0), 0)
+        expect(totalSeconds).toBe(3600)
+      } finally {
+        await NitroHealth.deleteRecordsByTimeRange('workout', workoutRange)
       }
     })
 
