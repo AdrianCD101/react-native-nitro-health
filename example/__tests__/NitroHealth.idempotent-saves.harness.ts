@@ -286,8 +286,9 @@ async function readIdempotentSleepSamples(): Promise<SleepSample[]> {
   )
 }
 
-// The session envelope reads back as kind 'session-envelope' on Android and as an
-// 'inBed' stage sample on iOS, so counts are asserted per stage value instead.
+// Counts are asserted per stage value: iOS stores each stage as an independent
+// sample while Android nests them inside one record, so stage values are the
+// only shape both platforms report identically.
 function sleepStageSamples(samples: readonly SleepSample[], stage: string): SleepSample[] {
   return samples.filter((sample) => sample.kind === 'stage' && sample.stage === stage)
 }

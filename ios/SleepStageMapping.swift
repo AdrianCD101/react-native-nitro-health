@@ -1,17 +1,24 @@
 import Foundation
 
-enum SleepStageMappingError: LocalizedError {
+// Nitro stringifies thrown Swift errors with String(describing:), which ignores
+// LocalizedError — CustomStringConvertible is what makes the message reach JS.
+enum SleepStageMappingError: LocalizedError, CustomStringConvertible {
     case unsupportedWritableStage(String)
 
-    var errorDescription: String? {
+    var description: String {
         switch self {
         case .unsupportedWritableStage(let stage):
             return "Unsupported writable sleep stage: \(stage)"
         }
     }
+
+    var errorDescription: String? {
+        return description
+    }
 }
 
 enum HealthKitSleepIntervalMapping: Equatable {
+    case sessionEnvelope
     case stage(String)
 }
 
@@ -34,8 +41,6 @@ func healthKitSleepStageValue(_ stage: String) throws -> Int {
 
 func normalizedSleepStage(value: Int) -> String {
     switch value {
-    case 0:
-        return "inBed"
     case 1:
         return "asleep"
     case 2:
@@ -51,6 +56,11 @@ func normalizedSleepStage(value: Int) -> String {
     }
 }
 
+// HealthKit stores a session's in-bed span (value 0) as just another category
+// sample; it is surfaced as the session envelope rather than a stage.
 func healthKitSleepIntervalMapping(value: Int) -> HealthKitSleepIntervalMapping {
+    if value == 0 {
+        return .sessionEnvelope
+    }
     return .stage(normalizedSleepStage(value: value))
 }

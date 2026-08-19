@@ -17,8 +17,7 @@ import com.facebook.proguard.annotations.DoNotStrip
 @Keep
 enum class NativeSleepStageData(@DoNotStrip @Keep val value: Int) {
   REPORTED(0),
-  NOTREPORTED(1),
-  UNVERIFIABLE(2);
+  NOTREPORTED(1);
 
   companion object
 }

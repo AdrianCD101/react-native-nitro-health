@@ -381,17 +381,16 @@ describe('NitroHealth saves (native)', () => {
 
       const envelope = page.samples.find(
         (sample) =>
-          (sample.kind === 'session-envelope' ||
-            (sample.kind === 'stage' && sample.stage === 'inBed')) &&
+          sample.kind === 'session-envelope' &&
           sample.startDate.getTime() === saveInterval.startDate.getTime() &&
           sample.endDate.getTime() === saveInterval.endDate.getTime()
       )
       expect(envelope).toBeDefined()
       if (envelope?.kind === 'session-envelope') {
-        expect(envelope.stageData).toBe('reported')
+        // HealthKit never links stages to their envelope, so iOS always
+        // reports 'not-reported' even for sessions saved with stages.
+        expect(envelope.stageData).toBe(Platform.OS === 'ios' ? 'not-reported' : 'reported')
         expect('stage' in envelope).toBe(false)
-      } else if (envelope) {
-        expect(envelope.stage).toBe('inBed')
       }
 
       expect(

@@ -389,7 +389,7 @@ describe('NitroHealth changes contract', () => {
               kind: 'stage',
               startTimeMs,
               endTimeMs,
-              stage: 'inBed',
+              stage: 'asleepDeep',
             },
           ],
         })
@@ -451,7 +451,7 @@ describe('NitroHealth changes contract', () => {
         { kind: 'session-envelope', stageData: 'reported' },
         {
           kind: 'stage',
-          stage: 'inBed',
+          stage: 'asleepDeep',
           identity: {
             kind: 'record-child',
             record: { kind: 'record', id: 'sleep-record' },

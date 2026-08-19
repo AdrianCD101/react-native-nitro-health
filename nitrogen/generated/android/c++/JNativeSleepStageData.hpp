@@ -48,9 +48,6 @@ namespace margelo::nitro::nitrohealth {
         case NativeSleepStageData::NOTREPORTED:
           static const auto fieldNOTREPORTED = clazz->getStaticField<JNativeSleepStageData>("NOTREPORTED");
           return clazz->getStaticFieldValue(fieldNOTREPORTED);
-        case NativeSleepStageData::UNVERIFIABLE:
-          static const auto fieldUNVERIFIABLE = clazz->getStaticField<JNativeSleepStageData>("UNVERIFIABLE");
-          return clazz->getStaticFieldValue(fieldUNVERIFIABLE);
         default:
           std::string stringValue = std::to_string(static_cast<int>(value));
           throw std::invalid_argument("Invalid enum value (" + stringValue + "!");

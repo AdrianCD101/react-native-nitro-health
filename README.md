@@ -691,7 +691,7 @@ const { samples } = await NitroHealth.readSleepSamples({ startDate, endDate })
 for (const sample of samples) {
   if (sample.kind === 'session-envelope') {
     console.log(sample.startDate, sample.endDate, sample.stageData)
-    // stageData: 'reported' | 'not-reported' | 'unverifiable'
+    // stageData: 'reported' | 'not-reported'
   } else {
     console.log(sample.startDate, sample.endDate, sample.stage)
     if (sample.identity.kind === 'record-child') console.log(sample.identity.record)
@@ -702,10 +702,10 @@ for (const sample of samples) {
 A session envelope has `kind: 'session-envelope'`, bounds, and `stageData`. It does not have a `stage`. A stage has `kind: 'stage'`, bounds, and `stage`; parent ownership is encoded by a `record-child` identity.
 
 - Android returns one record-identity envelope for every `SleepSessionRecord`, followed by its record-child stages. `stageData` is `reported` when explicit stages exist and `not-reported` when none exist.
-- iOS returns every HealthKit sleep category interval, including `inBed`, as an independent stage record because HealthKit does not expose native sleep-session ownership.
-- A session without stages remains only a session envelope. Nitro Health does not manufacture a synthetic `asleep` stage.
+- iOS returns every HealthKit `inBed` interval as a session envelope and every other sleep category interval as an independent stage record. HealthKit does not link stages to their envelope, so iOS envelopes always carry `stageData: 'not-reported'` and only appear when the source app wrote an in-bed interval — stage-only apps produce no envelope.
+- A session without stages remains only a session envelope. Nitro Health does not manufacture a synthetic `asleep` stage, and it does not reconstruct sessions from loose iOS stages.
 
-Stages normalize to `inBed`, `awake`, `awakeInBed`, `asleep`, `asleepCore`, `asleepDeep`, `asleepREM`, `outOfBed`, or `unknown`.
+Stages normalize to `awake`, `awakeInBed`, `asleep`, `asleepCore`, `asleepDeep`, `asleepREM`, `outOfBed`, or `unknown`.
 
 ### Workouts
 
@@ -1114,7 +1114,7 @@ await NitroHealth.saveSleepSessions([
 
 Writable stages are `awake`, `asleep`, `asleepCore`, `asleepDeep`, and `asleepREM`. Stages must have positive duration, stay inside the session, and not overlap. Gaps and adjacent intervals are allowed. `timeZone` is an optional IANA identifier and defaults to the device time zone. Device provenance belongs to the session and is applied to every stored stage; stages do not accept conflicting device fields.
 
-Android writes one session record with nested stages. iOS writes one `inBed` category interval and each explicit stage in one save operation. Reads return Android session envelopes or independent iOS stages through the flat tagged model; neither platform receives a synthetic `asleep` stage for an unstaged session.
+Android writes one session record with nested stages. iOS writes one `inBed` category interval (the session envelope on read) and each explicit stage in one save operation. Reads return session envelopes and stages through the flat tagged model on both platforms; neither platform receives a synthetic `asleep` stage for an unstaged session.
 
 ### Write Workouts
 

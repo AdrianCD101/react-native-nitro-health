@@ -64,7 +64,6 @@ import type { WorkoutSample } from '../WorkoutSample'
 import { makeHealthRecordingMethod, makeHealthSampleMetadata } from './sampleMetadataMapping'
 
 const SLEEP_STAGES = new Set<string>([
-  'inBed',
   'awake',
   'awakeInBed',
   'asleep',

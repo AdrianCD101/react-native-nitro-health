@@ -31,7 +31,6 @@ namespace margelo::nitro::nitrohealth {
   enum class NativeSleepStageData {
     REPORTED      SWIFT_NAME(reported) = 0,
     NOTREPORTED      SWIFT_NAME(notreported) = 1,
-    UNVERIFIABLE      SWIFT_NAME(unverifiable) = 2,
   } CLOSED_ENUM;
 
 } // namespace margelo::nitro::nitrohealth
@@ -46,7 +45,6 @@ namespace margelo::nitro {
       switch (hashString(unionValue.c_str(), unionValue.size())) {
         case hashString("reported"): return margelo::nitro::nitrohealth::NativeSleepStageData::REPORTED;
         case hashString("notReported"): return margelo::nitro::nitrohealth::NativeSleepStageData::NOTREPORTED;
-        case hashString("unverifiable"): return margelo::nitro::nitrohealth::NativeSleepStageData::UNVERIFIABLE;
         default: [[unlikely]]
           throw std::invalid_argument("Cannot convert \"" + unionValue + "\" to enum NativeSleepStageData - invalid value!");
       }
@@ -55,7 +53,6 @@ namespace margelo::nitro {
       switch (arg) {
         case margelo::nitro::nitrohealth::NativeSleepStageData::REPORTED: return JSIConverter<std::string>::toJSI(runtime, "reported");
         case margelo::nitro::nitrohealth::NativeSleepStageData::NOTREPORTED: return JSIConverter<std::string>::toJSI(runtime, "notReported");
-        case margelo::nitro::nitrohealth::NativeSleepStageData::UNVERIFIABLE: return JSIConverter<std::string>::toJSI(runtime, "unverifiable");
         default: [[unlikely]]
           throw std::invalid_argument("Cannot convert NativeSleepStageData to JS - invalid value: "
                                     + std::to_string(static_cast<int>(arg)) + "!");
@@ -69,7 +66,6 @@ namespace margelo::nitro {
       switch (hashString(unionValue.c_str(), unionValue.size())) {
         case hashString("reported"):
         case hashString("notReported"):
-        case hashString("unverifiable"):
           return true;
         default:
           return false;
