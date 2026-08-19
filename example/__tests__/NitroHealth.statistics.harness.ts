@@ -36,14 +36,16 @@ function sumStatistics(buckets: readonly HealthStatistics[]): number {
   return buckets.reduce((sum, bucket) => sum + (bucket.sum ?? 0), 0)
 }
 
-// Health Connect only counts Activity-category aggregates (steps, floors, energy) for apps on
-// the user-managed priority list. A real permission grant (local dev) registers the app on
-// that list, but Harness provisions CI emulators with `pm grant`, which skips that flow — so
-// the same aggregate query deterministically includes this app's writes locally and
-// deterministically excludes them in CI. Probe which environment this is once per run, using a
-// dedicated 2003 date island (2000/2001/2002/2006 belong to other fixtures) and the steps
-// permissions every caller of expectActivityRoundTrip already holds. iOS aggregation has no
-// priority list, so it always sees the app.
+// Health Connect only counts aggregates (steps, floors, energy, sleep and exercise
+// durations) for apps on the user-managed priority list — and that list is per category
+// (Activity, Sleep, ...), so steps visibility says nothing about sleep visibility. A real
+// permission grant (local dev) registers the app on the category's list, but Harness
+// provisions CI emulators with `pm grant`, which skips that flow — so the same aggregate
+// query deterministically includes this app's writes locally and deterministically excludes
+// them in CI. Probe each category once per run, using a dedicated 2003 date island
+// (2000/2001/2002/2004/2005/2006 belong to other fixtures) and permissions every caller of
+// the round-trip helper already holds. iOS aggregation has no priority list, so it always
+// sees the app.
 const aggregationProbeInterval = {
   startDate: new Date('2003-06-01T09:00:00.000Z'),
   endDate: new Date('2003-06-01T09:30:00.000Z'),
@@ -53,13 +55,22 @@ const aggregationProbeRange = {
   endDate: new Date('2003-06-02T00:00:00.000Z'),
 }
 
-let activityAggregationVisibility: Promise<boolean> | undefined
+const aggregationVisibilityByProbe = new Map<string, Promise<boolean>>()
 
-function isActivityAggregationVisible(): Promise<boolean> {
+function probeAggregationVisibility(key: string, probe: () => Promise<boolean>): Promise<boolean> {
   if (Platform.OS === 'ios') {
     return Promise.resolve(true)
   }
-  activityAggregationVisibility ??= (async () => {
+  let visibility = aggregationVisibilityByProbe.get(key)
+  if (visibility === undefined) {
+    visibility = probe()
+    aggregationVisibilityByProbe.set(key, visibility)
+  }
+  return visibility
+}
+
+function isActivityAggregationVisible(): Promise<boolean> {
+  return probeAggregationVisibility('steps', async () => {
     await NitroHealth.deleteRecordsByTimeRange('steps', aggregationProbeRange)
     try {
       await NitroHealth.saveSteps([
@@ -74,21 +85,71 @@ function isActivityAggregationVisible(): Promise<boolean> {
     } finally {
       await NitroHealth.deleteRecordsByTimeRange('steps', aggregationProbeRange)
     }
-  })()
-  return activityAggregationVisibility
+  })
+}
+
+function sumDurations(buckets: readonly HealthStatistics[]): number {
+  return buckets.reduce((sum, bucket) => sum + (bucket.duration ?? 0), 0)
+}
+
+// A stage-less probe session counts its full length in SLEEP_DURATION_TOTAL,
+// so any positive duration proves the Sleep category can see this app.
+function isSleepAggregationVisible(): Promise<boolean> {
+  return probeAggregationVisibility('sleep', async () => {
+    await NitroHealth.deleteRecordsByTimeRange('sleep', aggregationProbeRange)
+    try {
+      await NitroHealth.saveSleepSessions([
+        {
+          ...aggregationProbeInterval,
+          sync: { id: 'nitro-health-harness-sleep-aggregation-probe', version: 1 },
+        },
+      ])
+      const query = {
+        ...aggregationProbeRange,
+        bucket: 'day' as const,
+        metrics: ['duration' as const],
+      }
+      return sumDurations(await NitroHealth.readStatistics('sleep', query)) >= 1
+    } finally {
+      await NitroHealth.deleteRecordsByTimeRange('sleep', aggregationProbeRange)
+    }
+  })
+}
+
+function isWorkoutAggregationVisible(): Promise<boolean> {
+  return probeAggregationVisibility('workout', async () => {
+    await NitroHealth.deleteRecordsByTimeRange('workout', aggregationProbeRange)
+    try {
+      await NitroHealth.saveWorkout({
+        ...aggregationProbeInterval,
+        activityType: 'walking',
+        sync: { id: 'nitro-health-harness-workout-aggregation-probe', version: 1 },
+      })
+      const query = {
+        ...aggregationProbeRange,
+        bucket: 'day' as const,
+        metrics: ['duration' as const],
+      }
+      return sumDurations(await NitroHealth.readStatistics('workout', query)) >= 1
+    } finally {
+      await NitroHealth.deleteRecordsByTimeRange('workout', aggregationProbeRange)
+    }
+  })
 }
 
 // Writes are committed before the save promise resolves on both platforms, so every assertion
 // here is a single deterministic read — no polling. Record visibility is asserted everywhere;
 // the aggregate sum is asserted wherever aggregation can see this app (iOS always, Android only
-// when the app is on the priority list).
+// when the app is on the queried category's priority list).
 async function expectActivityRoundTrip(options: {
   readAggregate: () => Promise<number>
   aggregateTarget: number
   hasSavedRecord: () => Promise<boolean>
+  isAggregationVisible?: () => Promise<boolean>
 }): Promise<void> {
   expect(await options.hasSavedRecord()).toBe(true)
-  if (await isActivityAggregationVisible()) {
+  const isVisible = options.isAggregationVisible ?? isActivityAggregationVisible
+  if (await isVisible()) {
     expect(await options.readAggregate()).toBeGreaterThanOrEqual(options.aggregateTarget - 0.001)
   }
 }
@@ -192,7 +253,7 @@ describe('NitroHealth statistics (native)', () => {
           bucket: 'day',
           metrics: ['sum'],
         })
-      ).rejects.toThrow(`readStatistics does not support the 'sleep' data type`)
+      ).rejects.toThrow(`Metric 'sum' is not supported for 'sleep' (supported: duration)`)
 
       // HRV and SpO2 have no aggregate metrics on either platform (Android physically cannot
       // aggregate them; see HeartRateVariabilitySample/OxygenSaturationSample), so both are
@@ -539,17 +600,26 @@ describe('NitroHealth statistics (native)', () => {
           },
         ])
 
-        const buckets = await NitroHealth.readStatistics('sleep', {
-          ...sleepRange,
-          bucket: 'day',
-          metrics: ['duration'],
-          timeZone: 'UTC',
+        await expectActivityRoundTrip({
+          readAggregate: async () => {
+            const buckets = await NitroHealth.readStatistics('sleep', {
+              ...sleepRange,
+              bucket: 'day',
+              metrics: ['duration'],
+              timeZone: 'UTC',
+            })
+            for (const bucket of buckets) {
+              assertStatisticsEntry(bucket, ['duration'])
+            }
+            return buckets.reduce((sum, bucket) => sum + (bucket.duration ?? 0), 0)
+          },
+          aggregateTarget: 7.5 * 3600,
+          hasSavedRecord: async () =>
+            (await NitroHealth.readSleepSamples({ ...sleepRange, limit: 1000 })).samples.some(
+              (sample) => sample.kind === 'stage' && sample.stage === 'asleepDeep'
+            ),
+          isAggregationVisible: isSleepAggregationVisible,
         })
-        for (const bucket of buckets) {
-          assertStatisticsEntry(bucket, ['duration'])
-        }
-        const totalSeconds = buckets.reduce((sum, bucket) => sum + (bucket.duration ?? 0), 0)
-        expect(totalSeconds).toBe(7.5 * 3600)
       } finally {
         await NitroHealth.deleteRecordsByTimeRange('sleep', sleepRange)
       }
@@ -578,17 +648,26 @@ describe('NitroHealth statistics (native)', () => {
           sync: { id: 'nitro-health-harness-workout-statistics', version: 1 },
         })
 
-        const buckets = await NitroHealth.readStatistics('workout', {
-          ...workoutRange,
-          bucket: 'day',
-          metrics: ['duration'],
-          timeZone: 'UTC',
+        await expectActivityRoundTrip({
+          readAggregate: async () => {
+            const buckets = await NitroHealth.readStatistics('workout', {
+              ...workoutRange,
+              bucket: 'day',
+              metrics: ['duration'],
+              timeZone: 'UTC',
+            })
+            for (const bucket of buckets) {
+              assertStatisticsEntry(bucket, ['duration'])
+            }
+            return buckets.reduce((sum, bucket) => sum + (bucket.duration ?? 0), 0)
+          },
+          aggregateTarget: 3600,
+          hasSavedRecord: async () =>
+            (await NitroHealth.readWorkouts({ ...workoutRange, limit: 1000 })).samples.some(
+              (workout) => workout.startDate.getTime() === Date.parse('2005-07-01T10:00:00.000Z')
+            ),
+          isAggregationVisible: isWorkoutAggregationVisible,
         })
-        for (const bucket of buckets) {
-          assertStatisticsEntry(bucket, ['duration'])
-        }
-        const totalSeconds = buckets.reduce((sum, bucket) => sum + (bucket.duration ?? 0), 0)
-        expect(totalSeconds).toBe(3600)
       } finally {
         await NitroHealth.deleteRecordsByTimeRange('workout', workoutRange)
       }
