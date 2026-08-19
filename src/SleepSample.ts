@@ -1,4 +1,5 @@
 import type { HealthSample } from './HealthSample'
+import type { SleepSessionMetadata } from './SleepSessionMetadata'
 import type { SleepStage } from './SleepStage'
 
 /** Sleep-session envelope returned by {@linkcode NitroHealth.readSleepSamples}. */
@@ -15,6 +16,8 @@ export interface SleepSessionEnvelope extends HealthSample {
    * in-bed interval they belong to.
    */
   stageData: 'reported' | 'not-reported'
+  /** Platform-scoped session fields. Absent on iOS envelopes. */
+  metadata?: SleepSessionMetadata
 }
 
 /** Explicit sleep-stage interval returned by {@linkcode NitroHealth.readSleepSamples}. */

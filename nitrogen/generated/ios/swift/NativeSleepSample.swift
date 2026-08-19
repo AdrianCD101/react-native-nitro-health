@@ -18,7 +18,7 @@ public extension NativeSleepSample {
   /**
    * Create a new instance of `NativeSleepSample`.
    */
-  init(sampleMetadata: NativeHealthSampleMetadata, kind: NativeSleepSampleKind, startTimeMs: Double, endTimeMs: Double, stage: String?, stageData: NativeSleepStageData?) {
+  init(sampleMetadata: NativeHealthSampleMetadata, kind: NativeSleepSampleKind, startTimeMs: Double, endTimeMs: Double, stage: String?, stageData: NativeSleepStageData?, androidTitle: String?, androidNotes: String?) {
     self.init(sampleMetadata, kind, startTimeMs, endTimeMs, { () -> bridge.std__optional_std__string_ in
       if let __unwrappedValue = stage {
         return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
@@ -28,6 +28,18 @@ public extension NativeSleepSample {
     }(), { () -> bridge.std__optional_NativeSleepStageData_ in
       if let __unwrappedValue = stageData {
         return bridge.create_std__optional_NativeSleepStageData_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_std__string_ in
+      if let __unwrappedValue = androidTitle {
+        return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_std__string_ in
+      if let __unwrappedValue = androidNotes {
+        return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
       } else {
         return .init()
       }
@@ -69,5 +81,29 @@ public extension NativeSleepSample {
   @inline(__always)
   var stageData: NativeSleepStageData? {
     return self.__stageData.value
+  }
+  
+  @inline(__always)
+  var androidTitle: String? {
+    return { () -> String? in
+      if bridge.has_value_std__optional_std__string_(self.__androidTitle) {
+        let __unwrapped = bridge.get_std__optional_std__string_(self.__androidTitle)
+        return String(__unwrapped)
+      } else {
+        return nil
+      }
+    }()
+  }
+  
+  @inline(__always)
+  var androidNotes: String? {
+    return { () -> String? in
+      if bridge.has_value_std__optional_std__string_(self.__androidNotes) {
+        let __unwrapped = bridge.get_std__optional_std__string_(self.__androidNotes)
+        return String(__unwrapped)
+      } else {
+        return nil
+      }
+    }()
   }
 }

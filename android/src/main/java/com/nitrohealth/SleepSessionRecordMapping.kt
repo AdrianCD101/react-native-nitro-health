@@ -17,7 +17,9 @@ internal fun makeNativeSleepSamples(record: SleepSessionRecord): Array<NativeSle
             NativeSleepStageData.NOTREPORTED
         } else {
             NativeSleepStageData.REPORTED
-        }
+        },
+        androidTitle = record.title,
+        androidNotes = record.notes
     )
     val stages = record.stages.mapIndexed { index, stage ->
         NativeSleepSample(
@@ -30,7 +32,9 @@ internal fun makeNativeSleepSamples(record: SleepSessionRecord): Array<NativeSle
             startTimeMs = stage.startTime.toEpochMilli().toDouble(),
             endTimeMs = stage.endTime.toEpochMilli().toDouble(),
             stage = makeSleepStage(stage.stage),
-            stageData = null
+            stageData = null,
+            androidTitle = null,
+            androidNotes = null
         )
     }
 

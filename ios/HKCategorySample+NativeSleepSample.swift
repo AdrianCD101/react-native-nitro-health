@@ -14,7 +14,9 @@ extension HKCategorySample {
                 stage: nil,
                 // HealthKit does not link stages to their envelope, so whether
                 // stages were reported for this session is never knowable here.
-                stageData: .notreported
+                stageData: .notreported,
+                androidTitle: nil,
+                androidNotes: nil
             )
         case .stage(let stage):
             return NativeSleepSample(
@@ -23,7 +25,9 @@ extension HKCategorySample {
                 startTimeMs: startDate.timeIntervalSince1970 * 1000,
                 endTimeMs: endDate.timeIntervalSince1970 * 1000,
                 stage: stage,
-                stageData: nil
+                stageData: nil,
+                androidTitle: nil,
+                androidNotes: nil
             )
         }
     }

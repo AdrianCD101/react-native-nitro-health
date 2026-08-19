@@ -42,7 +42,9 @@ class SleepSessionInputMappingTest {
                         syncId = "night-2026-01-11",
                         syncVersion = 2.0,
                         timeZone = "America/New_York"
-                    )
+                    ),
+                    androidTitle = "Night sleep",
+                    androidNotes = "travel day"
                 )
             )
         ).single()
@@ -57,6 +59,8 @@ class SleepSessionInputMappingTest {
         )
         assertEquals("night-2026-01-11", record.metadata.clientRecordId)
         assertEquals(2L, record.metadata.clientRecordVersion)
+        assertEquals("Night sleep", record.title)
+        assertEquals("travel day", record.notes)
         assertEquals(Device.TYPE_WATCH, record.metadata.device?.type)
         assertEquals("Example", record.metadata.device?.manufacturer)
         assertEquals("Sleep Watch", record.metadata.device?.model)
@@ -83,7 +87,9 @@ class SleepSessionInputMappingTest {
                     startTimeMs = startTime.toEpochMilli().toDouble(),
                     endTimeMs = endTime.toEpochMilli().toDouble(),
                     stages = emptyArray(),
-                    writeMetadata = makeTestWriteMetadata(timeZone = "UTC")
+                    writeMetadata = makeTestWriteMetadata(timeZone = "UTC"),
+                    androidTitle = null,
+                    androidNotes = null
                 )
             )
         ).single()
@@ -103,7 +109,9 @@ class SleepSessionInputMappingTest {
                     startTimeMs = dstStart.toEpochMilli().toDouble(),
                     endTimeMs = dstEnd.toEpochMilli().toDouble(),
                     stages = emptyArray(),
-                    writeMetadata = makeTestWriteMetadata(timeZone = "America/New_York")
+                    writeMetadata = makeTestWriteMetadata(timeZone = "America/New_York"),
+                    androidTitle = null,
+                    androidNotes = null
                 )
             )
         ).single()
@@ -121,7 +129,9 @@ class SleepSessionInputMappingTest {
                         startTimeMs = startTime.toEpochMilli().toDouble(),
                         endTimeMs = endTime.toEpochMilli().toDouble(),
                         stages = emptyArray(),
-                        writeMetadata = makeTestWriteMetadata(timeZone = "Not/A_Zone")
+                        writeMetadata = makeTestWriteMetadata(timeZone = "Not/A_Zone"),
+                        androidTitle = null,
+                        androidNotes = null
                     )
                 )
             )
@@ -138,7 +148,9 @@ class SleepSessionInputMappingTest {
                         startTimeMs = startTime.toEpochMilli().toDouble(),
                         endTimeMs = endTime.toEpochMilli().toDouble(),
                         stages = emptyArray(),
-                        writeMetadata = makeTestWriteMetadata(timeZone = "+01:00")
+                        writeMetadata = makeTestWriteMetadata(timeZone = "+01:00"),
+                        androidTitle = null,
+                        androidNotes = null
                     )
                 )
             )

@@ -53,6 +53,10 @@ namespace margelo::nitro::nitrohealth {
       jni::local_ref<jni::JArrayClass<JNativeSleepSessionStageInput>> stages = this->getFieldValue(fieldStages);
       static const auto fieldWriteMetadata = clazz->getField<JNativeHealthWriteMetadata>("writeMetadata");
       jni::local_ref<JNativeHealthWriteMetadata> writeMetadata = this->getFieldValue(fieldWriteMetadata);
+      static const auto fieldAndroidTitle = clazz->getField<jni::JString>("androidTitle");
+      jni::local_ref<jni::JString> androidTitle = this->getFieldValue(fieldAndroidTitle);
+      static const auto fieldAndroidNotes = clazz->getField<jni::JString>("androidNotes");
+      jni::local_ref<jni::JString> androidNotes = this->getFieldValue(fieldAndroidNotes);
       return NativeSleepSessionInput(
         startTimeMs,
         endTimeMs,
@@ -66,7 +70,9 @@ namespace margelo::nitro::nitrohealth {
           }
           return __vector;
         }(stages),
-        writeMetadata->toCpp()
+        writeMetadata->toCpp(),
+        androidTitle != nullptr ? std::make_optional(androidTitle->toStdString()) : std::nullopt,
+        androidNotes != nullptr ? std::make_optional(androidNotes->toStdString()) : std::nullopt
       );
     }
 
@@ -76,7 +82,7 @@ namespace margelo::nitro::nitrohealth {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeSleepSessionInput::javaobject> fromCpp(const NativeSleepSessionInput& value) {
-      using JSignature = JNativeSleepSessionInput(double, double, jni::alias_ref<jni::JArrayClass<JNativeSleepSessionStageInput>>, jni::alias_ref<JNativeHealthWriteMetadata>);
+      using JSignature = JNativeSleepSessionInput(double, double, jni::alias_ref<jni::JArrayClass<JNativeSleepSessionStageInput>>, jni::alias_ref<JNativeHealthWriteMetadata>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
@@ -93,7 +99,9 @@ namespace margelo::nitro::nitrohealth {
           }
           return __array;
         }(value.stages),
-        JNativeHealthWriteMetadata::fromCpp(value.writeMetadata)
+        JNativeHealthWriteMetadata::fromCpp(value.writeMetadata),
+        value.androidTitle.has_value() ? jni::make_jstring(value.androidTitle.value()) : nullptr,
+        value.androidNotes.has_value() ? jni::make_jstring(value.androidNotes.value()) : nullptr
       );
     }
   };

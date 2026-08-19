@@ -36,6 +36,8 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthWriteMetadata; }
 #include "NativeSleepSessionStageInput.hpp"
 #include <vector>
 #include "NativeHealthWriteMetadata.hpp"
+#include <string>
+#include <optional>
 
 namespace margelo::nitro::nitrohealth {
 
@@ -48,10 +50,12 @@ namespace margelo::nitro::nitrohealth {
     double endTimeMs     SWIFT_PRIVATE;
     std::vector<NativeSleepSessionStageInput> stages     SWIFT_PRIVATE;
     NativeHealthWriteMetadata writeMetadata     SWIFT_PRIVATE;
+    std::optional<std::string> androidTitle     SWIFT_PRIVATE;
+    std::optional<std::string> androidNotes     SWIFT_PRIVATE;
 
   public:
     NativeSleepSessionInput() = default;
-    explicit NativeSleepSessionInput(double startTimeMs, double endTimeMs, std::vector<NativeSleepSessionStageInput> stages, NativeHealthWriteMetadata writeMetadata): startTimeMs(startTimeMs), endTimeMs(endTimeMs), stages(stages), writeMetadata(writeMetadata) {}
+    explicit NativeSleepSessionInput(double startTimeMs, double endTimeMs, std::vector<NativeSleepSessionStageInput> stages, NativeHealthWriteMetadata writeMetadata, std::optional<std::string> androidTitle, std::optional<std::string> androidNotes): startTimeMs(startTimeMs), endTimeMs(endTimeMs), stages(stages), writeMetadata(writeMetadata), androidTitle(androidTitle), androidNotes(androidNotes) {}
 
   public:
     friend bool operator==(const NativeSleepSessionInput& lhs, const NativeSleepSessionInput& rhs) = default;
@@ -70,7 +74,9 @@ namespace margelo::nitro {
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "startTimeMs"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs"))),
         JSIConverter<std::vector<margelo::nitro::nitrohealth::NativeSleepSessionStageInput>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "stages"))),
-        JSIConverter<margelo::nitro::nitrohealth::NativeHealthWriteMetadata>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "writeMetadata")))
+        JSIConverter<margelo::nitro::nitrohealth::NativeHealthWriteMetadata>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "writeMetadata"))),
+        JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "androidTitle"))),
+        JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "androidNotes")))
       );
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::nitrohealth::NativeSleepSessionInput& arg) {
@@ -79,6 +85,8 @@ namespace margelo::nitro {
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs"), JSIConverter<double>::toJSI(runtime, arg.endTimeMs));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "stages"), JSIConverter<std::vector<margelo::nitro::nitrohealth::NativeSleepSessionStageInput>>::toJSI(runtime, arg.stages));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "writeMetadata"), JSIConverter<margelo::nitro::nitrohealth::NativeHealthWriteMetadata>::toJSI(runtime, arg.writeMetadata));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "androidTitle"), JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.androidTitle));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "androidNotes"), JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.androidNotes));
       return obj;
     }
     static inline bool canConvert(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -93,6 +101,8 @@ namespace margelo::nitro {
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs")))) return false;
       if (!JSIConverter<std::vector<margelo::nitro::nitrohealth::NativeSleepSessionStageInput>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "stages")))) return false;
       if (!JSIConverter<margelo::nitro::nitrohealth::NativeHealthWriteMetadata>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "writeMetadata")))) return false;
+      if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "androidTitle")))) return false;
+      if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "androidNotes")))) return false;
       return true;
     }
   };

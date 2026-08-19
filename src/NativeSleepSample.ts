@@ -11,4 +11,6 @@ export interface NativeSleepSample {
   endTimeMs: number
   stage?: string
   stageData?: NativeSleepStageData
+  androidTitle?: string
+  androidNotes?: string
 }

@@ -489,13 +489,19 @@ function createNitroHealthMock(options = {}) {
     saveSleepSessions: createMockFunction((sessions) => {
       const validationError = validateNonEmpty(sessions, 'At least one sleep session is required')
       if (validationError !== undefined) return Promise.reject(validationError)
-      return saveSamples('sleep', sessions, (session) => ({
-        kind: 'session-envelope',
-        startDate: session.startDate,
-        endDate: session.endDate,
-        stageData:
-          Array.isArray(session.stages) && session.stages.length > 0 ? 'reported' : 'not-reported',
-      }))
+      return saveSamples('sleep', sessions, (session) => {
+        const envelope = {
+          kind: 'session-envelope',
+          startDate: session.startDate,
+          endDate: session.endDate,
+          stageData:
+            Array.isArray(session.stages) && session.stages.length > 0
+              ? 'reported'
+              : 'not-reported',
+        }
+        if (session.metadata !== undefined) envelope.metadata = session.metadata
+        return envelope
+      })
     }),
     saveWorkout: createMockFunction((workout) =>
       saveSamples('workout', [workout], (sample) => {

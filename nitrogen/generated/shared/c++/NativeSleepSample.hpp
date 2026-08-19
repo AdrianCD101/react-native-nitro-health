@@ -54,10 +54,12 @@ namespace margelo::nitro::nitrohealth {
     double endTimeMs     SWIFT_PRIVATE;
     std::optional<std::string> stage     SWIFT_PRIVATE;
     std::optional<NativeSleepStageData> stageData     SWIFT_PRIVATE;
+    std::optional<std::string> androidTitle     SWIFT_PRIVATE;
+    std::optional<std::string> androidNotes     SWIFT_PRIVATE;
 
   public:
     NativeSleepSample() = default;
-    explicit NativeSleepSample(NativeHealthSampleMetadata sampleMetadata, NativeSleepSampleKind kind, double startTimeMs, double endTimeMs, std::optional<std::string> stage, std::optional<NativeSleepStageData> stageData): sampleMetadata(sampleMetadata), kind(kind), startTimeMs(startTimeMs), endTimeMs(endTimeMs), stage(stage), stageData(stageData) {}
+    explicit NativeSleepSample(NativeHealthSampleMetadata sampleMetadata, NativeSleepSampleKind kind, double startTimeMs, double endTimeMs, std::optional<std::string> stage, std::optional<NativeSleepStageData> stageData, std::optional<std::string> androidTitle, std::optional<std::string> androidNotes): sampleMetadata(sampleMetadata), kind(kind), startTimeMs(startTimeMs), endTimeMs(endTimeMs), stage(stage), stageData(stageData), androidTitle(androidTitle), androidNotes(androidNotes) {}
 
   public:
     friend bool operator==(const NativeSleepSample& lhs, const NativeSleepSample& rhs) = default;
@@ -78,7 +80,9 @@ namespace margelo::nitro {
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "startTimeMs"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs"))),
         JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "stage"))),
-        JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeSleepStageData>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "stageData")))
+        JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeSleepStageData>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "stageData"))),
+        JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "androidTitle"))),
+        JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "androidNotes")))
       );
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::nitrohealth::NativeSleepSample& arg) {
@@ -89,6 +93,8 @@ namespace margelo::nitro {
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs"), JSIConverter<double>::toJSI(runtime, arg.endTimeMs));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "stage"), JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.stage));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "stageData"), JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeSleepStageData>>::toJSI(runtime, arg.stageData));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "androidTitle"), JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.androidTitle));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "androidNotes"), JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.androidNotes));
       return obj;
     }
     static inline bool canConvert(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -105,6 +111,8 @@ namespace margelo::nitro {
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "endTimeMs")))) return false;
       if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "stage")))) return false;
       if (!JSIConverter<std::optional<margelo::nitro::nitrohealth::NativeSleepStageData>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "stageData")))) return false;
+      if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "androidTitle")))) return false;
+      if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "androidNotes")))) return false;
       return true;
     }
   };
