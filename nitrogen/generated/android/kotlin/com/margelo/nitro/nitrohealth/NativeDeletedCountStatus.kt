@@ -16,8 +16,8 @@ import com.facebook.proguard.annotations.DoNotStrip
 @DoNotStrip
 @Keep
 enum class NativeDeletedCountStatus(@DoNotStrip @Keep val value: Int) {
-  UNVERIFIABLE(0),
-  KNOWN(1);
+  KNOWN(0),
+  UNVERIFIABLE(1);
 
   companion object
 }

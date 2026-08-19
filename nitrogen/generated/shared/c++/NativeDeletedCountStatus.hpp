@@ -29,8 +29,8 @@ namespace margelo::nitro::nitrohealth {
    * An enum which can be represented as a JavaScript union (NativeDeletedCountStatus).
    */
   enum class NativeDeletedCountStatus {
-    UNVERIFIABLE      SWIFT_NAME(unverifiable) = 0,
-    KNOWN      SWIFT_NAME(known) = 1,
+    KNOWN      SWIFT_NAME(known) = 0,
+    UNVERIFIABLE      SWIFT_NAME(unverifiable) = 1,
   } CLOSED_ENUM;
 
 } // namespace margelo::nitro::nitrohealth
@@ -43,16 +43,16 @@ namespace margelo::nitro {
     static inline margelo::nitro::nitrohealth::NativeDeletedCountStatus fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       std::string unionValue = JSIConverter<std::string>::fromJSI(runtime, arg);
       switch (hashString(unionValue.c_str(), unionValue.size())) {
-        case hashString("unverifiable"): return margelo::nitro::nitrohealth::NativeDeletedCountStatus::UNVERIFIABLE;
         case hashString("known"): return margelo::nitro::nitrohealth::NativeDeletedCountStatus::KNOWN;
+        case hashString("unverifiable"): return margelo::nitro::nitrohealth::NativeDeletedCountStatus::UNVERIFIABLE;
         default: [[unlikely]]
           throw std::invalid_argument("Cannot convert \"" + unionValue + "\" to enum NativeDeletedCountStatus - invalid value!");
       }
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, margelo::nitro::nitrohealth::NativeDeletedCountStatus arg) {
       switch (arg) {
-        case margelo::nitro::nitrohealth::NativeDeletedCountStatus::UNVERIFIABLE: return JSIConverter<std::string>::toJSI(runtime, "unverifiable");
         case margelo::nitro::nitrohealth::NativeDeletedCountStatus::KNOWN: return JSIConverter<std::string>::toJSI(runtime, "known");
+        case margelo::nitro::nitrohealth::NativeDeletedCountStatus::UNVERIFIABLE: return JSIConverter<std::string>::toJSI(runtime, "unverifiable");
         default: [[unlikely]]
           throw std::invalid_argument("Cannot convert NativeDeletedCountStatus to JS - invalid value: "
                                     + std::to_string(static_cast<int>(arg)) + "!");
@@ -64,8 +64,8 @@ namespace margelo::nitro {
       }
       std::string unionValue = JSIConverter<std::string>::fromJSI(runtime, value);
       switch (hashString(unionValue.c_str(), unionValue.size())) {
-        case hashString("unverifiable"):
         case hashString("known"):
+        case hashString("unverifiable"):
           return true;
         default:
           return false;

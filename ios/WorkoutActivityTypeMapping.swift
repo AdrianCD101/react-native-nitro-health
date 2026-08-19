@@ -1,13 +1,19 @@
 import Foundation
 
-enum WorkoutActivityTypeMappingError: LocalizedError {
+// Nitro stringifies thrown Swift errors with String(describing:), which ignores
+// LocalizedError — CustomStringConvertible is what makes the message reach JS.
+enum WorkoutActivityTypeMappingError: LocalizedError, CustomStringConvertible {
     case unsupportedWritableType(String)
 
-    var errorDescription: String? {
+    var description: String {
         switch self {
         case .unsupportedWritableType(let activityType):
             return "Unsupported writable workout activity type: \(activityType)"
         }
+    }
+
+    var errorDescription: String? {
+        return description
     }
 }
 

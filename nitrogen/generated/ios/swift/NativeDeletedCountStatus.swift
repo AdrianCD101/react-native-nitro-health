@@ -17,10 +17,10 @@ public extension NativeDeletedCountStatus {
    */
   init?(fromString string: String) {
     switch string {
-      case "unverifiable":
-        self = .unverifiable
       case "known":
         self = .known
+      case "unverifiable":
+        self = .unverifiable
       default:
         return nil
     }
@@ -31,10 +31,10 @@ public extension NativeDeletedCountStatus {
    */
   var stringValue: String {
     switch self {
-      case .unverifiable:
-        return "unverifiable"
       case .known:
         return "known"
+      case .unverifiable:
+        return "unverifiable"
     }
   }
 }

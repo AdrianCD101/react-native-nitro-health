@@ -42,12 +42,12 @@ namespace margelo::nitro::nitrohealth {
     static jni::alias_ref<JNativeDeletedCountStatus> fromCpp(NativeDeletedCountStatus value) {
       static const auto clazz = javaClassStatic();
       switch (value) {
-        case NativeDeletedCountStatus::UNVERIFIABLE:
-          static const auto fieldUNVERIFIABLE = clazz->getStaticField<JNativeDeletedCountStatus>("UNVERIFIABLE");
-          return clazz->getStaticFieldValue(fieldUNVERIFIABLE);
         case NativeDeletedCountStatus::KNOWN:
           static const auto fieldKNOWN = clazz->getStaticField<JNativeDeletedCountStatus>("KNOWN");
           return clazz->getStaticFieldValue(fieldKNOWN);
+        case NativeDeletedCountStatus::UNVERIFIABLE:
+          static const auto fieldUNVERIFIABLE = clazz->getStaticField<JNativeDeletedCountStatus>("UNVERIFIABLE");
+          return clazz->getStaticFieldValue(fieldUNVERIFIABLE);
         default:
           std::string stringValue = std::to_string(static_cast<int>(value));
           throw std::invalid_argument("Invalid enum value (" + stringValue + "!");

@@ -126,7 +126,7 @@ describe('NitroHealth reads (native)', () => {
       expect(sample.startDate).toBeInstanceOf(Date)
       expect(sample.endDate).toBeInstanceOf(Date)
       if (sample.kind === 'session-envelope') {
-        expect(['reported', 'not-reported', 'unverifiable']).toContain(sample.stageData)
+        expect(['reported', 'not-reported']).toContain(sample.stageData)
         expect('stage' in sample).toBe(false)
       } else {
         expect(typeof sample.stage).toBe('string')

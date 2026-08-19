@@ -21,8 +21,6 @@ public extension NativeSleepStageData {
         self = .reported
       case "notReported":
         self = .notreported
-      case "unverifiable":
-        self = .unverifiable
       default:
         return nil
     }
@@ -37,8 +35,6 @@ public extension NativeSleepStageData {
         return "reported"
       case .notreported:
         return "notReported"
-      case .unverifiable:
-        return "unverifiable"
     }
   }
 }

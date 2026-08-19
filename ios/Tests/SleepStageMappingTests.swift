@@ -16,8 +16,7 @@ final class SleepStageMappingTests: XCTestCase {
         }
     }
 
-    func testNormalizesEveryHealthKitSleepValue() {
-        XCTAssertEqual(normalizedSleepStage(value: 0), "inBed")
+    func testNormalizesEveryHealthKitStageValue() {
         XCTAssertEqual(normalizedSleepStage(value: 1), "asleep")
         XCTAssertEqual(normalizedSleepStage(value: 2), "awake")
         XCTAssertEqual(normalizedSleepStage(value: 3), "asleepCore")
@@ -26,8 +25,8 @@ final class SleepStageMappingTests: XCTestCase {
         XCTAssertEqual(normalizedSleepStage(value: 99), "unknown")
     }
 
-    func testMapsInBedToAnUnverifiableSessionEnvelope() {
-        XCTAssertEqual(healthKitSleepIntervalMapping(value: 0), .stage("inBed"))
+    func testMapsInBedToTheSessionEnvelope() {
+        XCTAssertEqual(healthKitSleepIntervalMapping(value: 0), .sessionEnvelope)
     }
 
     func testMapsEveryOtherIntervalToAnIndependentExplicitStage() {

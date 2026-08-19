@@ -9,8 +9,12 @@ export interface SleepSessionEnvelope extends HealthSample {
   startDate: Date
   /** End of the sleep session. */
   endDate: Date
-  /** Whether explicit stage detail exists or can be observed for this envelope. */
-  stageData: 'reported' | 'not-reported' | 'unverifiable'
+  /**
+   * Whether explicit stage detail exists for this envelope. Always
+   * `not-reported` on iOS: HealthKit does not link stage samples to the
+   * in-bed interval they belong to.
+   */
+  stageData: 'reported' | 'not-reported'
 }
 
 /** Explicit sleep-stage interval returned by {@linkcode NitroHealth.readSleepSamples}. */
