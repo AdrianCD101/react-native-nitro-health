@@ -46,13 +46,14 @@ extension HybridNitroHealth {
             let syncPrefix = sleepStageSyncPrefix(sessionSyncId: sync.id)
             let incomingVersion = Int64(sync.version)
 
+            // HealthKit metadata predicates reject string operators like beginsWith
+            // with an NSInvalidArgumentException at HKSampleQuery init (uncatchable
+            // from Swift), so candidates are narrowed to our own source's samples
+            // that carry any sync identifier and the prefix match happens in
+            // staleSleepStageUuids instead.
             let predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
                 HKQuery.predicateForObjects(from: HKSource.default()),
-                HKQuery.predicateForObjects(
-                    withMetadataKey: HKMetadataKeySyncIdentifier,
-                    operatorType: .beginsWith,
-                    value: syncPrefix
-                ),
+                HKQuery.predicateForObjects(withMetadataKey: HKMetadataKeySyncIdentifier),
             ])
             let candidates = try await queryHealthKitSamples(
                 sampleType: categoryType,
