@@ -22,6 +22,7 @@ let package = Package(
                 "SampleCursorUtils.swift",
                 "SampleUuidParsing.swift",
                 "SleepStageMapping.swift",
+                "SleepSyncSuffixUtils.swift",
                 "StatisticsBucketUtils.swift",
                 "SyncMetadataNormalization.swift",
                 "TimeZoneMapping.swift",

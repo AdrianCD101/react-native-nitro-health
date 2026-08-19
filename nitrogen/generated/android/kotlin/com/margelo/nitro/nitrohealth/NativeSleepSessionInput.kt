@@ -29,10 +29,7 @@ data class NativeSleepSessionInput(
   val stages: Array<NativeSleepSessionStageInput>,
   @DoNotStrip
   @Keep
-  val timeZone: String?,
-  @DoNotStrip
-  @Keep
-  val writeProvenance: NativeHealthWriteProvenance
+  val writeMetadata: NativeHealthWriteMetadata
 ) {
   /* primary constructor */
 
@@ -42,8 +39,7 @@ data class NativeSleepSessionInput(
     return Objects.deepEquals(this.startTimeMs, other.startTimeMs)
       && Objects.deepEquals(this.endTimeMs, other.endTimeMs)
       && Objects.deepEquals(this.stages, other.stages)
-      && Objects.deepEquals(this.timeZone, other.timeZone)
-      && Objects.deepEquals(this.writeProvenance, other.writeProvenance)
+      && Objects.deepEquals(this.writeMetadata, other.writeMetadata)
   }
 
   override fun hashCode(): Int {
@@ -51,8 +47,7 @@ data class NativeSleepSessionInput(
       startTimeMs,
       endTimeMs,
       stages,
-      timeZone,
-      writeProvenance
+      writeMetadata
     ).contentDeepHashCode()
   }
 
@@ -64,8 +59,8 @@ data class NativeSleepSessionInput(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(startTimeMs: Double, endTimeMs: Double, stages: Array<NativeSleepSessionStageInput>, timeZone: String?, writeProvenance: NativeHealthWriteProvenance): NativeSleepSessionInput {
-      return NativeSleepSessionInput(startTimeMs, endTimeMs, stages, timeZone, writeProvenance)
+    private fun fromCpp(startTimeMs: Double, endTimeMs: Double, stages: Array<NativeSleepSessionStageInput>, writeMetadata: NativeHealthWriteMetadata): NativeSleepSessionInput {
+      return NativeSleepSessionInput(startTimeMs, endTimeMs, stages, writeMetadata)
     }
   }
 }

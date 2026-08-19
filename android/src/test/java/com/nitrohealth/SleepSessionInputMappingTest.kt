@@ -10,7 +10,6 @@ import com.margelo.nitro.nitrohealth.NativeSleepSessionStageInput
 import java.time.Instant
 import java.time.ZoneOffset
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertThrows
 import org.junit.Test
 
@@ -35,12 +34,14 @@ class SleepSessionInputMappingTest {
                             stage = "asleepCore"
                         )
                     ),
-                    timeZone = "America/New_York",
-                    writeProvenance = makeTestWriteProvenance(
+                    writeMetadata = makeTestWriteMetadata(
                         deviceType = NativeHealthDeviceType.WATCH,
                         deviceManufacturer = "Example",
                         deviceModel = "Sleep Watch",
-                        recordingMethod = NativeHealthRecordingMethod.AUTOMATICALLYRECORDED
+                        recordingMethod = NativeHealthRecordingMethod.AUTOMATICALLYRECORDED,
+                        syncId = "night-2026-01-11",
+                        syncVersion = 2.0,
+                        timeZone = "America/New_York"
                     )
                 )
             )
@@ -54,7 +55,8 @@ class SleepSessionInputMappingTest {
             Metadata.RECORDING_METHOD_AUTOMATICALLY_RECORDED,
             record.metadata.recordingMethod
         )
-        assertNull(record.metadata.clientRecordId)
+        assertEquals("night-2026-01-11", record.metadata.clientRecordId)
+        assertEquals(2L, record.metadata.clientRecordVersion)
         assertEquals(Device.TYPE_WATCH, record.metadata.device?.type)
         assertEquals("Example", record.metadata.device?.manufacturer)
         assertEquals("Sleep Watch", record.metadata.device?.model)
@@ -81,8 +83,7 @@ class SleepSessionInputMappingTest {
                     startTimeMs = startTime.toEpochMilli().toDouble(),
                     endTimeMs = endTime.toEpochMilli().toDouble(),
                     stages = emptyArray(),
-                    timeZone = "UTC",
-                    writeProvenance = makeTestWriteProvenance()
+                    writeMetadata = makeTestWriteMetadata(timeZone = "UTC")
                 )
             )
         ).single()
@@ -102,8 +103,7 @@ class SleepSessionInputMappingTest {
                     startTimeMs = dstStart.toEpochMilli().toDouble(),
                     endTimeMs = dstEnd.toEpochMilli().toDouble(),
                     stages = emptyArray(),
-                    timeZone = "America/New_York",
-                    writeProvenance = makeTestWriteProvenance()
+                    writeMetadata = makeTestWriteMetadata(timeZone = "America/New_York")
                 )
             )
         ).single()
@@ -121,8 +121,7 @@ class SleepSessionInputMappingTest {
                         startTimeMs = startTime.toEpochMilli().toDouble(),
                         endTimeMs = endTime.toEpochMilli().toDouble(),
                         stages = emptyArray(),
-                        timeZone = "Not/A_Zone",
-                        writeProvenance = makeTestWriteProvenance()
+                        writeMetadata = makeTestWriteMetadata(timeZone = "Not/A_Zone")
                     )
                 )
             )
@@ -139,8 +138,7 @@ class SleepSessionInputMappingTest {
                         startTimeMs = startTime.toEpochMilli().toDouble(),
                         endTimeMs = endTime.toEpochMilli().toDouble(),
                         stages = emptyArray(),
-                        timeZone = "+01:00",
-                        writeProvenance = makeTestWriteProvenance()
+                        writeMetadata = makeTestWriteMetadata(timeZone = "+01:00")
                     )
                 )
             )

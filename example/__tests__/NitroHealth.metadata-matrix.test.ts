@@ -83,20 +83,13 @@ type ReadMatrix = {
   [K in HealthDataType]: ReadCase<K>
 }
 
-type SyncWriteCase = {
-  supportsSync: true
+type WriteCase = {
   save: () => Promise<unknown>
   nativeMetadata: () => NativeHealthWriteMetadata | undefined
 }
 
-type SleepWriteCase = {
-  supportsSync: false
-  save: () => Promise<unknown>
-  nativeMetadata: () => NativeHealthWriteProvenance | undefined
-}
-
 type WriteMatrix = {
-  [K in WritableHealthDataType]: K extends 'sleep' ? SleepWriteCase : SyncWriteCase
+  [K in WritableHealthDataType]: WriteCase
 }
 
 const recordId = 'metadata-record'
@@ -376,10 +369,6 @@ const publicWriteMetadata = {
   sync,
   timeZone: 'America/New_York',
 } as const
-const publicSleepProvenance = {
-  device,
-  recordingMethod: 'automatically-recorded',
-} as const
 const expectedNativeProvenance = {
   deviceType: 'smartDisplay',
   deviceManufacturer: 'Example',
@@ -406,17 +395,14 @@ const expectedSampleMetadata = {
 
 const writeMatrix = {
   steps: {
-    supportsSync: true,
     save: () => NitroHealth.saveSteps([{ ...publicWriteMetadata, startDate, endDate, count: 1 }]),
     nativeMetadata: () => mockNitroHealth.saveSteps.mock.calls[0]?.[0][0]?.writeMetadata,
   },
   heartRate: {
-    supportsSync: true,
     save: () => NitroHealth.saveHeartRate([{ ...publicWriteMetadata, date: startDate, bpm: 60 }]),
     nativeMetadata: () => mockNitroHealth.saveHeartRate.mock.calls[0]?.[0][0]?.writeMetadata,
   },
   bloodPressure: {
-    supportsSync: true,
     save: () =>
       NitroHealth.saveBloodPressure([
         { ...publicWriteMetadata, date: startDate, systolicMmHg: 120, diastolicMmHg: 80 },
@@ -424,7 +410,6 @@ const writeMatrix = {
     nativeMetadata: () => mockNitroHealth.saveBloodPressure.mock.calls[0]?.[0][0]?.writeMetadata,
   },
   bloodGlucose: {
-    supportsSync: true,
     save: () =>
       NitroHealth.saveBloodGlucose([
         { ...publicWriteMetadata, date: startDate, millimolesPerLiter: 5 },
@@ -432,13 +417,11 @@ const writeMatrix = {
     nativeMetadata: () => mockNitroHealth.saveBloodGlucose.mock.calls[0]?.[0][0]?.writeMetadata,
   },
   bodyTemperature: {
-    supportsSync: true,
     save: () =>
       NitroHealth.saveBodyTemperature([{ ...publicWriteMetadata, date: startDate, celsius: 36.5 }]),
     nativeMetadata: () => mockNitroHealth.saveBodyTemperature.mock.calls[0]?.[0][0]?.writeMetadata,
   },
   respiratoryRate: {
-    supportsSync: true,
     save: () =>
       NitroHealth.saveRespiratoryRate([
         { ...publicWriteMetadata, date: startDate, breathsPerMinute: 16 },
@@ -446,19 +429,16 @@ const writeMatrix = {
     nativeMetadata: () => mockNitroHealth.saveRespiratoryRate.mock.calls[0]?.[0][0]?.writeMetadata,
   },
   bodyFat: {
-    supportsSync: true,
     save: () =>
       NitroHealth.saveBodyFat([{ ...publicWriteMetadata, date: startDate, percentage: 20 }]),
     nativeMetadata: () => mockNitroHealth.saveBodyFat.mock.calls[0]?.[0][0]?.writeMetadata,
   },
   leanBodyMass: {
-    supportsSync: true,
     save: () =>
       NitroHealth.saveLeanBodyMass([{ ...publicWriteMetadata, date: startDate, kilograms: 55 }]),
     nativeMetadata: () => mockNitroHealth.saveLeanBodyMass.mock.calls[0]?.[0][0]?.writeMetadata,
   },
   basalBodyTemperature: {
-    supportsSync: true,
     save: () =>
       NitroHealth.saveBasalBodyTemperature([
         { ...publicWriteMetadata, date: startDate, celsius: 36.4 },
@@ -467,13 +447,11 @@ const writeMatrix = {
       mockNitroHealth.saveBasalBodyTemperature.mock.calls[0]?.[0][0]?.writeMetadata,
   },
   restingHeartRate: {
-    supportsSync: true,
     save: () =>
       NitroHealth.saveRestingHeartRate([{ ...publicWriteMetadata, date: startDate, bpm: 55 }]),
     nativeMetadata: () => mockNitroHealth.saveRestingHeartRate.mock.calls[0]?.[0][0]?.writeMetadata,
   },
   distance: {
-    supportsSync: true,
     save: () =>
       NitroHealth.saveDistance([
         {
@@ -487,7 +465,6 @@ const writeMatrix = {
     nativeMetadata: () => mockNitroHealth.saveDistance.mock.calls[0]?.[0][0]?.writeMetadata,
   },
   activeEnergyBurned: {
-    supportsSync: true,
     save: () =>
       NitroHealth.saveActiveEnergyBurned([
         { ...publicWriteMetadata, startDate, endDate, kilocalories: 10 },
@@ -496,19 +473,16 @@ const writeMatrix = {
       mockNitroHealth.saveActiveEnergyBurned.mock.calls[0]?.[0][0]?.writeMetadata,
   },
   hydration: {
-    supportsSync: true,
     save: () =>
       NitroHealth.saveHydration([{ ...publicWriteMetadata, startDate, endDate, milliliters: 250 }]),
     nativeMetadata: () => mockNitroHealth.saveHydration.mock.calls[0]?.[0][0]?.writeMetadata,
   },
   floorsClimbed: {
-    supportsSync: true,
     save: () =>
       NitroHealth.saveFloorsClimbed([{ ...publicWriteMetadata, startDate, endDate, floors: 2 }]),
     nativeMetadata: () => mockNitroHealth.saveFloorsClimbed.mock.calls[0]?.[0][0]?.writeMetadata,
   },
   oxygenSaturation: {
-    supportsSync: true,
     save: () =>
       NitroHealth.saveOxygenSaturation([
         { ...publicWriteMetadata, date: startDate, percentage: 98 },
@@ -516,12 +490,10 @@ const writeMatrix = {
     nativeMetadata: () => mockNitroHealth.saveOxygenSaturation.mock.calls[0]?.[0][0]?.writeMetadata,
   },
   height: {
-    supportsSync: true,
     save: () => NitroHealth.saveHeight([{ ...publicWriteMetadata, date: startDate, meters: 1.75 }]),
     nativeMetadata: () => mockNitroHealth.saveHeight.mock.calls[0]?.[0][0]?.writeMetadata,
   },
   vo2Max: {
-    supportsSync: true,
     save: () =>
       NitroHealth.saveVo2Max([
         { ...publicWriteMetadata, date: startDate, millilitersPerKilogramPerMinute: 42 },
@@ -529,18 +501,15 @@ const writeMatrix = {
     nativeMetadata: () => mockNitroHealth.saveVo2Max.mock.calls[0]?.[0][0]?.writeMetadata,
   },
   sleep: {
-    supportsSync: false,
-    save: () => NitroHealth.saveSleepSessions([{ ...publicSleepProvenance, startDate, endDate }]),
-    nativeMetadata: () => mockNitroHealth.saveSleepSessions.mock.calls[0]?.[0][0]?.writeProvenance,
+    save: () => NitroHealth.saveSleepSessions([{ ...publicWriteMetadata, startDate, endDate }]),
+    nativeMetadata: () => mockNitroHealth.saveSleepSessions.mock.calls[0]?.[0][0]?.writeMetadata,
   },
   bodyMass: {
-    supportsSync: true,
     save: () =>
       NitroHealth.saveBodyMass([{ ...publicWriteMetadata, date: startDate, kilograms: 70 }]),
     nativeMetadata: () => mockNitroHealth.saveBodyMass.mock.calls[0]?.[0][0]?.writeMetadata,
   },
   workout: {
-    supportsSync: true,
     save: () =>
       NitroHealth.saveWorkout({
         ...publicWriteMetadata,
@@ -551,7 +520,6 @@ const writeMatrix = {
     nativeMetadata: () => mockNitroHealth.saveWorkout.mock.calls[0]?.[0].writeMetadata,
   },
   nutrition: {
-    supportsSync: true,
     save: () =>
       NitroHealth.saveNutrition([{ ...publicWriteMetadata, startDate, endDate, proteinGrams: 42 }]),
     nativeMetadata: () => mockNitroHealth.saveNutrition.mock.calls[0]?.[0][0]?.writeMetadata,
@@ -574,14 +542,6 @@ const changeTrackedReadCases = readCases.filter(
 const writeCases = Object.entries(writeMatrix) as Array<
   { [K in WritableHealthDataType]: [K, (typeof writeMatrix)[K]] }[WritableHealthDataType]
 >
-type SyncWritableHealthDataType = Exclude<WritableHealthDataType, 'sleep'>
-const syncWriteCases = writeCases.filter(
-  (
-    entry
-  ): entry is {
-    [K in SyncWritableHealthDataType]: [K, (typeof writeMatrix)[K]]
-  }[SyncWritableHealthDataType] => entry[0] !== 'sleep'
-)
 
 describe('NitroHealth scalar metadata matrices', () => {
   beforeEach(() => {
@@ -624,7 +584,7 @@ describe('NitroHealth scalar metadata matrices', () => {
     expect(mockNitroHealth.getChanges).not.toHaveBeenCalled()
   })
 
-  it.each(syncWriteCases)(
+  it.each(writeCases)(
     '%s writes scalar provenance with sync metadata',
     async (_dataType, descriptor) => {
       await descriptor.save()
@@ -632,12 +592,4 @@ describe('NitroHealth scalar metadata matrices', () => {
       expect(descriptor.nativeMetadata()).toEqual(expectedNativeWriteMetadata)
     }
   )
-
-  it('writes sleep provenance without sync metadata', async () => {
-    await writeMatrix.sleep.save()
-
-    const nativeMetadata = writeMatrix.sleep.nativeMetadata()
-    expect(nativeMetadata).toEqual(expectedNativeProvenance)
-    expect(nativeMetadata).not.toHaveProperty('sync')
-  })
 })

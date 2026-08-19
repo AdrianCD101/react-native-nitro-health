@@ -59,11 +59,7 @@ import type { Vo2MaxSampleInput } from '../Vo2MaxSampleInput'
 import type { AndroidVo2MaxMeasurementMethod, IOSVo2MaxTestType } from '../Vo2MaxMetadata'
 import type { WorkoutSampleInput } from '../WorkoutSampleInput'
 import type { WritableWorkoutActivityType } from '../WritableWorkoutActivityType'
-import {
-  assertTimeZoneIdentifier,
-  makeNativeWriteMetadata,
-  makeNativeWriteProvenance,
-} from './sampleMetadataMapping'
+import { makeNativeWriteMetadata } from './sampleMetadataMapping'
 import {
   assertSampleBetween,
   assertSampleGreaterThanZero,
@@ -989,8 +985,6 @@ export function makeNativeSleepSessionInput(
   const endTimeMs = dateToTimeMs(session.endDate, `${prefix}a valid endDate is required`)
   assertStartBeforeEnd(startTimeMs, endTimeMs, prefix)
 
-  assertTimeZoneIdentifier(session.timeZone, `sessions[${sessionIndex}]`)
-
   if (session.stages !== undefined && !Array.isArray(session.stages)) {
     throw new Error(`${prefix}stages must be an array when provided`)
   }
@@ -1047,8 +1041,7 @@ export function makeNativeSleepSessionInput(
     startTimeMs,
     endTimeMs,
     stages: indexedStages.map(({ nativeStage }) => nativeStage),
-    timeZone: session.timeZone,
-    writeProvenance: makeNativeWriteProvenance(session, `sessions[${sessionIndex}]`),
+    writeMetadata: makeNativeWriteMetadata(session, `sessions[${sessionIndex}]`),
   }
 }
 

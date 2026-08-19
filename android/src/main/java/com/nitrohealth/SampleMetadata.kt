@@ -16,12 +16,6 @@ internal fun makeSampleMetadata(
     return makeSampleMetadata(writeMetadata.provenance, writeMetadata.sync)
 }
 
-internal fun makeSampleMetadata(
-    writeProvenance: NativeHealthWriteProvenance
-): Metadata {
-    return makeSampleMetadata(writeProvenance, sync = null)
-}
-
 private fun makeSampleMetadata(
     provenance: NativeHealthWriteProvenance,
     sync: NativeHealthSyncMetadata?
