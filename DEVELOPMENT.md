@@ -224,7 +224,7 @@ The iOS Harness run intentionally does not test denied HealthKit reads or writes
 
 Harness 1.4 filters platform-specific files by the `*.ios.harness.ts` and `*.android.harness.ts` suffixes. The opposite platform receives one skipped placeholder per filtered file, so skipped file counts remain expected even though no `it.skip` tests exist. Android currently reports the iOS observer file as skipped; iOS reports the two Android-only permission/prerequisite files as skipped.
 
-The GitHub Actions Harness workflow runs Android runtime validation for relevant pull requests and `main` pushes. iOS authorization is automated, but the iOS job runs only through workflow dispatch. Use workflow dispatch when CI device coverage is needed.
+The GitHub Actions Harness workflow runs both the Android and iOS runtime validation jobs for relevant pull requests and `main` pushes, and both can also be started through workflow dispatch.
 
 ## Manual Device Cases
 

@@ -128,6 +128,28 @@ describe('NitroHealth delete contract', () => {
     expect(mockNitroHealth.deleteRecordsByTimeRange).not.toHaveBeenCalled()
   })
 
+  it('rejects read-only and unknown data types before crossing native', async () => {
+    const range = {
+      startDate: new Date('2026-01-01T09:00:00.000Z'),
+      endDate: new Date('2026-01-01T09:30:00.000Z'),
+    }
+
+    await expect(
+      NitroHealth.deleteRecordsByIds('heartRateVariability' as never, [
+        { kind: 'record', id: 'record-1' },
+      ])
+    ).rejects.toThrow(`'heartRateVariability' is not a writable health data type`)
+    await expect(
+      NitroHealth.deleteRecordsByTimeRange('heartRateVariability' as never, range)
+    ).rejects.toThrow(`'heartRateVariability' is not a writable health data type`)
+    await expect(
+      NitroHealth.deleteRecordsByTimeRange('not-a-data-type' as never, range)
+    ).rejects.toThrow(`'not-a-data-type' is not a writable health data type`)
+
+    expect(mockNitroHealth.deleteRecordsByIds).not.toHaveBeenCalled()
+    expect(mockNitroHealth.deleteRecordsByTimeRange).not.toHaveBeenCalled()
+  })
+
   it('rejects malformed native deletion results', async () => {
     mockNitroHealth.deleteRecordsByIds.mockResolvedValue({
       status: 'completed',

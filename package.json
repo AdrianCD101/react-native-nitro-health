@@ -82,6 +82,7 @@
     "clean": "git clean -dfX",
     "release": "semantic-release",
     "build": "node verify-codegen.js && bun run typecheck && bob build",
+    "prepack": "bun run build",
     "codegen": "nitrogen --logLevel=\"debug\" && node post-script.js && bun run build"
   },
   "devDependencies": {

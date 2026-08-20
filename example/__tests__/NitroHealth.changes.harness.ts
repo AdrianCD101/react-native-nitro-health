@@ -3,7 +3,7 @@ import { describe, expect, it } from 'react-native-harness'
 import { NitroHealth } from 'react-native-nitro-health'
 import type { HealthRecordChange } from 'react-native-nitro-health'
 
-import { hasVerifiedPermissions } from './support/harnessSupport'
+import { requireVerifiedPermissions } from './support/harnessSupport'
 
 const changeInterval = {
   startDate: new Date('2003-06-01T09:00:00.000Z'),
@@ -83,14 +83,10 @@ async function drainHydrationChanges(changesToken: string): Promise<{
 
 describe('NitroHealth changes (native)', () => {
   it('observes a saved and then deleted step record', async () => {
-    const authorized = await hasVerifiedPermissions([
+    await requireVerifiedPermissions([
       { accessType: 'read', dataType: 'steps' },
       { accessType: 'write', dataType: 'steps' },
     ])
-
-    if (!authorized) {
-      return
-    }
 
     const baselineToken = await NitroHealth.createChangesToken('steps')
     await NitroHealth.saveSteps([
@@ -149,14 +145,10 @@ describe('NitroHealth changes (native)', () => {
   })
 
   it('reports platform-specific changes when a higher step version replaces a record', async () => {
-    const authorized = await hasVerifiedPermissions([
+    await requireVerifiedPermissions([
       { accessType: 'read', dataType: 'steps' },
       { accessType: 'write', dataType: 'steps' },
     ])
-
-    if (!authorized) {
-      return
-    }
 
     await NitroHealth.deleteRecordsByTimeRange('steps', replacementChangeRange)
 
@@ -223,7 +215,7 @@ describe('NitroHealth changes (native)', () => {
       { accessType: 'read' as const, dataType: 'floorsClimbed' as const },
       { accessType: 'write' as const, dataType: 'floorsClimbed' as const },
     ]
-    if (!(await hasVerifiedPermissions(permissions))) return
+    await requireVerifiedPermissions(permissions)
 
     const range = {
       startDate: new Date('2003-06-03T00:00:00.000Z'),
@@ -276,7 +268,7 @@ describe('NitroHealth changes (native)', () => {
       { accessType: 'read' as const, dataType: 'hydration' as const },
       { accessType: 'write' as const, dataType: 'hydration' as const },
     ]
-    if (!(await hasVerifiedPermissions(permissions))) return
+    await requireVerifiedPermissions(permissions)
 
     const range = {
       startDate: new Date('2003-06-04T00:00:00.000Z'),
@@ -320,9 +312,7 @@ describe('NitroHealth changes (native)', () => {
   })
 
   it('rejects a malformed changes token', async () => {
-    if (!(await hasVerifiedPermissions([{ accessType: 'read', dataType: 'steps' }]))) {
-      return
-    }
+    await requireVerifiedPermissions([{ accessType: 'read', dataType: 'steps' }])
 
     await expect(NitroHealth.getChanges('steps', 'not-a-real-token')).rejects.toThrow(
       /invalid changes token/i

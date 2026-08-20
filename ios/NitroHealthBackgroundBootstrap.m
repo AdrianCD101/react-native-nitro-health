@@ -9,10 +9,17 @@
 //  which must have observers standing again by the end of the launch
 //  sequence or HealthKit throttles future deliveries.
 //
-//  A load-time constructor only subscribes to the launch notification; all
-//  HealthKit and UserDefaults work runs inside the launch sequence, where
-//  Apple documents observer setup to belong. In app extensions the
-//  notification never fires, so this is inert there.
+//  The hook must live in an Objective-C class +load, not a C-level
+//  __attribute__((constructor)): the pod links as a static archive, and the
+//  linker only extracts an archive member nothing references when -ObjC
+//  forces it to — which it does solely for members that define an
+//  Objective-C class or category. A bare constructor in a class-less file
+//  is silently dropped and never runs.
+//
+//  +load only subscribes to the launch notification; all HealthKit and
+//  UserDefaults work runs inside the launch sequence, where Apple documents
+//  observer setup to belong. In app extensions the notification never
+//  fires, so this is inert there.
 //
 
 #import <Foundation/Foundation.h>
@@ -23,7 +30,12 @@ extern void NitroHealthPrivateRegisterPersistedObservers(void);
 
 static id NitroHealthLaunchObserverToken = nil;
 
-__attribute__((constructor)) static void NitroHealthInstallBackgroundBootstrap(void) {
+@interface NitroHealthBackgroundBootstrap : NSObject
+@end
+
+@implementation NitroHealthBackgroundBootstrap
+
++ (void)load {
   NitroHealthLaunchObserverToken = [[NSNotificationCenter defaultCenter]
       addObserverForName:UIApplicationDidFinishLaunchingNotification
                   object:nil
@@ -36,3 +48,5 @@ __attribute__((constructor)) static void NitroHealthInstallBackgroundBootstrap(v
                 }
               }];
 }
+
+@end

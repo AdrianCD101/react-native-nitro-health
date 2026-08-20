@@ -2,6 +2,7 @@ import type {
   AggregateOnlyHealthDataType,
   ChangeTrackedHealthDataType,
   HealthDataType,
+  WritableHealthDataType,
 } from '../HealthDataType'
 import type { HealthPermission } from '../HealthPermission'
 import type { HealthRecordIdentity } from '../HealthSampleIdentity'
@@ -83,6 +84,13 @@ export function parseHealthDataTypes(values: readonly string[], label: string): 
     }
     return value
   })
+}
+
+export function assertWritableHealthDataType(dataType: WritableHealthDataType): void {
+  const candidate: string = dataType
+  if (!isHealthDataType(candidate) || candidate === 'heartRateVariability') {
+    throw new Error(`'${String(dataType)}' is not a writable health data type`)
+  }
 }
 
 export function assertChangeTrackedHealthDataType(dataType: HealthDataType): void {

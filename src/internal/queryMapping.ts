@@ -21,12 +21,17 @@ export function makeTimeRange(query: { startDate: Date; endDate: Date }) {
   }
 }
 
+// Both platforms narrow the limit to a native integer: Swift's Int(Double)
+// traps beyond Int64 range and Kotlin's Double.toInt() saturates at Int32
+// max, so the boundary must reject anything a 32-bit page size can't hold.
+const MAX_QUERY_LIMIT = 2_147_483_647
+
 export function makeNativeSampleQuery(query: HealthDateRangeQuery): NativeHealthDateRangeQuery {
   const { startTimeMs, endTimeMs } = makeTimeRange(query)
   const limit = query.limit ?? 1000
 
-  if (!Number.isInteger(limit) || limit <= 0) {
-    throw new Error('limit must be a positive integer')
+  if (!Number.isInteger(limit) || limit <= 0 || limit > MAX_QUERY_LIMIT) {
+    throw new Error(`limit must be a positive integer no greater than ${MAX_QUERY_LIMIT}`)
   }
 
   if (query.cursor !== undefined && (typeof query.cursor !== 'string' || query.cursor === '')) {

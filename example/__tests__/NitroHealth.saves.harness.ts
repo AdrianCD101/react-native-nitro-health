@@ -4,7 +4,7 @@ import { NitroHealth } from 'react-native-nitro-health'
 import type { HealthSample, WorkoutSample } from 'react-native-nitro-health'
 
 import {
-  hasVerifiedPermissions,
+  requireVerifiedPermissions,
   assertConclusiveRead,
   saveInterval,
   saveReadRange,
@@ -125,65 +125,69 @@ describe('NitroHealth saves (native)', () => {
   })
 
   it('round-trips saved steps through native code when authorized', async () => {
-    const authorized = await hasVerifiedPermissions([
+    await requireVerifiedPermissions([
       { accessType: 'write', dataType: 'steps' },
       { accessType: 'read', dataType: 'steps' },
     ])
 
-    if (!authorized) {
-      return
+    await NitroHealth.deleteRecordsByTimeRange('steps', saveReadRange)
+    try {
+      await NitroHealth.saveSteps([{ ...saveInterval, count: 321 }])
+
+      const page = await NitroHealth.readSteps(saveReadRange)
+
+      assertConclusiveRead(page.samples)
+
+      expect(page.samples.some((sample) => sample.count === 321)).toBe(true)
+    } finally {
+      await NitroHealth.deleteRecordsByTimeRange('steps', saveReadRange)
     }
-
-    await NitroHealth.saveSteps([{ ...saveInterval, count: 321 }])
-
-    const page = await NitroHealth.readSteps(saveReadRange)
-
-    assertConclusiveRead(page.samples)
-
-    expect(page.samples.some((sample) => sample.count === 321)).toBe(true)
   })
 
   it('round-trips caller-asserted step device provenance with platform fidelity', async () => {
-    const authorized = await hasVerifiedPermissions([
+    await requireVerifiedPermissions([
       { accessType: 'write', dataType: 'steps' },
       { accessType: 'read', dataType: 'steps' },
     ])
-    if (!authorized) return
 
     const count = 654323
-    await NitroHealth.saveSteps([
-      {
-        ...saveInterval,
-        count,
-        device: {
-          type: 'watch',
-          manufacturer: 'Nitro Health',
-          model: 'Harness Sensor',
+    await NitroHealth.deleteRecordsByTimeRange('steps', saveReadRange)
+    try {
+      await NitroHealth.saveSteps([
+        {
+          ...saveInterval,
+          count,
+          device: {
+            type: 'watch',
+            manufacturer: 'Nitro Health',
+            model: 'Harness Sensor',
+          },
+          sync: { id: 'nitro-health-harness-device-provenance', version: 1 },
         },
-        sync: { id: 'nitro-health-harness-device-provenance', version: 1 },
-      },
-    ])
+      ])
 
-    const page = await NitroHealth.readSteps(saveReadRange)
-    assertConclusiveRead(page.samples)
-    const match = page.samples.find(
-      (sample) =>
-        sample.count === count &&
-        sample.startDate.getTime() === saveInterval.startDate.getTime() &&
-        sample.endDate.getTime() === saveInterval.endDate.getTime()
-    )
-    expect(match).toBeDefined()
-    expect(match?.device?.manufacturer).toBe('Nitro Health')
-    expect(match?.device?.model).toBe('Harness Sensor')
-    expect(match?.device?.type).toBe(Platform.OS === 'android' ? 'watch' : undefined)
+      const page = await NitroHealth.readSteps(saveReadRange)
+      assertConclusiveRead(page.samples)
+      const match = page.samples.find(
+        (sample) =>
+          sample.count === count &&
+          sample.startDate.getTime() === saveInterval.startDate.getTime() &&
+          sample.endDate.getTime() === saveInterval.endDate.getTime()
+      )
+      expect(match).toBeDefined()
+      expect(match?.device?.manufacturer).toBe('Nitro Health')
+      expect(match?.device?.model).toBe('Harness Sensor')
+      expect(match?.device?.type).toBe(Platform.OS === 'android' ? 'watch' : undefined)
+    } finally {
+      await NitroHealth.deleteRecordsByTimeRange('steps', saveReadRange)
+    }
   })
 
   it('round-trips manual and automatic step recording methods with platform fidelity', async () => {
-    const authorized = await hasVerifiedPermissions([
+    await requireVerifiedPermissions([
       { accessType: 'write', dataType: 'steps' },
       { accessType: 'read', dataType: 'steps' },
     ])
-    if (!authorized) return
 
     const manualCount = 654321
     const automaticCount = 654322
@@ -244,57 +248,61 @@ describe('NitroHealth saves (native)', () => {
   })
 
   it('round-trips walking/running distance and reports its storage scope', async () => {
-    const authorized = await hasVerifiedPermissions([
+    await requireVerifiedPermissions([
       { accessType: 'write', dataType: 'distance' },
       { accessType: 'read', dataType: 'distance' },
     ])
-    if (!authorized) return
 
-    const result = await NitroHealth.saveDistance([
-      { ...saveInterval, scope: 'walking-running', distanceMeters: 1234 },
-    ])
+    await NitroHealth.deleteRecordsByTimeRange('distance', saveReadRange)
+    try {
+      const result = await NitroHealth.saveDistance([
+        { ...saveInterval, scope: 'walking-running', distanceMeters: 1234 },
+      ])
 
-    const expectedStoredScope = Platform.OS === 'ios' ? 'walking-running' : 'activity-unspecified'
-    expect(result).toEqual({
-      status: 'completed',
-      storedScope: expectedStoredScope,
-      storedRecordingMethods: ['unknown'],
-    })
-    const page = await NitroHealth.readDistance(saveReadRange)
-    assertConclusiveRead(page.samples)
+      const expectedStoredScope = Platform.OS === 'ios' ? 'walking-running' : 'activity-unspecified'
+      expect(result).toEqual({
+        status: 'completed',
+        storedScope: expectedStoredScope,
+        storedRecordingMethods: ['unknown'],
+      })
+      const page = await NitroHealth.readDistance(saveReadRange)
+      assertConclusiveRead(page.samples)
 
-    const saved = page.samples.find(
-      (sample) => sample.distanceMeters === 1234 && sample.scope === expectedStoredScope
-    )
-    expect(saved).toBeDefined()
-    if (saved !== undefined) assertOrigin(saved)
+      const saved = page.samples.find(
+        (sample) => sample.distanceMeters === 1234 && sample.scope === expectedStoredScope
+      )
+      expect(saved).toBeDefined()
+      if (saved !== undefined) assertOrigin(saved)
+    } finally {
+      await NitroHealth.deleteRecordsByTimeRange('distance', saveReadRange)
+    }
   })
 
   it('round-trips saved body mass through native code when authorized', async () => {
-    const authorized = await hasVerifiedPermissions([
+    await requireVerifiedPermissions([
       { accessType: 'write', dataType: 'bodyMass' },
       { accessType: 'read', dataType: 'bodyMass' },
     ])
 
-    if (!authorized) {
-      return
+    await NitroHealth.deleteRecordsByTimeRange('bodyMass', saveReadRange)
+    try {
+      await NitroHealth.saveBodyMass([{ date: saveInterval.startDate, kilograms: 72.5 }])
+
+      const page = await NitroHealth.readBodyMass(saveReadRange)
+
+      assertConclusiveRead(page.samples)
+
+      expect(page.samples.some((sample) => sample.kilograms === 72.5)).toBe(true)
+    } finally {
+      await NitroHealth.deleteRecordsByTimeRange('bodyMass', saveReadRange)
     }
-
-    await NitroHealth.saveBodyMass([{ date: saveInterval.startDate, kilograms: 72.5 }])
-
-    const page = await NitroHealth.readBodyMass(saveReadRange)
-
-    assertConclusiveRead(page.samples)
-
-    expect(page.samples.some((sample) => sample.kilograms === 72.5)).toBe(true)
   })
 
   it('round-trips saved hydration through native code when authorized', async () => {
-    const authorized = await hasVerifiedPermissions([
+    await requireVerifiedPermissions([
       { accessType: 'write', dataType: 'hydration' },
       { accessType: 'read', dataType: 'hydration' },
     ])
-    if (!authorized) return
 
     await NitroHealth.deleteRecordsByTimeRange('hydration', saveReadRange)
     try {
@@ -322,33 +330,30 @@ describe('NitroHealth saves (native)', () => {
   })
 
   it('round-trips saved heart rate through native code when authorized', async () => {
-    const authorized = await hasVerifiedPermissions([
+    await requireVerifiedPermissions([
       { accessType: 'write', dataType: 'heartRate' },
       { accessType: 'read', dataType: 'heartRate' },
     ])
 
-    if (!authorized) {
-      return
+    await NitroHealth.deleteRecordsByTimeRange('heartRate', saveReadRange)
+    try {
+      await NitroHealth.saveHeartRate([{ date: saveInterval.startDate, bpm: 123 }])
+
+      const page = await NitroHealth.readHeartRate(saveReadRange)
+
+      assertConclusiveRead(page.samples)
+
+      expect(page.samples.some((sample) => sample.bpm === 123)).toBe(true)
+    } finally {
+      await NitroHealth.deleteRecordsByTimeRange('heartRate', saveReadRange)
     }
-
-    await NitroHealth.saveHeartRate([{ date: saveInterval.startDate, bpm: 123 }])
-
-    const page = await NitroHealth.readHeartRate(saveReadRange)
-
-    assertConclusiveRead(page.samples)
-
-    expect(page.samples.some((sample) => sample.bpm === 123)).toBe(true)
   })
 
   it('round-trips portable sleep stages through native code when authorized', async () => {
-    const authorized = await hasVerifiedPermissions([
+    await requireVerifiedPermissions([
       { accessType: 'write', dataType: 'sleep' },
       { accessType: 'read', dataType: 'sleep' },
     ])
-
-    if (!authorized) {
-      return
-    }
 
     const middleDate = new Date(
       saveInterval.startDate.getTime() +
@@ -417,14 +422,10 @@ describe('NitroHealth saves (native)', () => {
   })
 
   it('round-trips a portable workout through native code when authorized', async () => {
-    const authorized = await hasVerifiedPermissions([
+    await requireVerifiedPermissions([
       { accessType: 'write', dataType: 'workout' },
       { accessType: 'read', dataType: 'workout' },
     ])
-
-    if (!authorized) {
-      return
-    }
 
     await NitroHealth.deleteRecordsByTimeRange('workout', saveReadRange)
     try {
@@ -477,13 +478,10 @@ describe('NitroHealth saves (native)', () => {
     }
 
     it('stores an explicit non-device zone and reads its per-instant offset back', async () => {
-      const authorized = await hasVerifiedPermissions([
+      await requireVerifiedPermissions([
         { accessType: 'write', dataType: 'steps' },
         { accessType: 'read', dataType: 'steps' },
       ])
-      if (!authorized) {
-        return
-      }
 
       await NitroHealth.deleteRecordsByTimeRange('steps', dstReadRange)
       try {
@@ -516,13 +514,10 @@ describe('NitroHealth saves (native)', () => {
     })
 
     it('stores the device zone when timeZone is omitted', async () => {
-      const authorized = await hasVerifiedPermissions([
+      await requireVerifiedPermissions([
         { accessType: 'write', dataType: 'bloodGlucose' },
         { accessType: 'read', dataType: 'bloodGlucose' },
       ])
-      if (!authorized) {
-        return
-      }
 
       await NitroHealth.deleteRecordsByTimeRange('bloodGlucose', saveReadRange)
       try {
@@ -558,22 +553,23 @@ describe('NitroHealth saves (native)', () => {
 
   describe('resting heart rate', () => {
     it('round-trips saved resting heart rate through native code when authorized', async () => {
-      const authorized = await hasVerifiedPermissions([
+      await requireVerifiedPermissions([
         { accessType: 'write', dataType: 'restingHeartRate' },
         { accessType: 'read', dataType: 'restingHeartRate' },
       ])
 
-      if (!authorized) {
-        return
+      await NitroHealth.deleteRecordsByTimeRange('restingHeartRate', saveReadRange)
+      try {
+        await NitroHealth.saveRestingHeartRate([{ date: saveInterval.startDate, bpm: 58 }])
+
+        const page = await NitroHealth.readRestingHeartRate(saveReadRange)
+
+        assertConclusiveRead(page.samples)
+
+        expect(page.samples.some((sample) => sample.bpm === 58)).toBe(true)
+      } finally {
+        await NitroHealth.deleteRecordsByTimeRange('restingHeartRate', saveReadRange)
       }
-
-      await NitroHealth.saveRestingHeartRate([{ date: saveInterval.startDate, bpm: 58 }])
-
-      const page = await NitroHealth.readRestingHeartRate(saveReadRange)
-
-      assertConclusiveRead(page.samples)
-
-      expect(page.samples.some((sample) => sample.bpm === 58)).toBe(true)
     })
   })
 
@@ -582,32 +578,33 @@ describe('NitroHealth saves (native)', () => {
     // HealthKit's 0-1 fraction (percentage / 100) and reads it back multiplied by 100. A small
     // tolerance absorbs floating-point round-trip error; the value must still land in 0-100.
     it('round-trips saved oxygen saturation through native code when authorized', async () => {
-      const authorized = await hasVerifiedPermissions([
+      await requireVerifiedPermissions([
         { accessType: 'write', dataType: 'oxygenSaturation' },
         { accessType: 'read', dataType: 'oxygenSaturation' },
       ])
 
-      if (!authorized) {
-        return
-      }
-
       const savedPercentage = 97.5
 
-      await NitroHealth.saveOxygenSaturation([
-        { date: saveInterval.startDate, percentage: savedPercentage },
-      ])
+      await NitroHealth.deleteRecordsByTimeRange('oxygenSaturation', saveReadRange)
+      try {
+        await NitroHealth.saveOxygenSaturation([
+          { date: saveInterval.startDate, percentage: savedPercentage },
+        ])
 
-      const page = await NitroHealth.readOxygenSaturation(saveReadRange)
+        const page = await NitroHealth.readOxygenSaturation(saveReadRange)
 
-      assertConclusiveRead(page.samples)
+        assertConclusiveRead(page.samples)
 
-      const match = page.samples.find(
-        (sample) => Math.abs(sample.percentage - savedPercentage) < 0.01
-      )
+        const match = page.samples.find(
+          (sample) => Math.abs(sample.percentage - savedPercentage) < 0.01
+        )
 
-      expect(match).toBeDefined()
-      expect(match?.percentage).toBeGreaterThanOrEqual(0)
-      expect(match?.percentage).toBeLessThanOrEqual(100)
+        expect(match).toBeDefined()
+        expect(match?.percentage).toBeGreaterThanOrEqual(0)
+        expect(match?.percentage).toBeLessThanOrEqual(100)
+      } finally {
+        await NitroHealth.deleteRecordsByTimeRange('oxygenSaturation', saveReadRange)
+      }
     })
   })
 
@@ -616,48 +613,49 @@ describe('NitroHealth saves (native)', () => {
     // HKCorrelation (Android: one BloodPressureRecord) and the read must surface exactly one
     // sample carrying BOTH values under a single record identity — never two half-readings.
     it('round-trips a saved reading as one sample with both values when authorized', async () => {
-      const authorized = await hasVerifiedPermissions([
+      await requireVerifiedPermissions([
         { accessType: 'write', dataType: 'bloodPressure' },
         { accessType: 'read', dataType: 'bloodPressure' },
       ])
 
-      if (!authorized) {
-        return
-      }
+      await NitroHealth.deleteRecordsByTimeRange('bloodPressure', saveReadRange)
+      try {
+        await NitroHealth.saveBloodPressure([
+          {
+            date: saveInterval.startDate,
+            systolicMmHg: 118,
+            diastolicMmHg: 76,
+            metadata: {
+              android: {
+                bodyPosition: 'sitting_down',
+                measurementLocation: 'left_upper_arm',
+              },
+            },
+          },
+        ])
 
-      await NitroHealth.saveBloodPressure([
-        {
-          date: saveInterval.startDate,
-          systolicMmHg: 118,
-          diastolicMmHg: 76,
-          metadata: {
+        const page = await NitroHealth.readBloodPressure(saveReadRange)
+
+        assertConclusiveRead(page.samples)
+
+        const matches = page.samples.filter(
+          (sample) => sample.systolicMmHg === 118 && sample.diastolicMmHg === 76
+        )
+
+        expect(matches.length).toBeGreaterThanOrEqual(1)
+        expect(matches[0]?.identity.kind).toBe('record')
+        if (Platform.OS === 'android') {
+          expect(matches[0]?.metadata).toEqual({
             android: {
               bodyPosition: 'sitting_down',
               measurementLocation: 'left_upper_arm',
             },
-          },
-        },
-      ])
-
-      const page = await NitroHealth.readBloodPressure(saveReadRange)
-
-      assertConclusiveRead(page.samples)
-
-      const matches = page.samples.filter(
-        (sample) => sample.systolicMmHg === 118 && sample.diastolicMmHg === 76
-      )
-
-      expect(matches.length).toBeGreaterThanOrEqual(1)
-      expect(matches[0]?.identity.kind).toBe('record')
-      if (Platform.OS === 'android') {
-        expect(matches[0]?.metadata).toEqual({
-          android: {
-            bodyPosition: 'sitting_down',
-            measurementLocation: 'left_upper_arm',
-          },
-        })
-      } else {
-        expect(matches[0]?.metadata).toBeUndefined()
+          })
+        } else {
+          expect(matches[0]?.metadata).toBeUndefined()
+        }
+      } finally {
+        await NitroHealth.deleteRecordsByTimeRange('bloodPressure', saveReadRange)
       }
     })
   })
@@ -668,14 +666,10 @@ describe('NitroHealth saves (native)', () => {
     // and the read must surface exactly one entry carrying EVERY saved field under a
     // single record identity — never per-nutrient fragments, never dropped fields.
     it('round-trips a saved entry as one sample with every field when authorized', async () => {
-      const authorized = await hasVerifiedPermissions([
+      await requireVerifiedPermissions([
         { accessType: 'write', dataType: 'nutrition' },
         { accessType: 'read', dataType: 'nutrition' },
       ])
-
-      if (!authorized) {
-        return
-      }
 
       await NitroHealth.deleteRecordsByTimeRange('nutrition', saveReadRange)
 
@@ -718,14 +712,10 @@ describe('NitroHealth saves (native)', () => {
     })
 
     it('omits absent nutrients on read-back instead of fabricating zeros', async () => {
-      const authorized = await hasVerifiedPermissions([
+      await requireVerifiedPermissions([
         { accessType: 'write', dataType: 'nutrition' },
         { accessType: 'read', dataType: 'nutrition' },
       ])
-
-      if (!authorized) {
-        return
-      }
 
       await NitroHealth.deleteRecordsByTimeRange('nutrition', saveReadRange)
 
@@ -751,14 +741,10 @@ describe('NitroHealth saves (native)', () => {
 
   describe('blood glucose', () => {
     it('round-trips a saved reading in mmol/L when authorized', async () => {
-      const authorized = await hasVerifiedPermissions([
+      await requireVerifiedPermissions([
         { accessType: 'write', dataType: 'bloodGlucose' },
         { accessType: 'read', dataType: 'bloodGlucose' },
       ])
-
-      if (!authorized) {
-        return
-      }
 
       await NitroHealth.deleteRecordsByTimeRange('bloodGlucose', saveReadRange)
 
@@ -808,14 +794,10 @@ describe('NitroHealth saves (native)', () => {
 
   describe('body temperature', () => {
     it('round-trips a saved reading in celsius when authorized', async () => {
-      const authorized = await hasVerifiedPermissions([
+      await requireVerifiedPermissions([
         { accessType: 'write', dataType: 'bodyTemperature' },
         { accessType: 'read', dataType: 'bodyTemperature' },
       ])
-
-      if (!authorized) {
-        return
-      }
 
       await NitroHealth.deleteRecordsByTimeRange('bodyTemperature', saveReadRange)
 
@@ -855,42 +837,39 @@ describe('NitroHealth saves (native)', () => {
 
   describe('respiratory rate', () => {
     it('round-trips a saved reading in breaths per minute when authorized', async () => {
-      const authorized = await hasVerifiedPermissions([
+      await requireVerifiedPermissions([
         { accessType: 'write', dataType: 'respiratoryRate' },
         { accessType: 'read', dataType: 'respiratoryRate' },
       ])
 
-      if (!authorized) {
-        return
+      await NitroHealth.deleteRecordsByTimeRange('respiratoryRate', saveReadRange)
+      try {
+        await NitroHealth.saveRespiratoryRate([
+          { date: saveInterval.startDate, breathsPerMinute: 16.5 },
+        ])
+
+        const page = await NitroHealth.readRespiratoryRate(saveReadRange)
+
+        assertConclusiveRead(page.samples)
+
+        const matches = page.samples.filter(
+          (sample) => Math.abs(sample.breathsPerMinute - 16.5) < 0.001
+        )
+
+        expect(matches.length).toBeGreaterThanOrEqual(1)
+        expect(matches[0]?.identity.kind).toBe('record')
+      } finally {
+        await NitroHealth.deleteRecordsByTimeRange('respiratoryRate', saveReadRange)
       }
-
-      await NitroHealth.saveRespiratoryRate([
-        { date: saveInterval.startDate, breathsPerMinute: 16.5 },
-      ])
-
-      const page = await NitroHealth.readRespiratoryRate(saveReadRange)
-
-      assertConclusiveRead(page.samples)
-
-      const matches = page.samples.filter(
-        (sample) => Math.abs(sample.breathsPerMinute - 16.5) < 0.001
-      )
-
-      expect(matches.length).toBeGreaterThanOrEqual(1)
-      expect(matches[0]?.identity.kind).toBe('record')
     })
   })
 
   describe('VO2 max', () => {
     it('round-trips a saved reading in ml/kg/min when authorized', async () => {
-      const authorized = await hasVerifiedPermissions([
+      await requireVerifiedPermissions([
         { accessType: 'write', dataType: 'vo2Max' },
         { accessType: 'read', dataType: 'vo2Max' },
       ])
-
-      if (!authorized) {
-        return
-      }
 
       await NitroHealth.deleteRecordsByTimeRange('vo2Max', saveReadRange)
 
@@ -934,14 +913,10 @@ describe('NitroHealth saves (native)', () => {
     const syncId = 'nitro-health-harness-floors-round-trip'
 
     it('round-trips a saved floors interval when authorized', async () => {
-      const authorized = await hasVerifiedPermissions([
+      await requireVerifiedPermissions([
         { accessType: 'write', dataType: 'floorsClimbed' },
         { accessType: 'read', dataType: 'floorsClimbed' },
       ])
-
-      if (!authorized) {
-        return
-      }
 
       await NitroHealth.deleteRecordsByTimeRange('floorsClimbed', saveReadRange)
       try {
@@ -969,64 +944,62 @@ describe('NitroHealth saves (native)', () => {
 
   describe('body fat', () => {
     it('round-trips a saved reading in percent when authorized', async () => {
-      const authorized = await hasVerifiedPermissions([
+      await requireVerifiedPermissions([
         { accessType: 'write', dataType: 'bodyFat' },
         { accessType: 'read', dataType: 'bodyFat' },
       ])
 
-      if (!authorized) {
-        return
+      await NitroHealth.deleteRecordsByTimeRange('bodyFat', saveReadRange)
+      try {
+        await NitroHealth.saveBodyFat([{ date: saveInterval.startDate, percentage: 18.5 }])
+
+        const page = await NitroHealth.readBodyFat(saveReadRange)
+
+        assertConclusiveRead(page.samples)
+
+        // HealthKit stores body fat as a fraction (0-1); a matching 18.5 read back pins the
+        // native *100 / /100 conversion pair.
+        const matches = page.samples.filter((sample) => Math.abs(sample.percentage - 18.5) < 0.001)
+
+        expect(matches.length).toBeGreaterThanOrEqual(1)
+        expect(matches[0]?.identity.kind).toBe('record')
+      } finally {
+        await NitroHealth.deleteRecordsByTimeRange('bodyFat', saveReadRange)
       }
-
-      await NitroHealth.saveBodyFat([{ date: saveInterval.startDate, percentage: 18.5 }])
-
-      const page = await NitroHealth.readBodyFat(saveReadRange)
-
-      assertConclusiveRead(page.samples)
-
-      // HealthKit stores body fat as a fraction (0-1); a matching 18.5 read back pins the
-      // native *100 / /100 conversion pair.
-      const matches = page.samples.filter((sample) => Math.abs(sample.percentage - 18.5) < 0.001)
-
-      expect(matches.length).toBeGreaterThanOrEqual(1)
-      expect(matches[0]?.identity.kind).toBe('record')
     })
   })
 
   describe('lean body mass', () => {
     it('round-trips a saved reading in kilograms when authorized', async () => {
-      const authorized = await hasVerifiedPermissions([
+      await requireVerifiedPermissions([
         { accessType: 'write', dataType: 'leanBodyMass' },
         { accessType: 'read', dataType: 'leanBodyMass' },
       ])
 
-      if (!authorized) {
-        return
+      await NitroHealth.deleteRecordsByTimeRange('leanBodyMass', saveReadRange)
+      try {
+        await NitroHealth.saveLeanBodyMass([{ date: saveInterval.startDate, kilograms: 55.4 }])
+
+        const page = await NitroHealth.readLeanBodyMass(saveReadRange)
+
+        assertConclusiveRead(page.samples)
+
+        const matches = page.samples.filter((sample) => Math.abs(sample.kilograms - 55.4) < 0.001)
+
+        expect(matches.length).toBeGreaterThanOrEqual(1)
+        expect(matches[0]?.identity.kind).toBe('record')
+      } finally {
+        await NitroHealth.deleteRecordsByTimeRange('leanBodyMass', saveReadRange)
       }
-
-      await NitroHealth.saveLeanBodyMass([{ date: saveInterval.startDate, kilograms: 55.4 }])
-
-      const page = await NitroHealth.readLeanBodyMass(saveReadRange)
-
-      assertConclusiveRead(page.samples)
-
-      const matches = page.samples.filter((sample) => Math.abs(sample.kilograms - 55.4) < 0.001)
-
-      expect(matches.length).toBeGreaterThanOrEqual(1)
-      expect(matches[0]?.identity.kind).toBe('record')
     })
   })
 
   describe('basal body temperature', () => {
     it('round-trips a saved reading in celsius when authorized', async () => {
-      const authorized = await hasVerifiedPermissions([
+      await requireVerifiedPermissions([
         { accessType: 'write', dataType: 'basalBodyTemperature' },
         { accessType: 'read', dataType: 'basalBodyTemperature' },
       ])
-
-      if (!authorized) {
-        return
-      }
 
       await NitroHealth.deleteRecordsByTimeRange('basalBodyTemperature', saveReadRange)
 
@@ -1063,22 +1036,23 @@ describe('NitroHealth saves (native)', () => {
 
   describe('height', () => {
     it('round-trips saved height through native code when authorized', async () => {
-      const authorized = await hasVerifiedPermissions([
+      await requireVerifiedPermissions([
         { accessType: 'write', dataType: 'height' },
         { accessType: 'read', dataType: 'height' },
       ])
 
-      if (!authorized) {
-        return
+      await NitroHealth.deleteRecordsByTimeRange('height', saveReadRange)
+      try {
+        await NitroHealth.saveHeight([{ date: saveInterval.startDate, meters: 1.78 }])
+
+        const page = await NitroHealth.readHeight(saveReadRange)
+
+        assertConclusiveRead(page.samples)
+
+        expect(page.samples.some((sample) => sample.meters === 1.78)).toBe(true)
+      } finally {
+        await NitroHealth.deleteRecordsByTimeRange('height', saveReadRange)
       }
-
-      await NitroHealth.saveHeight([{ date: saveInterval.startDate, meters: 1.78 }])
-
-      const page = await NitroHealth.readHeight(saveReadRange)
-
-      assertConclusiveRead(page.samples)
-
-      expect(page.samples.some((sample) => sample.meters === 1.78)).toBe(true)
     })
   })
 })
