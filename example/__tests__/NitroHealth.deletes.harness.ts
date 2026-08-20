@@ -6,7 +6,7 @@ import {
   deleteInterval,
   deleteReadRange,
   emptyRange,
-  hasVerifiedPermissions,
+  requireVerifiedPermissions,
   assertConclusiveRead,
 } from './support/harnessSupport'
 
@@ -48,7 +48,7 @@ describe('NitroHealth deletes (native)', () => {
   })
 
   it('returns observable count state for a time-range delete that matches nothing', async () => {
-    if (!(await hasVerifiedPermissions([{ accessType: 'write', dataType: 'steps' }]))) return
+    await requireVerifiedPermissions([{ accessType: 'write', dataType: 'steps' }])
 
     const result = await NitroHealth.deleteRecordsByTimeRange('steps', emptyRange)
 
@@ -59,7 +59,7 @@ describe('NitroHealth deletes (native)', () => {
   })
 
   it('reports a no-match identity deletion according to native count visibility', async () => {
-    if (!(await hasVerifiedPermissions([{ accessType: 'write', dataType: 'steps' }]))) return
+    await requireVerifiedPermissions([{ accessType: 'write', dataType: 'steps' }])
 
     const outcome = await NitroHealth.deleteRecordsByIds('steps', [nonexistentRecord]).then(
       (result) => ({ status: 'completed' as const, result }),
@@ -78,11 +78,10 @@ describe('NitroHealth deletes (native)', () => {
   })
 
   it('round-trips save, delete by record identity, and re-read for steps', async () => {
-    const authorized = await hasVerifiedPermissions([
+    await requireVerifiedPermissions([
       { accessType: 'write', dataType: 'steps' },
       { accessType: 'read', dataType: 'steps' },
     ])
-    if (!authorized) return
 
     await NitroHealth.saveSteps([{ ...deleteInterval, count: 4321 }])
     const page = await NitroHealth.readSteps(deleteReadRange)
@@ -102,11 +101,10 @@ describe('NitroHealth deletes (native)', () => {
   })
 
   it('round-trips save, delete by time range, and observes count when available', async () => {
-    const authorized = await hasVerifiedPermissions([
+    await requireVerifiedPermissions([
       { accessType: 'write', dataType: 'steps' },
       { accessType: 'read', dataType: 'steps' },
     ])
-    if (!authorized) return
 
     await NitroHealth.saveSteps([{ ...deleteInterval, count: 4322 }])
     const page = await NitroHealth.readSteps(deleteReadRange)
@@ -126,11 +124,10 @@ describe('NitroHealth deletes (native)', () => {
   // The acceptance gate for correlation deletion (plan risk R2): the delete must remove the
   // HKCorrelation AND its member quantity samples on iOS, so the re-read finds nothing.
   it('round-trips save, delete by record identity, and re-read for blood pressure', async () => {
-    const authorized = await hasVerifiedPermissions([
+    await requireVerifiedPermissions([
       { accessType: 'write', dataType: 'bloodPressure' },
       { accessType: 'read', dataType: 'bloodPressure' },
     ])
-    if (!authorized) return
 
     await NitroHealth.saveBloodPressure([
       { date: deleteInterval.startDate, systolicMmHg: 133, diastolicMmHg: 87 },
@@ -154,11 +151,10 @@ describe('NitroHealth deletes (native)', () => {
   })
 
   it('round-trips save, delete by record identity, and re-read for nutrition', async () => {
-    const authorized = await hasVerifiedPermissions([
+    await requireVerifiedPermissions([
       { accessType: 'write', dataType: 'nutrition' },
       { accessType: 'read', dataType: 'nutrition' },
     ])
-    if (!authorized) return
 
     await NitroHealth.saveNutrition([
       { ...deleteInterval, foodName: 'Harness delete meal', proteinGrams: 21 },
@@ -182,11 +178,10 @@ describe('NitroHealth deletes (native)', () => {
   })
 
   it('round-trips save, delete by record identity, and re-read for blood glucose', async () => {
-    const authorized = await hasVerifiedPermissions([
+    await requireVerifiedPermissions([
       { accessType: 'write', dataType: 'bloodGlucose' },
       { accessType: 'read', dataType: 'bloodGlucose' },
     ])
-    if (!authorized) return
 
     await NitroHealth.saveBloodGlucose([
       { date: deleteInterval.startDate, millimolesPerLiter: 7.7 },
@@ -208,11 +203,10 @@ describe('NitroHealth deletes (native)', () => {
   })
 
   it('round-trips save, delete by record identity, and re-read for body temperature', async () => {
-    const authorized = await hasVerifiedPermissions([
+    await requireVerifiedPermissions([
       { accessType: 'write', dataType: 'bodyTemperature' },
       { accessType: 'read', dataType: 'bodyTemperature' },
     ])
-    if (!authorized) return
 
     await NitroHealth.saveBodyTemperature([{ date: deleteInterval.startDate, celsius: 38.5 }])
     const page = await NitroHealth.readBodyTemperature(deleteReadRange)
@@ -232,11 +226,10 @@ describe('NitroHealth deletes (native)', () => {
   })
 
   it('round-trips save, delete by record identity, and re-read for respiratory rate', async () => {
-    const authorized = await hasVerifiedPermissions([
+    await requireVerifiedPermissions([
       { accessType: 'write', dataType: 'respiratoryRate' },
       { accessType: 'read', dataType: 'respiratoryRate' },
     ])
-    if (!authorized) return
 
     await NitroHealth.saveRespiratoryRate([
       { date: deleteInterval.startDate, breathsPerMinute: 22.5 },
@@ -258,11 +251,10 @@ describe('NitroHealth deletes (native)', () => {
   })
 
   it('round-trips save, delete by record identity, and re-read for VO2 max', async () => {
-    const authorized = await hasVerifiedPermissions([
+    await requireVerifiedPermissions([
       { accessType: 'write', dataType: 'vo2Max' },
       { accessType: 'read', dataType: 'vo2Max' },
     ])
-    if (!authorized) return
 
     await NitroHealth.saveVo2Max([
       { date: deleteInterval.startDate, millilitersPerKilogramPerMinute: 43.5 },
@@ -286,11 +278,10 @@ describe('NitroHealth deletes (native)', () => {
   })
 
   it('round-trips save, delete by record identity, and re-read for floors climbed', async () => {
-    const authorized = await hasVerifiedPermissions([
+    await requireVerifiedPermissions([
       { accessType: 'write', dataType: 'floorsClimbed' },
       { accessType: 'read', dataType: 'floorsClimbed' },
     ])
-    if (!authorized) return
 
     await NitroHealth.deleteRecordsByTimeRange('floorsClimbed', deleteReadRange)
     await NitroHealth.saveFloorsClimbed([
@@ -322,11 +313,10 @@ describe('NitroHealth deletes (native)', () => {
   })
 
   it('round-trips save, delete by record identity, and re-read for hydration', async () => {
-    const authorized = await hasVerifiedPermissions([
+    await requireVerifiedPermissions([
       { accessType: 'write', dataType: 'hydration' },
       { accessType: 'read', dataType: 'hydration' },
     ])
-    if (!authorized) return
 
     await NitroHealth.deleteRecordsByTimeRange('hydration', deleteReadRange)
     try {
@@ -357,11 +347,10 @@ describe('NitroHealth deletes (native)', () => {
   })
 
   it('round-trips save, delete by record identity, and re-read for body fat', async () => {
-    const authorized = await hasVerifiedPermissions([
+    await requireVerifiedPermissions([
       { accessType: 'write', dataType: 'bodyFat' },
       { accessType: 'read', dataType: 'bodyFat' },
     ])
-    if (!authorized) return
 
     await NitroHealth.saveBodyFat([{ date: deleteInterval.startDate, percentage: 27.5 }])
     const page = await NitroHealth.readBodyFat(deleteReadRange)
@@ -381,11 +370,10 @@ describe('NitroHealth deletes (native)', () => {
   })
 
   it('round-trips save, delete by record identity, and re-read for lean body mass', async () => {
-    const authorized = await hasVerifiedPermissions([
+    await requireVerifiedPermissions([
       { accessType: 'write', dataType: 'leanBodyMass' },
       { accessType: 'read', dataType: 'leanBodyMass' },
     ])
-    if (!authorized) return
 
     await NitroHealth.saveLeanBodyMass([{ date: deleteInterval.startDate, kilograms: 48.5 }])
     const page = await NitroHealth.readLeanBodyMass(deleteReadRange)
@@ -405,11 +393,10 @@ describe('NitroHealth deletes (native)', () => {
   })
 
   it('round-trips save, delete by record identity, and re-read for basal body temperature', async () => {
-    const authorized = await hasVerifiedPermissions([
+    await requireVerifiedPermissions([
       { accessType: 'write', dataType: 'basalBodyTemperature' },
       { accessType: 'read', dataType: 'basalBodyTemperature' },
     ])
-    if (!authorized) return
 
     await NitroHealth.saveBasalBodyTemperature([{ date: deleteInterval.startDate, celsius: 35.9 }])
     const page = await NitroHealth.readBasalBodyTemperature(deleteReadRange)
@@ -429,11 +416,10 @@ describe('NitroHealth deletes (native)', () => {
   })
 
   it('deletes a heart-rate record and explicitly selects a parent for record children', async () => {
-    const authorized = await hasVerifiedPermissions([
+    await requireVerifiedPermissions([
       { accessType: 'write', dataType: 'heartRate' },
       { accessType: 'read', dataType: 'heartRate' },
     ])
-    if (!authorized) return
 
     const siblingDate = new Date(deleteInterval.startDate.getTime() + 5 * 60 * 1000)
     await NitroHealth.saveHeartRate([

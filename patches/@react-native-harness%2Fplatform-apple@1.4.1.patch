@@ -39,7 +39,7 @@ index 279b66906c087d9ffebad83512faad99cfb2449b..a07449ed0f884bd50782fe66931c0586
                  logger.info('Shutting down iOS simulator %s...', config.device.name);
                  await simctl.shutdownSimulator(udid);
 diff --git a/dist/xcrun/simctl.d.ts b/dist/xcrun/simctl.d.ts
-index 98c6d5b64445e1f1d2ed24b0553dc79d6d666131..ac20cf7d7173927ce5b350ea19544df5e041d2d5 100644
+index 98c6d5b64445e1f1d2ed24b0553dc79d6d666131..3b9925e99b0786666c929a68ece17d3b35c1c421 100644
 --- a/dist/xcrun/simctl.d.ts
 +++ b/dist/xcrun/simctl.d.ts
 @@ -54,6 +54,8 @@ export declare const shutdownSimulator: (udid: string) => Promise<void>;
@@ -90,26 +90,53 @@ index 756164cc35d1e6294610845b08999701bb96e3b4..156d5f502c6885b0e34b5b044fa8d26f
      const backupValue = await getDefaultsValue(udid, bundleId, HARNESS_JS_LOCATION_BACKUP_KEY);
      if (backupValue === null) {
 diff --git a/src/instance.ts b/src/instance.ts
-index 9b51929f1bafd90bcc130720a830e234e9d7ec06..a981af19756d028a8fef6afc53b22d06c3cd9d51 100644
+index 9b51929f1bafd90bcc130720a830e234e9d7ec06..cf348fe4e91a8e9941773f751a2d8396d7f8bc58 100644
 --- a/src/instance.ts
 +++ b/src/instance.ts
-@@ -79,0 +80 @@ export const getAppleSimulatorPlatformInstance = async (
+@@ -77,6 +77,7 @@ export const getAppleSimulatorPlatformInstance = async (
+ 
+   let startedByHarness = false;
+   let harnessJsLocationOverrideApplied = false;
 +  let previousReduceMotionValue: boolean | null | undefined;
-@@ -147,0 +149 @@ export const getAppleSimulatorPlatformInstance = async (
+ 
+   const xctestAgent = permissionsEnabled
+     ? createXCTestAgentController({
+@@ -145,6 +146,7 @@ export const getAppleSimulatorPlatformInstance = async (
+     harnessJsLocationOverrideApplied = true;
+   };
+ 
 +    previousReduceMotionValue = await simctl.applyReduceMotionOverride(udid);
-@@ -182,0 +185,3 @@ export const getAppleSimulatorPlatformInstance = async (
+   if (xctestAgent) {
+     const overlapStartup = shouldOverlapXCTestBuildAndSimulatorBoot();
+     iosInstanceLogger.debug(
+@@ -180,6 +182,9 @@ export const getAppleSimulatorPlatformInstance = async (
+         }
+         if (startedByHarness) {
+           await simctl.shutdownSimulator(udid);
 +        if (previousReduceMotionValue !== undefined) {
 +          await simctl.clearReduceMotionOverride(udid, previousReduceMotionValue);
 +        }
-@@ -226,0 +232,3 @@ export const getAppleSimulatorPlatformInstance = async (
+         }
+       }
+     }
+@@ -224,6 +229,9 @@ export const getAppleSimulatorPlatformInstance = async (
+       await simctl.clearHarnessJsLocationOverride(udid, config.bundleId);
+ 
+       if (startedByHarness) {
 +      if (previousReduceMotionValue !== undefined) {
 +        await simctl.clearReduceMotionOverride(udid, previousReduceMotionValue);
 +      }
+         logger.info('Shutting down iOS simulator %s...', config.device.name);
+         await simctl.shutdownSimulator(udid);
+       }
 diff --git a/src/xcrun/simctl.ts b/src/xcrun/simctl.ts
 index 5ad7d059a59d67d82df0c2b4b085df6e8bf6dc08..2500ae4703b330bd4cf03308ea1d452544c8f171 100644
 --- a/src/xcrun/simctl.ts
 +++ b/src/xcrun/simctl.ts
-@@ -522,0 +523,62 @@ const deleteDefaultsValue = async (
+@@ -506,6 +506,68 @@ const deleteDefaultsValue = async (
+   }
+ };
+ 
 +const ACCESSIBILITY_DEFAULTS_DOMAIN = 'com.apple.Accessibility';
 +const REDUCE_MOTION_DEFAULTS_KEY = 'ReduceMotionEnabled';
 +
@@ -172,6 +199,9 @@ index 5ad7d059a59d67d82df0c2b4b085df6e8bf6dc08..2500ae4703b330bd4cf03308ea1d4525
 +  );
 +};
 +
+ export const applyHarnessJsLocationOverride = async (
+   udid: string,
+   bundleId: string,
 diff --git a/xctest-agent/HarnessXCTestAgentUITests/HarnessXCTestAgentUITests.swift b/xctest-agent/HarnessXCTestAgentUITests/HarnessXCTestAgentUITests.swift
 index b1fca637cba95ae5e9d1dc64e154e9764ca32fe2..bf84abcc32d2cdbf7d4b996f32e863162c4e1f07 100644
 --- a/xctest-agent/HarnessXCTestAgentUITests/HarnessXCTestAgentUITests.swift

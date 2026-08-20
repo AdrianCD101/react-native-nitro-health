@@ -1,19 +1,13 @@
 import { describe, expect, it } from 'react-native-harness'
 import { NitroHealth } from 'react-native-nitro-health'
 
-import { stepsReadPermission } from './support/harnessSupport'
+import { requireVerifiedPermissions, stepsReadPermission } from './support/harnessSupport'
 
 const permissionStatuses = ['granted', 'notGranted', 'notDetermined', 'unverifiable']
 
 describe('NitroHealth Android permissions (native)', () => {
-  it('returns one post-request status per entry when authorization is already observable', async () => {
-    const before = await NitroHealth.getPermissionStatuses(stepsReadPermission)
-    if (
-      before.status === 'unavailable' ||
-      before.statuses.some(({ status }) => status !== 'granted')
-    ) {
-      return
-    }
+  it('returns one post-request status per entry once authorization is granted', async () => {
+    await requireVerifiedPermissions(stepsReadPermission)
 
     const result = await NitroHealth.requestAuthorization(stepsReadPermission)
 

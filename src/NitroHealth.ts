@@ -38,8 +38,8 @@ import type { HealthChangeNotification } from './HealthChangeNotification'
 import type { HealthChangesResult } from './HealthChangesResult'
 import type {
   ChangeTrackedHealthDataType,
-  HealthDataType,
   HealthStatisticsDataType,
+  WritableHealthDataType,
 } from './HealthDataType'
 import type { HealthDateRangeQuery } from './HealthDateRangeQuery'
 import type { HealthIdentityDeleteResult, HealthTimeRangeDeleteResult } from './HealthDeleteResult'
@@ -146,6 +146,7 @@ import {
   assertPermissions,
   assertRecordIdentities,
   assertUniqueSampleSyncIds,
+  assertWritableHealthDataType,
   parseChangeTrackedHealthDataTypes,
 } from './internal/validation'
 import {
@@ -327,12 +328,12 @@ export interface NitroHealth {
   saveNutrition(samples: NutritionSampleInput[]): Promise<HealthWriteResult>
   /** Deletes independently deletable records by physical identity. */
   deleteRecordsByIds(
-    dataType: HealthDataType,
+    dataType: WritableHealthDataType,
     records: HealthRecordIdentity[]
   ): Promise<HealthIdentityDeleteResult>
   /** Deletes caller-owned records overlapping a time range. */
   deleteRecordsByTimeRange(
-    dataType: HealthDataType,
+    dataType: WritableHealthDataType,
     query: HealthTimeRangeQuery
   ): Promise<HealthTimeRangeDeleteResult>
 }
@@ -783,6 +784,7 @@ export const NitroHealth: NitroHealth = {
     )
   },
   async deleteRecordsByIds(dataType, records) {
+    assertWritableHealthDataType(dataType)
     assertRecordIdentities(records)
     return makeIdentityDeleteResult(
       await NitroHealthNative.deleteRecordsByIds(
@@ -793,6 +795,7 @@ export const NitroHealth: NitroHealth = {
     )
   },
   async deleteRecordsByTimeRange(dataType, query) {
+    assertWritableHealthDataType(dataType)
     return makeTimeRangeDeleteResult(
       await NitroHealthNative.deleteRecordsByTimeRange(dataType, makeNativeTimeRangeQuery(query))
     )

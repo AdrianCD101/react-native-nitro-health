@@ -3,8 +3,7 @@
   "plugins": ["eslint", "typescript", "unicorn", "oxc", "react", "jest"],
   "env": {
     "es2024": true,
-    "node": true,
-    "jest": true
+    "node": true
   },
   "settings": {
     "react": {
@@ -54,10 +53,19 @@
   "overrides": [
     {
       "files": ["example/__tests__/**", "jest/**"],
+      "env": {
+        "jest": true
+      },
       "rules": {
         "anti-slop/no-module-mocking": "off",
         "anti-slop/no-unknown-returns": "off",
-        "anti-slop/require-safety-comment-for-type-assertion": "off"
+        "anti-slop/require-safety-comment-for-type-assertion": "off",
+        "jest/no-focused-tests": "error",
+        "jest/no-disabled-tests": "error",
+        "jest/valid-expect": "error",
+        "jest/no-standalone-expect": "error",
+        "jest/no-identical-title": "error",
+        "jest/no-conditional-expect": "error"
       }
     }
   ]

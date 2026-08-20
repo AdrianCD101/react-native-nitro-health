@@ -532,6 +532,14 @@ describe('NitroHealth workflow and permission contract', () => {
     await expect(NitroHealth.readSteps({ startDate, endDate, limit: 0 })).rejects.toThrow(
       'limit must be a positive integer'
     )
+    // Limits beyond Int32 max would trap in Swift's Int(Double) narrowing or
+    // saturate Kotlin's Double.toInt(), so they must be rejected in JS.
+    await expect(
+      NitroHealth.readSteps({ startDate, endDate, limit: 2_147_483_648 })
+    ).rejects.toThrow('limit must be a positive integer no greater than 2147483647')
+    await expect(NitroHealth.readSteps({ startDate, endDate, limit: 1e308 })).rejects.toThrow(
+      'limit must be a positive integer no greater than 2147483647'
+    )
     expect(mockNitroHealth.readSteps).not.toHaveBeenCalled()
   })
 })

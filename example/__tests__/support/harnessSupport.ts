@@ -179,10 +179,6 @@ export async function requireVerifiedPermissions(permissions: HealthPermission[]
   return true
 }
 
-export async function hasVerifiedPermissions(permissions: HealthPermission[]): Promise<true> {
-  return requireVerifiedPermissions(permissions)
-}
-
 export function assertConclusiveRead(samples: readonly unknown[]): void {
   if (Platform.OS === 'ios' && samples.length === 0) {
     throw new Error(

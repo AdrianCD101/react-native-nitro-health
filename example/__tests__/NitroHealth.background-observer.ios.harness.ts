@@ -2,7 +2,7 @@ import { describe, expect, it, waitUntil } from 'react-native-harness'
 import { NitroHealth } from 'react-native-nitro-health'
 import type { HealthRecordChange } from 'react-native-nitro-health'
 
-import { hasVerifiedPermissions } from './support/harnessSupport'
+import { requireVerifiedPermissions } from './support/harnessSupport'
 
 const notificationInterval = {
   startDate: new Date('2005-06-01T09:00:00.000Z'),
@@ -65,11 +65,10 @@ describe('NitroHealth iOS background observer (native)', () => {
       throw new Error('Harness prerequisite failed: observer background changes are unavailable')
     }
 
-    const authorized = await hasVerifiedPermissions([
+    await requireVerifiedPermissions([
       { accessType: 'read', dataType: 'steps' },
       { accessType: 'write', dataType: 'steps' },
     ])
-    if (!authorized) return
 
     await NitroHealth.deleteRecordsByTimeRange('steps', notificationRange)
     await NitroHealth.disableBackgroundChanges(['steps'])
@@ -126,11 +125,10 @@ describe('NitroHealth iOS background observer (native)', () => {
       throw new Error('Harness prerequisite failed: observer background changes are unavailable')
     }
 
-    const authorized = await hasVerifiedPermissions([
+    await requireVerifiedPermissions([
       { accessType: 'read', dataType: 'nutrition' },
       { accessType: 'write', dataType: 'nutrition' },
     ])
-    if (!authorized) return
 
     await NitroHealth.deleteRecordsByTimeRange('nutrition', nutritionNotificationRange)
     await NitroHealth.disableBackgroundChanges(['nutrition'])

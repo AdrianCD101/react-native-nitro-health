@@ -4,7 +4,7 @@ import type { HealthMetricValue, HealthSample, StepSample } from 'react-native-n
 
 import {
   emptyRange,
-  hasVerifiedPermissions,
+  requireVerifiedPermissions,
   assertConclusiveRead,
   saveReadRange,
 } from './support/harnessSupport'
@@ -311,11 +311,10 @@ describe('NitroHealth reads (native)', () => {
     }))
 
     it('walks step pages to exhaustion without duplicating or dropping identities', async () => {
-      const authorized = await hasVerifiedPermissions([
+      await requireVerifiedPermissions([
         { accessType: 'write', dataType: 'steps' },
         { accessType: 'read', dataType: 'steps' },
       ])
-      if (!authorized) return
 
       await NitroHealth.saveSteps(
         pagingIntervals.map((interval, index) => ({ ...interval, count: 100 + index }))

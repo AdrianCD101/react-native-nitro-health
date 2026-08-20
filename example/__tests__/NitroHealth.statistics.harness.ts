@@ -13,7 +13,7 @@ import {
   floorsClimbedWritePermission,
   hydrationReadPermission,
   hydrationWritePermission,
-  hasVerifiedPermissions,
+  requireVerifiedPermissions,
   last7DaysRange,
   lastDayRange,
   nutritionReadPermission,
@@ -319,12 +319,12 @@ describe('NitroHealth statistics (native)', () => {
     // 23 hours and 2025-11-02 (fall back) has 25. Both dates are in the past so the samples are
     // writable, and each range is a dedicated island that is cleared before and after.
     it('computes day buckets in an explicit non-device zone across DST boundaries', async () => {
-      const authorized = await hasVerifiedPermissions([
+      await requireVerifiedPermissions([
         { accessType: 'write', dataType: 'steps' },
         { accessType: 'read', dataType: 'steps' },
       ])
 
-      if (!authorized || !(await isActivityAggregationVisible())) {
+      if (!(await isActivityAggregationVisible())) {
         return
       }
 
@@ -408,14 +408,10 @@ describe('NitroHealth statistics (native)', () => {
     })
 
     it('round-trips saved steps through readStatistics when authorized', async () => {
-      const authorized = await hasVerifiedPermissions([
+      await requireVerifiedPermissions([
         { accessType: 'write', dataType: 'steps' },
         { accessType: 'read', dataType: 'steps' },
       ])
-
-      if (!authorized) {
-        return
-      }
 
       await NitroHealth.deleteRecordsByTimeRange('steps', statisticsRange)
       try {
@@ -446,7 +442,7 @@ describe('NitroHealth statistics (native)', () => {
 
     it('round-trips saved floors climbed through readStatistics when authorized', async () => {
       if (
-        !(await hasVerifiedPermissions([
+        !(await requireVerifiedPermissions([
           ...floorsClimbedReadPermission,
           ...floorsClimbedWritePermission,
         ]))
@@ -483,7 +479,10 @@ describe('NitroHealth statistics (native)', () => {
 
     it('round-trips saved hydration through readStatistics when authorized', async () => {
       if (
-        !(await hasVerifiedPermissions([...hydrationReadPermission, ...hydrationWritePermission]))
+        !(await requireVerifiedPermissions([
+          ...hydrationReadPermission,
+          ...hydrationWritePermission,
+        ]))
       ) {
         return
       }
@@ -511,7 +510,10 @@ describe('NitroHealth statistics (native)', () => {
 
     it('round-trips saved nutrition through per-nutrient statistics when authorized', async () => {
       if (
-        !(await hasVerifiedPermissions([...nutritionReadPermission, ...nutritionWritePermission]))
+        !(await requireVerifiedPermissions([
+          ...nutritionReadPermission,
+          ...nutritionWritePermission,
+        ]))
       ) {
         return
       }
@@ -557,7 +559,7 @@ describe('NitroHealth statistics (native)', () => {
 
     it('round-trips a saved sleep session through duration statistics when authorized', async () => {
       if (
-        !(await hasVerifiedPermissions([
+        !(await requireVerifiedPermissions([
           { accessType: 'read', dataType: 'sleep' },
           { accessType: 'write', dataType: 'sleep' },
         ]))
@@ -627,7 +629,7 @@ describe('NitroHealth statistics (native)', () => {
 
     it('round-trips a saved workout through duration statistics when authorized', async () => {
       if (
-        !(await hasVerifiedPermissions([
+        !(await requireVerifiedPermissions([
           { accessType: 'read', dataType: 'workout' },
           { accessType: 'write', dataType: 'workout' },
         ]))
@@ -674,9 +676,7 @@ describe('NitroHealth statistics (native)', () => {
     })
 
     it('reads basal energy statistics from native code without crashing', async () => {
-      if (!(await hasVerifiedPermissions(basalEnergyReadPermission))) {
-        return
-      }
+      await requireVerifiedPermissions(basalEnergyReadPermission)
 
       const dailyBasalEnergy = await NitroHealth.readStatistics('basalEnergyBurned', {
         ...last7DaysRange,
@@ -699,7 +699,7 @@ describe('NitroHealth statistics (native)', () => {
     // can see the app (see expectActivityRoundTrip) and shape-checked elsewhere.
     it('composes total energy from components per platform policy', async () => {
       if (
-        !(await hasVerifiedPermissions([
+        !(await requireVerifiedPermissions([
           ...activeEnergyReadPermission,
           ...activeEnergyWritePermission,
           ...totalEnergyReadPermission,

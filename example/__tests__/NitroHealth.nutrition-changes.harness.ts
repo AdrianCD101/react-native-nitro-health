@@ -3,7 +3,7 @@ import { describe, expect, it } from 'react-native-harness'
 import { NitroHealth } from 'react-native-nitro-health'
 import type { HealthRecordChange } from 'react-native-nitro-health'
 
-import { hasVerifiedPermissions } from './support/harnessSupport'
+import { requireVerifiedPermissions } from './support/harnessSupport'
 
 // Spike #100 acceptance suite: nutrition change tracking anchors on the food
 // correlation (iOS) / NutritionRecord (Android). The delete test is the verdict —
@@ -61,7 +61,7 @@ async function drainNutritionChanges(changesToken: string): Promise<{
 
 describe('NitroHealth nutrition changes (native)', () => {
   it('observes a saved and then deleted nutrition entry with a traceable record identity', async () => {
-    if (!(await hasVerifiedPermissions(nutritionPermissions))) return
+    await requireVerifiedPermissions(nutritionPermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('nutrition', roundTripRange)
     try {
@@ -126,7 +126,7 @@ describe('NitroHealth nutrition changes (native)', () => {
   })
 
   it('reports platform-specific changes when a higher nutrition version replaces an entry', async () => {
-    if (!(await hasVerifiedPermissions(nutritionPermissions))) return
+    await requireVerifiedPermissions(nutritionPermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('nutrition', replacementRange)
     try {
@@ -188,7 +188,7 @@ describe('NitroHealth nutrition changes (native)', () => {
   })
 
   it('drops a removed nutrient on re-save without leaking member-level noise', async () => {
-    if (!(await hasVerifiedPermissions(nutritionPermissions))) return
+    await requireVerifiedPermissions(nutritionPermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('nutrition', shrinkRange)
     try {
@@ -250,7 +250,7 @@ describe('NitroHealth nutrition changes (native)', () => {
   })
 
   it('drains a fresh token empty once every harness entry is cleaned up', async () => {
-    if (!(await hasVerifiedPermissions(nutritionPermissions))) return
+    await requireVerifiedPermissions(nutritionPermissions)
 
     const token = await NitroHealth.createChangesToken('nutrition')
     const result = await NitroHealth.getChanges('nutrition', token)

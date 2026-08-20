@@ -12,10 +12,14 @@ on:
       - 'example/android/**'
       - 'example/ios/**'
       - 'example/App.tsx'
+      - 'example/app.json'
+      - 'example/babel.config.js'
       - 'example/Gemfile'
       - 'example/Gemfile.lock'
+      - 'example/healthPermissions.ts'
       - 'example/index.js'
       - 'example/jest.harness.config.mjs'
+      - 'example/metro.config.js'
       - 'example/package.json'
       - 'example/rn-harness.config.mjs'
       - 'nitrogen/generated/android/**'
@@ -29,6 +33,7 @@ on:
       - 'bun.lock'
       - 'nitro.json'
       - 'package.json'
+      - 'patches/**'
   pull_request:
     paths:
       - '.github/workflows/harness.yml'
@@ -38,10 +43,14 @@ on:
       - 'example/android/**'
       - 'example/ios/**'
       - 'example/App.tsx'
+      - 'example/app.json'
+      - 'example/babel.config.js'
       - 'example/Gemfile'
       - 'example/Gemfile.lock'
+      - 'example/healthPermissions.ts'
       - 'example/index.js'
       - 'example/jest.harness.config.mjs'
+      - 'example/metro.config.js'
       - 'example/package.json'
       - 'example/rn-harness.config.mjs'
       - 'nitrogen/generated/android/**'
@@ -55,6 +64,7 @@ on:
       - 'bun.lock'
       - 'nitro.json'
       - 'package.json'
+      - 'patches/**'
   workflow_dispatch:
 
 permissions:
