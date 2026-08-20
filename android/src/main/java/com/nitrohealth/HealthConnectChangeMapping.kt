@@ -17,6 +17,7 @@ import androidx.health.connect.client.records.HeartRateVariabilityRmssdRecord
 import androidx.health.connect.client.records.HeightRecord
 import androidx.health.connect.client.records.HydrationRecord
 import androidx.health.connect.client.records.LeanBodyMassRecord
+import androidx.health.connect.client.records.NutritionRecord
 import androidx.health.connect.client.records.OxygenSaturationRecord
 import androidx.health.connect.client.records.Record
 import androidx.health.connect.client.records.RespiratoryRateRecord
@@ -40,6 +41,7 @@ import com.margelo.nitro.nitrohealth.NativeHeartRateVariabilitySample
 import com.margelo.nitro.nitrohealth.NativeHeightSample
 import com.margelo.nitro.nitrohealth.NativeHydrationSample
 import com.margelo.nitro.nitrohealth.NativeLeanBodyMassSample
+import com.margelo.nitro.nitrohealth.NativeNutritionSample
 import com.margelo.nitro.nitrohealth.NativeOxygenSaturationSample
 import com.margelo.nitro.nitrohealth.NativeRespiratoryRateSample
 import com.margelo.nitro.nitrohealth.NativeRestingHeartRateSample
@@ -185,6 +187,11 @@ private fun makeNativeUpsertionChange(record: Record): NativeHealthChange {
             recordId = recordId,
             workoutSamples = arrayOf(makeNativeWorkoutSample(record))
         )
+        is NutritionRecord -> makeNativeChange(
+            type = "upsert",
+            recordId = recordId,
+            nutritionSamples = arrayOf(makeNativeNutritionSample(record))
+        )
         else -> throw IllegalStateException(
             "Health Connect returned an unsupported record type: ${record.javaClass.name}"
         )
@@ -214,7 +221,8 @@ private fun makeNativeChange(
     vo2MaxSamples: Array<NativeVo2MaxSample>? = null,
     sleepSamples: Array<NativeSleepSample>? = null,
     bodyMassSamples: Array<NativeBodyMassSample>? = null,
-    workoutSamples: Array<NativeWorkoutSample>? = null
+    workoutSamples: Array<NativeWorkoutSample>? = null,
+    nutritionSamples: Array<NativeNutritionSample>? = null
 ): NativeHealthChange {
     return NativeHealthChange(
         type = type,
@@ -240,6 +248,7 @@ private fun makeNativeChange(
         sleepSamples = sleepSamples,
         bodyMassSamples = bodyMassSamples,
         workoutSamples = workoutSamples,
+        nutritionSamples = nutritionSamples,
         dummyNonEquatable = null
     )
 }

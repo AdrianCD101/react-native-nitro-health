@@ -178,26 +178,67 @@ describe('NitroHealth nutrition contract', () => {
     ).rejects.toThrow("readStatistics does not support the 'nutrition' data type")
   })
 
-  it('rejects change tracking for nutrition until the correlation spike lands', async () => {
-    // @ts-expect-error nutrition is excluded from ChangeTrackedHealthDataType
-    await expect(NitroHealth.createChangesToken('nutrition')).rejects.toThrow(
-      "Change tracking is not supported for 'nutrition' yet"
-    )
-    // @ts-expect-error nutrition is excluded from ChangeTrackedHealthDataType
-    await expect(NitroHealth.getChanges('nutrition', 'token')).rejects.toThrow(
-      "Change tracking is not supported for 'nutrition' yet"
-    )
-    await expect(
-      NitroHealth.configureBackgroundChanges({
-        // @ts-expect-error nutrition is excluded from ChangeTrackedHealthDataType
-        dataTypes: ['nutrition'],
-        frequency: 'daily',
-      })
-    ).rejects.toThrow(
-      "configuration.dataTypes[0]: change tracking is not supported for 'nutrition' yet"
-    )
-    expect(mockNitroHealth.createChangesToken).not.toHaveBeenCalled()
-    expect(mockNitroHealth.getChanges).not.toHaveBeenCalled()
-    expect(mockNitroHealth.configureBackgroundChanges).not.toHaveBeenCalled()
+  it('maps nutrition changes onto the correlation record identity', async () => {
+    const startDate = new Date('2026-01-01T12:00:00.000Z')
+    const endDate = new Date('2026-01-01T12:30:00.000Z')
+    mockNitroHealth.createChangesToken.mockResolvedValue('nutrition-token')
+    mockNitroHealth.getChanges.mockResolvedValue({
+      changes: [
+        {
+          type: 'upsert',
+          recordId: 'nutrition-1',
+          nutritionSamples: [
+            {
+              ...nativeRecordMetadata('nutrition-1'),
+              startTimeMs: startDate.getTime(),
+              endTimeMs: endDate.getTime(),
+              foodName: 'Chicken salad',
+              mealType: 'lunch',
+              energyKilocalories: 640,
+              proteinGrams: 42,
+            },
+          ],
+        },
+        {
+          type: 'delete',
+          recordId: 'nutrition-0',
+        },
+      ],
+      nextChangesToken: 'next-token',
+      hasMore: false,
+      tokenExpired: false,
+    })
+
+    await expect(NitroHealth.createChangesToken('nutrition')).resolves.toBe('nutrition-token')
+    expect(mockNitroHealth.createChangesToken).toHaveBeenCalledWith('nutrition')
+
+    await expect(NitroHealth.getChanges('nutrition', 'nutrition-token')).resolves.toEqual({
+      tokenExpired: false,
+      changes: [
+        {
+          type: 'upsert',
+          record: { kind: 'record', id: 'nutrition-1' },
+          samples: [
+            {
+              identity: { kind: 'record', id: 'nutrition-1' },
+              origin: { identifier: 'com.example.health' },
+              recordingMethod: 'unknown',
+              startDate,
+              endDate,
+              foodName: 'Chicken salad',
+              mealType: 'lunch',
+              energyKilocalories: 640,
+              proteinGrams: 42,
+            },
+          ],
+        },
+        {
+          type: 'delete',
+          record: { kind: 'record', id: 'nutrition-0' },
+        },
+      ],
+      nextChangesToken: 'next-token',
+      hasMore: false,
+    })
   })
 })

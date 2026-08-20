@@ -50,20 +50,23 @@ func makeReadAuthorizationObjectTypes(dataType: String) throws -> Set<HKObjectTy
     return [try makeHealthKitSampleType(dataType: dataType)]
 }
 
-// Observer queries and enableBackgroundDelivery reject correlation types. Every blood
-// pressure correlation contains a systolic member sample, so observing the systolic
-// quantity type is a faithful change trigger for the data type.
-func makeBackgroundDeliverySampleType(dataType: String) throws -> HKSampleType {
+// Observer queries and enableBackgroundDelivery reject correlation types, so
+// correlation-backed data types observe their member quantity types instead. Every blood
+// pressure correlation contains a systolic member sample, so that single type is a
+// faithful change trigger; no single nutrient is guaranteed present in a food
+// correlation, so nutrition observes all seven member types. Deterministic order
+// matters: partial-failure rollback walks the array in reverse.
+func makeBackgroundDeliverySampleTypes(dataType: String) throws -> [HKSampleType] {
     if dataType == "bloodPressure" {
-        return try makeBloodPressureQuantityTypes().systolic
+        return [try makeBloodPressureQuantityTypes().systolic]
     }
 
-    // No nutrition member type is a faithful change trigger (every nutrient is optional),
-    // and nutrition change tracking is deferred pending the correlation anchored-query
-    // spike. JS rejects nutrition before the bridge; failing loudly beats a silent no-op.
+    // Loose third-party dietary samples outside any food correlation can fire these
+    // observers; the resulting drain against the correlation anchor is empty and the
+    // acknowledge flow clears it, so spurious wake-ups are harmless.
     if dataType == "nutrition" {
-        throw permissionError("Change tracking is not supported for 'nutrition' yet")
+        return try makeNutritionQuantityTypes()
     }
 
-    return try makeHealthKitSampleType(dataType: dataType)
+    return [try makeHealthKitSampleType(dataType: dataType)]
 }

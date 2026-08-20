@@ -320,6 +320,20 @@ extension HybridNitroHealth {
                 recordId: uuid,
                 workoutSamples: [workout.nativeWorkoutSample]
             )
+        case "nutrition":
+            guard let correlation = sample as? HKCorrelation else {
+                throw unexpectedChangesSampleError(
+                    sample: sample,
+                    dataType: dataType,
+                    expectedType: "HKCorrelation"
+                )
+            }
+
+            return makeNativeHealthChange(
+                type: "upsert",
+                recordId: uuid,
+                nutritionSamples: [try correlation.nativeNutritionSample()]
+            )
         default:
             throw permissionError("Unsupported health data type: \(dataType)")
         }
@@ -374,7 +388,8 @@ extension HybridNitroHealth {
         vo2MaxSamples: [NativeVo2MaxSample]? = nil,
         sleepSamples: [NativeSleepSample]? = nil,
         bodyMassSamples: [NativeBodyMassSample]? = nil,
-        workoutSamples: [NativeWorkoutSample]? = nil
+        workoutSamples: [NativeWorkoutSample]? = nil,
+        nutritionSamples: [NativeNutritionSample]? = nil
     ) -> NativeHealthChange {
         return NativeHealthChange(
             type: type,
@@ -400,6 +415,7 @@ extension HybridNitroHealth {
             sleepSamples: sleepSamples,
             bodyMassSamples: bodyMassSamples,
             workoutSamples: workoutSamples,
+            nutritionSamples: nutritionSamples,
             dummyNonEquatable: nil
         )
     }

@@ -17,6 +17,7 @@ import type { NativeOxygenSaturationSample } from './NativeOxygenSaturationSampl
 import type { NativeRespiratoryRateSample } from './NativeRespiratoryRateSample'
 import type { NativeRestingHeartRateSample } from './NativeRestingHeartRateSample'
 import type { NativeSleepSample } from './NativeSleepSample'
+import type { NativeNutritionSample } from './NativeNutritionSample'
 import type { NativeStepSample } from './NativeStepSample'
 import type { NativeWorkoutSample } from './NativeWorkoutSample'
 
@@ -68,6 +69,8 @@ export interface NativeHealthChange {
   bodyMassSamples?: NativeBodyMassSample[]
   /** Workout samples for a `workout` upsert. */
   workoutSamples?: NativeWorkoutSample[]
+  /** Nutrition entries for a `nutrition` upsert. */
+  nutritionSamples?: NativeNutritionSample[]
   /** Prevents generated C++ equality until Nitro issue #1376 is resolved. */
   dummyNonEquatable?: () => void
 }

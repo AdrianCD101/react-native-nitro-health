@@ -9,7 +9,7 @@ final class NitroHealthBackgroundDelivery: NSObject {
 
     private let stateQueue = DispatchQueue(label: "com.nitrohealth.backgroundDelivery.state")
     private let operationQueue = BackgroundDeliveryOperationQueue()
-    private var observerQueries: [String: HKObserverQuery] = [:]
+    private var observerQueries: [String: [HKObserverQuery]] = [:]
     private var listener: (([String], String) -> Void)?
     private var inFlightDelivery: (id: String, notifications: [String: Int])?
     private var isEmissionScheduled = false
@@ -34,8 +34,8 @@ final class NitroHealthBackgroundDelivery: NSObject {
                     continue
                 }
 
-                let sampleType = try makeBackgroundDeliverySampleType(dataType: dataType)
-                _ = registerObserverIfNeeded(dataType: dataType, sampleType: sampleType)
+                let sampleTypes = try makeBackgroundDeliverySampleTypes(dataType: dataType)
+                _ = registerObserverIfNeeded(dataType: dataType, sampleTypes: sampleTypes)
 
                 Task { [weak self] in
                     guard let self else { return }
@@ -47,10 +47,12 @@ final class NitroHealthBackgroundDelivery: NSObject {
                             }
                             guard isStillConfigured else { return }
 
-                            try await healthStore.enableBackgroundDeliveryOrThrow(
-                                for: sampleType,
-                                frequency: frequency
-                            )
+                            for sampleType in sampleTypes {
+                                try await healthStore.enableBackgroundDeliveryOrThrow(
+                                    for: sampleType,
+                                    frequency: frequency
+                                )
+                            }
                         }
                     } catch {
                         NSLog(
@@ -126,7 +128,7 @@ final class NitroHealthBackgroundDelivery: NSObject {
         try await operationQueue.run { [self] in
             let uniqueDataTypes = Array(Set(dataTypes)).sorted()
             for dataType in uniqueDataTypes {
-                _ = try makeBackgroundDeliverySampleType(dataType: dataType)
+                _ = try makeBackgroundDeliverySampleTypes(dataType: dataType)
             }
             let previousConfiguration = stateQueue.sync { loadConfiguration() }
             let previousPendingNotifications = stateQueue.sync { loadPendingNotifications() }
@@ -177,7 +179,7 @@ final class NitroHealthBackgroundDelivery: NSObject {
     func disableAll() async throws {
         let configuration = stateQueue.sync { loadConfiguration() }
         let validDataTypes = configuration.keys.filter { dataType in
-            if (try? makeBackgroundDeliverySampleType(dataType: dataType)) != nil { return true }
+            if (try? makeBackgroundDeliverySampleTypes(dataType: dataType)) != nil { return true }
             NSLog("[NitroHealth] Removing unknown background delivery type %@", dataType)
             stateQueue.sync {
                 var updatedConfiguration = loadConfiguration()
@@ -196,11 +198,11 @@ final class NitroHealthBackgroundDelivery: NSObject {
         dataType: String,
         frequency: HKUpdateFrequency
     ) async throws {
-        let sampleType = try makeBackgroundDeliverySampleType(dataType: dataType)
+        let sampleTypes = try makeBackgroundDeliverySampleTypes(dataType: dataType)
         let previousFrequency = stateQueue.sync { loadConfiguration()[dataType] }
         let registeredObserver = registerObserverIfNeeded(
             dataType: dataType,
-            sampleType: sampleType
+            sampleTypes: sampleTypes
         )
 
         stateQueue.sync {
@@ -209,12 +211,38 @@ final class NitroHealthBackgroundDelivery: NSObject {
             saveConfiguration(configuration)
         }
 
+        var enabledSampleTypes = [HKSampleType]()
         do {
-            try await healthStore.enableBackgroundDeliveryOrThrow(
-                for: sampleType,
-                frequency: frequency
-            )
+            for sampleType in sampleTypes {
+                try await healthStore.enableBackgroundDeliveryOrThrow(
+                    for: sampleType,
+                    frequency: frequency
+                )
+                enabledSampleTypes.append(sampleType)
+            }
         } catch {
+            // Keep the dataType all-or-nothing: member types enabled before the failure
+            // return to their prior state (previous frequency, or disabled entirely).
+            for sampleType in enabledSampleTypes.reversed() {
+                do {
+                    if let previousRawValue = previousFrequency,
+                       let previous = HKUpdateFrequency(rawValue: previousRawValue) {
+                        try await healthStore.enableBackgroundDeliveryOrThrow(
+                            for: sampleType,
+                            frequency: previous
+                        )
+                    } else {
+                        try await healthStore.disableBackgroundDeliveryOrThrow(for: sampleType)
+                    }
+                } catch {
+                    NSLog(
+                        "[NitroHealth] Failed to roll back member delivery for %@: %@",
+                        dataType,
+                        error.localizedDescription
+                    )
+                }
+            }
+
             stateQueue.sync {
                 var configuration = loadConfiguration()
                 configuration[dataType] = previousFrequency
@@ -229,8 +257,39 @@ final class NitroHealthBackgroundDelivery: NSObject {
     }
 
     private func disableWithinOperation(dataType: String) async throws {
-        let sampleType = try makeBackgroundDeliverySampleType(dataType: dataType)
-        try await healthStore.disableBackgroundDeliveryOrThrow(for: sampleType)
+        let sampleTypes = try makeBackgroundDeliverySampleTypes(dataType: dataType)
+        let currentFrequencyRawValue = stateQueue.sync { loadConfiguration()[dataType] }
+
+        var disabledSampleTypes = [HKSampleType]()
+        do {
+            for sampleType in sampleTypes {
+                try await healthStore.disableBackgroundDeliveryOrThrow(for: sampleType)
+                disabledSampleTypes.append(sampleType)
+            }
+        } catch {
+            // Observers and configuration are untouched on partial failure, so the
+            // dataType stays fully configured; re-assert delivery for the members
+            // disabled before the failure.
+            if let rawValue = currentFrequencyRawValue,
+               let frequency = HKUpdateFrequency(rawValue: rawValue) {
+                for sampleType in disabledSampleTypes.reversed() {
+                    do {
+                        try await healthStore.enableBackgroundDeliveryOrThrow(
+                            for: sampleType,
+                            frequency: frequency
+                        )
+                    } catch {
+                        NSLog(
+                            "[NitroHealth] Failed to roll back member disable for %@: %@",
+                            dataType,
+                            error.localizedDescription
+                        )
+                    }
+                }
+            }
+            throw error
+        }
+
         removeObserver(dataType: dataType, clearPending: true)
 
         stateQueue.sync {
@@ -276,36 +335,38 @@ final class NitroHealthBackgroundDelivery: NSObject {
 
     private func registerObserverIfNeeded(
         dataType: String,
-        sampleType: HKSampleType
+        sampleTypes: [HKSampleType]
     ) -> Bool {
         return stateQueue.sync {
             guard observerQueries[dataType] == nil else { return false }
 
-            let query = HKObserverQuery(sampleType: sampleType, predicate: nil) {
-                [weak self] query, completion, error in
-                guard let self else {
-                    completion()
-                    return
-                }
+            let queries = sampleTypes.map { sampleType in
+                HKObserverQuery(sampleType: sampleType, predicate: nil) {
+                    [weak self] query, completion, error in
+                    guard let self else {
+                        completion()
+                        return
+                    }
 
-                self.handleObserverCallback(
-                    dataType: dataType,
-                    query: query,
-                    error: error,
-                    completion: completion
-                )
+                    self.handleObserverCallback(
+                        dataType: dataType,
+                        query: query,
+                        error: error,
+                        completion: completion
+                    )
+                }
             }
 
-            observerQueries[dataType] = query
-            healthStore.execute(query)
+            observerQueries[dataType] = queries
+            queries.forEach { healthStore.execute($0) }
             return true
         }
     }
 
     private func removeObserver(dataType: String, clearPending: Bool) {
         stateQueue.sync {
-            if let query = observerQueries.removeValue(forKey: dataType) {
-                healthStore.stop(query)
+            if let queries = observerQueries.removeValue(forKey: dataType) {
+                queries.forEach { healthStore.stop($0) }
             }
 
             if clearPending {
@@ -323,7 +384,7 @@ final class NitroHealthBackgroundDelivery: NSObject {
         completion: @escaping HKObserverQueryCompletionHandler
     ) {
         stateQueue.async {
-            guard self.observerQueries[dataType] === query else {
+            guard self.observerQueries[dataType]?.contains(where: { $0 === query }) == true else {
                 completion()
                 return
             }

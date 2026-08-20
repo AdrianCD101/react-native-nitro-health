@@ -31,22 +31,18 @@ const healthDataTypes = new Set([
 ])
 
 const aggregateOnlyDataTypes = new Set(['basalEnergyBurned', 'totalEnergyBurned'])
-const changeTrackingUnsupportedDataTypes = new Set(['nutrition'])
 
 function validateDataTypes(values, label) {
   for (const [index, value] of values.entries()) {
     if (!healthDataTypes.has(value)) {
       return new Error(`${label}[${index}]: unsupported health data type '${value}'`)
     }
-    if (changeTrackingUnsupportedDataTypes.has(value)) {
-      return new Error(`${label}[${index}]: change tracking is not supported for '${value}' yet`)
-    }
   }
 }
 
 function validateChangeTrackedDataType(dataType) {
-  if (changeTrackingUnsupportedDataTypes.has(dataType)) {
-    return new Error(`Change tracking is not supported for '${dataType}' yet`)
+  if (!healthDataTypes.has(dataType)) {
+    return new Error(`Change tracking is not supported for '${dataType}'`)
   }
 }
 
