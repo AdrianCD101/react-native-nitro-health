@@ -130,7 +130,7 @@ jobs:
 
       - name: Upload Android Harness diagnostics
         if: ${{ failure() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: harness-android-diagnostics
           if-no-files-found: warn
@@ -221,7 +221,7 @@ jobs:
 
       - name: Upload iOS Harness diagnostics
         if: ${{ failure() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: harness-ios-diagnostics
           if-no-files-found: warn
