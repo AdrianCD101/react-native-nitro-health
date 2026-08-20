@@ -16,6 +16,8 @@ import androidx.health.connect.client.records.HeartRateVariabilityRmssdRecord
 import androidx.health.connect.client.records.HeightRecord
 import androidx.health.connect.client.records.HydrationRecord
 import androidx.health.connect.client.records.LeanBodyMassRecord
+import androidx.health.connect.client.records.MealType
+import androidx.health.connect.client.records.NutritionRecord
 import androidx.health.connect.client.records.OxygenSaturationRecord
 import androidx.health.connect.client.records.Record
 import androidx.health.connect.client.records.RespiratoryRateRecord
@@ -53,6 +55,7 @@ import com.margelo.nitro.nitrohealth.NativeHeartRateVariabilitySample
 import com.margelo.nitro.nitrohealth.NativeHeightSample
 import com.margelo.nitro.nitrohealth.NativeHydrationSample
 import com.margelo.nitro.nitrohealth.NativeLeanBodyMassSample
+import com.margelo.nitro.nitrohealth.NativeNutritionSample
 import com.margelo.nitro.nitrohealth.NativeOxygenSaturationSample
 import com.margelo.nitro.nitrohealth.NativeRespiratoryRateSample
 import com.margelo.nitro.nitrohealth.NativeRestingHeartRateSample
@@ -158,7 +161,8 @@ class RecordToNativeParityTest {
             change.vo2MaxSamples,
             change.sleepSamples,
             change.bodyMassSamples,
-            change.workoutSamples
+            change.workoutSamples,
+            change.nutritionSamples
         ).count { it != null }
     }
 
@@ -313,6 +317,17 @@ class RecordToNativeParityTest {
                 endZoneOffset = null,
                 exerciseType = ExerciseSessionRecord.EXERCISE_TYPE_RUNNING,
                 metadata = metadata
+            ),
+            "nutrition" to NutritionRecord(
+                startTime = start,
+                startZoneOffset = null,
+                endTime = end,
+                endZoneOffset = null,
+                energy = Energy.kilocalories(640.0),
+                protein = Mass.grams(42.0),
+                name = "Chicken salad",
+                mealType = MealType.MEAL_TYPE_LUNCH,
+                metadata = metadata
             )
         )
     }
@@ -340,6 +355,7 @@ class RecordToNativeParityTest {
             is SleepSessionRecord -> makeNativeSleepSamples(record).toList()
             is WeightRecord -> listOf(makeNativeBodyMassSample(record))
             is ExerciseSessionRecord -> listOf(makeNativeWorkoutSample(record))
+            is NutritionRecord -> listOf(makeNativeNutritionSample(record))
             else -> error("Unsupported test record ${record.javaClass.name}")
         }
     }
@@ -367,6 +383,7 @@ class RecordToNativeParityTest {
             is SleepSessionRecord -> change.sleepSamples!!.toList()
             is WeightRecord -> change.bodyMassSamples!!.toList()
             is ExerciseSessionRecord -> change.workoutSamples!!.toList()
+            is NutritionRecord -> change.nutritionSamples!!.toList()
             else -> error("Unsupported test record ${record.javaClass.name}")
         }
     }
@@ -394,6 +411,7 @@ class RecordToNativeParityTest {
             is NativeSleepSample -> sample.sampleMetadata
             is NativeBodyMassSample -> sample.sampleMetadata
             is NativeWorkoutSample -> sample.sampleMetadata
+            is NativeNutritionSample -> sample.sampleMetadata
             else -> error("Unsupported test sample ${sample.javaClass.name}")
         }
     }

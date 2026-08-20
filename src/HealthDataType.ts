@@ -35,10 +35,11 @@ export type WritableHealthDataType = Exclude<HealthDataType, 'heartRateVariabili
 /**
  * Health data type supported by change tracking and background change delivery.
  *
- * `nutrition` is excluded until HealthKit anchored-query behavior over food correlations
- * is verified; requesting it rejects loudly rather than delivering incomplete changes.
+ * Every raw-readable data type is change-tracked, including `nutrition`: anchored queries
+ * and Health Connect change tokens both operate on the record that owns the samples (the
+ * food correlation on iOS, `NutritionRecord` on Android).
  */
-export type ChangeTrackedHealthDataType = Exclude<HealthDataType, 'nutrition'>
+export type ChangeTrackedHealthDataType = HealthDataType
 
 /**
  * Energy concept that exists only as an aggregate: HealthKit has no total-energy sample type and

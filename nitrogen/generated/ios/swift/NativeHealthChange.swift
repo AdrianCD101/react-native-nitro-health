@@ -18,7 +18,7 @@ public extension NativeHealthChange {
   /**
    * Create a new instance of `NativeHealthChange`.
    */
-  init(type: String, recordId: String, stepSamples: [NativeStepSample]?, heartRateSamples: [NativeHeartRateSample]?, bloodPressureSamples: [NativeBloodPressureSample]?, bloodGlucoseSamples: [NativeBloodGlucoseSample]?, bodyTemperatureSamples: [NativeBodyTemperatureSample]?, respiratoryRateSamples: [NativeRespiratoryRateSample]?, bodyFatSamples: [NativeBodyFatSample]?, leanBodyMassSamples: [NativeLeanBodyMassSample]?, basalBodyTemperatureSamples: [NativeBasalBodyTemperatureSample]?, restingHeartRateSamples: [NativeRestingHeartRateSample]?, heartRateVariabilitySamples: [NativeHeartRateVariabilitySample]?, distanceSamples: [NativeDistanceSample]?, activeEnergyBurnedSamples: [NativeActiveEnergyBurnedSample]?, hydrationSamples: [NativeHydrationSample]?, floorsClimbedSamples: [NativeFloorsClimbedSample]?, oxygenSaturationSamples: [NativeOxygenSaturationSample]?, heightSamples: [NativeHeightSample]?, vo2MaxSamples: [NativeVo2MaxSample]?, sleepSamples: [NativeSleepSample]?, bodyMassSamples: [NativeBodyMassSample]?, workoutSamples: [NativeWorkoutSample]?, dummyNonEquatable: (() -> Void)?) {
+  init(type: String, recordId: String, stepSamples: [NativeStepSample]?, heartRateSamples: [NativeHeartRateSample]?, bloodPressureSamples: [NativeBloodPressureSample]?, bloodGlucoseSamples: [NativeBloodGlucoseSample]?, bodyTemperatureSamples: [NativeBodyTemperatureSample]?, respiratoryRateSamples: [NativeRespiratoryRateSample]?, bodyFatSamples: [NativeBodyFatSample]?, leanBodyMassSamples: [NativeLeanBodyMassSample]?, basalBodyTemperatureSamples: [NativeBasalBodyTemperatureSample]?, restingHeartRateSamples: [NativeRestingHeartRateSample]?, heartRateVariabilitySamples: [NativeHeartRateVariabilitySample]?, distanceSamples: [NativeDistanceSample]?, activeEnergyBurnedSamples: [NativeActiveEnergyBurnedSample]?, hydrationSamples: [NativeHydrationSample]?, floorsClimbedSamples: [NativeFloorsClimbedSample]?, oxygenSaturationSamples: [NativeOxygenSaturationSample]?, heightSamples: [NativeHeightSample]?, vo2MaxSamples: [NativeVo2MaxSample]?, sleepSamples: [NativeSleepSample]?, bodyMassSamples: [NativeBodyMassSample]?, workoutSamples: [NativeWorkoutSample]?, nutritionSamples: [NativeNutritionSample]?, dummyNonEquatable: (() -> Void)?) {
     self.init(std.string(type), std.string(recordId), { () -> bridge.std__optional_std__vector_NativeStepSample__ in
       if let __unwrappedValue = stepSamples {
         return bridge.create_std__optional_std__vector_NativeStepSample__({ () -> bridge.std__vector_NativeStepSample_ in
@@ -263,6 +263,18 @@ public extension NativeHealthChange {
       if let __unwrappedValue = workoutSamples {
         return bridge.create_std__optional_std__vector_NativeWorkoutSample__({ () -> bridge.std__vector_NativeWorkoutSample_ in
           var __vector = bridge.create_std__vector_NativeWorkoutSample_(__unwrappedValue.count)
+          for __item in __unwrappedValue {
+            __vector.push_back(__item)
+          }
+          return __vector
+        }())
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_std__vector_NativeNutritionSample__ in
+      if let __unwrappedValue = nutritionSamples {
+        return bridge.create_std__optional_std__vector_NativeNutritionSample__({ () -> bridge.std__vector_NativeNutritionSample_ in
+          var __vector = bridge.create_std__vector_NativeNutritionSample_(__unwrappedValue.count)
           for __item in __unwrappedValue {
             __vector.push_back(__item)
           }
@@ -538,6 +550,18 @@ public extension NativeHealthChange {
     return { () -> [NativeWorkoutSample]? in
       if bridge.has_value_std__optional_std__vector_NativeWorkoutSample__(self.__workoutSamples) {
         let __unwrapped = bridge.get_std__optional_std__vector_NativeWorkoutSample__(self.__workoutSamples)
+        return __unwrapped.map({ __item in __item })
+      } else {
+        return nil
+      }
+    }()
+  }
+  
+  @inline(__always)
+  var nutritionSamples: [NativeNutritionSample]? {
+    return { () -> [NativeNutritionSample]? in
+      if bridge.has_value_std__optional_std__vector_NativeNutritionSample__(self.__nutritionSamples) {
+        let __unwrapped = bridge.get_std__optional_std__vector_NativeNutritionSample__(self.__nutritionSamples)
         return __unwrapped.map({ __item in __item })
       } else {
         return nil

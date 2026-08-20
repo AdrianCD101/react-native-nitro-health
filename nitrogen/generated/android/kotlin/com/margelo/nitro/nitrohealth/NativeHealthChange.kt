@@ -89,13 +89,16 @@ data class NativeHealthChange(
   val workoutSamples: Array<NativeWorkoutSample>?,
   @DoNotStrip
   @Keep
+  val nutritionSamples: Array<NativeNutritionSample>?,
+  @DoNotStrip
+  @Keep
   val dummyNonEquatable: Func_void?
 ) {
   /**
    * Create a new instance of NativeHealthChange from Kotlin
    */
-  constructor(type: String, recordId: String, stepSamples: Array<NativeStepSample>?, heartRateSamples: Array<NativeHeartRateSample>?, bloodPressureSamples: Array<NativeBloodPressureSample>?, bloodGlucoseSamples: Array<NativeBloodGlucoseSample>?, bodyTemperatureSamples: Array<NativeBodyTemperatureSample>?, respiratoryRateSamples: Array<NativeRespiratoryRateSample>?, bodyFatSamples: Array<NativeBodyFatSample>?, leanBodyMassSamples: Array<NativeLeanBodyMassSample>?, basalBodyTemperatureSamples: Array<NativeBasalBodyTemperatureSample>?, restingHeartRateSamples: Array<NativeRestingHeartRateSample>?, heartRateVariabilitySamples: Array<NativeHeartRateVariabilitySample>?, distanceSamples: Array<NativeDistanceSample>?, activeEnergyBurnedSamples: Array<NativeActiveEnergyBurnedSample>?, hydrationSamples: Array<NativeHydrationSample>?, floorsClimbedSamples: Array<NativeFloorsClimbedSample>?, oxygenSaturationSamples: Array<NativeOxygenSaturationSample>?, heightSamples: Array<NativeHeightSample>?, vo2MaxSamples: Array<NativeVo2MaxSample>?, sleepSamples: Array<NativeSleepSample>?, bodyMassSamples: Array<NativeBodyMassSample>?, workoutSamples: Array<NativeWorkoutSample>?, dummyNonEquatable: (() -> Unit)?):
-         this(type, recordId, stepSamples, heartRateSamples, bloodPressureSamples, bloodGlucoseSamples, bodyTemperatureSamples, respiratoryRateSamples, bodyFatSamples, leanBodyMassSamples, basalBodyTemperatureSamples, restingHeartRateSamples, heartRateVariabilitySamples, distanceSamples, activeEnergyBurnedSamples, hydrationSamples, floorsClimbedSamples, oxygenSaturationSamples, heightSamples, vo2MaxSamples, sleepSamples, bodyMassSamples, workoutSamples, dummyNonEquatable?.let { Func_void_java(it) })
+  constructor(type: String, recordId: String, stepSamples: Array<NativeStepSample>?, heartRateSamples: Array<NativeHeartRateSample>?, bloodPressureSamples: Array<NativeBloodPressureSample>?, bloodGlucoseSamples: Array<NativeBloodGlucoseSample>?, bodyTemperatureSamples: Array<NativeBodyTemperatureSample>?, respiratoryRateSamples: Array<NativeRespiratoryRateSample>?, bodyFatSamples: Array<NativeBodyFatSample>?, leanBodyMassSamples: Array<NativeLeanBodyMassSample>?, basalBodyTemperatureSamples: Array<NativeBasalBodyTemperatureSample>?, restingHeartRateSamples: Array<NativeRestingHeartRateSample>?, heartRateVariabilitySamples: Array<NativeHeartRateVariabilitySample>?, distanceSamples: Array<NativeDistanceSample>?, activeEnergyBurnedSamples: Array<NativeActiveEnergyBurnedSample>?, hydrationSamples: Array<NativeHydrationSample>?, floorsClimbedSamples: Array<NativeFloorsClimbedSample>?, oxygenSaturationSamples: Array<NativeOxygenSaturationSample>?, heightSamples: Array<NativeHeightSample>?, vo2MaxSamples: Array<NativeVo2MaxSample>?, sleepSamples: Array<NativeSleepSample>?, bodyMassSamples: Array<NativeBodyMassSample>?, workoutSamples: Array<NativeWorkoutSample>?, nutritionSamples: Array<NativeNutritionSample>?, dummyNonEquatable: (() -> Unit)?):
+         this(type, recordId, stepSamples, heartRateSamples, bloodPressureSamples, bloodGlucoseSamples, bodyTemperatureSamples, respiratoryRateSamples, bodyFatSamples, leanBodyMassSamples, basalBodyTemperatureSamples, restingHeartRateSamples, heartRateVariabilitySamples, distanceSamples, activeEnergyBurnedSamples, hydrationSamples, floorsClimbedSamples, oxygenSaturationSamples, heightSamples, vo2MaxSamples, sleepSamples, bodyMassSamples, workoutSamples, nutritionSamples, dummyNonEquatable?.let { Func_void_java(it) })
 
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
@@ -123,6 +126,7 @@ data class NativeHealthChange(
       && Objects.deepEquals(this.sleepSamples, other.sleepSamples)
       && Objects.deepEquals(this.bodyMassSamples, other.bodyMassSamples)
       && Objects.deepEquals(this.workoutSamples, other.workoutSamples)
+      && Objects.deepEquals(this.nutritionSamples, other.nutritionSamples)
       && Objects.deepEquals(this.dummyNonEquatable, other.dummyNonEquatable)
   }
 
@@ -151,6 +155,7 @@ data class NativeHealthChange(
       sleepSamples,
       bodyMassSamples,
       workoutSamples,
+      nutritionSamples,
       dummyNonEquatable
     ).contentDeepHashCode()
   }
@@ -163,8 +168,8 @@ data class NativeHealthChange(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(type: String, recordId: String, stepSamples: Array<NativeStepSample>?, heartRateSamples: Array<NativeHeartRateSample>?, bloodPressureSamples: Array<NativeBloodPressureSample>?, bloodGlucoseSamples: Array<NativeBloodGlucoseSample>?, bodyTemperatureSamples: Array<NativeBodyTemperatureSample>?, respiratoryRateSamples: Array<NativeRespiratoryRateSample>?, bodyFatSamples: Array<NativeBodyFatSample>?, leanBodyMassSamples: Array<NativeLeanBodyMassSample>?, basalBodyTemperatureSamples: Array<NativeBasalBodyTemperatureSample>?, restingHeartRateSamples: Array<NativeRestingHeartRateSample>?, heartRateVariabilitySamples: Array<NativeHeartRateVariabilitySample>?, distanceSamples: Array<NativeDistanceSample>?, activeEnergyBurnedSamples: Array<NativeActiveEnergyBurnedSample>?, hydrationSamples: Array<NativeHydrationSample>?, floorsClimbedSamples: Array<NativeFloorsClimbedSample>?, oxygenSaturationSamples: Array<NativeOxygenSaturationSample>?, heightSamples: Array<NativeHeightSample>?, vo2MaxSamples: Array<NativeVo2MaxSample>?, sleepSamples: Array<NativeSleepSample>?, bodyMassSamples: Array<NativeBodyMassSample>?, workoutSamples: Array<NativeWorkoutSample>?, dummyNonEquatable: Func_void?): NativeHealthChange {
-      return NativeHealthChange(type, recordId, stepSamples, heartRateSamples, bloodPressureSamples, bloodGlucoseSamples, bodyTemperatureSamples, respiratoryRateSamples, bodyFatSamples, leanBodyMassSamples, basalBodyTemperatureSamples, restingHeartRateSamples, heartRateVariabilitySamples, distanceSamples, activeEnergyBurnedSamples, hydrationSamples, floorsClimbedSamples, oxygenSaturationSamples, heightSamples, vo2MaxSamples, sleepSamples, bodyMassSamples, workoutSamples, dummyNonEquatable)
+    private fun fromCpp(type: String, recordId: String, stepSamples: Array<NativeStepSample>?, heartRateSamples: Array<NativeHeartRateSample>?, bloodPressureSamples: Array<NativeBloodPressureSample>?, bloodGlucoseSamples: Array<NativeBloodGlucoseSample>?, bodyTemperatureSamples: Array<NativeBodyTemperatureSample>?, respiratoryRateSamples: Array<NativeRespiratoryRateSample>?, bodyFatSamples: Array<NativeBodyFatSample>?, leanBodyMassSamples: Array<NativeLeanBodyMassSample>?, basalBodyTemperatureSamples: Array<NativeBasalBodyTemperatureSample>?, restingHeartRateSamples: Array<NativeRestingHeartRateSample>?, heartRateVariabilitySamples: Array<NativeHeartRateVariabilitySample>?, distanceSamples: Array<NativeDistanceSample>?, activeEnergyBurnedSamples: Array<NativeActiveEnergyBurnedSample>?, hydrationSamples: Array<NativeHydrationSample>?, floorsClimbedSamples: Array<NativeFloorsClimbedSample>?, oxygenSaturationSamples: Array<NativeOxygenSaturationSample>?, heightSamples: Array<NativeHeightSample>?, vo2MaxSamples: Array<NativeVo2MaxSample>?, sleepSamples: Array<NativeSleepSample>?, bodyMassSamples: Array<NativeBodyMassSample>?, workoutSamples: Array<NativeWorkoutSample>?, nutritionSamples: Array<NativeNutritionSample>?, dummyNonEquatable: Func_void?): NativeHealthChange {
+      return NativeHealthChange(type, recordId, stepSamples, heartRateSamples, bloodPressureSamples, bloodGlucoseSamples, bodyTemperatureSamples, respiratoryRateSamples, bodyFatSamples, leanBodyMassSamples, basalBodyTemperatureSamples, restingHeartRateSamples, heartRateVariabilitySamples, distanceSamples, activeEnergyBurnedSamples, hydrationSamples, floorsClimbedSamples, oxygenSaturationSamples, heightSamples, vo2MaxSamples, sleepSamples, bodyMassSamples, workoutSamples, nutritionSamples, dummyNonEquatable)
     }
   }
 }

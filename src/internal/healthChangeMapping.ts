@@ -20,6 +20,7 @@ import {
   makeHeightSample,
   makeHydrationSample,
   makeLeanBodyMassSample,
+  makeNutritionSample,
   makeOxygenSaturationSample,
   makeRespiratoryRateSample,
   makeRestingHeartRateSample,
@@ -51,6 +52,7 @@ const CHANGE_SAMPLE_FIELDS = [
   'sleepSamples',
   'bodyMassSamples',
   'workoutSamples',
+  'nutritionSamples',
 ] as const
 
 function assertNativeChangeIdentity(change: NativeHealthChange): void {
@@ -179,6 +181,11 @@ function makeUpsertSamples(
       if (change.workoutSamples === undefined)
         throw new Error("Native 'workout' upsert is missing samples")
       samples = change.workoutSamples.map(makeWorkoutSample)
+      break
+    case 'nutrition':
+      if (change.nutritionSamples === undefined)
+        throw new Error("Native 'nutrition' upsert is missing samples")
+      samples = change.nutritionSamples.map(makeNutritionSample)
       break
   }
 

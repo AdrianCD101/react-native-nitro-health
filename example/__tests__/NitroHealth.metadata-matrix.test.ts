@@ -1,5 +1,4 @@
 import type {
-  ChangeTrackedHealthDataType,
   HealthDataType,
   HealthSample,
   HealthSampleByDataType,
@@ -71,13 +70,10 @@ type NativeChangeSampleField = {
     : never
 }[keyof NativeHealthChange]
 
-// Change tracking is deferred for nutrition, so its case carries no change payload and the
-// matrix test asserts the loud rejection instead of a change round-trip.
 type ReadCase<K extends HealthDataType> = {
   read: () => Promise<HealthSampleByDataType[K]>
-} & (K extends ChangeTrackedHealthDataType
-  ? { change: NativeHealthChange }
-  : { change?: undefined })
+  change: NativeHealthChange
+}
 
 type ReadMatrix = {
   [K in HealthDataType]: ReadCase<K>
@@ -353,7 +349,7 @@ const readMatrix = {
       mockNitroHealth.readNutrition.mockResolvedValue({ samples: [nativeSamples.nutrition] })
       return (await NitroHealth.readNutrition(query)).samples[0]!
     },
-    change: undefined,
+    change: nativeUpsert('nutritionSamples', [nativeSamples.nutrition]),
   },
 } satisfies ReadMatrix
 
@@ -529,16 +525,6 @@ const writeMatrix = {
 const readCases = Object.entries(readMatrix) as Array<
   { [K in HealthDataType]: [K, (typeof readMatrix)[K]] }[HealthDataType]
 >
-// Nutrition reads participate in the metadata matrix but change tracking is deferred for
-// it, so the change round-trip runs only for change-tracked types and nutrition gets a
-// dedicated rejection test below.
-const changeTrackedReadCases = readCases.filter(
-  (
-    entry
-  ): entry is {
-    [K in ChangeTrackedHealthDataType]: [K, (typeof readMatrix)[K]]
-  }[ChangeTrackedHealthDataType] => entry[1].change !== undefined
-)
 const writeCases = Object.entries(writeMatrix) as Array<
   { [K in WritableHealthDataType]: [K, (typeof writeMatrix)[K]] }[WritableHealthDataType]
 >
@@ -548,7 +534,7 @@ describe('NitroHealth scalar metadata matrices', () => {
     jest.clearAllMocks()
   })
 
-  it.each(changeTrackedReadCases)(
+  it.each(readCases)(
     '%s maps common metadata identically for reads and changes',
     async (dataType, descriptor) => {
       const readSample = await descriptor.read()
@@ -572,17 +558,6 @@ describe('NitroHealth scalar metadata matrices', () => {
       expect(change.samples).toEqual([readSample])
     }
   )
-
-  it('nutrition maps common metadata for reads and rejects change tracking', async () => {
-    const readSample = await readMatrix.nutrition.read()
-
-    expect(readSample).toMatchObject(expectedSampleMetadata)
-
-    await expect(
-      NitroHealth.getChanges('nutrition' as ChangeTrackedHealthDataType, 'current-token')
-    ).rejects.toThrow("Change tracking is not supported for 'nutrition' yet")
-    expect(mockNitroHealth.getChanges).not.toHaveBeenCalled()
-  })
 
   it.each(writeCases)(
     '%s writes scalar provenance with sync metadata',

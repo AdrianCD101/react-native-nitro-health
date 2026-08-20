@@ -856,7 +856,10 @@ Buckets anchor at `startDate`. Use local midnight for calendar-day buckets. `wee
 
 Change tokens are durable synchronization checkpoints. They are different from pagination cursors. Persist one token per `ChangeTrackedHealthDataType` and device/store.
 
-`nutrition` does not support change tracking yet: HealthKit anchored-query behavior over food correlations is unverified, so requesting it rejects loudly (and is excluded at the type level) rather than delivering incomplete changes.
+Every raw-readable data type is change-tracked, including `nutrition`. Nutrition changes operate on the record that owns the entry — the food correlation on iOS, `NutritionRecord` on Android — so an upsert carries the complete current entry and a delete identifies the exact record that died, matching every other type's contract. Two nutrition-specific semantics worth knowing:
+
+- **iOS versioned re-saves surface as a delete + upsert pair.** HealthKit replaces a synced record instead of updating it in place, so a higher-version `saveNutrition` produces a delete of the old record identity followed by an upsert with a new one (Android updates in place and keeps its record id). This is the same replacement behavior as every other type; reconcile through the record identity in each change.
+- **Background wake-ups observe the seven member nutrient types.** HealthKit rejects correlation types for observer queries, so `configureBackgroundChanges(['nutrition'])` observes the dietary member types (energy, protein, carbohydrate, fat, fiber, sugar, sodium) and coalesces them into one `nutrition` notification. A loose third-party dietary sample outside any food correlation can therefore fire a spurious wake-up whose `getChanges` drain is empty — treat an empty drain as "nothing to do", never as an error.
 
 Create the token before the initial snapshot so changes that occur while paging the snapshot are not lost:
 

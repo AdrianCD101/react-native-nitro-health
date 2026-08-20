@@ -132,6 +132,10 @@ namespace margelo::nitro::nitrohealth { enum class NativeWorkoutActivityStatus; 
 namespace margelo::nitro::nitrohealth { enum class NativeWorkoutActivityPortability; }
 // Forward declaration of `NativeWorkoutActivityMapping` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class NativeWorkoutActivityMapping; }
+// Forward declaration of `NativeNutritionSample` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeNutritionSample; }
+// Forward declaration of `NativeNutritionMealType` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { enum class NativeNutritionMealType; }
 // Forward declaration of `NativeStepSamplePage` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeStepSamplePage; }
 // Forward declaration of `NativeHealthDateRangeQuery` to properly resolve imports.
@@ -186,10 +190,6 @@ namespace margelo::nitro::nitrohealth { struct NativeSleepSamplePage; }
 namespace margelo::nitro::nitrohealth { struct NativeWorkoutSamplePage; }
 // Forward declaration of `NativeNutritionSamplePage` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeNutritionSamplePage; }
-// Forward declaration of `NativeNutritionSample` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { struct NativeNutritionSample; }
-// Forward declaration of `NativeNutritionMealType` to properly resolve imports.
-namespace margelo::nitro::nitrohealth { enum class NativeNutritionMealType; }
 // Forward declaration of `NativeHealthWriteResult` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthWriteResult; }
 // Forward declaration of `NativeStepSampleInput` to properly resolve imports.
@@ -328,6 +328,8 @@ namespace margelo::nitro::nitrohealth { enum class NativeHealthAuthorizationStat
 #include "NativeWorkoutActivityStatus.hpp"
 #include "NativeWorkoutActivityPortability.hpp"
 #include "NativeWorkoutActivityMapping.hpp"
+#include "NativeNutritionSample.hpp"
+#include "NativeNutritionMealType.hpp"
 #include "NativeStepSamplePage.hpp"
 #include "NativeHealthDateRangeQuery.hpp"
 #include "NativeDistanceSamplePage.hpp"
@@ -355,8 +357,6 @@ namespace margelo::nitro::nitrohealth { enum class NativeHealthAuthorizationStat
 #include "NativeSleepSamplePage.hpp"
 #include "NativeWorkoutSamplePage.hpp"
 #include "NativeNutritionSamplePage.hpp"
-#include "NativeNutritionSample.hpp"
-#include "NativeNutritionMealType.hpp"
 #include "NativeHealthWriteResult.hpp"
 #include "NativeStepSampleInput.hpp"
 #include "NativeHealthWriteMetadata.hpp"

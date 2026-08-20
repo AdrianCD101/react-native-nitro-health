@@ -504,6 +504,25 @@ describe('NitroHealth changes contract', () => {
     )
   })
 
+  it('rejects a nutrition upsert carrying a foreign sample payload', async () => {
+    mockNitroHealth.getChanges.mockResolvedValue({
+      changes: [
+        {
+          type: 'upsert',
+          recordId: 'nutrition-1',
+          stepSamples: [],
+        },
+      ],
+      nextChangesToken: 'must-not-surface',
+      hasMore: false,
+      tokenExpired: false,
+    })
+
+    await expect(NitroHealth.getChanges('nutrition', 'current-token')).rejects.toThrow(
+      "Native 'nutrition' upsert is missing samples"
+    )
+  })
+
   it('rejects samples whose parent identity does not match the changed record', async () => {
     const startTimeMs = Date.parse('2026-01-01T00:00:00.000Z')
     const endTimeMs = Date.parse('2026-01-01T01:00:00.000Z')

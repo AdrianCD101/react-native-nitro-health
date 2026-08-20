@@ -31,8 +31,6 @@ const HEALTH_DATA_TYPES = new Set<string>([
   'nutrition',
 ] satisfies HealthDataType[])
 
-const CHANGE_TRACKING_UNSUPPORTED_DATA_TYPES = new Set<HealthDataType>(['nutrition'])
-
 const AGGREGATE_ONLY_DATA_TYPES = new Set<string>([
   'basalEnergyBurned',
   'totalEnergyBurned',
@@ -53,12 +51,6 @@ function isHealthDataType(value: string): value is HealthDataType {
 
 function isAggregateOnlyHealthDataType(value: string): value is AggregateOnlyHealthDataType {
   return AGGREGATE_ONLY_DATA_TYPES.has(value)
-}
-
-function isChangeTrackedHealthDataType(
-  dataType: HealthDataType
-): dataType is ChangeTrackedHealthDataType {
-  return !CHANGE_TRACKING_UNSUPPORTED_DATA_TYPES.has(dataType)
 }
 
 export function assertPermissions(permissions: HealthPermission[]): void {
@@ -94,8 +86,8 @@ export function parseHealthDataTypes(values: readonly string[], label: string): 
 }
 
 export function assertChangeTrackedHealthDataType(dataType: HealthDataType): void {
-  if (CHANGE_TRACKING_UNSUPPORTED_DATA_TYPES.has(dataType)) {
-    throw new Error(`Change tracking is not supported for '${dataType}' yet`)
+  if (!isHealthDataType(dataType)) {
+    throw new Error(`Change tracking is not supported for '${String(dataType)}'`)
   }
 }
 
@@ -103,12 +95,7 @@ export function parseChangeTrackedHealthDataTypes(
   values: readonly string[],
   label: string
 ): ChangeTrackedHealthDataType[] {
-  return parseHealthDataTypes(values, label).map((dataType, index) => {
-    if (!isChangeTrackedHealthDataType(dataType)) {
-      throw new Error(`${label}[${index}]: change tracking is not supported for '${dataType}' yet`)
-    }
-    return dataType
-  })
+  return parseHealthDataTypes(values, label)
 }
 
 export function dateToTimeMs(value: Date, message: string): number {

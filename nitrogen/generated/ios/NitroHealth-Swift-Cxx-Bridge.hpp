@@ -1528,6 +1528,47 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return optional.value();
   }
   
+  // pragma MARK: std::optional<NativeNutritionMealType>
+  /**
+   * Specialized version of `std::optional<NativeNutritionMealType>`.
+   */
+  using std__optional_NativeNutritionMealType_ = std::optional<NativeNutritionMealType>;
+  inline std::optional<NativeNutritionMealType> create_std__optional_NativeNutritionMealType_(const NativeNutritionMealType& value) noexcept {
+    return std::optional<NativeNutritionMealType>(value);
+  }
+  inline bool has_value_std__optional_NativeNutritionMealType_(const std::optional<NativeNutritionMealType>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline NativeNutritionMealType get_std__optional_NativeNutritionMealType_(const std::optional<NativeNutritionMealType>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::vector<NativeNutritionSample>
+  /**
+   * Specialized version of `std::vector<NativeNutritionSample>`.
+   */
+  using std__vector_NativeNutritionSample_ = std::vector<NativeNutritionSample>;
+  inline std::vector<NativeNutritionSample> create_std__vector_NativeNutritionSample_(size_t size) noexcept {
+    std::vector<NativeNutritionSample> vector;
+    vector.reserve(size);
+    return vector;
+  }
+  
+  // pragma MARK: std::optional<std::vector<NativeNutritionSample>>
+  /**
+   * Specialized version of `std::optional<std::vector<NativeNutritionSample>>`.
+   */
+  using std__optional_std__vector_NativeNutritionSample__ = std::optional<std::vector<NativeNutritionSample>>;
+  inline std::optional<std::vector<NativeNutritionSample>> create_std__optional_std__vector_NativeNutritionSample__(const std::vector<NativeNutritionSample>& value) noexcept {
+    return std::optional<std::vector<NativeNutritionSample>>(value);
+  }
+  inline bool has_value_std__optional_std__vector_NativeNutritionSample__(const std::optional<std::vector<NativeNutritionSample>>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline std::vector<NativeNutritionSample> get_std__optional_std__vector_NativeNutritionSample__(const std::optional<std::vector<NativeNutritionSample>>& optional) noexcept {
+    return optional.value();
+  }
+  
   // pragma MARK: std::function<void()>
   /**
    * Specialized version of `std::function<void()>`.
@@ -2416,32 +2457,6 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
   Func_void_NativeWorkoutSamplePage create_Func_void_NativeWorkoutSamplePage(void* NON_NULL swiftClosureWrapper) noexcept;
   inline Func_void_NativeWorkoutSamplePage_Wrapper wrap_Func_void_NativeWorkoutSamplePage(Func_void_NativeWorkoutSamplePage value) noexcept {
     return Func_void_NativeWorkoutSamplePage_Wrapper(std::move(value));
-  }
-  
-  // pragma MARK: std::optional<NativeNutritionMealType>
-  /**
-   * Specialized version of `std::optional<NativeNutritionMealType>`.
-   */
-  using std__optional_NativeNutritionMealType_ = std::optional<NativeNutritionMealType>;
-  inline std::optional<NativeNutritionMealType> create_std__optional_NativeNutritionMealType_(const NativeNutritionMealType& value) noexcept {
-    return std::optional<NativeNutritionMealType>(value);
-  }
-  inline bool has_value_std__optional_NativeNutritionMealType_(const std::optional<NativeNutritionMealType>& optional) noexcept {
-    return optional.has_value();
-  }
-  inline NativeNutritionMealType get_std__optional_NativeNutritionMealType_(const std::optional<NativeNutritionMealType>& optional) noexcept {
-    return optional.value();
-  }
-  
-  // pragma MARK: std::vector<NativeNutritionSample>
-  /**
-   * Specialized version of `std::vector<NativeNutritionSample>`.
-   */
-  using std__vector_NativeNutritionSample_ = std::vector<NativeNutritionSample>;
-  inline std::vector<NativeNutritionSample> create_std__vector_NativeNutritionSample_(size_t size) noexcept {
-    std::vector<NativeNutritionSample> vector;
-    vector.reserve(size);
-    return vector;
   }
   
   // pragma MARK: std::shared_ptr<Promise<NativeNutritionSamplePage>>
