@@ -53,6 +53,7 @@ describe('NitroHealth breadth data types contract', () => {
         endTimeMs: endDate.getTime(),
         limit: 1000,
         ascending: true,
+        originIdentifiers: [],
       })
       expect(result.samples).toHaveLength(1)
       expect(result.samples[0].identity).toEqual({
@@ -198,6 +199,7 @@ describe('NitroHealth breadth data types contract', () => {
         endTimeMs: endDate.getTime(),
         limit: 1000,
         ascending: true,
+        originIdentifiers: [],
       })
       expect(result.samples).toHaveLength(1)
       expect(result.samples[0].identity).toEqual({ kind: 'record', id: 'bp-record' })
@@ -243,6 +245,7 @@ describe('NitroHealth breadth data types contract', () => {
         endTimeMs: endDate.getTime(),
         limit: 1000,
         ascending: true,
+        originIdentifiers: [],
       })
       expect(result.samples).toHaveLength(1)
       expect(result.samples[0].identity).toEqual({ kind: 'record', id: 'bg-record' })
@@ -287,6 +290,7 @@ describe('NitroHealth breadth data types contract', () => {
         endTimeMs: endDate.getTime(),
         limit: 1000,
         ascending: true,
+        originIdentifiers: [],
       })
       expect(result.samples).toHaveLength(1)
       expect(result.samples[0].identity).toEqual({ kind: 'record', id: 'bt-record' })
@@ -326,6 +330,7 @@ describe('NitroHealth breadth data types contract', () => {
         endTimeMs: endDate.getTime(),
         limit: 1000,
         ascending: true,
+        originIdentifiers: [],
       })
       expect(result.samples).toHaveLength(1)
       expect(result.samples[0].identity).toEqual({ kind: 'record', id: 'rr-record' })
@@ -361,6 +366,7 @@ describe('NitroHealth breadth data types contract', () => {
         endTimeMs: endDate.getTime(),
         limit: 1000,
         ascending: true,
+        originIdentifiers: [],
       })
       expect(result.samples).toHaveLength(1)
       expect(result.samples[0].identity).toEqual({ kind: 'record', id: 'bf-record' })
@@ -396,6 +402,7 @@ describe('NitroHealth breadth data types contract', () => {
         endTimeMs: endDate.getTime(),
         limit: 1000,
         ascending: true,
+        originIdentifiers: [],
       })
       expect(result.samples).toHaveLength(1)
       expect(result.samples[0].identity).toEqual({ kind: 'record', id: 'lbm-record' })
@@ -432,6 +439,7 @@ describe('NitroHealth breadth data types contract', () => {
         endTimeMs: endDate.getTime(),
         limit: 1000,
         ascending: true,
+        originIdentifiers: [],
       })
       expect(result.samples).toHaveLength(1)
       expect(result.samples[0].identity).toEqual({ kind: 'record', id: 'bbt-record' })
@@ -497,6 +505,7 @@ describe('NitroHealth breadth data types contract', () => {
         endTimeMs: endDate.getTime(),
         limit: 1000,
         ascending: true,
+        originIdentifiers: [],
       })
       expect(result.samples).toHaveLength(1)
       expect(result.samples[0].date).toBeInstanceOf(Date)
@@ -529,6 +538,7 @@ describe('NitroHealth breadth data types contract', () => {
         endTimeMs: endDate.getTime(),
         limit: 1000,
         ascending: true,
+        originIdentifiers: [],
       })
       expect(result.samples).toHaveLength(1)
       expect(result.samples[0].identity).toEqual({ kind: 'record', id: 'vo2max-record' })
@@ -570,6 +580,7 @@ describe('NitroHealth breadth data types contract', () => {
         endTimeMs: endDate.getTime(),
         limit: 1000,
         ascending: true,
+        originIdentifiers: [],
       })
       expect(result.samples).toHaveLength(1)
       expect(result.samples[0].identity).toEqual({ kind: 'record', id: 'floors-record' })

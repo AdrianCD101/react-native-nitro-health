@@ -393,21 +393,6 @@ namespace NitroHealth { class HybridNitroHealthSpec_cxx; }
  */
 namespace margelo::nitro::nitrohealth::bridge::swift {
 
-  // pragma MARK: std::optional<NativeHealthAvailabilityReason>
-  /**
-   * Specialized version of `std::optional<NativeHealthAvailabilityReason>`.
-   */
-  using std__optional_NativeHealthAvailabilityReason_ = std::optional<NativeHealthAvailabilityReason>;
-  inline std::optional<NativeHealthAvailabilityReason> create_std__optional_NativeHealthAvailabilityReason_(const NativeHealthAvailabilityReason& value) noexcept {
-    return std::optional<NativeHealthAvailabilityReason>(value);
-  }
-  inline bool has_value_std__optional_NativeHealthAvailabilityReason_(const std::optional<NativeHealthAvailabilityReason>& optional) noexcept {
-    return optional.has_value();
-  }
-  inline NativeHealthAvailabilityReason get_std__optional_NativeHealthAvailabilityReason_(const std::optional<NativeHealthAvailabilityReason>& optional) noexcept {
-    return optional.value();
-  }
-  
   // pragma MARK: std::optional<std::string>
   /**
    * Specialized version of `std::optional<std::string>`.
@@ -420,6 +405,21 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
     return optional.has_value();
   }
   inline std::string get_std__optional_std__string_(const std::optional<std::string>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::optional<NativeHealthAvailabilityReason>
+  /**
+   * Specialized version of `std::optional<NativeHealthAvailabilityReason>`.
+   */
+  using std__optional_NativeHealthAvailabilityReason_ = std::optional<NativeHealthAvailabilityReason>;
+  inline std::optional<NativeHealthAvailabilityReason> create_std__optional_NativeHealthAvailabilityReason_(const NativeHealthAvailabilityReason& value) noexcept {
+    return std::optional<NativeHealthAvailabilityReason>(value);
+  }
+  inline bool has_value_std__optional_NativeHealthAvailabilityReason_(const std::optional<NativeHealthAvailabilityReason>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline NativeHealthAvailabilityReason get_std__optional_NativeHealthAvailabilityReason_(const std::optional<NativeHealthAvailabilityReason>& optional) noexcept {
     return optional.value();
   }
   
@@ -1683,6 +1683,21 @@ namespace margelo::nitro::nitrohealth::bridge::swift {
   Func_void_NativeStepSamplePage create_Func_void_NativeStepSamplePage(void* NON_NULL swiftClosureWrapper) noexcept;
   inline Func_void_NativeStepSamplePage_Wrapper wrap_Func_void_NativeStepSamplePage(Func_void_NativeStepSamplePage value) noexcept {
     return Func_void_NativeStepSamplePage_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::optional<bool>
+  /**
+   * Specialized version of `std::optional<bool>`.
+   */
+  using std__optional_bool_ = std::optional<bool>;
+  inline std::optional<bool> create_std__optional_bool_(const bool& value) noexcept {
+    return std::optional<bool>(value);
+  }
+  inline bool has_value_std__optional_bool_(const std::optional<bool>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline bool get_std__optional_bool_(const std::optional<bool>& optional) noexcept {
+    return optional.value();
   }
   
   // pragma MARK: std::shared_ptr<Promise<NativeDistanceSamplePage>>

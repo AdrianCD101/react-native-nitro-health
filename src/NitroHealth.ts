@@ -41,6 +41,7 @@ import type {
   HealthStatisticsDataType,
   WritableHealthDataType,
 } from './HealthDataType'
+import type { HealthDataOrigin } from './HealthDataOrigin'
 import type { HealthDateRangeQuery } from './HealthDateRangeQuery'
 import type { HealthIdentityDeleteResult, HealthTimeRangeDeleteResult } from './HealthDeleteResult'
 import type { HealthPermission } from './HealthPermission'
@@ -137,6 +138,7 @@ import {
   makeWorkoutSample,
 } from './internal/sampleOutputMapping'
 import { makeHealthChangesResult } from './internal/healthChangeMapping'
+import { makeHealthDataOrigin } from './internal/sampleMetadataMapping'
 import { makeHealthStatistics, makeHeartRateStatistics } from './internal/statisticsMapping'
 import {
   assertChangeTrackedHealthDataType,
@@ -211,6 +213,15 @@ function notifyChangeNotificationListeners(dataTypes: string[], deliveryId: stri
 
 /** Unified consumer-facing health workflows. */
 export interface NitroHealth {
+  /**
+   * The calling application's own data origin: the identity the health service records
+   * for samples this application writes, byte-identical to the
+   * {@linkcode HealthDataOrigin.identifier} returned on those samples. Useful for
+   * "is this sample mine?" comparisons and for composing identifier-based
+   * {@linkcode HealthDateRangeQuery.origins} filters; `origins: 'own-app'` covers the
+   * common case without touching an identifier.
+   */
+  readonly ownOrigin: HealthDataOrigin
   /** Returns health-service availability and actionable recovery when one exists. */
   getAvailability(): HealthAvailability
   /** Opens the recovery destination supplied by {@linkcode getAvailability}. */
@@ -339,6 +350,9 @@ export interface NitroHealth {
 }
 
 export const NitroHealth: NitroHealth = {
+  get ownOrigin() {
+    return makeHealthDataOrigin(NitroHealthNative.ownOrigin)
+  },
   getAvailability() {
     return makeHealthAvailability(NitroHealthNative.getAvailability())
   },

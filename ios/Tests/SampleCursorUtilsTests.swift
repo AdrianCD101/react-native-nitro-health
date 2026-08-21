@@ -11,7 +11,9 @@ final class SampleCursorUtilsTests: XCTestCase {
         queryStartTimeMs: Double = defaultQueryStartTimeMs,
         queryEndTimeMs: Double = defaultQueryEndTimeMs,
         startInterval: Double = 1_700_000_000,
-        seenUuids: [String] = ["A"]
+        seenUuids: [String] = ["A"],
+        originsOwnApp: Bool? = nil,
+        originIdentifiers: [String]? = nil
     ) -> SampleCursor {
         return SampleCursor(
             version: 1,
@@ -21,7 +23,9 @@ final class SampleCursorUtilsTests: XCTestCase {
             queryStartTimeMs: queryStartTimeMs,
             queryEndTimeMs: queryEndTimeMs,
             startInterval: startInterval,
-            seenUuids: seenUuids
+            seenUuids: seenUuids,
+            originsOwnApp: originsOwnApp,
+            originIdentifiers: originIdentifiers
         )
     }
 
@@ -183,6 +187,141 @@ final class SampleCursorUtilsTests: XCTestCase {
         )) { error in
             XCTAssertTrue(error.localizedDescription.contains("different date range"))
         }
+    }
+
+    // MARK: - Origins filter binding
+
+    func testDecodeRejectsUnfilteredCursorForFilteredQuery() throws {
+        let encoded = try encodeSampleCursor(makeCursor())
+
+        XCTAssertThrowsError(try decodeSampleCursor(
+            encoded,
+            dataType: "steps",
+            ascending: true,
+            queryStartTimeMs: defaultQueryStartTimeMs,
+            queryEndTimeMs: defaultQueryEndTimeMs,
+            ownAppOnly: true
+        )) { error in
+            XCTAssertTrue(error.localizedDescription.contains("different origins filter"))
+        }
+    }
+
+    func testDecodeRejectsFilteredCursorForUnfilteredQuery() throws {
+        let encoded = try encodeSampleCursor(makeCursor(originIdentifiers: ["com.a.app"]))
+
+        XCTAssertThrowsError(try decodeSampleCursor(
+            encoded,
+            dataType: "steps",
+            ascending: true,
+            queryStartTimeMs: defaultQueryStartTimeMs,
+            queryEndTimeMs: defaultQueryEndTimeMs
+        )) { error in
+            XCTAssertTrue(error.localizedDescription.contains("different origins filter"))
+        }
+    }
+
+    func testDecodeRejectsOwnAppCursorForIdentifiersQuery() throws {
+        let encoded = try encodeSampleCursor(makeCursor(originsOwnApp: true))
+
+        XCTAssertThrowsError(try decodeSampleCursor(
+            encoded,
+            dataType: "steps",
+            ascending: true,
+            queryStartTimeMs: defaultQueryStartTimeMs,
+            queryEndTimeMs: defaultQueryEndTimeMs,
+            originIdentifiers: ["com.a.app"]
+        )) { error in
+            XCTAssertTrue(error.localizedDescription.contains("different origins filter"))
+        }
+    }
+
+    func testDecodeRejectsDifferentIdentifierSets() throws {
+        let encoded = try encodeSampleCursor(makeCursor(originIdentifiers: ["com.a.app", "com.b.app"]))
+
+        XCTAssertThrowsError(try decodeSampleCursor(
+            encoded,
+            dataType: "steps",
+            ascending: true,
+            queryStartTimeMs: defaultQueryStartTimeMs,
+            queryEndTimeMs: defaultQueryEndTimeMs,
+            originIdentifiers: ["com.a.app"]
+        )) { error in
+            XCTAssertTrue(error.localizedDescription.contains("different origins filter"))
+        }
+    }
+
+    func testDecodeAcceptsMatchingCanonicalIdentifiers() throws {
+        let identifiers = ["com.a.app", "com.b.app"]
+        let cursor = makeCursor(originIdentifiers: identifiers)
+
+        let decoded = try decodeSampleCursor(
+            try encodeSampleCursor(cursor),
+            dataType: "steps",
+            ascending: true,
+            queryStartTimeMs: defaultQueryStartTimeMs,
+            queryEndTimeMs: defaultQueryEndTimeMs,
+            originIdentifiers: identifiers
+        )
+
+        XCTAssertEqual(decoded, cursor)
+    }
+
+    func testDecodeAcceptsOwnAppCursorForOwnAppQuery() throws {
+        let cursor = makeCursor(originsOwnApp: true)
+
+        let decoded = try decodeSampleCursor(
+            try encodeSampleCursor(cursor),
+            dataType: "steps",
+            ascending: true,
+            queryStartTimeMs: defaultQueryStartTimeMs,
+            queryEndTimeMs: defaultQueryEndTimeMs,
+            ownAppOnly: true
+        )
+
+        XCTAssertEqual(decoded, cursor)
+    }
+
+    func testDecodeTreatsLegacyPayloadWithoutOriginKeysAsUnfiltered() throws {
+        // A cursor produced by a build predating origin filtering has no origin keys;
+        // it stays valid for unfiltered queries and rejects filtered ones.
+        let payload = """
+        {"version":1,"platform":"ios","dataType":"steps","ascending":true,"queryStartTimeMs":\(defaultQueryStartTimeMs),"queryEndTimeMs":\(defaultQueryEndTimeMs),"startInterval":0,"seenUuids":[]}
+        """
+        let encoded = Data(payload.utf8).base64EncodedString().replacingOccurrences(of: "=", with: "")
+
+        XCTAssertNoThrow(try decodeSampleCursor(
+            encoded,
+            dataType: "steps",
+            ascending: true,
+            queryStartTimeMs: defaultQueryStartTimeMs,
+            queryEndTimeMs: defaultQueryEndTimeMs
+        ))
+
+        XCTAssertThrowsError(try decodeSampleCursor(
+            encoded,
+            dataType: "steps",
+            ascending: true,
+            queryStartTimeMs: defaultQueryStartTimeMs,
+            queryEndTimeMs: defaultQueryEndTimeMs,
+            ownAppOnly: true
+        ))
+    }
+
+    func testPaginationPropagatesOriginsIntoNextCursor() {
+        let page = paginateCursorPage(
+            items: makeItems([("A", 1), ("B", 2), ("C", 3), ("D", 4)]),
+            limit: 3,
+            dataType: "steps",
+            ascending: true,
+            queryStartTimeMs: defaultQueryStartTimeMs,
+            queryEndTimeMs: defaultQueryEndTimeMs,
+            cursor: nil,
+            ownAppOnly: nil,
+            originIdentifiers: ["com.a.app", "com.b.app"]
+        )
+
+        XCTAssertEqual(page.nextCursor?.originIdentifiers, ["com.a.app", "com.b.app"])
+        XCTAssertNil(page.nextCursor?.originsOwnApp)
     }
 
     // MARK: - Resume window

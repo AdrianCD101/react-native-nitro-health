@@ -2,6 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react-native'
 
 jest.mock('react-native-nitro-health', () => ({
   NitroHealth: {
+    ownOrigin: { identifier: 'com.nitrohealth.example', displayName: 'Nitro Health Example' },
     getAvailability: jest.fn(() => ({ status: 'available' as const })),
     getCapabilities: jest.fn(() =>
       Promise.resolve({

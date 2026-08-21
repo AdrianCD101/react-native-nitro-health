@@ -73,6 +73,7 @@ import com.margelo.nitro.nitrohealth.NativeHealthAvailabilityStatus
 import com.margelo.nitro.nitrohealth.NativeHealthCapabilities
 import com.margelo.nitro.nitrohealth.NativeHealthChangesResult
 import com.margelo.nitro.nitrohealth.NativeHealthDateRangeQuery
+import com.margelo.nitro.nitrohealth.NativeHealthDataOrigin
 import com.margelo.nitro.nitrohealth.NativeHealthDeleteResult
 import com.margelo.nitro.nitrohealth.NativeHealthPermission
 import com.margelo.nitro.nitrohealth.NativeHealthPermissionStatusResult
@@ -116,6 +117,18 @@ import java.time.ZoneId
 import kotlin.reflect.KClass
 
 class HybridNitroHealth: HybridNitroHealthSpec() {
+    // The app's own identity is constant for the process lifetime. `by lazy` caches the
+    // successful value; a thrown initializer (context not yet attached) re-runs on the
+    // next access, which is the desired retry behavior.
+    override val ownOrigin: NativeHealthDataOrigin by lazy {
+        val context = NitroModules.applicationContext
+            ?: throw IllegalStateException("Android application context is unavailable")
+        NativeHealthDataOrigin(
+            identifier = context.packageName,
+            displayName = context.applicationInfo.loadLabel(context.packageManager).toString()
+        )
+    }
+
     override fun getAvailability(): NativeHealthAvailability {
         val context = NitroModules.applicationContext
             ?: return makeUnavailableHealthConnectAvailability()
@@ -362,27 +375,10 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
 
     override fun readSteps(query: NativeHealthDateRangeQuery): Promise<NativeStepSamplePage> {
         return Promise.async {
-            val context = NitroModules.applicationContext
-                ?: throw IllegalStateException("Android application context is unavailable")
-
-            if (getAvailability().status != NativeHealthAvailabilityStatus.AVAILABLE) {
-                throw IllegalStateException("Health Connect is not available")
-            }
-
-            val client = HealthConnectClient.getOrCreate(context)
-            requireReadPermission(client, "steps")
-
-            val request = ReadRecordsRequest(
-                recordType = StepsRecord::class,
-                timeRangeFilter = TimeRangeFilter.between(
-                    Instant.ofEpochMilli(query.startTimeMs.toLong()),
-                    Instant.ofEpochMilli(query.endTimeMs.toLong())
-                ),
-                ascendingOrder = query.ascending,
-                pageSize = query.limit.toInt(),
-                pageToken = query.cursor?.let { decodeSampleCursor(it, "steps", query) }
+            val client = requireReadableClient("steps")
+            val response = client.readRecords(
+                makeSampleReadRecordsRequest("steps", StepsRecord::class, query)
             )
-            val response = client.readRecords(request)
 
             NativeStepSamplePage(
                 samples = response.records.map(::makeNativeStepSample).toTypedArray(),
@@ -393,27 +389,10 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
 
     override fun readDistance(query: NativeHealthDateRangeQuery): Promise<NativeDistanceSamplePage> {
         return Promise.async {
-            val context = NitroModules.applicationContext
-                ?: throw IllegalStateException("Android application context is unavailable")
-
-            if (getAvailability().status != NativeHealthAvailabilityStatus.AVAILABLE) {
-                throw IllegalStateException("Health Connect is not available")
-            }
-
-            val client = HealthConnectClient.getOrCreate(context)
-            requireReadPermission(client, "distance")
-
-            val request = ReadRecordsRequest(
-                recordType = DistanceRecord::class,
-                timeRangeFilter = TimeRangeFilter.between(
-                    Instant.ofEpochMilli(query.startTimeMs.toLong()),
-                    Instant.ofEpochMilli(query.endTimeMs.toLong())
-                ),
-                ascendingOrder = query.ascending,
-                pageSize = query.limit.toInt(),
-                pageToken = query.cursor?.let { decodeSampleCursor(it, "distance", query) }
+            val client = requireReadableClient("distance")
+            val response = client.readRecords(
+                makeSampleReadRecordsRequest("distance", DistanceRecord::class, query)
             )
-            val response = client.readRecords(request)
 
             NativeDistanceSamplePage(
                 samples = response.records.map(::makeNativeDistanceSample).toTypedArray(),
@@ -424,27 +403,10 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
 
     override fun readActiveEnergyBurned(query: NativeHealthDateRangeQuery): Promise<NativeActiveEnergyBurnedSamplePage> {
         return Promise.async {
-            val context = NitroModules.applicationContext
-                ?: throw IllegalStateException("Android application context is unavailable")
-
-            if (getAvailability().status != NativeHealthAvailabilityStatus.AVAILABLE) {
-                throw IllegalStateException("Health Connect is not available")
-            }
-
-            val client = HealthConnectClient.getOrCreate(context)
-            requireReadPermission(client, "activeEnergyBurned")
-
-            val request = ReadRecordsRequest(
-                recordType = ActiveCaloriesBurnedRecord::class,
-                timeRangeFilter = TimeRangeFilter.between(
-                    Instant.ofEpochMilli(query.startTimeMs.toLong()),
-                    Instant.ofEpochMilli(query.endTimeMs.toLong())
-                ),
-                ascendingOrder = query.ascending,
-                pageSize = query.limit.toInt(),
-                pageToken = query.cursor?.let { decodeSampleCursor(it, "activeEnergyBurned", query) }
+            val client = requireReadableClient("activeEnergyBurned")
+            val response = client.readRecords(
+                makeSampleReadRecordsRequest("activeEnergyBurned", ActiveCaloriesBurnedRecord::class, query)
             )
-            val response = client.readRecords(request)
 
             NativeActiveEnergyBurnedSamplePage(
                 samples = response.records.map(::makeNativeActiveEnergyBurnedSample).toTypedArray(),
@@ -455,27 +417,10 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
 
     override fun readHydration(query: NativeHealthDateRangeQuery): Promise<NativeHydrationSamplePage> {
         return Promise.async {
-            val context = NitroModules.applicationContext
-                ?: throw IllegalStateException("Android application context is unavailable")
-
-            if (getAvailability().status != NativeHealthAvailabilityStatus.AVAILABLE) {
-                throw IllegalStateException("Health Connect is not available")
-            }
-
-            val client = HealthConnectClient.getOrCreate(context)
-            requireReadPermission(client, "hydration")
-
-            val request = ReadRecordsRequest(
-                recordType = HydrationRecord::class,
-                timeRangeFilter = TimeRangeFilter.between(
-                    Instant.ofEpochMilli(query.startTimeMs.toLong()),
-                    Instant.ofEpochMilli(query.endTimeMs.toLong())
-                ),
-                ascendingOrder = query.ascending,
-                pageSize = query.limit.toInt(),
-                pageToken = query.cursor?.let { decodeSampleCursor(it, "hydration", query) }
+            val client = requireReadableClient("hydration")
+            val response = client.readRecords(
+                makeSampleReadRecordsRequest("hydration", HydrationRecord::class, query)
             )
-            val response = client.readRecords(request)
 
             NativeHydrationSamplePage(
                 samples = response.records.map(::makeNativeHydrationSample).toTypedArray(),
@@ -486,27 +431,10 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
 
     override fun readFloorsClimbed(query: NativeHealthDateRangeQuery): Promise<NativeFloorsClimbedSamplePage> {
         return Promise.async {
-            val context = NitroModules.applicationContext
-                ?: throw IllegalStateException("Android application context is unavailable")
-
-            if (getAvailability().status != NativeHealthAvailabilityStatus.AVAILABLE) {
-                throw IllegalStateException("Health Connect is not available")
-            }
-
-            val client = HealthConnectClient.getOrCreate(context)
-            requireReadPermission(client, "floorsClimbed")
-
-            val request = ReadRecordsRequest(
-                recordType = FloorsClimbedRecord::class,
-                timeRangeFilter = TimeRangeFilter.between(
-                    Instant.ofEpochMilli(query.startTimeMs.toLong()),
-                    Instant.ofEpochMilli(query.endTimeMs.toLong())
-                ),
-                ascendingOrder = query.ascending,
-                pageSize = query.limit.toInt(),
-                pageToken = query.cursor?.let { decodeSampleCursor(it, "floorsClimbed", query) }
+            val client = requireReadableClient("floorsClimbed")
+            val response = client.readRecords(
+                makeSampleReadRecordsRequest("floorsClimbed", FloorsClimbedRecord::class, query)
             )
-            val response = client.readRecords(request)
 
             NativeFloorsClimbedSamplePage(
                 samples = response.records.map(::makeNativeFloorsClimbedSample).toTypedArray(),
@@ -517,27 +445,10 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
 
     override fun readHeartRate(query: NativeHealthDateRangeQuery): Promise<NativeHeartRateSamplePage> {
         return Promise.async {
-            val context = NitroModules.applicationContext
-                ?: throw IllegalStateException("Android application context is unavailable")
-
-            if (getAvailability().status != NativeHealthAvailabilityStatus.AVAILABLE) {
-                throw IllegalStateException("Health Connect is not available")
-            }
-
-            val client = HealthConnectClient.getOrCreate(context)
-            requireReadPermission(client, "heartRate")
-
-            val request = ReadRecordsRequest(
-                recordType = HeartRateRecord::class,
-                timeRangeFilter = TimeRangeFilter.between(
-                    Instant.ofEpochMilli(query.startTimeMs.toLong()),
-                    Instant.ofEpochMilli(query.endTimeMs.toLong())
-                ),
-                ascendingOrder = query.ascending,
-                pageSize = query.limit.toInt(),
-                pageToken = query.cursor?.let { decodeSampleCursor(it, "heartRate", query) }
+            val client = requireReadableClient("heartRate")
+            val response = client.readRecords(
+                makeSampleReadRecordsRequest("heartRate", HeartRateRecord::class, query)
             )
-            val response = client.readRecords(request)
 
             // Deliberately NOT built on readInstantRecords: a HeartRateRecord is a series record —
             // an interval holding many (time, bpm) samples — so records must be flattened to
@@ -584,30 +495,12 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         dataType: String,
         query: NativeHealthDateRangeQuery
     ): ReadRecordsResponse<T> {
-        val context = NitroModules.applicationContext
-            ?: throw IllegalStateException("Android application context is unavailable")
-
-        if (getAvailability().status != NativeHealthAvailabilityStatus.AVAILABLE) {
-            throw IllegalStateException("Health Connect is not available")
-        }
-
-        val client = HealthConnectClient.getOrCreate(context)
-        requireReadPermission(client, dataType)
+        val client = requireReadableClient(dataType)
 
         @Suppress("UNCHECKED_CAST")
         val recordType = healthDataTypeDescriptorFor(dataType).recordType as KClass<T>
-        val request = ReadRecordsRequest(
-            recordType = recordType,
-            timeRangeFilter = TimeRangeFilter.between(
-                Instant.ofEpochMilli(query.startTimeMs.toLong()),
-                Instant.ofEpochMilli(query.endTimeMs.toLong())
-            ),
-            ascendingOrder = query.ascending,
-            pageSize = query.limit.toInt(),
-            pageToken = query.cursor?.let { decodeSampleCursor(it, dataType, query) }
-        )
 
-        return client.readRecords(request)
+        return client.readRecords(makeSampleReadRecordsRequest(dataType, recordType, query))
     }
 
     override fun readBloodPressure(
@@ -900,27 +793,10 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
 
     override fun readSleepSamples(query: NativeHealthDateRangeQuery): Promise<NativeSleepSamplePage> {
         return Promise.async {
-            val context = NitroModules.applicationContext
-                ?: throw IllegalStateException("Android application context is unavailable")
-
-            if (getAvailability().status != NativeHealthAvailabilityStatus.AVAILABLE) {
-                throw IllegalStateException("Health Connect is not available")
-            }
-
-            val client = HealthConnectClient.getOrCreate(context)
-            requireReadPermission(client, "sleep")
-
-            val request = ReadRecordsRequest(
-                recordType = SleepSessionRecord::class,
-                timeRangeFilter = TimeRangeFilter.between(
-                    Instant.ofEpochMilli(query.startTimeMs.toLong()),
-                    Instant.ofEpochMilli(query.endTimeMs.toLong())
-                ),
-                ascendingOrder = query.ascending,
-                pageSize = query.limit.toInt(),
-                pageToken = query.cursor?.let { decodeSampleCursor(it, "sleep", query) }
+            val client = requireReadableClient("sleep")
+            val response = client.readRecords(
+                makeSampleReadRecordsRequest("sleep", SleepSessionRecord::class, query)
             )
-            val response = client.readRecords(request)
             // Paging counts sessions (pageSize/limit and the cursor operate on records, not
             // flattened stages), so every stage of every returned session is kept — capping
             // in post would silently drop data between pages.
@@ -944,27 +820,10 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
 
     override fun readNutrition(query: NativeHealthDateRangeQuery): Promise<NativeNutritionSamplePage> {
         return Promise.async {
-            val context = NitroModules.applicationContext
-                ?: throw IllegalStateException("Android application context is unavailable")
-
-            if (getAvailability().status != NativeHealthAvailabilityStatus.AVAILABLE) {
-                throw IllegalStateException("Health Connect is not available")
-            }
-
-            val client = HealthConnectClient.getOrCreate(context)
-            requireReadPermission(client, "nutrition")
-
-            val request = ReadRecordsRequest(
-                recordType = NutritionRecord::class,
-                timeRangeFilter = TimeRangeFilter.between(
-                    Instant.ofEpochMilli(query.startTimeMs.toLong()),
-                    Instant.ofEpochMilli(query.endTimeMs.toLong())
-                ),
-                ascendingOrder = query.ascending,
-                pageSize = query.limit.toInt(),
-                pageToken = query.cursor?.let { decodeSampleCursor(it, "nutrition", query) }
+            val client = requireReadableClient("nutrition")
+            val response = client.readRecords(
+                makeSampleReadRecordsRequest("nutrition", NutritionRecord::class, query)
             )
-            val response = client.readRecords(request)
 
             NativeNutritionSamplePage(
                 samples = response.records.map(::makeNativeNutritionSample).toTypedArray(),
@@ -975,27 +834,10 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
 
     override fun readWorkouts(query: NativeHealthDateRangeQuery): Promise<NativeWorkoutSamplePage> {
         return Promise.async {
-            val context = NitroModules.applicationContext
-                ?: throw IllegalStateException("Android application context is unavailable")
-
-            if (getAvailability().status != NativeHealthAvailabilityStatus.AVAILABLE) {
-                throw IllegalStateException("Health Connect is not available")
-            }
-
-            val client = HealthConnectClient.getOrCreate(context)
-            requireReadPermission(client, "workout")
-
-            val request = ReadRecordsRequest(
-                recordType = ExerciseSessionRecord::class,
-                timeRangeFilter = TimeRangeFilter.between(
-                    Instant.ofEpochMilli(query.startTimeMs.toLong()),
-                    Instant.ofEpochMilli(query.endTimeMs.toLong())
-                ),
-                ascendingOrder = query.ascending,
-                pageSize = query.limit.toInt(),
-                pageToken = query.cursor?.let { decodeSampleCursor(it, "workout", query) }
+            val client = requireReadableClient("workout")
+            val response = client.readRecords(
+                makeSampleReadRecordsRequest("workout", ExerciseSessionRecord::class, query)
             )
-            val response = client.readRecords(request)
 
             NativeWorkoutSamplePage(
                 samples = response.records.map(::makeNativeWorkoutSample).toTypedArray(),
@@ -1415,6 +1257,41 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         if (!client.permissionController.getGrantedPermissions().contains(permission)) {
             throw SecurityException("Missing permission to read ${descriptor.permissionLabel}")
         }
+    }
+
+    private suspend fun requireReadableClient(dataType: String): HealthConnectClient {
+        val context = NitroModules.applicationContext
+            ?: throw IllegalStateException("Android application context is unavailable")
+
+        if (getAvailability().status != NativeHealthAvailabilityStatus.AVAILABLE) {
+            throw IllegalStateException("Health Connect is not available")
+        }
+
+        val client = HealthConnectClient.getOrCreate(context)
+        requireReadPermission(client, dataType)
+
+        return client
+    }
+
+    private fun <T : Record> makeSampleReadRecordsRequest(
+        dataType: String,
+        recordType: KClass<T>,
+        query: NativeHealthDateRangeQuery
+    ): ReadRecordsRequest<T> {
+        val context = NitroModules.applicationContext
+            ?: throw IllegalStateException("Android application context is unavailable")
+
+        return ReadRecordsRequest(
+            recordType = recordType,
+            timeRangeFilter = TimeRangeFilter.between(
+                Instant.ofEpochMilli(query.startTimeMs.toLong()),
+                Instant.ofEpochMilli(query.endTimeMs.toLong())
+            ),
+            dataOriginFilter = makeDataOriginFilter(query) { context.packageName },
+            ascendingOrder = query.ascending,
+            pageSize = query.limit.toInt(),
+            pageToken = query.cursor?.let { decodeSampleCursor(it, dataType, query) }
+        )
     }
 
 }

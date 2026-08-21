@@ -13,6 +13,8 @@
 #error NitroModules cannot be found! Are you sure you installed NitroModules properly?
 #endif
 
+// Forward declaration of `NativeHealthDataOrigin` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthDataOrigin; }
 // Forward declaration of `NativeHealthAvailability` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthAvailability; }
 // Forward declaration of `NativeHealthAvailabilityRecoveryResult` to properly resolve imports.
@@ -140,6 +142,7 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthPermission; }
 // Forward declaration of `NativeHealthAuthorizationResult` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthAuthorizationResult; }
 
+#include "NativeHealthDataOrigin.hpp"
 #include "NativeHealthAvailability.hpp"
 #include "NativeHealthAvailabilityRecoveryResult.hpp"
 #include <NitroModules/Promise.hpp>
@@ -236,7 +239,7 @@ namespace margelo::nitro::nitrohealth {
 
     public:
       // Properties
-      
+      virtual NativeHealthDataOrigin getOwnOrigin() = 0;
 
     public:
       // Methods

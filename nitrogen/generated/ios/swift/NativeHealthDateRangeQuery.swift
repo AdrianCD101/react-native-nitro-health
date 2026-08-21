@@ -18,13 +18,25 @@ public extension NativeHealthDateRangeQuery {
   /**
    * Create a new instance of `NativeHealthDateRangeQuery`.
    */
-  init(startTimeMs: Double, endTimeMs: Double, limit: Double, ascending: Bool, cursor: String?) {
+  init(startTimeMs: Double, endTimeMs: Double, limit: Double, ascending: Bool, cursor: String?, ownAppOnly: Bool?, originIdentifiers: [String]) {
     self.init(startTimeMs, endTimeMs, limit, ascending, { () -> bridge.std__optional_std__string_ in
       if let __unwrappedValue = cursor {
         return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
       } else {
         return .init()
       }
+    }(), { () -> bridge.std__optional_bool_ in
+      if let __unwrappedValue = ownAppOnly {
+        return bridge.create_std__optional_bool_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__vector_std__string_ in
+      var __vector = bridge.create_std__vector_std__string_(originIdentifiers.count)
+      for __item in originIdentifiers {
+        __vector.push_back(std.string(__item))
+      }
+      return __vector
     }())
   }
 
@@ -58,5 +70,22 @@ public extension NativeHealthDateRangeQuery {
         return nil
       }
     }()
+  }
+  
+  @inline(__always)
+  var ownAppOnly: Bool? {
+    return { () -> Bool? in
+      if bridge.has_value_std__optional_bool_(self.__ownAppOnly) {
+        let __unwrapped = bridge.get_std__optional_bool_(self.__ownAppOnly)
+        return __unwrapped
+      } else {
+        return nil
+      }
+    }()
+  }
+  
+  @inline(__always)
+  var originIdentifiers: [String] {
+    return self.__originIdentifiers.map({ __item in String(__item) })
   }
 }

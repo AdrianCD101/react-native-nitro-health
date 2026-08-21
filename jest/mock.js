@@ -261,11 +261,27 @@ function createNitroHealthMock(options = {}) {
     const end = sample.endDate instanceof Date ? sample.endDate.getTime() : start
     return { start, end, instant: start === end }
   }
+  // Mirrors the real wrapper's origins contract: 'own-app' matches the mock's own
+  // origin (every stored sample is an own-app write), an identifier list matches by
+  // exact origin identifier, an empty list throws, and unknown identifiers yield
+  // empty results rather than an error.
+  const matchesOrigins = (sample, origins) => {
+    if (origins === undefined) return true
+    if (origins === 'own-app') return sample.origin.identifier === mockOrigin.identifier
+    if (Array.isArray(origins)) {
+      if (origins.length === 0) {
+        throw new Error('origins must contain at least one identifier')
+      }
+      return origins.includes(sample.origin.identifier)
+    }
+    throw new Error("origins must be 'own-app' or an array of origin identifiers")
+  }
   const makeSamplePage = (dataType, query = {}) => {
     const queryStart = query.startDate instanceof Date ? query.startDate.getTime() : -Infinity
     const queryEnd = query.endDate instanceof Date ? query.endDate.getTime() : Infinity
     const ascending = query.ascending !== false
     const filtered = storedSamples[dataType]
+      .filter((sample) => matchesOrigins(sample, query.origins))
       .filter((sample) => {
         const { start, end, instant } = sampleBounds(sample)
         if (start === undefined || end === undefined) return true
@@ -295,6 +311,7 @@ function createNitroHealthMock(options = {}) {
     return { startDate: date, endDate: date, kilograms }
   }
   mock = {
+    ownOrigin: { ...mockOrigin },
     getAvailability: createMockFunction(() => profile.availability),
     performAvailabilityRecovery: createMockFunction(() =>
       Promise.resolve({ status: 'unavailable', reason: 'no-recovery-action' })

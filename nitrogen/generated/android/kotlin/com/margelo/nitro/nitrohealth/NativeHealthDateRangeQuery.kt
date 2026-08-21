@@ -32,7 +32,13 @@ data class NativeHealthDateRangeQuery(
   val ascending: Boolean,
   @DoNotStrip
   @Keep
-  val cursor: String?
+  val cursor: String?,
+  @DoNotStrip
+  @Keep
+  val ownAppOnly: Boolean?,
+  @DoNotStrip
+  @Keep
+  val originIdentifiers: Array<String>
 ) {
   /* primary constructor */
 
@@ -44,6 +50,8 @@ data class NativeHealthDateRangeQuery(
       && Objects.deepEquals(this.limit, other.limit)
       && Objects.deepEquals(this.ascending, other.ascending)
       && Objects.deepEquals(this.cursor, other.cursor)
+      && Objects.deepEquals(this.ownAppOnly, other.ownAppOnly)
+      && Objects.deepEquals(this.originIdentifiers, other.originIdentifiers)
   }
 
   override fun hashCode(): Int {
@@ -52,7 +60,9 @@ data class NativeHealthDateRangeQuery(
       endTimeMs,
       limit,
       ascending,
-      cursor
+      cursor,
+      ownAppOnly,
+      originIdentifiers
     ).contentDeepHashCode()
   }
 
@@ -64,8 +74,8 @@ data class NativeHealthDateRangeQuery(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(startTimeMs: Double, endTimeMs: Double, limit: Double, ascending: Boolean, cursor: String?): NativeHealthDateRangeQuery {
-      return NativeHealthDateRangeQuery(startTimeMs, endTimeMs, limit, ascending, cursor)
+    private fun fromCpp(startTimeMs: Double, endTimeMs: Double, limit: Double, ascending: Boolean, cursor: String?, ownAppOnly: Boolean?, originIdentifiers: Array<String>): NativeHealthDateRangeQuery {
+      return NativeHealthDateRangeQuery(startTimeMs, endTimeMs, limit, ascending, cursor, ownAppOnly, originIdentifiers)
     }
   }
 }

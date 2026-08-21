@@ -37,6 +37,15 @@ struct SampleCursor: Codable, Equatable {
     let startInterval: Double
     /// Uuids of already-returned samples whose start date equals `startInterval`.
     let seenUuids: [String]
+    // Origins filter the cursor was created under. Optional Codable fields keep the
+    // envelope at version 1 (cursors from builds without origin filtering decode as
+    // nil = unfiltered), unlike Android's positional envelope, which had to bump to v2.
+    // The identifiers are trusted to be canonical (sorted, deduped) from the JS layer,
+    // so exact array equality is set equality.
+    /// True when the cursor's query was scoped to the calling app's own samples.
+    let originsOwnApp: Bool?
+    /// Canonical origin identifier list the cursor's query was scoped to.
+    let originIdentifiers: [String]?
 }
 
 func encodeSampleCursor(_ cursor: SampleCursor) throws -> String {
@@ -52,7 +61,9 @@ func decodeSampleCursor(
     dataType: String,
     ascending: Bool,
     queryStartTimeMs: Double,
-    queryEndTimeMs: Double
+    queryEndTimeMs: Double,
+    ownAppOnly: Bool? = nil,
+    originIdentifiers: [String]? = nil
 ) throws -> SampleCursor {
     guard let data = base64UrlDecodedData(cursor),
           let decoded = try? JSONDecoder().decode(SampleCursor.self, from: data)
@@ -87,6 +98,15 @@ func decodeSampleCursor(
         throw invalidCursorError(
             dataType: dataType,
             detail: "the cursor was created by a query with a different date range"
+        )
+    }
+
+    guard (decoded.originsOwnApp ?? false) == (ownAppOnly ?? false),
+          decoded.originIdentifiers == originIdentifiers
+    else {
+        throw invalidCursorError(
+            dataType: dataType,
+            detail: "the cursor was created by a query with a different origins filter"
         )
     }
 
@@ -148,7 +168,9 @@ func paginateCursorPage(
     ascending: Bool,
     queryStartTimeMs: Double,
     queryEndTimeMs: Double,
-    cursor: SampleCursor?
+    cursor: SampleCursor?,
+    ownAppOnly: Bool? = nil,
+    originIdentifiers: [String]? = nil
 ) -> CursorPage {
     let seenUuids = Set(cursor?.seenUuids ?? [])
     let unseenIndices = items.indices.filter { !seenUuids.contains(items[$0].uuid) }
@@ -181,7 +203,9 @@ func paginateCursorPage(
             queryStartTimeMs: queryStartTimeMs,
             queryEndTimeMs: queryEndTimeMs,
             startInterval: boundaryInterval,
-            seenUuids: boundaryUuids
+            seenUuids: boundaryUuids,
+            originsOwnApp: ownAppOnly,
+            originIdentifiers: originIdentifiers
         )
     )
 }

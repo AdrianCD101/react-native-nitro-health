@@ -50,7 +50,7 @@ namespace margelo::nitro::nitrohealth {
 
   public:
     // Properties
-    
+    NativeHealthDataOrigin getOwnOrigin() override;
 
   public:
     // Methods

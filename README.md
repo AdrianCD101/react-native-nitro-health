@@ -295,6 +295,8 @@ interface HealthDataOrigin {
 
 Do not use a display name as a database key. Use `origin.identifier` for stable source grouping.
 
+`NitroHealth.ownOrigin` exposes the calling application's own origin synchronously — the same identity the health service records for this app's writes — for "is this sample mine?" comparisons and for composing identifier lists for [origin filtering](#origin-filtering).
+
 ### Device Provenance
 
 `origin` identifies the application that recorded a sample and is always assigned by the native health service. The optional `device` sibling describes the physical hardware asserted to have generated it:
@@ -433,6 +435,33 @@ do {
 Cursors are platform-specific, method-specific, query-specific, and short-lived. Do not parse, construct, transfer, or persist them. Invalid or foreign cursors reject.
 
 Android heart-rate and sleep reads page by parent Health Connect record. One record can flatten to multiple returned samples, so a page can contain more samples than `limit`. iOS limits independent samples directly. In either case, `nextCursor` is present whenever another page remains.
+
+### Origin Filtering
+
+Every raw `read*` query accepts an optional `origins` filter restricting results to samples recorded by specific applications:
+
+```ts
+// Only samples this app wrote — the one portable spelling:
+const mine = await NitroHealth.readSteps({ startDate, endDate, origins: 'own-app' })
+
+// Only samples from specific apps, by platform-native identifier:
+const own = NitroHealth.ownOrigin
+const observed = await NitroHealth.readSteps({ startDate, endDate })
+const otherApps = new Set(
+  observed.samples.map((s) => s.origin.identifier).filter((id) => id !== own.identifier)
+)
+const theirs = await NitroHealth.readSteps({ startDate, endDate, origins: [...otherApps] })
+```
+
+The filter is include-only and applies to raw reads exclusively — `readStatistics`, `readHeartRateStatistics`, change tracking, and deletes do not accept it.
+
+Identifiers are platform-native values: a bundle identifier on iOS, a package name on Android. The same third-party app has a different identifier on each platform, so identifiers are never portable — obtain them from `origin.identifier` on samples read on the same platform, or from `NitroHealth.ownOrigin`, and store any persisted filter preferences per platform. `origins: 'own-app'` is the only portable spelling and never touches an identifier.
+
+An identifier that matches no data source yields empty results rather than an error — indistinguishable from that app having recorded no data in the range, and the same outcome a wrong-platform identifier or typo produces. An empty `origins` array throws. Duplicate identifiers are collapsed; order does not matter.
+
+Pagination cursors bind the origins filter that produced them: resuming a cursor with a different `origins` value (including adding or removing the filter) rejects with an invalid-cursor error, the same as changing the date range. On Android, cursors created by library versions before origin filtering are also rejected — cursors are short-lived by contract and must never be persisted. Data sources that first appear between pages may contribute samples to later pages, just as newly written samples can.
+
+To exclude an origin instead, read unfiltered and drop samples by `sample.origin.identifier` — Health Connect has no native exclude filter, so the library does not offer one.
 
 ### Distance Scope
 
