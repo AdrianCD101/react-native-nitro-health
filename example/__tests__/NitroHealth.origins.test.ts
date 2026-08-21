@@ -71,9 +71,9 @@ describe('NitroHealth origins contract', () => {
     })
 
     it('rejects blank identifiers', async () => {
-      await expect(
-        NitroHealth.readSteps({ startDate, endDate, origins: ['  '] })
-      ).rejects.toThrow('origins identifiers must be non-empty strings')
+      await expect(NitroHealth.readSteps({ startDate, endDate, origins: ['  '] })).rejects.toThrow(
+        'origins identifiers must be non-empty strings'
+      )
       expect(mockNitroHealth.readSteps).not.toHaveBeenCalled()
     })
 
