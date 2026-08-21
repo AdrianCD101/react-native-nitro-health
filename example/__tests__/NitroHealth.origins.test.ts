@@ -78,26 +78,24 @@ describe('NitroHealth origins contract', () => {
     })
 
     it('rejects non-string identifiers', async () => {
-      // Simulates untrusted runtime input reaching the wrapper (e.g. from parsed JSON).
-      const nonStringIdentifiers: unknown = [42]
       await expect(
         NitroHealth.readSteps({
           startDate,
           endDate,
-          origins: nonStringIdentifiers as string[],
+          // @ts-expect-error This test exercises runtime validation for untyped JavaScript callers.
+          origins: [42],
         })
       ).rejects.toThrow('origins identifiers must be non-empty strings')
       expect(mockNitroHealth.readSteps).not.toHaveBeenCalled()
     })
 
     it('rejects values that are neither own-app nor an array', async () => {
-      // A bare identifier string is a likely caller mistake for the 'own-app' literal.
-      const bareIdentifier: unknown = 'com.a.app'
       await expect(
         NitroHealth.readSteps({
           startDate,
           endDate,
-          origins: bareIdentifier as 'own-app',
+          // @ts-expect-error A bare identifier string is a likely untyped-caller mistake for 'own-app'.
+          origins: 'com.a.app',
         })
       ).rejects.toThrow("origins must be 'own-app' or an array of origin identifiers")
       expect(mockNitroHealth.readSteps).not.toHaveBeenCalled()
