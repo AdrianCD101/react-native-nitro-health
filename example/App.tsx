@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native'
 import { NitroHealth } from 'react-native-nitro-health'
 import type {
   BackgroundChangesConfigurationResult,
@@ -116,9 +116,13 @@ function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error)
 }
 
+interface ReadQueryOptions {
+  origins?: 'own-app'
+}
+
 interface ReadCard {
   buttonLabel: string
-  execute: () => Promise<string[]>
+  execute: (options: ReadQueryOptions) => Promise<string[]>
 }
 
 type ReadCards = Partial<Record<HealthPermissionDataType, ReadCard>>
@@ -143,9 +147,10 @@ const readCards = {
   },
   distance: {
     buttonLabel: 'Read distance samples',
-    execute: async () => {
+    execute: async (options) => {
       const page = await NitroHealth.readDistance({
         ...lastDays(7),
+        ...options,
         limit: 20,
         ascending: false,
       })
@@ -268,9 +273,10 @@ const readCards = {
   },
   sleep: {
     buttonLabel: 'Read sleep samples',
-    execute: async () => {
+    execute: async (options) => {
       const page = await NitroHealth.readSleepSamples({
         ...lastDays(7),
+        ...options,
         limit: 50,
         ascending: false,
       })
@@ -288,9 +294,10 @@ const readCards = {
   },
   bodyMass: {
     buttonLabel: 'Read body mass',
-    execute: async () => {
+    execute: async (options) => {
       const page = await NitroHealth.readBodyMass({
         ...lastDays(7),
+        ...options,
         limit: 20,
         ascending: false,
       })
@@ -305,9 +312,10 @@ const readCards = {
   },
   workout: {
     buttonLabel: 'Read workouts',
-    execute: async () => {
+    execute: async (options) => {
       const page = await NitroHealth.readWorkouts({
         ...lastDays(7),
+        ...options,
         limit: 20,
         ascending: false,
       })
@@ -322,9 +330,10 @@ const readCards = {
   },
   nutrition: {
     buttonLabel: 'Read nutrition',
-    execute: async () => {
+    execute: async (options) => {
       const page = await NitroHealth.readNutrition({
         ...lastDays(7),
+        ...options,
         limit: 20,
         ascending: false,
       })
@@ -364,6 +373,7 @@ function App(): React.JSX.Element {
   const [readResults, setReadResults] = useState<
     Partial<Record<HealthPermissionDataType, string[]>>
   >({})
+  const [readOwnAppOnly, setReadOwnAppOnly] = useState(false)
   const [workflowActivity, setWorkflowActivity] = useState<string>()
   const [workflowMessage, setWorkflowMessage] = useState<string>()
   const [workflowError, setWorkflowError] = useState<string>()
@@ -567,7 +577,7 @@ function App(): React.JSX.Element {
         })
         return
       }
-      const lines = await readCard.execute()
+      const lines = await readCard.execute(readOwnAppOnly ? { origins: 'own-app' } : {})
       setReadResults((current) => ({ ...current, [dataType]: lines }))
       updateCard(dataType, { activity: undefined, readResult })
     } catch (error) {
@@ -687,6 +697,14 @@ function App(): React.JSX.Element {
         <Text style={[styles.status, isAvailable ? styles.available : styles.unavailable]}>
           {availabilityDetail}
         </Text>
+        <Text style={styles.detail}>
+          Own origin: {NitroHealth.ownOrigin.identifier}
+          {NitroHealth.ownOrigin.displayName ? ` (${NitroHealth.ownOrigin.displayName})` : ''}
+        </Text>
+        <View style={styles.toggleRow}>
+          <Text style={styles.detail}>Read only this app's data</Text>
+          <Switch value={readOwnAppOnly} onValueChange={setReadOwnAppOnly} />
+        </View>
 
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Workflows</Text>
@@ -900,6 +918,12 @@ const styles = StyleSheet.create({
   error: { marginTop: 10, fontSize: 14, color: '#b91c1c' },
   saved: { marginTop: 10, fontSize: 14, color: '#15803d' },
   buttonRow: { marginTop: 14, gap: 10 },
+  toggleRow: {
+    marginTop: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
   readResult: { marginTop: 4 },
   button: {
     minHeight: 44,

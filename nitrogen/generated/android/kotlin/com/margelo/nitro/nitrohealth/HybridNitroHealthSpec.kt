@@ -27,7 +27,9 @@ import com.margelo.nitro.core.HybridObject
 )
 abstract class HybridNitroHealthSpec: HybridObject() {
   // Properties
-  
+  @get:DoNotStrip
+  @get:Keep
+  abstract val ownOrigin: NativeHealthDataOrigin
 
   // Methods
   @DoNotStrip

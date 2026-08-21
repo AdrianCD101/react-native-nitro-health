@@ -176,7 +176,7 @@ export function makeHealthRecordingMethod(
   }
 }
 
-function makeHealthDataOrigin(origin: NativeHealthDataOrigin): HealthDataOrigin {
+export function makeHealthDataOrigin(origin: NativeHealthDataOrigin): HealthDataOrigin {
   if (typeof origin.identifier !== 'string' || origin.identifier.trim() === '') {
     throw new Error('Native health sample has an invalid origin identifier')
   }

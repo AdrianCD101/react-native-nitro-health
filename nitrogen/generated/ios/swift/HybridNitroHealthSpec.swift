@@ -10,7 +10,7 @@ import NitroModules
 /// See ``HybridNitroHealthSpec``
 public protocol HybridNitroHealthSpec_protocol: HybridObject {
   // Properties
-  
+  var ownOrigin: NativeHealthDataOrigin { get }
 
   // Methods
   func getAvailability() throws -> NativeHealthAvailability

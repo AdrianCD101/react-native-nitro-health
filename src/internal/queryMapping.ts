@@ -26,6 +26,25 @@ export function makeTimeRange(query: { startDate: Date; endDate: Date }) {
 // max, so the boundary must reject anything a 32-bit page size can't hold.
 const MAX_QUERY_LIMIT = 2_147_483_647
 
+// Canonical form for an origin identifier list: validated, deduped, and sorted so that
+// semantically identical filters serialize identically (pagination cursors bind the
+// canonical list and compare it byte-for-byte). An empty list is rejected here because
+// Health Connect treats an empty dataOriginFilter set as "no filter" — an empty include
+// list must never silently widen a scoped read.
+function canonicalizeOriginIdentifiers(identifiers: readonly string[]): string[] {
+  if (identifiers.length === 0) {
+    throw new Error('origins must contain at least one identifier')
+  }
+
+  for (const identifier of identifiers) {
+    if (typeof identifier !== 'string' || identifier.trim() === '') {
+      throw new Error('origins identifiers must be non-empty strings')
+    }
+  }
+
+  return Array.from(new Set(identifiers)).sort()
+}
+
 export function makeNativeSampleQuery(query: HealthDateRangeQuery): NativeHealthDateRangeQuery {
   const { startTimeMs, endTimeMs } = makeTimeRange(query)
   const limit = query.limit ?? 1000
@@ -43,6 +62,16 @@ export function makeNativeSampleQuery(query: HealthDateRangeQuery): NativeHealth
     endTimeMs,
     limit,
     ascending: query.ascending ?? true,
+  }
+
+  if (query.origins !== undefined) {
+    if (query.origins === 'own-app') {
+      nativeQuery.ownAppOnly = true
+    } else if (Array.isArray(query.origins)) {
+      nativeQuery.originIdentifiers = canonicalizeOriginIdentifiers(query.origins)
+    } else {
+      throw new Error("origins must be 'own-app' or an array of origin identifiers")
+    }
   }
 
   if (query.cursor !== undefined) nativeQuery.cursor = query.cursor

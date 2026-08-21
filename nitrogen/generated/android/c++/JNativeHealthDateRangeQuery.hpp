@@ -12,6 +12,7 @@
 
 #include <optional>
 #include <string>
+#include <vector>
 
 namespace margelo::nitro::nitrohealth {
 
@@ -42,12 +43,27 @@ namespace margelo::nitro::nitrohealth {
       jboolean ascending = this->getFieldValue(fieldAscending);
       static const auto fieldCursor = clazz->getField<jni::JString>("cursor");
       jni::local_ref<jni::JString> cursor = this->getFieldValue(fieldCursor);
+      static const auto fieldOwnAppOnly = clazz->getField<jni::JBoolean>("ownAppOnly");
+      jni::local_ref<jni::JBoolean> ownAppOnly = this->getFieldValue(fieldOwnAppOnly);
+      static const auto fieldOriginIdentifiers = clazz->getField<jni::JArrayClass<jni::JString>>("originIdentifiers");
+      jni::local_ref<jni::JArrayClass<jni::JString>> originIdentifiers = this->getFieldValue(fieldOriginIdentifiers);
       return NativeHealthDateRangeQuery(
         startTimeMs,
         endTimeMs,
         limit,
         static_cast<bool>(ascending),
-        cursor != nullptr ? std::make_optional(cursor->toStdString()) : std::nullopt
+        cursor != nullptr ? std::make_optional(cursor->toStdString()) : std::nullopt,
+        ownAppOnly != nullptr ? std::make_optional(static_cast<bool>(ownAppOnly->value())) : std::nullopt,
+        originIdentifiers != nullptr ? std::make_optional([&](auto&& __input) {
+          size_t __size = __input->size();
+          std::vector<std::string> __vector;
+          __vector.reserve(__size);
+          for (size_t __i = 0; __i < __size; __i++) {
+            auto __element = __input->getElement(__i);
+            __vector.push_back(__element->toStdString());
+          }
+          return __vector;
+        }(originIdentifiers)) : std::nullopt
       );
     }
 
@@ -57,7 +73,7 @@ namespace margelo::nitro::nitrohealth {
      */
     [[maybe_unused]]
     static jni::local_ref<JNativeHealthDateRangeQuery::javaobject> fromCpp(const NativeHealthDateRangeQuery& value) {
-      using JSignature = JNativeHealthDateRangeQuery(double, double, double, jboolean, jni::alias_ref<jni::JString>);
+      using JSignature = JNativeHealthDateRangeQuery(double, double, double, jboolean, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JArrayClass<jni::JString>>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
@@ -66,7 +82,18 @@ namespace margelo::nitro::nitrohealth {
         value.endTimeMs,
         value.limit,
         value.ascending,
-        value.cursor.has_value() ? jni::make_jstring(value.cursor.value()) : nullptr
+        value.cursor.has_value() ? jni::make_jstring(value.cursor.value()) : nullptr,
+        value.ownAppOnly.has_value() ? jni::JBoolean::valueOf(value.ownAppOnly.value()) : nullptr,
+        value.originIdentifiers.has_value() ? [&](auto&& __input) {
+          size_t __size = __input.size();
+          jni::local_ref<jni::JArrayClass<jni::JString>> __array = jni::JArrayClass<jni::JString>::newArray(__size);
+          for (size_t __i = 0; __i < __size; __i++) {
+            const auto& __element = __input[__i];
+            auto __elementJni = jni::make_jstring(__element);
+            __array->setElement(__i, *__elementJni);
+          }
+          return __array;
+        }(value.originIdentifiers.value()) : nullptr
       );
     }
   };

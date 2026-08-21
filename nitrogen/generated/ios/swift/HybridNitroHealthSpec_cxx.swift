@@ -121,7 +121,12 @@ open class HybridNitroHealthSpec_cxx {
   }
 
   // Properties
-  
+  public final var ownOrigin: NativeHealthDataOrigin {
+    @inline(__always)
+    get {
+      return self.__implementation.ownOrigin
+    }
+  }
 
   // Methods
   @inline(__always)

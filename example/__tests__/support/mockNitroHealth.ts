@@ -16,6 +16,7 @@ function mockNativeMethod<T extends NativeMethod>(): jest.Mock<ReturnType<T>, Pa
 /** Full native Nitro contract shared by the Jest wrapper tests. */
 export const mockNitroHealth = {
   name: 'NitroHealth',
+  ownOrigin: { identifier: 'com.nitrohealth.mock', displayName: 'Nitro Health Mock' },
   toString: mockNativeMethod<NitroHealthSpec['toString']>(),
   equals: mockNativeMethod<NitroHealthSpec['equals']>(),
   dispose: mockNativeMethod<NitroHealthSpec['dispose']>(),

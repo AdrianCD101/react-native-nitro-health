@@ -7,6 +7,8 @@
 
 #include "JHybridNitroHealthSpec.hpp"
 
+// Forward declaration of `NativeHealthDataOrigin` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthDataOrigin; }
 // Forward declaration of `NativeHealthAvailability` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthAvailability; }
 // Forward declaration of `NativeHealthAvailabilityStatus` to properly resolve imports.
@@ -258,14 +260,16 @@ namespace margelo::nitro::nitrohealth { struct NativeWorkoutSampleInput; }
 // Forward declaration of `NativeNutritionSampleInput` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeNutritionSampleInput; }
 
+#include "NativeHealthDataOrigin.hpp"
+#include "JNativeHealthDataOrigin.hpp"
+#include <string>
+#include <optional>
 #include "NativeHealthAvailability.hpp"
 #include "JNativeHealthAvailability.hpp"
 #include "NativeHealthAvailabilityStatus.hpp"
 #include "JNativeHealthAvailabilityStatus.hpp"
 #include "NativeHealthAvailabilityReason.hpp"
-#include <optional>
 #include "JNativeHealthAvailabilityReason.hpp"
-#include <string>
 #include "NativeHealthAvailabilityRecoveryResult.hpp"
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/JPromise.hpp>
@@ -548,7 +552,11 @@ namespace margelo::nitro::nitrohealth {
   }
 
   // Properties
-  
+  NativeHealthDataOrigin JHybridNitroHealthSpec::getOwnOrigin() {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JNativeHealthDataOrigin>()>("getOwnOrigin");
+    auto __result = method(_javaPart);
+    return __result->toCpp();
+  }
 
   // Methods
   NativeHealthAvailability JHybridNitroHealthSpec::getAvailability() {

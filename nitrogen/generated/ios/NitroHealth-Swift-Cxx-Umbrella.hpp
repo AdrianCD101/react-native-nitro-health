@@ -116,6 +116,8 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthCapabilities; }
 namespace margelo::nitro::nitrohealth { struct NativeHealthChange; }
 // Forward declaration of `NativeHealthChangesResult` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthChangesResult; }
+// Forward declaration of `NativeHealthDataOrigin` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthDataOrigin; }
 // Forward declaration of `NativeHealthDateRangeQuery` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthDateRangeQuery; }
 // Forward declaration of `NativeHealthDeleteResult` to properly resolve imports.
@@ -316,6 +318,7 @@ namespace margelo::nitro::nitrohealth { struct NativeWorkoutSample; }
 #include "NativeHealthCapabilities.hpp"
 #include "NativeHealthChange.hpp"
 #include "NativeHealthChangesResult.hpp"
+#include "NativeHealthDataOrigin.hpp"
 #include "NativeHealthDateRangeQuery.hpp"
 #include "NativeHealthDeleteResult.hpp"
 #include "NativeHealthDeleteStatus.hpp"

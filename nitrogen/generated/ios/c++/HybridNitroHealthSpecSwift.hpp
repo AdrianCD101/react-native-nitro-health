@@ -12,6 +12,8 @@
 // Forward declaration of `HybridNitroHealthSpec_cxx` to properly resolve imports.
 namespace NitroHealth { class HybridNitroHealthSpec_cxx; }
 
+// Forward declaration of `NativeHealthDataOrigin` to properly resolve imports.
+namespace margelo::nitro::nitrohealth { struct NativeHealthDataOrigin; }
 // Forward declaration of `NativeHealthAvailability` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { struct NativeHealthAvailability; }
 // Forward declaration of `NativeHealthAvailabilityStatus` to properly resolve imports.
@@ -263,11 +265,12 @@ namespace margelo::nitro::nitrohealth { struct NativeHealthAuthorizationResult; 
 // Forward declaration of `NativeHealthAuthorizationStatus` to properly resolve imports.
 namespace margelo::nitro::nitrohealth { enum class NativeHealthAuthorizationStatus; }
 
+#include "NativeHealthDataOrigin.hpp"
+#include <string>
+#include <optional>
 #include "NativeHealthAvailability.hpp"
 #include "NativeHealthAvailabilityStatus.hpp"
 #include "NativeHealthAvailabilityReason.hpp"
-#include <optional>
-#include <string>
 #include "NativeHealthAvailabilityRecoveryResult.hpp"
 #include <NitroModules/Promise.hpp>
 #include "NativeHealthCapabilities.hpp"
@@ -440,7 +443,9 @@ namespace margelo::nitro::nitrohealth {
 
   public:
     // Properties
-    
+    inline NativeHealthDataOrigin getOwnOrigin() noexcept override {
+      return _swiftPart.getOwnOrigin();
+    }
 
   public:
     // Methods

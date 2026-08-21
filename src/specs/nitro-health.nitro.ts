@@ -31,6 +31,7 @@ import type {
   NativeHealthCapabilities,
 } from '../NativeHealthCapabilities'
 import type { NativeHealthChangesResult } from '../NativeHealthChangesResult'
+import type { NativeHealthDataOrigin } from '../NativeHealthDataOrigin'
 import type { NativeHealthDateRangeQuery } from '../NativeHealthDateRangeQuery'
 import type { NativeHealthDeleteResult } from '../NativeHealthDeleteResult'
 import type { NativeHealthWriteResult } from '../NativeHealthWriteResult'
@@ -68,6 +69,7 @@ import type { NativeWorkoutSampleInput } from '../NativeWorkoutSampleInput'
 import type { NativePermissionWorkflowResult } from '../NativePermissionWorkflowResult'
 
 export interface NitroHealth extends HybridObject<{ ios: 'swift'; android: 'kotlin' }> {
+  readonly ownOrigin: NativeHealthDataOrigin
   getAvailability(): NativeHealthAvailability
   performAvailabilityRecovery(): Promise<NativeHealthAvailabilityRecoveryResult>
   getCapabilities(): Promise<NativeHealthCapabilities>

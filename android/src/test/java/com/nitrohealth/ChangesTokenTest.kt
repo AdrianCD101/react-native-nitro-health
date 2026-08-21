@@ -57,7 +57,9 @@ class ChangesTokenTest {
                 endTimeMs = 2_000.0,
                 limit = 100.0,
                 ascending = true,
-                cursor = null
+                cursor = null,
+                ownAppOnly = null,
+                originIdentifiers = null
             ),
             "page-token"
         )
@@ -66,7 +68,9 @@ class ChangesTokenTest {
             decodeChangesToken(cursor, "steps")
         }
 
-        assertEquals("Invalid changes token: expected a changes token, not kind \"steps\"", error.message)
+        // Sample cursors moved to a v2 envelope for origin filtering, so the changes-token
+        // decoder now rejects them at its version check rather than the kind check.
+        assertEquals("Invalid changes token: unsupported version \"v2\"", error.message)
     }
 
     @Test

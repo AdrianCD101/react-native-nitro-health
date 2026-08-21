@@ -27,19 +27,46 @@ extension HybridNitroHealth {
         authorizationLabel: String,
         map: (HKSample) throws -> T?
     ) async throws -> (samples: [T], nextCursor: String?) {
+        // The JS mapping layer guarantees exclusivity; both fields arriving means a
+        // caller bypassed it, which must fail loudly rather than pick a winner.
+        if query.ownAppOnly == true && query.originIdentifiers != nil {
+            throw permissionError("ownAppOnly and originIdentifiers are mutually exclusive")
+        }
+
         let cursor = try query.cursor.map {
             try decodeSampleCursor(
                 $0,
                 dataType: dataType,
                 ascending: query.ascending,
                 queryStartTimeMs: query.startTimeMs,
-                queryEndTimeMs: query.endTimeMs
+                queryEndTimeMs: query.endTimeMs,
+                ownAppOnly: query.ownAppOnly,
+                originIdentifiers: query.originIdentifiers
             )
         }
         try await requireDeterminedReadAuthorization(
             for: makeReadAuthorizationObjectTypes(dataType: dataType),
             label: authorizationLabel
         )
+
+        // Identifier resolution runs after the authorization gate (sources are only
+        // observable once read authorization has been determined). Zero matching
+        // sources short-circuits: the predicate would match nothing, and an unknown
+        // identifier is defined as empty results, never an error.
+        var originPredicate: NSPredicate?
+        if query.ownAppOnly == true {
+            originPredicate = HKQuery.predicateForObjects(from: [HKSource.default()])
+        } else if let identifiers = query.originIdentifiers {
+            let sources = try await healthStore.sources(
+                matchingBundleIdentifiers: identifiers,
+                sampleType: sampleType
+            )
+            if sources.isEmpty {
+                return (samples: [], nextCursor: nil)
+            }
+            originPredicate = HKQuery.predicateForObjects(from: Set(sources))
+        }
+
         let sortDescriptors = [
             NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: query.ascending),
         ]
@@ -47,7 +74,11 @@ extension HybridNitroHealth {
         let fetched = try await queryHealthKitSamples(
             sampleType: sampleType,
             limit: makeCursorFetchLimit(limit: Int(query.limit), cursor: cursor),
-            predicate: makePagedSamplesPredicate(query: query, cursor: cursor),
+            predicate: makePagedSamplesPredicate(
+                query: query,
+                cursor: cursor,
+                originPredicate: originPredicate
+            ),
             sortDescriptors: sortDescriptors
         )
 
@@ -73,7 +104,9 @@ extension HybridNitroHealth {
             ascending: query.ascending,
             queryStartTimeMs: query.startTimeMs,
             queryEndTimeMs: query.endTimeMs,
-            cursor: cursor
+            cursor: cursor,
+            ownAppOnly: query.ownAppOnly,
+            originIdentifiers: query.originIdentifiers
         )
 
         return (
@@ -84,26 +117,35 @@ extension HybridNitroHealth {
 
     private func makePagedSamplesPredicate(
         query: NativeHealthDateRangeQuery,
-        cursor: SampleCursor?
+        cursor: SampleCursor?,
+        originPredicate: NSPredicate?
     ) -> NSPredicate {
-        guard let cursor = cursor else {
-            return HKQuery.predicateForSamples(
+        let timePredicate: NSPredicate
+
+        if let cursor = cursor {
+            let window = makeCursorPageWindow(
+                cursor: cursor,
+                queryStartInterval: query.startTimeMs / 1000,
+                queryEndInterval: query.endTimeMs / 1000
+            )
+
+            timePredicate = HKQuery.predicateForSamples(
+                withStart: Date(timeIntervalSince1970: window.startInterval),
+                end: Date(timeIntervalSince1970: window.endInterval),
+                options: window.strictStartDate ? [.strictStartDate] : []
+            )
+        } else {
+            timePredicate = HKQuery.predicateForSamples(
                 withStart: Date(timeIntervalSince1970: query.startTimeMs / 1000),
                 end: Date(timeIntervalSince1970: query.endTimeMs / 1000),
                 options: []
             )
         }
 
-        let window = makeCursorPageWindow(
-            cursor: cursor,
-            queryStartInterval: query.startTimeMs / 1000,
-            queryEndInterval: query.endTimeMs / 1000
-        )
+        guard let originPredicate = originPredicate else {
+            return timePredicate
+        }
 
-        return HKQuery.predicateForSamples(
-            withStart: Date(timeIntervalSince1970: window.startInterval),
-            end: Date(timeIntervalSince1970: window.endInterval),
-            options: window.strictStartDate ? [.strictStartDate] : []
-        )
+        return NSCompoundPredicate(andPredicateWithSubpredicates: [timePredicate, originPredicate])
     }
 }

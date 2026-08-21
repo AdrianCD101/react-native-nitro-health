@@ -77,7 +77,9 @@ final class HealthChangesTokenTests: XCTestCase {
             queryStartTimeMs: 1_000,
             queryEndTimeMs: 2_000,
             startInterval: 0,
-            seenUuids: []
+            seenUuids: [],
+            originsOwnApp: nil,
+            originIdentifiers: nil
         ))
 
         XCTAssertThrowsError(try decodeHealthChangesToken(cursor, dataType: "steps")) { error in
