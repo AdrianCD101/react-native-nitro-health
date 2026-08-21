@@ -12,7 +12,7 @@ class SampleCursorTest {
         endTimeMs: Double = 2_000.0,
         ascending: Boolean = true,
         ownAppOnly: Boolean? = null,
-        originIdentifiers: Array<String>? = null
+        originIdentifiers: Array<String> = emptyArray()
     ) = NativeHealthDateRangeQuery(
         startTimeMs = startTimeMs,
         endTimeMs = endTimeMs,

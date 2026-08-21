@@ -38,7 +38,7 @@ data class NativeHealthDateRangeQuery(
   val ownAppOnly: Boolean?,
   @DoNotStrip
   @Keep
-  val originIdentifiers: Array<String>?
+  val originIdentifiers: Array<String>
 ) {
   /* primary constructor */
 
@@ -74,7 +74,7 @@ data class NativeHealthDateRangeQuery(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(startTimeMs: Double, endTimeMs: Double, limit: Double, ascending: Boolean, cursor: String?, ownAppOnly: Boolean?, originIdentifiers: Array<String>?): NativeHealthDateRangeQuery {
+    private fun fromCpp(startTimeMs: Double, endTimeMs: Double, limit: Double, ascending: Boolean, cursor: String?, ownAppOnly: Boolean?, originIdentifiers: Array<String>): NativeHealthDateRangeQuery {
       return NativeHealthDateRangeQuery(startTimeMs, endTimeMs, limit, ascending, cursor, ownAppOnly, originIdentifiers)
     }
   }

@@ -17,7 +17,7 @@ describe('NitroHealth origins contract', () => {
   })
 
   describe('query mapping', () => {
-    it("maps 'own-app' to ownAppOnly without an originIdentifiers key", async () => {
+    it("maps 'own-app' to ownAppOnly with the empty no-filter identifier list", async () => {
       mockNitroHealth.readSteps.mockResolvedValue({ samples: [] })
 
       await NitroHealth.readSteps({ startDate, endDate, origins: 'own-app' })
@@ -28,8 +28,8 @@ describe('NitroHealth origins contract', () => {
         limit: 1000,
         ascending: true,
         ownAppOnly: true,
+        originIdentifiers: [],
       })
-      expect(mockNitroHealth.readSteps.mock.calls[0]?.[0]).not.toHaveProperty('originIdentifiers')
     })
 
     it('canonicalizes identifier lists: deduped and sorted, without an ownAppOnly key', async () => {
@@ -51,14 +51,14 @@ describe('NitroHealth origins contract', () => {
       expect(mockNitroHealth.readSteps.mock.calls[0]?.[0]).not.toHaveProperty('ownAppOnly')
     })
 
-    it('sends a native query without origin keys when the caller omits origins', async () => {
+    it('sends the empty no-filter identifier list and no ownAppOnly key when origins is omitted', async () => {
       mockNitroHealth.readSteps.mockResolvedValue({ samples: [] })
 
       await NitroHealth.readSteps({ startDate, endDate })
 
       const nativeQuery = mockNitroHealth.readSteps.mock.calls[0]?.[0]
       expect(nativeQuery).not.toHaveProperty('ownAppOnly')
-      expect(nativeQuery).not.toHaveProperty('originIdentifiers')
+      expect(nativeQuery?.originIdentifiers).toEqual([])
     })
   })
 

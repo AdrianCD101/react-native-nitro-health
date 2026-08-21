@@ -48,6 +48,7 @@ describe('NitroHealth workouts contract', () => {
         endTimeMs: endDate.getTime(),
         limit: 1000,
         ascending: true,
+        originIdentifiers: [],
       })
       expect(result.samples).toHaveLength(1)
       expect(result.samples[0].identity).toEqual({ kind: 'record', id: 'workout-record-1' })
@@ -88,6 +89,7 @@ describe('NitroHealth workouts contract', () => {
         endTimeMs: endDate.getTime(),
         limit: 20,
         ascending: false,
+        originIdentifiers: [],
       })
     })
 

@@ -54,7 +54,7 @@ namespace margelo::nitro::nitrohealth {
         static_cast<bool>(ascending),
         cursor != nullptr ? std::make_optional(cursor->toStdString()) : std::nullopt,
         ownAppOnly != nullptr ? std::make_optional(static_cast<bool>(ownAppOnly->value())) : std::nullopt,
-        originIdentifiers != nullptr ? std::make_optional([&](auto&& __input) {
+        [&](auto&& __input) {
           size_t __size = __input->size();
           std::vector<std::string> __vector;
           __vector.reserve(__size);
@@ -63,7 +63,7 @@ namespace margelo::nitro::nitrohealth {
             __vector.push_back(__element->toStdString());
           }
           return __vector;
-        }(originIdentifiers)) : std::nullopt
+        }(originIdentifiers)
       );
     }
 
@@ -84,7 +84,7 @@ namespace margelo::nitro::nitrohealth {
         value.ascending,
         value.cursor.has_value() ? jni::make_jstring(value.cursor.value()) : nullptr,
         value.ownAppOnly.has_value() ? jni::JBoolean::valueOf(value.ownAppOnly.value()) : nullptr,
-        value.originIdentifiers.has_value() ? [&](auto&& __input) {
+        [&](auto&& __input) {
           size_t __size = __input.size();
           jni::local_ref<jni::JArrayClass<jni::JString>> __array = jni::JArrayClass<jni::JString>::newArray(__size);
           for (size_t __i = 0; __i < __size; __i++) {
@@ -93,7 +93,7 @@ namespace margelo::nitro::nitrohealth {
             __array->setElement(__i, *__elementJni);
           }
           return __array;
-        }(value.originIdentifiers.value()) : nullptr
+        }(value.originIdentifiers)
       );
     }
   };

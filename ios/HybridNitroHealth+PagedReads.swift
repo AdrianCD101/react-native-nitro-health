@@ -27,9 +27,11 @@ extension HybridNitroHealth {
         authorizationLabel: String,
         map: (HKSample) throws -> T?
     ) async throws -> (samples: [T], nextCursor: String?) {
-        // The JS mapping layer guarantees exclusivity; both fields arriving means a
-        // caller bypassed it, which must fail loudly rather than pick a winner.
-        if query.ownAppOnly == true && query.originIdentifiers != nil {
+        // An empty identifier list means "no identifier filter" on the wire; the JS layer
+        // rejects user-supplied empty arrays. Both filters arriving together means a caller
+        // bypassed the JS mapping layer, which must fail loudly rather than pick a winner.
+        let originIdentifiers = query.originIdentifiers.isEmpty ? nil : query.originIdentifiers
+        if query.ownAppOnly == true && originIdentifiers != nil {
             throw permissionError("ownAppOnly and originIdentifiers are mutually exclusive")
         }
 
@@ -41,7 +43,7 @@ extension HybridNitroHealth {
                 queryStartTimeMs: query.startTimeMs,
                 queryEndTimeMs: query.endTimeMs,
                 ownAppOnly: query.ownAppOnly,
-                originIdentifiers: query.originIdentifiers
+                originIdentifiers: originIdentifiers
             )
         }
         try await requireDeterminedReadAuthorization(
@@ -56,7 +58,7 @@ extension HybridNitroHealth {
         var originPredicate: NSPredicate?
         if query.ownAppOnly == true {
             originPredicate = HKQuery.predicateForObjects(from: [HKSource.default()])
-        } else if let identifiers = query.originIdentifiers {
+        } else if let identifiers = originIdentifiers {
             let sources = try await healthStore.sources(
                 matchingBundleIdentifiers: identifiers,
                 sampleType: sampleType
@@ -106,7 +108,7 @@ extension HybridNitroHealth {
             queryEndTimeMs: query.endTimeMs,
             cursor: cursor,
             ownAppOnly: query.ownAppOnly,
-            originIdentifiers: query.originIdentifiers
+            originIdentifiers: originIdentifiers
         )
 
         return (

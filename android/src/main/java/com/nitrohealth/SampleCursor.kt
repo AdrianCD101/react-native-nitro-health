@@ -19,17 +19,21 @@ private fun cursorOrder(ascending: Boolean): String {
     return if (ascending) "asc" else "desc"
 }
 
-// Canonical origins-filter field for the envelope: "" when unfiltered, "own-app", or
-// "ids:" + base64url of the newline-joined identifier list. The base64url alphabet
-// contains no '|', so identifier content can never break the positional envelope. The
-// identifiers arrive canonical (sorted, deduped) from the JS layer — the native side
-// trusts that, so byte equality of this field is set equality of the filter.
+// Canonical origins-filter field for the envelope: "" when unfiltered (an empty wire
+// array means "no identifier filter"), "own-app", or "ids:" + base64url of the
+// newline-joined identifier list. The base64url alphabet contains no '|', so identifier
+// content can never break the positional envelope. The identifiers arrive canonical
+// (sorted, deduped) from the JS layer — the native side trusts that, so byte equality
+// of this field is set equality of the filter.
 private fun cursorOriginsField(query: NativeHealthDateRangeQuery): String {
     if (query.ownAppOnly == true) {
         return ORIGINS_OWN_APP
     }
 
-    val identifiers = query.originIdentifiers ?: return ""
+    val identifiers = query.originIdentifiers
+    if (identifiers.isEmpty()) {
+        return ""
+    }
 
     return ORIGINS_IDENTIFIERS_PREFIX + Base64.getUrlEncoder().withoutPadding()
         .encodeToString(identifiers.joinToString("\n").toByteArray(Charsets.UTF_8))

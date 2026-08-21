@@ -370,6 +370,7 @@ describe('NitroHealth workflow and permission contract', () => {
       endTimeMs: endDate.getTime(),
       limit: 25,
       ascending: false,
+      originIdentifiers: [],
     })
   })
 
@@ -520,6 +521,7 @@ describe('NitroHealth workflow and permission contract', () => {
       endTimeMs: endDate.getTime(),
       limit: 1000,
       ascending: true,
+      originIdentifiers: [],
     })
 
     jest.clearAllMocks()

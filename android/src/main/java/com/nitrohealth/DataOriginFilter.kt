@@ -4,12 +4,13 @@ import androidx.health.connect.client.records.metadata.DataOrigin
 import com.margelo.nitro.nitrohealth.NativeHealthDateRangeQuery
 
 /**
- * Builds the Health Connect data-origin filter for a raw read. An empty set means
- * "no filter" to Health Connect, so this only ever returns an empty set for a query
- * with no origins filter at all: the JS mapping layer guarantees a present
- * `originIdentifiers` is non-empty, and a violated guarantee throws rather than
- * silently widening a scoped read. `ownAppOnly` and `originIdentifiers` are mutually
- * exclusive by the same contract.
+ * Builds the Health Connect data-origin filter for a raw read. On the wire an empty
+ * `originIdentifiers` array means "no identifier filter" — the sentinel is safe because
+ * the JS mapping layer rejects user-supplied empty arrays before they reach native, so an
+ * empty array here always means the caller requested no filter, never a scoped read that
+ * would silently widen. `ownAppOnly` and a non-empty `originIdentifiers` are mutually
+ * exclusive by the same JS contract; both arriving means the mapping layer was bypassed
+ * and must fail loudly rather than pick a winner.
  */
 internal fun makeDataOriginFilter(
     query: NativeHealthDateRangeQuery,
@@ -17,7 +18,7 @@ internal fun makeDataOriginFilter(
 ): Set<DataOrigin> {
     val identifiers = query.originIdentifiers
 
-    if (query.ownAppOnly == true && identifiers != null) {
+    if (query.ownAppOnly == true && identifiers.isNotEmpty()) {
         throw IllegalArgumentException("ownAppOnly and originIdentifiers are mutually exclusive")
     }
 
@@ -25,12 +26,5 @@ internal fun makeDataOriginFilter(
         return setOf(DataOrigin(ownPackageName()))
     }
 
-    if (identifiers != null) {
-        if (identifiers.isEmpty()) {
-            throw IllegalArgumentException("originIdentifiers must not be empty")
-        }
-        return identifiers.map { DataOrigin(it) }.toSet()
-    }
-
-    return emptySet()
+    return identifiers.map { DataOrigin(it) }.toSet()
 }

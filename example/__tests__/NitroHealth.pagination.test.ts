@@ -27,6 +27,7 @@ describe('NitroHealth pagination contract', () => {
         limit: 1000,
         ascending: true,
         cursor: 'opaque-cursor-1',
+        originIdentifiers: [],
       })
     })
 
@@ -42,6 +43,7 @@ describe('NitroHealth pagination contract', () => {
         endTimeMs: endDate.getTime(),
         limit: 1000,
         ascending: true,
+        originIdentifiers: [],
       })
       expect(mockNitroHealth.readSteps.mock.calls[0][0]).not.toHaveProperty('cursor')
     })

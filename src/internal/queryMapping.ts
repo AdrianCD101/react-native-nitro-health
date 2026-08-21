@@ -62,6 +62,7 @@ export function makeNativeSampleQuery(query: HealthDateRangeQuery): NativeHealth
     endTimeMs,
     limit,
     ascending: query.ascending ?? true,
+    originIdentifiers: [],
   }
 
   if (query.origins !== undefined) {

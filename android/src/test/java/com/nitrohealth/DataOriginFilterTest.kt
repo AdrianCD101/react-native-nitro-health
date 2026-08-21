@@ -9,7 +9,7 @@ import org.junit.Test
 class DataOriginFilterTest {
     private fun makeQuery(
         ownAppOnly: Boolean? = null,
-        originIdentifiers: Array<String>? = null
+        originIdentifiers: Array<String> = emptyArray()
     ) = NativeHealthDateRangeQuery(
         startTimeMs = 1_000.0,
         endTimeMs = 2_000.0,
@@ -56,12 +56,22 @@ class DataOriginFilterTest {
     }
 
     @Test
-    fun emptyIdentifiersThrow() {
-        // Health Connect treats an empty dataOriginFilter set as "no filter", so an empty
-        // include list arriving natively (the JS layer forbids it) must throw rather than
-        // silently widen a scoped read.
-        assertThrows(IllegalArgumentException::class.java) {
+    fun emptyIdentifiersMeanNoFilter() {
+        // On the wire an empty array is the "no identifier filter" sentinel; user-supplied
+        // empty arrays never reach native because the JS mapping layer rejects them.
+        assertEquals(
+            emptySet<DataOrigin>(),
             makeDataOriginFilter(makeQuery(originIdentifiers = emptyArray())) { "com.own.app" }
-        }
+        )
+    }
+
+    @Test
+    fun ownAppOnlyWithEmptyIdentifiersYieldsOwnPackage() {
+        assertEquals(
+            setOf(DataOrigin("com.own.app")),
+            makeDataOriginFilter(
+                makeQuery(ownAppOnly = true, originIdentifiers = emptyArray())
+            ) { "com.own.app" }
+        )
     }
 }

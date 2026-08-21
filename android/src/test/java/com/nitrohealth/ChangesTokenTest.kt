@@ -59,7 +59,7 @@ class ChangesTokenTest {
                 ascending = true,
                 cursor = null,
                 ownAppOnly = null,
-                originIdentifiers = null
+                originIdentifiers = emptyArray()
             ),
             "page-token"
         )
