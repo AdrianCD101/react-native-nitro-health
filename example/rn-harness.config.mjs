@@ -30,6 +30,9 @@ const config = {
   ],
   defaultRunner: 'android',
   bridgeTimeout: 300000,
+  // A fresh iOS 27 simulator on the xcode-27 CI image took over four minutes to boot,
+  // leaving too little of the 5-minute default for the XCTest agent to start.
+  platformReadyTimeout: 600000,
   // Several suites poll with waitUntil(..., { timeout: 10_000 }); the Harness default test
   // timeout of 5s cuts those polls short on slow CI emulators, so give every test headroom.
   testTimeout: 30_000,

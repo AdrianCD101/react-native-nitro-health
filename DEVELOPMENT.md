@@ -181,7 +181,7 @@ bun run harness:ios
 
 Harness does not build the app. Build and install it before local runs; CI supplies the built app through the Harness action. Rebuild after native or generated changes before rerunning it.
 
-The Harness config and workflows mirror `react-native-nitro-file-manager`; keep the two repositories in sync. This repository differs only in its app names, `permissions: true` with the HealthKit authorization setup, the 30-second test timeout, the `patches/**` workflow trigger, and the iOS workflow's `DEVICE_MODEL`. Android uses `Pixel_10` (API 37, `pixel_10` profile), and iOS uses `iPhone 17 Pro` on iOS 27.0. Android is the default runner. Both platforms have a five-minute bridge timeout. Android snapshots are enabled in CI only.
+The Harness config and workflows mirror `react-native-nitro-file-manager`; keep the two repositories in sync. This repository differs only in its app names, `permissions: true` with the HealthKit authorization setup, the 30-second test timeout, the `patches/**` workflow trigger, the iOS workflow's `DEVICE_MODEL`, and a 10-minute `platformReadyTimeout`. Android uses `Pixel_10` (API 37, `pixel_10` profile), and iOS uses `iPhone 17 Pro` on iOS 27.0. Android is the default runner. Both platforms have a five-minute bridge timeout and a ten-minute platform-ready timeout, which covers the simulator or emulator boot; a fresh iOS 27 simulator in CI took over four minutes to boot. Android snapshots are enabled in CI only.
 
 Override local device names when needed:
 
