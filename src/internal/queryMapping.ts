@@ -176,6 +176,7 @@ export function makeNativeStatisticsQuery(
     if (typeof query.timeZone !== 'string' || query.timeZone.trim() === '') {
       throw new Error('timeZone must be a non-empty IANA time-zone identifier')
     }
+
     nativeQuery.timeZone = query.timeZone
   }
 

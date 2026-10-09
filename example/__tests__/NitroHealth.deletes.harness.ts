@@ -19,9 +19,11 @@ function assertCompletedIdentityDelete(
   result: Awaited<ReturnType<typeof NitroHealth.deleteRecordsByIds>>
 ): void {
   expect(result.status).toBe('completed')
+
   if (result.status !== 'completed') return
 
   expect(result.requestedCount).toBe(1)
+
   if (result.deletedCount.status === 'known') {
     expect(result.deletedCount.value).toBe(1)
   }
@@ -53,6 +55,7 @@ describe('NitroHealth deletes (native)', () => {
     const result = await NitroHealth.deleteRecordsByTimeRange('steps', emptyRange)
 
     expect(result.status).toBe('completed')
+
     if (result.status === 'completed' && result.deletedCount.status === 'known') {
       expect(result.deletedCount.value).toBe(0)
     }
@@ -68,6 +71,7 @@ describe('NitroHealth deletes (native)', () => {
 
     if (outcome.status === 'completed') {
       expect(outcome.result.deletedCount).toEqual({ status: 'unverifiable' })
+
       return
     }
 
@@ -89,6 +93,7 @@ describe('NitroHealth deletes (native)', () => {
 
     const saved = page.samples.find((sample) => sample.count === 4321)
     expect(saved).toBeDefined()
+
     if (saved === undefined || saved.identity.kind !== 'record') return
 
     const result = await NitroHealth.deleteRecordsByIds('steps', [saved.identity])
@@ -113,6 +118,7 @@ describe('NitroHealth deletes (native)', () => {
 
     const result = await NitroHealth.deleteRecordsByTimeRange('steps', deleteReadRange)
     expect(result.status).toBe('completed')
+
     if (result.status === 'completed' && result.deletedCount.status === 'known') {
       expect(result.deletedCount.value).toBeGreaterThanOrEqual(1)
     }
@@ -138,7 +144,9 @@ describe('NitroHealth deletes (native)', () => {
     const saved = page.samples.find(
       (sample) => sample.systolicMmHg === 133 && sample.diastolicMmHg === 87
     )
+
     expect(saved).toBeDefined()
+
     if (saved === undefined || saved.identity.kind !== 'record') return
 
     const result = await NitroHealth.deleteRecordsByIds('bloodPressure', [saved.identity])
@@ -164,6 +172,7 @@ describe('NitroHealth deletes (native)', () => {
 
     const saved = page.samples.find((sample) => sample.foodName === 'Harness delete meal')
     expect(saved).toBeDefined()
+
     if (saved === undefined || saved.identity.kind !== 'record') return
 
     // On iOS this exercises the correlation cascade: the entry and its dietary member
@@ -191,6 +200,7 @@ describe('NitroHealth deletes (native)', () => {
 
     const saved = page.samples.find((sample) => Math.abs(sample.millimolesPerLiter - 7.7) < 0.001)
     expect(saved).toBeDefined()
+
     if (saved === undefined || saved.identity.kind !== 'record') return
 
     const result = await NitroHealth.deleteRecordsByIds('bloodGlucose', [saved.identity])
@@ -214,6 +224,7 @@ describe('NitroHealth deletes (native)', () => {
 
     const saved = page.samples.find((sample) => Math.abs(sample.celsius - 38.5) < 0.001)
     expect(saved).toBeDefined()
+
     if (saved === undefined || saved.identity.kind !== 'record') return
 
     const result = await NitroHealth.deleteRecordsByIds('bodyTemperature', [saved.identity])
@@ -239,6 +250,7 @@ describe('NitroHealth deletes (native)', () => {
 
     const saved = page.samples.find((sample) => Math.abs(sample.breathsPerMinute - 22.5) < 0.001)
     expect(saved).toBeDefined()
+
     if (saved === undefined || saved.identity.kind !== 'record') return
 
     const result = await NitroHealth.deleteRecordsByIds('respiratoryRate', [saved.identity])
@@ -265,7 +277,9 @@ describe('NitroHealth deletes (native)', () => {
     const saved = page.samples.find(
       (sample) => Math.abs(sample.millilitersPerKilogramPerMinute - 43.5) < 0.001
     )
+
     expect(saved).toBeDefined()
+
     if (saved === undefined || saved.identity.kind !== 'record') return
 
     const result = await NitroHealth.deleteRecordsByIds('vo2Max', [saved.identity])
@@ -300,7 +314,9 @@ describe('NitroHealth deletes (native)', () => {
         sample.startDate.getTime() === deleteInterval.startDate.getTime() &&
         sample.endDate.getTime() === deleteInterval.endDate.getTime()
     )
+
     expect(saved).toBeDefined()
+
     if (saved === undefined || saved.identity.kind !== 'record') return
 
     const result = await NitroHealth.deleteRecordsByIds('floorsClimbed', [saved.identity])
@@ -319,6 +335,7 @@ describe('NitroHealth deletes (native)', () => {
     ])
 
     await NitroHealth.deleteRecordsByTimeRange('hydration', deleteReadRange)
+
     try {
       await NitroHealth.saveHydration([
         {
@@ -332,6 +349,7 @@ describe('NitroHealth deletes (native)', () => {
 
       const saved = page.samples.find((sample) => Math.abs(sample.milliliters - 525.5) < 0.001)
       expect(saved).toBeDefined()
+
       if (saved === undefined || saved.identity.kind !== 'record') return
 
       const result = await NitroHealth.deleteRecordsByIds('hydration', [saved.identity])
@@ -358,6 +376,7 @@ describe('NitroHealth deletes (native)', () => {
 
     const saved = page.samples.find((sample) => Math.abs(sample.percentage - 27.5) < 0.001)
     expect(saved).toBeDefined()
+
     if (saved === undefined || saved.identity.kind !== 'record') return
 
     const result = await NitroHealth.deleteRecordsByIds('bodyFat', [saved.identity])
@@ -381,6 +400,7 @@ describe('NitroHealth deletes (native)', () => {
 
     const saved = page.samples.find((sample) => Math.abs(sample.kilograms - 48.5) < 0.001)
     expect(saved).toBeDefined()
+
     if (saved === undefined || saved.identity.kind !== 'record') return
 
     const result = await NitroHealth.deleteRecordsByIds('leanBodyMass', [saved.identity])
@@ -404,6 +424,7 @@ describe('NitroHealth deletes (native)', () => {
 
     const saved = page.samples.find((sample) => Math.abs(sample.celsius - 35.9) < 0.001)
     expect(saved).toBeDefined()
+
     if (saved === undefined || saved.identity.kind !== 'record') return
 
     const result = await NitroHealth.deleteRecordsByIds('basalBodyTemperature', [saved.identity])
@@ -431,9 +452,11 @@ describe('NitroHealth deletes (native)', () => {
     assertConclusiveRead(page.samples)
     const target = page.samples.find((sample) => sample.bpm === 124)
     expect(target).toBeDefined()
+
     if (target === undefined) return
 
     let record: HealthRecordIdentity
+
     if (target.identity.kind === 'record-child') {
       await expect(
         // @ts-expect-error This test exercises runtime validation for untyped JavaScript callers.

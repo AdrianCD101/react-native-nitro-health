@@ -32,6 +32,7 @@ describe('NitroHealth workflow and permission contract', () => {
       reason: 'provider-install-or-update-required',
       recovery: { kind: 'install-or-update-provider' },
     })
+
     if (availability.status === 'available' || !('recovery' in availability)) {
       throw new Error('Expected recoverable health availability')
     }
@@ -211,6 +212,7 @@ describe('NitroHealth workflow and permission contract', () => {
       { accessType: 'write', dataType: 'sleep' },
       { accessType: 'read', dataType: 'heartRate' },
     ]
+
     mockNitroHealth.getPermissionStatuses.mockResolvedValue({
       availability: { status: 'available' },
       statuses: [
@@ -237,6 +239,7 @@ describe('NitroHealth workflow and permission contract', () => {
       { accessType: 'read', dataType: 'steps' },
       { accessType: 'write', dataType: 'sleep' },
     ]
+
     mockNitroHealth.getPermissionStatuses.mockResolvedValueOnce({
       availability: { status: 'unavailable', reason: 'serviceUnavailable' },
       statuses: permissions.map((permission) => ({ permission, status: 'unverifiable' as const })),
@@ -266,6 +269,7 @@ describe('NitroHealth workflow and permission contract', () => {
       { accessType: 'write', dataType: 'steps' },
       { accessType: 'read', dataType: 'heartRate' },
     ]
+
     mockNitroHealth.requestAuthorization.mockResolvedValue({
       status: 'completed',
       availability: { status: 'available' },
@@ -292,6 +296,7 @@ describe('NitroHealth workflow and permission contract', () => {
       { accessType: 'read', dataType: 'steps' },
       { accessType: 'write', dataType: 'steps' },
     ]
+
     mockNitroHealth.requestAuthorization.mockResolvedValue({
       status: 'unavailable',
       availability: { status: 'unavailable', reason: 'notSupported' },

@@ -1,6 +1,7 @@
 import type { NativeHealthSampleMetadata } from './NativeHealthSampleMetadata'
 
 export type NativeSleepSampleKind = 'sessionEnvelope' | 'stage'
+
 export type NativeSleepStageData = 'reported' | 'notReported'
 
 /** Native sleep interval shape returned through the Nitro spec. */

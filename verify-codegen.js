@@ -8,6 +8,7 @@
  * close to the cause.
  */
 const path = require('node:path')
+
 const { readFileSync } = require('node:fs')
 
 const androidOnLoadFile = path.join(

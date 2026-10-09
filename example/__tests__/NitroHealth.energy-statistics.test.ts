@@ -90,6 +90,7 @@ describe('NitroHealth aggregate-only energy statistics contract', () => {
       { accessType: 'read', dataType: 'basalEnergyBurned' },
       { accessType: 'read', dataType: 'totalEnergyBurned' },
     ]
+
     mockNitroHealth.requestAuthorization.mockResolvedValue({
       status: 'completed',
       availability: { status: 'available' },

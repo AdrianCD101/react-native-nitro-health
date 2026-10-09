@@ -19,22 +19,27 @@ const roundTripRange = {
   startDate: new Date('2003-06-05T00:00:00.000Z'),
   endDate: new Date('2003-06-06T00:00:00.000Z'),
 }
+
 const roundTripInterval = {
   startDate: new Date('2003-06-05T09:00:00.000Z'),
   endDate: new Date('2003-06-05T09:30:00.000Z'),
 }
+
 const replacementRange = {
   startDate: new Date('2003-06-06T00:00:00.000Z'),
   endDate: new Date('2003-06-07T00:00:00.000Z'),
 }
+
 const replacementInterval = {
   startDate: new Date('2003-06-06T09:00:00.000Z'),
   endDate: new Date('2003-06-06T09:30:00.000Z'),
 }
+
 const shrinkRange = {
   startDate: new Date('2003-06-07T00:00:00.000Z'),
   endDate: new Date('2003-06-08T00:00:00.000Z'),
 }
+
 const shrinkInterval = {
   startDate: new Date('2003-06-07T09:00:00.000Z'),
   endDate: new Date('2003-06-07T09:30:00.000Z'),
@@ -49,10 +54,12 @@ async function drainNutritionChanges(changesToken: string): Promise<{
 
   for (let pageIndex = 0; pageIndex < 20; pageIndex += 1) {
     const result = await NitroHealth.getChanges('nutrition', currentToken)
+
     if (result.tokenExpired) throw new Error('Fresh changes token expired unexpectedly')
 
     changes.push(...result.changes)
     currentToken = result.nextChangesToken
+
     if (!result.hasMore) return { changes, changesToken: currentToken }
   }
 
@@ -64,6 +71,7 @@ describe('NitroHealth nutrition changes (native)', () => {
     await requireVerifiedPermissions(nutritionPermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('nutrition', roundTripRange)
+
     try {
       const baselineToken = await NitroHealth.createChangesToken('nutrition')
       await NitroHealth.saveNutrition([
@@ -83,6 +91,7 @@ describe('NitroHealth nutrition changes (native)', () => {
       ])
 
       const afterSave = await drainNutritionChanges(baselineToken)
+
       const upsert = afterSave.changes.find(
         (change) =>
           change.type === 'upsert' &&
@@ -91,6 +100,7 @@ describe('NitroHealth nutrition changes (native)', () => {
 
       // HealthKit hides read denials and returns no changes, even when writing is allowed.
       expect(upsert).toBeDefined()
+
       if (upsert === undefined || upsert.type !== 'upsert') return
 
       expect(
@@ -129,6 +139,7 @@ describe('NitroHealth nutrition changes (native)', () => {
     await requireVerifiedPermissions(nutritionPermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('nutrition', replacementRange)
+
     try {
       const baselineToken = await NitroHealth.createChangesToken('nutrition')
       await NitroHealth.saveNutrition([
@@ -141,6 +152,7 @@ describe('NitroHealth nutrition changes (native)', () => {
       ])
 
       const afterInitialSave = await drainNutritionChanges(baselineToken)
+
       const initialUpsert = afterInitialSave.changes.find(
         (change) =>
           change.type === 'upsert' &&
@@ -149,6 +161,7 @@ describe('NitroHealth nutrition changes (native)', () => {
 
       // HealthKit hides read denials and returns no changes, even when writing is allowed.
       expect(initialUpsert).toBeDefined()
+
       if (initialUpsert === undefined || initialUpsert.type !== 'upsert') return
 
       await NitroHealth.saveNutrition([
@@ -161,6 +174,7 @@ describe('NitroHealth nutrition changes (native)', () => {
       ])
 
       const afterReplacement = await drainNutritionChanges(afterInitialSave.changesToken)
+
       const replacementUpserts = afterReplacement.changes.filter(
         (change) =>
           change.type === 'upsert' &&
@@ -169,6 +183,7 @@ describe('NitroHealth nutrition changes (native)', () => {
 
       expect(replacementUpserts).toHaveLength(1)
       const replacementUpsert = replacementUpserts[0]
+
       if (replacementUpsert === undefined || replacementUpsert.type !== 'upsert') return
 
       const deletedInitialRecord = afterReplacement.changes.some(
@@ -191,6 +206,7 @@ describe('NitroHealth nutrition changes (native)', () => {
     await requireVerifiedPermissions(nutritionPermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('nutrition', shrinkRange)
+
     try {
       const baselineToken = await NitroHealth.createChangesToken('nutrition')
       await NitroHealth.saveNutrition([
@@ -203,6 +219,7 @@ describe('NitroHealth nutrition changes (native)', () => {
       ])
 
       const afterInitialSave = await drainNutritionChanges(baselineToken)
+
       const initialUpsert = afterInitialSave.changes.find(
         (change) =>
           change.type === 'upsert' &&
@@ -211,6 +228,7 @@ describe('NitroHealth nutrition changes (native)', () => {
 
       // HealthKit hides read denials and returns no changes, even when writing is allowed.
       expect(initialUpsert).toBeDefined()
+
       if (initialUpsert === undefined || initialUpsert.type !== 'upsert') return
 
       // The v2 save drops sugar entirely; on iOS the stale sugar member is deleted by
@@ -224,6 +242,7 @@ describe('NitroHealth nutrition changes (native)', () => {
       ])
 
       const afterShrink = await drainNutritionChanges(afterInitialSave.changesToken)
+
       const shrinkUpserts = afterShrink.changes.filter(
         (change): change is HealthRecordChange<'nutrition'> & { type: 'upsert' } =>
           change.type === 'upsert'
@@ -232,6 +251,7 @@ describe('NitroHealth nutrition changes (native)', () => {
       expect(shrinkUpserts).toHaveLength(1)
       const shrinkSample = shrinkUpserts[0]?.samples[0]
       expect(shrinkSample).toBeDefined()
+
       if (shrinkSample === undefined) return
 
       expect(Math.abs((shrinkSample.proteinGrams ?? 0) - 40)).toBeLessThan(0.001)
@@ -241,8 +261,10 @@ describe('NitroHealth nutrition changes (native)', () => {
       // correlation-level changes beyond the replacement itself.
       const foreignChanges = afterShrink.changes.filter((change) => {
         if (change.type === 'upsert') return !shrinkUpserts.includes(change)
+
         return Platform.OS === 'android' || change.record.id !== initialUpsert.record.id
       })
+
       expect(foreignChanges).toEqual([])
     } finally {
       await NitroHealth.deleteRecordsByTimeRange('nutrition', shrinkRange)
@@ -256,6 +278,7 @@ describe('NitroHealth nutrition changes (native)', () => {
     const result = await NitroHealth.getChanges('nutrition', token)
 
     expect(result.tokenExpired).toBe(false)
+
     if (result.tokenExpired) return
     expect(result.changes).toEqual([])
     expect(result.hasMore).toBe(false)

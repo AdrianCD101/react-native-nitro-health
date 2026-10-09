@@ -133,6 +133,7 @@ describe('NitroHealth save contract', () => {
   it('maps writable device provenance and every portable device type', async () => {
     const startDate = new Date('2026-01-01T09:00:00.000Z')
     const endDate = new Date('2026-01-01T09:30:00.000Z')
+
     const mappings = [
       ['unknown', 'unknown'],
       ['watch', 'watch'],
@@ -171,6 +172,7 @@ describe('NitroHealth save contract', () => {
   it('rejects malformed writable device provenance before crossing native', async () => {
     const startDate = new Date('2026-01-01T09:00:00.000Z')
     const endDate = new Date('2026-01-01T09:30:00.000Z')
+
     const save = (device: unknown) =>
       NitroHealth.saveSteps([{ startDate, endDate, count: 100, device } as never])
 
@@ -567,26 +569,31 @@ describe('NitroHealth save contract', () => {
         'samples[0]: count must be a positive integer'
       )
     }
+
     for (const distanceMeters of [-1, Number.NaN, Number.POSITIVE_INFINITY]) {
       await expect(
         NitroHealth.saveDistance([{ scope: 'walking-running', startDate, endDate, distanceMeters }])
       ).rejects.toThrow('samples[0]: distanceMeters must be a non-negative number')
     }
+
     for (const kilocalories of [-1, Number.NaN, Number.POSITIVE_INFINITY]) {
       await expect(
         NitroHealth.saveActiveEnergyBurned([{ startDate, endDate, kilocalories }])
       ).rejects.toThrow('samples[0]: kilocalories must be a non-negative number')
     }
+
     for (const floors of [-1, Number.NaN, Number.POSITIVE_INFINITY]) {
       await expect(NitroHealth.saveFloorsClimbed([{ startDate, endDate, floors }])).rejects.toThrow(
         'samples[0]: floors must be a non-negative number'
       )
     }
+
     for (const bpm of [0, -1, 0.5, 301, Number.NaN, Number.POSITIVE_INFINITY]) {
       await expect(NitroHealth.saveHeartRate([{ date, bpm }])).rejects.toThrow(
         'samples[0]: bpm must be between 1 and 300'
       )
     }
+
     for (const kilograms of [0, -1, Number.NaN, Number.POSITIVE_INFINITY]) {
       await expect(NitroHealth.saveBodyMass([{ date, kilograms }])).rejects.toThrow(
         'samples[0]: kilograms must be greater than 0'

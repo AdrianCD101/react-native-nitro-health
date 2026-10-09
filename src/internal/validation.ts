@@ -58,8 +58,10 @@ export function assertPermissions(permissions: HealthPermission[]): void {
   if (permissions.length === 0) {
     throw new Error('At least one health permission is required')
   }
+
   permissions.forEach((permission, index) => {
     const candidate: unknown = permission
+
     if (
       !isHealthPermissionCandidate(candidate) ||
       (candidate.accessType !== 'read' && candidate.accessType !== 'write') ||
@@ -68,9 +70,11 @@ export function assertPermissions(permissions: HealthPermission[]): void {
     ) {
       throw new Error(`permissions[${index}]: a supported read or write permission is required`)
     }
+
     if (candidate.accessType === 'write' && candidate.dataType === 'heartRateVariability') {
       throw new Error('permissions[' + index + ']: heartRateVariability is read-only')
     }
+
     if (candidate.accessType === 'write' && isAggregateOnlyHealthDataType(candidate.dataType)) {
       throw new Error(`permissions[${index}]: ${candidate.dataType} is an aggregate-only read type`)
     }
@@ -82,12 +86,14 @@ export function parseHealthDataTypes(values: readonly string[], label: string): 
     if (!isHealthDataType(value)) {
       throw new Error(`${label}[${index}]: unsupported health data type '${value}'`)
     }
+
     return value
   })
 }
 
 export function assertWritableHealthDataType(dataType: WritableHealthDataType): void {
   const candidate: string = dataType
+
   if (!isHealthDataType(candidate) || candidate === 'heartRateVariability') {
     throw new Error(`'${String(dataType)}' is not a writable health data type`)
   }
@@ -151,6 +157,7 @@ export function assertUniqueSampleSyncIds(samples: readonly { sync?: { id: strin
     if (sample.sync === undefined) return
 
     const previousIndex = firstIndexById.get(sample.sync.id)
+
     if (previousIndex !== undefined) {
       throw new Error(
         `samples[${index}]: sync.id duplicates samples[${previousIndex}].sync.id within this save call`
@@ -181,6 +188,7 @@ export function assertRecordIdentities(records: readonly HealthRecordIdentity[])
     if (ids.has(record.id)) {
       throw new Error(`records[${index}]: duplicate record identity '${record.id}'`)
     }
+
     ids.add(record.id)
   })
 }

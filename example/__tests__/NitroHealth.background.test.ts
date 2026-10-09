@@ -157,6 +157,7 @@ describe('NitroHealth background contract', () => {
     let subscription: ListenerSubscription | undefined
     const listener = jest.fn(() => subscription?.remove())
     const result = NitroHealth.subscribeToBackgroundChanges(listener)
+
     if (result.mode !== 'observer') throw new Error('Expected an observer subscription')
     subscription = result.subscription
     const nativeListener = mockNitroHealth.setOnBackgroundChangeListener.mock.calls[0]?.[0]
@@ -165,10 +166,13 @@ describe('NitroHealth background contract', () => {
 
     expect(mockNitroHealth.acknowledgeBackgroundChange).toHaveBeenCalledWith('delivery-2')
     expect(mockNitroHealth.setOnBackgroundChangeListener).toHaveBeenLastCalledWith(undefined)
+
     const acknowledgeOrder =
       mockNitroHealth.acknowledgeBackgroundChange.mock.invocationCallOrder[0] ?? 0
+
     const detachOrder =
       mockNitroHealth.setOnBackgroundChangeListener.mock.invocationCallOrder[1] ?? 0
+
     expect(acknowledgeOrder).toBeLessThan(detachOrder)
   })
 
@@ -178,6 +182,7 @@ describe('NitroHealth background contract', () => {
     mockNitroHealth.acknowledgeBackgroundChange.mockReturnValue(false)
     const listener = jest.fn()
     const result = NitroHealth.subscribeToBackgroundChanges(listener)
+
     if (result.mode !== 'observer') throw new Error('Expected an observer subscription')
     const nativeListener = mockNitroHealth.setOnBackgroundChangeListener.mock.calls[0]?.[0]
 
@@ -198,9 +203,11 @@ describe('NitroHealth background contract', () => {
     mockNitroHealth.setOnBackgroundChangeListener.mockReturnValue(true)
     mockNitroHealth.acknowledgeBackgroundChange.mockReturnValue(true)
     const listenerError = new Error('listener failed')
+
     const result = NitroHealth.subscribeToBackgroundChanges(() => {
       throw listenerError
     })
+
     if (result.mode !== 'observer') throw new Error('Expected an observer subscription')
     const nativeListener = mockNitroHealth.setOnBackgroundChangeListener.mock.calls[0]?.[0]
 

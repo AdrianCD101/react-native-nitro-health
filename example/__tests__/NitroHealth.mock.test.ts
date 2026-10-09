@@ -8,15 +8,19 @@ const range = {
   startDate: new Date('2026-01-01T00:00:00.000Z'),
   endDate: new Date('2026-01-02T00:00:00.000Z'),
 }
+
 const interval = {
   startDate: new Date('2026-01-01T10:00:00.000Z'),
   endDate: new Date('2026-01-01T11:00:00.000Z'),
 }
+
 const instant = new Date('2026-01-01T12:00:00.000Z')
+
 const origin = {
   identifier: 'react-native-nitro-health.mock',
   displayName: 'Nitro Health Jest Mock',
 }
+
 describe('NitroHealth Jest mock', () => {
   beforeEach(() => {
     resetNitroHealthMock()
@@ -136,6 +140,7 @@ describe('NitroHealth Jest mock', () => {
       NitroHealth.saveHeight([{ date: instant, meters: 1.8 }]),
       NitroHealth.saveVo2Max([{ date: instant, millilitersPerKilogramPerMinute: 42 }]),
     ])
+
     expect(saveResults).toEqual(
       Array.from({ length: saveResults.length }, () => ({
         status: 'completed',
@@ -161,6 +166,7 @@ describe('NitroHealth Jest mock', () => {
       NitroHealth.readHeight(range),
       NitroHealth.readVo2Max(range),
     ])
+
     const expectedValues = [
       { ...interval, kilocalories: 120 },
       { ...interval, milliliters: 500 },
@@ -182,6 +188,7 @@ describe('NitroHealth Jest mock', () => {
 
     pages.forEach((page, index) => {
       const expectedValue = expectedValues[index]
+
       if (expectedValue === undefined) throw new Error(`Missing expected value at index ${index}`)
       expect(page.samples).toHaveLength(1)
       expect(page.samples[0]).toEqual(
@@ -199,6 +206,7 @@ describe('NitroHealth Jest mock', () => {
 
   it('degrades iOS active, automatic, unknown, and omitted methods while retaining manual', async () => {
     const observer = createNitroHealthMock({ profile: 'observer' })
+
     const samples = [
       { date: instant, bpm: 61, recordingMethod: 'manual' as const },
       { date: instant, bpm: 62, recordingMethod: 'actively-recorded' as const },
@@ -225,6 +233,7 @@ describe('NitroHealth Jest mock', () => {
 
   it('returns profile-specific distance results and readback scopes', async () => {
     const observer = createNitroHealthMock({ profile: 'observer' })
+
     const samples = [
       {
         ...interval,
@@ -410,6 +419,7 @@ describe('NitroHealth Jest mock', () => {
     expect(firstPage.samples.map(({ count }) => count)).toEqual([1])
     expect(firstPage.nextCursor).toBe('mock:1')
     const cursor = firstPage.nextCursor
+
     if (cursor === undefined) throw new Error('Expected a pagination cursor')
     await expect(
       NitroHealth.readSteps({ ...range, ascending: false, limit: 1, cursor })

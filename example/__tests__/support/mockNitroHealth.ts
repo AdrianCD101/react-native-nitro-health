@@ -155,12 +155,19 @@ export function nativeRecordMetadata(
     originIdentifier: identifier,
     recordingMethod,
   }
+
   if (displayName !== undefined) sampleMetadata.originDisplayName = displayName
+
   if (device?.type !== undefined) sampleMetadata.deviceType = device.type
+
   if (device?.manufacturer !== undefined) sampleMetadata.deviceManufacturer = device.manufacturer
+
   if (device?.model !== undefined) sampleMetadata.deviceModel = device.model
+
   if (zone?.zoneOffset !== undefined) sampleMetadata.zoneOffset = zone.zoneOffset
+
   if (zone?.timeZone !== undefined) sampleMetadata.timeZone = zone.timeZone
+
   return { sampleMetadata }
 }
 
@@ -179,9 +186,14 @@ export function nativeRecordChildMetadata(
     originIdentifier: identifier,
     recordingMethod,
   }
+
   if (displayName !== undefined) sampleMetadata.originDisplayName = displayName
+
   if (device?.type !== undefined) sampleMetadata.deviceType = device.type
+
   if (device?.manufacturer !== undefined) sampleMetadata.deviceManufacturer = device.manufacturer
+
   if (device?.model !== undefined) sampleMetadata.deviceModel = device.model
+
   return { sampleMetadata }
 }

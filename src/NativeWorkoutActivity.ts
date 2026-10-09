@@ -1,5 +1,7 @@
 export type NativeWorkoutActivityStatus = 'known' | 'unknown'
+
 export type NativeWorkoutActivityPortability = 'portable' | 'readOnly'
+
 export type NativeWorkoutActivityMapping = 'exact' | 'broadened'
 
 /** Native transport for normalized workout activity semantics. */

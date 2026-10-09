@@ -14,6 +14,7 @@ function assertOrigin(sample: HealthSample): void {
   expect(typeof sample.origin.identifier).toBe('string')
   expect(sample.origin.identifier.length).toBeGreaterThan(0)
   expect(['string', 'undefined']).toContain(typeof sample.origin.displayName)
+
   if (sample.device !== undefined) {
     expect([
       'unknown',
@@ -131,6 +132,7 @@ describe('NitroHealth saves (native)', () => {
     ])
 
     await NitroHealth.deleteRecordsByTimeRange('steps', saveReadRange)
+
     try {
       await NitroHealth.saveSteps([{ ...saveInterval, count: 321 }])
 
@@ -152,6 +154,7 @@ describe('NitroHealth saves (native)', () => {
 
     const count = 654323
     await NitroHealth.deleteRecordsByTimeRange('steps', saveReadRange)
+
     try {
       await NitroHealth.saveSteps([
         {
@@ -168,12 +171,14 @@ describe('NitroHealth saves (native)', () => {
 
       const page = await NitroHealth.readSteps(saveReadRange)
       assertConclusiveRead(page.samples)
+
       const match = page.samples.find(
         (sample) =>
           sample.count === count &&
           sample.startDate.getTime() === saveInterval.startDate.getTime() &&
           sample.endDate.getTime() === saveInterval.endDate.getTime()
       )
+
       expect(match).toBeDefined()
       expect(match?.device?.manufacturer).toBe('Nitro Health')
       expect(match?.device?.model).toBe('Harness Sensor')
@@ -193,6 +198,7 @@ describe('NitroHealth saves (native)', () => {
     const automaticCount = 654322
 
     await NitroHealth.deleteRecordsByTimeRange('steps', recordingMethodReadRange)
+
     try {
       const manualResult = await NitroHealth.saveSteps([
         {
@@ -202,6 +208,7 @@ describe('NitroHealth saves (native)', () => {
           sync: { id: 'nitro-health-harness-recording-method-manual', version: 1 },
         },
       ])
+
       expect(manualResult).toEqual({
         status: 'completed',
         storedRecordingMethods: ['manual'],
@@ -209,12 +216,14 @@ describe('NitroHealth saves (native)', () => {
 
       const manualPage = await NitroHealth.readSteps(recordingMethodReadRange)
       assertConclusiveRead(manualPage.samples)
+
       const manualMatches = manualPage.samples.filter(
         (sample) =>
           sample.count === manualCount &&
           sample.startDate.getTime() === manualRecordingInterval.startDate.getTime() &&
           sample.endDate.getTime() === manualRecordingInterval.endDate.getTime()
       )
+
       expect(manualMatches).toHaveLength(1)
       expect(manualMatches[0]?.recordingMethod).toBe('manual')
 
@@ -226,6 +235,7 @@ describe('NitroHealth saves (native)', () => {
           sync: { id: 'nitro-health-harness-recording-method-automatic', version: 1 },
         },
       ])
+
       const expectedAutomaticMethod = Platform.OS === 'ios' ? 'unknown' : 'automatically-recorded'
       expect(automaticResult).toEqual({
         status: 'completed',
@@ -234,12 +244,14 @@ describe('NitroHealth saves (native)', () => {
 
       const automaticPage = await NitroHealth.readSteps(recordingMethodReadRange)
       assertConclusiveRead(automaticPage.samples)
+
       const automaticMatches = automaticPage.samples.filter(
         (sample) =>
           sample.count === automaticCount &&
           sample.startDate.getTime() === automaticRecordingInterval.startDate.getTime() &&
           sample.endDate.getTime() === automaticRecordingInterval.endDate.getTime()
       )
+
       expect(automaticMatches).toHaveLength(1)
       expect(automaticMatches[0]?.recordingMethod).toBe(expectedAutomaticMethod)
     } finally {
@@ -254,6 +266,7 @@ describe('NitroHealth saves (native)', () => {
     ])
 
     await NitroHealth.deleteRecordsByTimeRange('distance', saveReadRange)
+
     try {
       const result = await NitroHealth.saveDistance([
         { ...saveInterval, scope: 'walking-running', distanceMeters: 1234 },
@@ -271,7 +284,9 @@ describe('NitroHealth saves (native)', () => {
       const saved = page.samples.find(
         (sample) => sample.distanceMeters === 1234 && sample.scope === expectedStoredScope
       )
+
       expect(saved).toBeDefined()
+
       if (saved !== undefined) assertOrigin(saved)
     } finally {
       await NitroHealth.deleteRecordsByTimeRange('distance', saveReadRange)
@@ -285,6 +300,7 @@ describe('NitroHealth saves (native)', () => {
     ])
 
     await NitroHealth.deleteRecordsByTimeRange('bodyMass', saveReadRange)
+
     try {
       await NitroHealth.saveBodyMass([{ date: saveInterval.startDate, kilograms: 72.5 }])
 
@@ -305,6 +321,7 @@ describe('NitroHealth saves (native)', () => {
     ])
 
     await NitroHealth.deleteRecordsByTimeRange('hydration', saveReadRange)
+
     try {
       await NitroHealth.saveHydration([
         {
@@ -322,7 +339,9 @@ describe('NitroHealth saves (native)', () => {
           sample.startDate.getTime() === saveInterval.startDate.getTime() &&
           sample.endDate.getTime() === saveInterval.endDate.getTime()
       )
+
       expect(saved).toBeDefined()
+
       if (saved !== undefined) assertOrigin(saved)
     } finally {
       await NitroHealth.deleteRecordsByTimeRange('hydration', saveReadRange)
@@ -336,6 +355,7 @@ describe('NitroHealth saves (native)', () => {
     ])
 
     await NitroHealth.deleteRecordsByTimeRange('heartRate', saveReadRange)
+
     try {
       await NitroHealth.saveHeartRate([{ date: saveInterval.startDate, bpm: 123 }])
 
@@ -361,6 +381,7 @@ describe('NitroHealth saves (native)', () => {
     )
 
     await NitroHealth.deleteRecordsByTimeRange('sleep', saveReadRange)
+
     try {
       await NitroHealth.saveSleepSessions([
         {
@@ -390,7 +411,9 @@ describe('NitroHealth saves (native)', () => {
           sample.startDate.getTime() === saveInterval.startDate.getTime() &&
           sample.endDate.getTime() === saveInterval.endDate.getTime()
       )
+
       expect(envelope).toBeDefined()
+
       if (envelope?.kind === 'session-envelope') {
         // HealthKit never links stages to their envelope, so iOS always
         // reports 'not-reported' even for sessions saved with stages.
@@ -428,6 +451,7 @@ describe('NitroHealth saves (native)', () => {
     ])
 
     await NitroHealth.deleteRecordsByTimeRange('workout', saveReadRange)
+
     try {
       await NitroHealth.saveWorkout({
         ...saveInterval,
@@ -448,9 +472,12 @@ describe('NitroHealth saves (native)', () => {
           sample.startDate.getTime() === saveInterval.startDate.getTime() &&
           sample.endDate.getTime() === saveInterval.endDate.getTime()
       )
+
       expect(saved).toBeDefined()
+
       if (saved !== undefined) {
         assertOrigin(saved)
+
         if (Platform.OS === 'ios') {
           expect(saved.title).toBeUndefined()
           expect(saved.brandName).toBe('Nitro Health Harness Run')
@@ -472,6 +499,7 @@ describe('NitroHealth saves (native)', () => {
       startDate: new Date('2026-03-08T00:00:00.000Z'),
       endDate: new Date('2026-03-09T00:00:00.000Z'),
     }
+
     const dstStraddlingInterval = {
       startDate: new Date('2026-03-08T06:30:00.000Z'),
       endDate: new Date('2026-03-08T07:30:00.000Z'),
@@ -484,6 +512,7 @@ describe('NitroHealth saves (native)', () => {
       ])
 
       await NitroHealth.deleteRecordsByTimeRange('steps', dstReadRange)
+
       try {
         await NitroHealth.saveSteps([
           {
@@ -497,10 +526,12 @@ describe('NitroHealth saves (native)', () => {
         const page = await NitroHealth.readSteps(dstReadRange)
         const saved = page.samples.find((sample) => sample.count === 77)
         expect(saved).toBeDefined()
+
         if (saved !== undefined) {
           // The interval straddles the spring-forward shift; the surfaced offset is
           // resolved at the sample's start, which is still EST.
           expect(saved.zoneOffset).toBe('-05:00')
+
           if (Platform.OS === 'ios') {
             expect(saved.timeZone).toBe('America/New_York')
           } else {
@@ -520,6 +551,7 @@ describe('NitroHealth saves (native)', () => {
       ])
 
       await NitroHealth.deleteRecordsByTimeRange('bloodGlucose', saveReadRange)
+
       try {
         await NitroHealth.saveBloodGlucose([
           {
@@ -530,15 +562,19 @@ describe('NitroHealth saves (native)', () => {
         ])
 
         const page = await NitroHealth.readBloodGlucose(saveReadRange)
+
         const saved = page.samples.find(
           (sample) => Math.abs(sample.millimolesPerLiter - 5.5) < 0.001
         )
+
         expect(saved).toBeDefined()
+
         if (saved !== undefined) {
           // Omitted timeZone resolves to the device zone at write time on both platforms,
           // so our own write always reads back with a concrete offset.
           expect(typeof saved.zoneOffset).toBe('string')
           expect(saved.zoneOffset).toMatch(/^[+-]\d{2}:\d{2}$/)
+
           if (Platform.OS === 'ios') {
             expect(typeof saved.timeZone).toBe('string')
           } else {
@@ -559,6 +595,7 @@ describe('NitroHealth saves (native)', () => {
       ])
 
       await NitroHealth.deleteRecordsByTimeRange('restingHeartRate', saveReadRange)
+
       try {
         await NitroHealth.saveRestingHeartRate([{ date: saveInterval.startDate, bpm: 58 }])
 
@@ -586,6 +623,7 @@ describe('NitroHealth saves (native)', () => {
       const savedPercentage = 97.5
 
       await NitroHealth.deleteRecordsByTimeRange('oxygenSaturation', saveReadRange)
+
       try {
         await NitroHealth.saveOxygenSaturation([
           { date: saveInterval.startDate, percentage: savedPercentage },
@@ -619,6 +657,7 @@ describe('NitroHealth saves (native)', () => {
       ])
 
       await NitroHealth.deleteRecordsByTimeRange('bloodPressure', saveReadRange)
+
       try {
         await NitroHealth.saveBloodPressure([
           {
@@ -644,6 +683,7 @@ describe('NitroHealth saves (native)', () => {
 
         expect(matches.length).toBeGreaterThanOrEqual(1)
         expect(matches[0]?.identity.kind).toBe('record')
+
         if (Platform.OS === 'android') {
           expect(matches[0]?.metadata).toEqual({
             android: {
@@ -775,6 +815,7 @@ describe('NitroHealth saves (native)', () => {
 
         expect(matches.length).toBe(1)
         expect(matches[0]?.identity.kind).toBe('record')
+
         if (Platform.OS === 'android') {
           expect(matches[0]?.metadata).toEqual({
             android: {
@@ -822,6 +863,7 @@ describe('NitroHealth saves (native)', () => {
 
         expect(matches.length).toBe(1)
         expect(matches[0]?.identity.kind).toBe('record')
+
         if (Platform.OS === 'android') {
           expect(matches[0]?.metadata).toEqual({
             android: { measurementLocation: 'mouth' },
@@ -843,6 +885,7 @@ describe('NitroHealth saves (native)', () => {
       ])
 
       await NitroHealth.deleteRecordsByTimeRange('respiratoryRate', saveReadRange)
+
       try {
         await NitroHealth.saveRespiratoryRate([
           { date: saveInterval.startDate, breathsPerMinute: 16.5 },
@@ -896,6 +939,7 @@ describe('NitroHealth saves (native)', () => {
 
         expect(matches).toHaveLength(1)
         expect(matches[0]?.identity.kind).toBe('record')
+
         if (Platform.OS === 'android') {
           expect(matches[0]?.metadata).toEqual({
             android: { measurementMethod: 'multistage_fitness_test' },
@@ -919,6 +963,7 @@ describe('NitroHealth saves (native)', () => {
       ])
 
       await NitroHealth.deleteRecordsByTimeRange('floorsClimbed', saveReadRange)
+
       try {
         await NitroHealth.saveFloorsClimbed([
           { ...saveInterval, floors: 12.5, sync: { id: syncId, version: 1 } },
@@ -950,6 +995,7 @@ describe('NitroHealth saves (native)', () => {
       ])
 
       await NitroHealth.deleteRecordsByTimeRange('bodyFat', saveReadRange)
+
       try {
         await NitroHealth.saveBodyFat([{ date: saveInterval.startDate, percentage: 18.5 }])
 
@@ -977,6 +1023,7 @@ describe('NitroHealth saves (native)', () => {
       ])
 
       await NitroHealth.deleteRecordsByTimeRange('leanBodyMass', saveReadRange)
+
       try {
         await NitroHealth.saveLeanBodyMass([{ date: saveInterval.startDate, kilograms: 55.4 }])
 
@@ -1023,6 +1070,7 @@ describe('NitroHealth saves (native)', () => {
 
         expect(matches.length).toBe(1)
         expect(matches[0]?.identity.kind).toBe('record')
+
         if (Platform.OS === 'android') {
           expect(matches[0]?.metadata).toEqual({ android: { measurementLocation: 'ear' } })
         } else {
@@ -1042,6 +1090,7 @@ describe('NitroHealth saves (native)', () => {
       ])
 
       await NitroHealth.deleteRecordsByTimeRange('height', saveReadRange)
+
       try {
         await NitroHealth.saveHeight([{ date: saveInterval.startDate, meters: 1.78 }])
 

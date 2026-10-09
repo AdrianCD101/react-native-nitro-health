@@ -9,6 +9,7 @@ jest.mock('react-native-nitro-modules', () => ({
 import { NitroHealth } from 'react-native-nitro-health'
 
 const sessionStart = new Date('2026-01-11T03:00:00.000Z')
+
 const sessionEnd = new Date('2026-01-11T11:30:00.000Z')
 
 describe('NitroHealth sleep session save contract', () => {
@@ -22,11 +23,13 @@ describe('NitroHealth sleep session save contract', () => {
       endDate: new Date('2026-01-11T08:00:00.000Z'),
       stage: 'asleepDeep' as const,
     }
+
     const earlierStage = {
       startDate: new Date('2026-01-11T04:00:00.000Z'),
       endDate: new Date('2026-01-11T06:30:00.000Z'),
       stage: 'asleepCore' as const,
     }
+
     const stages = [laterStage, earlierStage]
     mockNitroHealth.saveSleepSessions.mockResolvedValueOnce({
       storedRecordingMethods: ['manual'],

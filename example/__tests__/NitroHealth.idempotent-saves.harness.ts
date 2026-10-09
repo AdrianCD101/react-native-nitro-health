@@ -27,62 +27,77 @@ const stepReadWritePermissions: HealthPermission[] = [
   { accessType: 'read', dataType: 'steps' },
   { accessType: 'write', dataType: 'steps' },
 ]
+
 const workoutReadWritePermissions: HealthPermission[] = [
   { accessType: 'read', dataType: 'workout' },
   { accessType: 'write', dataType: 'workout' },
 ]
+
 const bloodPressureReadWritePermissions: HealthPermission[] = [
   { accessType: 'read', dataType: 'bloodPressure' },
   { accessType: 'write', dataType: 'bloodPressure' },
 ]
+
 const bloodGlucoseReadWritePermissions: HealthPermission[] = [
   { accessType: 'read', dataType: 'bloodGlucose' },
   { accessType: 'write', dataType: 'bloodGlucose' },
 ]
+
 const bodyTemperatureReadWritePermissions: HealthPermission[] = [
   { accessType: 'read', dataType: 'bodyTemperature' },
   { accessType: 'write', dataType: 'bodyTemperature' },
 ]
+
 const respiratoryRateReadWritePermissions: HealthPermission[] = [
   { accessType: 'read', dataType: 'respiratoryRate' },
   { accessType: 'write', dataType: 'respiratoryRate' },
 ]
+
 const vo2MaxReadWritePermissions: HealthPermission[] = [
   { accessType: 'read', dataType: 'vo2Max' },
   { accessType: 'write', dataType: 'vo2Max' },
 ]
+
 const floorsClimbedReadWritePermissions: HealthPermission[] = [
   { accessType: 'read', dataType: 'floorsClimbed' },
   { accessType: 'write', dataType: 'floorsClimbed' },
 ]
+
 const hydrationReadWritePermissions: HealthPermission[] = [
   { accessType: 'read', dataType: 'hydration' },
   { accessType: 'write', dataType: 'hydration' },
 ]
+
 const bodyFatReadWritePermissions: HealthPermission[] = [
   { accessType: 'read', dataType: 'bodyFat' },
   { accessType: 'write', dataType: 'bodyFat' },
 ]
+
 const leanBodyMassReadWritePermissions: HealthPermission[] = [
   { accessType: 'read', dataType: 'leanBodyMass' },
   { accessType: 'write', dataType: 'leanBodyMass' },
 ]
+
 const basalBodyTemperatureReadWritePermissions: HealthPermission[] = [
   { accessType: 'read', dataType: 'basalBodyTemperature' },
   { accessType: 'write', dataType: 'basalBodyTemperature' },
 ]
+
 const nutritionReadWritePermissions: HealthPermission[] = [
   { accessType: 'read', dataType: 'nutrition' },
   { accessType: 'write', dataType: 'nutrition' },
 ]
+
 const sleepReadWritePermissions: HealthPermission[] = [
   { accessType: 'read', dataType: 'sleep' },
   { accessType: 'write', dataType: 'sleep' },
 ]
+
 const idempotentInterval = {
   startDate: new Date('2004-06-01T09:00:00.000Z'),
   endDate: new Date('2004-06-01T09:30:00.000Z'),
 }
+
 const idempotentReadRange = {
   startDate: new Date('2004-06-01T00:00:00.000Z'),
   endDate: new Date('2004-06-02T00:00:00.000Z'),
@@ -125,6 +140,7 @@ async function readIdempotentBloodPressure(
   expectedSystolic: readonly number[]
 ): Promise<BloodPressureSample[]> {
   const page = await NitroHealth.readBloodPressure({ ...idempotentReadRange, limit: 1000 })
+
   return page.samples.filter(
     (sample) =>
       sample.date.getTime() === idempotentInterval.startDate.getTime() &&
@@ -136,6 +152,7 @@ async function readIdempotentNutrition(
   expectedFoodNames: readonly string[]
 ): Promise<NutritionSample[]> {
   const page = await NitroHealth.readNutrition({ ...idempotentReadRange, limit: 1000 })
+
   return page.samples.filter(
     (sample) =>
       sample.startDate.getTime() === idempotentInterval.startDate.getTime() &&
@@ -148,6 +165,7 @@ async function readIdempotentBloodGlucose(
   expectedMmolPerLiter: readonly number[]
 ): Promise<BloodGlucoseSample[]> {
   const page = await NitroHealth.readBloodGlucose({ ...idempotentReadRange, limit: 1000 })
+
   return page.samples.filter(
     (sample) =>
       sample.date.getTime() === idempotentInterval.startDate.getTime() &&
@@ -161,6 +179,7 @@ async function readIdempotentBodyTemperature(
   expectedCelsius: readonly number[]
 ): Promise<BodyTemperatureSample[]> {
   const page = await NitroHealth.readBodyTemperature({ ...idempotentReadRange, limit: 1000 })
+
   return page.samples.filter(
     (sample) =>
       sample.date.getTime() === idempotentInterval.startDate.getTime() &&
@@ -172,6 +191,7 @@ async function readIdempotentRespiratoryRate(
   expectedBreathsPerMinute: readonly number[]
 ): Promise<RespiratoryRateSample[]> {
   const page = await NitroHealth.readRespiratoryRate({ ...idempotentReadRange, limit: 1000 })
+
   return page.samples.filter(
     (sample) =>
       sample.date.getTime() === idempotentInterval.startDate.getTime() &&
@@ -185,6 +205,7 @@ async function readIdempotentVo2Max(
   expectedMillilitersPerKilogramPerMinute: readonly number[]
 ): Promise<Vo2MaxSample[]> {
   const page = await NitroHealth.readVo2Max({ ...idempotentReadRange, limit: 1000 })
+
   return page.samples.filter(
     (sample) =>
       sample.date.getTime() === idempotentInterval.startDate.getTime() &&
@@ -205,6 +226,7 @@ async function readIdempotentFloorsClimbed(
       ...idempotentReadRange,
       limit: 1000,
     }
+
     if (cursor !== undefined) query.cursor = cursor
     const page = await NitroHealth.readFloorsClimbed(query)
     samples.push(...page.samples)
@@ -223,6 +245,7 @@ async function readIdempotentHydration(
   expectedMilliliters: readonly number[]
 ): Promise<HydrationSample[]> {
   const page = await NitroHealth.readHydration({ ...idempotentReadRange, limit: 1000 })
+
   return page.samples.filter(
     (sample) =>
       sample.startDate.getTime() === idempotentInterval.startDate.getTime() &&
@@ -235,6 +258,7 @@ async function readIdempotentBodyFat(
   expectedPercentages: readonly number[]
 ): Promise<BodyFatSample[]> {
   const page = await NitroHealth.readBodyFat({ ...idempotentReadRange, limit: 1000 })
+
   return page.samples.filter(
     (sample) =>
       sample.date.getTime() === idempotentInterval.startDate.getTime() &&
@@ -246,6 +270,7 @@ async function readIdempotentLeanBodyMass(
   expectedKilograms: readonly number[]
 ): Promise<LeanBodyMassSample[]> {
   const page = await NitroHealth.readLeanBodyMass({ ...idempotentReadRange, limit: 1000 })
+
   return page.samples.filter(
     (sample) =>
       sample.date.getTime() === idempotentInterval.startDate.getTime() &&
@@ -257,6 +282,7 @@ async function readIdempotentBasalBodyTemperature(
   expectedCelsius: readonly number[]
 ): Promise<BasalBodyTemperatureSample[]> {
   const page = await NitroHealth.readBasalBodyTemperature({ ...idempotentReadRange, limit: 1000 })
+
   return page.samples.filter(
     (sample) =>
       sample.date.getTime() === idempotentInterval.startDate.getTime() &&
@@ -268,6 +294,7 @@ async function readIdempotentWorkouts(
   expectedDisplayNames: readonly string[]
 ): Promise<WorkoutSample[]> {
   const page = await NitroHealth.readWorkouts({ ...idempotentReadRange, limit: 1000 })
+
   return page.samples.filter(
     (workout) =>
       workout.startDate.getTime() === idempotentInterval.startDate.getTime() &&
@@ -279,6 +306,7 @@ async function readIdempotentWorkouts(
 
 async function readIdempotentSleepSamples(): Promise<SleepSample[]> {
   const page = await NitroHealth.readSleepSamples({ ...idempotentReadRange, limit: 1000 })
+
   return page.samples.filter(
     (sample) =>
       sample.startDate.getTime() >= idempotentReadRange.startDate.getTime() &&
@@ -335,6 +363,7 @@ describe('NitroHealth idempotent saves (native)', () => {
       const initialSamples = await readIdempotentStepSamples([720_001, 720_002])
       expect(initialSamples).toHaveLength(1)
       const initialSample = initialSamples[0]
+
       if (initialSample === undefined) {
         return
       }
@@ -352,6 +381,7 @@ describe('NitroHealth idempotent saves (native)', () => {
 
       expect(replacementSamples).toHaveLength(1)
       const replacementSample = replacementSamples[0]
+
       if (replacementSample === undefined) {
         return
       }
@@ -360,6 +390,7 @@ describe('NitroHealth idempotent saves (native)', () => {
       expect(replacementSample.device?.manufacturer).toBe('Nitro Health')
       expect(replacementSample.device?.model).toBe('Replacement Sensor')
       expect(replacementSample.device?.type).toBe(Platform.OS === 'android' ? 'phone' : undefined)
+
       if (Platform.OS === 'android') {
         expect(recordId(replacementSample.identity)).toBe(recordId(initialSample.identity))
       } else if (Platform.OS === 'ios') {
@@ -385,11 +416,13 @@ describe('NitroHealth idempotent saves (native)', () => {
           sync: { id: 'nitro-health-harness-lower-version', version: 2 },
         },
       ])
+
       expect(currentResult.storedRecordingMethods).toEqual(['manual'])
 
       const currentSamples = await readIdempotentStepSamples([730_001, 730_002])
       expect(currentSamples).toHaveLength(1)
       const currentSample = currentSamples[0]
+
       if (currentSample === undefined) {
         return
       }
@@ -427,6 +460,7 @@ describe('NitroHealth idempotent saves (native)', () => {
     await requireVerifiedPermissions(workoutReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('workout', idempotentReadRange)
+
     try {
       const workout = {
         ...idempotentInterval,
@@ -454,6 +488,7 @@ describe('NitroHealth idempotent saves (native)', () => {
     await requireVerifiedPermissions(bloodPressureReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('bloodPressure', idempotentReadRange)
+
     try {
       const sample = {
         date: idempotentInterval.startDate,
@@ -477,6 +512,7 @@ describe('NitroHealth idempotent saves (native)', () => {
     await requireVerifiedPermissions(bloodPressureReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('bloodPressure', idempotentReadRange)
+
     try {
       const syncId = 'nitro-health-harness-bp-higher-version'
       await NitroHealth.saveBloodPressure([
@@ -491,6 +527,7 @@ describe('NitroHealth idempotent saves (native)', () => {
       const initial = await readIdempotentBloodPressure([142, 143])
       expect(initial).toHaveLength(1)
       const initialSample = initial[0]
+
       if (initialSample === undefined) {
         return
       }
@@ -507,12 +544,14 @@ describe('NitroHealth idempotent saves (native)', () => {
       const replacement = await readIdempotentBloodPressure([142, 143])
       expect(replacement).toHaveLength(1)
       const replacementSample = replacement[0]
+
       if (replacementSample === undefined) {
         return
       }
 
       expect(replacementSample.systolicMmHg).toBe(143)
       expect(replacementSample.diastolicMmHg).toBe(93)
+
       if (Platform.OS === 'android') {
         expect(recordId(replacementSample.identity)).toBe(recordId(initialSample.identity))
       } else if (Platform.OS === 'ios') {
@@ -530,6 +569,7 @@ describe('NitroHealth idempotent saves (native)', () => {
     await requireVerifiedPermissions(nutritionReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('nutrition', idempotentReadRange)
+
     try {
       const sample = {
         ...idempotentInterval,
@@ -557,6 +597,7 @@ describe('NitroHealth idempotent saves (native)', () => {
     await requireVerifiedPermissions(nutritionReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('nutrition', idempotentReadRange)
+
     try {
       const syncId = 'nitro-health-harness-nutrition-higher-version'
       await NitroHealth.saveNutrition([
@@ -573,8 +614,10 @@ describe('NitroHealth idempotent saves (native)', () => {
         'Harness versioned meal v1',
         'Harness versioned meal v2',
       ])
+
       expect(initial).toHaveLength(1)
       const initialSample = initial[0]
+
       if (initialSample === undefined) {
         return
       }
@@ -595,8 +638,10 @@ describe('NitroHealth idempotent saves (native)', () => {
         'Harness versioned meal v1',
         'Harness versioned meal v2',
       ])
+
       expect(replacement).toHaveLength(1)
       const replacementSample = replacement[0]
+
       if (replacementSample === undefined) {
         return
       }
@@ -605,6 +650,7 @@ describe('NitroHealth idempotent saves (native)', () => {
       expect(replacementSample.energyKilocalories).toBeCloseTo(520, 1)
       expect(replacementSample.sodiumMilligrams).toBeCloseTo(700, 1)
       expect(replacementSample.proteinGrams).toBeUndefined()
+
       if (Platform.OS === 'android') {
         expect(recordId(replacementSample.identity)).toBe(recordId(initialSample.identity))
       } else if (Platform.OS === 'ios') {
@@ -619,6 +665,7 @@ describe('NitroHealth idempotent saves (native)', () => {
     await requireVerifiedPermissions(sleepReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('sleep', idempotentReadRange)
+
     try {
       const session = {
         ...idempotentInterval,
@@ -652,6 +699,7 @@ describe('NitroHealth idempotent saves (native)', () => {
     await requireVerifiedPermissions(sleepReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('sleep', idempotentReadRange)
+
     try {
       const syncId = 'nitro-health-harness-sleep-higher-version'
       const stageBoundary = new Date('2004-06-01T09:10:00.000Z')
@@ -708,6 +756,7 @@ describe('NitroHealth idempotent saves (native)', () => {
     await requireVerifiedPermissions(bloodGlucoseReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('bloodGlucose', idempotentReadRange)
+
     try {
       const sample = {
         date: idempotentInterval.startDate,
@@ -729,6 +778,7 @@ describe('NitroHealth idempotent saves (native)', () => {
     await requireVerifiedPermissions(bloodGlucoseReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('bloodGlucose', idempotentReadRange)
+
     try {
       const syncId = 'nitro-health-harness-bg-higher-version'
       await NitroHealth.saveBloodGlucose([
@@ -742,6 +792,7 @@ describe('NitroHealth idempotent saves (native)', () => {
       const initial = await readIdempotentBloodGlucose([6.2, 6.3])
       expect(initial).toHaveLength(1)
       const initialSample = initial[0]
+
       if (initialSample === undefined) {
         return
       }
@@ -757,11 +808,13 @@ describe('NitroHealth idempotent saves (native)', () => {
       const replacement = await readIdempotentBloodGlucose([6.2, 6.3])
       expect(replacement).toHaveLength(1)
       const replacementSample = replacement[0]
+
       if (replacementSample === undefined) {
         return
       }
 
       expect(Math.abs(replacementSample.millimolesPerLiter - 6.3)).toBeLessThan(0.001)
+
       if (Platform.OS === 'android') {
         expect(recordId(replacementSample.identity)).toBe(recordId(initialSample.identity))
       } else if (Platform.OS === 'ios') {
@@ -776,6 +829,7 @@ describe('NitroHealth idempotent saves (native)', () => {
     await requireVerifiedPermissions(bodyTemperatureReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('bodyTemperature', idempotentReadRange)
+
     try {
       const sample = {
         date: idempotentInterval.startDate,
@@ -797,6 +851,7 @@ describe('NitroHealth idempotent saves (native)', () => {
     await requireVerifiedPermissions(bodyTemperatureReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('bodyTemperature', idempotentReadRange)
+
     try {
       const syncId = 'nitro-health-harness-bt-higher-version'
       await NitroHealth.saveBodyTemperature([
@@ -810,6 +865,7 @@ describe('NitroHealth idempotent saves (native)', () => {
       const initial = await readIdempotentBodyTemperature([37.1, 37.2])
       expect(initial).toHaveLength(1)
       const initialSample = initial[0]
+
       if (initialSample === undefined) {
         return
       }
@@ -825,11 +881,13 @@ describe('NitroHealth idempotent saves (native)', () => {
       const replacement = await readIdempotentBodyTemperature([37.1, 37.2])
       expect(replacement).toHaveLength(1)
       const replacementSample = replacement[0]
+
       if (replacementSample === undefined) {
         return
       }
 
       expect(Math.abs(replacementSample.celsius - 37.2)).toBeLessThan(0.001)
+
       if (Platform.OS === 'android') {
         expect(recordId(replacementSample.identity)).toBe(recordId(initialSample.identity))
       } else if (Platform.OS === 'ios') {
@@ -844,6 +902,7 @@ describe('NitroHealth idempotent saves (native)', () => {
     await requireVerifiedPermissions(respiratoryRateReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('respiratoryRate', idempotentReadRange)
+
     try {
       const sample = {
         date: idempotentInterval.startDate,
@@ -865,6 +924,7 @@ describe('NitroHealth idempotent saves (native)', () => {
     await requireVerifiedPermissions(respiratoryRateReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('respiratoryRate', idempotentReadRange)
+
     try {
       const syncId = 'nitro-health-harness-rr-higher-version'
       await NitroHealth.saveRespiratoryRate([
@@ -878,6 +938,7 @@ describe('NitroHealth idempotent saves (native)', () => {
       const initial = await readIdempotentRespiratoryRate([16.5, 17.5])
       expect(initial).toHaveLength(1)
       const initialSample = initial[0]
+
       if (initialSample === undefined) {
         return
       }
@@ -893,11 +954,13 @@ describe('NitroHealth idempotent saves (native)', () => {
       const replacement = await readIdempotentRespiratoryRate([16.5, 17.5])
       expect(replacement).toHaveLength(1)
       const replacementSample = replacement[0]
+
       if (replacementSample === undefined) {
         return
       }
 
       expect(Math.abs(replacementSample.breathsPerMinute - 17.5)).toBeLessThan(0.001)
+
       if (Platform.OS === 'android') {
         expect(recordId(replacementSample.identity)).toBe(recordId(initialSample.identity))
       } else if (Platform.OS === 'ios') {
@@ -912,6 +975,7 @@ describe('NitroHealth idempotent saves (native)', () => {
     await requireVerifiedPermissions(vo2MaxReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('vo2Max', idempotentReadRange)
+
     try {
       const sample = {
         date: idempotentInterval.startDate,
@@ -933,6 +997,7 @@ describe('NitroHealth idempotent saves (native)', () => {
     await requireVerifiedPermissions(vo2MaxReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('vo2Max', idempotentReadRange)
+
     try {
       const syncId = 'nitro-health-harness-vo2-higher-version'
       await NitroHealth.saveVo2Max([
@@ -946,6 +1011,7 @@ describe('NitroHealth idempotent saves (native)', () => {
       const initial = await readIdempotentVo2Max([42.5, 43.5])
       expect(initial).toHaveLength(1)
       const initialSample = initial[0]
+
       if (initialSample === undefined) {
         return
       }
@@ -961,11 +1027,13 @@ describe('NitroHealth idempotent saves (native)', () => {
       const replacement = await readIdempotentVo2Max([42.5, 43.5])
       expect(replacement).toHaveLength(1)
       const replacementSample = replacement[0]
+
       if (replacementSample === undefined) {
         return
       }
 
       expect(Math.abs(replacementSample.millilitersPerKilogramPerMinute - 43.5)).toBeLessThan(0.001)
+
       if (Platform.OS === 'android') {
         expect(recordId(replacementSample.identity)).toBe(recordId(initialSample.identity))
       } else if (Platform.OS === 'ios') {
@@ -980,6 +1048,7 @@ describe('NitroHealth idempotent saves (native)', () => {
     await requireVerifiedPermissions(floorsClimbedReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('floorsClimbed', idempotentReadRange)
+
     try {
       const sample = {
         ...idempotentInterval,
@@ -1001,6 +1070,7 @@ describe('NitroHealth idempotent saves (native)', () => {
     await requireVerifiedPermissions(hydrationReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('hydration', idempotentReadRange)
+
     try {
       const sample = {
         ...idempotentInterval,
@@ -1022,6 +1092,7 @@ describe('NitroHealth idempotent saves (native)', () => {
     await requireVerifiedPermissions(floorsClimbedReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('floorsClimbed', idempotentReadRange)
+
     try {
       const syncId = 'nitro-health-harness-floors-higher-version'
       await NitroHealth.saveFloorsClimbed([
@@ -1035,6 +1106,7 @@ describe('NitroHealth idempotent saves (native)', () => {
       const initial = await readIdempotentFloorsClimbed([11.5, 12.5])
       expect(initial).toHaveLength(1)
       const initialSample = initial[0]
+
       if (initialSample === undefined) {
         return
       }
@@ -1050,11 +1122,13 @@ describe('NitroHealth idempotent saves (native)', () => {
       const replacement = await readIdempotentFloorsClimbed([11.5, 12.5])
       expect(replacement).toHaveLength(1)
       const replacementSample = replacement[0]
+
       if (replacementSample === undefined) {
         return
       }
 
       expect(Math.abs(replacementSample.floors - 12.5)).toBeLessThan(0.001)
+
       if (Platform.OS === 'android') {
         expect(recordId(replacementSample.identity)).toBe(recordId(initialSample.identity))
       } else if (Platform.OS === 'ios') {
@@ -1069,6 +1143,7 @@ describe('NitroHealth idempotent saves (native)', () => {
     await requireVerifiedPermissions(bodyFatReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('bodyFat', idempotentReadRange)
+
     try {
       const sample = {
         date: idempotentInterval.startDate,
@@ -1090,6 +1165,7 @@ describe('NitroHealth idempotent saves (native)', () => {
     await requireVerifiedPermissions(bodyFatReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('bodyFat', idempotentReadRange)
+
     try {
       const syncId = 'nitro-health-harness-bf-higher-version'
       await NitroHealth.saveBodyFat([
@@ -1103,6 +1179,7 @@ describe('NitroHealth idempotent saves (native)', () => {
       const initial = await readIdempotentBodyFat([18.5, 19.5])
       expect(initial).toHaveLength(1)
       const initialSample = initial[0]
+
       if (initialSample === undefined) {
         return
       }
@@ -1118,11 +1195,13 @@ describe('NitroHealth idempotent saves (native)', () => {
       const replacement = await readIdempotentBodyFat([18.5, 19.5])
       expect(replacement).toHaveLength(1)
       const replacementSample = replacement[0]
+
       if (replacementSample === undefined) {
         return
       }
 
       expect(Math.abs(replacementSample.percentage - 19.5)).toBeLessThan(0.001)
+
       if (Platform.OS === 'android') {
         expect(recordId(replacementSample.identity)).toBe(recordId(initialSample.identity))
       } else if (Platform.OS === 'ios') {
@@ -1137,6 +1216,7 @@ describe('NitroHealth idempotent saves (native)', () => {
     await requireVerifiedPermissions(leanBodyMassReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('leanBodyMass', idempotentReadRange)
+
     try {
       const sample = {
         date: idempotentInterval.startDate,
@@ -1158,6 +1238,7 @@ describe('NitroHealth idempotent saves (native)', () => {
     await requireVerifiedPermissions(leanBodyMassReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('leanBodyMass', idempotentReadRange)
+
     try {
       const syncId = 'nitro-health-harness-lbm-higher-version'
       await NitroHealth.saveLeanBodyMass([
@@ -1171,6 +1252,7 @@ describe('NitroHealth idempotent saves (native)', () => {
       const initial = await readIdempotentLeanBodyMass([55.4, 56.4])
       expect(initial).toHaveLength(1)
       const initialSample = initial[0]
+
       if (initialSample === undefined) {
         return
       }
@@ -1186,11 +1268,13 @@ describe('NitroHealth idempotent saves (native)', () => {
       const replacement = await readIdempotentLeanBodyMass([55.4, 56.4])
       expect(replacement).toHaveLength(1)
       const replacementSample = replacement[0]
+
       if (replacementSample === undefined) {
         return
       }
 
       expect(Math.abs(replacementSample.kilograms - 56.4)).toBeLessThan(0.001)
+
       if (Platform.OS === 'android') {
         expect(recordId(replacementSample.identity)).toBe(recordId(initialSample.identity))
       } else if (Platform.OS === 'ios') {
@@ -1205,6 +1289,7 @@ describe('NitroHealth idempotent saves (native)', () => {
     await requireVerifiedPermissions(basalBodyTemperatureReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('basalBodyTemperature', idempotentReadRange)
+
     try {
       const sample = {
         date: idempotentInterval.startDate,
@@ -1226,6 +1311,7 @@ describe('NitroHealth idempotent saves (native)', () => {
     await requireVerifiedPermissions(basalBodyTemperatureReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('basalBodyTemperature', idempotentReadRange)
+
     try {
       const syncId = 'nitro-health-harness-bbt-higher-version'
       await NitroHealth.saveBasalBodyTemperature([
@@ -1239,6 +1325,7 @@ describe('NitroHealth idempotent saves (native)', () => {
       const initial = await readIdempotentBasalBodyTemperature([36.4, 36.5])
       expect(initial).toHaveLength(1)
       const initialSample = initial[0]
+
       if (initialSample === undefined) {
         return
       }
@@ -1254,11 +1341,13 @@ describe('NitroHealth idempotent saves (native)', () => {
       const replacement = await readIdempotentBasalBodyTemperature([36.4, 36.5])
       expect(replacement).toHaveLength(1)
       const replacementSample = replacement[0]
+
       if (replacementSample === undefined) {
         return
       }
 
       expect(Math.abs(replacementSample.celsius - 36.5)).toBeLessThan(0.001)
+
       if (Platform.OS === 'android') {
         expect(recordId(replacementSample.identity)).toBe(recordId(initialSample.identity))
       } else if (Platform.OS === 'ios') {
@@ -1273,6 +1362,7 @@ describe('NitroHealth idempotent saves (native)', () => {
     await requireVerifiedPermissions(workoutReadWritePermissions)
 
     await NitroHealth.deleteRecordsByTimeRange('workout', idempotentReadRange)
+
     try {
       const syncId = 'nitro-health-harness-workout-higher-version'
       await NitroHealth.saveWorkout({
@@ -1286,6 +1376,7 @@ describe('NitroHealth idempotent saves (native)', () => {
         'Nitro Workout Version 1',
         'Nitro Workout Version 2',
       ])
+
       expect(initial).toHaveLength(1)
 
       await NitroHealth.saveWorkout({
@@ -1299,10 +1390,12 @@ describe('NitroHealth idempotent saves (native)', () => {
         'Nitro Workout Version 1',
         'Nitro Workout Version 2',
       ])
+
       expect(replacement).toHaveLength(1)
       expect(replacement[0] ? workoutDisplayName(replacement[0]) : undefined).toBe(
         'Nitro Workout Version 2'
       )
+
       if (Platform.OS === 'android') {
         expect(replacement[0]?.title).toBe('Nitro Workout Version 2')
         expect(replacement[0]?.brandName).toBeUndefined()

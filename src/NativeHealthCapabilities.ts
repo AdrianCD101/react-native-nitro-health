@@ -5,6 +5,7 @@ export type NativeHealthAdditionalAccessStatus =
   | 'notDeclared'
   | 'notGranted'
   | 'granted'
+
 export type NativeBackgroundChangesMode = 'observer' | 'polling'
 
 /** Native runtime capability result. */

@@ -9,6 +9,7 @@ jest.mock('react-native-nitro-modules', () => ({
 import { NitroHealth } from 'react-native-nitro-health'
 
 const startDate = new Date('2026-01-01T00:00:00.000Z')
+
 const endDate = new Date('2026-01-08T00:00:00.000Z')
 
 describe('NitroHealth origins contract', () => {

@@ -76,28 +76,51 @@ import {
 // behave identically on both platforms instead of passing on iOS and throwing a raw
 // IllegalArgumentException on Android.
 const MAX_STEP_COUNT = 1_000_000
+
 const MAX_DISTANCE_METERS = 1_000_000
+
 const MAX_KILOCALORIES = 1_000_000
+
 const MAX_MILLILITERS = 100_000
+
 const MAX_FLOORS = 1_000_000
+
 const MIN_BPM = 1
+
 const MAX_BPM = 300
+
 const MIN_SYSTOLIC_MMHG = 20
+
 const MAX_SYSTOLIC_MMHG = 200
+
 const MIN_DIASTOLIC_MMHG = 10
+
 const MAX_DIASTOLIC_MMHG = 180
+
 const MIN_MILLIMOLES_PER_LITER = 0.5
+
 const MAX_MILLIMOLES_PER_LITER = 50
+
 const MIN_CELSIUS = 20
+
 const MAX_CELSIUS = 45
+
 const MIN_BREATHS_PER_MINUTE = 0
+
 const MAX_BREATHS_PER_MINUTE = 120
+
 const MAX_KILOGRAMS = 1_000
+
 const MAX_HEIGHT_METERS = 3
+
 const MIN_VO2_MAX = 0
+
 const MAX_VO2_MAX = 100
+
 const MAX_NUTRIENT_VALUE = 100_000
+
 const NUTRITION_MEAL_TYPES = new Set<NutritionMealType>(['breakfast', 'lunch', 'dinner', 'snack'])
+
 const WRITABLE_SLEEP_STAGES = new Set<WritableSleepStage>([
   'awake',
   'asleep',
@@ -105,6 +128,7 @@ const WRITABLE_SLEEP_STAGES = new Set<WritableSleepStage>([
   'asleepDeep',
   'asleepREM',
 ])
+
 const WRITABLE_WORKOUT_ACTIVITY_TYPES = new Set<WritableWorkoutActivityType>([
   'americanFootball',
   'australianFootball',
@@ -219,38 +243,50 @@ function makeNativeBloodPressureMetadata(
   index: number
 ): Pick<NativeBloodPressureSampleInput, 'androidBodyPosition' | 'androidMeasurementLocation'> {
   if (metadata === undefined) return {}
+
   if (typeof metadata !== 'object' || metadata === null || Array.isArray(metadata)) {
     throw new Error(`samples[${index}]: metadata must be an object`)
   }
+
   const unsupportedPlatform = Object.keys(metadata).find((key) => key !== 'android')
+
   if (unsupportedPlatform !== undefined) {
     throw new Error(`samples[${index}]: metadata.${unsupportedPlatform} is unsupported`)
   }
 
   const android = metadata.android
+
   if (android === undefined) return {}
+
   if (typeof android !== 'object' || android === null || Array.isArray(android)) {
     throw new Error(`samples[${index}]: metadata.android must be an object`)
   }
+
   const supportedKeys = new Set(['bodyPosition', 'measurementLocation'])
   const unsupportedKey = Object.keys(android).find((key) => !supportedKeys.has(key))
+
   if (unsupportedKey !== undefined) {
     throw new Error(`samples[${index}]: metadata.android.${unsupportedKey} is unsupported`)
   }
 
   const androidBodyPosition = makeNativeBloodPressureBodyPosition(android.bodyPosition, index)
+
   const androidMeasurementLocation = makeNativeBloodPressureMeasurementLocation(
     android.measurementLocation,
     index
   )
+
   const result: Pick<
     NativeBloodPressureSampleInput,
     'androidBodyPosition' | 'androidMeasurementLocation'
   > = {}
+
   if (androidBodyPosition !== undefined) result.androidBodyPosition = androidBodyPosition
+
   if (androidMeasurementLocation !== undefined) {
     result.androidMeasurementLocation = androidMeasurementLocation
   }
+
   return result
 }
 
@@ -338,23 +374,29 @@ function makeNativeBloodGlucoseMetadata(
   index: number
 ): Partial<NativeBloodGlucoseSampleInput> {
   if (metadata === undefined) return {}
+
   if (typeof metadata !== 'object' || metadata === null || Array.isArray(metadata)) {
     throw new Error(`samples[${index}]: metadata must be an object`)
   }
+
   const supportedPlatforms = new Set(['android', 'ios'])
   const unsupportedPlatform = Object.keys(metadata).find((key) => !supportedPlatforms.has(key))
+
   if (unsupportedPlatform !== undefined) {
     throw new Error(`samples[${index}]: metadata.${unsupportedPlatform} is unsupported`)
   }
 
   const result: Partial<NativeBloodGlucoseSampleInput> = {}
   const android = metadata.android
+
   if (android !== undefined) {
     if (typeof android !== 'object' || android === null || Array.isArray(android)) {
       throw new Error(`samples[${index}]: metadata.android must be an object`)
     }
+
     const supportedKeys = new Set(['specimenSource', 'mealType', 'relationToMeal'])
     const unsupportedKey = Object.keys(android).find((key) => !supportedKeys.has(key))
+
     if (unsupportedKey !== undefined) {
       throw new Error(`samples[${index}]: metadata.android.${unsupportedKey} is unsupported`)
     }
@@ -363,27 +405,36 @@ function makeNativeBloodGlucoseMetadata(
       android.specimenSource,
       index
     )
+
     const androidMealType = makeNativeBloodGlucoseMealType(android.mealType, index)
+
     const androidRelationToMeal = makeNativeBloodGlucoseRelationToMeal(
       android.relationToMeal,
       index
     )
+
     if (androidSpecimenSource !== undefined) result.androidSpecimenSource = androidSpecimenSource
+
     if (androidMealType !== undefined) result.androidMealType = androidMealType
+
     if (androidRelationToMeal !== undefined) result.androidRelationToMeal = androidRelationToMeal
   }
 
   const ios = metadata.ios
+
   if (ios !== undefined) {
     if (typeof ios !== 'object' || ios === null || Array.isArray(ios)) {
       throw new Error(`samples[${index}]: metadata.ios must be an object`)
     }
+
     const unsupportedKey = Object.keys(ios).find((key) => key !== 'mealTime')
+
     if (unsupportedKey !== undefined) {
       throw new Error(`samples[${index}]: metadata.ios.${unsupportedKey} is unsupported`)
     }
 
     const iosMealTime = makeNativeBloodGlucoseMealTime(ios.mealTime, index)
+
     if (iosMealTime !== undefined) result.iosMealTime = iosMealTime
   }
 
@@ -438,44 +489,57 @@ function makeNativeVo2MaxMetadata(
   index: number
 ): Pick<NativeVo2MaxSampleInput, 'androidMeasurementMethod' | 'iosTestType'> {
   if (metadata === undefined) return {}
+
   if (typeof metadata !== 'object' || metadata === null || Array.isArray(metadata)) {
     throw new Error(`samples[${index}]: metadata must be an object`)
   }
+
   const supportedPlatforms = new Set(['android', 'ios'])
   const unsupportedPlatform = Object.keys(metadata).find((key) => !supportedPlatforms.has(key))
+
   if (unsupportedPlatform !== undefined) {
     throw new Error(`samples[${index}]: metadata.${unsupportedPlatform} is unsupported`)
   }
 
   const result: Pick<NativeVo2MaxSampleInput, 'androidMeasurementMethod' | 'iosTestType'> = {}
   const android = metadata.android
+
   if (android !== undefined) {
     if (typeof android !== 'object' || android === null || Array.isArray(android)) {
       throw new Error(`samples[${index}]: metadata.android must be an object`)
     }
+
     const unsupportedKey = Object.keys(android).find((key) => key !== 'measurementMethod')
+
     if (unsupportedKey !== undefined) {
       throw new Error(`samples[${index}]: metadata.android.${unsupportedKey} is unsupported`)
     }
+
     const androidMeasurementMethod = makeNativeAndroidVo2MaxMeasurementMethod(
       android.measurementMethod,
       index
     )
+
     if (androidMeasurementMethod !== undefined) {
       result.androidMeasurementMethod = androidMeasurementMethod
     }
   }
 
   const ios = metadata.ios
+
   if (ios !== undefined) {
     if (typeof ios !== 'object' || ios === null || Array.isArray(ios)) {
       throw new Error(`samples[${index}]: metadata.ios must be an object`)
     }
+
     const unsupportedKey = Object.keys(ios).find((key) => key !== 'testType')
+
     if (unsupportedKey !== undefined) {
       throw new Error(`samples[${index}]: metadata.ios.${unsupportedKey} is unsupported`)
     }
+
     const iosTestType = makeNativeIOSVo2MaxTestType(ios.testType, index)
+
     if (iosTestType !== undefined) result.iosTestType = iosTestType
   }
 
@@ -541,11 +605,14 @@ function makeNativeBodyTemperatureMetadata(
   index: number
 ): Pick<NativeBodyTemperatureSampleInput, 'androidMeasurementLocation' | 'iosSensorLocation'> {
   if (metadata === undefined) return {}
+
   if (typeof metadata !== 'object' || metadata === null || Array.isArray(metadata)) {
     throw new Error(`samples[${index}]: metadata must be an object`)
   }
+
   const supportedPlatforms = new Set(['android', 'ios'])
   const unsupportedPlatform = Object.keys(metadata).find((key) => !supportedPlatforms.has(key))
+
   if (unsupportedPlatform !== undefined) {
     throw new Error(`samples[${index}]: metadata.${unsupportedPlatform} is unsupported`)
   }
@@ -554,34 +621,45 @@ function makeNativeBodyTemperatureMetadata(
     NativeBodyTemperatureSampleInput,
     'androidMeasurementLocation' | 'iosSensorLocation'
   > = {}
+
   const android = metadata.android
+
   if (android !== undefined) {
     if (typeof android !== 'object' || android === null || Array.isArray(android)) {
       throw new Error(`samples[${index}]: metadata.android must be an object`)
     }
+
     const unsupportedKey = Object.keys(android).find((key) => key !== 'measurementLocation')
+
     if (unsupportedKey !== undefined) {
       throw new Error(`samples[${index}]: metadata.android.${unsupportedKey} is unsupported`)
     }
+
     const androidMeasurementLocation = makeNativeAndroidBodyTemperatureMeasurementLocation(
       android.measurementLocation,
       index
     )
+
     if (androidMeasurementLocation !== undefined) {
       result.androidMeasurementLocation = androidMeasurementLocation
     }
   }
 
   const ios = metadata.ios
+
   if (ios !== undefined) {
     if (typeof ios !== 'object' || ios === null || Array.isArray(ios)) {
       throw new Error(`samples[${index}]: metadata.ios must be an object`)
     }
+
     const unsupportedKey = Object.keys(ios).find((key) => key !== 'sensorLocation')
+
     if (unsupportedKey !== undefined) {
       throw new Error(`samples[${index}]: metadata.ios.${unsupportedKey} is unsupported`)
     }
+
     const iosSensorLocation = makeNativeIOSBodyTemperatureSensorLocation(ios.sensorLocation, index)
+
     if (iosSensorLocation !== undefined) result.iosSensorLocation = iosSensorLocation
   }
 
@@ -612,6 +690,7 @@ export function makeNativeDistanceSampleInput(
   if (sample.scope !== 'walking-running') {
     throw new Error(`samples[${index}]: scope must be walking-running`)
   }
+
   const { startTimeMs, endTimeMs } = makeSampleInterval(sample, index)
 
   assertSampleNonNegativeNumber(sample.distanceMeters, index, 'distanceMeters')
@@ -678,6 +757,7 @@ function makeNativeNutritionNutrient(
   if (value === undefined) return undefined
   assertSampleNonNegativeNumber(value, index, name)
   assertSampleMaxValue(value, MAX_NUTRIENT_VALUE, index, name)
+
   return value
 }
 
@@ -690,9 +770,11 @@ export function makeNativeNutritionSampleInput(
   if (NUTRITION_NUTRIENT_FIELDS.every((field) => sample[field] === undefined)) {
     throw new Error(`samples[${index}]: at least one nutrient value is required`)
   }
+
   if (sample.mealType !== undefined && !NUTRITION_MEAL_TYPES.has(sample.mealType)) {
     throw new Error(`samples[${index}]: mealType must be breakfast, lunch, dinner, or snack`)
   }
+
   if (sample.foodName !== undefined) {
     if (typeof sample.foodName !== 'string' || sample.foodName.trim() === '') {
       throw new Error(`samples[${index}]: foodName must be a non-empty string`)
@@ -704,10 +786,14 @@ export function makeNativeNutritionSampleInput(
     endTimeMs,
     writeMetadata: makeNativeWriteMetadata(sample, index),
   }
+
   if (sample.foodName !== undefined) native.foodName = sample.foodName
+
   if (sample.mealType !== undefined) native.mealType = sample.mealType
+
   for (const field of NUTRITION_NUTRIENT_FIELDS) {
     const value = makeNativeNutritionNutrient(sample[field], index, field)
+
     if (value !== undefined) native[field] = value
   }
 
@@ -982,35 +1068,45 @@ function makeNativeSleepSessionMetadata(
 ): Pick<NativeSleepSessionInput, 'androidTitle' | 'androidNotes'> {
   if (metadata === undefined) return {}
   const prefix = `sessions[${sessionIndex}]: `
+
   if (typeof metadata !== 'object' || metadata === null || Array.isArray(metadata)) {
     throw new Error(`${prefix}metadata must be an object`)
   }
+
   const unsupportedPlatform = Object.keys(metadata).find((key) => key !== 'android')
+
   if (unsupportedPlatform !== undefined) {
     throw new Error(`${prefix}metadata.${unsupportedPlatform} is unsupported`)
   }
 
   const result: Pick<NativeSleepSessionInput, 'androidTitle' | 'androidNotes'> = {}
   const android = metadata.android
+
   if (android !== undefined) {
     if (typeof android !== 'object' || android === null || Array.isArray(android)) {
       throw new Error(`${prefix}metadata.android must be an object`)
     }
+
     const supportedKeys = new Set(['title', 'notes'])
     const unsupportedKey = Object.keys(android).find((key) => !supportedKeys.has(key))
+
     if (unsupportedKey !== undefined) {
       throw new Error(`${prefix}metadata.android.${unsupportedKey} is unsupported`)
     }
+
     if (android.title !== undefined) {
       if (typeof android.title !== 'string' || android.title.trim() === '') {
         throw new Error(`${prefix}metadata.android.title must be a non-empty string when provided`)
       }
+
       result.androidTitle = android.title
     }
+
     if (android.notes !== undefined) {
       if (typeof android.notes !== 'string' || android.notes.trim() === '') {
         throw new Error(`${prefix}metadata.android.notes must be a non-empty string when provided`)
       }
+
       result.androidNotes = android.notes
     }
   }
@@ -1033,10 +1129,12 @@ export function makeNativeSleepSessionInput(
 
   const indexedStages = (session.stages ?? []).map((stage, stageIndex) => {
     const stagePrefix = `sessions[${sessionIndex}].stages[${stageIndex}]: `
+
     const stageStartTimeMs = dateToTimeMs(
       stage.startDate,
       `${stagePrefix}a valid startDate is required`
     )
+
     const stageEndTimeMs = dateToTimeMs(stage.endDate, `${stagePrefix}a valid endDate is required`)
     assertStartBeforeEnd(stageStartTimeMs, stageEndTimeMs, stagePrefix)
 
@@ -1055,6 +1153,7 @@ export function makeNativeSleepSessionInput(
       endTimeMs: stageEndTimeMs,
       stage: stage.stage,
     }
+
     return { nativeStage, originalIndex: stageIndex }
   })
 
@@ -1069,6 +1168,7 @@ export function makeNativeSleepSessionInput(
   for (let index = 1; index < indexedStages.length; index += 1) {
     const previous = indexedStages[index - 1]
     const current = indexedStages[index]
+
     if (previous === undefined || current === undefined) continue
 
     if (current.nativeStage.startTimeMs < previous.nativeStage.endTimeMs) {

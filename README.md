@@ -486,7 +486,11 @@ interface BloodPressureSample extends HealthSample {
     android?: {
       bodyPosition?: 'unknown' | 'standing_up' | 'sitting_down' | 'lying_down' | 'reclining'
       measurementLocation?:
-        'unknown' | 'left_wrist' | 'right_wrist' | 'left_upper_arm' | 'right_upper_arm'
+        | 'unknown'
+        | 'left_wrist'
+        | 'right_wrist'
+        | 'left_upper_arm'
+        | 'right_upper_arm'
     }
   }
 }
@@ -782,7 +786,9 @@ Unknown or future native activity values remain explicitly `unknown`; they are n
 
 ```ts
 type HealthMetricValue =
-  { status: 'available'; value: number } | { status: 'not-reported' } | { status: 'unsupported' }
+  | { status: 'available'; value: number }
+  | { status: 'not-reported' }
+  | { status: 'unsupported' }
 ```
 
 On iOS, total distance and active energy are `available` when the workout reports them and `not-reported` otherwise. Android currently returns `unsupported` for both exercise-session totals.

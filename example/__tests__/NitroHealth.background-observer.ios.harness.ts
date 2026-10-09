@@ -8,14 +8,17 @@ const notificationInterval = {
   startDate: new Date('2005-06-01T09:00:00.000Z'),
   endDate: new Date('2005-06-01T09:30:00.000Z'),
 }
+
 const notificationRange = {
   startDate: new Date('2005-06-01T00:00:00.000Z'),
   endDate: new Date('2005-06-02T00:00:00.000Z'),
 }
+
 const nutritionNotificationInterval = {
   startDate: new Date('2005-06-02T09:00:00.000Z'),
   endDate: new Date('2005-06-02T09:30:00.000Z'),
 }
+
 const nutritionNotificationRange = {
   startDate: new Date('2005-06-02T00:00:00.000Z'),
   endDate: new Date('2005-06-03T00:00:00.000Z'),
@@ -27,10 +30,12 @@ async function drainStepChanges(changesToken: string): Promise<HealthRecordChang
 
   for (let pageIndex = 0; pageIndex < 20; pageIndex += 1) {
     const result = await NitroHealth.getChanges('steps', currentToken)
+
     if (result.tokenExpired) throw new Error('Fresh changes token expired unexpectedly')
 
     changes.push(...result.changes)
     currentToken = result.nextChangesToken
+
     if (!result.hasMore) return changes
   }
 
@@ -45,10 +50,12 @@ async function drainNutritionChanges(
 
   for (let pageIndex = 0; pageIndex < 20; pageIndex += 1) {
     const result = await NitroHealth.getChanges('nutrition', currentToken)
+
     if (result.tokenExpired) throw new Error('Fresh changes token expired unexpectedly')
 
     changes.push(...result.changes)
     currentToken = result.nextChangesToken
+
     if (!result.hasMore) return changes
   }
 
@@ -58,9 +65,11 @@ async function drainNutritionChanges(
 describe('NitroHealth iOS background observer (native)', () => {
   it('emits an observer notification that leads to a durable step change', async () => {
     const capabilities = await NitroHealth.getCapabilities()
+
     if (capabilities.status === 'unavailable') {
       throw new Error('Harness prerequisite failed: health data is unavailable')
     }
+
     if (capabilities.backgroundChanges.mode !== 'observer') {
       throw new Error('Harness prerequisite failed: observer background changes are unavailable')
     }
@@ -73,12 +82,15 @@ describe('NitroHealth iOS background observer (native)', () => {
     await NitroHealth.deleteRecordsByTimeRange('steps', notificationRange)
     await NitroHealth.disableBackgroundChanges(['steps'])
     let stepNotificationCount = 0
+
     const subscriptionResult = NitroHealth.subscribeToBackgroundChanges(({ dataTypes }) => {
       if (dataTypes.includes('steps')) stepNotificationCount += 1
     })
+
     if (subscriptionResult.mode !== 'observer') {
       throw new Error('Observer capability returned a polling subscription')
     }
+
     let isDeliveryEnabled = false
 
     try {
@@ -86,6 +98,7 @@ describe('NitroHealth iOS background observer (native)', () => {
         dataTypes: ['steps'],
         frequency: 'immediate',
       })
+
       expect(configured).toEqual({ status: 'completed', mode: 'observer' })
       isDeliveryEnabled = true
       const changesToken = await NitroHealth.createChangesToken('steps')
@@ -109,6 +122,7 @@ describe('NitroHealth iOS background observer (native)', () => {
       ).toBe(true)
     } finally {
       subscriptionResult.subscription.remove()
+
       if (isDeliveryEnabled) await NitroHealth.disableBackgroundChanges(['steps'])
       await NitroHealth.deleteRecordsByTimeRange('steps', notificationRange)
     }
@@ -118,9 +132,11 @@ describe('NitroHealth iOS background observer (native)', () => {
   // seven member dietary quantity types and coalesces them into one dataType notification.
   it('emits an observer notification for a nutrition entry via member-type fan-in', async () => {
     const capabilities = await NitroHealth.getCapabilities()
+
     if (capabilities.status === 'unavailable') {
       throw new Error('Harness prerequisite failed: health data is unavailable')
     }
+
     if (capabilities.backgroundChanges.mode !== 'observer') {
       throw new Error('Harness prerequisite failed: observer background changes are unavailable')
     }
@@ -133,12 +149,15 @@ describe('NitroHealth iOS background observer (native)', () => {
     await NitroHealth.deleteRecordsByTimeRange('nutrition', nutritionNotificationRange)
     await NitroHealth.disableBackgroundChanges(['nutrition'])
     let nutritionNotificationCount = 0
+
     const subscriptionResult = NitroHealth.subscribeToBackgroundChanges(({ dataTypes }) => {
       if (dataTypes.includes('nutrition')) nutritionNotificationCount += 1
     })
+
     if (subscriptionResult.mode !== 'observer') {
       throw new Error('Observer capability returned a polling subscription')
     }
+
     let isDeliveryEnabled = false
 
     try {
@@ -146,6 +165,7 @@ describe('NitroHealth iOS background observer (native)', () => {
         dataTypes: ['nutrition'],
         frequency: 'immediate',
       })
+
       expect(configured).toEqual({ status: 'completed', mode: 'observer' })
       isDeliveryEnabled = true
       const changesToken = await NitroHealth.createChangesToken('nutrition')
@@ -174,6 +194,7 @@ describe('NitroHealth iOS background observer (native)', () => {
       ).toBe(true)
     } finally {
       subscriptionResult.subscription.remove()
+
       if (isDeliveryEnabled) await NitroHealth.disableBackgroundChanges(['nutrition'])
       await NitroHealth.deleteRecordsByTimeRange('nutrition', nutritionNotificationRange)
     }

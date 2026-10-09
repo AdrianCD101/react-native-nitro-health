@@ -172,18 +172,23 @@ const changeNotificationListeners = new Map<
   number,
   (notification: HealthChangeNotification) => void
 >()
+
 let nextChangeNotificationListenerId = 1
+
 let isDispatchingChangeNotification = false
 
 function notifyChangeNotificationListeners(dataTypes: string[], deliveryId: string): void {
   const notification: HealthChangeNotification = {
     dataTypes: [...new Set(parseChangeTrackedHealthDataTypes(dataTypes, 'notification.dataTypes'))],
   }
+
   const listeners = [...changeNotificationListeners.values()]
+
   if (listeners.length === 0) return
 
   let firstError: unknown
   isDispatchingChangeNotification = true
+
   try {
     for (const listener of listeners) {
       try {
@@ -360,13 +365,16 @@ export const NitroHealth: NitroHealth = {
     if (recovery.kind !== 'install-or-update-provider') {
       throw new Error('Unsupported health availability recovery action')
     }
+
     return makeAvailabilityRecoveryResult(await NitroHealthNative.performAvailabilityRecovery())
   },
   async getCapabilities() {
     const availability = makeHealthAvailability(NitroHealthNative.getAvailability())
+
     if (availability.status === 'unavailable') {
       return { status: 'unavailable', availability }
     }
+
     return {
       status: 'available',
       ...makeHealthCapabilities(await NitroHealthNative.getCapabilities()),
@@ -376,10 +384,13 @@ export const NitroHealth: NitroHealth = {
     if (access !== 'background-read' && access !== 'history-read') {
       throw new Error('access must be background-read or history-read')
     }
+
     const availability = makeHealthAvailability(NitroHealthNative.getAvailability())
+
     if (availability.status === 'unavailable') {
       return { access, status: 'unavailable', availability }
     }
+
     return makeAdditionalAccessResult(
       access,
       await NitroHealthNative.requestAdditionalAccess(access)
@@ -395,6 +406,7 @@ export const NitroHealth: NitroHealth = {
     if (configuration.dataTypes.length === 0) {
       throw new Error('At least one background change data type is required')
     }
+
     return makeBackgroundChangesResult(
       await NitroHealthNative.configureBackgroundChanges(
         [
@@ -410,6 +422,7 @@ export const NitroHealth: NitroHealth = {
     if (dataTypes !== undefined && dataTypes.length === 0) {
       throw new Error('dataTypes must be omitted or contain at least one health data type')
     }
+
     return makeBackgroundChangesResult(
       await NitroHealthNative.disableBackgroundChanges(
         dataTypes === undefined
@@ -422,10 +435,13 @@ export const NitroHealth: NitroHealth = {
     if (typeof listener !== 'function') {
       throw new Error('A background change listener function is required')
     }
+
     const availability = makeHealthAvailability(NitroHealthNative.getAvailability())
+
     if (availability.status === 'unavailable') {
       return { mode: 'unavailable', availability }
     }
+
     if (NitroHealthNative.getBackgroundChangesMode() === 'polling') {
       return { mode: 'polling', scheduling: 'app-owned' }
     }
@@ -435,6 +451,7 @@ export const NitroHealth: NitroHealth = {
         throw new Error('Native observer listener registration is unavailable')
       }
     }
+
     const listenerId = nextChangeNotificationListenerId
     nextChangeNotificationListenerId += 1
     changeNotificationListeners.set(listenerId, listener)
@@ -447,6 +464,7 @@ export const NitroHealth: NitroHealth = {
           if (isRemoved) return
           isRemoved = true
           changeNotificationListeners.delete(listenerId)
+
           if (changeNotificationListeners.size === 0 && !isDispatchingChangeNotification) {
             NitroHealthNative.setOnBackgroundChangeListener(undefined)
           }
@@ -456,11 +474,13 @@ export const NitroHealth: NitroHealth = {
   },
   async createChangesToken(dataType) {
     assertChangeTrackedHealthDataType(dataType)
+
     return NitroHealthNative.createChangesToken(dataType)
   },
   async getChanges(dataType, changesToken) {
     assertChangeTrackedHealthDataType(dataType)
     assertChangesToken(changesToken)
+
     return makeHealthChangesResult(
       dataType,
       await NitroHealthNative.getChanges(dataType, changesToken)
@@ -468,6 +488,7 @@ export const NitroHealth: NitroHealth = {
   },
   async getPermissionStatuses(permissions) {
     assertPermissions(permissions)
+
     return makeHealthPermissionStatusResult(
       await NitroHealthNative.getPermissionStatuses(permissions),
       permissions
@@ -475,6 +496,7 @@ export const NitroHealth: NitroHealth = {
   },
   async requestAuthorization(permissions) {
     assertPermissions(permissions)
+
     return makeHealthAuthorizationResult(
       await NitroHealthNative.requestAuthorization(permissions),
       permissions
@@ -604,6 +626,7 @@ export const NitroHealth: NitroHealth = {
       dataType,
       makeNativeStatisticsQuery(dataType, query)
     )
+
     return statistics.map((bucket) => makeHealthStatistics(dataType, bucket))
   },
   async readSleepSamples(query) {
@@ -628,12 +651,14 @@ export const NitroHealth: NitroHealth = {
     assertNonEmptySamples(samples)
     const nativeSamples = samples.map(makeNativeStepSampleInput)
     assertUniqueSampleSyncIds(samples)
+
     return makeHealthWriteResult(await NitroHealthNative.saveSteps(nativeSamples), samples.length)
   },
   async saveDistance(samples) {
     assertNonEmptySamples(samples)
     const nativeSamples = samples.map(makeNativeDistanceSampleInput)
     assertUniqueSampleSyncIds(samples)
+
     return makeDistanceWriteResult(
       await NitroHealthNative.saveDistance(nativeSamples),
       samples.length
@@ -643,6 +668,7 @@ export const NitroHealth: NitroHealth = {
     assertNonEmptySamples(samples)
     const nativeSamples = samples.map(makeNativeActiveEnergyBurnedSampleInput)
     assertUniqueSampleSyncIds(samples)
+
     return makeHealthWriteResult(
       await NitroHealthNative.saveActiveEnergyBurned(nativeSamples),
       samples.length
@@ -652,6 +678,7 @@ export const NitroHealth: NitroHealth = {
     assertNonEmptySamples(samples)
     const nativeSamples = samples.map(makeNativeHydrationSampleInput)
     assertUniqueSampleSyncIds(samples)
+
     return makeHealthWriteResult(
       await NitroHealthNative.saveHydration(nativeSamples),
       samples.length
@@ -661,6 +688,7 @@ export const NitroHealth: NitroHealth = {
     assertNonEmptySamples(samples)
     const nativeSamples = samples.map(makeNativeFloorsClimbedSampleInput)
     assertUniqueSampleSyncIds(samples)
+
     return makeHealthWriteResult(
       await NitroHealthNative.saveFloorsClimbed(nativeSamples),
       samples.length
@@ -670,6 +698,7 @@ export const NitroHealth: NitroHealth = {
     assertNonEmptySamples(samples)
     const nativeSamples = samples.map(makeNativeHeartRateSampleInput)
     assertUniqueSampleSyncIds(samples)
+
     return makeHealthWriteResult(
       await NitroHealthNative.saveHeartRate(nativeSamples),
       samples.length
@@ -679,6 +708,7 @@ export const NitroHealth: NitroHealth = {
     assertNonEmptySamples(samples)
     const nativeSamples = samples.map(makeNativeBloodPressureSampleInput)
     assertUniqueSampleSyncIds(samples)
+
     return makeHealthWriteResult(
       await NitroHealthNative.saveBloodPressure(nativeSamples),
       samples.length
@@ -688,6 +718,7 @@ export const NitroHealth: NitroHealth = {
     assertNonEmptySamples(samples)
     const nativeSamples = samples.map(makeNativeBloodGlucoseSampleInput)
     assertUniqueSampleSyncIds(samples)
+
     return makeHealthWriteResult(
       await NitroHealthNative.saveBloodGlucose(nativeSamples),
       samples.length
@@ -697,6 +728,7 @@ export const NitroHealth: NitroHealth = {
     assertNonEmptySamples(samples)
     const nativeSamples = samples.map(makeNativeBodyTemperatureSampleInput)
     assertUniqueSampleSyncIds(samples)
+
     return makeHealthWriteResult(
       await NitroHealthNative.saveBodyTemperature(nativeSamples),
       samples.length
@@ -706,6 +738,7 @@ export const NitroHealth: NitroHealth = {
     assertNonEmptySamples(samples)
     const nativeSamples = samples.map(makeNativeRespiratoryRateSampleInput)
     assertUniqueSampleSyncIds(samples)
+
     return makeHealthWriteResult(
       await NitroHealthNative.saveRespiratoryRate(nativeSamples),
       samples.length
@@ -715,12 +748,14 @@ export const NitroHealth: NitroHealth = {
     assertNonEmptySamples(samples)
     const nativeSamples = samples.map(makeNativeBodyFatSampleInput)
     assertUniqueSampleSyncIds(samples)
+
     return makeHealthWriteResult(await NitroHealthNative.saveBodyFat(nativeSamples), samples.length)
   },
   async saveLeanBodyMass(samples) {
     assertNonEmptySamples(samples)
     const nativeSamples = samples.map(makeNativeLeanBodyMassSampleInput)
     assertUniqueSampleSyncIds(samples)
+
     return makeHealthWriteResult(
       await NitroHealthNative.saveLeanBodyMass(nativeSamples),
       samples.length
@@ -730,6 +765,7 @@ export const NitroHealth: NitroHealth = {
     assertNonEmptySamples(samples)
     const nativeSamples = samples.map(makeNativeBasalBodyTemperatureSampleInput)
     assertUniqueSampleSyncIds(samples)
+
     return makeHealthWriteResult(
       await NitroHealthNative.saveBasalBodyTemperature(nativeSamples),
       samples.length
@@ -739,6 +775,7 @@ export const NitroHealth: NitroHealth = {
     assertNonEmptySamples(samples)
     const nativeSamples = samples.map(makeNativeBodyMassSampleInput)
     assertUniqueSampleSyncIds(samples)
+
     return makeHealthWriteResult(
       await NitroHealthNative.saveBodyMass(nativeSamples),
       samples.length
@@ -748,6 +785,7 @@ export const NitroHealth: NitroHealth = {
     assertNonEmptySamples(samples)
     const nativeSamples = samples.map(makeNativeRestingHeartRateSampleInput)
     assertUniqueSampleSyncIds(samples)
+
     return makeHealthWriteResult(
       await NitroHealthNative.saveRestingHeartRate(nativeSamples),
       samples.length
@@ -757,6 +795,7 @@ export const NitroHealth: NitroHealth = {
     assertNonEmptySamples(samples)
     const nativeSamples = samples.map(makeNativeOxygenSaturationSampleInput)
     assertUniqueSampleSyncIds(samples)
+
     return makeHealthWriteResult(
       await NitroHealthNative.saveOxygenSaturation(nativeSamples),
       samples.length
@@ -766,17 +805,20 @@ export const NitroHealth: NitroHealth = {
     assertNonEmptySamples(samples)
     const nativeSamples = samples.map(makeNativeHeightSampleInput)
     assertUniqueSampleSyncIds(samples)
+
     return makeHealthWriteResult(await NitroHealthNative.saveHeight(nativeSamples), samples.length)
   },
   async saveVo2Max(samples) {
     assertNonEmptySamples(samples)
     const nativeSamples = samples.map(makeNativeVo2MaxSampleInput)
     assertUniqueSampleSyncIds(samples)
+
     return makeHealthWriteResult(await NitroHealthNative.saveVo2Max(nativeSamples), samples.length)
   },
   async saveSleepSessions(sessions) {
     assertNonEmptySessions(sessions)
     assertUniqueSampleSyncIds(sessions)
+
     return makeHealthWriteResult(
       await NitroHealthNative.saveSleepSessions(sessions.map(makeNativeSleepSessionInput)),
       sessions.length
@@ -792,6 +834,7 @@ export const NitroHealth: NitroHealth = {
     assertNonEmptySamples(samples)
     const nativeSamples = samples.map(makeNativeNutritionSampleInput)
     assertUniqueSampleSyncIds(samples)
+
     return makeHealthWriteResult(
       await NitroHealthNative.saveNutrition(nativeSamples),
       samples.length
@@ -800,6 +843,7 @@ export const NitroHealth: NitroHealth = {
   async deleteRecordsByIds(dataType, records) {
     assertWritableHealthDataType(dataType)
     assertRecordIdentities(records)
+
     return makeIdentityDeleteResult(
       await NitroHealthNative.deleteRecordsByIds(
         dataType,
@@ -810,6 +854,7 @@ export const NitroHealth: NitroHealth = {
   },
   async deleteRecordsByTimeRange(dataType, query) {
     assertWritableHealthDataType(dataType)
+
     return makeTimeRangeDeleteResult(
       await NitroHealthNative.deleteRecordsByTimeRange(dataType, makeNativeTimeRangeQuery(query))
     )

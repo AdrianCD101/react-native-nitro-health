@@ -10,6 +10,7 @@ describe('NitroHealth authorized harness prerequisites', () => {
 
     const capabilities = await NitroHealth.getCapabilities()
     expect(capabilities.status).toBe('available')
+
     if (capabilities.status !== 'available') return
     expect(capabilities.backgroundChanges.backgroundRead).toBe('granted')
     expect(capabilities.historyRead).toBe('granted')

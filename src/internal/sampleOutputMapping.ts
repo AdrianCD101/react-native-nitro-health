@@ -74,6 +74,7 @@ const SLEEP_STAGES = new Set<string>([
   'outOfBed',
   'unknown',
 ] satisfies SleepStage[])
+
 const WORKOUT_ACTIVITY_TYPES = new Set<string>([
   'americanFootball',
   'archery',
@@ -249,6 +250,7 @@ function makeBodyTemperatureMetadata(
   sample: Pick<NativeBodyTemperatureSample, 'androidMeasurementLocation' | 'iosSensorLocation'>
 ): BodyTemperatureSample['metadata'] {
   let metadata: BodyTemperatureSample['metadata']
+
   if (sample.androidMeasurementLocation !== undefined) {
     metadata = {
       android: {
@@ -258,12 +260,14 @@ function makeBodyTemperatureMetadata(
       },
     }
   }
+
   if (sample.iosSensorLocation !== undefined) {
     metadata = {
       ...metadata,
       ios: { sensorLocation: makeIOSBodyTemperatureSensorLocation(sample.iosSensorLocation) },
     }
   }
+
   return metadata
 }
 
@@ -274,12 +278,15 @@ export function makeSamplePage<TNative, TSample>(
   const result: HealthSamplePage<TSample> = {
     samples: page.samples.map(map),
   }
+
   if (page.nextCursor !== undefined) result.nextCursor = page.nextCursor
+
   return result
 }
 
 export function makeDistanceScope(scope: NativeDistanceSample['scope']): DistanceSample['scope'] {
   if (scope === 'walkingRunning') return 'walking-running'
+
   if (scope === 'activityUnspecified') return 'activity-unspecified'
   throw new Error(`Unsupported native distance scope: ${scope}`)
 }
@@ -289,13 +296,16 @@ function makeHealthMetricValue(metric: NativeHealthMetricValue): HealthMetricVal
     if (typeof metric.value !== 'number' || !Number.isFinite(metric.value)) {
       throw new Error('Available native health metric is missing a finite value')
     }
+
     return { status: 'available', value: metric.value }
   }
 
   if (metric.value !== undefined) {
     throw new Error('Unavailable native health metric contains a value')
   }
+
   if (metric.status === 'notReported') return { status: 'not-reported' }
+
   if (metric.status === 'unsupported') return { status: 'unsupported' }
   throw new Error(`Unsupported native health metric status: ${metric.status}`)
 }
@@ -309,6 +319,7 @@ function makeWorkoutActivity(activity: NativeWorkoutActivity): WorkoutActivity {
     ) {
       throw new Error('Unknown native workout activity contains known activity fields')
     }
+
     return { status: 'unknown' }
   }
 
@@ -320,12 +331,15 @@ function makeWorkoutActivity(activity: NativeWorkoutActivity): WorkoutActivity {
   ) {
     throw new Error('Known native workout activity is incomplete')
   }
+
   if (!isWorkoutActivityType(activity.type)) {
     throw new Error(`Unsupported normalized native workout activity: ${activity.type}`)
   }
+
   if (activity.portability !== 'portable' && activity.portability !== 'readOnly') {
     throw new Error(`Unsupported native workout portability: ${activity.portability}`)
   }
+
   if (activity.mapping !== 'exact' && activity.mapping !== 'broadened') {
     throw new Error(`Unsupported native workout mapping fidelity: ${activity.mapping}`)
   }
@@ -383,16 +397,25 @@ export function makeNutritionSample(sample: NativeNutritionSample): NutritionSam
     startDate: new Date(sample.startTimeMs),
     endDate: new Date(sample.endTimeMs),
   }
+
   if (sample.foodName !== undefined) nutrition.foodName = sample.foodName
+
   if (sample.mealType !== undefined) nutrition.mealType = sample.mealType
+
   if (sample.energyKilocalories !== undefined)
     nutrition.energyKilocalories = sample.energyKilocalories
+
   if (sample.proteinGrams !== undefined) nutrition.proteinGrams = sample.proteinGrams
+
   if (sample.totalCarbohydrateGrams !== undefined)
     nutrition.totalCarbohydrateGrams = sample.totalCarbohydrateGrams
+
   if (sample.totalFatGrams !== undefined) nutrition.totalFatGrams = sample.totalFatGrams
+
   if (sample.dietaryFiberGrams !== undefined) nutrition.dietaryFiberGrams = sample.dietaryFiberGrams
+
   if (sample.sugarGrams !== undefined) nutrition.sugarGrams = sample.sugarGrams
+
   if (sample.sodiumMilligrams !== undefined) nutrition.sodiumMilligrams = sample.sodiumMilligrams
 
   return nutrition
@@ -440,6 +463,7 @@ export function makeHeartRateVariabilitySample(
   if (sample.method !== 'sdnn' && sample.method !== 'rmssd') {
     throw new Error(`Unsupported native heart rate variability method: ${sample.method}`)
   }
+
   return {
     ...makeHealthSampleMetadata(sample.sampleMetadata),
     date: new Date(sample.timeMs),
@@ -451,11 +475,13 @@ export function makeHeartRateVariabilitySample(
 export function makeBloodPressureSample(sample: NativeBloodPressureSample): BloodPressureSample {
   const hasBodyPosition = sample.androidBodyPosition !== undefined
   const hasMeasurementLocation = sample.androidMeasurementLocation !== undefined
+
   if (hasBodyPosition !== hasMeasurementLocation) {
     throw new Error('Native blood pressure metadata is incomplete')
   }
 
   let metadata: BloodPressureSample['metadata']
+
   if (sample.androidBodyPosition !== undefined && sample.androidMeasurementLocation !== undefined) {
     metadata = {
       android: {
@@ -473,7 +499,9 @@ export function makeBloodPressureSample(sample: NativeBloodPressureSample): Bloo
     systolicMmHg: sample.systolicMmHg,
     diastolicMmHg: sample.diastolicMmHg,
   }
+
   if (metadata !== undefined) result.metadata = metadata
+
   return result
 }
 
@@ -483,12 +511,15 @@ export function makeBloodGlucoseSample(sample: NativeBloodGlucoseSample): BloodG
     sample.androidMealType,
     sample.androidRelationToMeal,
   ]
+
   const androidFieldCount = androidFields.filter((field) => field !== undefined).length
+
   if (androidFieldCount !== 0 && androidFieldCount !== androidFields.length) {
     throw new Error('Native blood glucose Android metadata is incomplete')
   }
 
   let metadata: BloodGlucoseSample['metadata']
+
   if (
     sample.androidSpecimenSource !== undefined &&
     sample.androidMealType !== undefined &&
@@ -503,6 +534,7 @@ export function makeBloodGlucoseSample(sample: NativeBloodGlucoseSample): BloodG
       tears: 'tears',
       wholeBlood: 'whole_blood',
     } as const
+
     const mealType = {
       unspecified: 'unknown',
       breakfast: 'breakfast',
@@ -510,6 +542,7 @@ export function makeBloodGlucoseSample(sample: NativeBloodGlucoseSample): BloodG
       dinner: 'dinner',
       snack: 'snack',
     } as const
+
     const relationToMeal = {
       unspecified: 'unknown',
       general: 'general',
@@ -517,6 +550,7 @@ export function makeBloodGlucoseSample(sample: NativeBloodGlucoseSample): BloodG
       beforeMeal: 'before_meal',
       afterMeal: 'after_meal',
     } as const
+
     metadata = {
       android: {
         specimenSource: specimenSource[sample.androidSpecimenSource],
@@ -525,6 +559,7 @@ export function makeBloodGlucoseSample(sample: NativeBloodGlucoseSample): BloodG
       },
     }
   }
+
   if (sample.iosMealTime !== undefined) {
     metadata = { ...metadata, ios: { mealTime: sample.iosMealTime } }
   }
@@ -534,7 +569,9 @@ export function makeBloodGlucoseSample(sample: NativeBloodGlucoseSample): BloodG
     date: new Date(sample.timeMs),
     millimolesPerLiter: sample.millimolesPerLiter,
   }
+
   if (metadata !== undefined) result.metadata = metadata
+
   return result
 }
 
@@ -542,12 +579,15 @@ export function makeBodyTemperatureSample(
   sample: NativeBodyTemperatureSample
 ): BodyTemperatureSample {
   const metadata = makeBodyTemperatureMetadata(sample)
+
   const result: BodyTemperatureSample = {
     ...makeHealthSampleMetadata(sample.sampleMetadata),
     date: new Date(sample.timeMs),
     celsius: sample.celsius,
   }
+
   if (metadata !== undefined) result.metadata = metadata
+
   return result
 }
 
@@ -581,12 +621,15 @@ export function makeBasalBodyTemperatureSample(
   sample: NativeBasalBodyTemperatureSample
 ): BasalBodyTemperatureSample {
   const metadata = makeBodyTemperatureMetadata(sample)
+
   const result: BasalBodyTemperatureSample = {
     ...makeHealthSampleMetadata(sample.sampleMetadata),
     date: new Date(sample.timeMs),
     celsius: sample.celsius,
   }
+
   if (metadata !== undefined) result.metadata = metadata
+
   return result
 }
 
@@ -617,13 +660,16 @@ export function makeVo2MaxSample(sample: NativeVo2MaxSample): Vo2MaxSample {
     multistageFitnessTest: 'multistage_fitness_test',
     rockportFitnessTest: 'rockport_fitness_test',
   } as const
+
   const iosTestType = {
     maxExercise: 'max_exercise',
     predictionSubMaxExercise: 'prediction_sub_max_exercise',
     predictionNonExercise: 'prediction_non_exercise',
     predictionStepTest: 'prediction_step_test',
   } as const
+
   let metadata: Vo2MaxSample['metadata']
+
   if (sample.androidMeasurementMethod !== undefined) {
     metadata = {
       android: {
@@ -631,6 +677,7 @@ export function makeVo2MaxSample(sample: NativeVo2MaxSample): Vo2MaxSample {
       },
     }
   }
+
   if (sample.iosTestType !== undefined) {
     metadata = { ...metadata, ios: { testType: iosTestType[sample.iosTestType] } }
   }
@@ -640,7 +687,9 @@ export function makeVo2MaxSample(sample: NativeVo2MaxSample): Vo2MaxSample {
     date: new Date(sample.timeMs),
     millilitersPerKilogramPerMinute: sample.millilitersPerKilogramPerMinute,
   }
+
   if (metadata !== undefined) result.metadata = metadata
+
   return result
 }
 
@@ -655,19 +704,25 @@ export function makeSleepSample(sample: NativeSleepSample): SleepSample {
     if (sample.stage !== undefined || sample.stageData === undefined) {
       throw new Error('Native sleep session envelope has invalid stage fields')
     }
+
     let android: AndroidSleepSessionMetadata | undefined
+
     if (sample.androidTitle !== undefined) {
       android = { title: sample.androidTitle }
     }
+
     if (sample.androidNotes !== undefined) {
       android = { ...android, notes: sample.androidNotes }
     }
+
     const envelope: SleepSessionEnvelope = {
       ...base,
       kind: 'session-envelope',
       stageData: sample.stageData === 'notReported' ? 'not-reported' : sample.stageData,
     }
+
     if (android !== undefined) envelope.metadata = { android }
+
     return envelope
   }
 
@@ -675,9 +730,11 @@ export function makeSleepSample(sample: NativeSleepSample): SleepSample {
     if (sample.stage === undefined || sample.stageData !== undefined) {
       throw new Error('Native sleep stage has invalid stage fields')
     }
+
     if (!isSleepStage(sample.stage)) {
       throw new Error(`Unsupported native sleep stage: ${sample.stage}`)
     }
+
     return {
       ...base,
       kind: 'stage',
@@ -712,6 +769,7 @@ export function makeHealthWriteResult(
       `Native write returned ${result.storedRecordingMethods.length} recording methods for ${expectedCount} inputs`
     )
   }
+
   return {
     status: 'completed',
     storedRecordingMethods: result.storedRecordingMethods.map(makeHealthRecordingMethod),
