@@ -86,13 +86,13 @@
     "codegen": "nitrogen --logLevel=\"debug\" && node post-script.js && bun run build"
   },
   "devDependencies": {
-    "@oxlint/plugins": "1.78.0",
+    "@oxlint/plugins": "^1.87.0",
     "@types/jest": "^30.0.0",
     "@types/react": "19.2.15",
     "conventional-changelog-conventionalcommits": "^9.1.0",
     "nitrogen": "^0.36.5",
-    "oxfmt": "^0.60.0",
-    "oxlint": "1.78.0",
+    "oxfmt": "^0.72.0",
+    "oxlint": "^1.87.0",
     "react": "19.2.6",
     "react-native": "0.86.0",
     "react-native-builder-bob": "^0.43.0",
