@@ -43,14 +43,22 @@
   ],
   "main": "./lib/commonjs/index.js",
   "module": "./lib/module/index.js",
-  "types": "./lib/typescript/src/index.d.ts",
+  "types": "./lib/typescript/commonjs/src/index.d.ts",
   "react-native": "src/index",
   "exports": {
     ".": {
-      "types": "./lib/typescript/src/index.d.ts",
-      "react-native": "./src/index.ts",
-      "import": "./lib/module/index.js",
-      "require": "./lib/commonjs/index.js",
+      "react-native": {
+        "types": "./lib/typescript/module/src/index.d.ts",
+        "default": "./src/index.ts"
+      },
+      "import": {
+        "types": "./lib/typescript/module/src/index.d.ts",
+        "default": "./lib/module/index.js"
+      },
+      "require": {
+        "types": "./lib/typescript/commonjs/src/index.d.ts",
+        "default": "./lib/commonjs/index.js"
+      },
       "default": "./lib/module/index.js"
     },
     "./jest/mock": {
@@ -98,7 +106,7 @@
     "react-native-builder-bob": "^0.43.0",
     "react-native-nitro-modules": "^0.36.5",
     "semantic-release": "^25.0.3",
-    "typescript": "^6.0.3"
+    "typescript": "^7.0.2"
   },
   "peerDependencies": {
     "react": "*",
@@ -112,8 +120,18 @@
     "source": "src",
     "output": "lib",
     "targets": [
-      "commonjs",
-      "module",
+      [
+        "commonjs",
+        {
+          "esm": true
+        }
+      ],
+      [
+        "module",
+        {
+          "esm": true
+        }
+      ],
       [
         "typescript",
         {
