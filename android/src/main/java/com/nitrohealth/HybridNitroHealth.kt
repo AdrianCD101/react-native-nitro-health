@@ -2,8 +2,8 @@ package com.nitrohealth
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
+import androidx.core.net.toUri
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.aggregate.AggregationResult
 import androidx.health.connect.client.permission.HealthPermission
@@ -146,9 +146,8 @@ class HybridNitroHealth: HybridNitroHealthSpec() {
         }
 
         val providerPackageName = "com.google.android.apps.healthdata"
-        val uri = Uri.parse(
-            "market://details?id=$providerPackageName&url=healthconnect%3A%2F%2Fonboarding"
-        )
+        val uri =
+            "market://details?id=$providerPackageName&url=healthconnect%3A%2F%2Fonboarding".toUri()
         val intent = Intent(Intent.ACTION_VIEW).apply {
             setPackage("com.android.vending")
             data = uri
