@@ -45,6 +45,7 @@ function isWritableDataType(
 
 function lastDays(days: number) {
   const endDate = new Date()
+
   return { startDate: new Date(endDate.getTime() - days * 24 * 60 * 60 * 1000), endDate }
 }
 
@@ -52,6 +53,7 @@ function formatIdentity(identity: HealthSampleIdentity): string {
   if (identity.kind === 'record') {
     return `record ${identity.id}`
   }
+
   return `child ${identity.id} of record ${identity.record.id}`
 }
 
@@ -77,6 +79,7 @@ function formatPermissionStatuses(result: HealthPermissionStatusResult): string 
   const entries = result.statuses
     .map(({ permission, status }) => `${permission.accessType}:${permission.dataType}=${status}`)
     .join(', ')
+
   return result.status === 'available'
     ? entries
     : `unavailable (${result.availability.reason}); ${entries}`
@@ -86,6 +89,7 @@ function formatAuthorization(result: HealthAuthorizationResult): string {
   const entries = result.statuses
     .map(({ permission, status }) => `${permission.accessType}:${permission.dataType}=${status}`)
     .join(', ')
+
   return result.status === 'completed'
     ? entries
     : `unavailable (${result.availability.reason}); ${entries}`
@@ -95,9 +99,11 @@ function formatBackgroundResult(result: BackgroundChangesConfigurationResult): s
   if (result.status === 'completed') {
     return 'Observer delivery configured'
   }
+
   if (result.status === 'user-action-required') {
     return `Polling requires ${result.scheduling} scheduling; background read: ${result.backgroundRead}`
   }
+
   return 'Background changes unavailable'
 }
 
@@ -136,6 +142,7 @@ const readCards = {
         bucket: 'day',
         metrics: ['sum'],
       })
+
       return [
         `Daily step buckets: ${buckets.length}`,
         ...buckets
@@ -154,6 +161,7 @@ const readCards = {
         limit: 20,
         ascending: false,
       })
+
       return [
         `Distance samples: ${page.samples.length}${page.nextCursor ? ' (more available)' : ''}`,
         ...page.samples.map(
@@ -171,6 +179,7 @@ const readCards = {
         bucket: 'day',
         metrics: ['sum'],
       })
+
       return [
         `Daily active-energy buckets: ${buckets.length}`,
         ...buckets
@@ -191,6 +200,7 @@ const readCards = {
         bucket: 'day',
         metrics: ['sum'],
       })
+
       return [
         `Daily basal-energy buckets: ${buckets.length}`,
         ...buckets
@@ -211,6 +221,7 @@ const readCards = {
         bucket: 'day',
         metrics: ['sum'],
       })
+
       return [
         `Daily total-energy buckets: ${buckets.length}`,
         ...buckets
@@ -231,6 +242,7 @@ const readCards = {
         bucket: 'day',
         metrics: ['sum'],
       })
+
       return [
         `Daily hydration buckets: ${buckets.length}`,
         ...buckets
@@ -251,6 +263,7 @@ const readCards = {
         bucket: 'day',
         metrics: ['sum'],
       })
+
       return [
         `Daily floors-climbed buckets: ${buckets.length}`,
         ...buckets
@@ -264,6 +277,7 @@ const readCards = {
     buttonLabel: 'Read Heart Rate stats',
     execute: async () => {
       const statistics = await NitroHealth.readHeartRateStatistics(lastDays(1))
+
       return [
         `Average bpm: ${statistics.average ?? 'n/a'}`,
         `Min bpm: ${statistics.min ?? 'n/a'}`,
@@ -280,6 +294,7 @@ const readCards = {
         limit: 50,
         ascending: false,
       })
+
       return [
         `Sleep samples: ${page.samples.length}${page.nextCursor ? ' (more available)' : ''}`,
         ...page.samples.map((sample) => {
@@ -287,6 +302,7 @@ const readCards = {
             sample.kind === 'session-envelope'
               ? `session envelope; stage data ${sample.stageData}`
               : `stage ${sample.stage}${sample.identity.kind === 'record-child' ? `; parent ${sample.identity.record.id}` : ''}`
+
           return `${sample.startDate.toLocaleString()}: ${sleepDetail} | ${formatSampleContext(sample.identity, sample.origin)}`
         }),
       ]
@@ -301,6 +317,7 @@ const readCards = {
         limit: 20,
         ascending: false,
       })
+
       return [
         `Body mass samples: ${page.samples.length}${page.nextCursor ? ' (more available)' : ''}`,
         ...page.samples.map(
@@ -319,6 +336,7 @@ const readCards = {
         limit: 20,
         ascending: false,
       })
+
       return [
         `Workouts: ${page.samples.length}${page.nextCursor ? ' (more available)' : ''}`,
         ...page.samples.map(
@@ -337,6 +355,7 @@ const readCards = {
         limit: 20,
         ascending: false,
       })
+
       return [
         `Nutrition entries: ${page.samples.length}${page.nextCursor ? ' (more available)' : ''}`,
         ...page.samples.map(
@@ -352,6 +371,7 @@ function getReadCard(dataType: HealthPermissionDataType): ReadCard | undefined {
   for (const [readDataType, readCard] of Object.entries(readCards)) {
     if (readDataType === dataType) return readCard
   }
+
   return undefined
 }
 
@@ -370,9 +390,11 @@ function App(): React.JSX.Element {
   const isAvailable = availability.status === 'available'
   const [capabilities, setCapabilities] = useState<HealthCapabilitiesResult>()
   const [cards, setCards] = useState<Partial<Record<HealthPermissionDataType, CardState>>>({})
+
   const [readResults, setReadResults] = useState<
     Partial<Record<HealthPermissionDataType, string[]>>
   >({})
+
   const [readOwnAppOnly, setReadOwnAppOnly] = useState(false)
   const [workflowActivity, setWorkflowActivity] = useState<string>()
   const [workflowMessage, setWorkflowMessage] = useState<string>()
@@ -402,6 +424,7 @@ function App(): React.JSX.Element {
   async function runWorkflow(name: string, operation: () => Promise<void>): Promise<void> {
     setWorkflowActivity(name)
     setWorkflowError(undefined)
+
     try {
       await operation()
     } catch (error) {
@@ -415,10 +438,13 @@ function App(): React.JSX.Element {
     await runWorkflow('capabilities', async () => {
       const result = await NitroHealth.getCapabilities()
       setCapabilities(result)
+
       if (result.status === 'unavailable') {
         setWorkflowMessage(`Capabilities unavailable: ${result.availability.reason}`)
+
         return
       }
+
       const background = result.backgroundChanges
       setWorkflowMessage(
         background.mode === 'observer'
@@ -435,6 +461,7 @@ function App(): React.JSX.Element {
     ) {
       return
     }
+
     await runWorkflow('recovery', async () => {
       const result = await NitroHealth.performAvailabilityRecovery(availability.recovery)
       setWorkflowMessage(
@@ -475,6 +502,7 @@ function App(): React.JSX.Element {
   async function revokePermissions(): Promise<void> {
     await runWorkflow('revoke', async () => {
       const result = await NitroHealth.revokeAllPermissions()
+
       if (result.status === 'completed') {
         setWorkflowMessage('All health permissions revoked')
       } else if (result.status === 'user-action-required') {
@@ -491,10 +519,13 @@ function App(): React.JSX.Element {
         dataTypes: ['steps', 'sleep', 'workout'],
         frequency: 'immediate',
       })
+
       backgroundSubscription.current?.remove()
+
       const subscription = NitroHealth.subscribeToBackgroundChanges(({ dataTypes }) => {
         setWorkflowMessage(`Background change: ${dataTypes.join(', ')}`)
       })
+
       if (subscription.mode === 'observer') {
         backgroundSubscription.current = subscription.subscription
         setWorkflowMessage(`${formatBackgroundResult(configuration)}; observer subscribed`)
@@ -522,6 +553,7 @@ function App(): React.JSX.Element {
   async function checkPermission(dataType: HealthPermissionDataType): Promise<void> {
     const permission: HealthPermission[] = [{ accessType: 'read', dataType }]
     updateCard(dataType, { activity: 'checking', feedback: undefined })
+
     try {
       const statusResult = await NitroHealth.getPermissionStatuses(permission)
       updateCard(dataType, { activity: undefined, statusResult })
@@ -541,12 +573,15 @@ function App(): React.JSX.Element {
       activity: accessType === 'read' ? 'requesting' : 'requestingWrite',
       feedback: undefined,
     })
+
     try {
       let permission: HealthPermission = { accessType: 'read', dataType }
+
       if (accessType === 'write') {
         if (!isWritableDataType(dataType)) throw new Error(`${dataType} is read-only`)
         permission = { accessType: 'write', dataType }
       }
+
       const result = await NitroHealth.requestAuthorization([permission])
       updateCard(
         dataType,
@@ -564,19 +599,24 @@ function App(): React.JSX.Element {
 
   async function runReadCard(dataType: HealthPermissionDataType): Promise<void> {
     const readCard = getReadCard(dataType)
+
     if (!readCard) return
 
     updateCard(dataType, { activity: 'reading', feedback: undefined })
+
     try {
       const readResult = await NitroHealth.requestAuthorization([{ accessType: 'read', dataType }])
+
       if (!authorizationAllowsOperation(readResult)) {
         updateCard(dataType, {
           activity: undefined,
           readResult,
           feedback: { kind: 'error', message: 'Read access is unavailable or not granted.' },
         })
+
         return
       }
+
       const lines = await readCard.execute(readOwnAppOnly ? { origins: 'own-app' } : {})
       setReadResults((current) => ({ ...current, [dataType]: lines }))
       updateCard(dataType, { activity: undefined, readResult })
@@ -597,16 +637,19 @@ function App(): React.JSX.Element {
       const writeResult = await NitroHealth.requestAuthorization([
         { accessType: 'write', dataType },
       ])
+
       if (!authorizationAllowsOperation(writeResult)) {
         updateCard(dataType, {
           activity: undefined,
           writeResult,
           feedback: { kind: 'error', message: 'Write access is unavailable or not granted.' },
         })
+
         return
       }
 
       let message: string
+
       switch (dataType) {
         case 'steps':
           await NitroHealth.saveSteps([{ startDate, endDate, count: 250 }])
@@ -616,9 +659,11 @@ function App(): React.JSX.Element {
           const result = await NitroHealth.saveDistance([
             { scope: 'walking-running', startDate, endDate, distanceMeters: 400 },
           ])
+
           message = `Saved 400 m with storage scope ${result.storedScope}`
           break
         }
+
         case 'activeEnergyBurned':
           await NitroHealth.saveActiveEnergyBurned([{ startDate, endDate, kilocalories: 45 }])
           message = 'Saved 45 kcal'
@@ -669,6 +714,7 @@ function App(): React.JSX.Element {
           break
         default:
           updateCard(dataType, { activity: undefined })
+
           return
       }
 
@@ -794,6 +840,7 @@ function App(): React.JSX.Element {
           const isBusy = card.activity !== undefined
           const readCard = getReadCard(dataType)
           const readLines = readResults[dataType]
+
           return (
             <View key={dataType} style={styles.card}>
               <Text style={styles.cardTitle}>{label}</Text>

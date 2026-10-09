@@ -22,11 +22,14 @@ import {
 } from './support/harnessSupport'
 
 const statisticsMetricKeys = ['sum', 'avg', 'min', 'max', 'duration'] as const
+
 const statisticsRangeEnd = Date.now() - 60 * 60 * 1000
+
 const statisticsRange = {
   startDate: new Date(statisticsRangeEnd - 48 * 60 * 60 * 1000),
   endDate: new Date(statisticsRangeEnd),
 }
+
 const statisticsInterval = {
   startDate: new Date(statisticsRangeEnd - 6 * 60 * 60 * 1000),
   endDate: new Date(statisticsRangeEnd - 5.5 * 60 * 60 * 1000),
@@ -50,6 +53,7 @@ const aggregationProbeInterval = {
   startDate: new Date('2003-06-01T09:00:00.000Z'),
   endDate: new Date('2003-06-01T09:30:00.000Z'),
 }
+
 const aggregationProbeRange = {
   startDate: new Date('2003-06-01T00:00:00.000Z'),
   endDate: new Date('2003-06-02T00:00:00.000Z'),
@@ -61,17 +65,21 @@ function probeAggregationVisibility(key: string, probe: () => Promise<boolean>):
   if (Platform.OS === 'ios') {
     return Promise.resolve(true)
   }
+
   let visibility = aggregationVisibilityByProbe.get(key)
+
   if (visibility === undefined) {
     visibility = probe()
     aggregationVisibilityByProbe.set(key, visibility)
   }
+
   return visibility
 }
 
 function isActivityAggregationVisible(): Promise<boolean> {
   return probeAggregationVisibility('steps', async () => {
     await NitroHealth.deleteRecordsByTimeRange('steps', aggregationProbeRange)
+
     try {
       await NitroHealth.saveSteps([
         {
@@ -81,6 +89,7 @@ function isActivityAggregationVisible(): Promise<boolean> {
         },
       ])
       const query = { ...aggregationProbeRange, bucket: 'day' as const, metrics: ['sum' as const] }
+
       return sumStatistics(await NitroHealth.readStatistics('steps', query)) >= 1
     } finally {
       await NitroHealth.deleteRecordsByTimeRange('steps', aggregationProbeRange)
@@ -97,6 +106,7 @@ function sumDurations(buckets: readonly HealthStatistics[]): number {
 function isSleepAggregationVisible(): Promise<boolean> {
   return probeAggregationVisibility('sleep', async () => {
     await NitroHealth.deleteRecordsByTimeRange('sleep', aggregationProbeRange)
+
     try {
       await NitroHealth.saveSleepSessions([
         {
@@ -104,11 +114,13 @@ function isSleepAggregationVisible(): Promise<boolean> {
           sync: { id: 'nitro-health-harness-sleep-aggregation-probe', version: 1 },
         },
       ])
+
       const query = {
         ...aggregationProbeRange,
         bucket: 'day' as const,
         metrics: ['duration' as const],
       }
+
       return sumDurations(await NitroHealth.readStatistics('sleep', query)) >= 1
     } finally {
       await NitroHealth.deleteRecordsByTimeRange('sleep', aggregationProbeRange)
@@ -119,17 +131,20 @@ function isSleepAggregationVisible(): Promise<boolean> {
 function isWorkoutAggregationVisible(): Promise<boolean> {
   return probeAggregationVisibility('workout', async () => {
     await NitroHealth.deleteRecordsByTimeRange('workout', aggregationProbeRange)
+
     try {
       await NitroHealth.saveWorkout({
         ...aggregationProbeInterval,
         activityType: 'walking',
         sync: { id: 'nitro-health-harness-workout-aggregation-probe', version: 1 },
       })
+
       const query = {
         ...aggregationProbeRange,
         bucket: 'day' as const,
         metrics: ['duration' as const],
       }
+
       return sumDurations(await NitroHealth.readStatistics('workout', query)) >= 1
     } finally {
       await NitroHealth.deleteRecordsByTimeRange('workout', aggregationProbeRange)
@@ -149,6 +164,7 @@ async function expectActivityRoundTrip(options: {
 }): Promise<void> {
   expect(await options.hasSavedRecord()).toBe(true)
   const isVisible = options.isAggregationVisible ?? isActivityAggregationVisible
+
   if (await isVisible()) {
     expect(await options.readAggregate()).toBeGreaterThanOrEqual(options.aggregateTarget - 0.001)
   }
@@ -192,6 +208,7 @@ describe('NitroHealth statistics (native)', () => {
       })
 
       expect(Array.isArray(dailySteps)).toBe(true)
+
       for (const entry of dailySteps) {
         assertStatisticsEntry(entry, ['sum'])
       }
@@ -203,6 +220,7 @@ describe('NitroHealth statistics (native)', () => {
       })
 
       expect(Array.isArray(hourlyHeartRate)).toBe(true)
+
       for (const entry of hourlyHeartRate) {
         assertStatisticsEntry(entry, ['avg', 'min', 'max'])
       }
@@ -214,6 +232,7 @@ describe('NitroHealth statistics (native)', () => {
       })
 
       expect(Array.isArray(dailyRestingHeartRate)).toBe(true)
+
       for (const entry of dailyRestingHeartRate) {
         assertStatisticsEntry(entry, ['avg', 'min', 'max'])
       }
@@ -225,6 +244,7 @@ describe('NitroHealth statistics (native)', () => {
       })
 
       expect(Array.isArray(dailyHeight)).toBe(true)
+
       for (const entry of dailyHeight) {
         assertStatisticsEntry(entry, ['avg', 'min', 'max'])
       }
@@ -334,15 +354,18 @@ describe('NitroHealth statistics (native)', () => {
         startDate: new Date('2026-03-08T05:00:00.000Z'),
         endDate: new Date('2026-03-10T04:00:00.000Z'),
       }
+
       // 2025-11-02T00:00 is 04:00Z (EDT, -4); 2025-11-03T00:00 is 05:00Z (EST, -5).
       const fallRange = {
         startDate: new Date('2025-11-02T04:00:00.000Z'),
         endDate: new Date('2025-11-03T05:00:00.000Z'),
       }
+
       const hour = 60 * 60 * 1000
 
       await NitroHealth.deleteRecordsByTimeRange('steps', springRange)
       await NitroHealth.deleteRecordsByTimeRange('steps', fallRange)
+
       try {
         await NitroHealth.saveSteps([
           {
@@ -373,9 +396,11 @@ describe('NitroHealth statistics (native)', () => {
         })
 
         expect(springBuckets).toHaveLength(2)
+
         for (const bucket of springBuckets) {
           expect(bucket.timeZone).toBe('America/New_York')
         }
+
         // The bucket containing the spring-forward shift spans 23 physical hours.
         expect(springBuckets[0].startDate.getTime()).toBe(springRange.startDate.getTime())
         expect(springBuckets[0].endDate.getTime() - springBuckets[0].startDate.getTime()).toBe(
@@ -414,6 +439,7 @@ describe('NitroHealth statistics (native)', () => {
       ])
 
       await NitroHealth.deleteRecordsByTimeRange('steps', statisticsRange)
+
       try {
         const query = { ...statisticsRange, bucket: 'day' as const, metrics: ['sum' as const] }
         const baseline = sumStatistics(await NitroHealth.readStatistics('steps', query))
@@ -451,6 +477,7 @@ describe('NitroHealth statistics (native)', () => {
       }
 
       await NitroHealth.deleteRecordsByTimeRange('floorsClimbed', statisticsRange)
+
       try {
         const query = { ...statisticsRange, bucket: 'day' as const, metrics: ['sum' as const] }
         const baseline = sumStatistics(await NitroHealth.readStatistics('floorsClimbed', query))
@@ -488,6 +515,7 @@ describe('NitroHealth statistics (native)', () => {
       }
 
       await NitroHealth.deleteRecordsByTimeRange('hydration', statisticsRange)
+
       try {
         const query = { ...statisticsRange, bucket: 'day' as const, metrics: ['sum' as const] }
         const baseline = sumStatistics(await NitroHealth.readStatistics('hydration', query))
@@ -519,14 +547,18 @@ describe('NitroHealth statistics (native)', () => {
       }
 
       await NitroHealth.deleteRecordsByTimeRange('nutrition', statisticsRange)
+
       try {
         const query = { ...statisticsRange, bucket: 'day' as const, metrics: ['sum' as const] }
+
         const proteinBaseline = sumStatistics(
           await NitroHealth.readStatistics('nutritionProtein', query)
         )
+
         const energyBaseline = sumStatistics(
           await NitroHealth.readStatistics('nutritionEnergyConsumed', query)
         )
+
         const sodiumBaseline = sumStatistics(
           await NitroHealth.readStatistics('nutritionSodium', query)
         )
@@ -547,10 +579,12 @@ describe('NitroHealth statistics (native)', () => {
         expect(
           sumStatistics(await NitroHealth.readStatistics('nutritionEnergyConsumed', query))
         ).toBeGreaterThanOrEqual(energyBaseline + 640 - 0.001)
+
         // Sodium was not part of the saved entry, so its sums must not change.
         const sodiumAfterSave = sumStatistics(
           await NitroHealth.readStatistics('nutritionSodium', query)
         )
+
         expect(Math.abs(sodiumAfterSave - sodiumBaseline)).toBeLessThan(0.001)
       } finally {
         await NitroHealth.deleteRecordsByTimeRange('nutrition', statisticsRange)
@@ -572,7 +606,9 @@ describe('NitroHealth statistics (native)', () => {
         startDate: new Date('2005-06-01T00:00:00.000Z'),
         endDate: new Date('2005-06-03T00:00:00.000Z'),
       }
+
       await NitroHealth.deleteRecordsByTimeRange('sleep', sleepRange)
+
       try {
         // 8h session with a 30-minute awake gap: both platforms must report
         // 7.5h asleep (Android subtracts awake stages natively; iOS
@@ -610,9 +646,11 @@ describe('NitroHealth statistics (native)', () => {
               metrics: ['duration'],
               timeZone: 'UTC',
             })
+
             for (const bucket of buckets) {
               assertStatisticsEntry(bucket, ['duration'])
             }
+
             return buckets.reduce((sum, bucket) => sum + (bucket.duration ?? 0), 0)
           },
           aggregateTarget: 7.5 * 3600,
@@ -641,7 +679,9 @@ describe('NitroHealth statistics (native)', () => {
         startDate: new Date('2005-07-01T00:00:00.000Z'),
         endDate: new Date('2005-07-02T00:00:00.000Z'),
       }
+
       await NitroHealth.deleteRecordsByTimeRange('workout', workoutRange)
+
       try {
         await NitroHealth.saveWorkout({
           startDate: new Date('2005-07-01T10:00:00.000Z'),
@@ -658,9 +698,11 @@ describe('NitroHealth statistics (native)', () => {
               metrics: ['duration'],
               timeZone: 'UTC',
             })
+
             for (const bucket of buckets) {
               assertStatisticsEntry(bucket, ['duration'])
             }
+
             return buckets.reduce((sum, bucket) => sum + (bucket.duration ?? 0), 0)
           },
           aggregateTarget: 3600,
@@ -685,6 +727,7 @@ describe('NitroHealth statistics (native)', () => {
       })
 
       expect(Array.isArray(dailyBasalEnergy)).toBe(true)
+
       for (const entry of dailyBasalEnergy) {
         assertStatisticsEntry(entry, ['sum'])
         expect(entry.sum ?? 0).toBeGreaterThanOrEqual(0)
@@ -712,13 +755,16 @@ describe('NitroHealth statistics (native)', () => {
         startDate: new Date('2006-06-01T00:00:00.000Z'),
         endDate: new Date('2006-06-02T00:00:00.000Z'),
       }
+
       const energyIslandInterval = {
         startDate: new Date('2006-06-01T09:00:00.000Z'),
         endDate: new Date('2006-06-01T09:30:00.000Z'),
       }
+
       const query = { ...energyIslandRange, bucket: 'day' as const, metrics: ['sum' as const] }
 
       await NitroHealth.deleteRecordsByTimeRange('activeEnergyBurned', energyIslandRange)
+
       try {
         await NitroHealth.saveActiveEnergyBurned([
           {
@@ -752,6 +798,7 @@ describe('NitroHealth statistics (native)', () => {
           // aggregation (see expectActivityRoundTrip), so the composed value is unobservable
           // on a `pm grant`-provisioned emulator — assert only the bucket shape here.
           const totals = await NitroHealth.readStatistics('totalEnergyBurned', query)
+
           for (const entry of totals) {
             assertStatisticsEntry(entry, ['sum'])
           }

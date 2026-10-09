@@ -64,17 +64,20 @@ function makeNativeHealthDeviceInfo(
   if (device === undefined) return undefined
 
   const prefix = typeof indexOrPrefix === 'number' ? `samples[${indexOrPrefix}]` : indexOrPrefix
+
   if (typeof device !== 'object' || device === null || Array.isArray(device)) {
     throw new Error(`${prefix}: device must be an object when provided`)
   }
 
   const supportedKeys = new Set(['type', 'manufacturer', 'model'])
   const unsupportedKey = Object.keys(device).find((key) => !supportedKeys.has(key))
+
   if (unsupportedKey !== undefined) {
     throw new Error(`${prefix}: device.${unsupportedKey} is unsupported`)
   }
 
   let type: NativeHealthDeviceInfo['type']
+
   switch (device.type) {
     case undefined:
     case 'unknown':
@@ -105,6 +108,7 @@ function makeNativeHealthDeviceInfo(
       throw new Error(`${prefix}: device.manufacturer must be a non-empty string`)
     }
   }
+
   if (device.model !== undefined) {
     if (typeof device.model !== 'string' || device.model.trim() === '') {
       throw new Error(`${prefix}: device.model must be a non-empty string`)
@@ -127,6 +131,7 @@ export function makeNativeWriteProvenance(
   indexOrPrefix: number | string
 ): NativeHealthWriteProvenance {
   const device = makeNativeHealthDeviceInfo(sample.device, indexOrPrefix)
+
   return {
     deviceType: device?.type,
     deviceManufacturer: device?.manufacturer,
@@ -140,6 +145,7 @@ export function assertTimeZoneIdentifier(
   indexOrPrefix: number | string
 ): void {
   if (timeZone === undefined) return
+
   if (typeof timeZone !== 'string' || timeZone.trim() === '') {
     const prefix = typeof indexOrPrefix === 'number' ? `samples[${indexOrPrefix}]` : indexOrPrefix
     throw new Error(`${prefix}: timeZone must be a non-empty IANA time-zone identifier`)
@@ -152,11 +158,15 @@ export function makeNativeWriteMetadata(
 ): NativeHealthWriteMetadata {
   assertTimeZoneIdentifier(sample.timeZone, indexOrPrefix)
   const sync = makeNativeSync(sample.sync, indexOrPrefix)
+
   const metadata: NativeHealthWriteMetadata = {
     provenance: makeNativeWriteProvenance(sample, indexOrPrefix),
   }
+
   if (sync !== undefined) metadata.sync = sync
+
   if (sample.timeZone !== undefined) metadata.timeZone = sample.timeZone
+
   return metadata
 }
 
@@ -213,9 +223,11 @@ function makeHealthDeviceInfo(
   device: NativeHealthDeviceInfo | undefined
 ): HealthDeviceInfo | undefined {
   if (device === undefined) return undefined
+
   if (device.manufacturer !== undefined && typeof device.manufacturer !== 'string') {
     throw new Error('Native health device has an invalid manufacturer')
   }
+
   if (device.model !== undefined && typeof device.model !== 'string') {
     throw new Error('Native health device has an invalid model')
   }
@@ -229,9 +241,13 @@ function makeHealthDeviceInfo(
   }
 
   const info: HealthDeviceInfo = {}
+
   if (type !== undefined) info.type = type
+
   if (manufacturer !== undefined) info.manufacturer = manufacturer
+
   if (model !== undefined) info.model = model
+
   return info
 }
 
@@ -241,6 +257,7 @@ export function makeHealthSampleMetadata(sampleMetadata: NativeHealthSampleMetad
     manufacturer: sampleMetadata.deviceManufacturer,
     model: sampleMetadata.deviceModel,
   })
+
   const metadata: HealthSample = {
     identity: makeHealthSampleIdentity({
       kind: sampleMetadata.identityKind,
@@ -253,9 +270,13 @@ export function makeHealthSampleMetadata(sampleMetadata: NativeHealthSampleMetad
     }),
     recordingMethod: makeHealthRecordingMethod(sampleMetadata.recordingMethod),
   }
+
   if (device !== undefined) metadata.device = device
+
   if (sampleMetadata.zoneOffset !== undefined) metadata.zoneOffset = sampleMetadata.zoneOffset
+
   if (sampleMetadata.timeZone !== undefined) metadata.timeZone = sampleMetadata.timeZone
+
   return metadata
 }
 
@@ -263,6 +284,7 @@ function makeHealthSampleIdentity(identity: NativeHealthSampleIdentity): HealthS
   if (typeof identity.id !== 'string' || identity.id.trim() === '') {
     throw new Error('Native health sample has an invalid identity id')
   }
+
   if (typeof identity.recordId !== 'string' || identity.recordId.trim() === '') {
     throw new Error('Native health sample has an invalid record id')
   }
@@ -271,6 +293,7 @@ function makeHealthSampleIdentity(identity: NativeHealthSampleIdentity): HealthS
     if (identity.id !== identity.recordId) {
       throw new Error('Native record identity id does not match its record id')
     }
+
     return { kind: 'record', id: identity.id }
   }
 

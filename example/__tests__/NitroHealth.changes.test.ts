@@ -145,6 +145,7 @@ describe('NitroHealth changes contract', () => {
 
     if (result.tokenExpired) throw new Error('Expected a successful changes result')
     const change = result.changes[0]
+
     if (change === undefined || change.type !== 'upsert') {
       throw new Error('Expected an upsert change')
     }
@@ -193,6 +194,7 @@ describe('NitroHealth changes contract', () => {
     })
 
     const result = await NitroHealth.getChanges('bloodPressure', 'current-token')
+
     if (result.tokenExpired) throw new Error('Expected a successful changes result')
 
     expect(result.changes[0]).toMatchObject({
@@ -233,6 +235,7 @@ describe('NitroHealth changes contract', () => {
     })
 
     const result = await NitroHealth.getChanges('bloodGlucose', 'current-token')
+
     if (result.tokenExpired) throw new Error('Expected a successful changes result')
 
     expect(result.changes[0]).toMatchObject({
@@ -264,6 +267,7 @@ describe('NitroHealth changes contract', () => {
     })
 
     const result = await NitroHealth.getChanges('vo2Max', 'current-token')
+
     if (result.tokenExpired) throw new Error('Expected a successful changes result')
 
     expect(result.changes[0]).toMatchObject({
@@ -295,6 +299,7 @@ describe('NitroHealth changes contract', () => {
     })
 
     const result = await NitroHealth.getChanges('bodyTemperature', 'current-token')
+
     if (result.tokenExpired) throw new Error('Expected a successful changes result')
 
     expect(result.changes[0]).toMatchObject({
@@ -334,7 +339,9 @@ describe('NitroHealth changes contract', () => {
   it('preserves distance, floors climbed, tagged sleep, and workout semantics in upserts', async () => {
     const startTimeMs = Date.parse('2026-01-01T00:00:00.000Z')
     const endTimeMs = Date.parse('2026-01-01T08:00:00.000Z')
+
     type NativeChangesResult = Awaited<ReturnType<typeof mockNitroHealth.getChanges>>
+
     const changePage = (change: NativeChangesResult['changes'][number]): NativeChangesResult => ({
       changes: [change],
       nextChangesToken: 'next-token',
@@ -431,6 +438,7 @@ describe('NitroHealth changes contract', () => {
     ) {
       throw new Error('Expected successful change pages')
     }
+
     expect(distance.changes[0]).toMatchObject({
       record: { kind: 'record', id: 'distance-record' },
       samples: [{ scope: 'walking-running', distanceMeters: 5000 }],

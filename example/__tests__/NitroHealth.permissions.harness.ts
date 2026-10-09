@@ -17,6 +17,7 @@ describe('NitroHealth permissions (native)', () => {
 
     if (availability.status === 'available') {
       expect(availability).toEqual({ status: 'available' })
+
       return
     }
 
@@ -26,6 +27,7 @@ describe('NitroHealth permissions (native)', () => {
         reason: 'provider-install-or-update-required',
         recovery: { kind: 'install-or-update-provider' },
       })
+
       return
     }
 
@@ -67,6 +69,7 @@ describe('NitroHealth permissions (native)', () => {
     if (result.status === 'unavailable') {
       expect(result.availability.status).toBe('unavailable')
       expect(result.statuses.every((entry) => entry.status === 'unverifiable')).toBe(true)
+
       return
     }
 

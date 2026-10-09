@@ -76,6 +76,7 @@ function makeUpsertSamples(
   }
 
   let samples: HealthSampleByDataType[ChangeTrackedHealthDataType][]
+
   switch (dataType) {
     case 'steps':
       if (change.stepSamples === undefined)

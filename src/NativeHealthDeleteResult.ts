@@ -1,4 +1,5 @@
 export type NativeHealthDeleteStatus = 'completed' | 'notFoundOrNotOwned'
+
 export type NativeDeletedCountStatus = 'known' | 'unverifiable'
 
 /** Native aggregate deletion outcome. */

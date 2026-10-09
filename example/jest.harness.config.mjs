@@ -7,6 +7,7 @@ try {
 }
 
 const runnerOptionIndex = process.argv.findIndex((argument) => argument === '--harnessRunner')
+
 const harnessRunner =
   process.argv.find((argument) => argument.startsWith('--harnessRunner='))?.split('=', 2)[1] ??
   (runnerOptionIndex >= 0 ? process.argv[runnerOptionIndex + 1] : undefined) ??

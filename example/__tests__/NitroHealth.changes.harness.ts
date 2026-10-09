@@ -9,10 +9,12 @@ const changeInterval = {
   startDate: new Date('2003-06-01T09:00:00.000Z'),
   endDate: new Date('2003-06-01T09:30:00.000Z'),
 }
+
 const replacementChangeInterval = {
   startDate: new Date('2003-06-02T09:00:00.000Z'),
   endDate: new Date('2003-06-02T09:30:00.000Z'),
 }
+
 const replacementChangeRange = {
   startDate: new Date('2003-06-02T00:00:00.000Z'),
   endDate: new Date('2003-06-03T00:00:00.000Z'),
@@ -52,10 +54,12 @@ async function drainFloorsClimbedChanges(changesToken: string): Promise<{
 
   for (let pageIndex = 0; pageIndex < 20; pageIndex += 1) {
     const result = await NitroHealth.getChanges('floorsClimbed', currentToken)
+
     if (result.tokenExpired) throw new Error('Fresh changes token expired unexpectedly')
 
     changes.push(...result.changes)
     currentToken = result.nextChangesToken
+
     if (!result.hasMore) return { changes, changesToken: currentToken }
   }
 
@@ -71,10 +75,12 @@ async function drainHydrationChanges(changesToken: string): Promise<{
 
   for (let pageIndex = 0; pageIndex < 20; pageIndex += 1) {
     const result = await NitroHealth.getChanges('hydration', currentToken)
+
     if (result.tokenExpired) throw new Error('Fresh changes token expired unexpectedly')
 
     changes.push(...result.changes)
     currentToken = result.nextChangesToken
+
     if (!result.hasMore) return { changes, changesToken: currentToken }
   }
 
@@ -99,6 +105,7 @@ describe('NitroHealth changes (native)', () => {
     ])
 
     const afterSave = await drainStepChanges(baselineToken)
+
     const upsert = afterSave.changes.find(
       (change) =>
         change.type === 'upsert' && change.samples.some((sample) => sample.count === 987_654)
@@ -106,6 +113,7 @@ describe('NitroHealth changes (native)', () => {
 
     // HealthKit hides read denials and returns no changes, even when writing is allowed.
     expect(upsert).toBeDefined()
+
     if (upsert === undefined || upsert.type !== 'upsert') {
       return
     }
@@ -117,11 +125,13 @@ describe('NitroHealth changes (native)', () => {
           : sample.identity.record.id === upsert.record.id
       )
     ).toBe(true)
+
     if (Platform.OS === 'android') {
       expect(upsert.samples.every((sample) => sample.device?.type === 'watch')).toBe(true)
     } else {
       expect(upsert.samples.every((sample) => sample.device?.type === undefined)).toBe(true)
     }
+
     expect(upsert.samples.every((sample) => sample.device?.manufacturer === 'Nitro Health')).toBe(
       true
     )
@@ -129,8 +139,10 @@ describe('NitroHealth changes (native)', () => {
 
     const deletion = await NitroHealth.deleteRecordsByIds('steps', [upsert.record])
     expect(deletion.status).toBe('completed')
+
     if (deletion.status === 'completed') {
       expect(deletion.requestedCount).toBe(1)
+
       if (deletion.deletedCount.status === 'known') {
         expect(deletion.deletedCount.value).toBe(1)
       }
@@ -163,6 +175,7 @@ describe('NitroHealth changes (native)', () => {
       ])
 
       const afterInitialSave = await drainStepChanges(baselineToken)
+
       const initialUpsert = afterInitialSave.changes.find(
         (change) =>
           change.type === 'upsert' && change.samples.some((sample) => sample.count === 987_651)
@@ -170,6 +183,7 @@ describe('NitroHealth changes (native)', () => {
 
       // HealthKit hides read denials and returns no changes, even when writing is allowed.
       expect(initialUpsert).toBeDefined()
+
       if (initialUpsert === undefined || initialUpsert.type !== 'upsert') {
         return
       }
@@ -183,6 +197,7 @@ describe('NitroHealth changes (native)', () => {
       ])
 
       const afterReplacement = await drainStepChanges(afterInitialSave.changesToken)
+
       const replacementUpserts = afterReplacement.changes.filter(
         (change) =>
           change.type === 'upsert' && change.samples.some((sample) => sample.count === 987_652)
@@ -190,6 +205,7 @@ describe('NitroHealth changes (native)', () => {
 
       expect(replacementUpserts).toHaveLength(1)
       const replacementUpsert = replacementUpserts[0]
+
       if (replacementUpsert === undefined || replacementUpsert.type !== 'upsert') {
         return
       }
@@ -215,18 +231,21 @@ describe('NitroHealth changes (native)', () => {
       { accessType: 'read' as const, dataType: 'floorsClimbed' as const },
       { accessType: 'write' as const, dataType: 'floorsClimbed' as const },
     ]
+
     await requireVerifiedPermissions(permissions)
 
     const range = {
       startDate: new Date('2003-06-03T00:00:00.000Z'),
       endDate: new Date('2003-06-04T00:00:00.000Z'),
     }
+
     const interval = {
       startDate: new Date('2003-06-03T09:00:00.000Z'),
       endDate: new Date('2003-06-03T09:30:00.000Z'),
     }
 
     await NitroHealth.deleteRecordsByTimeRange('floorsClimbed', range)
+
     try {
       const baselineToken = await NitroHealth.createChangesToken('floorsClimbed')
       await NitroHealth.saveFloorsClimbed([
@@ -238,6 +257,7 @@ describe('NitroHealth changes (native)', () => {
       ])
 
       const afterSave = await drainFloorsClimbedChanges(baselineToken)
+
       const upsert = afterSave.changes.find(
         (change) =>
           change.type === 'upsert' &&
@@ -248,7 +268,9 @@ describe('NitroHealth changes (native)', () => {
               sample.endDate.getTime() === interval.endDate.getTime()
           )
       )
+
       expect(upsert).toBeDefined()
+
       if (upsert === undefined || upsert.type !== 'upsert') return
 
       await NitroHealth.deleteRecordsByIds('floorsClimbed', [upsert.record])
@@ -268,18 +290,21 @@ describe('NitroHealth changes (native)', () => {
       { accessType: 'read' as const, dataType: 'hydration' as const },
       { accessType: 'write' as const, dataType: 'hydration' as const },
     ]
+
     await requireVerifiedPermissions(permissions)
 
     const range = {
       startDate: new Date('2003-06-04T00:00:00.000Z'),
       endDate: new Date('2003-06-05T00:00:00.000Z'),
     }
+
     const interval = {
       startDate: new Date('2003-06-04T09:00:00.000Z'),
       endDate: new Date('2003-06-04T09:30:00.000Z'),
     }
 
     await NitroHealth.deleteRecordsByTimeRange('hydration', range)
+
     try {
       const baselineToken = await NitroHealth.createChangesToken('hydration')
       await NitroHealth.saveHydration([
@@ -291,12 +316,15 @@ describe('NitroHealth changes (native)', () => {
       ])
 
       const afterSave = await drainHydrationChanges(baselineToken)
+
       const upsert = afterSave.changes.find(
         (change) =>
           change.type === 'upsert' &&
           change.samples.some((sample) => Math.abs(sample.milliliters - 425.5) < 0.001)
       )
+
       expect(upsert).toBeDefined()
+
       if (upsert === undefined || upsert.type !== 'upsert') return
 
       await NitroHealth.deleteRecordsByIds('hydration', [upsert.record])

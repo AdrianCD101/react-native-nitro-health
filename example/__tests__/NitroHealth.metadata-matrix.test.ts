@@ -89,11 +89,17 @@ type WriteMatrix = {
 }
 
 const recordId = 'metadata-record'
+
 const startDate = new Date('2026-01-01T09:00:00.000Z')
+
 const endDate = new Date('2026-01-01T09:30:00.000Z')
+
 const startTimeMs = startDate.getTime()
+
 const endTimeMs = endDate.getTime()
+
 const query = { startDate, endDate }
+
 const sampleMetadata = nativeRecordMetadata(
   recordId,
   'com.example.metadata',
@@ -182,6 +188,7 @@ const readMatrix = {
   steps: {
     async read() {
       mockNitroHealth.readSteps.mockResolvedValue({ samples: [nativeSamples.steps] })
+
       return (await NitroHealth.readSteps(query)).samples[0]!
     },
     change: nativeUpsert('stepSamples', [nativeSamples.steps]),
@@ -189,6 +196,7 @@ const readMatrix = {
   heartRate: {
     async read() {
       mockNitroHealth.readHeartRate.mockResolvedValue({ samples: [nativeSamples.heartRate] })
+
       return (await NitroHealth.readHeartRate(query)).samples[0]!
     },
     change: nativeUpsert('heartRateSamples', [nativeSamples.heartRate]),
@@ -198,6 +206,7 @@ const readMatrix = {
       mockNitroHealth.readBloodPressure.mockResolvedValue({
         samples: [nativeSamples.bloodPressure],
       })
+
       return (await NitroHealth.readBloodPressure(query)).samples[0]!
     },
     change: nativeUpsert('bloodPressureSamples', [nativeSamples.bloodPressure]),
@@ -205,6 +214,7 @@ const readMatrix = {
   bloodGlucose: {
     async read() {
       mockNitroHealth.readBloodGlucose.mockResolvedValue({ samples: [nativeSamples.bloodGlucose] })
+
       return (await NitroHealth.readBloodGlucose(query)).samples[0]!
     },
     change: nativeUpsert('bloodGlucoseSamples', [nativeSamples.bloodGlucose]),
@@ -214,6 +224,7 @@ const readMatrix = {
       mockNitroHealth.readBodyTemperature.mockResolvedValue({
         samples: [nativeSamples.bodyTemperature],
       })
+
       return (await NitroHealth.readBodyTemperature(query)).samples[0]!
     },
     change: nativeUpsert('bodyTemperatureSamples', [nativeSamples.bodyTemperature]),
@@ -223,6 +234,7 @@ const readMatrix = {
       mockNitroHealth.readRespiratoryRate.mockResolvedValue({
         samples: [nativeSamples.respiratoryRate],
       })
+
       return (await NitroHealth.readRespiratoryRate(query)).samples[0]!
     },
     change: nativeUpsert('respiratoryRateSamples', [nativeSamples.respiratoryRate]),
@@ -230,6 +242,7 @@ const readMatrix = {
   bodyFat: {
     async read() {
       mockNitroHealth.readBodyFat.mockResolvedValue({ samples: [nativeSamples.bodyFat] })
+
       return (await NitroHealth.readBodyFat(query)).samples[0]!
     },
     change: nativeUpsert('bodyFatSamples', [nativeSamples.bodyFat]),
@@ -237,6 +250,7 @@ const readMatrix = {
   leanBodyMass: {
     async read() {
       mockNitroHealth.readLeanBodyMass.mockResolvedValue({ samples: [nativeSamples.leanBodyMass] })
+
       return (await NitroHealth.readLeanBodyMass(query)).samples[0]!
     },
     change: nativeUpsert('leanBodyMassSamples', [nativeSamples.leanBodyMass]),
@@ -246,6 +260,7 @@ const readMatrix = {
       mockNitroHealth.readBasalBodyTemperature.mockResolvedValue({
         samples: [nativeSamples.basalBodyTemperature],
       })
+
       return (await NitroHealth.readBasalBodyTemperature(query)).samples[0]!
     },
     change: nativeUpsert('basalBodyTemperatureSamples', [nativeSamples.basalBodyTemperature]),
@@ -255,6 +270,7 @@ const readMatrix = {
       mockNitroHealth.readRestingHeartRate.mockResolvedValue({
         samples: [nativeSamples.restingHeartRate],
       })
+
       return (await NitroHealth.readRestingHeartRate(query)).samples[0]!
     },
     change: nativeUpsert('restingHeartRateSamples', [nativeSamples.restingHeartRate]),
@@ -264,6 +280,7 @@ const readMatrix = {
       mockNitroHealth.readHeartRateVariability.mockResolvedValue({
         samples: [nativeSamples.heartRateVariability],
       })
+
       return (await NitroHealth.readHeartRateVariability(query)).samples[0]!
     },
     change: nativeUpsert('heartRateVariabilitySamples', [nativeSamples.heartRateVariability]),
@@ -271,6 +288,7 @@ const readMatrix = {
   distance: {
     async read() {
       mockNitroHealth.readDistance.mockResolvedValue({ samples: [nativeSamples.distance] })
+
       return (await NitroHealth.readDistance(query)).samples[0]!
     },
     change: nativeUpsert('distanceSamples', [nativeSamples.distance]),
@@ -280,6 +298,7 @@ const readMatrix = {
       mockNitroHealth.readActiveEnergyBurned.mockResolvedValue({
         samples: [nativeSamples.activeEnergyBurned],
       })
+
       return (await NitroHealth.readActiveEnergyBurned(query)).samples[0]!
     },
     change: nativeUpsert('activeEnergyBurnedSamples', [nativeSamples.activeEnergyBurned]),
@@ -287,6 +306,7 @@ const readMatrix = {
   hydration: {
     async read() {
       mockNitroHealth.readHydration.mockResolvedValue({ samples: [nativeSamples.hydration] })
+
       return (await NitroHealth.readHydration(query)).samples[0]!
     },
     change: nativeUpsert('hydrationSamples', [nativeSamples.hydration]),
@@ -296,6 +316,7 @@ const readMatrix = {
       mockNitroHealth.readFloorsClimbed.mockResolvedValue({
         samples: [nativeSamples.floorsClimbed],
       })
+
       return (await NitroHealth.readFloorsClimbed(query)).samples[0]!
     },
     change: nativeUpsert('floorsClimbedSamples', [nativeSamples.floorsClimbed]),
@@ -305,6 +326,7 @@ const readMatrix = {
       mockNitroHealth.readOxygenSaturation.mockResolvedValue({
         samples: [nativeSamples.oxygenSaturation],
       })
+
       return (await NitroHealth.readOxygenSaturation(query)).samples[0]!
     },
     change: nativeUpsert('oxygenSaturationSamples', [nativeSamples.oxygenSaturation]),
@@ -312,6 +334,7 @@ const readMatrix = {
   height: {
     async read() {
       mockNitroHealth.readHeight.mockResolvedValue({ samples: [nativeSamples.height] })
+
       return (await NitroHealth.readHeight(query)).samples[0]!
     },
     change: nativeUpsert('heightSamples', [nativeSamples.height]),
@@ -319,6 +342,7 @@ const readMatrix = {
   vo2Max: {
     async read() {
       mockNitroHealth.readVo2Max.mockResolvedValue({ samples: [nativeSamples.vo2Max] })
+
       return (await NitroHealth.readVo2Max(query)).samples[0]!
     },
     change: nativeUpsert('vo2MaxSamples', [nativeSamples.vo2Max]),
@@ -326,6 +350,7 @@ const readMatrix = {
   sleep: {
     async read() {
       mockNitroHealth.readSleepSamples.mockResolvedValue({ samples: [nativeSamples.sleep] })
+
       return (await NitroHealth.readSleepSamples(query)).samples[0]!
     },
     change: nativeUpsert('sleepSamples', [nativeSamples.sleep]),
@@ -333,6 +358,7 @@ const readMatrix = {
   bodyMass: {
     async read() {
       mockNitroHealth.readBodyMass.mockResolvedValue({ samples: [nativeSamples.bodyMass] })
+
       return (await NitroHealth.readBodyMass(query)).samples[0]!
     },
     change: nativeUpsert('bodyMassSamples', [nativeSamples.bodyMass]),
@@ -340,6 +366,7 @@ const readMatrix = {
   workout: {
     async read() {
       mockNitroHealth.readWorkouts.mockResolvedValue({ samples: [nativeSamples.workout] })
+
       return (await NitroHealth.readWorkouts(query)).samples[0]!
     },
     change: nativeUpsert('workoutSamples', [nativeSamples.workout]),
@@ -347,6 +374,7 @@ const readMatrix = {
   nutrition: {
     async read() {
       mockNitroHealth.readNutrition.mockResolvedValue({ samples: [nativeSamples.nutrition] })
+
       return (await NitroHealth.readNutrition(query)).samples[0]!
     },
     change: nativeUpsert('nutritionSamples', [nativeSamples.nutrition]),
@@ -354,28 +382,33 @@ const readMatrix = {
 } satisfies ReadMatrix
 
 const sync = { id: 'metadata-sync-id', version: 4 } as const
+
 const device = {
   type: 'smart-display',
   manufacturer: 'Example',
   model: 'Metadata Sensor',
 } as const
+
 const publicWriteMetadata = {
   device,
   recordingMethod: 'automatically-recorded',
   sync,
   timeZone: 'America/New_York',
 } as const
+
 const expectedNativeProvenance = {
   deviceType: 'smartDisplay',
   deviceManufacturer: 'Example',
   deviceModel: 'Metadata Sensor',
   recordingMethod: 'automaticallyRecorded',
 } satisfies NativeHealthWriteProvenance
+
 const expectedNativeWriteMetadata = {
   provenance: expectedNativeProvenance,
   sync,
   timeZone: 'America/New_York',
 } satisfies NativeHealthWriteMetadata
+
 const expectedSampleMetadata = {
   identity: { kind: 'record', id: recordId },
   origin: { identifier: 'com.example.metadata', displayName: 'Metadata Source' },
@@ -525,6 +558,7 @@ const writeMatrix = {
 const readCases = Object.entries(readMatrix) as Array<
   { [K in HealthDataType]: [K, (typeof readMatrix)[K]] }[HealthDataType]
 >
+
 const writeCases = Object.entries(writeMatrix) as Array<
   { [K in WritableHealthDataType]: [K, (typeof writeMatrix)[K]] }[WritableHealthDataType]
 >
@@ -550,10 +584,12 @@ describe('NitroHealth scalar metadata matrices', () => {
 
       const changesResult = await NitroHealth.getChanges(dataType, 'current-token')
       expect(changesResult.tokenExpired).toBe(false)
+
       if (changesResult.tokenExpired) throw new Error('Expected a usable changes result')
 
       const change = changesResult.changes[0]
       expect(change?.type).toBe('upsert')
+
       if (change?.type !== 'upsert') throw new Error('Expected an upsert change')
       expect(change.samples).toEqual([readSample])
     }

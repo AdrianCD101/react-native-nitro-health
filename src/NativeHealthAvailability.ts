@@ -1,4 +1,5 @@
 export type NativeHealthAvailabilityStatus = 'available' | 'unavailable'
+
 export type NativeHealthAvailabilityReason =
   | 'notSupported'
   | 'serviceUnavailable'

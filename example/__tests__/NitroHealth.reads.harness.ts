@@ -13,6 +13,7 @@ function assertSampleIdentityAndOrigin(sample: HealthSample): void {
   expect(['record', 'record-child']).toContain(sample.identity.kind)
   expect(typeof sample.identity.id).toBe('string')
   expect(sample.identity.id.length).toBeGreaterThan(0)
+
   if (sample.identity.kind === 'record-child') {
     expect(sample.identity.record.kind).toBe('record')
     expect(typeof sample.identity.record.id).toBe('string')
@@ -48,6 +49,7 @@ function assertSampleIdentityAndOrigin(sample: HealthSample): void {
 
 function assertMetric(metric: HealthMetricValue): void {
   expect(['available', 'not-reported', 'unsupported']).toContain(metric.status)
+
   if (metric.status === 'available') {
     expect(typeof metric.value).toBe('number')
     expect(Number.isFinite(metric.value)).toBe(true)
@@ -66,6 +68,7 @@ describe('NitroHealth reads (native)', () => {
     const page = await NitroHealth.readDistance(emptyRange)
 
     expect(Array.isArray(page.samples)).toBe(true)
+
     for (const sample of page.samples) {
       assertSampleIdentityAndOrigin(sample)
       expect(typeof sample.distanceMeters).toBe('number')
@@ -89,18 +92,21 @@ describe('NitroHealth reads (native)', () => {
 
   it('reads active energy, heart rate, and body mass with identity and origin', async () => {
     const energy = await NitroHealth.readActiveEnergyBurned(emptyRange)
+
     for (const sample of energy.samples) {
       assertSampleIdentityAndOrigin(sample)
       expect(typeof sample.kilocalories).toBe('number')
     }
 
     const heartRate = await NitroHealth.readHeartRate(emptyRange)
+
     for (const sample of heartRate.samples) {
       assertSampleIdentityAndOrigin(sample)
       expect(typeof sample.bpm).toBe('number')
     }
 
     const bodyMass = await NitroHealth.readBodyMass(emptyRange)
+
     for (const sample of bodyMass.samples) {
       assertSampleIdentityAndOrigin(sample)
       expect(typeof sample.kilograms).toBe('number')
@@ -109,6 +115,7 @@ describe('NitroHealth reads (native)', () => {
 
   it('reads hydration intervals in milliliters with identity and origin', async () => {
     const page = await NitroHealth.readHydration(emptyRange)
+
     for (const sample of page.samples) {
       assertSampleIdentityAndOrigin(sample)
       expect(sample.identity.kind).toBe('record')
@@ -121,15 +128,18 @@ describe('NitroHealth reads (native)', () => {
     const page = await NitroHealth.readSleepSamples(emptyRange)
 
     expect(Array.isArray(page.samples)).toBe(true)
+
     for (const sample of page.samples) {
       assertSampleIdentityAndOrigin(sample)
       expect(sample.startDate).toBeInstanceOf(Date)
       expect(sample.endDate).toBeInstanceOf(Date)
+
       if (sample.kind === 'session-envelope') {
         expect(['reported', 'not-reported']).toContain(sample.stageData)
         expect('stage' in sample).toBe(false)
       } else {
         expect(typeof sample.stage).toBe('string')
+
         if (sample.identity.kind === 'record-child') {
           expect(sample.identity.record.id.length).toBeGreaterThan(0)
         }
@@ -141,6 +151,7 @@ describe('NitroHealth reads (native)', () => {
     const page = await NitroHealth.readWorkouts(emptyRange)
 
     expect(Array.isArray(page.samples)).toBe(true)
+
     for (const workout of page.samples) {
       assertSampleIdentityAndOrigin(workout)
       expect(workout.startDate).toBeInstanceOf(Date)
@@ -148,6 +159,7 @@ describe('NitroHealth reads (native)', () => {
       expect(typeof workout.elapsedDurationSeconds).toBe('number')
       expect(workout.elapsedDurationSeconds).toBeGreaterThanOrEqual(0)
       assertMetric(workout.activeDuration)
+
       if (workout.activity.status === 'known') {
         expect(typeof workout.activity.type).toBe('string')
         expect(['portable', 'read-only']).toContain(workout.activity.portability)
@@ -155,6 +167,7 @@ describe('NitroHealth reads (native)', () => {
       } else {
         expect(workout.activity).toEqual({ status: 'unknown' })
       }
+
       expect(['string', 'undefined']).toContain(typeof workout.title)
       expect(['string', 'undefined']).toContain(typeof workout.brandName)
       assertMetric(workout.totalDistance)
@@ -164,12 +177,14 @@ describe('NitroHealth reads (native)', () => {
 
   it('reads resting heart rate, HRV, oxygen saturation, and height with origins', async () => {
     const restingHeartRate = await NitroHealth.readRestingHeartRate(emptyRange)
+
     for (const sample of restingHeartRate.samples) {
       assertSampleIdentityAndOrigin(sample)
       expect(typeof sample.bpm).toBe('number')
     }
 
     const heartRateVariability = await NitroHealth.readHeartRateVariability(emptyRange)
+
     for (const sample of heartRateVariability.samples) {
       assertSampleIdentityAndOrigin(sample)
       expect(typeof sample.milliseconds).toBe('number')
@@ -177,6 +192,7 @@ describe('NitroHealth reads (native)', () => {
     }
 
     const oxygenSaturation = await NitroHealth.readOxygenSaturation(emptyRange)
+
     for (const sample of oxygenSaturation.samples) {
       assertSampleIdentityAndOrigin(sample)
       expect(sample.percentage).toBeGreaterThanOrEqual(0)
@@ -184,6 +200,7 @@ describe('NitroHealth reads (native)', () => {
     }
 
     const height = await NitroHealth.readHeight(emptyRange)
+
     for (const sample of height.samples) {
       assertSampleIdentityAndOrigin(sample)
       expect(typeof sample.meters).toBe('number')
@@ -192,6 +209,7 @@ describe('NitroHealth reads (native)', () => {
 
   it('reads blood pressure as one sample carrying both values under a record identity', async () => {
     const page = await NitroHealth.readBloodPressure(emptyRange)
+
     for (const sample of page.samples) {
       assertSampleIdentityAndOrigin(sample)
       expect(sample.identity.kind).toBe('record')
@@ -204,10 +222,12 @@ describe('NitroHealth reads (native)', () => {
 
   it('reads nutrition entries as one sample per eating event under a record identity', async () => {
     const page = await NitroHealth.readNutrition(emptyRange)
+
     for (const sample of page.samples) {
       assertSampleIdentityAndOrigin(sample)
       expect(sample.identity.kind).toBe('record')
       expect(sample.endDate.getTime()).toBeGreaterThanOrEqual(sample.startDate.getTime())
+
       for (const value of [
         sample.energyKilocalories,
         sample.proteinGrams,
@@ -226,6 +246,7 @@ describe('NitroHealth reads (native)', () => {
 
   it('reads blood glucose readings under a record identity with plausible mmol/L values', async () => {
     const page = await NitroHealth.readBloodGlucose(emptyRange)
+
     for (const sample of page.samples) {
       assertSampleIdentityAndOrigin(sample)
       expect(sample.identity.kind).toBe('record')
@@ -236,6 +257,7 @@ describe('NitroHealth reads (native)', () => {
 
   it('reads body temperature readings under a record identity with plausible celsius values', async () => {
     const page = await NitroHealth.readBodyTemperature(emptyRange)
+
     for (const sample of page.samples) {
       assertSampleIdentityAndOrigin(sample)
       expect(sample.identity.kind).toBe('record')
@@ -246,6 +268,7 @@ describe('NitroHealth reads (native)', () => {
 
   it('reads respiratory rate readings under a record identity with plausible values', async () => {
     const page = await NitroHealth.readRespiratoryRate(emptyRange)
+
     for (const sample of page.samples) {
       assertSampleIdentityAndOrigin(sample)
       expect(sample.identity.kind).toBe('record')
@@ -256,6 +279,7 @@ describe('NitroHealth reads (native)', () => {
 
   it('reads VO2 max readings under a record identity with plausible values', async () => {
     const page = await NitroHealth.readVo2Max(emptyRange)
+
     for (const sample of page.samples) {
       assertSampleIdentityAndOrigin(sample)
       expect(sample.identity.kind).toBe('record')
@@ -266,6 +290,7 @@ describe('NitroHealth reads (native)', () => {
 
   it('reads floors climbed intervals under a record identity with plausible values', async () => {
     const page = await NitroHealth.readFloorsClimbed(emptyRange)
+
     for (const sample of page.samples) {
       assertSampleIdentityAndOrigin(sample)
       expect(sample.identity.kind).toBe('record')
@@ -276,6 +301,7 @@ describe('NitroHealth reads (native)', () => {
 
   it('reads body fat readings under a record identity with plausible percentages', async () => {
     const page = await NitroHealth.readBodyFat(emptyRange)
+
     for (const sample of page.samples) {
       assertSampleIdentityAndOrigin(sample)
       expect(sample.identity.kind).toBe('record')
@@ -286,6 +312,7 @@ describe('NitroHealth reads (native)', () => {
 
   it('reads lean body mass readings under a record identity with plausible kilograms', async () => {
     const page = await NitroHealth.readLeanBodyMass(emptyRange)
+
     for (const sample of page.samples) {
       assertSampleIdentityAndOrigin(sample)
       expect(sample.identity.kind).toBe('record')
@@ -296,6 +323,7 @@ describe('NitroHealth reads (native)', () => {
 
   it('reads basal body temperature readings under a record identity with plausible celsius values', async () => {
     const page = await NitroHealth.readBasalBodyTemperature(emptyRange)
+
     for (const sample of page.samples) {
       assertSampleIdentityAndOrigin(sample)
       expect(sample.identity.kind).toBe('record')
@@ -336,6 +364,7 @@ describe('NitroHealth reads (native)', () => {
         collected.push(...page.samples)
         cursor = page.nextCursor
         pages += 1
+
         if (cursor !== undefined) expect(page.samples.length).toBe(2)
       } while (cursor !== undefined && pages < maxPages)
 

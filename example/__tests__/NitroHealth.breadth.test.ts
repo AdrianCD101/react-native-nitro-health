@@ -13,6 +13,7 @@ jest.mock('react-native-nitro-modules', () => ({
 import { NitroHealth } from 'react-native-nitro-health'
 
 const nativeUnknownWriteResult = { storedRecordingMethods: ['unknown' as const] }
+
 const emptyWriteMetadata = {
   provenance: {
     deviceType: undefined,
@@ -21,6 +22,7 @@ const emptyWriteMetadata = {
     recordingMethod: undefined,
   },
 }
+
 const unknownWriteResult = {
   status: 'completed' as const,
   storedRecordingMethods: ['unknown' as const],

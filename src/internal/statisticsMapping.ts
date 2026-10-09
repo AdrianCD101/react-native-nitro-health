@@ -39,6 +39,7 @@ export function makeHealthStatistics<T extends HealthStatisticsDataType>(
     if (statistics.scope === undefined) {
       throw new Error('Native distance statistics are missing scope')
     }
+
     // SAFETY: distance is the only data type whose statistics contract adds scope.
     return {
       ...result,
@@ -49,6 +50,7 @@ export function makeHealthStatistics<T extends HealthStatisticsDataType>(
   if (statistics.scope !== undefined) {
     throw new Error(`Native '${dataType}' statistics unexpectedly contain distance scope`)
   }
+
   // SAFETY: all non-distance statistics contracts are represented by the validated base result.
   return result as HealthStatisticsByDataType<T>
 }

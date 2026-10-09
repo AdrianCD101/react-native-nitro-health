@@ -18,6 +18,7 @@ describe('NitroHealth delete contract', () => {
       { kind: 'record' as const, id: 'record-1' },
       { kind: 'record' as const, id: 'record-2' },
     ]
+
     mockNitroHealth.deleteRecordsByIds.mockResolvedValue({
       status: 'completed',
       deletedCountStatus: 'known',

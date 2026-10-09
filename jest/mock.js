@@ -2,6 +2,7 @@ function createMockFunction(implementation) {
   if (typeof jest !== 'undefined' && typeof jest.fn === 'function') {
     return jest.fn(implementation)
   }
+
   return implementation || (() => undefined)
 }
 
@@ -50,6 +51,7 @@ function validatePermissions(permissions) {
   if (!Array.isArray(permissions) || permissions.length === 0) {
     return new Error('At least one health permission is required')
   }
+
   for (const [index, permission] of permissions.entries()) {
     if (
       typeof permission !== 'object' ||
@@ -60,9 +62,11 @@ function validatePermissions(permissions) {
     ) {
       return new Error(`permissions[${index}]: a supported read or write permission is required`)
     }
+
     if (permission.accessType === 'write' && permission.dataType === 'heartRateVariability') {
       return new Error(`permissions[${index}]: heartRateVariability is read-only`)
     }
+
     if (permission.accessType === 'write' && aggregateOnlyDataTypes.has(permission.dataType)) {
       return new Error(
         `permissions[${index}]: ${permission.dataType} is an aggregate-only read type`
@@ -118,6 +122,7 @@ function createProfile(profile) {
       },
     }
   }
+
   if (profile === 'unavailable') {
     return {
       availability: { status: 'unavailable', reason: 'not-supported' },
@@ -131,6 +136,7 @@ function createProfile(profile) {
       },
     }
   }
+
   return {
     availability: { status: 'available' },
     capabilities: {
@@ -151,20 +157,27 @@ function createNitroHealthMock(options = {}) {
   const identityCounters = Object.fromEntries(writableDataTypes.map((dataType) => [dataType, 0]))
   let mock
   const currentAvailability = () => mock.getAvailability()
+
   const unavailableAvailability = () => {
     const availability = currentAvailability()
+
     return availability.status === 'unavailable' ? availability : undefined
   }
+
   const rejectWhenUnavailable = (value) => {
     if (unavailableAvailability() !== undefined) {
       return Promise.reject(new Error('Health data is not available'))
     }
+
     return Promise.resolve(value)
   }
+
   const getPermissionStatusResult = (permissions) => {
     const validationError = validatePermissions(permissions)
+
     if (validationError !== undefined) return Promise.reject(validationError)
     const availability = unavailableAvailability()
+
     const statuses = permissions.map((permission) => ({
       permission,
       status:
@@ -175,21 +188,28 @@ function createNitroHealthMock(options = {}) {
             ? 'notDetermined'
             : 'notGranted',
     }))
+
     if (availability !== undefined) {
       return Promise.resolve({ status: 'unavailable', availability, statuses })
     }
+
     return Promise.resolve({ status: 'available', statuses })
   }
+
   const storedRecordingMethod = (recordingMethod) => {
     if (profileName === 'observer') {
       return recordingMethod === 'manual' ? 'manual' : 'unknown'
     }
+
     return recordingMethod || 'unknown'
   }
+
   const storedDeviceForInput = (device) => {
     if (device === undefined || Object.keys(device).length === 0) return undefined
+
     if (profileName !== 'observer') {
       const projected = { ...device, type: device.type || 'unknown' }
+
       return projected.type === 'unknown' &&
         projected.manufacturer === undefined &&
         projected.model === undefined
@@ -198,13 +218,18 @@ function createNitroHealthMock(options = {}) {
     }
 
     const projected = {}
+
     if (device.manufacturer !== undefined) projected.manufacturer = device.manufacturer
+
     if (device.model !== undefined) projected.model = device.model
+
     return Object.keys(projected).length === 0 ? undefined : projected
   }
+
   const nextIdentity = (dataType) => {
     identityCounters[dataType] += 1
     const recordId = `mock-${dataType}-${identityCounters[dataType]}`
+
     if (profileName === 'polling' && dataType === 'heartRate') {
       return {
         kind: 'record-child',
@@ -212,8 +237,10 @@ function createNitroHealthMock(options = {}) {
         record: { kind: 'record', id: recordId },
       }
     }
+
     return { kind: 'record', id: recordId }
   }
+
   const makeStoredSample = (dataType, recordingMethod, device, fields) => {
     const storedSample = {
       identity: nextIdentity(dataType),
@@ -221,19 +248,26 @@ function createNitroHealthMock(options = {}) {
       recordingMethod,
       ...fields,
     }
+
     if (device !== undefined) storedSample.device = device
+
     return storedSample
   }
+
   const defaultStoredFields = (sample) => {
     const fields = { ...sample }
     delete fields.device
     delete fields.recordingMethod
     delete fields.sync
+
     return fields
   }
+
   const saveSamples = (dataType, samples, makeFields = defaultStoredFields, extraResult = {}) => {
     const validationError = validateNonEmpty(samples, 'At least one sample is required')
+
     if (validationError !== undefined) return Promise.reject(validationError)
+
     if (unavailableAvailability() !== undefined) {
       return Promise.reject(new Error('Health data is not available'))
     }
@@ -241,6 +275,7 @@ function createNitroHealthMock(options = {}) {
     const storedRecordingMethods = samples.map((sample) =>
       storedRecordingMethod(sample.recordingMethod)
     )
+
     const publicSamples = samples.map((sample, index) =>
       makeStoredSample(
         dataType,
@@ -249,42 +284,57 @@ function createNitroHealthMock(options = {}) {
         makeFields(sample, storedRecordingMethods[index])
       )
     )
+
     storedSamples[dataType].push(...publicSamples)
+
     return Promise.resolve({ status: 'completed', storedRecordingMethods, ...extraResult })
   }
+
   const sampleBounds = (sample) => {
     if (sample.date instanceof Date) {
       const time = sample.date.getTime()
+
       return { start: time, end: time, instant: true }
     }
+
     const start = sample.startDate instanceof Date ? sample.startDate.getTime() : undefined
     const end = sample.endDate instanceof Date ? sample.endDate.getTime() : start
+
     return { start, end, instant: start === end }
   }
+
   // Mirrors the real wrapper's origins contract: 'own-app' matches the mock's own
   // origin (every stored sample is an own-app write), an identifier list matches by
   // exact origin identifier, an empty list throws, and unknown identifiers yield
   // empty results rather than an error.
   const matchesOrigins = (sample, origins) => {
     if (origins === undefined) return true
+
     if (origins === 'own-app') return sample.origin.identifier === mockOrigin.identifier
+
     if (Array.isArray(origins)) {
       if (origins.length === 0) {
         throw new Error('origins must contain at least one identifier')
       }
+
       return origins.includes(sample.origin.identifier)
     }
+
     throw new Error("origins must be 'own-app' or an array of origin identifiers")
   }
+
   const makeSamplePage = (dataType, query = {}) => {
     const queryStart = query.startDate instanceof Date ? query.startDate.getTime() : -Infinity
     const queryEnd = query.endDate instanceof Date ? query.endDate.getTime() : Infinity
     const ascending = query.ascending !== false
+
     const filtered = storedSamples[dataType]
       .filter((sample) => matchesOrigins(sample, query.origins))
       .filter((sample) => {
         const { start, end, instant } = sampleBounds(sample)
+
         if (start === undefined || end === undefined) return true
+
         return instant
           ? start >= queryStart && start < queryEnd
           : end > queryStart && start < queryEnd
@@ -292,10 +342,13 @@ function createNitroHealthMock(options = {}) {
       .sort((left, right) => {
         const leftStart = sampleBounds(left).start || 0
         const rightStart = sampleBounds(right).start || 0
+
         return ascending ? leftStart - rightStart : rightStart - leftStart
       })
+
     const cursorMatch =
       typeof query.cursor === 'string' ? /^mock:(\d+)$/.exec(query.cursor) : undefined
+
     const offset = cursorMatch === null || cursorMatch === undefined ? 0 : Number(cursorMatch[1])
     const limit = Number.isInteger(query.limit) && query.limit > 0 ? query.limit : filtered.length
     const samples = filtered.slice(offset, offset + limit)
@@ -305,11 +358,15 @@ function createNitroHealthMock(options = {}) {
       ? { samples, nextCursor: `mock:${nextOffset}` }
       : { samples }
   }
+
   const readSamples = (dataType, query) => rejectWhenUnavailable(makeSamplePage(dataType, query))
+
   const makeBodyMassFields = (sample) => {
     const { date, kilograms } = sample
+
     return { startDate: date, endDate: date, kilograms }
   }
+
   mock = {
     ownOrigin: { ...mockOrigin },
     getAvailability: createMockFunction(() => profile.availability),
@@ -318,6 +375,7 @@ function createNitroHealthMock(options = {}) {
     ),
     getCapabilities: createMockFunction(() => {
       const availability = unavailableAvailability()
+
       return Promise.resolve(
         availability === undefined
           ? { status: 'available', ...profile.capabilities }
@@ -328,27 +386,34 @@ function createNitroHealthMock(options = {}) {
       if (access !== 'background-read' && access !== 'history-read') {
         return Promise.reject(new Error('access must be background-read or history-read'))
       }
+
       const availability = unavailableAvailability()
+
       if (availability !== undefined) {
         return Promise.resolve({ access, status: 'unavailable', availability })
       }
+
       const status =
         access === 'background-read'
           ? profile.capabilities.backgroundChanges.backgroundRead
           : profile.capabilities.historyRead
+
       return Promise.resolve({ access, status })
     }),
     managePermissions: createMockFunction(() => {
       const availability = unavailableAvailability()
+
       if (availability !== undefined) {
         return Promise.resolve({ status: 'unavailable', availability })
       }
+
       if (profileName === 'observer') {
         return Promise.resolve({
           status: 'user-action-required',
           action: { kind: 'manual', destination: 'health-app-permissions' },
         })
       }
+
       return Promise.resolve({
         status: 'user-action-required',
         action: { kind: 'opened', destination: 'health-connect-settings' },
@@ -356,27 +421,35 @@ function createNitroHealthMock(options = {}) {
     }),
     revokeAllPermissions: createMockFunction(() => {
       const availability = unavailableAvailability()
+
       if (availability !== undefined) {
         return Promise.resolve({ status: 'unavailable', availability })
       }
+
       if (profileName === 'observer') {
         return Promise.resolve({
           status: 'user-action-required',
           action: { kind: 'manual', destination: 'health-app-permissions' },
         })
       }
+
       return Promise.resolve({ status: 'completed' })
     }),
     configureBackgroundChanges: createMockFunction((configuration) => {
       if (!Array.isArray(configuration?.dataTypes) || configuration.dataTypes.length === 0) {
         return Promise.reject(new Error('At least one background change data type is required'))
       }
+
       const validationError = validateDataTypes(configuration.dataTypes, 'configuration.dataTypes')
+
       if (validationError !== undefined) return Promise.reject(validationError)
+
       if (unavailableAvailability() !== undefined) return Promise.resolve({ status: 'unavailable' })
+
       if (profileName === 'observer') {
         return Promise.resolve({ status: 'completed', mode: 'observer' })
       }
+
       return Promise.resolve({
         status: 'user-action-required',
         mode: 'polling',
@@ -390,12 +463,17 @@ function createNitroHealthMock(options = {}) {
           new Error('dataTypes must be omitted or contain at least one health data type')
         )
       }
+
       const validationError = dataTypes && validateDataTypes(dataTypes, 'dataTypes')
+
       if (validationError !== undefined) return Promise.reject(validationError)
+
       if (unavailableAvailability() !== undefined) return Promise.resolve({ status: 'unavailable' })
+
       if (profileName === 'observer') {
         return Promise.resolve({ status: 'completed', mode: 'observer' })
       }
+
       return Promise.resolve({
         status: 'user-action-required',
         mode: 'polling',
@@ -407,11 +485,15 @@ function createNitroHealthMock(options = {}) {
       if (typeof listener !== 'function') {
         throw new Error('A background change listener function is required')
       }
+
       const availability = unavailableAvailability()
+
       if (availability !== undefined) {
         return { mode: 'unavailable', availability }
       }
+
       if (profileName !== 'observer') return { mode: 'polling', scheduling: 'app-owned' }
+
       return {
         mode: 'observer',
         subscription: { remove: createMockFunction(() => undefined) },
@@ -419,12 +501,16 @@ function createNitroHealthMock(options = {}) {
     }),
     createChangesToken: createMockFunction((dataType) => {
       const validationError = validateChangeTrackedDataType(dataType)
+
       if (validationError !== undefined) return Promise.reject(validationError)
+
       return rejectWhenUnavailable('mock-changes-token')
     }),
     getChanges: createMockFunction((dataType) => {
       const validationError = validateChangeTrackedDataType(dataType)
+
       if (validationError !== undefined) return Promise.reject(validationError)
+
       return rejectWhenUnavailable({
         tokenExpired: false,
         changes: [],
@@ -469,6 +555,7 @@ function createNitroHealthMock(options = {}) {
           delete fields.recordingMethod
           delete fields.sync
           delete fields.scope
+
           return {
             ...fields,
             scope: profileName === 'observer' ? 'walking-running' : 'activity-unspecified',
@@ -501,7 +588,9 @@ function createNitroHealthMock(options = {}) {
     saveVo2Max: createMockFunction((samples) => saveSamples('vo2Max', samples)),
     saveSleepSessions: createMockFunction((sessions) => {
       const validationError = validateNonEmpty(sessions, 'At least one sleep session is required')
+
       if (validationError !== undefined) return Promise.reject(validationError)
+
       return saveSamples('sleep', sessions, (session) => {
         const envelope = {
           kind: 'session-envelope',
@@ -512,7 +601,9 @@ function createNitroHealthMock(options = {}) {
               ? 'reported'
               : 'not-reported',
         }
+
         if (session.metadata !== undefined) envelope.metadata = session.metadata
+
         return envelope
       })
     }),
@@ -532,10 +623,12 @@ function createNitroHealthMock(options = {}) {
           totalDistance: { status: 'not-reported' },
           totalActiveEnergyBurned: { status: 'not-reported' },
         }
+
         if (sample.displayName !== undefined) {
           if (profileName === 'observer') storedWorkout.brandName = sample.displayName
           else storedWorkout.title = sample.displayName
         }
+
         return storedWorkout
       })
     ),
@@ -544,6 +637,7 @@ function createNitroHealthMock(options = {}) {
       if (records.length === 0) {
         return Promise.reject(new Error('At least one record identity is required'))
       }
+
       return rejectWhenUnavailable({
         status: 'completed',
         requestedCount: records.length,
@@ -556,7 +650,9 @@ function createNitroHealthMock(options = {}) {
     getPermissionStatuses: createMockFunction(getPermissionStatusResult),
     requestAuthorization: createMockFunction(async (permissions) => {
       const result = await getPermissionStatusResult(permissions)
+
       if (result.status === 'unavailable') return result
+
       return { status: 'completed', statuses: result.statuses }
     }),
   }
