@@ -181,7 +181,7 @@ bun run harness:ios
 
 Harness does not build the app. Build and install it before local runs; CI supplies the built app through the Harness action. Rebuild after native or generated changes before rerunning it.
 
-The Harness config and workflows mirror `react-native-nitro-file-manager`; keep the two repositories in sync. This repository differs only in its app names, `permissions: true` with the HealthKit authorization setup, the 30-second test timeout, and the `patches/**` workflow trigger. Android uses `Pixel_10` (API 37, `pixel_10` profile), and iOS uses `iPhone 17 Pro` on iOS 27.0. Android is the default runner. Both platforms have a five-minute bridge timeout. Android snapshots are enabled in CI only.
+The Harness config and workflows mirror `react-native-nitro-file-manager`; keep the two repositories in sync. This repository differs only in its app names, `permissions: true` with the HealthKit authorization setup, the 30-second test timeout, the `patches/**` workflow trigger, and the iOS workflow's `DEVICE_MODEL`. Android uses `Pixel_10` (API 37, `pixel_10` profile), and iOS uses `iPhone 17 Pro` on iOS 27.0. Android is the default runner. Both platforms have a five-minute bridge timeout. Android snapshots are enabled in CI only.
 
 Override local device names when needed:
 
@@ -242,7 +242,7 @@ After the flow completes, every write permission reports `granted` and every rea
 
 The iOS Harness run intentionally does not test denied HealthKit reads or writes. HealthKit conceals read denial, making it observable only as empty data, and denied writes require a separate mutually exclusive authorization state. Denied/unavailable and callback-error branches belong in focused native tests or a future dedicated denied run rather than the positive integration suite. The shared authorization setup checks `Platform.OS` and requests HealthKit access only on iOS; there is no separate profile environment variable.
 
-CI runs in separate `.github/workflows/harness-android.yml` and `.github/workflows/harness-ios.yml` workflows. Android pins API 36 with the Pixel 7 profile and builds the x86_64 APK. iOS runs on GitHub's `xcode-27` preview image, which provides Xcode 27.0 and the iOS 27.0 simulator runtime for the config defaults (iPhone 17 Pro on iOS 27.0). Move to a GA macOS label once one ships Xcode 27.
+CI runs in separate `.github/workflows/harness-android.yml` and `.github/workflows/harness-ios.yml` workflows. Android pins API 36 with the Pixel 7 profile and builds the x86_64 APK. iOS runs on GitHub's `xcode-27` preview image, which provides Xcode 27.0 and the iOS 27.0 simulator runtime. That image has no iPhone 17 Pro simulator, so the iOS workflow sets `DEVICE_MODEL` to `iPhone 17`. Move to a GA macOS label once one ships Xcode 27.
 
 Harness filters platform-specific files by the `*.ios.harness.ts` and `*.android.harness.ts` suffixes. Since Harness 1.5, filtered files are left out of the run rather than reported as skipped. Android runs 11 files and leaves out the iOS observer file. iOS runs 10 files and leaves out the two Android-only permission/prerequisite files.
 
