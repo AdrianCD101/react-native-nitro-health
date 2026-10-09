@@ -179,13 +179,15 @@ bun run harness:android
 bun run harness:ios
 ```
 
-Harness does not build or install the app. Rebuild after native or generated changes before rerunning it.
+Harness does not build the app. Build and install it before local runs; CI supplies the built app through the Harness action. Rebuild after native or generated changes before rerunning it.
+
+The Harness config and workflows mirror `react-native-nitro-file-manager`; keep the two repositories in sync. This repository differs only in its app names, `permissions: true` with the HealthKit authorization setup, the 30-second test timeout, and the `patches/**` workflow trigger. Android uses `Pixel_10` (API 37, `pixel_10` profile), and iOS uses `iPhone 17 Pro` on iOS 27.0. Android is the default runner. Both platforms have a five-minute bridge timeout. Android snapshots are enabled in CI only.
 
 Override local device names when needed:
 
 ```sh
-RN_HARNESS_IOS_SIMULATOR='iPhone 17 Pro' RN_HARNESS_IOS_RUNTIME='26.0' bun run harness:ios
-RN_HARNESS_ANDROID_AVD='Pixel_7_API_35' RN_HARNESS_ANDROID_API_LEVEL='35' RN_HARNESS_ANDROID_PROFILE='pixel_7' bun run harness:android
+DEVICE_MODEL='iPhone 17 Pro' IOS_VERSION='27.0' bun run harness:ios
+AVD_NAME='Pixel_7_API_36' DEVICE_API_LEVEL='36' DEVICE_PROFILE='pixel_7' bun run harness:android
 ```
 
 On Android, Harness grants every supported dangerous permission declared by the example manifest before app startup. Its prerequisite test fails unless all positive-test permissions are granted. Positive integration tests must throw when prerequisites are unmet and must never return early as a passing result.
@@ -196,13 +198,14 @@ The iOS Harness run enables a patched XCTest permission watchdog. Before each te
 
 HealthKit authorization is not a normal simulator privacy service. `xcrun simctl privacy` cannot grant or reset it, and turning access off in the Health app leaves authorization determined. A later call to `requestAuthorization()` therefore does not necessarily present the initial Health access sheet. The upstream Harness permission watchdog also searches SpringBoard for ordinary permission alerts, while the HealthKit sheet and its controls can appear in the target application's accessibility tree.
 
-This repository patches `@react-native-harness/platform-apple@1.4.1` through Bun's `patchedDependencies`. The patch is stored at `patches/@react-native-harness%2Fplatform-apple@1.4.1.patch` and does the following:
+This repository patches `@react-native-harness/platform-apple@1.5.0` through Bun's `patchedDependencies`. The patch is stored at `patches/@react-native-harness%2Fplatform-apple@1.5.0.patch` and does the following:
 
 1. Calls `resetAuthorizationStatus(for: .health)` for the target application when the XCTest agent starts. This makes HealthKit authorization undetermined again, including after permissions were disabled in the Health app.
 2. Searches both the target application and SpringBoard accessibility trees.
-3. Selects `Turn On All` (or `Allow All`) and then confirms `Allow`.
+3. Selects every requested type and confirms the sheet. On iOS 26 and earlier it selects `Turn On All` (or `Allow All`) and then taps `Allow`. On iOS 27 it selects `Select All N Topics`, scrolls to `Continue`, chooses `All Recorded Data and Future Data`, and then taps `Allow` (see "iOS 27 Authorization Sheet" below).
+4. Enables Reduce Motion after simulator preparation and restores its previous value during cleanup, before shutting down a simulator started by Harness.
 
-Harness 1.4.1 provides graceful XCTest shutdown and cancels timers left by completed `Promise.race` branches. Do not restore the former local TypeScript/JavaScript shutdown patch; that fix is now upstream.
+Harness 1.5.0 includes the upstream graceful XCTest shutdown and timer cleanup fixes, plus owned-process cleanup for cancelled runs. Keep the Harness packages and GitHub Actions refs on the same release.
 
 The JavaScript setup is `example/__tests__/support/harnessAuthorizationSetup.ts`; its shared permission list is `example/healthPermissions.ts`. `permissions: true` in `example/rn-harness.config.mjs` starts the patched XCTest agent. The patch applies during `bun install`; do not edit `node_modules` without regenerating the Bun patch.
 
@@ -220,11 +223,30 @@ bun run harness:ios
 
 The automation currently depends on the English accessibility labels listed in the patch. If authorization setup times out after an iOS update, inspect the XCTest agent log and the target-app/SpringBoard accessibility trees before adding labels. Do not work around the failure with conditional passing returns, `--forceExit`, or manual pre-grant instructions.
 
-The iOS Harness run intentionally does not test denied HealthKit reads or writes. HealthKit conceals read denial, making it observable only as empty data, and denied writes require a separate mutually exclusive authorization state. Denied/unavailable and callback-error branches belong in focused native tests or a future dedicated denied run rather than the positive integration suite. Platform-specific setup is derived directly from `--harnessRunner`; there is no separate profile environment variable.
+##### iOS 27 Authorization Sheet
 
-Harness 1.4 filters platform-specific files by the `*.ios.harness.ts` and `*.android.harness.ts` suffixes. The opposite platform receives one skipped placeholder per filtered file, so skipped file counts remain expected even though no `it.skip` tests exist. Android currently reports the iOS observer file as skipped; iOS reports the two Android-only permission/prerequisite files as skipped.
+iOS 27 splits the Health access sheet into two pages, so the iOS 26 labels no longer match. Observed on the iOS 27.0 simulator (24A434) with Xcode 27.0 (27A266a):
 
-The GitHub Actions Harness workflow runs both the Android and iOS runtime validation jobs for relevant pull requests and `main` pushes, and both can also be started through workflow dispatch.
+| Step                             | iOS 26 and earlier             | iOS 27                                                                                                                                                                  |
+| -------------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Select every requested type      | `Turn On All` (or `Allow All`) | `Select All N Topics`, where N counts the requested types. Its identifier is `UIA.Health.AuthSheet.AllCategoryButton`.                                                  |
+| Leave the type list              | `Allow`                        | `Continue`, at the end of the scrolling list beside `Don't Allow`. It is off screen until the list scrolls.                                                             |
+| Choose how much history to share | No such step                   | A second page asks "How much data would you like to share with "NitroHealthExample"?" and offers `Past 30 Days and Future Data` or `All Recorded Data and Future Data`. |
+| Confirm                          | No separate step               | `Allow` on the second page. It stays disabled until a history option is chosen.                                                                                         |
+
+After the select-all tap, the same element reads `Deselect N Topics` and keeps its identifier. Match the `Select All` label rather than the identifier, or the next watchdog pass clears the selection.
+
+Harness chooses `All Recorded Data and Future Data` so that tests reading older samples see them. According to the sheet's text, `Past 30 Days and Future Data` shares only the last 30 days. Reads of older samples would then return no data, indistinguishable from an empty store.
+
+After the flow completes, every write permission reports `granted` and every read permission reports `unverifiable`, as on earlier iOS versions.
+
+The iOS Harness run intentionally does not test denied HealthKit reads or writes. HealthKit conceals read denial, making it observable only as empty data, and denied writes require a separate mutually exclusive authorization state. Denied/unavailable and callback-error branches belong in focused native tests or a future dedicated denied run rather than the positive integration suite. The shared authorization setup checks `Platform.OS` and requests HealthKit access only on iOS; there is no separate profile environment variable.
+
+CI runs in separate `.github/workflows/harness-android.yml` and `.github/workflows/harness-ios.yml` workflows. Android pins API 36 with the Pixel 7 profile and builds the x86_64 APK. iOS runs on GitHub's `xcode-27` preview image, which provides Xcode 27.0 and the iOS 27.0 simulator runtime for the config defaults (iPhone 17 Pro on iOS 27.0). Move to a GA macOS label once one ships Xcode 27.
+
+Harness filters platform-specific files by the `*.ios.harness.ts` and `*.android.harness.ts` suffixes. Since Harness 1.5, filtered files are left out of the run rather than reported as skipped. Android runs 11 files and leaves out the iOS observer file. iOS runs 10 files and leaves out the two Android-only permission/prerequisite files.
+
+Both Harness workflows run for relevant pull requests and `main` pushes, and both can also be started through workflow dispatch.
 
 ## Manual Device Cases
 

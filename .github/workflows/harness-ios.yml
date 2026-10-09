@@ -1,0 +1,83 @@
+name: Run React Native Harness iOS
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/harness-ios.yml'
+      - 'example/**'
+      - 'android/**'
+      - 'ios/**'
+      - 'cpp/**'
+      - 'src/**'
+      - 'nitrogen/**'
+      - '*.podspec'
+      - 'package.json'
+      - 'bun.lock'
+      - 'pnpm-lock.yaml'
+      - 'package-lock.json'
+      - 'yarn.lock'
+      - 'react-native.config.js'
+      - 'nitro.json'
+      - 'patches/**'
+  pull_request:
+    paths:
+      - '.github/workflows/harness-ios.yml'
+      - 'example/**'
+      - 'android/**'
+      - 'ios/**'
+      - 'cpp/**'
+      - 'src/**'
+      - 'nitrogen/**'
+      - '*.podspec'
+      - 'package.json'
+      - 'bun.lock'
+      - 'pnpm-lock.yaml'
+      - 'package-lock.json'
+      - 'yarn.lock'
+      - 'react-native.config.js'
+      - 'nitro.json'
+      - 'patches/**'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test iOS Harness
+    runs-on: xcode-27
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_27.0.app/Contents/Developer
+
+      - name: Install Pods
+        working-directory: example
+        run: bun run pod
+
+      - name: Build iOS app
+        working-directory: example/ios
+        run: |
+          set -o pipefail && xcodebuild             CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++             -derivedDataPath build -UseModernBuildSystem=YES             -workspace NitroHealthExample.xcworkspace             -scheme NitroHealthExample             -sdk iphonesimulator             -configuration Debug             build             CODE_SIGNING_ALLOWED=NO
+
+      - name: Run React Native Harness
+        uses: callstackincubator/react-native-harness@v1.5.0
+        with:
+          app: ios/build/Build/Products/Debug-iphonesimulator/NitroHealthExample.app
+          runner: ios
+          projectRoot: example
+          packageManager: bun

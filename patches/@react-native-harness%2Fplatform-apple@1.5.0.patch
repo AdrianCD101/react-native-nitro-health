@@ -1,5 +1,5 @@
 diff --git a/dist/instance.js b/dist/instance.js
-index 279b66906c087d9ffebad83512faad99cfb2449b..a07449ed0f884bd50782fe66931c058660e9946e 100644
+index a3591428fe6ce8c6bb1edff556f2b8d8582c1721..bc7b1acee7b8baaf88480fbab79660dff09a82e2 100644
 --- a/dist/instance.js
 +++ b/dist/instance.js
 @@ -37,6 +37,7 @@ export const getAppleSimulatorPlatformInstance = async (config, harnessConfig, i
@@ -10,7 +10,7 @@ index 279b66906c087d9ffebad83512faad99cfb2449b..a07449ed0f884bd50782fe66931c0586
      const xctestAgent = permissionsEnabled
          ? createXCTestAgentController({
              appBundleId: config.bundleId,
-@@ -75,6 +76,7 @@ export const getAppleSimulatorPlatformInstance = async (config, harnessConfig, i
+@@ -74,6 +75,7 @@ export const getAppleSimulatorPlatformInstance = async (config, harnessConfig, i
          }
          await simctl.applyHarnessJsLocationOverride(udid, config.bundleId, `localhost:${harnessConfig.metroPort}`);
          harnessJsLocationOverrideApplied = true;
@@ -18,7 +18,7 @@ index 279b66906c087d9ffebad83512faad99cfb2449b..a07449ed0f884bd50782fe66931c0586
      };
      if (xctestAgent) {
          const overlapStartup = shouldOverlapXCTestBuildAndSimulatorBoot();
-@@ -105,6 +107,9 @@ export const getAppleSimulatorPlatformInstance = async (config, harnessConfig, i
+@@ -104,6 +106,9 @@ export const getAppleSimulatorPlatformInstance = async (config, harnessConfig, i
                  if (harnessJsLocationOverrideApplied) {
                      await simctl.clearHarnessJsLocationOverride(udid, config.bundleId);
                  }
@@ -28,7 +28,7 @@ index 279b66906c087d9ffebad83512faad99cfb2449b..a07449ed0f884bd50782fe66931c0586
                  if (startedByHarness) {
                      await simctl.shutdownSimulator(udid);
                  }
-@@ -141,6 +146,9 @@ export const getAppleSimulatorPlatformInstance = async (config, harnessConfig, i
+@@ -139,6 +144,9 @@ export const getAppleSimulatorPlatformInstance = async (config, harnessConfig, i
              await xctestAgent?.dispose();
              await simctl.stopApp(udid, config.bundleId);
              await simctl.clearHarnessJsLocationOverride(udid, config.bundleId);
@@ -39,7 +39,7 @@ index 279b66906c087d9ffebad83512faad99cfb2449b..a07449ed0f884bd50782fe66931c0586
                  logger.info('Shutting down iOS simulator %s...', config.device.name);
                  await simctl.shutdownSimulator(udid);
 diff --git a/dist/xcrun/simctl.d.ts b/dist/xcrun/simctl.d.ts
-index 98c6d5b64445e1f1d2ed24b0553dc79d6d666131..3b9925e99b0786666c929a68ece17d3b35c1c421 100644
+index e5212ce23c947d6acd34a1769ee703229cff6a04..00f1fb8d5aa6a9f99f4761f2ed68d86d5d3ae6df 100644
 --- a/dist/xcrun/simctl.d.ts
 +++ b/dist/xcrun/simctl.d.ts
 @@ -54,6 +54,8 @@ export declare const shutdownSimulator: (udid: string) => Promise<void>;
@@ -52,7 +52,7 @@ index 98c6d5b64445e1f1d2ed24b0553dc79d6d666131..3b9925e99b0786666c929a68ece17d3b
  export declare const clearHarnessJsLocationOverride: (udid: string, bundleId: string) => Promise<void>;
  export declare const screenshot: (udid: string, destination: string) => Promise<string>;
 diff --git a/dist/xcrun/simctl.js b/dist/xcrun/simctl.js
-index 756164cc35d1e6294610845b08999701bb96e3b4..156d5f502c6885b0e34b5b044fa8d26f51f8c30f 100644
+index 1c2f32ffb2c72f83c39f32fca389dde394fb0a94..9dd9a9ec4906c6bcc5923fcbb9dfaa3c77413d89 100644
 --- a/dist/xcrun/simctl.js
 +++ b/dist/xcrun/simctl.js
 @@ -288,6 +288,33 @@ const deleteDefaultsValue = async (udid, bundleId, key) => {
@@ -90,7 +90,7 @@ index 756164cc35d1e6294610845b08999701bb96e3b4..156d5f502c6885b0e34b5b044fa8d26f
      const backupValue = await getDefaultsValue(udid, bundleId, HARNESS_JS_LOCATION_BACKUP_KEY);
      if (backupValue === null) {
 diff --git a/src/instance.ts b/src/instance.ts
-index 9b51929f1bafd90bcc130720a830e234e9d7ec06..cf348fe4e91a8e9941773f751a2d8396d7f8bc58 100644
+index 429e9cf0f770e25bba1207f77a3a2412f4975f5d..38b8c5ad46aed0dcb1a340d9288e2e7aeefecb38 100644
 --- a/src/instance.ts
 +++ b/src/instance.ts
 @@ -77,6 +77,7 @@ export const getAppleSimulatorPlatformInstance = async (
@@ -101,39 +101,39 @@ index 9b51929f1bafd90bcc130720a830e234e9d7ec06..cf348fe4e91a8e9941773f751a2d8396
  
    const xctestAgent = permissionsEnabled
      ? createXCTestAgentController({
-@@ -145,6 +146,7 @@ export const getAppleSimulatorPlatformInstance = async (
+@@ -142,6 +143,7 @@ export const getAppleSimulatorPlatformInstance = async (
+       `localhost:${harnessConfig.metroPort}`
+     );
      harnessJsLocationOverrideApplied = true;
++    previousReduceMotionValue = await simctl.applyReduceMotionOverride(udid);
    };
  
-+    previousReduceMotionValue = await simctl.applyReduceMotionOverride(udid);
    if (xctestAgent) {
-     const overlapStartup = shouldOverlapXCTestBuildAndSimulatorBoot();
-     iosInstanceLogger.debug(
-@@ -180,6 +182,9 @@ export const getAppleSimulatorPlatformInstance = async (
+@@ -177,6 +179,9 @@ export const getAppleSimulatorPlatformInstance = async (
+         if (harnessJsLocationOverrideApplied) {
+           await simctl.clearHarnessJsLocationOverride(udid, config.bundleId);
          }
-         if (startedByHarness) {
-           await simctl.shutdownSimulator(udid);
 +        if (previousReduceMotionValue !== undefined) {
 +          await simctl.clearReduceMotionOverride(udid, previousReduceMotionValue);
 +        }
+         if (startedByHarness) {
+           await simctl.shutdownSimulator(udid);
          }
-       }
-     }
-@@ -224,6 +229,9 @@ export const getAppleSimulatorPlatformInstance = async (
+@@ -221,6 +226,9 @@ export const getAppleSimulatorPlatformInstance = async (
+       await simctl.stopApp(udid, config.bundleId);
        await simctl.clearHarnessJsLocationOverride(udid, config.bundleId);
  
-       if (startedByHarness) {
 +      if (previousReduceMotionValue !== undefined) {
 +        await simctl.clearReduceMotionOverride(udid, previousReduceMotionValue);
 +      }
+       if (startedByHarness) {
          logger.info('Shutting down iOS simulator %s...', config.device.name);
          await simctl.shutdownSimulator(udid);
-       }
 diff --git a/src/xcrun/simctl.ts b/src/xcrun/simctl.ts
-index 5ad7d059a59d67d82df0c2b4b085df6e8bf6dc08..2500ae4703b330bd4cf03308ea1d452544c8f171 100644
+index 720fd3b0009efb43e5f53b739624cf608884bbb6..48098c0283396c7d9171b59f02d946aefa8e7f5a 100644
 --- a/src/xcrun/simctl.ts
 +++ b/src/xcrun/simctl.ts
-@@ -506,6 +506,68 @@ const deleteDefaultsValue = async (
+@@ -507,6 +507,68 @@ const deleteDefaultsValue = async (
    }
  };
  
@@ -217,10 +217,10 @@ index b1fca637cba95ae5e9d1dc64e154e9764ca32fe2..bf84abcc32d2cdbf7d4b996f32e86316
      ]
  
 diff --git a/xctest-agent/HarnessXCTestAgentUITests/PermissionPromptWatchdog.swift b/xctest-agent/HarnessXCTestAgentUITests/PermissionPromptWatchdog.swift
-index 8a732266c52c7d19dc86b012f59c3906063b72d0..b93d7a8d36dec6cef38dcd416bb1bc02d54bfa59 100644
+index 8a732266c52c7d19dc86b012f59c3906063b72d0..f472e11e32e6c343c88e9a13c0769df8bf073ee8 100644
 --- a/xctest-agent/HarnessXCTestAgentUITests/PermissionPromptWatchdog.swift
 +++ b/xctest-agent/HarnessXCTestAgentUITests/PermissionPromptWatchdog.swift
-@@ -16,6 +16,15 @@ struct PermissionPromptConfiguration: Codable {
+@@ -16,6 +16,24 @@ struct PermissionPromptConfiguration: Codable {
  
  final class PermissionPromptWatchdog: AgentCapability {
    private enum Constants {
@@ -229,20 +229,38 @@ index 8a732266c52c7d19dc86b012f59c3906063b72d0..b93d7a8d36dec6cef38dcd416bb1bc02
 +      "Health Data Access",
 +      "Allow Access to Health Data"
 +    ]
-+    static let healthKitSelectAllLabels = [
-+      "Turn On All",
-+      "Allow All"
-+    ]
++    // iOS 26 and earlier label the control "Turn On All" or "Allow All". iOS 27 labels it
++    // "Select All N Topics" and relabels the same element "Deselect N Topics" once tapped,
++    // so match the label, never the identifier, or the next pass clears the selection.
++    static let healthKitSelectAllPredicate = NSPredicate(
++      format: "label IN %@ OR label BEGINSWITH %@",
++      ["Turn On All", "Allow All"],
++      "Select All"
++    )
++    // iOS 27 asks how much history to share on a second page before it enables Allow.
++    static let healthKitAllHistoryPredicate = NSPredicate(
++      format: "label BEGINSWITH %@",
++      "All Recorded Data"
++    )
      static let knownPositiveButtonLabels = [
        "Allow",
        "OK",
-@@ -32,20 +41,76 @@ final class PermissionPromptWatchdog: AgentCapability {
+@@ -31,21 +49,147 @@ final class PermissionPromptWatchdog: AgentCapability {
+     ]
    }
  
++  // iOS 26 and earlier confirm the type list with Allow. iOS 27 ends the type list with
++  // Continue and confirms on a history page that enables Allow once a range is chosen.
++  private enum HealthKitPromptStep {
++    case idle
++    case typesSelected
++    case historyRequested
++  }
++
    private let springboard: XCUIApplication
 +  private let targetApplication: XCUIApplication?
    private let state: HarnessXCTestAgentState
-+  private var isHandlingHealthKitPrompt = false
++  private var healthKitStep = HealthKitPromptStep.idle
  
    private func log(_ message: String) {
      NSLog("[HarnessXCTestAgent][PermissionPromptWatchdog] %@", message)
@@ -279,20 +297,82 @@ index 8a732266c52c7d19dc86b012f59c3906063b72d0..b93d7a8d36dec6cef38dcd416bb1bc02
 +    return nil
 +  }
 +
++  private func findElement(matching predicate: NSPredicate) -> XCUIElement? {
++    for application in applications {
++      let element = application.descendants(matching: .any).matching(predicate).firstMatch
++
++      if element.exists && element.isHittable {
++        return element
++      }
++    }
++
++    return nil
++  }
++
++  private func findEnabledButton(label: String) -> XCUIElement? {
++    guard let button = findElement(labels: [label], buttonsOnly: true), button.isEnabled else {
++      return nil
++    }
++
++    return button
++  }
++
++  private func findPromptApplication() -> XCUIApplication? {
++    return applications.first { application in
++      Constants.healthKitPromptLabels.contains { label in
++        let element = application.descendants(matching: .any)[label].firstMatch
++        return element.exists && element.isHittable
++      }
++    }
++  }
++
 +  private func handleHealthKitPrompt() -> Bool {
-+    if let selectAll = findElement(labels: Constants.healthKitSelectAllLabels) {
++    if let selectAll = findElement(matching: Constants.healthKitSelectAllPredicate) {
 +      log("HealthKit: selecting all requested data types")
 +      selectAll.tap()
-+      isHandlingHealthKitPrompt = true
++      healthKitStep = .typesSelected
 +      return true
 +    }
 +
-+    if isHandlingHealthKitPrompt,
-+       let allow = findElement(labels: ["Allow"], buttonsOnly: true) {
-+      log("HealthKit: confirming selected data types")
-+      allow.tap()
-+      isHandlingHealthKitPrompt = false
-+      return true
++    switch healthKitStep {
++    case .idle:
++      break
++
++    case .typesSelected:
++      if let continueButton = findElement(labels: ["Continue"], buttonsOnly: true) {
++        log("HealthKit: continuing to the history page")
++        continueButton.tap()
++        healthKitStep = .historyRequested
++        return true
++      }
++
++      if let allow = findEnabledButton(label: "Allow") {
++        log("HealthKit: confirming selected data types")
++        allow.tap()
++        healthKitStep = .idle
++        return true
++      }
++
++      // iOS 27 ends the type list with Continue, which the list only creates once it scrolls near it.
++      if let promptApplication = findPromptApplication() {
++        log("HealthKit: scrolling the type list toward Continue")
++        promptApplication.swipeUp()
++        return true
++      }
++
++    case .historyRequested:
++      if let allow = findEnabledButton(label: "Allow") {
++        log("HealthKit: confirming selected data types and history")
++        allow.tap()
++        healthKitStep = .idle
++        return true
++      }
++
++      if let allHistory = findElement(matching: Constants.healthKitAllHistoryPredicate) {
++        log("HealthKit: sharing all recorded data")
++        allHistory.tap()
++        return true
++      }
 +    }
 +
 +    if findElement(labels: Constants.healthKitPromptLabels) != nil {
@@ -300,7 +380,7 @@ index 8a732266c52c7d19dc86b012f59c3906063b72d0..b93d7a8d36dec6cef38dcd416bb1bc02
 +      return true
 +    }
 +
-+    return isHandlingHealthKitPrompt
++    return healthKitStep != .idle
    }
  
    func setUp() throws {
@@ -314,7 +394,7 @@ index 8a732266c52c7d19dc86b012f59c3906063b72d0..b93d7a8d36dec6cef38dcd416bb1bc02
      }
    }
  
-@@ -54,6 +119,10 @@ final class PermissionPromptWatchdog: AgentCapability {
+@@ -54,6 +198,10 @@ final class PermissionPromptWatchdog: AgentCapability {
        return
      }
  
