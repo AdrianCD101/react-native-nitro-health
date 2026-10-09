@@ -72,10 +72,11 @@ jobs:
         working-directory: example
         run: bun run pod
 
+      # Keep code signing on: an unsigned simulator build drops the HealthKit entitlement.
       - name: Build iOS app
         working-directory: example/ios
         run: |
-          set -o pipefail && xcodebuild             CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++             -derivedDataPath build -UseModernBuildSystem=YES             -workspace NitroHealthExample.xcworkspace             -scheme NitroHealthExample             -sdk iphonesimulator             -configuration Debug             build             CODE_SIGNING_ALLOWED=NO
+          set -o pipefail && xcodebuild             CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++             -derivedDataPath build -UseModernBuildSystem=YES             -workspace NitroHealthExample.xcworkspace             -scheme NitroHealthExample             -sdk iphonesimulator             -configuration Debug             build
 
       - name: Run React Native Harness
         uses: callstackincubator/react-native-harness@v1.5.0
