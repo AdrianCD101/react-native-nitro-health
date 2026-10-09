@@ -204,6 +204,7 @@ This repository patches `@react-native-harness/platform-apple@1.5.0` through Bun
 2. Searches both the target application and SpringBoard accessibility trees.
 3. Selects every requested type and confirms the sheet. On iOS 26 and earlier it selects `Turn On All` (or `Allow All`) and then taps `Allow`. On iOS 27 it selects `Select All N Topics`, scrolls to `Continue`, chooses `All Recorded Data and Future Data`, and then taps `Allow` (see "iOS 27 Authorization Sheet" below).
 4. Enables Reduce Motion after simulator preparation and restores its previous value during cleanup, before shutting down a simulator started by Harness.
+5. Treats exit code 3 from `xcrun simctl appinfo` as "not installed". Xcode 27 fails with that code when no app has the bundle identifier, where earlier Xcode versions succeeded with a one-entry plist. Without this, Harness crashes before installing the app on a fresh simulator, as in CI.
 
 Harness 1.5.0 includes the upstream graceful XCTest shutdown and timer cleanup fixes, plus owned-process cleanup for cancelled runs. Keep the Harness packages and GitHub Actions refs on the same release.
 

@@ -52,10 +52,39 @@ index e5212ce23c947d6acd34a1769ee703229cff6a04..00f1fb8d5aa6a9f99f4761f2ed68d86d
  export declare const clearHarnessJsLocationOverride: (udid: string, bundleId: string) => Promise<void>;
  export declare const screenshot: (udid: string, destination: string) => Promise<string>;
 diff --git a/dist/xcrun/simctl.js b/dist/xcrun/simctl.js
-index 1c2f32ffb2c72f83c39f32fca389dde394fb0a94..9dd9a9ec4906c6bcc5923fcbb9dfaa3c77413d89 100644
+index 1c2f32ffb2c72f83c39f32fca389dde394fb0a94..8005aef319c9e92b974a292411ea9193dc92a381 100644
 --- a/dist/xcrun/simctl.js
 +++ b/dist/xcrun/simctl.js
-@@ -288,6 +288,33 @@ const deleteDefaultsValue = async (udid, bundleId, key) => {
+@@ -88,12 +88,22 @@ export const collectCrashReports = async ({ udid, processNames, crashArtifactWri
+     return [];
+ };
+ export const getAppInfo = async (udid, bundleId) => {
+-    const { stdout: plistOutput } = await spawn('xcrun', [
+-        'simctl',
+-        'appinfo',
+-        udid,
+-        bundleId,
+-    ]);
++    let plistOutput;
++    try {
++        ({ stdout: plistOutput } = await spawn('xcrun', [
++            'simctl',
++            'appinfo',
++            udid,
++            bundleId,
++        ]));
++    }
++    catch (error) {
++        // Xcode 27 exits with ESRCH (3) when no app has the bundle identifier.
++        if (error instanceof SubprocessError && error.exitCode === 3) {
++            return null;
++        }
++        throw error;
++    }
+     const json = await plistToJson(plistOutput);
+     // If there is only one entry, it means the app is not installed
+     const hasMoreThanOneEntry = Object.keys(json).length > 1;
+@@ -288,6 +298,33 @@ const deleteDefaultsValue = async (udid, bundleId, key) => {
          throw error;
      }
  };
@@ -130,10 +159,40 @@ index 429e9cf0f770e25bba1207f77a3a2412f4975f5d..38b8c5ad46aed0dcb1a340d9288e2e7a
          logger.info('Shutting down iOS simulator %s...', config.device.name);
          await simctl.shutdownSimulator(udid);
 diff --git a/src/xcrun/simctl.ts b/src/xcrun/simctl.ts
-index 720fd3b0009efb43e5f53b739624cf608884bbb6..48098c0283396c7d9171b59f02d946aefa8e7f5a 100644
+index 720fd3b0009efb43e5f53b739624cf608884bbb6..75fb5f03ce2398bc6f8ebc89ce58970c87260791 100644
 --- a/src/xcrun/simctl.ts
 +++ b/src/xcrun/simctl.ts
-@@ -507,6 +507,68 @@ const deleteDefaultsValue = async (
+@@ -184,12 +184,23 @@ export const getAppInfo = async (
+   udid: string,
+   bundleId: string,
+ ): Promise<AppleAppInfo | null> => {
+-  const { stdout: plistOutput } = await spawn('xcrun', [
+-    'simctl',
+-    'appinfo',
+-    udid,
+-    bundleId,
+-  ]);
++  let plistOutput: string;
++
++  try {
++    ({ stdout: plistOutput } = await spawn('xcrun', [
++      'simctl',
++      'appinfo',
++      udid,
++      bundleId,
++    ]));
++  } catch (error) {
++    // Xcode 27 exits with ESRCH (3) when no app has the bundle identifier.
++    if (error instanceof SubprocessError && error.exitCode === 3) {
++      return null;
++    }
++
++    throw error;
++  }
+ 
+   const json = await plistToJson(plistOutput);
+ 
+@@ -507,6 +518,68 @@ const deleteDefaultsValue = async (
    }
  };
  
